@@ -79,8 +79,8 @@ export const useActivities = () => {
       setIsStravaConnected(false);
   };
 
-  // 4. SINCRONIZACIÓN CON STRAVA (NÚCLEO)
- const handleStravaSync = async () => {
+  // 4. SINCRONIZACIÓN CON STRAVA (VERSIÓN FINAL CON DATOS AMPLIADOS)
+  const handleStravaSync = async () => {
     try {
         setUploading(true);
         setUploadStatus("Conectando con Strava...");
@@ -110,16 +110,13 @@ export const useActivities = () => {
 
         const stravaActivities = await response.json();
         
-        // --- 🛡️ FILTRO INFALIBLE POR ID ---
         setUploadStatus("Filtrando duplicados...");
 
-        // 1. Creamos una lista con los IDs de Strava que YA tenemos en la base de datos
-        // (Convertimos a String por seguridad, aunque sean números)
+        // Usamos el strava_id para filtrar (infalible)
         const existingIds = new Set(activities.map(a => String(a.strava_id)));
 
         const newRows = stravaActivities
             .filter(act => {
-                // Si la actividad ya tiene su ID registrado, NO pasa.
                 return !existingIds.has(String(act.id));
             })
             .map(act => {
@@ -138,11 +135,13 @@ export const useActivities = () => {
                     duration: Math.round(act.moving_time / 60),
                     hr_avg: hr, 
                     calories: act.kilojoules || act.calories || 0,
-                    strava_id: act.id // <--- 🔥 LA CLAVE: Guardamos el ID para la próxima
+                    strava_id: act.id,
+                    // Nuevas columnas de datos físicos
+                    distance: act.distance || 0, // Metros
+                    elevation_gain: act.total_elevation_gain || 0, // Metros
+                    watts_avg: act.average_watts || 0 // Watios
                 };
             });
-
-        // --- FIN DEL FILTRO ---
 
         if (newRows.length === 0) {
             setUploadStatus("¡Todo actualizado!");
@@ -182,7 +181,7 @@ export const useActivities = () => {
       const idxDate = getIdx(['fecha', 'date']);
       const idxType = getIdx(['tipo', 'type']);
       const idxTimeMoved = getIdx(['tiempo en movimiento', 'moving time']);
-      const idxHr = getIdx(['frecuencia cardiaca', 'avg heart rate', 'frecuencia cardíaca']); // Añadida tilde
+      const idxHr = getIdx(['frecuencia cardiaca', 'avg heart rate', 'frecuencia cardíaca']); 
       
       if (idxDate === -1) { alert("Error CSV: No encuentro la fecha"); setUploading(false); return; }
       
@@ -199,7 +198,8 @@ export const useActivities = () => {
                      type: row[idxType] || 'Actividad',
                      duration: Math.round(duration/60), 
                      hr_avg: parseFloat(row[idxHr]) || 0,
-                     calories: 0
+                     calories: 0,
+                     distance: 0, elevation_gain: 0, watts_avg: 0 // Default para CSV antiguos
                  });
              }
          }
@@ -238,17 +238,16 @@ export const useActivities = () => {
     return { lthr: Math.round(bestEffort.hr_avg * factor), basedOnDate: bestEffort.date, basedOnHr: bestEffort.hr_avg, basedOnDuration: bestEffort.duration };
   };
 
-  // 7. CÁLCULO DE MÉTRICAS (CORE ALGORÍTMICO)
+  // 7. CÁLCULO DE MÉTRICAS + PREDICCIÓN CON CONTEXTO HISTÓRICO
   const metrics = useMemo(() => {
-    // Si no hay datos, retornamos ceros seguros
     if (!activities || activities.length === 0) {
         return { 
-            filteredData: [], 
-            currentMetrics: { ctl: 0, atl: 0, tcb: 0, rampRate: 0, avgTss7d: 0 }, 
+            filteredData: [], currentMetrics: { ctl: 0, atl: 0, tcb: 0, rampRate: 0, avgTss7d: 0, acwr: 0, monotony: 0, strain: 0, forecast: null, pastCtl: 0 }, 
             chartData: [], distribution: [], zones: [], summary: { count: 0 } 
         };
     }
 
+    // ... (Mantén aquí la configuración de factores y calculateTSS EXACTAMENTE IGUAL que antes) ...
     const factorA = settings.gender === 'female' ? 0.86 : 0.64;
     const factorB = settings.gender === 'female' ? 1.67 : 1.92;
 
@@ -256,52 +255,42 @@ export const useActivities = () => {
         const t = act.type.toLowerCase();
         const isBike = t.includes('ciclismo') || t.includes('bici');
         const sportSettings = isBike ? settings.bike : settings.run;
-        
         const hr = Number(act.hr_avg);
         const fcReposo = Number(settings.fcReposo) || 50;
-        
-        // Estimación si no hay pulso
         if (!hr || hr <= fcReposo) return (act.duration / 60) * 40; 
-
         const fcMax = Number(sportSettings.max) || 190;
         const lthr = Number(sportSettings.lthr) || 165;
         const hrReserve = fcMax - fcReposo;
         if (hrReserve <= 0) return 0; 
-
         const hrRatio = (hr - fcReposo) / hrReserve;
         const safeRatio = Math.min(hrRatio, 1.15); 
         const yFactor = factorA * Math.exp(factorB * safeRatio);
         const trimp = act.duration * safeRatio * yFactor;
-
         const lthrRatio = (lthr - fcReposo) / hrReserve;
         const lthrFactor = factorA * Math.exp(factorB * lthrRatio);
         const oneHourLthrTrimp = 60 * lthrRatio * lthrFactor;
-
         if (oneHourLthrTrimp <= 0) return 0; 
         return Math.max(0, (trimp / oneHourLthrTrimp) * 100);
     };
+    // ... (Fin calculateTSS) ...
 
-    // Preparar fechas
+    // Preparación de datos (Igual)
     const sortedActs = [...activities]; 
     const startDate = new Date(sortedActs[0].date);
     const lastActivityDate = new Date(sortedActs[sortedActs.length - 1].date);
     const today = new Date();
     
-    // Lógica de "Fecha de Corte" (Congelar estado si no hay entreno hoy)
     const daysSinceLast = (today - lastActivityDate) / (1000 * 60 * 60 * 24);
     const todayStr = today.toISOString().split('T')[0];
     const hasActivityToday = sortedActs.some(a => a.date.startsWith(todayStr));
-    
     let endDate = today;
-    if (daysSinceLast > 30) {
-        endDate = lastActivityDate; // Si dejaste de entrenar hace un mes, cortamos ahí
-    } else if (!hasActivityToday) {
+    if (daysSinceLast > 30) endDate = lastActivityDate;
+    else if (!hasActivityToday) {
         const yesterday = new Date(today);
         yesterday.setDate(today.getDate() - 1);
-        endDate = yesterday; // Congelamos en ayer
+        endDate = yesterday;
     } 
 
-    // Indexar actividades por fecha
     const activitiesMap = new Map();
     sortedActs.forEach(act => {
         const dKey = new Date(act.date).toISOString().split('T')[0];
@@ -309,55 +298,76 @@ export const useActivities = () => {
         activitiesMap.get(dKey).push(act);
     });
 
-    // Bucle de cálculo diario (Banister/Coggan)
-    let ctl = 0; 
-    let atl = 0; 
+    // Bucle CTL/ATL (Igual)
+    let ctl = 0; let atl = 0; 
     const fullSeries = [];
     const oneDay = 24 * 60 * 60 * 1000;
-    
+    const loadHistory = []; 
+
     for (let time = startDate.getTime(); time <= endDate.getTime(); time += oneDay) {
         const d = new Date(time);
         const dateStr = d.toISOString().split('T')[0];
         const daysActs = activitiesMap.get(dateStr) || [];
-        
         let dailyTss = 0;
         daysActs.forEach(act => { dailyTss += calculateTSS(act); });
+        loadHistory.push(dailyTss);
 
-        if (fullSeries.length === 0 && dailyTss > 0) {
-            ctl = dailyTss; atl = dailyTss; // Arranque rápido
-        } else {
+        if (fullSeries.length === 0 && dailyTss > 0) { ctl = dailyTss; atl = dailyTss; } 
+        else {
             ctl = ctl + (dailyTss - ctl) / settings.ta;
             atl = atl + (dailyTss - atl) / settings.tf;
         }
-        
-        const tsb = ctl - atl;
-        fullSeries.push({ 
-            date: dateStr, 
-            ctl: parseFloat(ctl.toFixed(1)), 
-            atl: parseFloat(atl.toFixed(1)), 
-            tcb: parseFloat(tsb.toFixed(1)), 
-            dailyTss: Math.round(dailyTss) 
-        });
+        fullSeries.push({ date: dateStr, ctl: parseFloat(ctl.toFixed(1)), atl: parseFloat(atl.toFixed(1)), tcb: parseFloat((ctl - atl).toFixed(1)), dailyTss: Math.round(dailyTss) });
     }
 
-    // Métricas finales
-    const lastPoint = fullSeries[fullSeries.length - 1] || { ctl: 0, atl: 0, tcb: 0, dailyTss: 0 };
+    const lastPoint = fullSeries[fullSeries.length - 1] || { ctl: 0, atl: 0, tcb: 0 };
     const prevWeekPoint = fullSeries[fullSeries.length - 8] || { ctl: 0 }; 
+    const pastMonthPoint = fullSeries[fullSeries.length - 30] || fullSeries[0] || { ctl: 0 }; // <--- DATO NUEVO: Hace 30 días
+    
     const rampRate = parseFloat((lastPoint.ctl - prevWeekPoint.ctl).toFixed(1));
-    const last7Days = fullSeries.slice(-7);
-    const avgTss7d = last7Days.reduce((sum, d) => sum + d.dailyTss, 0) / (last7Days.length || 1);
 
-    // Filtros de visualización
+    // Cálculos Avanzados
+    const last7Loads = loadHistory.slice(-7);
+    const last28Loads = loadHistory.slice(-28);
+    const sum7 = last7Loads.reduce((a, b) => a + b, 0);
+    const sum28 = last28Loads.reduce((a, b) => a + b, 0);
+    const avgLoad7 = sum7 / (last7Loads.length || 1);
+    const avgLoad28 = sum28 / (last28Loads.length || 1);
+    const acwr = avgLoad28 > 0 ? (avgLoad7 / avgLoad28) : 0;
+    const mean = avgLoad7;
+    const variance = last7Loads.reduce((t, n) => t + Math.pow(n - mean, 2), 0) / (last7Loads.length || 1);
+    const stdDev = Math.sqrt(variance);
+    const monotony = stdDev > 0 ? (mean / stdDev) : (mean > 0 ? 4 : 0);
+    const strain = sum7 * monotony;
+
+    // --- MOTOR DE PREDICCIÓN ---
+    let predCtl = lastPoint.ctl;
+    let daysToNextLevel = null;
+    const currentLevelMax = Math.ceil((lastPoint.ctl + 1) / 30) * 30; // Siguiente escalón de 30
+    
+    for(let i=1; i<=28; i++) {
+        predCtl = predCtl + (avgLoad7 - predCtl) / settings.ta;
+        if (!daysToNextLevel && predCtl >= currentLevelMax && lastPoint.ctl < currentLevelMax) {
+            daysToNextLevel = i;
+        }
+    }
+
+    const forecast = {
+        ctl4Weeks: parseFloat(predCtl.toFixed(1)),
+        trend: predCtl > lastPoint.ctl ? 'up' : (predCtl < lastPoint.ctl ? 'down' : 'flat'),
+        diff: parseFloat((predCtl - lastPoint.ctl).toFixed(1)),
+        nextLevelDays: daysToNextLevel,
+        nextLevelVal: currentLevelMax
+    };
+
+    // ... (Filtros visuales igual) ...
     const cutoff = new Date();
     if (timeRange === '30d') cutoff.setDate(today.getDate() - 30);
     else if (timeRange === '90d') cutoff.setDate(today.getDate() - 90);
     else if (timeRange === '1y') cutoff.setFullYear(today.getFullYear() - 1);
     else if (timeRange === 'all') cutoff.setTime(startDate.getTime()); 
-
     const visibleActs = sortedActs.filter(a => new Date(a.date) >= cutoff);
     const chartData = fullSeries.filter(d => new Date(d.date) >= cutoff);
-
-    // Distribución
     const cats = visibleActs.reduce((acc, curr) => { acc[curr.type] = (acc[curr.type] || 0) + 1; return acc; }, {});
     const distribution = Object.keys(cats).map(k => ({ name: k, value: cats[k] }));
 
@@ -366,7 +376,12 @@ export const useActivities = () => {
         atl: lastPoint.atl, 
         tcb: lastPoint.tcb, 
         rampRate, 
-        avgTss7d: Math.round(avgTss7d) 
+        avgTss7d: Math.round(avgLoad7),
+        acwr: parseFloat(acwr.toFixed(2)),
+        monotony: parseFloat(monotony.toFixed(2)),
+        strain: Math.round(strain),
+        pastCtl: parseFloat(pastMonthPoint.ctl.toFixed(1)), // <--- EXPORTAMOS DATO HISTÓRICO
+        forecast
     };
 
     return { filteredData: visibleActs.reverse(), currentMetrics, chartData, distribution, zones: [], summary: { count: visibleActs.length } };
