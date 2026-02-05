@@ -1,70 +1,112 @@
 import React from 'react';
-import { TrendingUp, Zap, Activity, Trophy } from 'lucide-react';
-import { InfoTooltip } from '../common/InfoTooltip';
+import { Activity, Battery, TrendingUp, Zap, Clock, Anchor } from 'lucide-react';
 
-const KpiCard = ({ title, value, subtext, Icon, color, tooltip }) => {
-  const colors = { 
-    blue: "bg-blue-50 text-blue-600", 
-    orange: "bg-orange-50 text-orange-600", 
-    emerald: "bg-emerald-50 text-emerald-600", 
-    purple: "bg-purple-50 text-purple-600" 
-  };
+export const KpiGrid = ({ metrics, summary, timeRange }) => {
+  // Aseguramos que los valores existan para evitar errores
+  const { ctl, atl, tsb, rampRate, avgTss7d, monotony, acwr } = metrics || {};
+
+  const cards = [
+    { 
+        title: "Fitness (CTL)", 
+        value: Math.round(ctl || 0), 
+        icon: Activity, 
+        desc: "Tu motor físico actual",
+        ideal: "Cuanto más, mejor", // El fitness no tiene techo
+        color: "text-blue-600 dark:text-blue-400",
+        bg: "bg-blue-50 dark:bg-blue-900/20"
+    },
+    { 
+        title: "Fatiga (ATL)", 
+        value: Math.round(atl || 0), 
+        icon: Battery, 
+        desc: "Cansancio acumulado (7d)",
+        ideal: "< Fitness + 20", // Regla general de seguridad
+        color: "text-purple-600 dark:text-purple-400",
+        bg: "bg-purple-50 dark:bg-purple-900/20"
+    },
+    { 
+        title: "Forma (TSB)", 
+        value: Math.round(tsb || 0), 
+        icon: Zap, 
+        desc: "Frescura para competir",
+        ideal: tsb > 0 ? "Zona: Descanso/Carrera" : "Zona: Entrenamiento",
+        // Lógica de color semáforo para el TSB
+        color: tsb < -30 ? "text-red-600 dark:text-red-400" : (tsb > 25 ? "text-emerald-600 dark:text-emerald-400" : "text-amber-600 dark:text-amber-400"),
+        bg: tsb < -30 ? "bg-red-50 dark:bg-red-900/20" : (tsb > 25 ? "bg-emerald-50 dark:bg-emerald-900/20" : "bg-amber-50 dark:bg-amber-900/20")
+    },
+    { 
+        title: "Ramp Rate", 
+        value: rampRate || 0, 
+        icon: TrendingUp, 
+        desc: "Ritmo de subida de carga",
+        ideal: "< 6 pts/semana", // Subir más rápido es peligroso
+        color: rampRate > 6 ? "text-red-600 dark:text-red-400" : "text-slate-600 dark:text-slate-400",
+        bg: rampRate > 6 ? "bg-red-50 dark:bg-red-900/20" : "bg-slate-50 dark:bg-slate-800"
+    },
+    { 
+      title: "Monotonía", 
+      value: monotony || 0, 
+      icon: Clock, 
+      desc: "Variedad en los entrenos",
+      ideal: "< 2.0 (Varía la intensidad)", // Monotonía alta = estancamiento
+      color: monotony > 2 ? "text-orange-600 dark:text-orange-400" : "text-indigo-600 dark:text-indigo-400",
+      bg: monotony > 2 ? "bg-orange-50 dark:bg-orange-900/20" : "bg-indigo-50 dark:bg-indigo-900/20"
+    },
+    { 
+      title: "Riesgo (ACWR)", 
+      value: acwr || 0, 
+      icon: Anchor, 
+      desc: "Ratio Agudo vs Crónico",
+      ideal: "0.8 - 1.3 (Zona Segura)", // El rango dorado de prevención
+      color: (acwr > 1.3 || acwr < 0.7) && acwr !== 0 ? "text-red-600 dark:text-red-400" : "text-teal-600 dark:text-teal-400",
+      bg: (acwr > 1.3 || acwr < 0.7) && acwr !== 0 ? "bg-red-50 dark:bg-red-900/20" : "bg-teal-50 dark:bg-teal-900/20"
+    }
+  ];
+
   return (
-    <div className="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm flex flex-col justify-between hover:shadow-md transition-shadow">
-      <div className="flex justify-between items-start mb-4">
-        <div className={`p-3 rounded-xl ${colors[color]} bg-opacity-50`}>
-          <Icon size={22}/>
+    <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-3 sm:gap-4 mb-6">
+      {cards.map((card, idx) => (
+        <div 
+            key={idx} 
+            className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800 p-4 shadow-sm hover:shadow-md transition-all duration-300 flex flex-col justify-between"
+        >
+          {/* Cabecera Icono + Titulo */}
+          <div className="flex justify-between items-start mb-2">
+            <div className={`p-2 rounded-lg ${card.bg} ${card.color}`}>
+              <card.icon size={18} />
+            </div>
+            {/* Si es el primero, mostramos el rango de tiempo seleccionado */}
+            {idx === 0 && (
+                <span className="text-[9px] font-bold bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 px-2 py-0.5 rounded-full uppercase">
+                    {timeRange}
+                </span>
+            )}
+          </div>
+
+          {/* Valor Principal */}
+          <div>
+            <h4 className="text-[10px] sm:text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-0.5">
+                {card.title}
+            </h4>
+            <span className="text-2xl sm:text-3xl font-black text-slate-800 dark:text-white tracking-tight leading-none">
+                {card.value}
+            </span>
+          </div>
+
+          {/* Footer: Explicación + Ideal */}
+          <div className="mt-3 pt-3 border-t border-slate-50 dark:border-slate-800/50">
+             <p className="text-[10px] text-slate-500 dark:text-slate-400 font-medium leading-tight mb-1">
+                {card.desc}
+             </p>
+             <div className="flex items-center gap-1.5">
+                <span className="text-[9px] font-bold text-slate-300 dark:text-slate-600 uppercase">Meta:</span>
+                <span className="text-[9px] font-bold text-slate-600 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5 rounded-md">
+                    {card.ideal}
+                </span>
+             </div>
+          </div>
         </div>
-      </div>
-      <div>
-        <h4 className="text-slate-400 text-xs font-bold uppercase mb-1 flex items-center gap-1">
-          {title}
-          <InfoTooltip text={tooltip} />
-        </h4>
-        <div className="flex items-baseline gap-2">
-          <span className="text-3xl font-black text-slate-800">{value}</span>
-          <span className="text-xs font-medium text-slate-500">{subtext}</span>
-        </div>
-      </div>
+      ))}
     </div>
   );
 };
-
-export const KpiGrid = ({ metrics, summary, timeRange }) => (
-  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-    <KpiCard 
-      title="Fitness (CTL)" 
-      value={metrics.ctl} 
-      subtext="pts" 
-      Icon={TrendingUp} 
-      color="blue" 
-      tooltip="Carga Crónica. Tu forma física base acumulada (42 días)."
-    />
-    <KpiCard 
-      title="Fatiga (ATL)" 
-      value={metrics.atl} 
-      subtext="pts" 
-      Icon={Zap} 
-      color="orange" 
-      tooltip="Carga Aguda. Tu fatiga actual (7 días)."
-    />
-    <KpiCard 
-      title="Forma (TSB)" 
-      value={metrics.tcb} 
-      subtext={metrics.tcb > 0 ? "Fresco" : "Carga"} 
-      Icon={Activity} 
-      color={metrics.tcb > 0 ? "emerald" : "purple"} 
-      tooltip="Balance de Estrés. Positivo = Descansado. Negativo = Entrenando duro."
-    />
-    <div className="bg-gradient-to-br from-slate-900 to-slate-800 rounded-2xl p-5 text-white flex flex-col justify-between shadow-xl">
-       <div className="flex justify-between items-center">
-         <div className="bg-white/10 p-2 rounded-lg"><Trophy size={20} className="text-yellow-400"/></div>
-         <span className="text-[10px] font-bold bg-white/20 px-2 py-1 rounded uppercase">{timeRange === 'all' ? 'HISTÓRICO' : timeRange}</span>
-       </div>
-       <div className="mt-4">
-         <p className="text-slate-400 text-[10px] font-bold uppercase">Sesiones Totales</p>
-         <span className="text-3xl font-bold">{summary.count}</span>
-       </div>
-    </div>
-  </div>
-);
