@@ -80,7 +80,7 @@ export const useActivities = () => {
   };
 
   // 4. SINCRONIZACIÓN CON STRAVA (NÚCLEO)
-  const handleStravaSync = async () => {
+ const handleStravaSync = async () => {
     try {
         setUploading(true);
         setUploadStatus("Conectando con Strava...");
@@ -94,51 +94,67 @@ export const useActivities = () => {
             return;
         }
 
-        setUploadStatus("Descargando historial...");
+        setUploadStatus("Comprobando historial...");
         
-        // Pedimos 200 actividades para tener buena base de cálculo
         const response = await fetch('https://www.strava.com/api/v3/athlete/activities?per_page=200', {
             headers: { 'Authorization': `Bearer ${profile.strava_access_token}` }
         });
 
-        // Manejo de token caducado (Error 401)
         if (response.status === 401) {
             console.warn("Token revocado. Desconectando...");
             await handleDisconnectStrava();
-            throw new Error("El permiso de Strava ha caducado o fue revocado. Por favor, conecta de nuevo.");
+            throw new Error("El permiso de Strava ha caducado. Conecta de nuevo.");
         }
 
         if (!response.ok) throw new Error("Error de conexión con Strava");
 
         const stravaActivities = await response.json();
-        setUploadStatus(`Procesando ${stravaActivities.length} actividades...`);
-
-        const newRows = stravaActivities.map(act => {
-            // Traducción de tipos
-            let typeES = act.type;
-            if (act.type === 'Run') typeES = 'Carrera';
-            if (act.type === 'Ride') typeES = 'Ciclismo';
-            if (act.type === 'WeightTraining') typeES = 'Fuerza';
-            if (act.type === 'Walk') typeES = 'Caminata';
-            if (act.type === 'Swim') typeES = 'Natación';
-
-            // CORRECCIÓN BPM: Usamos 'average_heartrate' (sin guion bajo extra)
-            const hr = Number(act.average_heartrate) || 0; 
-
-            return {
-                date: act.start_date_local, 
-                type: typeES,
-                duration: Math.round(act.moving_time / 60),
-                hr_avg: hr, 
-                calories: act.kilojoules || act.calories || 0,
-            };
-        });
-
-        // Insertamos en BD
-        const { error } = await supabase.from('activities').insert(newRows);
         
-        // Si hay error (ej: duplicados), avisamos en consola pero no rompemos la app
-        if (error) console.warn("Aviso BBDD:", error.message);
+        // --- 🛡️ FILTRO INFALIBLE POR ID ---
+        setUploadStatus("Filtrando duplicados...");
+
+        // 1. Creamos una lista con los IDs de Strava que YA tenemos en la base de datos
+        // (Convertimos a String por seguridad, aunque sean números)
+        const existingIds = new Set(activities.map(a => String(a.strava_id)));
+
+        const newRows = stravaActivities
+            .filter(act => {
+                // Si la actividad ya tiene su ID registrado, NO pasa.
+                return !existingIds.has(String(act.id));
+            })
+            .map(act => {
+                let typeES = act.type;
+                if (act.type === 'Run') typeES = 'Carrera';
+                if (act.type === 'Ride') typeES = 'Ciclismo';
+                if (act.type === 'WeightTraining') typeES = 'Fuerza';
+                if (act.type === 'Walk') typeES = 'Caminata';
+                if (act.type === 'Swim') typeES = 'Natación';
+
+                const hr = Number(act.average_heartrate) || 0; 
+
+                return {
+                    date: act.start_date_local, 
+                    type: typeES,
+                    duration: Math.round(act.moving_time / 60),
+                    hr_avg: hr, 
+                    calories: act.kilojoules || act.calories || 0,
+                    strava_id: act.id // <--- 🔥 LA CLAVE: Guardamos el ID para la próxima
+                };
+            });
+
+        // --- FIN DEL FILTRO ---
+
+        if (newRows.length === 0) {
+            setUploadStatus("¡Todo actualizado!");
+            setUploading(false);
+            setTimeout(() => setUploadStatus(null), 2000);
+            return; 
+        }
+
+        setUploadStatus(`Guardando ${newRows.length} nuevas...`);
+
+        const { error } = await supabase.from('activities').insert(newRows);
+        if (error) throw error;
 
         setUploadStatus("¡Sincronizado!");
         await fetchActivities();
