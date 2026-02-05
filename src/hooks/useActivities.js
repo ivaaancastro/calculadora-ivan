@@ -9,10 +9,15 @@ export const useActivities = () => {
   const [uploadStatus, setUploadStatus] = useState(null);
   const [timeRange, setTimeRange] = useState('30d');
   
+  // Estado de conexión con Strava
+  const [isStravaConnected, setIsStravaConnected] = useState(false);
+
+  // Zonas por defecto
   const defaultZones = [
     { min: 0, max: 135 }, { min: 136, max: 150 }, { min: 151, max: 165 }, { min: 166, max: 178 }, { min: 179, max: 200 }
   ];
 
+  // Configuración del perfil
   const [settings, setSettings] = useState({
     gender: 'male',
     fcReposo: 50, weight: 70, zonesMode: 'manual',
@@ -21,13 +26,17 @@ export const useActivities = () => {
     ta: 42, tf: 7 
   });
 
+  // Carga inicial
   useEffect(() => {
     Promise.all([fetchProfile(), fetchActivities()]).then(() => setLoading(false));
   }, []);
 
+  // 1. OBTENER PERFIL Y ESTADO STRAVA
   const fetchProfile = async () => {
     const { data, error } = await supabase.from('profiles').select('*').eq('id', 1).single();
     if (!error && data) {
+      if (data.strava_access_token) setIsStravaConnected(true);
+
       setSettings(prev => ({
         ...prev,
         gender: data.gender || 'male',
@@ -48,12 +57,150 @@ export const useActivities = () => {
     }
   };
 
+  // 2. OBTENER ACTIVIDADES DE SUPABASE
   const fetchActivities = async () => {
     const { data, error } = await supabase.from('activities').select('*');
     if (!error && data) {
-        const sorted = data.sort((a, b) => new Date(a.date) - new Date(b.date));
+        // Pre-ordenamos y creamos objetos fecha para evitar errores luego
+        const sorted = data
+            .map(a => ({...a, dateObj: new Date(a.date)}))
+            .sort((a, b) => a.dateObj - b.dateObj);
         setActivities(sorted);
     }
+  };
+
+  // 3. DESCONEXIÓN DE EMERGENCIA
+  const handleDisconnectStrava = async () => {
+      await supabase.from('profiles').update({
+          strava_access_token: null,
+          strava_refresh_token: null,
+          strava_expires_at: null
+      }).eq('id', 1);
+      setIsStravaConnected(false);
+  };
+
+  // 4. SINCRONIZACIÓN CON STRAVA (NÚCLEO)
+  const handleStravaSync = async () => {
+    try {
+        setUploading(true);
+        setUploadStatus("Conectando con Strava...");
+
+        const { data: profile } = await supabase.from('profiles').select('strava_access_token').eq('id', 1).single();
+        
+        if (!profile?.strava_access_token) {
+            alert("No estás conectado a Strava.");
+            setIsStravaConnected(false);
+            setUploading(false);
+            return;
+        }
+
+        setUploadStatus("Descargando historial...");
+        
+        // Pedimos 200 actividades para tener buena base de cálculo
+        const response = await fetch('https://www.strava.com/api/v3/athlete/activities?per_page=200', {
+            headers: { 'Authorization': `Bearer ${profile.strava_access_token}` }
+        });
+
+        // Manejo de token caducado (Error 401)
+        if (response.status === 401) {
+            console.warn("Token revocado. Desconectando...");
+            await handleDisconnectStrava();
+            throw new Error("El permiso de Strava ha caducado o fue revocado. Por favor, conecta de nuevo.");
+        }
+
+        if (!response.ok) throw new Error("Error de conexión con Strava");
+
+        const stravaActivities = await response.json();
+        setUploadStatus(`Procesando ${stravaActivities.length} actividades...`);
+
+        const newRows = stravaActivities.map(act => {
+            // Traducción de tipos
+            let typeES = act.type;
+            if (act.type === 'Run') typeES = 'Carrera';
+            if (act.type === 'Ride') typeES = 'Ciclismo';
+            if (act.type === 'WeightTraining') typeES = 'Fuerza';
+            if (act.type === 'Walk') typeES = 'Caminata';
+            if (act.type === 'Swim') typeES = 'Natación';
+
+            // CORRECCIÓN BPM: Usamos 'average_heartrate' (sin guion bajo extra)
+            const hr = Number(act.average_heartrate) || 0; 
+
+            return {
+                date: act.start_date_local, 
+                type: typeES,
+                duration: Math.round(act.moving_time / 60),
+                hr_avg: hr, 
+                calories: act.kilojoules || act.calories || 0,
+            };
+        });
+
+        // Insertamos en BD
+        const { error } = await supabase.from('activities').insert(newRows);
+        
+        // Si hay error (ej: duplicados), avisamos en consola pero no rompemos la app
+        if (error) console.warn("Aviso BBDD:", error.message);
+
+        setUploadStatus("¡Sincronizado!");
+        await fetchActivities();
+        
+    } catch (err) {
+        console.error(err);
+        alert(err.message);
+    } finally {
+        setUploading(false);
+        setTimeout(() => setUploadStatus(null), 3000);
+    }
+  };
+
+  // 5. IMPORTACIÓN CSV (LEGACY)
+  const processFile = async (file) => {
+    setUploading(true); setUploadStatus("Analizando...");
+    const reader = new FileReader();
+    reader.onload = async (e) => {
+      const rows = parseCSV(e.target.result);
+      if (rows.length < 2) { setUploading(false); return; }
+      
+      const header = rows[0].map(h => h.toLowerCase().trim().replace(/"/g, ''));
+      const getIdx = (opts) => header.findIndex(h => opts.some(opt => h.includes(opt)));
+      
+      const idxDate = getIdx(['fecha', 'date']);
+      const idxType = getIdx(['tipo', 'type']);
+      const idxTimeMoved = getIdx(['tiempo en movimiento', 'moving time']);
+      const idxHr = getIdx(['frecuencia cardiaca', 'avg heart rate', 'frecuencia cardíaca']); // Añadida tilde
+      
+      if (idxDate === -1) { alert("Error CSV: No encuentro la fecha"); setUploading(false); return; }
+      
+      const newRows = [];
+      for (let i = 1; i < rows.length; i++) {
+         const row = rows[i];
+         if (!row[idxDate]) continue;
+         const parsedDate = parseStravaDate(row[idxDate]);
+         if(parsedDate) {
+             const duration = parseFloat(row[idxTimeMoved]) || 0;
+             if(duration > 0) {
+                 newRows.push({
+                     date: parsedDate,
+                     type: row[idxType] || 'Actividad',
+                     duration: Math.round(duration/60), 
+                     hr_avg: parseFloat(row[idxHr]) || 0,
+                     calories: 0
+                 });
+             }
+         }
+      }
+      await supabase.from('activities').insert(newRows);
+      setUploadStatus("¡Listo!"); await fetchActivities(); setUploading(false); setTimeout(() => setUploadStatus(null), 3000);
+    };
+    reader.readAsText(file);
+  };
+
+  // 6. UTILIDADES: BORRAR Y ANALIZAR
+  const handleClearDb = async () => {
+    if(!window.confirm("¿Estás seguro de borrar TODOS los datos de actividad?")) return;
+    setUploadStatus("Borrando...");
+    await supabase.from('activities').delete().neq('id', 0);
+    await fetchActivities();
+    setUploadStatus(null);
   };
 
   const analyzeHistory = (sportType) => {
@@ -72,134 +219,20 @@ export const useActivities = () => {
     let factor = 0.95;
     if (bestEffort.duration > 50) factor = 1.0;
     else if (bestEffort.duration > 30) factor = 0.97;
-    return { 
-        lthr: Math.round(bestEffort.hr_avg * factor), 
-        basedOnDate: bestEffort.date, 
-        basedOnHr: bestEffort.hr_avg, 
-        basedOnDuration: bestEffort.duration 
-    };
+    return { lthr: Math.round(bestEffort.hr_avg * factor), basedOnDate: bestEffort.date, basedOnHr: bestEffort.hr_avg, basedOnDuration: bestEffort.duration };
   };
 
-  const processFile = async (file) => {
-    setUploading(true); setUploadStatus("Analizando...");
-    const reader = new FileReader();
-    reader.onload = async (e) => {
-      const rows = parseCSV(e.target.result);
-      if (rows.length < 2) { setUploading(false); return; }
-      
-      const header = rows[0].map(h => h.toLowerCase().trim().replace(/"/g, ''));
-      const getIdx = (opts, exclude = []) => header.findIndex(h => opts.some(opt => h.includes(opt)) && !exclude.some(ex => h.includes(ex)));
-      
-      const idxDate = getIdx(['fecha', 'date']);
-      const idxType = getIdx(['tipo', 'type']);
-      const idxTimeMoved = getIdx(['tiempo en movimiento', 'moving time']);
-      const idxTimeElapsed = getIdx(['tiempo transcurrido', 'elapsed time']);
-      const idxHr = getIdx(['frecuencia cardiaca media', 'ritmo cardiaco promedio', 'avg heart rate']);
-      const idxCal = getIdx(['calorías', 'calories']);
-
-      if (idxDate === -1) { alert("Error CSV"); setUploading(false); return; }
-      
-      setUploadStatus(`Procesando ${rows.length} filas...`);
-      const newRows = [];
-      
-      for (let i = 1; i < rows.length; i++) {
-        const row = rows[i];
-        if (!row[idxDate]) continue;
-        const parsedDate = parseStravaDate(row[idxDate]);
-        if (parsedDate) {
-          const parseNum = (val) => {
-             if (!val) return 0;
-             if (val.toString().includes(':')) {
-                const parts = val.split(':').map(Number);
-                if (parts.length === 3) return parts[0]*3600 + parts[1]*60 + parts[2];
-                if (parts.length === 2) return parts[0]*60 + parts[1];
-                return 0;
-             }
-             return parseFloat(val.toString().replace(',', '.')) || 0;
-          };
-
-          const rawMoved = row[idxTimeMoved];
-          const rawElapsed = row[idxTimeElapsed];
-          let durationSec = parseNum(rawMoved);
-          if (durationSec === 0) durationSec = parseNum(rawElapsed);
-          const hrVal = parseNum(row[idxHr]);
-
-          if (durationSec > 0) {
-             newRows.push({
-                date: parsedDate,
-                type: row[idxType] || 'Actividad',
-                duration: Math.round(durationSec / 60),
-                hr_avg: hrVal,
-                calories: parseNum(row[idxCal]),
-             });
-          }
-        }
-      }
-      setUploadStatus(`Guardando ${newRows.length} actividades...`);
-      const batchSize = 50;
-      for (let i = 0; i < newRows.length; i += batchSize) {
-        await supabase.from('activities').insert(newRows.slice(i, i + batchSize));
-      }
-      setUploadStatus("¡Listo!"); await fetchActivities(); setUploading(false); setTimeout(() => setUploadStatus(null), 3000);
-    };
-    reader.readAsText(file);
-  };
-
-  const handleClearDb = async () => {
-    if(!window.confirm("¿Borrar TODOS los datos?")) return;
-    setUploadStatus("Borrando...");
-    await supabase.from('activities').delete().neq('id', 0);
-    await fetchActivities();
-    setUploadStatus(null);
-  };
-
-  // --- CÁLCULO CORE CON "ESTADO CONGELADO" ---
+  // 7. CÁLCULO DE MÉTRICAS (CORE ALGORÍTMICO)
   const metrics = useMemo(() => {
-    if (activities.length === 0) return { filteredData: [], currentMetrics: {}, chartData: [], distribution: [], zones: [], summary: {} };
+    // Si no hay datos, retornamos ceros seguros
+    if (!activities || activities.length === 0) {
+        return { 
+            filteredData: [], 
+            currentMetrics: { ctl: 0, atl: 0, tcb: 0, rampRate: 0, avgTss7d: 0 }, 
+            chartData: [], distribution: [], zones: [], summary: { count: 0 } 
+        };
+    }
 
-    // 1. Clonar y ordenar
-    const sortedActs = [...activities].sort((a, b) => new Date(a.date) - new Date(b.date));
-    
-    const startDate = new Date(sortedActs[0].date);
-    const lastActivityDate = new Date(sortedActs[sortedActs.length - 1].date);
-    const today = new Date();
-    
-    // --- LÓGICA INTELIGENTE DE FECHA DE CORTE ---
-    
-    // 1. ¿Cuánto hace del último entreno registrado?
-    const daysSinceLast = (today - lastActivityDate) / (1000 * 60 * 60 * 24);
-
-    // 2. ¿Tenemos alguna actividad HOY?
-    // Convertimos a string YYYY-MM-DD para comparar sin horas
-    const todayStr = today.toISOString().split('T')[0];
-    const hasActivityToday = sortedActs.some(a => a.date.startsWith(todayStr));
-
-    // 3. Decidir Fecha Final (endDate):
-    let endDate = today;
-
-    if (daysSinceLast > 30) {
-        // A. Si hace más de un mes que no entrenas, cortamos ahí (evita caída infinita a cero)
-        endDate = lastActivityDate;
-    } else if (!hasActivityToday) {
-        // B. Si entrenas habitualmente pero HOY aún no has subido nada:
-        // CORTAMOS AYER. Así tu gráfica se congela en el último estado conocido y no baja.
-        const yesterday = new Date(today);
-        yesterday.setDate(today.getDate() - 1);
-        endDate = yesterday;
-    } 
-    // C. Si hasActivityToday es true, endDate es HOY (se calcula el entreno nuevo).
-
-    // --- FIN LÓGICA DE CORTE ---
-
-    // Filtros visuales
-    const cutoff = new Date();
-    if (timeRange === '30d') cutoff.setDate(today.getDate() - 30);
-    else if (timeRange === '90d') cutoff.setDate(today.getDate() - 90);
-    else if (timeRange === '1y') cutoff.setFullYear(today.getFullYear() - 1);
-    else if (timeRange === 'all') cutoff.setTime(startDate.getTime()); 
-
-    const visibleActs = sortedActs.filter(a => new Date(a.date) >= cutoff);
-    
     const factorA = settings.gender === 'female' ? 0.86 : 0.64;
     const factorB = settings.gender === 'female' ? 1.67 : 1.92;
 
@@ -211,6 +244,7 @@ export const useActivities = () => {
         const hr = Number(act.hr_avg);
         const fcReposo = Number(settings.fcReposo) || 50;
         
+        // Estimación si no hay pulso
         if (!hr || hr <= fcReposo) return (act.duration / 60) * 40; 
 
         const fcMax = Number(sportSettings.max) || 190;
@@ -231,7 +265,27 @@ export const useActivities = () => {
         return Math.max(0, (trimp / oneHourLthrTrimp) * 100);
     };
 
-    // Indexado por fecha para rendimiento
+    // Preparar fechas
+    const sortedActs = [...activities]; 
+    const startDate = new Date(sortedActs[0].date);
+    const lastActivityDate = new Date(sortedActs[sortedActs.length - 1].date);
+    const today = new Date();
+    
+    // Lógica de "Fecha de Corte" (Congelar estado si no hay entreno hoy)
+    const daysSinceLast = (today - lastActivityDate) / (1000 * 60 * 60 * 24);
+    const todayStr = today.toISOString().split('T')[0];
+    const hasActivityToday = sortedActs.some(a => a.date.startsWith(todayStr));
+    
+    let endDate = today;
+    if (daysSinceLast > 30) {
+        endDate = lastActivityDate; // Si dejaste de entrenar hace un mes, cortamos ahí
+    } else if (!hasActivityToday) {
+        const yesterday = new Date(today);
+        yesterday.setDate(today.getDate() - 1);
+        endDate = yesterday; // Congelamos en ayer
+    } 
+
+    // Indexar actividades por fecha
     const activitiesMap = new Map();
     sortedActs.forEach(act => {
         const dKey = new Date(act.date).toISOString().split('T')[0];
@@ -239,56 +293,73 @@ export const useActivities = () => {
         activitiesMap.get(dKey).push(act);
     });
 
+    // Bucle de cálculo diario (Banister/Coggan)
     let ctl = 0; 
     let atl = 0; 
     const fullSeries = [];
     const oneDay = 24 * 60 * 60 * 1000;
     
-    // Bucle temporal hasta endDate (que puede ser Ayer u Hoy)
     for (let time = startDate.getTime(); time <= endDate.getTime(); time += oneDay) {
         const d = new Date(time);
         const dateStr = d.toISOString().split('T')[0];
-        
         const daysActs = activitiesMap.get(dateStr) || [];
         
         let dailyTss = 0;
         daysActs.forEach(act => { dailyTss += calculateTSS(act); });
 
         if (fullSeries.length === 0 && dailyTss > 0) {
-            ctl = dailyTss;
-            atl = dailyTss;
+            ctl = dailyTss; atl = dailyTss; // Arranque rápido
         } else {
             ctl = ctl + (dailyTss - ctl) / settings.ta;
             atl = atl + (dailyTss - atl) / settings.tf;
         }
         
         const tsb = ctl - atl;
-
         fullSeries.push({ 
             date: dateStr, 
             ctl: parseFloat(ctl.toFixed(1)), 
             atl: parseFloat(atl.toFixed(1)), 
-            tcb: parseFloat(tsb.toFixed(1)),
+            tcb: parseFloat(tsb.toFixed(1)), 
             dailyTss: Math.round(dailyTss) 
         });
     }
 
+    // Métricas finales
     const lastPoint = fullSeries[fullSeries.length - 1] || { ctl: 0, atl: 0, tcb: 0, dailyTss: 0 };
-    const prevWeekPoint = fullSeries[fullSeries.length - 8] || { ctl: 0 };
+    const prevWeekPoint = fullSeries[fullSeries.length - 8] || { ctl: 0 }; 
     const rampRate = parseFloat((lastPoint.ctl - prevWeekPoint.ctl).toFixed(1));
-    
     const last7Days = fullSeries.slice(-7);
     const avgTss7d = last7Days.reduce((sum, d) => sum + d.dailyTss, 0) / (last7Days.length || 1);
 
-    const currentMetrics = { ...lastPoint, rampRate, avgTss7d: Math.round(avgTss7d) };
+    // Filtros de visualización
+    const cutoff = new Date();
+    if (timeRange === '30d') cutoff.setDate(today.getDate() - 30);
+    else if (timeRange === '90d') cutoff.setDate(today.getDate() - 90);
+    else if (timeRange === '1y') cutoff.setFullYear(today.getFullYear() - 1);
+    else if (timeRange === 'all') cutoff.setTime(startDate.getTime()); 
+
+    const visibleActs = sortedActs.filter(a => new Date(a.date) >= cutoff);
     const chartData = fullSeries.filter(d => new Date(d.date) >= cutoff);
-    const zoneBins = { Z1: 0, Z2: 0, Z3: 0, Z4: 0, Z5: 0 }; 
-    const zones = Object.keys(zoneBins).map(k => ({ name: k, value: 0 })); 
+
+    // Distribución
     const cats = visibleActs.reduce((acc, curr) => { acc[curr.type] = (acc[curr.type] || 0) + 1; return acc; }, {});
     const distribution = Object.keys(cats).map(k => ({ name: k, value: cats[k] }));
 
-    return { filteredData: visibleActs.reverse(), currentMetrics, chartData, distribution, zones, summary: { count: visibleActs.length } };
+    const currentMetrics = { 
+        ctl: lastPoint.ctl, 
+        atl: lastPoint.atl, 
+        tcb: lastPoint.tcb, 
+        rampRate, 
+        avgTss7d: Math.round(avgTss7d) 
+    };
+
+    return { filteredData: visibleActs.reverse(), currentMetrics, chartData, distribution, zones: [], summary: { count: visibleActs.length } };
   }, [activities, timeRange, settings]);
 
-  return { activities, loading, uploading, uploadStatus, timeRange, settings, setTimeRange, handleClearDb, processFile, fetchActivities, fetchProfile, analyzeHistory, ...metrics };
+  return { 
+      activities, loading, uploading, uploadStatus, timeRange, settings, 
+      isStravaConnected, handleStravaSync, handleDisconnectStrava, 
+      setTimeRange, handleClearDb, processFile, fetchActivities, fetchProfile, analyzeHistory, 
+      ...metrics 
+  };
 };
