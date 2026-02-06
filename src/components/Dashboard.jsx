@@ -14,6 +14,7 @@ import ActivityCalendar from './dashboard/ActivityCalendar';
 import { FitnessStatus } from './dashboard/FitnessStatus';
 import AddActivityModal from './modals/AddActivityModal';
 import ProfileModal from './modals/ProfileModal';
+import { SeasonPlanner } from './dashboard/SeasonPlanner';
 
 const Dashboard = () => {
   const { 
@@ -114,6 +115,12 @@ const Dashboard = () => {
                         <HistoryList activities={filteredData} />
                     </div>
                 </div>
+                {/* PESTAÑA 4: PLANIFICADOR */}
+                <div className={activeTab === 'planner' ? 'block' : 'hidden'}>
+                    <SeasonPlanner currentMetrics={currentMetrics} 
+                      activities={activities}
+                    />
+                </div>
             </div>
 
             {/* --- LAYOUT ESCRITORIO --- */}
@@ -132,9 +139,16 @@ const Dashboard = () => {
                             <ActivityCalendar activities={activities} />
                         </div>
                     </div>
-                    <div className="col-span-4 h-[725px]">
+                    <div className="col-span-4 h-[607px]">
                         <HistoryList activities={filteredData} />
                     </div>
+                </div>
+                <div className="mt-8">
+                    <h2 className="text-xl font-bold text-slate-800 dark:text-white mb-4">Planificador de Temporada</h2>
+                    <SeasonPlanner currentMetrics={currentMetrics} 
+                      activities={activities}
+                    />
+                    
                 </div>
             </div>
 
