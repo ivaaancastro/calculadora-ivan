@@ -1,5 +1,5 @@
 import React from 'react';
-import { Clock, Calendar, Heart, Flame } from 'lucide-react';
+import { Clock, Calendar, Heart, Flame, Trash2, Zap } from 'lucide-react';
 
 const COLORS = { 
     'Ciclismo': '#3b82f6', 
@@ -10,7 +10,8 @@ const COLORS = {
     'Entrenamiento': '#6366f1' 
 };
 
-export const HistoryList = ({ activities }) => {
+// AHORA RECIBIMOS LA PROP 'onDelete'
+export const HistoryList = ({ activities, onDelete }) => {
   const sortedActivities = [...activities].sort((a, b) => new Date(b.date) - new Date(a.date));
 
   return (
@@ -30,7 +31,7 @@ export const HistoryList = ({ activities }) => {
       <div className="flex-1 overflow-y-auto custom-scrollbar p-2">
         <div className="space-y-1">
           {sortedActivities.slice(0, 50).map((act, i) => (
-            <div key={i} className="group flex items-center justify-between p-2.5 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-xl transition-all border border-transparent hover:border-slate-100 dark:hover:border-slate-700 cursor-default">
+            <div key={act.id || i} className="group flex items-center justify-between p-2.5 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-xl transition-all border border-transparent hover:border-slate-100 dark:hover:border-slate-700 cursor-default relative pr-8">
               
               {/* IZQUIERDA: ICONO + INFO */}
               <div className="flex items-center gap-3 min-w-0">
@@ -57,6 +58,15 @@ export const HistoryList = ({ activities }) => {
               {/* DERECHA: MÉTRICAS */}
               <div className="flex items-center gap-4 text-right shrink-0">
                 
+                {/* TSS (Mostramos el real calculado) */}
+                <div className="hidden sm:flex flex-col items-end w-10">
+                   <div className="flex items-center gap-1 text-emerald-600 dark:text-emerald-400">
+                      <Zap size={10} className="fill-current" />
+                      <span className="text-xs font-black">{act.tss || 0}</span>
+                   </div>
+                   <span className="text-[9px] font-bold text-slate-400">TSS</span>
+                </div>
+
                 {/* DURACIÓN + DISTANCIA */}
                 <div className="flex flex-col items-end w-12">
                    <div className="flex items-center gap-1 text-slate-700 dark:text-slate-300">
@@ -70,37 +80,19 @@ export const HistoryList = ({ activities }) => {
                    )}
                 </div>
 
-                {/* PULSO */}
-                <div className="hidden sm:flex flex-col items-end w-14">
-                  {act.hr_avg > 0 ? (
-                      <>
-                        <div className="flex items-center gap-1 text-rose-600 dark:text-rose-500">
-                            <Heart size={10} className="fill-current" />
-                            <span className="text-xs font-black">{Math.round(act.hr_avg)}</span>
-                        </div>
-                        <span className="text-[9px] font-bold text-slate-400">ppm</span>
-                      </>
-                  ) : (
-                      <span className="text-slate-200 dark:text-slate-700 text-xs font-bold">-</span>
-                  )}
-                </div>
-
-                {/* CALORÍAS */}
-                <div className="hidden sm:flex flex-col items-end w-14">
-                  {act.calories > 0 ? (
-                      <>
-                        <div className="flex items-center gap-1 text-orange-500">
-                            <Flame size={10} className="fill-current" />
-                            <span className="text-xs font-black">{Math.round(act.calories)}</span>
-                        </div>
-                        <span className="text-[9px] font-bold text-slate-400">kcal</span>
-                      </>
-                  ) : (
-                      <span className="text-slate-200 dark:text-slate-700 text-xs font-bold">-</span>
-                  )}
-                </div>
-
               </div>
+
+              {/* BOTÓN ELIMINAR (SOLO VISIBLE AL HACER HOVER) */}
+              <button 
+                onClick={(e) => {
+                    e.stopPropagation(); // Evita que el click afecte a otros elementos si los hubiera
+                    onDelete(act.id);
+                }}
+                className="absolute right-2 top-1/2 -translate-y-1/2 p-2 text-slate-300 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg opacity-0 group-hover:opacity-100 transition-all z-10"
+                title="Eliminar actividad"
+              >
+                <Trash2 size={16} />
+              </button>
 
             </div>
           ))}
