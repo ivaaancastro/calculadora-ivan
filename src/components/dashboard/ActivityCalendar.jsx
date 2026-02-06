@@ -85,6 +85,7 @@ const ActivityCalendar = ({ activities }) => {
           const isToday = new Date().toLocaleDateString('en-CA') === dateKey;
 
           // CÁLCULO DIRECTO LEYENDO LA PROPIEDAD .tss
+          // Ya no calculamos nada, solo sumamos lo que nos da el hook
           const totalDuration = dayActs.reduce((acc, curr) => acc + curr.duration, 0);
           const totalTSS = dayActs.reduce((acc, curr) => acc + (curr.tss || 0), 0);
 

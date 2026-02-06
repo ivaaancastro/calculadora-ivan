@@ -21,7 +21,7 @@ const Dashboard = () => {
     activities, loading, uploading, uploadStatus, timeRange, settings,
     setTimeRange, handleClearDb, processFile, fetchActivities, fetchProfile, 
     analyzeHistory, filteredData, currentMetrics, chartData, distribution, summary,
-    isStravaConnected, handleStravaSync 
+    isStravaConnected, handleStravaSync, deleteActivity // <--- IMPORTAMOS FUNCIÓN BORRAR
   } = useActivities();
 
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -112,13 +112,14 @@ const Dashboard = () => {
                         <Plus size={18} /> Añadir Actividad Manual
                     </button>
                     <div className="h-[calc(100vh-200px)]">
-                        <HistoryList activities={filteredData} />
+                        {/* AÑADIDO: onDelete */}
+                        <HistoryList activities={filteredData} onDelete={deleteActivity} />
                     </div>
                 </div>
                 {/* PESTAÑA 4: PLANIFICADOR */}
                 <div className={activeTab === 'planner' ? 'block' : 'hidden'}>
                     <SeasonPlanner currentMetrics={currentMetrics} 
-                      activities={activities}
+                      activities={activities} // Necesario para el Oráculo
                     />
                 </div>
             </div>
@@ -140,15 +141,15 @@ const Dashboard = () => {
                         </div>
                     </div>
                     <div className="col-span-4 h-[607px]">
-                        <HistoryList activities={filteredData} />
+                         {/* AÑADIDO: onDelete */}
+                        <HistoryList activities={filteredData} onDelete={deleteActivity} />
                     </div>
                 </div>
                 <div className="mt-8">
                     <h2 className="text-xl font-bold text-slate-800 dark:text-white mb-4">Planificador de Temporada</h2>
                     <SeasonPlanner currentMetrics={currentMetrics} 
-                      activities={activities}
+                      activities={activities} // Necesario para el Oráculo
                     />
-                    
                 </div>
             </div>
 
