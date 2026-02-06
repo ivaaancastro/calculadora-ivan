@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { 
   ChevronLeft, ChevronRight, Bike, Footprints, Dumbbell, Activity, 
-  Calendar as CalIcon, Clock, Heart, Zap, MapPin, Layers 
+  Calendar as CalIcon, Clock, Heart, Zap, MapPin 
 } from 'lucide-react';
 
 const getActivityStyle = (type) => {
@@ -51,7 +51,6 @@ const ActivityCalendar = ({ activities }) => {
 
   return (
     <div className="w-full h-full flex flex-col select-none">
-      {/* HEADER CALENDARIO */}
       <div className="flex items-center justify-between mb-4">
         <h3 className="text-base font-bold text-slate-800 dark:text-white flex items-center gap-2 capitalize transition-colors">
           <CalIcon size={16} className="text-slate-400 dark:text-slate-500"/>
@@ -78,21 +77,16 @@ const ActivityCalendar = ({ activities }) => {
           const dateKey = d.toLocaleDateString('en-CA');
           const dayActs = activitiesByDate[dateKey] || [];
           
-          // Ordenamos por duración para que el entreno principal sea el icono grande
           const sortedActs = [...dayActs].sort((a,b) => b.duration - a.duration);
           const mainAct = sortedActs[0];
           
-          // Estilos del entreno principal
           const mainStyle = mainAct ? getActivityStyle(mainAct.type) : null;
           const MainIcon = mainStyle ? mainStyle.icon : null;
           const isToday = new Date().toLocaleDateString('en-CA') === dateKey;
 
-          // Cálculos totales del día para el Header del Tooltip
+          // CÁLCULO DIRECTO LEYENDO LA PROPIEDAD .tss
           const totalDuration = dayActs.reduce((acc, curr) => acc + curr.duration, 0);
-          const totalTSS = dayActs.reduce((acc, curr) => {
-             const factor = curr.hr_avg > 0 ? (curr.hr_avg / 180) : 0.5;
-             return acc + Math.round(curr.duration * factor);
-          }, 0);
+          const totalTSS = dayActs.reduce((acc, curr) => acc + (curr.tss || 0), 0);
 
           return (
             <div 
@@ -108,26 +102,21 @@ const ActivityCalendar = ({ activities }) => {
               
               {mainAct && (
                 <>
-                  {/* ICONO CENTRAL (Principal) */}
                   <div className={`w-7 h-7 rounded-full flex items-center justify-center ${mainStyle.bg} ${mainStyle.text} mb-0.5 z-0`}>
                     <MainIcon size={14} strokeWidth={2.5} />
                   </div>
 
-                  {/* PUNTITOS DE COLORES (Secundarios) */}
                   {dayActs.length > 1 && (
                     <div className="absolute bottom-1 flex gap-1">
-                        {/* Mostramos un punto por cada actividad EXTRA (excluyendo la principal), máx 3 */}
                         {sortedActs.slice(1, 4).map((act, idx) => (
                             <div key={idx} className={`w-1.5 h-1.5 rounded-full ${getActivityStyle(act.type).dot}`}></div>
                         ))}
-                        {dayActs.length > 4 && <div className="w-1.5 h-1.5 rounded-full bg-slate-300 dark:bg-slate-600"></div>}
                     </div>
                   )}
 
-                  {/* TOOLTIP MULTI-ENTRENO */}
+                  {/* TOOLTIP LEEYENDO TSS REAL */}
                   <div className="opacity-0 group-hover:opacity-100 absolute bottom-full mb-2 min-w-[180px] bg-slate-900 text-white rounded-xl p-0 pointer-events-none z-50 shadow-xl border border-slate-700 transition-all duration-200 translate-y-2 group-hover:translate-y-0 hidden sm:block overflow-hidden">
                     
-                    {/* 1. Header del Día (Totales) */}
                     <div className="bg-slate-800 p-2 border-b border-slate-700 flex justify-between items-center">
                         <span className="text-[10px] font-bold text-slate-400 uppercase">Resumen Día {day}</span>
                         <div className="flex gap-2 text-[10px] font-mono">
@@ -136,13 +125,12 @@ const ActivityCalendar = ({ activities }) => {
                         </div>
                     </div>
                     
-                    {/* 2. Lista de Entrenos */}
                     <div className="p-2 space-y-2">
                         {sortedActs.map((act, idx) => {
                             const style = getActivityStyle(act.type);
                             const ActIcon = style.icon;
-                            // TSS individual estimado
-                            const tss = Math.round(act.duration * (act.hr_avg > 0 ? act.hr_avg/180 : 0.5));
+                            // TSS REAL
+                            const tss = act.tss || 0;
                             
                             return (
                                 <div key={idx} className="flex items-center justify-between gap-3 text-[10px]">
@@ -165,8 +153,6 @@ const ActivityCalendar = ({ activities }) => {
                             )
                         })}
                     </div>
-
-                    {/* Flecha */}
                     <div className="absolute top-full left-1/2 -translate-x-1/2 -mt-1 border-4 border-transparent border-t-slate-900"></div>
                   </div>
                 </>
