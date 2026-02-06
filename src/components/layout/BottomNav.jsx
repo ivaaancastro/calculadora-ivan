@@ -1,5 +1,5 @@
 import React from 'react';
-import { LayoutDashboard, BarChart2, History, User } from 'lucide-react';
+import { LayoutDashboard, BarChart2, History, User, Calendar } from 'lucide-react';
 
 export const BottomNav = ({ activeTab, onTabChange }) => {
   const navItems = [
@@ -7,6 +7,7 @@ export const BottomNav = ({ activeTab, onTabChange }) => {
     { id: 'analytics', label: 'Análisis', icon: BarChart2 },
     { id: 'history', label: 'Diario', icon: History },
     { id: 'profile', label: 'Perfil', icon: User },
+    { id: 'planner', label: 'Plan', icon: Calendar },
   ];
 
   return (
