@@ -18,7 +18,7 @@ export const useActivities = () => {
 
   const [settings, setSettings] = useState({
     gender: 'male', fcReposo: 50, weight: 70, zonesMode: 'manual',
-    run: { max: 200, lthr: 178, zones: defaultZones }, // LTHR ajustado a tu realidad
+    run: { max: 200, lthr: 178, zones: defaultZones }, 
     bike: { max: 190, lthr: 168, zones: defaultZones },
     ta: 42, tf: 7 
   });
@@ -38,7 +38,7 @@ export const useActivities = () => {
         fcReposo: Number(data.fc_rest) || 50,
         run: { 
             max: Number(data.run_fc_max) || 200, 
-            lthr: Number(data.run_lthr) || 178, // Importante: Valor coherente
+            lthr: Number(data.run_lthr) || 178, 
             zones: data.run_zones || defaultZones 
         },
         bike: { 
@@ -106,9 +106,72 @@ export const useActivities = () => {
     finally { setUploading(false); setTimeout(() => setUploadStatus(null), 2000); }
   };
 
-  const processFile = async (file) => { /* ... Lógica CSV igual que antes ... */ };
-  const handleClearDb = async () => { /* ... Lógica Borrar igual que antes ... */ };
-  const analyzeHistory = (sport) => { /* ... Lógica LTHR igual que antes ... */ };
+  const processFile = async (file) => {
+    setUploading(true); setUploadStatus("Analizando...");
+    const reader = new FileReader();
+    reader.onload = async (e) => {
+      const rows = parseCSV(e.target.result);
+      if (rows.length < 2) { setUploading(false); return; }
+      
+      const header = rows[0].map(h => h.toLowerCase().trim().replace(/"/g, ''));
+      const getIdx = (opts) => header.findIndex(h => opts.some(opt => h.includes(opt)));
+      
+      const idxDate = getIdx(['fecha', 'date']);
+      const idxType = getIdx(['tipo', 'type']);
+      const idxTimeMoved = getIdx(['tiempo en movimiento', 'moving time']);
+      const idxHr = getIdx(['frecuencia cardiaca', 'avg heart rate']); 
+      
+      if (idxDate === -1) { alert("Error CSV"); setUploading(false); return; }
+      
+      const newRows = [];
+      for (let i = 1; i < rows.length; i++) {
+         const row = rows[i];
+         if (!row[idxDate]) continue;
+         const parsedDate = parseStravaDate(row[idxDate]);
+         if(parsedDate) {
+             const duration = parseFloat(row[idxTimeMoved]) || 0;
+             if(duration > 0) {
+                 newRows.push({
+                     date: parsedDate,
+                     type: row[idxType] || 'Actividad',
+                     duration: Math.round(duration/60), 
+                     hr_avg: parseFloat(row[idxHr]) || 0,
+                     calories: 0, distance: 0, elevation_gain: 0, watts_avg: 0
+                 });
+             }
+         }
+      }
+      await supabase.from('activities').insert(newRows);
+      setUploadStatus("¡Listo!"); await fetchActivities(); setUploading(false); setTimeout(() => setUploadStatus(null), 3000);
+    };
+    reader.readAsText(file);
+  };
+
+  const handleClearDb = async () => {
+    if(!window.confirm("¿Borrar todo?")) return;
+    setUploadStatus("Borrando...");
+    await supabase.from('activities').delete().neq('id', 0);
+    await fetchActivities();
+    setUploadStatus(null);
+  };
+
+  const analyzeHistory = (sport) => { /* ... Lógica existente ... */ };
+
+  // --- NUEVO: FUNCIÓN BORRAR ACTIVIDAD ---
+  const deleteActivity = async (id) => {
+    if (!window.confirm("¿Seguro que quieres eliminar esta actividad?")) return;
+    setUploadStatus("Eliminando...");
+    try {
+        const { error } = await supabase.from('activities').delete().eq('id', id);
+        if (error) throw error;
+        await fetchActivities();
+        setUploadStatus("Eliminado");
+        setTimeout(() => setUploadStatus(null), 2000);
+    } catch (err) {
+        alert("Error borrando: " + err.message);
+        setUploadStatus(null);
+    }
+  };
 
   // --- CÁLCULOS MATEMÁTICOS (CORE) ---
   const metrics = useMemo(() => {
@@ -154,22 +217,21 @@ export const useActivities = () => {
     };
 
     // 2. PROCESAMIENTO E INYECCIÓN DE TSS
-    // Aquí calculamos el TSS y se lo pegamos a cada actividad para siempre
+    // Calculamos el TSS y se lo pegamos a cada actividad
     const processedActivities = [...activities].map(act => ({
         ...act,
-        tss: calculateTSS(act) // <--- ESTO ES LA CLAVE
+        tss: calculateTSS(act) 
     }));
 
-    // ... (El resto del código de Banister/CTL usa ahora processedActivities) ...
-    
     // Preparar fechas
-    const startDate = new Date(processedActivities[0].date);
-    const lastActivityDate = new Date(processedActivities[processedActivities.length - 1].date);
+    const sortedActs = processedActivities; // Ya están ordenadas por fetch
+    const startDate = new Date(sortedActs[0].date);
+    const lastActivityDate = new Date(sortedActs[sortedActs.length - 1].date);
     const today = new Date();
     
     const daysSinceLast = (today - lastActivityDate) / (1000 * 60 * 60 * 24);
     const todayStr = today.toISOString().split('T')[0];
-    const hasActivityToday = processedActivities.some(a => a.date.startsWith(todayStr));
+    const hasActivityToday = sortedActs.some(a => a.date.startsWith(todayStr));
     
     let endDate = today;
     if (daysSinceLast > 30) endDate = lastActivityDate;
@@ -180,7 +242,7 @@ export const useActivities = () => {
     } 
 
     const activitiesMap = new Map();
-    processedActivities.forEach(act => {
+    sortedActs.forEach(act => {
         const dKey = new Date(act.date).toISOString().split('T')[0];
         if (!activitiesMap.has(dKey)) activitiesMap.set(dKey, []);
         activitiesMap.get(dKey).push(act);
@@ -197,7 +259,7 @@ export const useActivities = () => {
         const dateStr = d.toISOString().split('T')[0];
         const daysActs = activitiesMap.get(dateStr) || [];
         
-        // Sumamos el TSS que ya calculamos arriba
+        // Sumamos el TSS pre-calculado
         let dailyTss = 0;
         daysActs.forEach(act => { dailyTss += act.tss; });
         loadHistory.push(dailyTss);
@@ -222,9 +284,8 @@ export const useActivities = () => {
     const last7Loads = loadHistory.slice(-7);
     const last28Loads = loadHistory.slice(-28);
     const sum7 = last7Loads.reduce((a, b) => a + b, 0);
-    const sum28 = last28Loads.reduce((a, b) => a + b, 0);
     const avgLoad7 = sum7 / (last7Loads.length || 1);
-    const avgLoad28 = sum28 / (last28Loads.length || 1);
+    const avgLoad28 = last28Loads.reduce((a, b) => a + b, 0) / (last28Loads.length || 1);
     const acwr = avgLoad28 > 0 ? (avgLoad7 / avgLoad28) : 0;
     
     const mean = avgLoad7;
@@ -258,7 +319,6 @@ export const useActivities = () => {
     else if (timeRange === '1y') cutoff.setFullYear(today.getFullYear() - 1);
     else if (timeRange === 'all') cutoff.setTime(startDate.getTime()); 
     
-    // Usamos processedActivities (con TSS) para filtrar
     const visibleActs = processedActivities.filter(a => new Date(a.date) >= cutoff);
     const chartData = fullSeries.filter(d => new Date(d.date) >= cutoff);
     const cats = visibleActs.reduce((acc, curr) => { acc[curr.type] = (acc[curr.type] || 0) + 1; return acc; }, {});
@@ -271,7 +331,7 @@ export const useActivities = () => {
     };
 
     return { 
-        activities: processedActivities.reverse(), // Exportamos las actividades con TSS
+        activities: processedActivities.reverse(), // Exportamos las actividades con TSS ya calculado
         filteredData: visibleActs.reverse(), 
         currentMetrics, chartData, distribution, zones: [], summary: { count: visibleActs.length } 
     };
@@ -281,7 +341,7 @@ export const useActivities = () => {
       activities: metrics.activities, // Usar las procesadas
       loading, uploading, uploadStatus, timeRange, settings, 
       isStravaConnected, handleStravaSync, handleDisconnectStrava, 
-      setTimeRange, handleClearDb, processFile, fetchActivities, fetchProfile, analyzeHistory, 
+      setTimeRange, handleClearDb, deleteActivity, processFile, fetchActivities, fetchProfile, analyzeHistory, 
       ...metrics 
   };
 };
