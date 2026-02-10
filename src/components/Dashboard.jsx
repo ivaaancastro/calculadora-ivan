@@ -95,7 +95,7 @@ const Dashboard = () => {
                 {/* PESTAÑA 1: INICIO */}
                 <div className={activeTab === 'overview' ? 'block space-y-6' : 'hidden'}>
                     <FitnessStatus metrics={currentMetrics} />
-                    <SmartCoach metrics={currentMetrics} />
+                    <SmartCoach metrics={currentMetrics} activities={activities} />
                     <KpiGrid metrics={currentMetrics} summary={summary} timeRange={timeRange} />
                 </div>
 
@@ -134,7 +134,9 @@ const Dashboard = () => {
                 </div>
                 <div className="grid grid-cols-12 gap-6 items-start">
                     <div className="col-span-8 grid grid-cols-2 gap-6">
-                        <div className="min-h-[350px]"><SmartCoach metrics={currentMetrics} /></div>
+                        <div className="min-h-[350px]">
+                            <SmartCoach metrics={currentMetrics} activities={activities} />
+                        </div>
                         <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-sm p-5 min-h-[350px] transition-colors">
                             <h3 className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase mb-4">Calendario</h3>
                             <ActivityCalendar activities={activities} />

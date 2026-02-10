@@ -27,7 +27,7 @@ export const useActivities = () => {
     Promise.all([fetchProfile(), fetchActivities()]).then(() => setLoading(false));
   }, []);
 
-  // --- CARGA DE DATOS ---
+  // --- 1. CARGA DE DATOS ---
   const fetchProfile = async () => {
     const { data, error } = await supabase.from('profiles').select('*').eq('id', 1).single();
     if (!error && data) {
@@ -60,7 +60,32 @@ export const useActivities = () => {
     }
   };
 
-  // --- GESTIÓN STRAVA & CSV ---
+  // --- 2. GESTIÓN STRAVA (CON AUTO-REFRESCO) ---
+  
+  // Función auxiliar para renovar el token si ha caducado
+  const refreshStravaToken = async (refreshToken) => {
+    const clientId = import.meta.env.VITE_STRAVA_CLIENT_ID;
+    const clientSecret = import.meta.env.VITE_STRAVA_CLIENT_SECRET;
+
+    if (!clientId || !clientSecret) {
+        throw new Error("Faltan las credenciales de Strava (Client ID/Secret) en .env");
+    }
+
+    const response = await fetch('https://www.strava.com/oauth/token', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            client_id: clientId,
+            client_secret: clientSecret,
+            grant_type: 'refresh_token',
+            refresh_token: refreshToken
+        })
+    });
+
+    if (!response.ok) throw new Error("No se pudo refrescar el token. Reconecta Strava.");
+    return await response.json();
+  };
+
   const handleDisconnectStrava = async () => {
       await supabase.from('profiles').update({ strava_access_token: null, strava_refresh_token: null, strava_expires_at: null }).eq('id', 1);
       setIsStravaConnected(false);
@@ -68,16 +93,56 @@ export const useActivities = () => {
 
   const handleStravaSync = async () => {
     try {
-        setUploading(true); setUploadStatus("Conectando...");
-        const { data: profile } = await supabase.from('profiles').select('strava_access_token').eq('id', 1).single();
+        setUploading(true); setUploadStatus("Verificando sesión...");
+        
+        // A. Obtener tokens de BD
+        const { data: profile } = await supabase.from('profiles').select('*').eq('id', 1).single();
         if (!profile?.strava_access_token) throw new Error("No conectado a Strava.");
 
+        let accessToken = profile.strava_access_token;
+        
+        // B. Verificar Expiración (Token dura 6 horas)
+        const nowInSeconds = Math.floor(Date.now() / 1000);
+        // Si caduca en menos de 5 min (300s) o ya caducó, renovamos
+        if (profile.strava_expires_at && nowInSeconds >= (profile.strava_expires_at - 300)) {
+            setUploadStatus("Renovando token...");
+            console.log("🔄 Renovando token de Strava...");
+            
+            try {
+                const newTokens = await refreshStravaToken(profile.strava_refresh_token);
+                
+                // Guardar nuevos tokens
+                const { error: updateError } = await supabase.from('profiles').update({
+                    strava_access_token: newTokens.access_token,
+                    strava_refresh_token: newTokens.refresh_token,
+                    strava_expires_at: newTokens.expires_at
+                }).eq('id', 1);
+
+                if (updateError) throw updateError;
+                accessToken = newTokens.access_token; // Usar el nuevo
+                console.log("✅ Token renovado.");
+            } catch (refreshError) {
+                console.error("Fallo renovación:", refreshError);
+                await handleDisconnectStrava();
+                throw new Error("Sesión caducada. Por favor, reconecta Strava.");
+            }
+        }
+
+        // C. Descargar Actividades
+        setUploadStatus("Sincronizando...");
         const response = await fetch('https://www.strava.com/api/v3/athlete/activities?per_page=200', {
-            headers: { 'Authorization': `Bearer ${profile.strava_access_token}` }
+            headers: { 'Authorization': `Bearer ${accessToken}` }
         });
-        if (!response.ok) throw new Error("Error Strava");
+        
+        if (response.status === 401) {
+             await handleDisconnectStrava();
+             throw new Error("Strava rechazó el acceso. Reconecta tu cuenta.");
+        }
+        if (!response.ok) throw new Error(`Error Strava: ${response.status}`);
+        
         const stravaActivities = await response.json();
         
+        // D. Procesar y Guardar
         const existingIds = new Set(activities.map(a => String(a.strava_id)));
         const newRows = stravaActivities
             .filter(act => !existingIds.has(String(act.id)))
@@ -100,12 +165,15 @@ export const useActivities = () => {
         if (newRows.length > 0) {
             await supabase.from('activities').insert(newRows);
             await fetchActivities();
+            setUploadStatus(`¡${newRows.length} nuevas!`);
+        } else {
+            setUploadStatus("Todo al día");
         }
-        setUploadStatus("¡Sincronizado!");
     } catch (err) { alert(err.message); } 
-    finally { setUploading(false); setTimeout(() => setUploadStatus(null), 2000); }
+    finally { setUploading(false); setTimeout(() => setUploadStatus(null), 3000); }
   };
 
+  // --- 3. GESTIÓN MANUAL Y ARCHIVOS ---
   const processFile = async (file) => {
     setUploading(true); setUploadStatus("Analizando...");
     const reader = new FileReader();
@@ -121,7 +189,7 @@ export const useActivities = () => {
       const idxTimeMoved = getIdx(['tiempo en movimiento', 'moving time']);
       const idxHr = getIdx(['frecuencia cardiaca', 'avg heart rate']); 
       
-      if (idxDate === -1) { alert("Error CSV"); setUploading(false); return; }
+      if (idxDate === -1) { alert("Error CSV: No encuentro fecha"); setUploading(false); return; }
       
       const newRows = [];
       for (let i = 1; i < rows.length; i++) {
@@ -141,23 +209,25 @@ export const useActivities = () => {
              }
          }
       }
-      await supabase.from('activities').insert(newRows);
-      setUploadStatus("¡Listo!"); await fetchActivities(); setUploading(false); setTimeout(() => setUploadStatus(null), 3000);
+      if (newRows.length > 0) {
+          await supabase.from('activities').insert(newRows);
+          await fetchActivities();
+          setUploadStatus("Importado");
+      }
+      setUploading(false); setTimeout(() => setUploadStatus(null), 3000);
     };
     reader.readAsText(file);
   };
 
   const handleClearDb = async () => {
-    if(!window.confirm("¿Borrar todo?")) return;
+    if(!window.confirm("¿Borrar todo el historial?")) return;
     setUploadStatus("Borrando...");
     await supabase.from('activities').delete().neq('id', 0);
     await fetchActivities();
     setUploadStatus(null);
   };
 
-  const analyzeHistory = (sport) => { /* ... Lógica existente ... */ };
-
-  // --- NUEVO: FUNCIÓN BORRAR ACTIVIDAD ---
+  // FUNCIÓN NUEVA: BORRAR UNA ACTIVIDAD
   const deleteActivity = async (id) => {
     if (!window.confirm("¿Seguro que quieres eliminar esta actividad?")) return;
     setUploadStatus("Eliminando...");
@@ -173,7 +243,9 @@ export const useActivities = () => {
     }
   };
 
-  // --- CÁLCULOS MATEMÁTICOS (CORE) ---
+  const analyzeHistory = (sport) => { /* Lógica existente para perfil */ };
+
+  // --- 4. CÁLCULOS MATEMÁTICOS (CORE) ---
   const metrics = useMemo(() => {
     if (!activities || activities.length === 0) {
         return { 
@@ -181,7 +253,7 @@ export const useActivities = () => {
         };
     }
 
-    // 1. FUNCIÓN MAESTRA DE TSS (Modelo Cuadrático / hrTSS Coggan)
+    // A. FUNCIÓN MAESTRA DE TSS (Modelo Cuadrático / hrTSS Coggan)
     const calculateTSS = (act) => {
         const t = act.type.toLowerCase();
         const isBike = t.includes('ciclismo') || t.includes('bici');
@@ -190,21 +262,21 @@ export const useActivities = () => {
         const hr = Number(act.hr_avg);
         const durationHours = act.duration / 60;
 
-        // A. SIN PULSO: Estimación manual (50 TSS/hora)
+        // Caso 1: Sin pulso -> Estimación manual (50 TSS/hora)
         if (!hr || hr <= 40) return Math.round(durationHours * 50);
 
-        // B. CON PULSO: Modelo Cuadrático
+        // Caso 2: Con pulso -> Modelo Cuadrático
         let lthr = Number(sportSettings.lthr);
         if (!lthr || lthr < 100) lthr = isBike ? 168 : 178; // Defaults de seguridad
 
-        // Factor de Intensidad (IF)
+        // Factor de Intensidad (IF) = HR / LTHR
         let IF = hr / lthr;
 
         // Correcciones de realismo
-        if (isBike && IF < 0.75 && IF > 0.5) IF = IF * 1.1; // Boost bici suave
-        if (IF > 1.15) IF = 1.15; // Cap máximo
+        if (isBike && IF < 0.75 && IF > 0.5) IF = IF * 1.1; // Boost bici suave (el pulso baja en bajadas)
+        if (IF > 1.15) IF = 1.15; // Cap máximo (nadie aguanta 120% mucho tiempo)
 
-        // TSS = Horas * IF² * 100
+        // Fórmula: TSS = Horas * IF² * 100
         let tss = durationHours * (IF * IF) * 100;
 
         // Suelo Aeróbico (Mínimo 40 TSS/hora para deporte real)
@@ -216,19 +288,20 @@ export const useActivities = () => {
         return Math.round(tss);
     };
 
-    // 2. PROCESAMIENTO E INYECCIÓN DE TSS
+    // B. PROCESAMIENTO E INYECCIÓN DE TSS
     // Calculamos el TSS y se lo pegamos a cada actividad
     const processedActivities = [...activities].map(act => ({
         ...act,
         tss: calculateTSS(act) 
     }));
 
-    // Preparar fechas
-    const sortedActs = processedActivities; // Ya están ordenadas por fetch
+    // C. CÁLCULO DE MÉTRICAS (BANISTER)
+    const sortedActs = processedActivities; // Ya ordenadas por fecha en fetch
     const startDate = new Date(sortedActs[0].date);
     const lastActivityDate = new Date(sortedActs[sortedActs.length - 1].date);
     const today = new Date();
     
+    // Determinamos rango de fechas para el gráfico
     const daysSinceLast = (today - lastActivityDate) / (1000 * 60 * 60 * 24);
     const todayStr = today.toISOString().split('T')[0];
     const hasActivityToday = sortedActs.some(a => a.date.startsWith(todayStr));
@@ -241,6 +314,7 @@ export const useActivities = () => {
         endDate = yesterday;
     } 
 
+    // Mapear actividades por día
     const activitiesMap = new Map();
     sortedActs.forEach(act => {
         const dKey = new Date(act.date).toISOString().split('T')[0];
@@ -248,7 +322,7 @@ export const useActivities = () => {
         activitiesMap.get(dKey).push(act);
     });
 
-    // Bucle Banister (CTL/ATL)
+    // Bucle día a día (CTL/ATL)
     let ctl = 0; let atl = 0; 
     const fullSeries = [];
     const oneDay = 24 * 60 * 60 * 1000;
@@ -266,21 +340,28 @@ export const useActivities = () => {
 
         if (fullSeries.length === 0 && dailyTss > 0) { ctl = dailyTss; atl = dailyTss; } 
         else {
+            // Fórmulas de Banister
             ctl = ctl + (dailyTss - ctl) / settings.ta;
             atl = atl + (dailyTss - atl) / settings.tf;
         }
         
-        fullSeries.push({ date: dateStr, ctl: parseFloat(ctl.toFixed(1)), atl: parseFloat(atl.toFixed(1)), tcb: parseFloat((ctl - atl).toFixed(1)), dailyTss: Math.round(dailyTss) });
+        fullSeries.push({ 
+            date: dateStr, 
+            ctl: parseFloat(ctl.toFixed(1)), 
+            atl: parseFloat(atl.toFixed(1)), 
+            tcb: parseFloat((ctl - atl).toFixed(1)), // TCB = TSB (Forma)
+            dailyTss: Math.round(dailyTss) 
+        });
     }
 
-    // Métricas Actuales
+    // Métricas Actuales (Último punto)
     const lastPoint = fullSeries[fullSeries.length - 1] || { ctl: 0, atl: 0, tcb: 0 };
     const prevWeekPoint = fullSeries[fullSeries.length - 8] || { ctl: 0 }; 
     const pastMonthPoint = fullSeries[fullSeries.length - 30] || fullSeries[0] || { ctl: 0 };
     
     const rampRate = parseFloat((lastPoint.ctl - prevWeekPoint.ctl).toFixed(1));
 
-    // ACWR y Monotonía
+    // ACWR, Monotonía y Strain
     const last7Loads = loadHistory.slice(-7);
     const last28Loads = loadHistory.slice(-28);
     const sum7 = last7Loads.reduce((a, b) => a + b, 0);
@@ -294,7 +375,7 @@ export const useActivities = () => {
     const monotony = stdDev > 0 ? (mean / stdDev) : (mean > 0 ? 4 : 0);
     const strain = sum7 * monotony;
 
-    // Predicción Futura
+    // Predicción Futura (Forecast)
     let predCtl = lastPoint.ctl;
     let daysToNextLevel = null;
     const currentLevelMax = Math.ceil((lastPoint.ctl + 1) / 30) * 30;
@@ -312,7 +393,7 @@ export const useActivities = () => {
         nextLevelVal: currentLevelMax
     };
 
-    // Filtros Visuales
+    // D. FILTROS VISUALES
     const cutoff = new Date();
     if (timeRange === '30d') cutoff.setDate(today.getDate() - 30);
     else if (timeRange === '90d') cutoff.setDate(today.getDate() - 90);
