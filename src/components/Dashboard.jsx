@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Loader2, FileText, Plus } from 'lucide-react';
+import { Loader2, FileText, Plus, Calendar as CalIcon } from 'lucide-react';
 import { useActivities } from '../hooks/useActivities';
 
 // Componentes
@@ -15,19 +15,20 @@ import { FitnessStatus } from './dashboard/FitnessStatus';
 import AddActivityModal from './modals/AddActivityModal';
 import ProfileModal from './modals/ProfileModal';
 import { SeasonPlanner } from './dashboard/SeasonPlanner';
+import { CalendarPage } from './pages/CalendarPage';
 
 const Dashboard = () => {
   const { 
     activities, loading, uploading, uploadStatus, timeRange, settings,
     setTimeRange, handleClearDb, processFile, fetchActivities, fetchProfile, 
     analyzeHistory, filteredData, currentMetrics, chartData, distribution, summary,
-    isStravaConnected, handleStravaSync, deleteActivity // <--- IMPORTAMOS FUNCIÓN BORRAR
+    isStravaConnected, handleStravaSync, deleteActivity 
   } = useActivities();
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   
-  // ESTADO PARA NAVEGACIÓN MÓVIL
+  // ESTADO PARA NAVEGACIÓN
   const [activeTab, setActiveTab] = useState('overview'); 
 
   const handleTabChange = (tab) => {
@@ -47,10 +48,8 @@ const Dashboard = () => {
   );
 
   return (
-    // FONDO GENERAL CON SOPORTE DARK MODE
     <div className="min-h-screen bg-[#F8FAFC] dark:bg-slate-950 text-slate-800 dark:text-slate-200 font-sans pb-24 md:pb-12 transition-colors duration-300">
       
-      {/* NAVBAR */}
       <Navbar 
         activities={activities} uploading={uploading} handleClearDb={handleClearDb}
         onFileUpload={processFile} onAddClick={() => setIsModalOpen(true)}
@@ -58,14 +57,12 @@ const Dashboard = () => {
         onSync={handleStravaSync}
       />
 
-      {/* BARRA DE ESTADO DE CARGA */}
       {uploadStatus && (
         <div className="bg-blue-600 dark:bg-blue-700 text-white text-center py-2 text-xs font-bold uppercase animate-in slide-in-from-top sticky top-[60px] z-30 shadow-md">
           {uploadStatus}
         </div>
       )}
 
-      {/* CONTENIDO PRINCIPAL */}
       <main className="w-full max-w-[1800px] mx-auto px-4 sm:px-6 py-4 sm:py-6 space-y-6">
         
         {activities.length === 0 ? (
@@ -78,87 +75,77 @@ const Dashboard = () => {
            </div>
         ) : (
           <>
-            {/* FILTROS DE TIEMPO */}
-            {(activeTab === 'overview' || activeTab === 'analytics') && (
-                <div className="flex gap-1 overflow-x-auto pb-2 no-scrollbar -mx-4 px-4 sm:mx-0 sm:px-0">
-                    {['30d', '90d', '1y', 'all'].map(r => (
-                        <button key={r} onClick={() => setTimeRange(r)} className={`flex-shrink-0 px-4 py-1.5 rounded-full text-[11px] font-bold transition whitespace-nowrap uppercase tracking-wider ${timeRange === r ? 'bg-slate-900 text-white dark:bg-blue-600 shadow-md transform scale-105' : 'bg-white text-slate-500 border border-slate-100 dark:bg-slate-900 dark:border-slate-800 dark:text-slate-400'}`}>
-                            {r === 'all' ? 'Todo' : r.replace('d', ' Días').replace('y', ' Año')}
-                        </button>
-                    ))}
-                </div>
-            )}
-
-            {/* --- LAYOUT MÓVIL (PESTAÑAS) --- */}
-            <div className="md:hidden space-y-6">
-                
-                {/* PESTAÑA 1: INICIO */}
-                <div className={activeTab === 'overview' ? 'block space-y-6' : 'hidden'}>
-                    <FitnessStatus metrics={currentMetrics} />
-                    <SmartCoach metrics={currentMetrics} activities={activities} />
-                    <KpiGrid metrics={currentMetrics} summary={summary} timeRange={timeRange} />
-                </div>
-
-                {/* PESTAÑA 2: ANÁLISIS */}
-                <div className={activeTab === 'analytics' ? 'block space-y-6' : 'hidden'}>
-                    <div className="h-[300px]"><EvolutionChart data={chartData} /></div>
-                    <div className="h-[300px]"><DistributionChart distribution={distribution} total={summary.count} /></div>
-                    <div className="h-[350px]"><ActivityCalendar activities={activities} /></div>
-                </div>
-
-                {/* PESTAÑA 3: DIARIO */}
-                <div className={activeTab === 'history' ? 'block' : 'hidden'}>
-                    <button onClick={() => setIsModalOpen(true)} className="w-full py-3 mb-4 bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 rounded-xl border border-blue-100 dark:border-blue-900/50 font-bold text-sm flex items-center justify-center gap-2 transition-colors">
-                        <Plus size={18} /> Añadir Actividad Manual
+            {/* NAVEGACIÓN SUPERIOR (TIPO TRAINING PEAKS) */}
+            <div className="flex justify-center md:justify-start gap-2 mb-6 border-b border-slate-200 dark:border-slate-800 pb-1">
+                {[
+                    { id: 'overview', label: 'Dashboard' },
+                    { id: 'calendar', label: 'Calendario' },
+                    { id: 'analytics', label: 'Análisis' },
+                    { id: 'history', label: 'Actividades' },
+                    { id: 'planner', label: 'Temporada' }
+                ].map(tab => (
+                    <button 
+                        key={tab.id}
+                        onClick={() => setActiveTab(tab.id)}
+                        className={`px-4 py-2 text-sm font-bold rounded-t-lg transition-all ${
+                            activeTab === tab.id 
+                            ? 'text-blue-600 border-b-2 border-blue-600 bg-blue-50/50 dark:bg-blue-900/10 dark:text-blue-400' 
+                            : 'text-slate-500 hover:text-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800'
+                        }`}
+                    >
+                        {tab.label}
                     </button>
-                    <div className="h-[calc(100vh-200px)]">
-                        {/* AÑADIDO: onDelete */}
-                        <HistoryList activities={filteredData} onDelete={deleteActivity} />
-                    </div>
-                </div>
-                {/* PESTAÑA 4: PLANIFICADOR */}
-                <div className={activeTab === 'planner' ? 'block' : 'hidden'}>
-                    <SeasonPlanner currentMetrics={currentMetrics} 
-                      activities={activities} // Necesario para el Oráculo
-                    />
+                ))}
+            </div>
+
+            {/* VISTA DASHBOARD (OVERVIEW) */}
+            <div className={activeTab === 'overview' ? 'block space-y-6 animate-in fade-in' : 'hidden'}>
+                <FitnessStatus metrics={currentMetrics} />
+                <KpiGrid metrics={currentMetrics} summary={summary} timeRange={timeRange} />
+                
+                {/* En móvil ponemos un resumen compacto, en desktop el completo */}
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                    <div className="lg:col-span-8 h-[300px]"><EvolutionChart data={chartData} /></div>
+                    <div className="lg:col-span-4 h-[300px]"><DistributionChart distribution={distribution} total={summary.count} /></div>
                 </div>
             </div>
 
-            {/* --- LAYOUT ESCRITORIO --- */}
-            <div className="hidden md:block space-y-6">
-                <FitnessStatus metrics={currentMetrics} />
-                <KpiGrid metrics={currentMetrics} summary={summary} timeRange={timeRange} />
-                <div className="grid grid-cols-12 gap-6">
-                    <div className="col-span-8 h-[300px]"><EvolutionChart data={chartData} /></div>
-                    <div className="col-span-4 h-[300px]"><DistributionChart distribution={distribution} total={summary.count} /></div>
+            {/* VISTA CALENDARIO COMPLETO (NUEVA) */}
+            <div className={activeTab === 'calendar' ? 'block animate-in fade-in' : 'hidden'}>
+                <CalendarPage activities={activities} />
+            </div>
+
+            {/* VISTA ANÁLISIS */}
+            <div className={activeTab === 'analytics' ? 'block space-y-6 animate-in fade-in' : 'hidden'}>
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <div className="h-[350px]"><EvolutionChart data={chartData} /></div>
+                    <div className="h-[350px]"><DistributionChart distribution={distribution} total={summary.count} /></div>
                 </div>
-                <div className="grid grid-cols-12 gap-6 items-start">
-                    <div className="col-span-8 grid grid-cols-2 gap-6">
-                        <div className="min-h-[350px]">
-                            <SmartCoach metrics={currentMetrics} activities={activities} />
-                        </div>
-                        <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-sm p-5 min-h-[350px] transition-colors">
-                            <h3 className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase mb-4">Calendario</h3>
-                            <ActivityCalendar activities={activities} />
-                        </div>
-                    </div>
-                    <div className="col-span-4 h-[607px]">
-                         {/* AÑADIDO: onDelete */}
-                        <HistoryList activities={filteredData} onDelete={deleteActivity} />
-                    </div>
-                </div>
-                <div className="mt-8">
-                    <h2 className="text-xl font-bold text-slate-800 dark:text-white mb-4">Planificador de Temporada</h2>
-                    <SeasonPlanner currentMetrics={currentMetrics} 
-                      activities={activities} // Necesario para el Oráculo
-                    />
-                </div>
+                {/* Aquí podríamos meter más gráficas de zonas, etc */}
+            </div>
+
+            {/* VISTA HISTORIAL (LISTA) */}
+            <div className={activeTab === 'history' ? 'block animate-in fade-in' : 'hidden'}>
+                 <div className="flex justify-end mb-4">
+                    <button onClick={() => setIsModalOpen(true)} className="py-2 px-4 bg-blue-600 text-white rounded-lg font-bold text-sm flex items-center gap-2 shadow-lg shadow-blue-600/20 hover:bg-blue-700 transition">
+                        <Plus size={18} /> Añadir Manual
+                    </button>
+                 </div>
+                 <div className="h-[calc(100vh-250px)]">
+                    <HistoryList activities={filteredData} onDelete={deleteActivity} />
+                 </div>
+            </div>
+
+            {/* VISTA PLANIFICADOR */}
+            <div className={activeTab === 'planner' ? 'block animate-in fade-in' : 'hidden'}>
+                <SeasonPlanner currentMetrics={currentMetrics} activities={activities} />
             </div>
 
           </>
         )}
       </main>
 
+      {/* BOTTOM NAV PARA MÓVIL */}
       <BottomNav activeTab={activeTab} onTabChange={handleTabChange} />
 
       <AddActivityModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} onSave={fetchActivities} />
