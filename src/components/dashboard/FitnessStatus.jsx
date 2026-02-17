@@ -1,211 +1,185 @@
-import React from 'react';
-import { 
-  Zap, Battery, Activity, AlertTriangle, TrendingUp, 
-  Anchor, Play, Timer, Heart, ShieldCheck, ArrowUpRight, ArrowDownRight 
-} from 'lucide-react';
+import React, { useMemo } from 'react';
+import { Target, AlertTriangle, CheckCircle2, Activity, Info, Zap } from 'lucide-react';
 
-export const FitnessStatus = ({ metrics }) => {
-  if (!metrics) return <div className="h-48 bg-slate-100 dark:bg-slate-900 rounded-3xl animate-pulse"></div>;
+export const FitnessStatus = ({ activities, metrics }) => {
+  // 1. ANÁLISIS 80/20 (Últimos 28 días)
+  const analysis = useMemo(() => {
+    if (!activities || activities.length === 0) return null;
 
-  const { ctl, atl, tcb: tsb, rampRate } = metrics;
+    const today = new Date();
+    const cutoff = new Date(today.getTime() - 28 * 24 * 60 * 60 * 1000); // 4 Semanas
 
-  // 1. LÓGICA DE ESTADO (MOTORES)
-  let mode = {
-    title: "Mantenimiento",
-    gradient: "from-blue-600 to-cyan-500",
-    shadow: "shadow-blue-500/20",
-    icon: Activity,
-    bgIcon: "bg-blue-100 text-blue-600",
-    trend: "Estable",
-    recommendation: {
-      type: "Técnica / Aeróbico",
-      duration: "45 - 60 min",
-      intensity: "Z1 - Z2",
-      desc: "Mantén el motor en marcha sin quemarlo."
-    }
+    let low = 0;   // Z1/Z2 (Base aeróbica)
+    let mod = 0;   // Z3 (Tempo / Threshold / Zona Gris)
+    let high = 0;  // Z4/Z5 (VO2Max / Anaeróbico)
+    let totalMins = 0;
+
+    activities.forEach(act => {
+      const d = new Date(act.date);
+      if (d >= cutoff && act.duration > 0) {
+        const hours = act.duration / 60;
+        let IF = 0;
+        
+        // Calculamos el Intensity Factor real de la sesión: IF = Raíz(TSS / (Horas * 100))
+        if (act.tss && hours > 0) {
+           IF = Math.sqrt(act.tss / (hours * 100));
+        } else {
+           IF = 0.70; // Fallback por defecto si no hay datos
+        }
+        
+        // Clasificamos los minutos en las 3 zonas fisiológicas
+        if (IF < 0.80) low += act.duration;
+        else if (IF < 0.95) mod += act.duration;
+        else high += act.duration;
+        
+        totalMins += act.duration;
+      }
+    });
+
+    if (totalMins === 0) return null;
+
+    // Porcentajes
+    const pLow = Math.round((low / totalMins) * 100);
+    const pMod = Math.round((mod / totalMins) * 100);
+    const pHigh = Math.round((high / totalMins) * 100);
+
+    return { pLow, pMod, pHigh, totalHours: (totalMins / 60).toFixed(1) };
+  }, [activities]);
+
+  if (!analysis) return <div className="h-48 bg-slate-100 dark:bg-slate-900 rounded-3xl animate-pulse"></div>;
+
+  const { pLow, pMod, pHigh, totalHours } = analysis;
+
+  // 2. EL ENTRENADOR (Lógica de diagnóstico)
+  let coach = {
+      title: "Distribución Óptima",
+      status: "Polarizado",
+      color: "text-emerald-600",
+      bg: "bg-emerald-50 dark:bg-emerald-900/20",
+      border: "border-emerald-200 dark:border-emerald-800",
+      icon: CheckCircle2,
+      msg: "Estás entrenando como un pro. Gran base aeróbica y dejas la fatiga para los días clave. Mantén este equilibrio."
   };
 
-  if (tsb < -30) {
-    mode = {
-      title: "Sobrecarga",
-      gradient: "from-red-600 to-orange-600",
-      shadow: "shadow-red-600/30",
-      icon: AlertTriangle,
-      bgIcon: "bg-red-100 text-red-600",
-      trend: "Fatiga Extrema",
-      recommendation: {
-        type: "Descanso Total",
-        duration: "0 min",
-        intensity: "Off",
-        desc: "Riesgo alto. Apaga el motor hoy."
-      }
-    };
-  } else if (tsb < -10) {
-    mode = {
-      title: "Productivo",
-      gradient: "from-orange-500 to-amber-500",
-      shadow: "shadow-orange-500/30",
-      icon: TrendingUp,
-      bgIcon: "bg-orange-100 text-orange-600",
-      trend: "Construyendo",
-      recommendation: {
-        type: "Resistencia / Tempo",
-        duration: "60 - 90 min",
-        intensity: "Z2 - Z3",
-        desc: "Estás asimilando bien. Sigue sumando."
-      }
-    };
-  } else if (tsb > 25) {
-    mode = {
-      title: "Desentreno",
-      gradient: "from-slate-500 to-slate-400",
-      shadow: "shadow-slate-500/20",
-      icon: Anchor,
-      bgIcon: "bg-slate-100 text-slate-600",
-      trend: "Perdiendo Forma",
-      recommendation: {
-        type: "Activación / Series",
-        duration: "45 min",
-        intensity: "Z4 - Z5",
-        desc: "El motor se enfría. Dale un apretón."
-      }
-    };
-  } else if (tsb > 5) {
-    mode = {
-      title: "Pico de Forma",
-      gradient: "from-emerald-500 to-teal-400",
-      shadow: "shadow-emerald-500/30",
-      icon: Zap,
-      bgIcon: "bg-emerald-100 text-emerald-600",
-      trend: "Race Ready",
-      recommendation: {
-        type: "Race Day / Test",
-        duration: "Variable",
-        intensity: "All Out",
-        desc: "Baterías llenas. Ve a por el PR."
-      }
-    };
-  }
-
-  // Riesgo de Lesión
-  const isRisk = rampRate > 6;
-  if (isRisk) {
-      mode.recommendation.desc = "⚠️ Carga aguda excesiva. Reduce volumen hoy.";
-      mode.recommendation.type = "Recuperación Activa";
+  if (pMod > 30) {
+      coach = {
+          title: "Peligro: Zona Gris",
+          status: "Estancamiento",
+          color: "text-amber-600",
+          bg: "bg-amber-50 dark:bg-amber-900/20",
+          border: "border-amber-200 dark:border-amber-800",
+          icon: AlertTriangle,
+          msg: "Haces demasiados kilómetros a intensidad media (Tempo). Te cansas mucho pero mejoras poco. Los días suaves, rueda MÁS SUAVE."
+      };
+  } else if (pHigh > 25) {
+      coach = {
+          title: "Sobrecarga Alta Intensidad",
+          status: "Riesgo Lesión",
+          color: "text-red-600",
+          bg: "bg-red-50 dark:bg-red-900/20",
+          border: "border-red-200 dark:border-red-800",
+          icon: Zap,
+          msg: "Estás abusando del trabajo anaeróbico. Si superas el 20% de alta intensidad de forma crónica, tu sistema nervioso colapsará."
+      };
+  } else if (pLow > 90) {
+      coach = {
+          title: "Construcción de Base",
+          status: "Aeróbico",
+          color: "text-blue-600",
+          bg: "bg-blue-50 dark:bg-blue-900/20",
+          border: "border-blue-200 dark:border-blue-800",
+          icon: Activity,
+          msg: "Volumen aeróbico puro. Ideal para invierno/pretemporada, pero si vas a competir pronto, toca meter más 'chispazos' (Z4/Z5)."
+      };
   }
 
   return (
-    <div className="w-full bg-white dark:bg-slate-900 rounded-3xl border border-slate-100 dark:border-slate-800 shadow-xl overflow-hidden relative transition-all">
+    <div className={`w-full bg-white dark:bg-slate-900 rounded-3xl border shadow-sm overflow-hidden relative transition-all ${coach.border}`}>
       
-      {/* FONDO DECORATIVO */}
-      <div className={`absolute top-0 right-0 w-[400px] h-full bg-gradient-to-l ${mode.gradient} opacity-10 blur-3xl -skew-x-12 translate-x-20`}></div>
+      {/* Etiqueta superior */}
+      <div className="absolute top-0 right-0 bg-slate-100 dark:bg-slate-800 px-4 py-1.5 rounded-bl-2xl text-[10px] font-bold uppercase tracking-wider text-slate-500 border-l border-b border-slate-100 dark:border-slate-800">
+          Análisis Últimos 28 Días
+      </div>
 
-      <div className="relative z-10 p-6 grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-0 items-stretch">
-        
-        {/* COLUMNA 1: ESTADO VISUAL + INSIGNIAS (5 cols) */}
-        <div className="lg:col-span-5 flex flex-col justify-center gap-5 lg:pr-6 border-b lg:border-b-0 lg:border-r border-slate-100 dark:border-slate-800 pb-6 lg:pb-0">
-            
-            {/* Título y Estado */}
-            <div className="flex items-center gap-4">
-                <div className={`p-3.5 rounded-2xl ${mode.bgIcon} shadow-sm`}>
-                    <mode.icon size={28} />
-                </div>
-                <div>
-                    <span className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Estado Actual</span>
-                    <h1 className="text-3xl font-black text-slate-800 dark:text-white leading-none tracking-tight">
-                        {mode.title}
-                    </h1>
-                </div>
-            </div>
+      <div className="p-6 md:p-8 flex flex-col md:flex-row gap-8 items-center">
+          
+          {/* IZQUIERDA: Diagnóstico del Coach */}
+          <div className="flex-1 space-y-4">
+              <div className="flex items-center gap-3">
+                  <div className={`p-3 rounded-2xl ${coach.bg} ${coach.color}`}>
+                      <coach.icon size={24} />
+                  </div>
+                  <div>
+                      <span className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Radar de Calidad</span>
+                      <h2 className="text-2xl font-black text-slate-800 dark:text-white leading-tight">
+                          {coach.title}
+                      </h2>
+                  </div>
+              </div>
 
-            {/* AQUI ESTÁ EL CAMBIO: INSIGNIAS TÁCTICAS (Adiós Barrita) */}
-            <div className="flex gap-3">
-                {/* Insignia 1: Tendencia */}
-                <div className="flex-1 bg-slate-50 dark:bg-slate-800 rounded-xl p-2.5 flex items-center gap-3 border border-slate-100 dark:border-slate-700/50">
-                    <div className={`p-1.5 rounded-lg ${atl > ctl ? 'bg-orange-100 text-orange-600' : 'bg-emerald-100 text-emerald-600'}`}>
-                        {atl > ctl ? <ArrowUpRight size={14}/> : <ArrowDownRight size={14}/>}
-                    </div>
-                    <div>
-                        <span className="text-[9px] uppercase font-bold text-slate-400 block">Tendencia</span>
-                        <span className="text-xs font-bold text-slate-700 dark:text-slate-200 leading-none">{mode.trend}</span>
-                    </div>
-                </div>
+              <div className="bg-slate-50 dark:bg-slate-800/50 p-4 rounded-2xl border border-slate-100 dark:border-slate-700/50 relative">
+                  <Info size={16} className="absolute top-4 right-4 text-slate-300" />
+                  <p className="text-sm font-medium text-slate-600 dark:text-slate-300 leading-relaxed pr-6">
+                      {coach.msg}
+                  </p>
+              </div>
+          </div>
 
-                {/* Insignia 2: Riesgo Lesión (Ramp Rate) */}
-                <div className="flex-1 bg-slate-50 dark:bg-slate-800 rounded-xl p-2.5 flex items-center gap-3 border border-slate-100 dark:border-slate-700/50">
-                    <div className={`p-1.5 rounded-lg ${isRisk ? 'bg-red-100 text-red-600 animate-pulse' : 'bg-blue-100 text-blue-600'}`}>
-                        {isRisk ? <AlertTriangle size={14}/> : <ShieldCheck size={14}/>}
-                    </div>
-                    <div>
-                        <span className="text-[9px] uppercase font-bold text-slate-400 block">Riesgo</span>
-                        <span className={`text-xs font-bold leading-none ${isRisk ? 'text-red-500' : 'text-slate-700 dark:text-slate-200'}`}>
-                            {isRisk ? 'Alto' : 'Bajo'}
-                        </span>
-                    </div>
-                </div>
-            </div>
+          {/* DERECHA: Gráfico Visual 80/20 */}
+          <div className="w-full md:w-[45%] lg:w-[40%] flex flex-col justify-center">
+              
+              <div className="flex justify-between items-end mb-3">
+                  <span className="text-xs font-bold text-slate-500 uppercase">Regla 80/20</span>
+                  <span className="text-xs font-bold bg-slate-100 dark:bg-slate-800 px-2 py-1 rounded-md text-slate-600 dark:text-slate-300">
+                      Volumen: {totalHours}h
+                  </span>
+              </div>
 
-        </div>
+              {/* Barra Apilada Central */}
+              <div className="h-6 w-full bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden flex shadow-inner">
+                  {/* Zona 1: Base (Verde) */}
+                  <div 
+                    className="h-full bg-emerald-500 transition-all duration-1000 flex items-center justify-center text-[10px] font-black text-white/90" 
+                    style={{ width: `${pLow}%` }}
+                    title={`Base Aeróbica: ${pLow}%`}
+                  >
+                      {pLow > 10 ? `${pLow}%` : ''}
+                  </div>
+                  {/* Zona 2: Gris/Tempo (Naranja) */}
+                  <div 
+                    className="h-full bg-amber-400 transition-all duration-1000 flex items-center justify-center text-[10px] font-black text-white/90" 
+                    style={{ width: `${pMod}%` }}
+                    title={`Zona Gris (Tempo): ${pMod}%`}
+                  >
+                      {pMod > 10 ? `${pMod}%` : ''}
+                  </div>
+                  {/* Zona 3: Alta Int (Rojo) */}
+                  <div 
+                    className="h-full bg-red-500 transition-all duration-1000 flex items-center justify-center text-[10px] font-black text-white/90" 
+                    style={{ width: `${pHigh}%` }}
+                    title={`Alta Intensidad: ${pHigh}%`}
+                  >
+                      {pHigh > 10 ? `${pHigh}%` : ''}
+                  </div>
+              </div>
 
-        {/* COLUMNA 2: MÉTRICAS COMPACTAS (3 cols) */}
-        <div className="lg:col-span-3 flex flex-row lg:flex-col justify-between items-center lg:justify-center px-0 lg:px-8 gap-4 border-b lg:border-b-0 lg:border-r border-slate-100 dark:border-slate-800 pb-6 lg:pb-0">
-            <div className="text-center lg:text-left w-full">
-                <span className="text-[10px] uppercase font-bold text-slate-400 block mb-1">Fitness (CTL)</span>
-                <div className="flex items-center justify-center lg:justify-start gap-2">
-                    <Activity size={18} className="text-blue-500"/>
-                    <span className="text-3xl font-black text-slate-800 dark:text-white tracking-tight">{Math.round(ctl)}</span>
-                </div>
-            </div>
-            <div className="text-center lg:text-left w-full">
-                <span className="text-[10px] uppercase font-bold text-slate-400 block mb-1">Fatiga (ATL)</span>
-                <div className="flex items-center justify-center lg:justify-start gap-2">
-                    <Battery size={18} className="text-purple-500"/>
-                    <span className="text-3xl font-black text-slate-800 dark:text-white tracking-tight">{Math.round(atl)}</span>
-                </div>
-            </div>
-        </div>
+              {/* Leyenda Inferior */}
+              <div className="flex justify-between text-[10px] font-bold uppercase mt-3 px-1">
+                  <div className="flex items-center gap-1.5">
+                      <div className="w-2.5 h-2.5 rounded-full bg-emerald-500"></div>
+                      <span className="text-slate-500">Z1-Z2 (Base)</span>
+                  </div>
+                  <div className="flex items-center gap-1.5">
+                      <div className="w-2.5 h-2.5 rounded-full bg-amber-400"></div>
+                      <span className="text-slate-500">Z3 (Gris)</span>
+                  </div>
+                  <div className="flex items-center gap-1.5">
+                      <div className="w-2.5 h-2.5 rounded-full bg-red-500"></div>
+                      <span className="text-slate-500">Z4-Z5 (HIIT)</span>
+                  </div>
+              </div>
 
-        {/* COLUMNA 3: EL ENTRENADOR (4 cols) */}
-        <div className="lg:col-span-4 pl-0 lg:pl-6 flex flex-col justify-center">
-            
-            <div className={`relative rounded-2xl p-5 text-white shadow-lg overflow-hidden bg-gradient-to-br ${mode.gradient} ${mode.shadow} group cursor-default transition-transform hover:scale-[1.02]`}>
-                
-                {/* Header Tarjeta */}
-                <div className="relative z-10 flex justify-between items-start mb-3">
-                    <div className="flex items-center gap-1.5 bg-white/20 backdrop-blur-md px-2 py-1 rounded-lg border border-white/10">
-                        <Play size={10} fill="currentColor" />
-                        <span className="text-[10px] font-bold uppercase tracking-wider">Hoy</span>
-                    </div>
-                    <Heart size={16} className="opacity-80 animate-pulse"/>
-                </div>
-
-                {/* Contenido Principal */}
-                <div className="relative z-10 space-y-1">
-                    <h3 className="text-xl font-black tracking-tight leading-none">
-                        {mode.recommendation.type}
-                    </h3>
-                    <p className="text-xs font-medium opacity-90 leading-relaxed border-t border-white/20 pt-2 mt-2">
-                        "{mode.recommendation.desc}"
-                    </p>
-                </div>
-
-                {/* Footer Tarjeta */}
-                <div className="relative z-10 mt-4 flex items-center gap-4 text-xs font-bold opacity-80">
-                    <div className="flex items-center gap-1 bg-black/10 px-2 py-1 rounded-md">
-                        <Timer size={12}/> {mode.recommendation.duration}
-                    </div>
-                    <div className="flex items-center gap-1 bg-black/10 px-2 py-1 rounded-md">
-                        <Zap size={12}/> {mode.recommendation.intensity}
-                    </div>
-                </div>
-
-                {/* Decoración Fondo */}
-                <div className="absolute -bottom-6 -right-6 text-white opacity-10 rotate-12">
-                    <mode.icon size={120} />
-                </div>
-            </div>
-
-        </div>
+          </div>
 
       </div>
     </div>
