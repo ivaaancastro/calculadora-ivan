@@ -76,7 +76,7 @@ const Dashboard = () => {
         ) : (
           <>
             {/* NAVEGACIÓN SUPERIOR (TIPO TRAINING PEAKS) */}
-            <div className="flex justify-center md:justify-start gap-2 mb-6 border-b border-slate-200 dark:border-slate-800 pb-1">
+            <div className="hidden md:flex justify-start gap-2 mb-6 border-b border-slate-200 dark:border-slate-800 pb-1 overflow-x-auto hide-scrollbar">
                 {[
                     { id: 'overview', label: 'Dashboard' },
                     { id: 'calendar', label: 'Calendario' },
@@ -87,7 +87,7 @@ const Dashboard = () => {
                     <button 
                         key={tab.id}
                         onClick={() => setActiveTab(tab.id)}
-                        className={`px-4 py-2 text-sm font-bold rounded-t-lg transition-all ${
+                        className={`px-4 py-2 text-sm font-bold rounded-t-lg transition-all whitespace-nowrap ${
                             activeTab === tab.id 
                             ? 'text-blue-600 border-b-2 border-blue-600 bg-blue-50/50 dark:bg-blue-900/10 dark:text-blue-400' 
                             : 'text-slate-500 hover:text-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800'
@@ -100,8 +100,8 @@ const Dashboard = () => {
 
             {/* VISTA DASHBOARD (OVERVIEW) */}
             <div className={activeTab === 'overview' ? 'block space-y-6 animate-in fade-in' : 'hidden'}>
-                <FitnessStatus metrics={currentMetrics} />
-                <KpiGrid metrics={currentMetrics} summary={summary} timeRange={timeRange} />
+              <FitnessStatus metrics={currentMetrics} activities={activities} />
+              <KpiGrid metrics={currentMetrics} summary={summary} timeRange={timeRange} />
                 
                 {/* En móvil ponemos un resumen compacto, en desktop el completo */}
                 <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
