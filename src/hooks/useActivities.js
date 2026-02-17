@@ -81,7 +81,6 @@ export const useActivities = () => {
         let accessToken = profile.strava_access_token;
         const nowInSeconds = Math.floor(Date.now() / 1000);
         
-        // Refresco de token si está a menos de 5 min de caducar o caducado
         if (profile.strava_expires_at && nowInSeconds >= (profile.strava_expires_at - 300)) {
             setUploadStatus("Renovando token...");
             try {
@@ -130,14 +129,25 @@ export const useActivities = () => {
             });
 
         if (newRows.length > 0) {
-            await supabase.from('activities').insert(newRows);
+            // AÑADIDO: GESTIÓN DE ERRORES SILENCIOSOS DE SUPABASE
+            const { error: insertError } = await supabase.from('activities').insert(newRows);
+            
+            if (insertError) {
+                console.error("Fallo al guardar en DB:", insertError);
+                throw new Error(`Error BD: ${insertError.message || 'Verifica que creaste las columnas name, description y speed_avg'}`);
+            }
+
             await fetchActivities();
             setUploadStatus(`¡${newRows.length} nuevas!`);
         } else {
             setUploadStatus("Todo al día");
         }
-    } catch (err) { alert(err.message); } 
-    finally { setUploading(false); setTimeout(() => setUploadStatus(null), 3000); }
+    } catch (err) { 
+        alert(err.message); 
+    } finally { 
+        setUploading(false); 
+        setTimeout(() => setUploadStatus(null), 3000); 
+    }
   };
 
   // --- 3. GESTIÓN MANUAL Y BORRADO ---
@@ -179,9 +189,13 @@ export const useActivities = () => {
          }
       }
       if (newRows.length > 0) {
-          await supabase.from('activities').insert(newRows);
-          await fetchActivities();
-          setUploadStatus("Importado");
+          const { error: insertError } = await supabase.from('activities').insert(newRows);
+          if (insertError) {
+              alert(`Error al importar CSV: ${insertError.message}`);
+          } else {
+              await fetchActivities();
+              setUploadStatus("Importado");
+          }
       }
       setUploading(false); setTimeout(() => setUploadStatus(null), 3000);
     };
@@ -304,7 +318,6 @@ export const useActivities = () => {
     }
 
     // C. MÉTRICAS AVANZADAS Y PREDICCIONES
-    // Como el bucle llega siempre hasta hoy, "lastPoint" ahora es siempre el día actual
     const lastPoint = fullSeries[fullSeries.length - 1] || { ctl: 0, atl: 0, tcb: 0 };
     const prevWeekPoint = fullSeries[fullSeries.length - 8] || { ctl: 0 }; 
     const pastMonthPoint = fullSeries[fullSeries.length - 30] || fullSeries[0] || { ctl: 0 };
