@@ -1,403 +1,286 @@
-import React, { useState, useEffect, useMemo } from 'react';
-import { 
-  Calendar, Flag, Trophy, Trash2, TrendingUp, Clock, 
-  Footprints, Bike, Dumbbell, Zap, Lock, Edit3, CheckCircle2 
-} from 'lucide-react';
-import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
-import { usePlanner } from '../../hooks/usePlanner';
+import React, { useState, useMemo, useEffect } from 'react';
+import { Target, Calendar as CalIcon, TrendingUp, AlertTriangle, CheckCircle2, Zap, ArrowRight, Save, ShieldAlert, Flag } from 'lucide-react';
 
-// --- COMPONENTE PREDICCIÓN (Sin cambios) ---
-const RacePredictor = ({ nextRace, activities, currentCtl, currentTsb }) => {
-  if (!nextRace || !activities || activities.length === 0) return null;
-
-  const isRun = nextRace.sport === 'run';
-  const relevantActs = activities
-    .filter(a => {
-        const type = a.type.toLowerCase();
-        return (isRun ? (type.includes('carrera') || type.includes('correr')) : (type.includes('ciclismo') || type.includes('bici')))
-               && a.duration > 20 && a.distance > 0;
-    });
-
-  if (relevantActs.length < 3) return null;
-
-  const sortedBySpeed = relevantActs.map(a => ({...a, speed: a.distance / a.duration})).sort((a, b) => b.speed - a.speed);
-  const topSlice = Math.max(3, Math.floor(sortedBySpeed.length * 0.2));
-  const bestSessions = sortedBySpeed.slice(0, topSlice);
-  const avgBestSpeed = bestSessions.reduce((acc, curr) => acc + curr.speed, 0) / bestSessions.length;
-  const fatigueFactor = currentCtl > 80 ? 1.05 : (currentCtl > 50 ? 1.06 : 1.075);
-  const targetDist = nextRace.distance || (isRun ? 21097 : 90000);
-  const baseTime = targetDist / avgBestSpeed; 
-  const distanceRatio = targetDist > (bestSessions.reduce((a,c)=>a+c.distance,0)/bestSessions.length) ? (targetDist / (bestSessions.reduce((a,c)=>a+c.distance,0)/bestSessions.length)) : 1;
-  const predictedTimeMin = baseTime * Math.pow(distanceRatio, fatigueFactor - 1) * 0.96 * (currentTsb < -20 ? 1.02 : 1.0);
-
-  const hours = Math.floor(predictedTimeMin / 60);
-  const mins = Math.floor(predictedTimeMin % 60);
-  const paceSec = Math.round((predictedTimeMin * 60) / (targetDist / 1000));
-
-  return (
-    <div className="mt-6 bg-gradient-to-br from-slate-900 to-slate-800 dark:from-blue-900/40 dark:to-slate-900 rounded-2xl p-5 text-white shadow-xl border border-slate-700 relative overflow-hidden">
-        <div className="absolute top-0 right-0 p-4 opacity-10"><Trophy size={80}/></div>
-        <h4 className="text-xs font-bold text-blue-300 uppercase tracking-widest mb-4 flex items-center gap-2">
-            <Clock size={14}/> Potencial Estimado
-        </h4>
-        <div className="flex justify-between items-end relative z-10">
-            <div>
-                <p className="text-[10px] text-slate-300 uppercase mb-1">Objetivo: {nextRace.name}</p>
-                <div className="flex items-baseline gap-1">
-                    <span className="text-3xl font-black tracking-tighter">{hours > 0 ? `${hours}h ${mins}m` : `${mins}m`}</span>
-                </div>
-            </div>
-            <div className="text-right">
-                <p className="text-[10px] text-slate-300 uppercase mb-1">Ritmo {isRun ? '/km' : 'km/h'}</p>
-                <div className="flex items-baseline gap-1 justify-end">
-                    <span className="text-2xl font-bold text-emerald-400 tracking-tighter">
-                        {isRun ? `${Math.floor(paceSec / 60)}:${(paceSec % 60).toString().padStart(2, '0')}` : ((targetDist/1000)/(predictedTimeMin/60)).toFixed(1)}
-                    </span>
-                </div>
-            </div>
-        </div>
-    </div>
-  );
+// Helper para encontrar el lunes de una semana (Para sincronizar perfecto con el calendario)
+const getMonday = (d) => {
+    const date = new Date(d);
+    const day = date.getDay();
+    const diff = date.getDate() - day + (day === 0 ? -6 : 1);
+    return new Date(date.setDate(diff));
 };
 
-// --- COMPONENTE PRINCIPAL ---
-export const SeasonPlanner = ({ currentMetrics, activities }) => {
-  const { events, fetchEvents, addEvent, deleteEvent, simulation } = usePlanner(currentMetrics);
-  const [newEvent, setNewEvent] = useState({ name: '', date: '', priority: 'B', sport: 'run', distance: 0 });
+export const SeasonPlanner = ({ currentMetrics }) => {
+  // Estados iniciales: Evento a 12 semanas vista por defecto, CTL objetivo +20 del actual
+  const [eventName, setEventName] = useState('Mi Gran Objetivo');
+  const [eventDate, setEventDate] = useState(() => {
+      const d = new Date();
+      d.setDate(d.getDate() + 12 * 7); // +12 semanas
+      return d.toISOString().split('T')[0];
+  });
+  
+  const currentCtl = currentMetrics?.ctl ? Math.round(currentMetrics.ctl) : 40;
+  const [targetCtl, setTargetCtl] = useState(currentCtl + 20);
+  const [saveSuccess, setSaveSuccess] = useState(false);
 
-  const [weekData, setWeekData] = useState([]);
-  const [projectedStats, setProjectedStats] = useState({ ctl: 0, tsb: 0, totalTss: 0 });
+  // --- EL MOTOR MATEMÁTICO (Planificador Inverso) ---
+  const plan = useMemo(() => {
+      if (!eventDate || !targetCtl) return null;
+      
+      const today = new Date();
+      const end = new Date(eventDate);
+      const days = Math.round((end - today) / (1000 * 60 * 60 * 24));
+      const weeks = Math.floor(days / 7);
 
-  // 1. GENERAR LA SEMANA ACTUAL (CORREGIDO: ZONA HORARIA Y MULTI-ACTIVIDAD)
-  useEffect(() => {
-    const today = new Date();
-    today.setHours(0, 0, 0, 0); // Normalizamos "hoy" a medianoche local
+      if (weeks < 3) return { error: 'El evento está demasiado cerca. Necesitas al menos 3 semanas para planificar un Tapering.' };
+      if (weeks > 52) return { error: 'El evento está a más de un año. Planifica macrociclos más cortos.' };
 
-    // Calcular el Lunes de esta semana (respetando zona local)
-    const dayOfWeek = today.getDay(); // 0 (Domingo) - 6 (Sábado)
-    // Convertimos a: 0 (Lunes) - 6 (Domingo)
-    const daysSinceMonday = (dayOfWeek + 6) % 7; 
-    
-    const monday = new Date(today);
-    monday.setDate(today.getDate() - daysSinceMonday);
+      const ctlDelta = targetCtl - currentCtl;
+      
+      // Reservamos 2 semanas para Taper (Descanso)
+      const buildWeeks = weeks - 2; 
+      
+      // Ramp Rate Requerido (Puntos de CTL que hay que subir por semana útil)
+      const requiredRamp = ctlDelta / buildWeeks;
 
-    const week = [];
-    for (let i = 0; i < 7; i++) {
-        const d = new Date(monday);
-        d.setDate(monday.getDate() + i);
-        
-        // CLAVE: Usamos toLocaleDateString('en-CA') para obtener "YYYY-MM-DD" LOCAL
-        // Esto evita que las 23:00 del día anterior cuenten como hoy por culpa del UTC
-        const dateKey = d.toLocaleDateString('en-CA');
-        
-        const isPast = d < today;
-        const isToday = d.getTime() === today.getTime();
+      // Diagnóstico de Riesgo
+      let risk = { level: 'low', color: 'text-emerald-500', bg: 'bg-emerald-50 dark:bg-emerald-900/20', border: 'border-emerald-200 dark:border-emerald-800', msg: 'Rampa conservadora. Muy segura.' };
+      if (requiredRamp > 2 && requiredRamp <= 5) risk = { level: 'optimal', color: 'text-blue-500', bg: 'bg-blue-50 dark:bg-blue-900/20', border: 'border-blue-200 dark:border-blue-800', msg: 'Zona Óptima. Ganancia sólida sin sobreentrenamiento.' };
+      else if (requiredRamp > 5 && requiredRamp <= 8) risk = { level: 'high', color: 'text-orange-500', bg: 'bg-orange-50 dark:bg-orange-900/20', border: 'border-orange-200 dark:border-orange-800', msg: 'Rampa Agresiva. Mucha fatiga, cuida la nutrición y el sueño.' };
+      else if (requiredRamp > 8) risk = { level: 'extreme', color: 'text-red-500', bg: 'bg-red-50 dark:bg-red-900/20', border: 'border-red-200 dark:border-red-800', msg: 'Riesgo Crítico de Lesión. Baja tu CTL objetivo o retrasa la carrera.' };
 
-        // 1. Buscar TODAS las actividades de ese día (no solo la primera)
-        const dayActivities = activities?.filter(a => {
-            const actDate = new Date(a.date);
-            return actDate.toLocaleDateString('en-CA') === dateKey;
-        }) || [];
+      // Generar Semanas
+      const weeklyPlan = [];
+      let simCtl = currentCtl;
 
-        // 2. Sumarizar datos reales
-        let realStats = { sport: 'run', mins: 0, tss: 0 };
-        if (dayActivities.length > 0) {
-            // Sumamos duración y TSS de todo lo que hiciste ese día
-            const totalMins = dayActivities.reduce((acc, curr) => acc + curr.duration, 0);
-            const totalTss = dayActivities.reduce((acc, curr) => acc + (curr.tss || 0), 0);
-            
-            // Para el icono, cogemos el deporte de la actividad más larga
-            const mainAct = dayActivities.sort((a,b) => b.duration - a.duration)[0];
-            const type = mainAct.type.toLowerCase();
-            let mainSport = 'run';
-            if (type.includes('bici') || type.includes('ciclismo')) mainSport = 'bike';
-            else if (type.includes('fuerza') || type.includes('pesa') || type.includes('gim')) mainSport = 'gym';
+      for (let i = 1; i <= weeks; i++) {
+          const isTaper1 = i === weeks - 1;
+          const isRaceWeek = i === weeks;
+          const isRestWeek = !isTaper1 && !isRaceWeek && (i % 3 === 0); // Cada 3 semanas, descarga
 
-            realStats = { sport: mainSport, mins: totalMins, tss: totalTss };
-        }
-        
-        week.push({
-            date: d,
-            dayName: ['Lun','Mar','Mié','Jue','Vie','Sáb','Dom'][i],
-            isPast,
-            isToday,
-            isReal: dayActivities.length > 0, // Es real si hay al menos 1 actividad
-            sport: dayActivities.length > 0 ? realStats.sport : 'run',
-            mins: dayActivities.length > 0 ? realStats.mins : 0,
-            tss: dayActivities.length > 0 ? realStats.tss : 0,
-            plannedMins: 60,
-            plannedIntensity: 'med'
-        });
-    }
-    setWeekData(week);
-  }, [activities]);
+          let weekTss = 0;
+          let type = 'Carga';
+          let theme = 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 border-blue-200 dark:border-blue-800';
 
-  // 2. SIMULADOR DE FUTURO (PROYECCIÓN)
-  useEffect(() => {
-    if (weekData.length === 0 || !currentMetrics) return;
+          if (isRaceWeek) {
+              type = 'Semana de Carrera';
+              theme = 'bg-red-50 dark:bg-red-900/20 text-red-600 border-red-200 dark:border-red-800';
+              simCtl -= 2; // Pierdes algo de fitness por descansar
+              weekTss = (simCtl * 7) * 0.4; // Solo 40% del volumen habitual
+          } else if (isTaper1) {
+              type = 'Tapering (Descarga)';
+              theme = 'bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 border-emerald-200 dark:border-emerald-800';
+              simCtl -= 1;
+              weekTss = (simCtl * 7) * 0.6; // 60% del volumen
+          } else if (isRestWeek) {
+              type = 'Recuperación Activa';
+              theme = 'bg-orange-50 dark:bg-orange-900/20 text-orange-600 border-orange-200 dark:border-orange-800';
+              // Mantiene el CTL sin subirlo
+              weekTss = (simCtl * 7) * 0.8;
+          } else {
+              type = 'Carga (Build)';
+              theme = 'bg-slate-50 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700';
+              // Subimos el CTL (compensando las semanas de descanso)
+              const effectiveRamp = requiredRamp * 1.3; 
+              simCtl += effectiveRamp;
+              // Fórmula aproximada de TSS para subir X puntos de CTL
+              weekTss = (simCtl * 7) + (effectiveRamp * 15);
+          }
 
-    let runningCtl = currentMetrics.ctl;
-    let runningAtl = currentMetrics.atl;
-    let accumulatedTss = 0;
+          const wDate = new Date();
+          wDate.setDate(wDate.getDate() + (i - 1) * 7);
 
-    weekData.forEach(day => {
-        let dayTss = 0;
-        
-        // Si es pasado o es hoy y ya hay dato real -> REAL
-        if (day.isPast || (day.isToday && day.isReal)) {
-            dayTss = day.tss;
-        } else {
-            // Si es futuro -> PLANIFICADO
-            const factors = { 'low': 45, 'med': 60, 'high': 80, 'rest': 0 };
-            dayTss = Math.round((day.plannedMins / 60) * factors[day.plannedIntensity]);
-        }
+          weeklyPlan.push({
+              weekNum: i,
+              date: wDate,
+              type,
+              theme,
+              targetTss: Math.round(weekTss),
+              projectedCtl: Math.round(simCtl)
+          });
+      }
 
-        accumulatedTss += dayTss;
-        
-        if (!day.isPast) {
-            runningCtl = runningCtl + (dayTss - runningCtl) / 42;
-            runningAtl = runningAtl + (dayTss - runningAtl) / 7;
-        }
-    });
+      return { weeks, ctlDelta, requiredRamp: requiredRamp.toFixed(1), risk, weeklyPlan };
+  }, [eventDate, targetCtl, currentCtl]);
 
-    setProjectedStats({
-        ctl: Math.round(runningCtl),
-        tsb: Math.round(runningCtl - runningAtl),
-        totalTss: Math.round(accumulatedTss)
-    });
+  // --- SINCRONIZACIÓN CON EL CALENDARIO ---
+  const handleApplyToCalendar = () => {
+      if (!plan || !plan.weeklyPlan) return;
 
-  }, [weekData, currentMetrics]);
+      const saved = localStorage.getItem('planner_targets');
+      const currentTargets = saved ? JSON.parse(saved) : {};
 
+      plan.weeklyPlan.forEach(week => {
+          const monday = getMonday(week.date);
+          const dateKey = monday.toLocaleDateString('en-CA');
+          currentTargets[dateKey] = week.targetTss;
+      });
 
-  const updatePlan = (index, field, value) => {
-      const newData = [...weekData];
-      newData[index][field] = value;
-      setWeekData(newData);
+      localStorage.setItem('planner_targets', JSON.stringify(currentTargets));
+      
+      setSaveSuccess(true);
+      setTimeout(() => setSaveSuccess(false), 3000);
   };
-
-  useEffect(() => { fetchEvents(); }, [fetchEvents]);
-  const nextMainRace = useMemo(() => {
-    const upcoming = events.filter(e => new Date(e.date) >= new Date()).sort((a,b) => new Date(a.date) - new Date(b.date));
-    return upcoming.find(e => e.priority === 'A') || upcoming[0];
-  }, [events]);
-
-  const handleAdd = async (e) => {
-    e.preventDefault();
-    if (!newEvent.name || !newEvent.date) return;
-    await addEvent(newEvent);
-    setNewEvent({ name: '', date: '', priority: 'B', sport: 'run', distance: 0 });
-  };
-
-  const getIcon = (sport) => sport === 'run' ? <Footprints size={14}/> : (sport === 'bike' ? <Bike size={14}/> : <Dumbbell size={14}/>);
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 animate-in fade-in duration-500">
+    <div className="animate-in fade-in slide-in-from-bottom-4 duration-300 pb-12">
       
-      {/* IZQUIERDA */}
-      <div className="lg:col-span-4 space-y-6">
-        <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800 p-5 shadow-sm transition-colors">
-            <h3 className="text-sm font-bold text-slate-800 dark:text-white flex items-center gap-2 mb-4 uppercase">
-                <Flag size={16} className="text-red-500"/> Definir Objetivo
-            </h3>
-            <form onSubmit={handleAdd} className="space-y-3">
-                <div className="space-y-1">
-                    <label className="text-[10px] font-bold text-slate-400 uppercase">Nombre</label>
-                    <input type="text" placeholder="Ej: Media Maratón" value={newEvent.name} onChange={e => setNewEvent({...newEvent, name: e.target.value})}
-                        className="w-full bg-slate-50 dark:bg-slate-800 rounded-lg p-2 text-xs font-bold text-slate-700 dark:text-white outline-none focus:ring-2 ring-blue-500"
-                    />
-                </div>
-                <div className="grid grid-cols-2 gap-3">
-                    <div className="space-y-1">
-                        <label className="text-[10px] font-bold text-slate-400 uppercase">Fecha</label>
-                        <input type="date" value={newEvent.date} onChange={e => setNewEvent({...newEvent, date: e.target.value})}
-                            className="w-full bg-slate-50 dark:bg-slate-800 rounded-lg p-2 text-xs font-bold text-slate-700 dark:text-white outline-none"
-                        />
-                    </div>
-                    <div className="grid grid-cols-2 gap-3">
-                         <div className="space-y-1">
-                            <label className="text-[10px] font-bold text-slate-400 uppercase">Distancia</label>
-                            <input type="number" placeholder="km" value={newEvent.distance > 0 ? newEvent.distance / 1000 : ''} onChange={e => setNewEvent({...newEvent, distance: Number(e.target.value) * 1000})} className="w-full bg-slate-50 dark:bg-slate-800 rounded-lg p-2 text-xs font-bold text-slate-700 dark:text-white outline-none"/>
-                        </div>
-                        <div className="space-y-1">
-                            <label className="text-[10px] font-bold text-slate-400 uppercase">Prio</label>
-                            <select value={newEvent.priority} onChange={e => setNewEvent({...newEvent, priority: e.target.value})} className="w-full bg-slate-50 dark:bg-slate-800 rounded-lg p-2 text-xs font-bold text-slate-700 dark:text-white outline-none">
-                                <option value="A">A</option><option value="B">B</option>
-                            </select>
-                        </div>
-                    </div>
-                </div>
-                <button type="submit" className="w-full bg-slate-900 dark:bg-blue-600 text-white font-bold py-2 rounded-lg text-xs mt-2 hover:opacity-90 transition shadow-lg shadow-slate-200 dark:shadow-blue-900/20">Añadir</button>
-            </form>
-        </div>
+      {/* CABECERA (HERO) */}
+      <div className="bg-white dark:bg-slate-900 rounded-2xl p-6 md:p-8 shadow-sm border border-slate-200 dark:border-slate-800 mb-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+          <div>
+              <h1 className="text-3xl font-black text-slate-800 dark:text-white tracking-tight flex items-center gap-3 mb-2">
+                  <div className="p-2.5 bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded-xl">
+                      <Target size={24} />
+                  </div>
+                  Road to Race
+              </h1>
+              <p className="text-slate-500 dark:text-slate-400 text-sm max-w-xl leading-relaxed">
+                  El planificador inverso calcula el estrés (TSS) que necesitas sumar cada semana para construir el estado de forma exacto que exige tu próxima carrera.
+              </p>
+          </div>
 
-        <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800 p-5 shadow-sm transition-colors">
-            <h3 className="text-sm font-bold text-slate-800 dark:text-white flex items-center gap-2 mb-4 uppercase">
-                <Calendar size={16} className="text-blue-500"/> Próximas Carreras
-            </h3>
-            {events.length === 0 ? <p className="text-xs text-slate-400 text-center py-4">Sin carreras.</p> : (
-                <div className="space-y-2 max-h-[200px] overflow-y-auto custom-scrollbar">
-                    {events.map(ev => (
-                        <div key={ev.id} className="flex justify-between items-center p-3 rounded-xl border border-slate-100 dark:border-slate-800 hover:border-blue-200 transition-all">
-                            <div>
-                                <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded text-white ${ev.priority === 'A' ? 'bg-red-500' : 'bg-orange-400'}`}>{ev.priority}</span>
-                                <h4 className="text-xs font-bold text-slate-700 dark:text-white mt-1">{ev.name}</h4>
-                            </div>
-                            <button onClick={() => deleteEvent(ev.id)} className="text-slate-300 hover:text-red-500"><Trash2 size={14}/></button>
-                        </div>
-                    ))}
-                </div>
-            )}
-        </div>
-        <RacePredictor nextRace={nextMainRace} activities={activities} currentCtl={currentMetrics?.ctl || 0} currentTsb={currentMetrics?.tcb || 0} />
+          {/* BOTÓN MAGIA */}
+          {plan && !plan.error && (
+              <button 
+                  onClick={handleApplyToCalendar}
+                  className={`flex items-center gap-2 px-6 py-3 rounded-xl font-black text-sm transition-all shadow-lg w-full md:w-auto justify-center ${
+                      saveSuccess 
+                      ? 'bg-emerald-500 text-white shadow-emerald-500/20 scale-95' 
+                      : 'bg-slate-900 dark:bg-blue-600 hover:bg-slate-800 dark:hover:bg-blue-700 text-white shadow-slate-900/20 dark:shadow-blue-900/20 hover:scale-105'
+                  }`}
+              >
+                  {saveSuccess ? <CheckCircle2 size={18} /> : <Save size={18}/>}
+                  {saveSuccess ? 'Enviado al Calendario' : 'Aplicar al Calendario'}
+              </button>
+          )}
       </div>
 
-      {/* DERECHA */}
-      <div className="lg:col-span-8 space-y-6">
-        
-        {/* PANEL PROYECCIÓN */}
-        <div className="bg-slate-900 text-white rounded-2xl p-6 shadow-xl relative overflow-hidden">
-            <div className="absolute top-0 right-0 p-6 opacity-5"><TrendingUp size={150}/></div>
-            
-            <div className="relative z-10 flex flex-col md:flex-row justify-between items-end gap-6">
-                <div>
-                    <h2 className="text-lg font-bold flex items-center gap-2 mb-1">
-                        <Zap className="text-yellow-400" size={20}/> Proyección Semanal
-                    </h2>
-                    <p className="text-xs text-slate-400 max-w-sm leading-relaxed">
-                        Así acabarás el domingo combinando lo entrenado + lo planificado.
-                    </p>
-                </div>
-                
-                <div className="flex gap-6">
-                    <div className="text-right">
-                        <span className="text-[10px] font-bold text-slate-400 uppercase block">Carga Total</span>
-                        <span className="text-3xl font-black tracking-tight">{projectedStats.totalTss}</span>
-                        <span className="text-xs text-slate-500 font-bold">TSS</span>
-                    </div>
-                    <div className="text-right">
-                        <span className="text-[10px] font-bold text-slate-400 uppercase block">Fitness (CTL)</span>
-                        <span className="text-3xl font-black tracking-tight text-blue-400">{projectedStats.ctl}</span>
-                        <span className="text-xs text-slate-500 font-bold">Puntos</span>
-                    </div>
-                    <div className="text-right">
-                        <span className="text-[10px] font-bold text-slate-400 uppercase block">Forma (TSB)</span>
-                        <span className={`text-3xl font-black tracking-tight ${projectedStats.tsb >= 0 ? 'text-emerald-400' : 'text-amber-400'}`}>
-                            {projectedStats.tsb > 0 ? '+' : ''}{projectedStats.tsb}
-                        </span>
-                    </div>
-                </div>
-            </div>
-        </div>
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+          
+          {/* COLUMNA IZQUIERDA: CONFIGURACIÓN (4 cols) */}
+          <div className="lg:col-span-4 space-y-6">
+              
+              <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm p-6">
+                  <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest flex items-center gap-2 mb-5">
+                      <Flag size={14}/> Configuración del Evento
+                  </h3>
+                  
+                  <div className="space-y-5">
+                      <div className="space-y-1.5">
+                          <label className="text-[10px] font-bold text-slate-500 uppercase ml-1">Nombre de la Carrera / Reto</label>
+                          <input type="text" value={eventName} onChange={(e) => setEventName(e.target.value)}
+                               className="w-full bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-xl p-3 text-sm font-bold text-slate-700 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none transition-all"
+                          />
+                      </div>
 
-        {/* TABLERO */}
-        <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800 p-5 shadow-sm transition-colors">
-            
-            <div className="flex items-center gap-2 mb-6 pb-4 border-b border-slate-100 dark:border-slate-800">
-                <Calendar size={18} className="text-blue-500"/>
-                <h3 className="text-sm font-bold text-slate-800 dark:text-white uppercase">
-                    Planificador Táctico
-                </h3>
-            </div>
+                      <div className="space-y-1.5">
+                          <label className="text-[10px] font-bold text-slate-500 uppercase ml-1">Fecha del Evento</label>
+                          <div className="relative">
+                              <CalIcon size={16} className="absolute left-3.5 top-3.5 text-slate-400"/>
+                              <input type="date" value={eventDate} onChange={(e) => setEventDate(e.target.value)}
+                                  className="w-full bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-xl p-3 pl-10 text-sm font-bold text-slate-700 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none transition-all"
+                              />
+                          </div>
+                      </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-7 gap-3">
-                {weekData.map((day, i) => {
-                    let displayTss = 0;
-                    if (day.isPast || (day.isToday && day.isReal)) {
-                        displayTss = day.tss;
-                    } else {
-                        const factors = { 'low': 45, 'med': 60, 'high': 80, 'rest': 0 };
-                        displayTss = Math.round((day.plannedMins / 60) * factors[day.plannedIntensity]);
-                    }
+                      <div className="space-y-1.5 pt-4 border-t border-slate-100 dark:border-slate-800">
+                          <label className="text-[10px] font-bold text-slate-500 uppercase ml-1 flex justify-between">
+                              <span>Fitness Actual (CTL)</span>
+                              <span className="text-blue-500">{currentCtl}</span>
+                          </label>
+                          <label className="text-[10px] font-bold text-slate-500 uppercase ml-1 flex justify-between mt-3">
+                              <span>Fitness Objetivo (CTL Día D)</span>
+                              <span className="text-blue-500">{targetCtl}</span>
+                          </label>
+                          <input 
+                              type="range" min={currentCtl} max={150} value={targetCtl} 
+                              onChange={(e) => setTargetCtl(Number(e.target.value))}
+                              className="w-full h-2 bg-slate-200 dark:bg-slate-700 rounded-lg appearance-none cursor-pointer accent-blue-600 mt-2"
+                          />
+                          <p className="text-[10px] font-medium text-slate-400 text-center mt-2">
+                              Desliza para elegir lo en forma que quieres llegar.
+                          </p>
+                      </div>
+                  </div>
+              </div>
 
-                    return (
-                        <div 
-                            key={i} 
-                            className={`relative rounded-xl border p-3 flex flex-col gap-2 transition-all
-                                ${day.isToday ? 'ring-2 ring-blue-500 border-transparent bg-blue-50/10 dark:bg-blue-900/10 scale-105 z-10 shadow-lg' : 'border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900'}
-                                ${day.isPast ? 'opacity-70 grayscale-[0.5]' : ''}
-                            `}
-                        >
-                            <div className="flex justify-between items-center pb-2 border-b border-dashed border-slate-200 dark:border-slate-700">
-                                <span className={`text-[10px] font-black uppercase ${day.isToday ? 'text-blue-500' : 'text-slate-400'}`}>
-                                    {day.dayName}
-                                </span>
-                                {day.isPast || (day.isToday && day.isReal) ? (
-                                    <Lock size={10} className="text-slate-300"/>
-                                ) : (
-                                    <Edit3 size={10} className="text-emerald-500"/>
-                                )}
-                            </div>
+              {/* DIAGNÓSTICO DE RIESGO */}
+              {plan && !plan.error && (
+                  <div className={`rounded-2xl border p-5 transition-colors ${plan.risk.bg} ${plan.risk.border}`}>
+                      <div className="flex items-start gap-3">
+                          <div className={`p-2 rounded-lg bg-white/50 dark:bg-black/20 ${plan.risk.color}`}>
+                              {plan.requiredRamp > 8 ? <ShieldAlert size={20}/> : (plan.requiredRamp > 5 ? <AlertTriangle size={20}/> : <TrendingUp size={20}/>)}
+                          </div>
+                          <div>
+                              <h4 className={`text-xs font-black uppercase tracking-wider mb-1 ${plan.risk.color}`}>
+                                  Rampa: +{plan.requiredRamp} CTL/sem
+                              </h4>
+                              <p className="text-xs font-medium text-slate-700 dark:text-slate-300 leading-relaxed">
+                                  {plan.risk.msg}
+                              </p>
+                          </div>
+                      </div>
+                  </div>
+              )}
 
-                            {(day.isPast || (day.isToday && day.isReal)) ? (
-                                <div className="flex flex-col gap-1 py-2">
-                                    {day.isReal ? (
-                                        <>
-                                            <div className="flex items-center gap-1.5">
-                                                <div className="p-1 rounded bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300">
-                                                    {getIcon(day.sport)}
-                                                </div>
-                                                <span className="text-[10px] font-bold capitalize text-slate-600 dark:text-slate-300">
-                                                    {day.sport === 'run' ? 'Carrera' : day.sport}
-                                                </span>
-                                            </div>
-                                            <div className="mt-1">
-                                                <span className="text-xs font-black text-slate-800 dark:text-white">{day.mins}m</span>
-                                                <span className="text-[9px] text-slate-400 ml-1 block">{displayTss} TSS</span>
-                                            </div>
-                                        </>
-                                    ) : (
-                                        <div className="text-center py-4 text-[10px] text-slate-400 italic">Descanso</div>
-                                    )}
-                                </div>
-                            ) : (
-                                <div className="flex flex-col gap-2">
-                                    <select 
-                                        value={day.plannedIntensity} 
-                                        onChange={(e) => updatePlan(i, 'plannedIntensity', e.target.value)}
-                                        className={`w-full text-[10px] font-bold rounded p-1 outline-none border cursor-pointer
-                                            ${day.plannedIntensity === 'rest' ? 'bg-slate-100 text-slate-400 border-transparent' : 
-                                              day.plannedIntensity === 'high' ? 'bg-red-50 text-red-600 border-red-100' : 
-                                              day.plannedIntensity === 'med' ? 'bg-orange-50 text-orange-600 border-orange-100' : 
-                                              'bg-green-50 text-green-600 border-green-100'}`}
-                                    >
-                                        <option value="rest">💤 Descanso</option>
-                                        <option value="low">🟢 Suave</option>
-                                        <option value="med">🟠 Medio</option>
-                                        <option value="high">🔴 Duro</option>
-                                    </select>
+          </div>
 
-                                    {day.plannedIntensity !== 'rest' && (
-                                        <div className="space-y-1">
-                                            <div className="flex justify-between text-[10px]">
-                                                <span className="text-slate-400">Duración</span>
-                                                <span className="font-bold text-slate-700 dark:text-slate-300">{day.plannedMins}m</span>
-                                            </div>
-                                            <input 
-                                                type="range" min="20" max="180" step="10"
-                                                value={day.plannedMins}
-                                                onChange={(e) => updatePlan(i, 'plannedMins', Number(e.target.value))}
-                                                className="w-full h-1 bg-slate-200 dark:bg-slate-700 rounded-lg appearance-none cursor-pointer accent-blue-500"
-                                            />
-                                            <div className="text-right pt-1 border-t border-dashed border-slate-100 dark:border-slate-800">
-                                                <span className="text-[9px] font-bold text-blue-500">Est. {displayTss} TSS</span>
-                                            </div>
-                                        </div>
-                                    )}
-                                </div>
-                            )}
-                        </div>
-                    );
-                })}
-            </div>
-            
-            <div className="mt-6 flex items-start gap-2 text-[10px] text-slate-400 bg-slate-50 dark:bg-slate-800/50 p-3 rounded-lg">
-                <CheckCircle2 size={14} className="text-emerald-500 shrink-0 mt-0.5"/>
-                <p>
-                    <strong className="text-slate-600 dark:text-slate-300">Modo Híbrido Activo:</strong> Se han sincronizado tus datos reales con el calendario local. Tus días pasados están bloqueados con lo que realmente hiciste. Planifica el resto para ver tu proyección.
-                </p>
-            </div>
+          {/* COLUMNA DERECHA: LA RECETA SEMANAL (8 cols) */}
+          <div className="lg:col-span-8">
+              {plan?.error ? (
+                  <div className="bg-red-50 dark:bg-red-900/10 border border-red-200 dark:border-red-900/30 rounded-2xl p-8 flex flex-col items-center justify-center text-center h-full min-h-[300px]">
+                      <AlertTriangle size={48} className="text-red-400 mb-4"/>
+                      <h3 className="text-lg font-bold text-red-800 dark:text-red-400 mb-2">No se puede calcular</h3>
+                      <p className="text-sm text-red-600/80 dark:text-red-500/80 max-w-md">{plan.error}</p>
+                  </div>
+              ) : plan && (
+                  <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden">
+                      <div className="p-5 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between bg-slate-50/50 dark:bg-slate-800/20">
+                          <h3 className="text-sm font-black text-slate-800 dark:text-white uppercase tracking-wider flex items-center gap-2">
+                              <CalIcon size={16} className="text-blue-500"/> Prescripción Semanal
+                          </h3>
+                          <span className="text-[10px] font-bold text-slate-500 bg-slate-200 dark:bg-slate-800 px-2.5 py-1 rounded-md">
+                              Faltan {plan.weeks} semanas
+                          </span>
+                      </div>
 
-        </div>
+                      <div className="p-4 md:p-6 space-y-3 max-h-[600px] overflow-y-auto custom-scrollbar">
+                          {plan.weeklyPlan.map((week, i) => (
+                              <div key={i} className={`p-4 rounded-2xl border flex flex-col sm:flex-row sm:items-center justify-between gap-4 transition-all hover:shadow-md ${week.theme}`}>
+                                  
+                                  <div className="flex items-center gap-4">
+                                      <div className="w-12 h-12 rounded-full bg-white/50 dark:bg-black/20 flex flex-col items-center justify-center shrink-0">
+                                          <span className="text-[9px] uppercase font-bold opacity-60 leading-none">Sem</span>
+                                          <span className="text-lg font-black leading-none mt-0.5">{week.weekNum}</span>
+                                      </div>
+                                      <div>
+                                          <h4 className="text-sm font-black tracking-tight">{week.type}</h4>
+                                          <span className="text-[10px] font-bold opacity-70 flex items-center gap-1 mt-0.5">
+                                              Inicia: {getMonday(week.date).toLocaleDateString('es-ES', { day: 'numeric', month: 'short' })}
+                                          </span>
+                                      </div>
+                                  </div>
+
+                                  <div className="flex items-center gap-6 sm:justify-end">
+                                      <div className="text-center">
+                                          <span className="block text-[9px] font-bold uppercase opacity-60 mb-0.5">Target TSS</span>
+                                          <span className="text-xl font-black flex items-center gap-1 justify-center">
+                                              <Zap size={14} className="opacity-50"/> {week.targetTss}
+                                          </span>
+                                      </div>
+                                      <ArrowRight size={16} className="opacity-30 hidden sm:block"/>
+                                      <div className="text-center w-16">
+                                          <span className="block text-[9px] font-bold uppercase opacity-60 mb-0.5">CTL Fin</span>
+                                          <span className="text-xl font-black">{week.projectedCtl}</span>
+                                      </div>
+                                  </div>
+
+                              </div>
+                          ))}
+                      </div>
+                  </div>
+              )}
+          </div>
+
       </div>
     </div>
   );
