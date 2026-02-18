@@ -35,6 +35,7 @@ export const useActivities = () => {
       setSettings(prev => ({
         ...prev,
         gender: data.gender || 'male',
+        weight: Number(data.weight) || 70, // <-- AÑADIDO: Ahora sí lee el peso de la BD
         fcReposo: Number(data.fc_rest) || 50,
         run: { max: Number(data.run_fc_max) || 200, lthr: Number(data.run_lthr) || 178, zones: data.run_zones || defaultZones },
         bike: { max: Number(data.bike_fc_max) || 190, lthr: Number(data.bike_lthr) || 168, zones: data.bike_zones || defaultZones }
@@ -124,14 +125,13 @@ export const useActivities = () => {
                     distance: act.distance || 0, 
                     elevation_gain: act.total_elevation_gain || 0, 
                     watts_avg: act.average_watts || 0,
-                    speed_avg: act.average_speed || 0         
+                    speed_avg: act.average_speed || 0,
+                    map_polyline: act.map?.summary_polyline || ''
                 };
             });
 
         if (newRows.length > 0) {
-            // AÑADIDO: GESTIÓN DE ERRORES SILENCIOSOS DE SUPABASE
             const { error: insertError } = await supabase.from('activities').insert(newRows);
-            
             if (insertError) {
                 console.error("Fallo al guardar en DB:", insertError);
                 throw new Error(`Error BD: ${insertError.message || 'Verifica que creaste las columnas name, description y speed_avg'}`);
@@ -225,9 +225,49 @@ export const useActivities = () => {
     }
   };
 
-  const analyzeHistory = (sport) => { /* Lógica de lthr futuro */ };
+  // --- 4. ALGORITMO INTELIGENTE LTHR (AÑADIDO) ---
+  const analyzeHistory = (sport) => {
+      const cutoff = new Date();
+      cutoff.setDate(cutoff.getDate() - 90);
 
-  // --- 4. CÁLCULOS MATEMÁTICOS (CORE BANISTER & TSS) ---
+      const sportActs = activities.filter(a => {
+          const isMatch = sport === 'run' 
+              ? (a.type.toLowerCase().includes('run') || a.type.toLowerCase().includes('carrera'))
+              : (a.type.toLowerCase().includes('bike') || a.type.toLowerCase().includes('ciclismo'));
+          return isMatch && new Date(a.date) >= cutoff && (a.hr_avg > 0);
+      });
+
+      if (sportActs.length === 0) {
+          const currentMax = settings[sport].max;
+          if (currentMax > 100) {
+              return { 
+                  lthr: Math.round(currentMax * 0.85), 
+                  msg: `Calculado al 85% de tu FC Máxima (${currentMax} ppm) por falta de historial reciente.` 
+              };
+          }
+          return null; 
+      }
+
+      const sorted = sportActs.sort((a, b) => b.hr_avg - a.hr_avg);
+      const bestEffort = sorted[0];
+
+      let calculatedLthr = bestEffort.hr_avg;
+
+      if (bestEffort.duration < 20) {
+          calculatedLthr = Math.round(bestEffort.hr_avg * 0.90);
+      } else if (bestEffort.duration >= 20 && bestEffort.duration <= 45) {
+          calculatedLthr = Math.round(bestEffort.hr_avg * 0.95);
+      } else {
+          calculatedLthr = Math.round(bestEffort.hr_avg * 0.98);
+      }
+
+      return { 
+          lthr: calculatedLthr, 
+          msg: `Basado en tu entreno "${bestEffort.name}" (${bestEffort.duration}m a ${Math.round(bestEffort.hr_avg)} ppm media).` 
+      };
+  };
+
+  // --- 5. CÁLCULOS MATEMÁTICOS (CORE BANISTER & TSS) ---
   const metrics = useMemo(() => {
     if (!activities || activities.length === 0) {
         return { 
@@ -235,7 +275,6 @@ export const useActivities = () => {
         };
     }
 
-    // A. FUNCIÓN MAESTRA DE TSS (Modelo Cuadrático / hrTSS Coggan)
     const calculateTSS = (act) => {
         const t = act.type.toLowerCase();
         const isBike = t.includes('ciclismo') || t.includes('bici');
@@ -264,16 +303,14 @@ export const useActivities = () => {
         return Math.round(tss);
     };
 
-    // Inyectar el TSS en cada actividad
     const processedActivities = [...activities].map(act => ({
         ...act,
         tss: calculateTSS(act) 
     }));
 
-    // B. BUCLE DE BANISTER (CTL / ATL / TSB)
     const sortedActs = processedActivities; 
     const startDate = new Date(sortedActs[0].date);
-    const today = new Date(); // <--- EL DÍA DE HOY
+    const today = new Date(); 
     
     const activitiesMap = new Map();
     sortedActs.forEach(act => {
@@ -287,8 +324,6 @@ export const useActivities = () => {
     const oneDay = 24 * 60 * 60 * 1000;
     const loadHistory = []; 
 
-    // Usamos UTC para evitar bugs de cambios de hora (Daylight Saving Time) al sumar 24h
-    // Y forzamos que el bucle siempre llegue hasta endUTC (Hoy), haya o no entreno
     const startUTC = Date.UTC(startDate.getUTCFullYear(), startDate.getUTCMonth(), startDate.getUTCDate());
     const endUTC = Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), today.getUTCDate());
 
@@ -317,7 +352,6 @@ export const useActivities = () => {
         });
     }
 
-    // C. MÉTRICAS AVANZADAS Y PREDICCIONES
     const lastPoint = fullSeries[fullSeries.length - 1] || { ctl: 0, atl: 0, tcb: 0 };
     const prevWeekPoint = fullSeries[fullSeries.length - 8] || { ctl: 0 }; 
     const pastMonthPoint = fullSeries[fullSeries.length - 30] || fullSeries[0] || { ctl: 0 };
@@ -356,7 +390,8 @@ export const useActivities = () => {
 
     // D. FILTROS PARA INTERFAZ VISUAL
     const cutoff = new Date();
-    if (timeRange === '30d') cutoff.setDate(today.getDate() - 30);
+    if (timeRange === '7d') cutoff.setDate(today.getDate() - 7);
+    else if (timeRange === '30d') cutoff.setDate(today.getDate() - 30); // <-- CORREGIDO a else if
     else if (timeRange === '90d') cutoff.setDate(today.getDate() - 90);
     else if (timeRange === '1y') cutoff.setFullYear(today.getFullYear() - 1);
     else if (timeRange === 'all') cutoff.setTime(startDate.getTime()); 
