@@ -189,43 +189,52 @@ export const useActivities = () => {
         const t = act.type.toLowerCase();
         const isBike = t.includes('ciclismo') || t.includes('bici');
         const sportSettings = isBike ? settings.bike : settings.run;
-        let lthr = Number(sportSettings.lthr) || (isBike ? 168 : 178); 
+        const lthr = Number(sportSettings.lthr) || (isBike ? 168 : 178); 
 
-        // 1. SI TENEMOS DATOS EXACTOS (STREAMS), CALCULAMOS EL TSS SEGUNDO A SEGUNDO
+        // 1. CÁLCULO EXACTO SEGUNDO A SEGUNDO (hrTSS Oficial de TrainingPeaks)
         if (act.streams_data && act.streams_data.heartrate && act.streams_data.time) {
             const hrData = act.streams_data.heartrate.data;
             const timeData = act.streams_data.time.data;
             let exactTSS = 0;
             
             for (let i = 1; i < hrData.length; i++) {
-                let dt = timeData[i] - timeData[i-1]; // Segundos transcurridos en ese intervalo
+                let dt = timeData[i] - timeData[i-1]; 
                 let hr = hrData[i];
-                let intensity = hr / lthr;
+                let pctLthr = hr / lthr; // % de tu pulso respecto al umbral
                 
-                // Ponderación exponencial: Los esfuerzos por encima del umbral castigan mucho más
-                if (isBike && intensity < 0.75 && intensity > 0.5) intensity = intensity * 1.1; 
-                if (intensity > 1.20) intensity = 1.20; // Tope fisiológico para evitar bugs de picos de sensor
+                let tssPerHour = 0;
+
+                // Coeficientes oficiales de Joe Friel
+                if (pctLthr < 0.81) tssPerHour = 20;         // Zona 1
+                else if (pctLthr < 0.90) tssPerHour = 50;    // Zona 2
+                else if (pctLthr < 0.94) tssPerHour = 70;    // Zona 3
+                else if (pctLthr < 1.00) tssPerHour = 90;    // Zona 4
+                else if (pctLthr < 1.03) tssPerHour = 105;   // Zona 5a
+                else if (pctLthr < 1.06) tssPerHour = 120;   // Zona 5b
+                else tssPerHour = 140;                       // Zona 5c (Máximo fisiológico)
                 
-                // hrTSS por cada segundo
-                let secondTSS = (dt / 3600) * (intensity * intensity) * 100;
-                exactTSS += secondTSS;
+                // Sumamos la parte proporcional de ese segundo
+                exactTSS += (dt / 3600) * tssPerHour;
             }
             return Math.round(exactTSS);
         }
 
-        // 2. SI NO HAY STREAMS AÚN, USAMOS LA FÓRMULA ANTIGUA DE RESPALDO
+        // 2. FÓRMULA DE RESPALDO (Para entrenos sin GPS/streams bajados)
         const hr = Number(act.hr_avg); 
         const durationHours = act.duration / 60;
-        if (!hr || hr <= 40) return Math.round(durationHours * 50);
+        if (!hr || hr <= 40) return Math.round(durationHours * 30); // Base genérica
 
-        let IF = hr / lthr;
-        if (isBike && IF < 0.75 && IF > 0.5) IF = IF * 1.1; 
-        if (IF > 1.15) IF = 1.15; 
-        
-        let estimatedTss = durationHours * (IF * IF) * 100;
-        if (!t.includes('caminata') && !t.includes('andar')) {
-            const minTss = durationHours * 40; if (estimatedTss < minTss) estimatedTss = minTss;
-        }
+        let pctLthr = hr / lthr;
+        let tssPerHour = 0;
+
+        // Para la media global somos más conservadores para no inflar
+        if (pctLthr < 0.81) tssPerHour = 20;
+        else if (pctLthr < 0.90) tssPerHour = 50;
+        else if (pctLthr < 0.94) tssPerHour = 70;
+        else if (pctLthr < 1.00) tssPerHour = 85; 
+        else tssPerHour = 100; 
+
+        let estimatedTss = durationHours * tssPerHour;
         return Math.round(estimatedTss);
     };
 

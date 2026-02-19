@@ -5,6 +5,7 @@ import {
 } from 'recharts';
 import { Target, Activity, Flame, Mountain, Clock, MapPin, Zap, TrendingUp, Trophy, Heart, Wind, CalendarDays } from 'lucide-react';
 
+// Algoritmo hiper-rápido de ventana deslizante (O(n))
 const getPeak = (data, windowSize) => {
     if (!data || data.length < windowSize) return 0;
     let currentSum = 0;
@@ -17,18 +18,25 @@ const getPeak = (data, windowSize) => {
     return maxSum / windowSize;
 };
 
-// Helper para colores de deportes
-const getSportColor = (sportType) => {
-    const t = sportType.toLowerCase();
-    if (t.includes('bici') || t.includes('ciclismo') || t.includes('ride')) return '#3b82f6'; // Azul
-    if (t.includes('run') || t.includes('carrera') || t.includes('correr')) return '#f97316'; // Naranja
-    if (t.includes('nadar') || t.includes('swim')) return '#06b6d4'; // Cyan
-    if (t.includes('gym') || t.includes('fuerza') || t.includes('weight')) return '#a855f7'; // Morado
-    if (t.includes('andar') || t.includes('caminata') || t.includes('walk')) return '#10b981'; // Esmeralda
-    return '#64748b'; // Gris por defecto
+// Array Logarítmico para crear la "Curva Continua" (en segundos)
+const TIME_INTERVALS = [1, 5, 15, 30, 60, 180, 300, 600, 1200, 2400, 3600, 7200]; 
+
+const formatInterval = (secs) => {
+    if (secs < 60) return `${secs}s`;
+    if (secs < 3600) return `${secs/60}m`;
+    return `${secs/3600}h`;
 };
 
-// Helper para sacar el lunes de cada semana
+const getSportColor = (sportType) => {
+    const t = sportType.toLowerCase();
+    if (t.includes('bici') || t.includes('ciclismo') || t.includes('ride')) return '#3b82f6'; 
+    if (t.includes('run') || t.includes('carrera') || t.includes('correr')) return '#f97316'; 
+    if (t.includes('nadar') || t.includes('swim')) return '#06b6d4'; 
+    if (t.includes('gym') || t.includes('fuerza') || t.includes('weight')) return '#a855f7'; 
+    if (t.includes('andar') || t.includes('caminata') || t.includes('walk')) return '#10b981'; 
+    return '#64748b'; 
+};
+
 const getMonday = (d) => {
     const date = new Date(d);
     const day = date.getDay();
@@ -46,18 +54,17 @@ export const AdvancedAnalytics = ({ activities, settings }) => {
       
       const sortedActivities = [...activities].sort((a, b) => new Date(a.date) - new Date(b.date));
       const accumMap = new Map();
-      const weeklyMap = new Map(); // NUEVO: Mapa para la carga semanal
+      const weeklyMap = new Map(); 
 
-      const peakHr = { '5s':0, '15s':0, '30s':0, '1m':0, '5m':0, '10m':0, '20m':0, '40m':0, '60m':0 };
-      const peakSpd = { '5s':0, '15s':0, '30s':0, '1m':0, '5m':0, '10m':0, '20m':0, '40m':0, '60m':0 };
+      // Inicializar objetos de récords dinámicos
+      const peakHr = {}; const peakSpd = {};
+      TIME_INTERVALS.forEach(i => { peakHr[i] = 0; peakSpd[i] = 0; });
 
       const efData = [];
 
       sortedActivities.forEach(act => {
-          // 1. TSS por Deporte
           if (act.tss > 0) tssBySport[act.type] = (tssBySport[act.type] || 0) + act.tss;
 
-          // 2. Acumulación Diaria
           const dateKey = new Date(act.date).toLocaleDateString('es-ES', { day: '2-digit', month: 'short' });
           if (!accumMap.has(dateKey)) accumMap.set(dateKey, { date: dateKey, dailyDistance: 0, dailyTime: 0, dailyElevation: 0 });
           
@@ -66,11 +73,8 @@ export const AdvancedAnalytics = ({ activities, settings }) => {
           dayData.dailyTime += (act.duration / 60); 
           dayData.dailyElevation += act.elevation_gain; 
 
-          // 3. NUEVO: Agrupación Semanal (Lunes a Domingo)
           const weekStart = getMonday(act.date);
-          if (!weeklyMap.has(weekStart)) {
-              weeklyMap.set(weekStart, { week: weekStart, tss: 0, hours: 0 });
-          }
+          if (!weeklyMap.has(weekStart)) weeklyMap.set(weekStart, { week: weekStart, tss: 0, hours: 0 });
           const wData = weeklyMap.get(weekStart);
           wData.tss += act.tss || 0;
           wData.hours += (act.duration || 0) / 60;
@@ -79,7 +83,6 @@ export const AdvancedAnalytics = ({ activities, settings }) => {
           const isBike = typeLower.includes('bici') || typeLower.includes('ciclismo');
           const isRun = typeLower.includes('run') || typeLower.includes('carrera') || typeLower.includes('correr');
 
-          // 4. Extracción de Zonas y Récords
           if (act.streams_data) {
               if (act.streams_data.heartrate && act.streams_data.time) {
                   const hrData = act.streams_data.heartrate.data;
@@ -94,81 +97,48 @@ export const AdvancedAnalytics = ({ activities, settings }) => {
                       else if (hr > userZones[4].max) zonesData[4] += dt;
                   }
 
-                  peakHr['5s'] = Math.max(peakHr['5s'], getPeak(hrData, 5));
-                  peakHr['15s'] = Math.max(peakHr['15s'], getPeak(hrData, 15));
-                  peakHr['30s'] = Math.max(peakHr['30s'], getPeak(hrData, 30));
-                  peakHr['1m'] = Math.max(peakHr['1m'], getPeak(hrData, 60));
-                  peakHr['5m'] = Math.max(peakHr['5m'], getPeak(hrData, 300));
-                  peakHr['10m'] = Math.max(peakHr['10m'], getPeak(hrData, 600));
-                  peakHr['20m'] = Math.max(peakHr['20m'], getPeak(hrData, 1200));
-                  peakHr['40m'] = Math.max(peakHr['40m'], getPeak(hrData, 2400));
-                  peakHr['60m'] = Math.max(peakHr['60m'], getPeak(hrData, 3600));
+                  // ESCÁNER MÁGICO DE RÉCORDS (Bucle Dinámico)
+                  TIME_INTERVALS.forEach(windowSize => {
+                      if (hrData.length >= windowSize) {
+                          peakHr[windowSize] = Math.max(peakHr[windowSize], getPeak(hrData, windowSize));
+                      }
+                  });
               }
 
               if (act.streams_data.velocity_smooth && act.streams_data.time) {
                   const spdData = act.streams_data.velocity_smooth.data;
-                  peakSpd['5s'] = Math.max(peakSpd['5s'], getPeak(spdData, 5));
-                  peakSpd['15s'] = Math.max(peakSpd['15s'], getPeak(spdData, 15));
-                  peakSpd['30s'] = Math.max(peakSpd['30s'], getPeak(spdData, 30));
-                  peakSpd['1m'] = Math.max(peakSpd['1m'], getPeak(spdData, 60));
-                  peakSpd['5m'] = Math.max(peakSpd['5m'], getPeak(spdData, 300));
-                  peakSpd['10m'] = Math.max(peakSpd['10m'], getPeak(spdData, 600));
-                  peakSpd['20m'] = Math.max(peakSpd['20m'], getPeak(spdData, 1200));
-                  peakSpd['40m'] = Math.max(peakSpd['40m'], getPeak(spdData, 2400));
-                  peakSpd['60m'] = Math.max(peakSpd['60m'], getPeak(spdData, 3600));
+                  TIME_INTERVALS.forEach(windowSize => {
+                      if (spdData.length >= windowSize) {
+                          peakSpd[windowSize] = Math.max(peakSpd[windowSize], getPeak(spdData, windowSize));
+                      }
+                  });
               }
           }
 
-          // 5. Eficiencia Aeróbica
-          let vamBike = null;
-          let costRun = null;
-
-          if (isBike && act.elevation_gain >= 100 && act.duration > 0) {
-              vamBike = Math.round(act.elevation_gain / (act.duration / 60)); 
-          }
-
+          let vamBike = null; let costRun = null;
+          if (isBike && act.elevation_gain >= 100 && act.duration > 0) vamBike = Math.round(act.elevation_gain / (act.duration / 60)); 
           const runZ2Max = settings.run.zones[1].max + 3; 
           if (isRun && act.hr_avg > 100 && act.hr_avg <= runZ2Max && act.speed_avg > 0) {
               const paceMinKm = 16.666666666667 / act.speed_avg;
               costRun = Math.round(act.hr_avg * paceMinKm); 
           }
-
-          if (vamBike || costRun) {
-              efData.push({ date: dateKey, vamBike: vamBike, costRun: costRun, name: act.name });
-          }
+          if (vamBike || costRun) efData.push({ date: dateKey, vamBike: vamBike, costRun: costRun, name: act.name });
       });
 
-      // --- FORMATEO DE GRÁFICOS ---
-      
-      // NUEVO: Gráfico Semanal
       const weeklyChart = Array.from(weeklyMap.values()).map(w => ({
           dateLabel: new Date(w.week).toLocaleDateString('es-ES', { day: '2-digit', month: 'short' }),
-          tss: Math.round(w.tss),
-          hours: Number(w.hours.toFixed(1))
+          tss: Math.round(w.tss), hours: Number(w.hours.toFixed(1))
       }));
 
-      // Acumulación Diaria
       let totalDist = 0; let totalTime = 0; let totalElev = 0;
       const accumChart = Array.from(accumMap.values()).map(day => {
           totalDist += day.dailyDistance; totalTime += day.dailyTime; totalElev += day.dailyElevation;
           return { date: day.date, distance: Number(totalDist.toFixed(1)), time: Number(totalTime.toFixed(1)), elevation: Math.round(totalElev) };
       });
 
-      // Donut TSS Mejorado
-      const tssChart = Object.keys(tssBySport).map(key => ({ 
-          name: key, 
-          value: Math.round(tssBySport[key]), 
-          color: getSportColor(key) 
-      })).sort((a, b) => b.value - a.value);
-
-      // Zonas
-      const zonesChart = zonesData.map((secs, i) => ({ 
-          name: ['Z1 Recup.', 'Z2 Base', 'Z3 Tempo', 'Z4 Umbral', 'Z5 VO2Max'][i], 
-          hours: Number((secs / 3600).toFixed(1)), 
-          fill: ['#94a3b8', '#10b981', '#3b82f6', '#f97316', '#ef4444'][i] 
-      }));
+      const tssChart = Object.keys(tssBySport).map(key => ({ name: key, value: Math.round(tssBySport[key]), color: getSportColor(key) })).sort((a, b) => b.value - a.value);
+      const zonesChart = zonesData.map((secs, i) => ({ name: ['Z1 Recup.', 'Z2 Base', 'Z3 Tempo', 'Z4 Umbral', 'Z5 VO2Max'][i], hours: Number((secs / 3600).toFixed(1)), fill: ['#94a3b8', '#10b981', '#3b82f6', '#f97316', '#ef4444'][i] }));
       
-      // Foco Garmin
       const lowAerobic = zonesData[0] + zonesData[1]; const highAerobic = zonesData[2] + zonesData[3]; const anaerobic = zonesData[4];
       const totalFocus = lowAerobic + highAerobic + anaerobic;
       const focusChart = totalFocus > 0 ? [
@@ -177,24 +147,21 @@ export const AdvancedAnalytics = ({ activities, settings }) => {
           { name: 'Anaeróbico', value: Math.round((anaerobic/totalFocus)*100), color: '#a855f7', desc: 'Sprint' }
       ] : [];
 
-      // Curvas de Récords
-      const curveSpd = Object.keys(peakSpd).map(k => ({ name: k, value: Number((peakSpd[k] * 3.6).toFixed(1)) })).filter(d => d.value > 0);
-      const curveHr = Object.keys(peakHr).map(k => ({ name: k, value: Math.round(peakHr[k]) })).filter(d => d.value > 0);
+      // CONVERTIR DICCIONARIOS EN ARRAYS CONTINUOS PARA LA GRÁFICA
+      const curveSpd = TIME_INTERVALS.map(i => ({ name: formatInterval(i), value: Number((peakSpd[i] * 3.6).toFixed(1)) })).filter(d => d.value > 0);
+      const curveHr = TIME_INTERVALS.map(i => ({ name: formatInterval(i), value: Math.round(peakHr[i]) })).filter(d => d.value > 0);
 
       return { tssChart, zonesChart, focusChart, accumChart, weeklyChart, efData, curveSpd, curveHr };
   }, [activities, settings]);
 
   if (!activities || activities.length === 0) return null;
 
-  // Variables UI
   const accumColor = accumType === 'distance' ? '#3b82f6' : accumType === 'time' ? '#10b981' : '#a855f7';
   const accumUnit = accumType === 'distance' ? 'km' : accumType === 'time' ? 'h' : 'm+';
-  
   const currentCurve = curveType === 'speed' ? analytics.curveSpd : analytics.curveHr;
   const curveColor = curveType === 'speed' ? '#3b82f6' : '#f43f5e';
   const curveUnit = curveType === 'speed' ? 'km/h' : 'ppm';
 
-  // --- TOOLTIPS PERSONALIZADOS ---
   const CustomWeeklyTooltip = ({ active, payload, label }) => {
       if (active && payload && payload.length) {
           return (
@@ -225,9 +192,7 @@ export const AdvancedAnalytics = ({ activities, settings }) => {
                               <span>{entry.name}:</span>
                               <span>{entry.value} {entry.dataKey === 'vamBike' ? 'm/h' : 'lat/km'}</span>
                           </p>
-                          <p className="text-[9px] text-slate-500 font-medium">
-                              {entry.dataKey === 'vamBike' ? 'Velocidad de Ascenso Media' : 'Coste cardíaco en Zona 2'}
-                          </p>
+                          <p className="text-[9px] text-slate-500 font-medium">{entry.dataKey === 'vamBike' ? 'Velocidad de Ascenso Media' : 'Coste cardíaco en Zona 2'}</p>
                       </div>
                   ))}
               </div>
@@ -256,7 +221,6 @@ export const AdvancedAnalytics = ({ activities, settings }) => {
           <Activity size={16}/> Laboratorio Fisiológico Avanzado
       </h3>
 
-      {/* FILA 1: KPIs Rápidos */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           
           <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-4 shadow-sm flex flex-col">
@@ -264,7 +228,6 @@ export const AdvancedAnalytics = ({ activities, settings }) => {
               <div className="flex-1 h-[120px] relative">
                   <ResponsiveContainer width="100%" height="100%">
                       <PieChart>
-                          {/* Donut más grueso para mejor visualización */}
                           <Pie data={analytics.tssChart} innerRadius={35} outerRadius={55} paddingAngle={3} dataKey="value" stroke="none">
                               {analytics.tssChart.map((e, i) => <Cell key={i} fill={e.color} />)}
                           </Pie>
@@ -316,10 +279,8 @@ export const AdvancedAnalytics = ({ activities, settings }) => {
           </div>
       </div>
 
-      {/* FILA 2: Gráficos de Progresión (2 Columnas) */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
           
-          {/* NUEVO: BALANCE DE CARGA SEMANAL */}
           <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-5 shadow-sm">
               <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1 flex items-center gap-1.5"><CalendarDays size={14} className="text-purple-500"/> Progreso y Carga Semanal</h4>
               <p className="text-[9px] font-medium text-slate-400 mb-4">¿Estás siendo constante? Compara el Estrés (TSS) generado vs las Horas invertidas.</p>
@@ -328,15 +289,10 @@ export const AdvancedAnalytics = ({ activities, settings }) => {
                       <ComposedChart data={analytics.weeklyChart} margin={{ top: 5, right: 0, bottom: 0, left: -20 }}>
                           <CartesianGrid strokeDasharray="3 3" opacity={0.1} vertical={false}/>
                           <XAxis dataKey="dateLabel" tick={{fontSize: 10, fill: '#94a3b8'}} minTickGap={15} />
-                          
-                          {/* Eje Izquierdo: TSS (Morado) */}
                           <YAxis yAxisId="left" tick={{fontSize: 10, fill: '#a855f7'}} axisLine={false} tickLine={false} />
-                          {/* Eje Derecho: Horas (Verde). Oculto para mantener limpio el diseño pero funcional para la línea */}
                           <YAxis yAxisId="right" orientation="right" domain={[0, 'auto']} hide />
-                          
                           <Tooltip content={<CustomWeeklyTooltip />} cursor={{fill: '#f1f5f9', opacity: 0.1}} />
                           <Legend wrapperStyle={{ fontSize: '10px', fontWeight: 'bold' }} />
-                          
                           <Bar yAxisId="left" dataKey="tss" name="Carga (TSS)" fill="#a855f7" radius={[4, 4, 0, 0]} maxBarSize={35} />
                           <Line yAxisId="right" type="monotone" dataKey="hours" name="Volumen (Horas)" stroke="#10b981" strokeWidth={3} dot={{r:3, fill: '#10b981'}} />
                       </ComposedChart>
@@ -344,7 +300,6 @@ export const AdvancedAnalytics = ({ activities, settings }) => {
               </div>
           </div>
 
-          {/* EFICIENCIA AERÓBICA */}
           <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-5 shadow-sm">
               <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1 flex items-center gap-1.5"><TrendingUp size={14} className="text-emerald-500"/> Progreso Aeróbico y Escalada</h4>
               <p className="text-[9px] font-medium text-slate-400 mb-4">
@@ -368,14 +323,13 @@ export const AdvancedAnalytics = ({ activities, settings }) => {
 
       </div>
 
-      {/* FILA 3: Récords y Acumulado */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
 
           <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-5 shadow-sm flex flex-col">
               <div className="flex justify-between items-start mb-4">
                   <div>
-                      <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-1.5"><Trophy size={14} className="text-yellow-500"/> Curva de Rendimiento Máximo</h4>
-                      <p className="text-[9px] font-medium text-slate-400 mt-1">Tus picos absolutos de la temporada analizados segundo a segundo.</p>
+                      <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-1.5"><Trophy size={14} className="text-yellow-500"/> Curva de Rendimiento Máximo Continua</h4>
+                      <p className="text-[9px] font-medium text-slate-400 mt-1">Tu perfil fisiológico completo: Desde 1 segundo hasta 2 horas.</p>
                   </div>
                   <div className="flex bg-slate-100 dark:bg-slate-800/80 p-0.5 rounded-lg border border-slate-200 dark:border-slate-700">
                       <button onClick={() => setCurveType('speed')} className={`flex items-center gap-1 px-2 py-1 text-[9px] font-bold rounded-md ${curveType === 'speed' ? 'bg-white dark:bg-slate-900 text-blue-600 shadow-sm' : 'text-slate-500'}`}><Wind size={10}/> Vel</button>
@@ -393,7 +347,7 @@ export const AdvancedAnalytics = ({ activities, settings }) => {
                               </linearGradient>
                           </defs>
                           <CartesianGrid strokeDasharray="3 3" opacity={0.1} />
-                          <XAxis dataKey="name" tick={{fontSize: 10, fill: '#94a3b8', fontWeight: 'bold'}} />
+                          <XAxis dataKey="name" tick={{fontSize: 10, fill: '#94a3b8', fontWeight: 'bold'}} interval={0} minTickGap={10} />
                           <YAxis tick={{fontSize: 10, fill: '#94a3b8'}} domain={[curveType === 'speed' ? 0 : 'dataMin - 5', 'dataMax + 10']} />
                           <Tooltip formatter={(value) => [`${value} ${curveUnit}`, 'Récord']} contentStyle={{ borderRadius: '8px', border: 'none', fontSize: '11px', fontWeight: 'bold' }} />
                           <Area type="monotone" dataKey="value" stroke={curveColor} strokeWidth={3} fillOpacity={1} fill="url(#colorCurve)" activeDot={{ r: 6 }} />
