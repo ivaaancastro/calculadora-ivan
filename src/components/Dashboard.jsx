@@ -9,9 +9,7 @@ import { KpiGrid } from "./dashboard/KpiGrid";
 import { EvolutionChart } from "./dashboard/EvolutionChart";
 import { DistributionChart } from "./dashboard/DistributionChart";
 import { HistoryList } from "./dashboard/HistoryList";
-import { SportBreakdown } from "./dashboard/SportBreakdown";
-import { SeasonPlanner } from "./dashboard/SeasonPlanner";
-import AddActivityModal from "./modals/AddActivityModal";
+import { AdvancedAnalytics } from "./dashboard/AdvancedAnalytics";import AddActivityModal from "./modals/AddActivityModal";
 import { CalendarPage } from "./pages/CalendarPage";
 import { ActivityDetailPage } from "./pages/ActivityDetailPage";
 import { ProfilePage } from "./pages/ProfilePage";
@@ -38,6 +36,10 @@ const Dashboard = () => {
     isStravaConnected,
     handleStravaSync,
     deleteActivity,
+    fetchActivityStreams,
+    isDeepSyncing,
+    deepSyncProgress,
+    handleDeepSync,
   } = useActivities();
 
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -90,6 +92,8 @@ const Dashboard = () => {
         {activeActivity ? (
           <ActivityDetailPage
             activity={activeActivity}
+            settings={settings}
+            fetchStreams={fetchActivityStreams}
             onBack={() => setActiveActivity(null)}
             onDelete={deleteActivity}
           />
@@ -102,8 +106,12 @@ const Dashboard = () => {
             onUpdate={fetchProfile}
             onAnalyze={analyzeHistory}
             onBack={() => setActiveTab("overview")}
+            activities={activities}
+            isDeepSyncing={isDeepSyncing}
+            deepSyncProgress={deepSyncProgress}
+            onDeepSync={handleDeepSync}
           />
-        ) : 
+        ) :
         
         /* 3. VISTA VACÍA (SIN DATOS) */
         activities.length === 0 ? (
@@ -128,7 +136,6 @@ const Dashboard = () => {
                 { id: "overview", label: "Dashboard" },
                 { id: "calendar", label: "Calendario" },
                 { id: "history", label: "Actividades" },
-                { id: "planner", label: "Temporada" }, // <-- Vuelto a añadir
               ].map((tab) => (
                 <button
                   key={tab.id}
@@ -185,11 +192,12 @@ const Dashboard = () => {
                 </div>
               </div>
 
-              <div className="pt-6 mt-6 border-t border-slate-200 dark:border-slate-800 space-y-6">
-                <h3 className="text-sm font-bold text-slate-500 uppercase tracking-wider px-2">
-                  Análisis Fisiológico y de Carga
-                </h3>
-                <SportBreakdown activities={filteredData} />
+              {/* 3. SECCIÓN AVANZADA (Abajo) */}
+              <div className="pt-6 mt-6 border-t border-slate-200 dark:border-slate-800">
+                <AdvancedAnalytics 
+                    activities={filteredData} 
+                    settings={settings} 
+                />
               </div>
             </div>
 
@@ -219,11 +227,6 @@ const Dashboard = () => {
                   onSelectActivity={(act) => setActiveActivity(act)} /* Vinculado a la pág. completa también */
                 />
               </div>
-            </div>
-
-            {/* VISTA: TEMPORADA (PLANIFICADOR ROAD TO RACE) */}
-            <div className={activeTab === "planner" ? "block animate-in fade-in" : "hidden"}>
-                <SeasonPlanner currentMetrics={currentMetrics} />
             </div>
 
           </>

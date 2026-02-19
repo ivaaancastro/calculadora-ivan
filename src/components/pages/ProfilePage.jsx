@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { ArrowLeft, Save, User, Activity, Heart, Info, RefreshCw, Zap, Flame, Wind } from 'lucide-react';
+import { ArrowLeft, Save, User, Activity, Heart, Info, RefreshCw, Zap, Flame, Wind, Database } from 'lucide-react';
 import { supabase } from '../../supabase';
 
 // Nombres y colores para las 5 zonas fisiológicas
@@ -11,7 +11,7 @@ const ZONE_LABELS = [
     { name: 'VO2 Max', desc: 'Capacidad Anaeróbica', color: 'text-red-600 bg-red-100 dark:bg-red-900/30 dark:text-red-400' }
 ];
 
-export const ProfilePage = ({ currentSettings, onUpdate, onAnalyze, onBack }) => {
+export const ProfilePage = ({ currentSettings, onUpdate, onAnalyze, onBack, activities, isDeepSyncing, deepSyncProgress, onDeepSync }) => {
   const [formData, setFormData] = useState(currentSettings);
   const [loading, setLoading] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
@@ -21,6 +21,11 @@ export const ProfilePage = ({ currentSettings, onUpdate, onAnalyze, onBack }) =>
   }, [currentSettings]);
 
   if (!formData) return null;
+
+  // Cálculos para la caja de Sincronización Profunda
+  const stravaActs = activities?.filter(a => a.strava_id) || [];
+  const pureActs = stravaActs.filter(a => a.streams_data);
+  const syncPct = stravaActs.length > 0 ? Math.round((pureActs.length / stravaActs.length) * 100) : 0;
 
   const handleChange = (section, field, value) => {
     if (section) {
@@ -165,8 +170,54 @@ export const ProfilePage = ({ currentSettings, onUpdate, onAnalyze, onBack }) =>
                       </p>
                   </div>
               </div>
+              {/* TARJETA DE ESTADO DE LA BASE DE DATOS */}
+              <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm p-5 md:p-6">
+                  <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest flex items-center gap-2 mb-4">
+                      <Database size={14}/> Precisión de Datos
+                  </h3>
+                  
+                  <div className="space-y-4">
+                      <div>
+                          <div className="flex justify-between items-end mb-1">
+                              <span className="text-[10px] font-bold text-slate-500 uppercase">Historial Strava</span>
+                              <span className="text-sm font-black text-slate-700 dark:text-slate-300">
+                                  {pureActs.length} / {stravaActs.length} <span className="text-[10px] text-slate-400 font-medium">Puros</span>
+                              </span>
+                          </div>
+                          <div className="w-full h-2.5 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
+                              <div className="h-full bg-blue-500 transition-all duration-500" style={{ width: `${syncPct}%` }}></div>
+                          </div>
+                      </div>
+
+                      <p className="text-[10px] text-slate-500 dark:text-slate-400 leading-relaxed">
+                          Para que tus gráficas de forma (CTL) sean 100% exactas, la app necesita procesar tu telemetría segundo a segundo.
+                      </p>
+
+                      <button 
+                          onClick={onDeepSync}
+                          disabled={isDeepSyncing || syncPct === 100}
+                          className={`w-full py-2.5 rounded-xl font-bold text-xs flex items-center justify-center gap-2 transition-all ${
+                              syncPct === 100 
+                                  ? 'bg-emerald-50 text-emerald-600 dark:bg-emerald-900/20 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800/50' 
+                                  : 'bg-slate-900 text-white dark:bg-blue-600 hover:scale-105 shadow-md'
+                          }`}
+                      >
+                          {isDeepSyncing ? (
+                              <>
+                                  <Loader2 size={14} className="animate-spin"/> 
+                                  Procesando {deepSyncProgress?.current} de {deepSyncProgress?.total}...
+                              </>
+                          ) : syncPct === 100 ? (
+                              'Historial 100% Exacto'
+                          ) : (
+                              'Descargar Telemetría (Deep Sync)'
+                          )}
+                      </button>
+                  </div>
+              </div>
 
           </div>
+          
 
           {/* COLUMNA DERECHA: ZONAS POR DEPORTE (8 cols) */}
           <div className="lg:col-span-8 space-y-6">
