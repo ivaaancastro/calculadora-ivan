@@ -42,6 +42,30 @@ export const useActivities = () => {
     }
   };
 
+  // GUARDAR PERFIL EN BASE DE DATOS
+  const updateProfile = async (newSettings) => {
+      try {
+          const { error } = await supabase.from('profiles').update({
+              weight: newSettings.weight,
+              fc_rest: newSettings.fcReposo,
+              run_fc_max: newSettings.run.max,
+              run_lthr: newSettings.run.lthr,
+              run_zones: newSettings.run.zones,
+              bike_fc_max: newSettings.bike.max,
+              bike_lthr: newSettings.bike.lthr,
+              bike_zones: newSettings.bike.zones
+          }).eq('id', 1);
+
+          if (error) throw error;
+          
+          setSettings(newSettings);
+          alert("¡Perfil fisiológico guardado y actualizado con éxito!");
+      } catch (error) {
+          console.error("Error guardando perfil:", error);
+          alert("Hubo un error al intentar guardar en la base de datos.");
+      }
+  };
+
   const fetchActivities = async () => {
     const { data, error } = await supabase.from('activities').select('*');
     if (!error && data) {
@@ -315,6 +339,7 @@ export const useActivities = () => {
       deleteActivity, processFile, fetchActivities, fetchProfile, analyzeHistory, 
       fetchActivityStreams,
       isDeepSyncing, deepSyncProgress, handleDeepSync,
+      updateProfile,
       ...metrics 
   };
 };
