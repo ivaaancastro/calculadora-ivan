@@ -67,10 +67,25 @@ const MetricBox = ({ label, value, unit, colorClass = "border-slate-300 dark:bor
     </div>
 );
 
+// HELPER: Formateador de Ritmo a mm:ss
+const formatPace = (decimalMinutes) => {
+    if (!decimalMinutes || decimalMinutes >= 20) return '>20:00';
+    const mins = Math.floor(decimalMinutes);
+    const secs = Math.round((decimalMinutes - mins) * 60);
+    return `${mins}:${secs.toString().padStart(2, '0')}`;
+};
+
 export const ActivityDetailPage = ({ activity, settings, fetchStreams, onBack, onDelete }) => {
   const [streams, setStreams] = useState(null);
   const [loadingStreams, setLoadingStreams] = useState(true);
   const fetchedRef = useRef(null);
+
+  // DETECCIÓN DE DEPORTE (Para saber si dibujamos Vel. o Ritmo)
+  const isPaceBased = useMemo(() => {
+      if (!activity) return false;
+      const t = String(activity.type).toLowerCase();
+      return t.includes('carrera') || t.includes('run') || t.includes('correr') || t.includes('andar') || t.includes('walk') || t.includes('caminata');
+  }, [activity]);
 
   useEffect(() => {
       if (!activity) return;
@@ -83,16 +98,33 @@ export const ActivityDetailPage = ({ activity, settings, fetchStreams, onBack, o
       }
   }, [activity, fetchStreams]);
 
+  // PROCESADOR DE DATOS AVANZADO (Velocidad y Ritmo juntos)
   const chartData = useMemo(() => {
       if (!streams || !streams.time) return [];
       const timeData = streams.time.data;
       const step = Math.max(1, Math.floor(timeData.length / 150));
       const data = [];
+      
       for (let i = 0; i < timeData.length; i += step) {
+          const ms = streams.velocity_smooth ? streams.velocity_smooth.data[i] : null;
+          let speed = null;
+          let pace = null;
+          
+          if (ms !== null) {
+              speed = Number((ms * 3.6).toFixed(1)); // km/h
+              if (ms > 0.1) {
+                  pace = Number((16.666666666667 / ms).toFixed(2)); // min/km (decimal)
+                  if (pace > 20) pace = 20; // Tope máximo para que no rompa el gráfico al pararse en un semáforo
+              } else {
+                  pace = 20; 
+              }
+          }
+
           data.push({
               time: Math.floor(timeData[i] / 60), 
               hr: streams.heartrate ? streams.heartrate.data[i] : null,
-              speed: streams.velocity_smooth ? Number((streams.velocity_smooth.data[i] * 3.6).toFixed(1)) : null,
+              speed: speed,
+              pace: pace,
               alt: streams.altitude ? Math.round(streams.altitude.data[i]) : null,
           });
       }
@@ -103,15 +135,13 @@ export const ActivityDetailPage = ({ activity, settings, fetchStreams, onBack, o
   const maxSpeedMetric = useMemo(() => {
       if (streams?.velocity_smooth?.data?.length > 0) {
           const maxMs = Math.max(...streams.velocity_smooth.data);
-          const type = activity.type.toLowerCase();
-          if (type.includes('bici') || type.includes('ciclismo')) return { value: (maxMs * 3.6).toFixed(1), unit: 'km/h', label: 'Vel. Máxima' };
-          if (type.includes('carrera') || type.includes('correr') || type.includes('run')) {
-              if (maxMs <= 0) return null;
-              const minPerKm = 16.666666666667 / maxMs; const mins = Math.floor(minPerKm); const secs = Math.round((minPerKm - mins) * 60);
-              return { value: `${mins}:${secs.toString().padStart(2, '0')}`, unit: '/km', label: 'Ritmo Máx' };
-          }
+          if (!isPaceBased) return { value: (maxMs * 3.6).toFixed(1), unit: 'km/h', label: 'Vel. Máxima' };
+          
+          if (maxMs <= 0.1) return null;
+          const minPerKm = 16.666666666667 / maxMs; 
+          return { value: formatPace(minPerKm), unit: '/km', label: 'Ritmo Máx' };
       } return null;
-  }, [streams, activity]);
+  }, [streams, isPaceBased]);
 
   const exactZoneAnalysis = useMemo(() => {
       if (!streams || !streams.heartrate || !streams.time) return null;
@@ -132,26 +162,25 @@ export const ActivityDetailPage = ({ activity, settings, fetchStreams, onBack, o
 
   if (!activity) return null;
 
-  const formatTime = (mins) => { const h = Math.floor(mins / 60); const m = Math.floor(mins % 60); return h > 0 ? `${h}h ${m}m` : `${m}m`; };
+  const formatTimeStr = (mins) => { const h = Math.floor(mins / 60); const m = Math.floor(mins % 60); return h > 0 ? `${h}h ${m}m` : `${m}m`; };
   const dateStr = new Date(activity.date).toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'short', year: 'numeric' });
   
   const getSpeedOrPace = () => {
       const speedMs = activity.speed_avg || 0; if (speedMs === 0) return null;
-      const type = activity.type.toLowerCase();
-      if (type.includes('bici') || type.includes('ciclismo')) return { value: (speedMs * 3.6).toFixed(1), unit: 'km/h', label: 'Vel. Media' };
-      if (type.includes('carrera') || type.includes('run')) {
-          const minPerKm = 16.666666666667 / speedMs; const mins = Math.floor(minPerKm); const secs = Math.round((minPerKm - mins) * 60);
-          return { value: `${mins}:${secs.toString().padStart(2, '0')}`, unit: '/km', label: 'Ritmo Medio' };
-      } return null;
+      if (!isPaceBased) return { value: (speedMs * 3.6).toFixed(1), unit: 'km/h', label: 'Vel. Media' };
+      
+      const minPerKm = 16.666666666667 / speedMs; 
+      return { value: formatPace(minPerKm), unit: '/km', label: 'Ritmo Medio' };
   };
   const speedMetric = getSpeedOrPace();
 
   const getTheme = (type) => {
-    const t = type.toLowerCase();
+    const t = String(type).toLowerCase();
     if (t.includes('run') || t.includes('carrera')) return '#ea580c';
+    if (t.includes('andar') || t.includes('walk') || t.includes('caminata')) return '#10b981';
     if (t.includes('bike') || t.includes('bici')) return '#2563eb';
     if (t.includes('gym') || t.includes('fuerza')) return '#7c3aed';
-    return '#64748b';
+    return '#71717a';
   };
   const themeColor = getTheme(activity.type);
 
@@ -190,7 +219,7 @@ export const ActivityDetailPage = ({ activity, settings, fetchStreams, onBack, o
           </h1>
           
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-y-4 gap-x-6 mt-6 pt-4 border-t border-slate-200 dark:border-zinc-800">
-              <MetricBox label="Tiempo" value={formatTime(activity.duration)} />
+              <MetricBox label="Tiempo" value={formatTimeStr(activity.duration)} />
               <MetricBox label="Distancia" value={(activity.distance/1000).toFixed(2)} unit="km" />
               {activity.elevation_gain > 0 && <MetricBox label="Desnivel" value={activity.elevation_gain} unit="m" />}
               <MetricBox label="Carga" value={activity.tss} unit="TSS" colorClass="border-blue-500" />
@@ -247,21 +276,48 @@ export const ActivityDetailPage = ({ activity, settings, fetchStreams, onBack, o
                   ) : chartData.length > 0 ? (
                       <div className="flex-1 space-y-6">
                           
+                          {/* GRÁFICA VELOCIDAD / RITMO */}
                           <div className="h-[200px] w-full">
-                              <h4 className="text-[10px] font-bold text-slate-500 dark:text-zinc-400 uppercase mb-1 tracking-wider">Velocidad y Perfil</h4>
+                              <h4 className="text-[10px] font-bold text-slate-500 dark:text-zinc-400 uppercase mb-1 tracking-wider">
+                                  {isPaceBased ? 'Ritmo y Perfil' : 'Velocidad y Perfil'}
+                              </h4>
                               <ResponsiveContainer width="100%" height="100%">
                                   <AreaChart data={chartData} margin={{ top: 10, right: 0, left: -25, bottom: 0 }}>
                                       <CartesianGrid strokeDasharray="2 2" vertical={false} stroke="#3f3f46" opacity={0.3} />
                                       <XAxis dataKey="time" tick={{fontSize: 9, fill: '#71717a'}} tickFormatter={(val) => `${val}m`} minTickGap={30} axisLine={{stroke: '#3f3f46'}} tickLine={false}/>
-                                      <YAxis yAxisId="left" tick={{fontSize: 9, fill: '#2563eb'}} domain={[0, dataMax => Math.ceil(dataMax * 1.1)]} axisLine={false} tickLine={false}/>
+                                      
+                                      {/* MAGIA DE EJES Y RITMO */}
+                                      <YAxis 
+                                          yAxisId="left" 
+                                          tick={{fontSize: 9, fill: themeColor}} 
+                                          domain={isPaceBased ? ['dataMin - 0.5', 'dataMax + 1'] : [0, dataMax => Math.ceil(dataMax * 1.1)]} 
+                                          axisLine={false} 
+                                          tickLine={false}
+                                          reversed={isPaceBased} // Invertimos el eje Y para que ir "más rápido" (menos min/km) sea un pico hacia arriba
+                                          tickFormatter={isPaceBased ? formatPace : undefined}
+                                      />
+                                      
                                       <YAxis yAxisId="right" orientation="right" hide domain={['dataMin', dataMax => Math.ceil(dataMax * 1.15)]} />
-                                      <Tooltip contentStyle={tooltipStyle} labelFormatter={(val) => `Minuto ${val}`} />
-                                      <Area yAxisId="right" type="monotone" dataKey="alt" name="Altitud (m)" stroke="#71717a" fillOpacity={0.1} fill="#71717a" isAnimationActive={false} />
-                                      <Area yAxisId="left" type="monotone" dataKey="speed" name="Vel. (km/h)" stroke="#2563eb" strokeWidth={2} fillOpacity={0.1} fill="#2563eb" isAnimationActive={false} />
+                                      
+                                      <Tooltip 
+                                          contentStyle={tooltipStyle} 
+                                          labelFormatter={(val) => `Minuto ${val}`} 
+                                          formatter={(value, name) => {
+                                              if (name === 'pace') return [`${formatPace(value)} /km`, 'Ritmo'];
+                                              if (name === 'speed') return [`${value} km/h`, 'Velocidad'];
+                                              if (name === 'alt') return [`${value} m`, 'Altitud'];
+                                              return [value, name];
+                                          }}
+                                      />
+                                      <Area yAxisId="right" type="monotone" dataKey="alt" name="alt" stroke="#71717a" fillOpacity={0.1} fill="#71717a" isAnimationActive={false} />
+                                      
+                                      {/* Dibujamos la línea de Pace o de Speed según el deporte */}
+                                      <Area yAxisId="left" type="monotone" dataKey={isPaceBased ? "pace" : "speed"} name={isPaceBased ? "pace" : "speed"} stroke={themeColor} strokeWidth={2} fillOpacity={0.1} fill={themeColor} isAnimationActive={false} />
                                   </AreaChart>
                               </ResponsiveContainer>
                           </div>
 
+                          {/* GRÁFICA DE PULSO */}
                           <div className="h-[200px] w-full">
                               <h4 className="text-[10px] font-bold text-slate-500 dark:text-zinc-400 uppercase mb-1 tracking-wider">Pulsaciones</h4>
                               <ResponsiveContainer width="100%" height="100%">
@@ -269,8 +325,15 @@ export const ActivityDetailPage = ({ activity, settings, fetchStreams, onBack, o
                                       <CartesianGrid strokeDasharray="2 2" vertical={false} stroke="#3f3f46" opacity={0.3} />
                                       <XAxis dataKey="time" tick={{fontSize: 9, fill: '#71717a'}} tickFormatter={(val) => `${val}m`} minTickGap={30} axisLine={{stroke: '#3f3f46'}} tickLine={false}/>
                                       <YAxis tick={{fontSize: 9, fill: '#ef4444'}} domain={['dataMin - 5', dataMax => Math.ceil(dataMax * 1.1)]} axisLine={false} tickLine={false}/>
-                                      <Tooltip contentStyle={tooltipStyle} labelFormatter={(val) => `Minuto ${val}`} />
-                                      <Area type="monotone" dataKey="hr" name="Pulso (ppm)" stroke="#ef4444" strokeWidth={2} fillOpacity={0.1} fill="#ef4444" isAnimationActive={false} />
+                                      <Tooltip 
+                                          contentStyle={tooltipStyle} 
+                                          labelFormatter={(val) => `Minuto ${val}`} 
+                                          formatter={(value, name) => {
+                                              if (name === 'hr') return [`${value} ppm`, 'Pulso'];
+                                              return [value, name];
+                                          }}
+                                      />
+                                      <Area type="monotone" dataKey="hr" name="hr" stroke="#ef4444" strokeWidth={2} fillOpacity={0.1} fill="#ef4444" isAnimationActive={false} />
                                   </AreaChart>
                               </ResponsiveContainer>
                           </div>
