@@ -1,7 +1,8 @@
 import React, { useRef } from 'react';
-import { Upload, Trash2, UserCircle, Plus, RefreshCw, Activity, Settings, Moon, Sun } from 'lucide-react';
+import { Upload, Trash2, UserCircle, Plus, RefreshCw, Activity, Settings, Moon, Sun, LogOut } from 'lucide-react';
 import StravaConnect from '../common/StravaConnect';
 import { useTheme } from '../../hooks/useTheme'; 
+import { supabase } from '../../supabase'; // <-- Importamos Supabase para poder cerrar sesión
 
 export const Navbar = ({ 
   activities, uploading, handleClearDb, onFileUpload, 
@@ -9,6 +10,10 @@ export const Navbar = ({
 }) => {
   const fileInputRef = useRef(null);
   const { theme, toggleTheme } = useTheme(); 
+
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+  };
 
   return (
     <nav className="bg-white/90 dark:bg-zinc-950/90 backdrop-blur-md border-b border-slate-200 dark:border-zinc-800 px-4 sm:px-6 py-2.5 sticky top-0 z-40 transition-all duration-300">
@@ -65,10 +70,19 @@ export const Navbar = ({
                 <UserCircle size={18} className="text-slate-500 dark:text-zinc-400"/>
                 <span className="text-[10px] font-bold uppercase tracking-wider text-slate-600 dark:text-zinc-300">Perfil</span>
             </button>
+
+            {/* BOTÓN DE LOGOUT */}
+            <button onClick={handleLogout} className="flex items-center gap-1.5 px-2 py-1 hover:bg-red-50 dark:hover:bg-red-900/20 rounded transition-colors text-red-500 dark:text-red-400" title="Cerrar Sesión">
+                <LogOut size={16} />
+            </button>
           </div>
 
           <button onClick={onProfileClick} className="md:hidden p-1.5 text-slate-400 hover:text-slate-700 dark:text-zinc-400 dark:hover:text-zinc-100">
              <Settings size={20} />
+          </button>
+          
+          <button onClick={handleLogout} className="md:hidden p-1.5 text-red-400 hover:text-red-500">
+             <LogOut size={20} />
           </button>
         </div>
       </div>
