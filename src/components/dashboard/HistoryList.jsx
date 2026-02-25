@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { Activity, Clock, Map, Mountain, Zap, Heart, Search, Filter } from 'lucide-react';
 
 const getSportIcon = (type) => {
@@ -19,19 +19,28 @@ const formatTime = (minutes) => {
 };
 
 export const HistoryList = ({ activities, onSelectActivity }) => {
-  const [searchTerm, setSearchTerm] = useState('');
-  const [filterSport, setFilterSport] = useState('all');
+  
+  // MAGIA UX: Inicializar con la memoria de la sesión
+  const [searchTerm, setSearchTerm] = useState(() => sessionStorage.getItem('forma_history_search') || '');
+  const [filterSport, setFilterSport] = useState(() => sessionStorage.getItem('forma_history_filter') || 'all');
+
+  // Guardar en memoria de sesión cada vez que cambien
+  useEffect(() => {
+    sessionStorage.setItem('forma_history_search', searchTerm);
+  }, [searchTerm]);
+
+  useEffect(() => {
+    sessionStorage.setItem('forma_history_filter', filterSport);
+  }, [filterSport]);
 
   const processedData = useMemo(() => {
     let filtered = [...activities];
 
-    // Filtro por texto
     if (searchTerm) {
       const term = searchTerm.toLowerCase();
       filtered = filtered.filter(a => String(a.name).toLowerCase().includes(term) || String(a.type).toLowerCase().includes(term));
     }
 
-    // Filtro por deporte
     if (filterSport !== 'all') {
       filtered = filtered.filter(a => {
         const t = String(a.type).toLowerCase();
@@ -48,26 +57,26 @@ export const HistoryList = ({ activities, onSelectActivity }) => {
   if (!activities || activities.length === 0) return null;
 
   return (
-    <div className="bg-white dark:bg-zinc-900 rounded-lg border border-slate-200 dark:border-zinc-800 flex flex-col h-full overflow-hidden">
+    <div className="bg-white dark:bg-zinc-900 rounded-lg border border-slate-200 dark:border-zinc-800 flex flex-col h-full overflow-hidden shadow-sm">
         
         {/* BARRA DE HERRAMIENTAS SUPERIOR */}
         <div className="flex flex-col sm:flex-row justify-between items-center gap-4 p-4 border-b border-slate-200 dark:border-zinc-800 bg-slate-50/50 dark:bg-zinc-950/30">
             {/* Buscador */}
             <div className="relative w-full sm:w-64">
-                <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+                <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 dark:text-zinc-500" />
                 <input 
                     type="text" 
                     placeholder="Buscar actividad..." 
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
-                    className="w-full pl-9 pr-4 py-1.5 bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-700 rounded text-xs text-slate-800 dark:text-zinc-200 focus:outline-none focus:border-blue-500 transition-colors"
+                    className="w-full pl-9 pr-4 py-1.5 bg-white dark:bg-zinc-950 border border-slate-200 dark:border-zinc-700 rounded text-xs text-slate-800 dark:text-zinc-200 focus:outline-none focus:border-blue-500 transition-colors shadow-sm"
                 />
             </div>
 
             {/* Filtros Rápidos */}
             <div className="flex items-center gap-2">
-                <Filter size={14} className="text-slate-400" />
-                <div className="flex border border-slate-200 dark:border-zinc-700 rounded overflow-hidden">
+                <Filter size={14} className="text-slate-400 dark:text-zinc-500" />
+                <div className="flex border border-slate-200 dark:border-zinc-700 rounded overflow-hidden shadow-sm">
                     {['all', 'bici', 'run', 'fuerza'].map(type => (
                         <button 
                             key={type}
@@ -81,7 +90,7 @@ export const HistoryList = ({ activities, onSelectActivity }) => {
             </div>
         </div>
 
-        {/* TABLA DE DATOS (DATA GRID) */}
+        {/* TABLA DE DATOS */}
         <div className="flex-1 overflow-auto custom-scrollbar">
             <table className="w-full text-left border-collapse">
                 <thead className="sticky top-0 z-10 bg-slate-50 dark:bg-zinc-900/95 backdrop-blur shadow-sm">
@@ -103,7 +112,7 @@ export const HistoryList = ({ activities, onSelectActivity }) => {
                             onClick={() => onSelectActivity(act)}
                             className="hover:bg-slate-50 dark:hover:bg-zinc-800/50 transition-colors group cursor-pointer"
                         >
-                            <td className="px-4 py-3 whitespace-nowrap text-slate-500 dark:text-zinc-400">
+                            <td className="px-4 py-3 whitespace-nowrap text-slate-500 dark:text-zinc-400 font-mono">
                                 {new Date(act.date).toLocaleDateString('es-ES', { day: '2-digit', month: 'short' })}
                             </td>
                             <td className="px-4 py-3 whitespace-nowrap">
@@ -133,7 +142,7 @@ export const HistoryList = ({ activities, onSelectActivity }) => {
                         </tr>
                     )) : (
                         <tr>
-                            <td colSpan="8" className="px-4 py-8 text-center text-slate-400 dark:text-zinc-500 text-xs font-bold uppercase tracking-widest">
+                            <td colSpan="8" className="px-4 py-8 text-center text-slate-400 dark:text-zinc-600 text-xs font-bold uppercase tracking-widest">
                                 No se encontraron actividades
                             </td>
                         </tr>
