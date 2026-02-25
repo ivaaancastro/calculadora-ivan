@@ -6,7 +6,6 @@ import {
 
 const WEEKDAYS = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'];
 
-// Adaptados los colores a la paleta neutra (zinc/dark) de alto contraste
 const getSportColor = (type) => {
   const t = String(type).toLowerCase();
   if (t.includes('run') || t.includes('carrera') || t.includes('correr')) return 'bg-orange-100 text-orange-700 border-orange-200 dark:bg-orange-900/20 dark:text-orange-400 dark:border-orange-900/50 hover:bg-orange-200 dark:hover:bg-orange-900/40';
@@ -25,7 +24,21 @@ const getSportIcon = (type) => {
 };
 
 export const CalendarPage = ({ activities, onDelete, onSelectActivity }) => {
-  const [currentDate, setCurrentDate] = useState(new Date());
+  
+  // MAGIA UX: Inicializamos el calendario recordando el último mes visitado
+  const [currentDate, setCurrentDate] = useState(() => {
+    const savedDate = sessionStorage.getItem('forma_calendar_date');
+    if (savedDate) {
+        const d = new Date(savedDate);
+        if (!isNaN(d.getTime())) return d; // Comprobamos que sea válida
+    }
+    return new Date();
+  });
+
+  // MAGIA UX: Guardamos la fecha cada vez que cambias de mes
+  useEffect(() => {
+    sessionStorage.setItem('forma_calendar_date', currentDate.toISOString());
+  }, [currentDate]);
   
   const [weeklyTargets, setWeeklyTargets] = useState(() => {
     const saved = localStorage.getItem('planner_targets');
@@ -97,7 +110,7 @@ export const CalendarPage = ({ activities, onDelete, onSelectActivity }) => {
 
   return (
     <>
-      <div className="flex flex-col bg-white dark:bg-zinc-900 rounded-lg border border-slate-200 dark:border-zinc-800 overflow-visible mb-6">
+      <div className="flex flex-col bg-white dark:bg-zinc-900 rounded-lg border border-slate-200 dark:border-zinc-800 overflow-visible mb-6 shadow-sm">
         
         {/* HEADER */}
         <div className="flex items-center justify-between p-3 sm:p-4 border-b border-slate-200 dark:border-zinc-800 bg-slate-50 dark:bg-zinc-950/50">
@@ -106,7 +119,7 @@ export const CalendarPage = ({ activities, onDelete, onSelectActivity }) => {
                   <CalIcon className="text-blue-600 dark:text-blue-500 w-4 h-4 sm:w-5 sm:h-5" />
                   {new Date(year, month).toLocaleDateString('es-ES', { month: 'long', year: 'numeric' })}
               </h2>
-              <button onClick={goToday} className="text-[10px] sm:text-xs font-bold uppercase tracking-wider px-2 sm:px-3 py-1 bg-white dark:bg-zinc-800 border border-slate-300 dark:border-zinc-700 text-slate-600 dark:text-zinc-300 rounded hover:bg-slate-50 dark:hover:bg-zinc-700 transition">Hoy</button>
+              <button onClick={goToday} className="text-[10px] sm:text-xs font-bold uppercase tracking-wider px-2 sm:px-3 py-1 bg-white dark:bg-zinc-800 border border-slate-300 dark:border-zinc-700 text-slate-600 dark:text-zinc-300 rounded hover:bg-slate-50 dark:hover:bg-zinc-700 transition-colors">Hoy</button>
           </div>
           <div className="flex items-center border border-slate-200 dark:border-zinc-700 rounded overflow-hidden">
               <button onClick={prevMonth} className="p-1.5 sm:p-2 bg-transparent hover:bg-slate-100 dark:hover:bg-zinc-800 text-slate-500 dark:text-zinc-400 transition-colors"><ChevronLeft size={18}/></button>
