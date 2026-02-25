@@ -1,10 +1,9 @@
 import React, { useMemo, useEffect, useState, useRef } from 'react';
-import { ArrowLeft, ExternalLink, Trash2, Calendar, Activity, Layers, Loader2, Heart, Clock, MapPin, Zap, Target, Info, Navigation2 } from 'lucide-react';
+import { ArrowLeft, ExternalLink, Trash2, Calendar, Activity, Layers, Loader2, Heart, Clock, MapPin, Zap, Target, Info } from 'lucide-react';
 import { MapContainer, TileLayer, Polyline, useMap, CircleMarker } from 'react-leaflet';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer } from 'recharts';
 import 'leaflet/dist/leaflet.css';
 
-// DECODIFICADOR DE LA LÍNEA BÁSICA (Fallback)
 const decodePolyline = (str, precision = 5) => {
     let index = 0, lat = 0, lng = 0, coordinates = [], shift = 0, result = 0, byte = null, latitude_change, longitude_change, factor = Math.pow(10, precision);
     while (index < str.length) {
@@ -20,18 +19,15 @@ const decodePolyline = (str, precision = 5) => {
     return coordinates;
 };
 
-// AUTO-CENTRADO DEL MAPA
 const MapBounds = ({ bounds }) => {
     const map = useMap();
-    useEffect(() => { if (bounds && bounds.length > 0) map.fitBounds(bounds, { padding: [40, 40] }); }, [map, bounds]);
+    useEffect(() => { if (bounds && bounds.length > 0) map.fitBounds(bounds, { padding: [30, 30] }); }, [map, bounds]);
     return null;
 };
 
-// MAPA INTERACTIVO SUPER-PRO
 const InteractiveMap = ({ polyline, highResCoords, color, currentPosition }) => {
     const [mapType, setMapType] = useState('dark');
 
-    // Usar Alta Resolución si está disponible (Deep Sync), si no, usar la básica
     const coords = useMemo(() => {
         if (highResCoords && highResCoords.length > 0) return highResCoords;
         if (polyline) return decodePolyline(polyline);
@@ -53,7 +49,6 @@ const InteractiveMap = ({ polyline, highResCoords, color, currentPosition }) => 
 
     return (
         <div className="w-full h-full rounded-lg overflow-hidden relative border border-slate-200 dark:border-zinc-800 z-0 bg-slate-100 dark:bg-zinc-900 shadow-sm flex flex-col">
-            {/* BOTONERA DE ESTILOS DEL MAPA */}
             <div className="absolute top-3 right-3 z-[400] flex border border-slate-200 dark:border-zinc-700/80 rounded bg-white/90 dark:bg-zinc-900/90 backdrop-blur-sm shadow-sm overflow-hidden p-0.5">
                 {['light', 'dark', 'satellite'].map((type) => (
                     <button 
@@ -67,24 +62,13 @@ const InteractiveMap = ({ polyline, highResCoords, color, currentPosition }) => 
             
             <MapContainer center={coords[0]} zoom={13} scrollWheelZoom={true} className="w-full h-full z-0" zoomControl={false}>
                 <TileLayer key={mapType} url={mapSources[mapType].url} attribution={mapSources[mapType].attribution} />
-                
-                {/* SOMBRA / CONTORNO DE LA LÍNEA PARA HACERLA DESTACHAR */}
                 <Polyline positions={coords} pathOptions={{ color: mapType === 'light' ? "#ffffff" : "#000000", weight: 6, opacity: 0.3 }} />
-                
-                {/* LÍNEA PRINCIPAL */}
                 <Polyline positions={coords} pathOptions={{ color: color || "#2563eb", weight: 3, opacity: 1 }} />
-                
-                {/* MARCADOR DE INICIO (Verde) */}
                 <CircleMarker center={coords[0]} radius={5} pathOptions={{ color: '#ffffff', fillColor: '#10b981', fillOpacity: 1, weight: 2 }} />
-                
-                {/* MARCADOR DE FIN (Negro/Blanco) */}
                 <CircleMarker center={coords[coords.length - 1]} radius={5} pathOptions={{ color: '#ffffff', fillColor: '#18181b', fillOpacity: 1, weight: 2 }} />
-                
-                {/* PUNTO DE SEGUIMIENTO EN TIEMPO REAL AL PASAR EL RATÓN */}
                 {currentPosition && (
                     <CircleMarker center={currentPosition} radius={7} pathOptions={{ color: '#ffffff', fillColor: color || '#2563eb', fillOpacity: 1, weight: 3 }} />
                 )}
-                
                 <MapBounds bounds={coords} />
             </MapContainer>
         </div>
@@ -141,6 +125,23 @@ export const ActivityDetailPage = ({ activity, settings, fetchStreams, onBack, o
       }
   }, [activity, fetchStreams]);
 
+  const exactZoneAnalysis = useMemo(() => {
+      if (!streams || !streams.heartrate || !streams.time) return null;
+      const type = activity.type.toLowerCase();
+      const isBike = type.includes('bici') || type.includes('ciclismo');
+      const userZones = isBike ? settings.bike.zones : settings.run.zones;
+      const hrData = streams.heartrate.data; const timeData = streams.time.data;
+      let zoneSeconds = [0, 0, 0, 0, 0];
+      
+      for (let i = 1; i < hrData.length; i++) {
+          const hr = hrData[i]; const dt = timeData[i] - timeData[i-1]; 
+          const zIndex = userZones.findIndex(z => hr >= z.min && hr <= z.max);
+          if (zIndex !== -1) zoneSeconds[zIndex] += dt; else if (hr > userZones[4].max) zoneSeconds[4] += dt; 
+      }
+      const totalSeconds = zoneSeconds.reduce((a, b) => a + b, 0);
+      return zoneSeconds.map((sec, i) => ({ zone: i + 1, minutes: sec / 60, pct: totalSeconds > 0 ? (sec / totalSeconds) * 100 : 0 }));
+  }, [streams, activity, settings]);
+
   const proMetrics = useMemo(() => {
       if (!streams || !streams.time) return { cadenceAvg: 0, maxSpeedObj: null, decoupling: null };
       
@@ -179,10 +180,69 @@ export const ActivityDetailPage = ({ activity, settings, fetchStreams, onBack, o
       return { cadenceAvg, maxSpeedObj, decoupling };
   }, [streams, isPaceBased]);
 
+  // 🔥 TRAINING EFFECT ALGORITHM (Estilo Garmin) 🔥
+  const trainingEffect = useMemo(() => {
+      if (!exactZoneAnalysis) return null;
+
+      const z1m = exactZoneAnalysis[0].minutes;
+      const z2m = exactZoneAnalysis[1].minutes;
+      const z3m = exactZoneAnalysis[2].minutes;
+      const z4m = exactZoneAnalysis[3].minutes;
+      const z5m = exactZoneAnalysis[4].minutes;
+
+      // Puntos base Aeróbicos (Z2 y Z3 dan base, Z4 da umbral)
+      let aerobicPoints = (z1m * 0.03) + (z2m * 0.08) + (z3m * 0.15) + (z4m * 0.25) + (z5m * 0.10);
+      let aerobicScore = Math.min(5.0, aerobicPoints / 1.8).toFixed(1); // Normalizado a max 5.0
+
+      // Puntos base Anaeróbicos (Z5 puro y algo de Z4)
+      let anaerobicPoints = (z4m * 0.05) + (z5m * 0.35);
+      let anaerobicScore = Math.min(5.0, anaerobicPoints / 1.2).toFixed(1); // Normalizado a max 5.0
+
+      let primaryBenefit = "Recuperación";
+      let benefitColor = "text-slate-500 dark:text-zinc-400";
+
+      if (parseFloat(aerobicScore) < 1.5 && parseFloat(anaerobicScore) < 1.0) {
+          primaryBenefit = "Recuperación Activa";
+          benefitColor = "text-slate-500 dark:text-zinc-400";
+      } else if (parseFloat(anaerobicScore) >= 3.0 && parseFloat(anaerobicScore) > parseFloat(aerobicScore) - 1.0) {
+          primaryBenefit = "Capacidad Anaeróbica";
+          benefitColor = "text-purple-600 dark:text-purple-400";
+      } else if (z5m > 6) {
+          primaryBenefit = "VO2 Max";
+          benefitColor = "text-rose-600 dark:text-rose-500";
+      } else if (z4m > 15) {
+          primaryBenefit = "Umbral de Lactato";
+          benefitColor = "text-amber-600 dark:text-amber-500";
+      } else if (z3m > 20) {
+          primaryBenefit = "Tempo";
+          benefitColor = "text-emerald-600 dark:text-emerald-500";
+      } else {
+          primaryBenefit = "Base Aeróbica";
+          benefitColor = "text-blue-600 dark:text-blue-400";
+      }
+
+      const getLabel = (score) => {
+          if (score < 1.0) return "Ninguno";
+          if (score < 2.0) return "Menor";
+          if (score < 3.0) return "Mantenimiento";
+          if (score < 4.0) return "Mejora";
+          if (score < 5.0) return "Mejora alta";
+          return "Sobreesfuerzo";
+      };
+
+      return {
+          aerobic: parseFloat(aerobicScore),
+          anaerobic: parseFloat(anaerobicScore),
+          aerobicLabel: getLabel(parseFloat(aerobicScore)),
+          anaerobicLabel: getLabel(parseFloat(anaerobicScore)),
+          primaryBenefit,
+          benefitColor
+      };
+  }, [exactZoneAnalysis]);
+
   const chartData = useMemo(() => {
       if (!streams || !streams.time) return [];
-      const timeData = streams.time.data;
-      const latlngStream = streams.latlng?.data;
+      const timeData = streams.time.data; const latlngStream = streams.latlng?.data;
       const step = Math.max(1, Math.floor(timeData.length / 150));
       const data = [];
       
@@ -195,11 +255,8 @@ export const ActivityDetailPage = ({ activity, settings, fetchStreams, onBack, o
               else { pace = 20; }
           }
           data.push({
-              time: Math.floor(timeData[i] / 60), 
-              hr: streams.heartrate ? streams.heartrate.data[i] : null,
-              speed: speed,
-              pace: pace,
-              alt: streams.altitude ? Math.round(streams.altitude.data[i]) : null,
+              time: Math.floor(timeData[i] / 60), hr: streams.heartrate ? streams.heartrate.data[i] : null,
+              speed: speed, pace: pace, alt: streams.altitude ? Math.round(streams.altitude.data[i]) : null,
               latlng: latlngStream ? latlngStream[i] : null
           });
       }
@@ -207,23 +264,6 @@ export const ActivityDetailPage = ({ activity, settings, fetchStreams, onBack, o
   }, [streams]);
 
   const maxHr = useMemo(() => streams?.heartrate?.data?.length > 0 ? Math.max(...streams.heartrate.data) : null, [streams]);
-
-  const exactZoneAnalysis = useMemo(() => {
-      if (!streams || !streams.heartrate || !streams.time) return null;
-      const type = activity.type.toLowerCase();
-      const isBike = type.includes('bici') || type.includes('ciclismo');
-      const userZones = isBike ? settings.bike.zones : settings.run.zones;
-      const hrData = streams.heartrate.data; const timeData = streams.time.data;
-      let zoneSeconds = [0, 0, 0, 0, 0];
-      
-      for (let i = 1; i < hrData.length; i++) {
-          const hr = hrData[i]; const dt = timeData[i] - timeData[i-1]; 
-          const zIndex = userZones.findIndex(z => hr >= z.min && hr <= z.max);
-          if (zIndex !== -1) zoneSeconds[zIndex] += dt; else if (hr > userZones[4].max) zoneSeconds[4] += dt; 
-      }
-      const totalSeconds = zoneSeconds.reduce((a, b) => a + b, 0);
-      return zoneSeconds.map((sec, i) => ({ zone: i + 1, minutes: sec / 60, pct: totalSeconds > 0 ? (sec / totalSeconds) * 100 : 0 }));
-  }, [streams, activity, settings]);
 
   if (!activity) return null;
 
@@ -252,11 +292,8 @@ export const ActivityDetailPage = ({ activity, settings, fetchStreams, onBack, o
   const ZONE_COLORS = ['#94a3b8', '#3b82f6', '#10b981', '#eab308', '#ef4444'];
   const tooltipStyle = { backgroundColor: '#18181b', border: '1px solid #27272a', borderRadius: '4px', color: '#f4f4f5', fontSize: '11px', fontWeight: '500', padding: '8px 12px' };
 
-  // Manejador del ratón, con seguridad por si latlng no existe
   const handleMouseMove = (state) => {
-    if (state && state.activePayload && state.activePayload.length > 0) {
-        setActivePayload(state.activePayload[0].payload);
-    }
+    if (state && state.activePayload && state.activePayload.length > 0) setActivePayload(state.activePayload[0].payload);
   };
 
   return (
@@ -322,7 +359,7 @@ export const ActivityDetailPage = ({ activity, settings, fetchStreams, onBack, o
                               value={`${proMetrics.decoupling > 0 ? '+' : ''}${proMetrics.decoupling}`} unit="%" 
                               colorClass={proMetrics.decoupling <= 5 ? "border-emerald-500" : "border-rose-500"} 
                               valueColor={proMetrics.decoupling <= 5 ? "text-emerald-600 dark:text-emerald-500" : "text-rose-600 dark:text-rose-500"}
-                              tooltip="Compara la eficiencia (Velocidad / Pulso) de la 1ª mitad del entreno con la 2ª. Un valor menor al 5% indica una gran resistencia base (tu pulso no sufre deriva térmica)."
+                              tooltip="Compara la eficiencia (Velocidad / Pulso) de la 1ª mitad del entreno con la 2ª. Un valor menor al 5% indica una gran resistencia base."
                           />
                       )}
                   </div>
@@ -330,22 +367,12 @@ export const ActivityDetailPage = ({ activity, settings, fetchStreams, onBack, o
           </div>
       </div>
 
-      {/* NUEVO LAYOUT SIDE-BY-SIDE (Scroll Independiente) */}
-      <div className="flex flex-col lg:flex-row gap-4 h-auto lg:h-[calc(100vh-200px)] lg:min-h-[700px]">
-          
-          {/* COLUMNA IZQUIERDA: MAPA FIJO Y ZONAS */}
-          <div className="w-full lg:w-5/12 flex flex-col gap-4 h-full">
-              {/* Mapa Expansible */}
+      {/* MAPA Y GRÁFICAS */}
+      <div className="flex flex-col lg:flex-row gap-4 h-auto lg:h-[calc(100vh-200px)] lg:min-h-[700px] mb-4">
+          <div className="w-full lg:w-5/12 flex flex-col gap-4 h-full sticky top-[80px] z-10">
               <div className="flex-1 min-h-[350px] lg:min-h-0 relative">
-                  <InteractiveMap 
-                      polyline={activity.map_polyline} 
-                      highResCoords={streams?.latlng?.data} // Usamos Alta Resolución
-                      color={themeColor} 
-                      currentPosition={activePayload?.latlng} 
-                  />
+                  <InteractiveMap polyline={activity.map_polyline} highResCoords={streams?.latlng?.data} color={themeColor} currentPosition={activePayload?.latlng} />
               </div>
-
-              {/* Zonas Cardíacas (Debajo del mapa) */}
               <div className="shrink-0 bg-white dark:bg-zinc-900 rounded-lg border border-slate-200 dark:border-zinc-800 p-4 shadow-sm">
                   <div className="flex justify-between items-center mb-3 border-b border-slate-200 dark:border-zinc-800 pb-2">
                       <h3 className="text-[11px] font-bold text-slate-700 dark:text-zinc-300 uppercase tracking-widest">Zonas Cardíacas</h3>
@@ -374,7 +401,6 @@ export const ActivityDetailPage = ({ activity, settings, fetchStreams, onBack, o
               </div>
           </div>
 
-          {/* COLUMNA DERECHA: GRÁFICAS CON SCROLL INTERNO */}
           <div className="w-full lg:w-7/12 flex flex-col gap-4 overflow-y-auto custom-scrollbar h-full pr-1">
               <div className="bg-white dark:bg-zinc-900 rounded-lg border border-slate-200 dark:border-zinc-800 p-4 shadow-sm flex flex-col flex-1 min-h-[500px]">
                   <div className="flex justify-between items-center mb-4 border-b border-slate-200 dark:border-zinc-800 pb-2 shrink-0">
@@ -385,7 +411,6 @@ export const ActivityDetailPage = ({ activity, settings, fetchStreams, onBack, o
                       <div className="flex-1 flex items-center justify-center"><Loader2 size={24} className="animate-spin text-slate-500 dark:text-zinc-600"/></div>
                   ) : chartData.length > 0 ? (
                       <div className="flex-1 space-y-6">
-                          
                           <div className="h-[220px] w-full">
                               <h4 className="text-[10px] font-bold text-slate-500 dark:text-zinc-400 uppercase mb-1 tracking-wider">
                                   {isPaceBased ? 'Ritmo y Altimetría' : 'Velocidad y Altimetría'}
@@ -431,6 +456,50 @@ export const ActivityDetailPage = ({ activity, settings, fetchStreams, onBack, o
               </div>
           </div>
       </div>
+
+      {/* 🔥 TRAINING EFFECT (GARMIN STYLE) 🔥 */}
+      {trainingEffect && !loadingStreams && (
+          <div className="bg-white dark:bg-zinc-900 rounded-lg p-5 border border-slate-200 dark:border-zinc-800 shadow-sm mt-6">
+              <h3 className="text-[11px] font-bold text-slate-700 dark:text-zinc-300 uppercase tracking-widest mb-4 flex items-center gap-1.5 border-b border-slate-200 dark:border-zinc-800 pb-2">
+                  <Target size={14} className="text-slate-400 dark:text-zinc-500" strokeWidth={2.5}/> Beneficio del Entrenamiento (Training Effect)
+              </h3>
+              
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-center">
+                  {/* Etiqueta Principal */}
+                  <div className="flex flex-col items-center justify-center p-4 bg-slate-50 dark:bg-zinc-950 rounded-lg border border-slate-100 dark:border-zinc-800/50">
+                      <span className="text-[10px] font-bold text-slate-500 dark:text-zinc-400 uppercase tracking-widest mb-1">Impacto Principal</span>
+                      <span className={`text-lg font-black uppercase tracking-tight ${trainingEffect.benefitColor}`}>
+                          {trainingEffect.primaryBenefit}
+                      </span>
+                  </div>
+
+                  {/* Barra Aeróbica */}
+                  <div className="flex flex-col gap-2">
+                      <div className="flex justify-between items-end">
+                          <span className="text-[11px] font-bold text-slate-700 dark:text-zinc-300 uppercase tracking-wider">Carga Aeróbica</span>
+                          <span className="text-base font-black text-blue-500">{trainingEffect.aerobic.toFixed(1)}</span>
+                      </div>
+                      <div className="w-full h-2.5 bg-slate-200 dark:bg-zinc-800 rounded-full overflow-hidden">
+                          <div className="h-full bg-blue-500 transition-all duration-1000" style={{ width: `${(trainingEffect.aerobic / 5) * 100}%` }}></div>
+                      </div>
+                      <span className="text-[9px] font-bold text-slate-500 dark:text-zinc-500 uppercase text-right tracking-widest">{trainingEffect.aerobicLabel}</span>
+                  </div>
+
+                  {/* Barra Anaeróbica */}
+                  <div className="flex flex-col gap-2">
+                      <div className="flex justify-between items-end">
+                          <span className="text-[11px] font-bold text-slate-700 dark:text-zinc-300 uppercase tracking-wider">Carga Anaeróbica</span>
+                          <span className="text-base font-black text-purple-500">{trainingEffect.anaerobic.toFixed(1)}</span>
+                      </div>
+                      <div className="w-full h-2.5 bg-slate-200 dark:bg-zinc-800 rounded-full overflow-hidden">
+                          <div className="h-full bg-purple-500 transition-all duration-1000" style={{ width: `${(trainingEffect.anaerobic / 5) * 100}%` }}></div>
+                      </div>
+                      <span className="text-[9px] font-bold text-slate-500 dark:text-zinc-500 uppercase text-right tracking-widest">{trainingEffect.anaerobicLabel}</span>
+                  </div>
+              </div>
+          </div>
+      )}
+
     </div>
   );
 };
