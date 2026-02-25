@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
-import { supabase } from '../supabase';
+import { supabase } from '../supabase'; // Asegúrate de que la ruta es correcta
 
 export const useActivities = () => {
   const [activities, setActivities] = useState([]);
@@ -27,8 +27,25 @@ export const useActivities = () => {
     Promise.all([fetchProfile(), fetchActivities()]).then(() => setLoading(false));
   }, []);
 
+  // Función de ayuda para obtener el ID del usuario actual
+  const getCurrentUserId = async () => {
+    const { data: { session } } = await supabase.auth.getSession();
+    return session?.user?.id || null;
+  };
+
   const fetchProfile = async () => {
-    const { data, error } = await supabase.from('profiles').select('*').eq('id', 1).single();
+    const userId = await getCurrentUserId();
+    if (!userId) return;
+
+    // Buscamos el perfil del usuario activo
+    const { data, error } = await supabase.from('profiles').select('*').eq('user_id', userId).single();
+    
+    // Si no existe (es un usuario nuevo), creamos un perfil en blanco
+    if (error && error.code === 'PGRST116') {
+        await supabase.from('profiles').insert([{ user_id: userId }]);
+        return;
+    }
+
     if (!error && data) {
       if (data.strava_access_token) setIsStravaConnected(true);
       setSettings(prev => ({
@@ -42,10 +59,14 @@ export const useActivities = () => {
     }
   };
 
-  // GUARDAR PERFIL EN BASE DE DATOS
+  // GUARDAR PERFIL EN BASE DE DATOS (UPSERT MULTI-USUARIO)
   const updateProfile = async (newSettings) => {
       try {
-          const { error } = await supabase.from('profiles').update({
+          const userId = await getCurrentUserId();
+          if (!userId) throw new Error("No hay sesión activa");
+
+          const { error } = await supabase.from('profiles').upsert({
+              user_id: userId, // Esencial para el Upsert
               weight: newSettings.weight,
               fc_rest: newSettings.fcReposo,
               run_fc_max: newSettings.run.max,
@@ -54,7 +75,7 @@ export const useActivities = () => {
               bike_fc_max: newSettings.bike.max,
               bike_lthr: newSettings.bike.lthr,
               bike_zones: newSettings.bike.zones
-          }).eq('id', 1);
+          }, { onConflict: 'user_id' }); // Sobrescribe si ya existe ese user_id
 
           if (error) throw error;
           
@@ -67,6 +88,7 @@ export const useActivities = () => {
   };
 
   const fetchActivities = async () => {
+    // Al tener RLS activado, un simple Select('*') ya solo devuelve las del usuario
     const { data, error } = await supabase.from('activities').select('*');
     if (!error && data) {
         const sorted = data.map(a => ({...a, dateObj: new Date(a.date)})).sort((a, b) => a.dateObj - b.dateObj);
@@ -87,12 +109,14 @@ export const useActivities = () => {
   };
 
   const handleDisconnectStrava = async () => {
-      await supabase.from('profiles').update({ strava_access_token: null, strava_refresh_token: null, strava_expires_at: null }).eq('id', 1);
+      const userId = await getCurrentUserId();
+      await supabase.from('profiles').update({ strava_access_token: null, strava_refresh_token: null, strava_expires_at: null }).eq('user_id', userId);
       setIsStravaConnected(false);
   };
 
   const getValidStravaToken = async () => {
-      const { data: profile } = await supabase.from('profiles').select('*').eq('id', 1).single();
+      const userId = await getCurrentUserId();
+      const { data: profile } = await supabase.from('profiles').select('*').eq('user_id', userId).single();
       if (!profile?.strava_access_token) throw new Error("No conectado a Strava.");
 
       let accessToken = profile.strava_access_token;
@@ -101,7 +125,7 @@ export const useActivities = () => {
       if (profile.strava_expires_at && nowInSeconds >= (profile.strava_expires_at - 300)) {
           try {
               const newTokens = await refreshStravaToken(profile.strava_refresh_token);
-              await supabase.from('profiles').update({ strava_access_token: newTokens.access_token, strava_refresh_token: newTokens.refresh_token, strava_expires_at: newTokens.expires_at }).eq('id', 1);
+              await supabase.from('profiles').update({ strava_access_token: newTokens.access_token, strava_refresh_token: newTokens.refresh_token, strava_expires_at: newTokens.expires_at }).eq('user_id', userId);
               accessToken = newTokens.access_token;
           } catch (e) { await handleDisconnectStrava(); throw new Error("Sesión caducada."); }
       }
@@ -129,6 +153,9 @@ export const useActivities = () => {
 
   const handleStravaSync = async () => {
     try {
+        const userId = await getCurrentUserId();
+        if (!userId) throw new Error("Sesión no válida");
+
         setUploading(true); setUploadStatus("Sincronizando...");
         const accessToken = await getValidStravaToken();
 
@@ -147,6 +174,7 @@ export const useActivities = () => {
             if (act.type === 'Walk') typeES = 'Caminata';
             if (act.type === 'Swim') typeES = 'Natación';
             return {
+                user_id: userId, // <-- INYECTAMOS EL DUEÑO
                 date: act.start_date_local, type: typeES, name: act.name || 'Entreno sin título', 
                 description: act.description || '', duration: Math.round(act.moving_time / 60),
                 hr_avg: Number(act.average_heartrate) || 0, calories: act.kilojoules || act.calories || 0,
@@ -168,7 +196,6 @@ export const useActivities = () => {
     finally { setUploading(false); setTimeout(() => setUploadStatus(null), 3000); }
   };
 
-  // --- ROBOT DE SINCRONIZACIÓN PROFUNDA (DEEP SYNC) ---
   const handleDeepSync = async () => {
       const activitiesToSync = activities.filter(a => a.strava_id && !a.streams_data);
       
@@ -186,7 +213,6 @@ export const useActivities = () => {
           for (const act of activitiesToSync) {
               setDeepSyncProgress({ current: count + 1, total: activitiesToSync.length });
               await fetchActivityStreams(act.id, act.strava_id);
-              // Esperamos 1.5 segundos entre cada petición (Seguridad anti-baneo de Strava)
               await new Promise(resolve => setTimeout(resolve, 1500));
               count++;
           }
@@ -200,22 +226,21 @@ export const useActivities = () => {
       }
   };
 
-  const processFile = async (file) => { /* ... IGUAL ... */ };
-  const handleClearDb = async () => { /* ... IGUAL ... */ };
-  const deleteActivity = async (id) => { /* ... IGUAL ... */ };
-  const analyzeHistory = (sport) => { /* ... IGUAL ... */ };
+  const processFile = async (file) => { /* Tu lógica manual aquí si aplica */ };
+  const handleClearDb = async () => { /* ... */ };
+  const deleteActivity = async (id) => { /* ... */ };
+  const analyzeHistory = (sport) => { /* ... */ };
 
-  // --- EL NUEVO NÚCLEO MATEMÁTICO EXACTO ---
+  // --- EL NÚCLEO MATEMÁTICO EXACTO ---
   const metrics = useMemo(() => {
     if (!activities || activities.length === 0) return { activities: [], filteredData: [], currentMetrics: null, chartData: [], distribution: [], summary: { count: 0 } };
 
     const calculateTSS = (act) => {
-        const t = act.type.toLowerCase();
+        const t = String(act.type).toLowerCase();
         const isBike = t.includes('ciclismo') || t.includes('bici');
         const sportSettings = isBike ? settings.bike : settings.run;
         const lthr = Number(sportSettings.lthr) || (isBike ? 168 : 178); 
 
-        // 1. CÁLCULO EXACTO SEGUNDO A SEGUNDO (hrTSS Oficial de TrainingPeaks)
         if (act.streams_data && act.streams_data.heartrate && act.streams_data.time) {
             const hrData = act.streams_data.heartrate.data;
             const timeData = act.streams_data.time.data;
@@ -224,42 +249,35 @@ export const useActivities = () => {
             for (let i = 1; i < hrData.length; i++) {
                 let dt = timeData[i] - timeData[i-1]; 
                 let hr = hrData[i];
-                let pctLthr = hr / lthr; // % de tu pulso respecto al umbral
+                let pctLthr = hr / lthr; 
                 
                 let tssPerHour = 0;
-
-                // Coeficientes oficiales de Joe Friel
-                if (pctLthr < 0.81) tssPerHour = 20;         // Zona 1
-                else if (pctLthr < 0.90) tssPerHour = 50;    // Zona 2
-                else if (pctLthr < 0.94) tssPerHour = 70;    // Zona 3
-                else if (pctLthr < 1.00) tssPerHour = 90;    // Zona 4
-                else if (pctLthr < 1.03) tssPerHour = 105;   // Zona 5a
-                else if (pctLthr < 1.06) tssPerHour = 120;   // Zona 5b
-                else tssPerHour = 140;                       // Zona 5c (Máximo fisiológico)
+                if (pctLthr < 0.81) tssPerHour = 20;         
+                else if (pctLthr < 0.90) tssPerHour = 50;    
+                else if (pctLthr < 0.94) tssPerHour = 70;    
+                else if (pctLthr < 1.00) tssPerHour = 90;    
+                else if (pctLthr < 1.03) tssPerHour = 105;   
+                else if (pctLthr < 1.06) tssPerHour = 120;   
+                else tssPerHour = 140;                       
                 
-                // Sumamos la parte proporcional de ese segundo
                 exactTSS += (dt / 3600) * tssPerHour;
             }
             return Math.round(exactTSS);
         }
 
-        // 2. FÓRMULA DE RESPALDO (Para entrenos sin GPS/streams bajados)
         const hr = Number(act.hr_avg); 
         const durationHours = act.duration / 60;
-        if (!hr || hr <= 40) return Math.round(durationHours * 30); // Base genérica
+        if (!hr || hr <= 40) return Math.round(durationHours * 30); 
 
         let pctLthr = hr / lthr;
         let tssPerHour = 0;
-
-        // Para la media global somos más conservadores para no inflar
         if (pctLthr < 0.81) tssPerHour = 20;
         else if (pctLthr < 0.90) tssPerHour = 50;
         else if (pctLthr < 0.94) tssPerHour = 70;
         else if (pctLthr < 1.00) tssPerHour = 85; 
         else tssPerHour = 100; 
 
-        let estimatedTss = durationHours * tssPerHour;
-        return Math.round(estimatedTss);
+        return Math.round(durationHours * tssPerHour);
     };
 
     const processedActivities = [...activities].map(act => ({ ...act, tss: calculateTSS(act) }));
@@ -325,12 +343,16 @@ export const useActivities = () => {
     const cats = visibleActs.reduce((acc, curr) => { acc[curr.type] = (acc[curr.type] || 0) + 1; return acc; }, {});
     const distribution = Object.keys(cats).map(k => ({ name: k, value: cats[k] }));
 
+    let sumDur = 0, sumDist = 0, sumElev = 0, sumTSS = 0;
+    visibleActs.forEach(a => { sumDur+=a.duration; sumDist+=a.distance; sumElev+=a.elevation_gain; sumTSS+=a.tss; });
+    const summary = { count: visibleActs.length, duration: Math.floor(sumDur/60), distance: Math.round(sumDist/1000), elevation: sumElev, tss: sumTSS };
+
     const currentMetrics = { 
         ctl: lastPoint.ctl, atl: lastPoint.atl, tcb: lastPoint.tcb, rampRate, avgTss7d: Math.round(avgLoad7), 
         acwr: parseFloat(acwr.toFixed(2)), monotony: parseFloat(monotony.toFixed(2)), strain: Math.round(strain), pastCtl: parseFloat(pastMonthPoint.ctl.toFixed(1))
     };
 
-    return { activities: processedActivities.reverse(), filteredData: visibleActs.reverse(), currentMetrics, chartData, distribution, summary: { count: visibleActs.length } };
+    return { activities: processedActivities.reverse(), filteredData: visibleActs.reverse(), currentMetrics, chartData, distribution, summary };
   }, [activities, timeRange, settings]);
 
   return { 
