@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
-import { supabase } from '../supabase'; // Asegúrate de que la ruta es correcta
+import { supabase } from '../supabase';
 
 export const useActivities = () => {
   const [activities, setActivities] = useState([]);
@@ -27,7 +27,6 @@ export const useActivities = () => {
     Promise.all([fetchProfile(), fetchActivities()]).then(() => setLoading(false));
   }, []);
 
-  // Función de ayuda para obtener el ID del usuario actual
   const getCurrentUserId = async () => {
     const { data: { session } } = await supabase.auth.getSession();
     return session?.user?.id || null;
@@ -37,10 +36,8 @@ export const useActivities = () => {
     const userId = await getCurrentUserId();
     if (!userId) return;
 
-    // Buscamos el perfil del usuario activo
     const { data, error } = await supabase.from('profiles').select('*').eq('user_id', userId).single();
     
-    // Si no existe (es un usuario nuevo), creamos un perfil en blanco
     if (error && error.code === 'PGRST116') {
         await supabase.from('profiles').insert([{ user_id: userId }]);
         return;
@@ -59,14 +56,13 @@ export const useActivities = () => {
     }
   };
 
-  // GUARDAR PERFIL EN BASE DE DATOS (UPSERT MULTI-USUARIO)
   const updateProfile = async (newSettings) => {
       try {
           const userId = await getCurrentUserId();
           if (!userId) throw new Error("No hay sesión activa");
 
           const { error } = await supabase.from('profiles').upsert({
-              user_id: userId, // Esencial para el Upsert
+              user_id: userId, 
               weight: newSettings.weight,
               fc_rest: newSettings.fcReposo,
               run_fc_max: newSettings.run.max,
@@ -75,7 +71,7 @@ export const useActivities = () => {
               bike_fc_max: newSettings.bike.max,
               bike_lthr: newSettings.bike.lthr,
               bike_zones: newSettings.bike.zones
-          }, { onConflict: 'user_id' }); // Sobrescribe si ya existe ese user_id
+          }, { onConflict: 'user_id' }); 
 
           if (error) throw error;
           
@@ -88,7 +84,6 @@ export const useActivities = () => {
   };
 
   const fetchActivities = async () => {
-    // Al tener RLS activado, un simple Select('*') ya solo devuelve las del usuario
     const { data, error } = await supabase.from('activities').select('*');
     if (!error && data) {
         const sorted = data.map(a => ({...a, dateObj: new Date(a.date)})).sort((a, b) => a.dateObj - b.dateObj);
@@ -135,7 +130,8 @@ export const useActivities = () => {
   const fetchActivityStreams = async (activityId, stravaId) => {
       try {
           const token = await getValidStravaToken();
-          const response = await fetch(`https://www.strava.com/api/v3/activities/${stravaId}/streams?keys=time,heartrate,watts,velocity_smooth,altitude,cadence&key_by_type=true`, {
+          // Añadimos latlng a la petición de Strava
+          const response = await fetch(`https://www.strava.com/api/v3/activities/${stravaId}/streams?keys=time,heartrate,watts,velocity_smooth,altitude,cadence,latlng&key_by_type=true`, {
               headers: { 'Authorization': `Bearer ${token}` }
           });
           
@@ -145,57 +141,78 @@ export const useActivities = () => {
           await supabase.from('activities').update({ streams_data: streams }).eq('id', activityId);
           setActivities(prev => prev.map(a => a.id === activityId ? { ...a, streams_data: streams } : a));
           return streams;
-      } catch (e) {
-          console.error("Error bajando streams:", e);
-          return null;
-      }
+      } catch (e) { return null; }
   };
 
+  // --- SINCRONIZACIÓN BÁSICA CON PAGINACIÓN ---
   const handleStravaSync = async () => {
     try {
         const userId = await getCurrentUserId();
         if (!userId) throw new Error("Sesión no válida");
 
-        setUploading(true); setUploadStatus("Sincronizando...");
+        setUploading(true); 
+        setUploadStatus("Buscando historial...");
         const accessToken = await getValidStravaToken();
 
-        const response = await fetch('https://www.strava.com/api/v3/athlete/activities?per_page=50', {
-            headers: { 'Authorization': `Bearer ${accessToken}` }
-        });
-        if (response.status === 401) { await handleDisconnectStrava(); throw new Error("Reconecta tu cuenta."); }
-        if (!response.ok) throw new Error("Error conectando con Strava");
-        
-        const stravaActivities = await response.json();
+        let page = 1;
+        let hasMore = true;
+        let totalNew = 0;
         const existingIds = new Set(activities.map(a => String(a.strava_id)));
-        
-        const newRows = stravaActivities.filter(act => !existingIds.has(String(act.id))).map(act => {
-            let typeES = act.type === 'Run' ? 'Carrera' : (act.type === 'Ride' ? 'Ciclismo' : act.type);
-            if (act.type === 'WeightTraining') typeES = 'Fuerza';
-            if (act.type === 'Walk') typeES = 'Caminata';
-            if (act.type === 'Swim') typeES = 'Natación';
-            return {
-                user_id: userId, // <-- INYECTAMOS EL DUEÑO
-                date: act.start_date_local, type: typeES, name: act.name || 'Entreno sin título', 
-                description: act.description || '', duration: Math.round(act.moving_time / 60),
-                hr_avg: Number(act.average_heartrate) || 0, calories: act.kilojoules || act.calories || 0,
-                strava_id: act.id, distance: act.distance || 0, elevation_gain: act.total_elevation_gain || 0, 
-                watts_avg: act.average_watts || 0, speed_avg: act.average_speed || 0,
-                map_polyline: act.map?.summary_polyline || ''
-            };
-        });
 
-        if (newRows.length > 0) {
-            const { error: insertError } = await supabase.from('activities').insert(newRows);
-            if (insertError) throw new Error(`Error BD: ${insertError.message}`);
+        while (hasMore) {
+            setUploadStatus(`Sincronizando pág. ${page}...`);
+            const response = await fetch(`https://www.strava.com/api/v3/athlete/activities?per_page=200&page=${page}`, {
+                headers: { 'Authorization': `Bearer ${accessToken}` }
+            });
+            
+            if (response.status === 401) { await handleDisconnectStrava(); throw new Error("Reconecta tu cuenta."); }
+            if (!response.ok) throw new Error("Error conectando con Strava");
+            
+            const stravaActivities = await response.json();
+            
+            if (stravaActivities.length === 0) {
+                hasMore = false;
+                break;
+            }
+            
+            const newRows = stravaActivities.filter(act => !existingIds.has(String(act.id))).map(act => {
+                let typeES = act.type === 'Run' ? 'Carrera' : (act.type === 'Ride' ? 'Ciclismo' : act.type);
+                if (act.type === 'WeightTraining') typeES = 'Fuerza';
+                if (act.type === 'Walk') typeES = 'Caminata';
+                if (act.type === 'Swim') typeES = 'Natación';
+                return {
+                    user_id: userId,
+                    date: act.start_date_local, type: typeES, name: act.name || 'Entreno sin título', 
+                    description: act.description || '', duration: Math.round(act.moving_time / 60),
+                    hr_avg: Number(act.average_heartrate) || 0, calories: act.kilojoules || act.calories || 0,
+                    strava_id: act.id, distance: act.distance || 0, elevation_gain: act.total_elevation_gain || 0, 
+                    watts_avg: act.average_watts || 0, speed_avg: act.average_speed || 0,
+                    map_polyline: act.map?.summary_polyline || ''
+                };
+            });
+
+            if (newRows.length > 0) {
+                const { error: insertError } = await supabase.from('activities').insert(newRows);
+                if (insertError) throw new Error(`Error BD: ${insertError.message}`);
+                totalNew += newRows.length;
+                page++; 
+            } else {
+                hasMore = false;
+            }
+        }
+
+        if (totalNew > 0) {
             await fetchActivities();
-            setUploadStatus(`¡${newRows.length} nuevas!`);
+            setUploadStatus(`¡${totalNew} nuevas!`);
         } else {
             setUploadStatus("Todo al día");
         }
+
     } catch (err) { alert(err.message); } 
     finally { setUploading(false); setTimeout(() => setUploadStatus(null), 3000); }
   };
 
+  // --- SINCRONIZACIÓN PROFUNDA (MODO PRODUCCIÓN - MÁXIMA VELOCIDAD) ---
   const handleDeepSync = async () => {
       const activitiesToSync = activities.filter(a => a.strava_id && !a.streams_data);
       
@@ -204,7 +221,7 @@ export const useActivities = () => {
           return;
       }
 
-      if (!window.confirm(`Se van a descargar los datos milimétricos de ${activitiesToSync.length} actividades.\n\nEl proceso irá despacio (1 actividad cada 1.5s) para que Strava no bloquee la cuenta. Puedes dejar la pestaña abierta mientras termina.\n\n¿Empezamos?`)) return;
+      if (!window.confirm(`Se van a descargar los datos milimétricos (Telemetría y GPS) de ${activitiesToSync.length} actividades.\n\nAl tener cuenta de Producción, el proceso irá a máxima velocidad. ¿Empezamos?`)) return;
 
       setIsDeepSyncing(true);
       let count = 0;
@@ -212,11 +229,14 @@ export const useActivities = () => {
       try {
           for (const act of activitiesToSync) {
               setDeepSyncProgress({ current: count + 1, total: activitiesToSync.length });
+              
               await fetchActivityStreams(act.id, act.strava_id);
-              await new Promise(resolve => setTimeout(resolve, 1500));
+              
+              // Freno de mano quitado: Solo 100ms para que la UI respire, ¡15 veces más rápido!
+              await new Promise(resolve => setTimeout(resolve, 100));
               count++;
           }
-          alert("Sincronización profunda completada. ¡Tu motor matemático ahora es 100% exacto!");
+          alert("Sincronización profunda completada a velocidad turbo. ¡Tu motor matemático y el mapa interactivo ahora son 100% exactos!");
       } catch (error) {
           console.error("Error en deep sync:", error);
           alert("La sincronización profunda se detuvo por un error de conexión.");
@@ -226,12 +246,41 @@ export const useActivities = () => {
       }
   };
 
-  const processFile = async (file) => { /* Tu lógica manual aquí si aplica */ };
-  const handleClearDb = async () => { /* ... */ };
-  const deleteActivity = async (id) => { /* ... */ };
-  const analyzeHistory = (sport) => { /* ... */ };
+  const processFile = async (file) => { console.log("Lógica de CSV pendiente", file) };
+  
+  const handleClearDb = async () => {
+      if (!window.confirm("¿Estás seguro de borrar TODAS tus actividades? Esto no se puede deshacer.")) return;
+      const userId = await getCurrentUserId();
+      if (!userId) return;
 
-  // --- EL NÚCLEO MATEMÁTICO EXACTO ---
+      try {
+          const { error } = await supabase.from('activities').delete().eq('user_id', userId);
+          if (error) throw error;
+          setActivities([]);
+          alert("Tus actividades han sido borradas de la base de datos.");
+      } catch (error) {
+          console.error("Error al borrar BD:", error);
+          alert("Hubo un error al borrar las actividades.");
+      }
+  };
+
+  const deleteActivity = async (id) => {
+      const userId = await getCurrentUserId();
+      if (!userId) return;
+
+      try {
+          const { error } = await supabase.from('activities').delete().eq('id', id).eq('user_id', userId);
+          if (error) throw error;
+          setActivities(prev => prev.filter(a => a.id !== id));
+      } catch (error) {
+          console.error("Error borrando actividad:", error);
+          alert("No se pudo borrar la actividad.");
+      }
+  };
+
+  const analyzeHistory = (sport) => { console.log("Análisis manual pendiente para:", sport); };
+
+  // --- NÚCLEO MATEMÁTICO (CON PROYECCIÓN FUTURA) ---
   const metrics = useMemo(() => {
     if (!activities || activities.length === 0) return { activities: [], filteredData: [], currentMetrics: null, chartData: [], distribution: [], summary: { count: 0 } };
 
@@ -242,15 +291,11 @@ export const useActivities = () => {
         const lthr = Number(sportSettings.lthr) || (isBike ? 168 : 178); 
 
         if (act.streams_data && act.streams_data.heartrate && act.streams_data.time) {
-            const hrData = act.streams_data.heartrate.data;
-            const timeData = act.streams_data.time.data;
+            const hrData = act.streams_data.heartrate.data; const timeData = act.streams_data.time.data;
             let exactTSS = 0;
-            
             for (let i = 1; i < hrData.length; i++) {
                 let dt = timeData[i] - timeData[i-1]; 
-                let hr = hrData[i];
-                let pctLthr = hr / lthr; 
-                
+                let hr = hrData[i]; let pctLthr = hr / lthr; 
                 let tssPerHour = 0;
                 if (pctLthr < 0.81) tssPerHour = 20;         
                 else if (pctLthr < 0.90) tssPerHour = 50;    
@@ -259,24 +304,16 @@ export const useActivities = () => {
                 else if (pctLthr < 1.03) tssPerHour = 105;   
                 else if (pctLthr < 1.06) tssPerHour = 120;   
                 else tssPerHour = 140;                       
-                
                 exactTSS += (dt / 3600) * tssPerHour;
             }
             return Math.round(exactTSS);
         }
 
-        const hr = Number(act.hr_avg); 
-        const durationHours = act.duration / 60;
+        const hr = Number(act.hr_avg); const durationHours = act.duration / 60;
         if (!hr || hr <= 40) return Math.round(durationHours * 30); 
-
-        let pctLthr = hr / lthr;
-        let tssPerHour = 0;
-        if (pctLthr < 0.81) tssPerHour = 20;
-        else if (pctLthr < 0.90) tssPerHour = 50;
-        else if (pctLthr < 0.94) tssPerHour = 70;
-        else if (pctLthr < 1.00) tssPerHour = 85; 
-        else tssPerHour = 100; 
-
+        let pctLthr = hr / lthr; let tssPerHour = 0;
+        if (pctLthr < 0.81) tssPerHour = 20; else if (pctLthr < 0.90) tssPerHour = 50;
+        else if (pctLthr < 0.94) tssPerHour = 70; else if (pctLthr < 1.00) tssPerHour = 85; else tssPerHour = 100; 
         return Math.round(durationHours * tssPerHour);
     };
 
@@ -298,25 +335,38 @@ export const useActivities = () => {
     const loadHistory = []; 
 
     const startUTC = Date.UTC(startDate.getUTCFullYear(), startDate.getUTCMonth(), startDate.getUTCDate());
-    const endUTC = Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), today.getUTCDate());
+    const todayUTC = Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), today.getUTCDate());
+    const endUTC = todayUTC + (7 * oneDay);
 
     for (let time = startUTC; time <= endUTC; time += oneDay) {
         const d = new Date(time);
         const dateStr = d.toISOString().split('T')[0];
         const daysActs = activitiesMap.get(dateStr) || [];
+        
         let dailyTss = 0;
         daysActs.forEach(act => { dailyTss += act.tss; });
-        loadHistory.push(dailyTss);
+        
+        if (time <= todayUTC) loadHistory.push(dailyTss);
 
         if (fullSeries.length === 0 && dailyTss > 0) { ctl = dailyTss; atl = dailyTss; } 
         else { ctl = ctl + (dailyTss - ctl) / settings.ta; atl = atl + (dailyTss - atl) / settings.tf; }
         
-        fullSeries.push({ date: dateStr, ctl: parseFloat(ctl.toFixed(1)), atl: parseFloat(atl.toFixed(1)), tcb: parseFloat((ctl - atl).toFixed(1)), dailyTss: Math.round(dailyTss) });
+        fullSeries.push({ 
+            date: dateStr, 
+            ctl: parseFloat(ctl.toFixed(1)), 
+            atl: parseFloat(atl.toFixed(1)), 
+            tcb: parseFloat((ctl - atl).toFixed(1)), 
+            dailyTss: Math.round(dailyTss) 
+        });
     }
 
-    const lastPoint = fullSeries[fullSeries.length - 1] || { ctl: 0, atl: 0, tcb: 0 };
-    const prevWeekPoint = fullSeries[fullSeries.length - 8] || { ctl: 0 }; 
-    const pastMonthPoint = fullSeries[fullSeries.length - 30] || fullSeries[0] || { ctl: 0 };
+    const todayStr = new Date(todayUTC).toISOString().split('T')[0];
+    const todayIndex = fullSeries.findIndex(d => d.date === todayStr);
+    const currentIndex = todayIndex !== -1 ? todayIndex : fullSeries.length - 8;
+
+    const lastPoint = fullSeries[currentIndex] || { ctl: 0, atl: 0, tcb: 0 };
+    const prevWeekPoint = fullSeries[currentIndex - 7] || { ctl: 0 }; 
+    const pastMonthPoint = fullSeries[currentIndex - 30] || fullSeries[0] || { ctl: 0 };
     
     const rampRate = parseFloat((lastPoint.ctl - prevWeekPoint.ctl).toFixed(1));
     const last7Loads = loadHistory.slice(-7); const last28Loads = loadHistory.slice(-28);
@@ -340,6 +390,7 @@ export const useActivities = () => {
     
     const visibleActs = processedActivities.filter(a => new Date(a.date) >= cutoff);
     const chartData = fullSeries.filter(d => new Date(d.date) >= cutoff);
+    
     const cats = visibleActs.reduce((acc, curr) => { acc[curr.type] = (acc[curr.type] || 0) + 1; return acc; }, {});
     const distribution = Object.keys(cats).map(k => ({ name: k, value: cats[k] }));
 
