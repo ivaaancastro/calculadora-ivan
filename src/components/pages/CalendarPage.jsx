@@ -25,17 +25,15 @@ const getSportIcon = (type) => {
 
 export const CalendarPage = ({ activities, onDelete, onSelectActivity }) => {
   
-  // MAGIA UX: Inicializamos el calendario recordando el último mes visitado
   const [currentDate, setCurrentDate] = useState(() => {
     const savedDate = sessionStorage.getItem('forma_calendar_date');
     if (savedDate) {
         const d = new Date(savedDate);
-        if (!isNaN(d.getTime())) return d; // Comprobamos que sea válida
+        if (!isNaN(d.getTime())) return d; 
     }
     return new Date();
   });
 
-  // MAGIA UX: Guardamos la fecha cada vez que cambias de mes
   useEffect(() => {
     sessionStorage.setItem('forma_calendar_date', currentDate.toISOString());
   }, [currentDate]);
@@ -163,40 +161,46 @@ export const CalendarPage = ({ activities, onDelete, onSelectActivity }) => {
                   }
 
                   return (
-                      <div key={wIdx} className="grid grid-cols-7 lg:grid-cols-[repeat(7,1fr)_130px] border-b border-slate-200 dark:border-zinc-800 last:border-b-0">
+                      // FILA PRINCIPAL: Aquí está la altura fija (lg:h-[140px])
+                      <div key={wIdx} className="grid grid-cols-7 lg:grid-cols-[repeat(7,1fr)_130px] border-b border-slate-200 dark:border-zinc-800 last:border-b-0 lg:h-[140px]">
                           
-                          {/* 7 DÍAS INDIVIDUALES */}
+                          {/* 7 DÍAS INDIVIDUALES (Ahora toman la altura del padre con lg:h-full) */}
                           {week.map((day, dIdx) => {
                               const dateKey = day.date.toLocaleDateString('en-CA');
                               const acts = activitiesByDate[dateKey] || [];
                               const isToday = new Date().toLocaleDateString('en-CA') === dateKey;
 
                               return (
-                                  <div key={dIdx} className={`relative p-0.5 sm:p-1 lg:p-1.5 border-r border-slate-200 dark:border-zinc-800 flex flex-col gap-0.5 sm:gap-1 min-h-[90px] sm:min-h-[110px] lg:min-h-[130px]
+                                  <div key={dIdx} className={`relative p-1 lg:p-1.5 border-r border-slate-200 dark:border-zinc-800 flex flex-col h-[90px] sm:h-[110px] lg:h-full overflow-hidden
                                       ${!day.isCurrentMonth ? 'bg-slate-50/50 dark:bg-zinc-950/30' : 'bg-white dark:bg-zinc-900'}
                                       ${isToday ? 'bg-blue-50/30 dark:bg-blue-900/10 border-blue-200 dark:border-blue-800/50' : ''}
                                   `}>
-                                      <div className="flex justify-center lg:justify-between items-start px-1 mb-0.5">
+                                      {/* Número del día */}
+                                      <div className="flex justify-center lg:justify-between items-start px-1 mb-1 shrink-0">
                                           <span className={`text-[9px] lg:text-[11px] font-bold ${!day.isCurrentMonth ? 'text-slate-300 dark:text-zinc-600' : isToday ? 'text-blue-600 dark:text-blue-400 bg-blue-100 dark:bg-blue-900/50 px-1.5 rounded-sm' : 'text-slate-500 dark:text-zinc-400'}`}>
                                               {day.date.getDate()}
                                           </span>
                                       </div>
 
-                                      <div className="flex-1 flex flex-col gap-1 w-full">
+                                      {/* Contenedor de entrenos con SCROLL si hay más de la cuenta */}
+                                      <div className="flex-1 overflow-y-auto custom-scrollbar flex flex-col gap-1 w-full pr-0.5">
                                           {acts.map((act, i) => (
                                               <div 
                                                 key={i} 
                                                 onClick={() => onSelectActivity && onSelectActivity(act)}
-                                                className={`p-1 lg:p-1.5 rounded border cursor-pointer transition-colors flex flex-col items-center lg:items-stretch ${getSportColor(act.type)}`}
+                                                className={`p-1 lg:p-1.5 rounded border cursor-pointer transition-colors flex flex-col items-center lg:items-stretch w-full shrink-0 ${getSportColor(act.type)}`}
                                               >
-                                                  <div className="flex lg:flex-row flex-col items-center lg:justify-between w-full gap-0.5">
-                                                      <div className="flex items-center gap-1 font-bold">
-                                                          {getSportIcon(act.type)}
-                                                          <span className="hidden lg:inline text-[10px] truncate max-w-[45px]">{act.type}</span>
+                                                  {/* Título truncado inteligentemente */}
+                                                  <div className="flex flex-col lg:flex-row items-center lg:justify-between w-full gap-0.5 lg:gap-1">
+                                                      <div className="flex items-center justify-center lg:justify-start gap-1 font-bold flex-1 min-w-0 w-full" title={act.name || act.type}>
+                                                          <span className="shrink-0">{getSportIcon(act.type)}</span>
+                                                          <span className="hidden lg:block text-[9px] xl:text-[10px] truncate w-full text-left">
+                                                              {act.name || act.type}
+                                                          </span>
                                                       </div>
-                                                      {act.tss > 0 && <span className="text-[9px] lg:text-[10px] font-black font-mono opacity-90">{Math.round(act.tss)}</span>}
+                                                      {act.tss > 0 && <span className="text-[9px] lg:text-[10px] font-black font-mono opacity-90 shrink-0">{Math.round(act.tss)}</span>}
                                                   </div>
-                                                  <div className="flex justify-center lg:justify-between opacity-80 text-[8px] lg:text-[9px] mt-0.5 font-mono">
+                                                  <div className="flex justify-center lg:justify-between opacity-80 text-[8px] lg:text-[9px] mt-0.5 font-mono w-full">
                                                       <span>{act.duration}m</span>
                                                       {act.distance > 0 && <span className="hidden lg:inline">{(act.distance/1000).toFixed(0)}k</span>}
                                                   </div>
@@ -207,42 +211,56 @@ export const CalendarPage = ({ activities, onDelete, onSelectActivity }) => {
                               );
                           })}
 
-                          {/* COLUMNA RESUMEN Y OBJETIVO */}
-                          <div className="col-span-7 lg:col-span-1 bg-slate-50 dark:bg-zinc-950/50 border-t lg:border-t-0 lg:border-l border-slate-200 dark:border-zinc-800 p-2 flex flex-row lg:flex-col justify-between items-center lg:items-stretch gap-2 lg:gap-0">
+                          {/* COLUMNA RESUMEN Y OBJETIVO (Ajustada para que no se aplaste) */}
+                          <div className="col-span-7 lg:col-span-1 bg-slate-50 dark:bg-zinc-950/50 border-t lg:border-t-0 lg:border-l border-slate-200 dark:border-zinc-800 p-2 flex flex-row lg:flex-col justify-between h-[60px] lg:h-full">
                               
-                              <div className="flex flex-row lg:flex-col gap-4 lg:gap-2 flex-1 justify-around lg:justify-end">
-                                 <div className="text-center lg:text-right">
-                                    <span className="hidden lg:block text-[9px] font-bold text-slate-400 dark:text-zinc-500 uppercase tracking-widest mb-1">Volumen</span>
-                                    <div className="flex items-center justify-center lg:justify-end gap-1 text-slate-600 dark:text-zinc-300 font-mono font-bold text-[10px] lg:text-xs">
-                                        <Clock size={10} className="lg:w-3 lg:h-3 text-emerald-500" /> {Math.floor(weekDuration / 60)}h <span className="hidden sm:inline">{weekDuration % 60}m</span>
-                                    </div>
-                                </div>
-                                 <div className="text-center lg:text-right">
-                                    <span className="hidden lg:block text-[9px] font-bold text-slate-400 dark:text-zinc-500 uppercase tracking-widest mb-1">Distancia</span>
-                                    <div className="flex items-center justify-center lg:justify-end gap-1 text-slate-600 dark:text-zinc-300 font-mono font-bold text-[10px] lg:text-xs">
-                                        <MapPin size={10} className="lg:w-3 lg:h-3 text-blue-500" /> {(weekDist / 1000).toFixed(0)}km
-                                    </div>
-                                </div>
-                                <div className="text-center lg:text-right">
-                                    <span className="hidden lg:block text-[9px] font-bold text-slate-400 dark:text-zinc-500 uppercase tracking-widest mb-1">Carga</span>
-                                    <div className="flex items-center justify-center lg:justify-end gap-1 text-amber-600 dark:text-amber-500 font-mono font-black text-xs lg:text-sm">
-                                        <Zap size={10} className="lg:w-3 lg:h-3" /> {Math.round(weekTSS)} <span className="lg:hidden text-[8px]">TSS</span>
-                                    </div>
-                                </div>
+                              {/* MÉTRICAS ALINEADAS IZQUIERDA/DERECHA */}
+                              <div className="flex flex-row lg:flex-col gap-4 lg:gap-2 flex-1 justify-around lg:justify-center w-full px-1">
+                                 
+                                 {/* VOLUMEN */}
+                                 <div className="flex flex-col lg:flex-row lg:justify-between items-center text-[10px] lg:text-xs">
+                                     <span className="hidden lg:flex items-center gap-1.5 text-slate-400 dark:text-zinc-500 font-bold uppercase tracking-wider text-[9px]">
+                                         <Clock size={10} /> Vol
+                                     </span>
+                                     <span className="text-emerald-600 dark:text-emerald-500 font-mono font-bold">
+                                         {Math.floor(weekDuration / 60)}h <span className="hidden sm:inline">{weekDuration % 60}m</span>
+                                     </span>
+                                 </div>
+
+                                 {/* DISTANCIA */}
+                                 <div className="flex flex-col lg:flex-row lg:justify-between items-center text-[10px] lg:text-xs">
+                                     <span className="hidden lg:flex items-center gap-1.5 text-slate-400 dark:text-zinc-500 font-bold uppercase tracking-wider text-[9px]">
+                                         <MapPin size={10} /> Dist
+                                     </span>
+                                     <span className="text-blue-600 dark:text-blue-500 font-mono font-bold">
+                                         {(weekDist / 1000).toFixed(0)}km
+                                     </span>
+                                 </div>
+
+                                 {/* CARGA */}
+                                 <div className="flex flex-col lg:flex-row lg:justify-between items-center text-[10px] lg:text-xs">
+                                     <span className="hidden lg:flex items-center gap-1.5 text-slate-400 dark:text-zinc-500 font-bold uppercase tracking-wider text-[9px]">
+                                         <Zap size={10} /> TSS
+                                     </span>
+                                     <span className="text-amber-600 dark:text-amber-500 font-mono font-black">
+                                         {Math.round(weekTSS)}
+                                     </span>
+                                 </div>
                               </div>
 
+                              {/* PANEL DE OBJETIVOS (Fijo en la parte inferior) */}
                               <div 
                                 onClick={() => handleEditTarget(weekKey)}
-                                className="flex-shrink-0 w-1/3 lg:w-full border-l lg:border-l-0 lg:border-t border-slate-200 dark:border-zinc-800 pl-3 lg:pl-0 lg:pt-2 cursor-pointer group hover:bg-slate-100 dark:hover:bg-zinc-800/50 rounded transition-colors"
+                                className="flex-shrink-0 w-1/3 lg:w-full border-l lg:border-l-0 lg:border-t border-slate-200 dark:border-zinc-800 pl-3 lg:pl-0 lg:pt-2 cursor-pointer group hover:bg-slate-100 dark:hover:bg-zinc-800/50 rounded transition-colors mt-auto"
                               >
-                                 <div className="flex justify-between items-center mb-0.5">
-                                    <span className="text-[9px] font-bold text-slate-500 dark:text-zinc-400 uppercase tracking-widest flex items-center gap-1">
+                                 <div className="flex justify-between items-center mb-1 lg:mb-0.5">
+                                    <span className="text-[9px] font-bold text-slate-500 dark:text-zinc-400 uppercase tracking-widest flex items-center gap-1 px-1">
                                         <Target size={10}/> Objetivo
                                     </span>
                                  </div>
-                                 <div className="text-right lg:text-right mb-1">
+                                 <div className="text-right mb-1.5 px-1">
                                      {targetTSS > 0 ? (
-                                        <span className="text-[10px] lg:text-xs font-bold text-slate-700 dark:text-zinc-200 font-mono">
+                                        <span className="text-[10px] lg:text-[11px] font-bold text-slate-700 dark:text-zinc-200 font-mono">
                                             {targetTSS} TSS
                                         </span>
                                      ) : (

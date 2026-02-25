@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { Save, Activity, Heart, Zap, User, Database, Loader2, RefreshCw, CheckCircle2, ArrowLeft, Calculator, Lock, Key } from 'lucide-react';
-import { supabase } from '../../supabase'; // Asegúrate de que esta ruta es correcta
+import { Save, Activity, Heart, Zap, Database, Loader2, RefreshCw, CheckCircle2, ArrowLeft, Calculator, Lock, Key, Bike, Footprints, Weight } from 'lucide-react';
+import { supabase } from '../../supabase'; 
 
+// Algoritmo de extracción de picos
 const getPeakByTime = (hrData, timeData, windowSeconds) => {
     if (!hrData || !timeData || hrData.length < 2) return 0;
     let maxAvg = 0; let currentSum = 0; let count = 0; let left = 0;
@@ -20,8 +21,6 @@ const getPeakByTime = (hrData, timeData, windowSeconds) => {
 export const ProfilePage = ({ currentSettings, onUpdate, activities, isDeepSyncing, deepSyncProgress, onDeepSync, onBack }) => {
   const [formData, setFormData] = useState(null);
   const [isScanning, setIsScanning] = useState(false);
-  
-  // Estados para el cambio de contraseña
   const [newPassword, setNewPassword] = useState('');
   const [isUpdatingPwd, setIsUpdatingPwd] = useState(false);
 
@@ -35,7 +34,6 @@ export const ProfilePage = ({ currentSettings, onUpdate, activities, isDeepSynci
   const pureActs = stravaActs.filter(a => a.streams_data);
   const syncPct = stravaActs.length > 0 ? Math.round((pureActs.length / stravaActs.length) * 100) : 0;
 
-  // FUNCIÓN PARA CAMBIAR CONTRASEÑA
   const handleUpdatePassword = async (e) => {
     e.preventDefault();
     if (newPassword.length < 6) return alert("La contraseña debe tener al menos 6 caracteres.");
@@ -139,125 +137,180 @@ export const ProfilePage = ({ currentSettings, onUpdate, activities, isDeepSynci
   );
 
   return (
-    <div className="animate-in fade-in duration-300 pb-12 max-w-5xl mx-auto">
+    <div className="animate-in fade-in duration-300 pb-12 max-w-6xl mx-auto">
       
-      <div className="flex items-center justify-between mb-8 border-b border-slate-200 dark:border-zinc-800 pb-4">
-          <div>
-              <button onClick={onBack} className="flex items-center gap-1.5 text-slate-500 hover:text-slate-800 dark:text-zinc-400 dark:hover:text-zinc-100 transition font-bold mb-4 px-3 py-1.5 text-[10px] uppercase tracking-wider rounded border border-slate-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 w-max shadow-sm">
-                  <ArrowLeft size={14} /> Volver al Dashboard
+      {/* HEADER */}
+      <div className="flex items-center justify-between mb-6 border-b border-slate-200 dark:border-zinc-800 pb-4">
+          <div className="flex items-center gap-4">
+              <button onClick={onBack} className="flex items-center justify-center w-8 h-8 rounded-full bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 text-slate-500 hover:text-slate-900 dark:text-zinc-400 dark:hover:text-zinc-100 transition-colors shadow-sm">
+                  <ArrowLeft size={16} />
               </button>
-              <h1 className="text-2xl font-black text-slate-900 dark:text-zinc-100 tracking-tight uppercase flex items-center gap-2">
-                  Perfil Fisiológico
-              </h1>
+              <div>
+                  <h1 className="text-xl font-black text-slate-900 dark:text-zinc-100 tracking-tight uppercase">Laboratorio & Perfil</h1>
+                  <p className="text-[10px] text-slate-500 dark:text-zinc-500 font-bold uppercase tracking-widest mt-0.5">Ajustes Biométricos y Sistema</p>
+              </div>
           </div>
-          <button onClick={() => onUpdate(formData)} className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded text-[11px] font-bold uppercase tracking-wider transition-colors shadow-md">
+          <button onClick={() => onUpdate(formData)} className="flex items-center gap-1.5 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded text-[10px] font-bold uppercase tracking-widest transition-colors shadow-sm">
               <Save size={14} /> Guardar
           </button>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
-          <div className="lg:col-span-4 space-y-4">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+          
+          {/* COLUMNA IZQUIERDA: Sistema y Motor (4/12) */}
+          <div className="lg:col-span-4 space-y-6">
               
-              {/* DATOS BIOMÉTRICOS */}
-              <div className="bg-white dark:bg-zinc-900 rounded-lg border border-slate-200 dark:border-zinc-800 p-4 shadow-sm">
-                  <PanelHeader icon={Heart} title="Datos Biométricos" subtitle="Base para cálculos calóricos" />
-                  <div className="space-y-4">
-                      <div>
-                          <label className="text-[10px] font-bold text-slate-500 dark:text-zinc-400 uppercase tracking-widest">Peso (kg)</label>
-                          <input type="number" name="weight" value={formData.weight} onChange={handleChange} className="w-full bg-transparent border border-slate-200 dark:border-zinc-700 rounded px-3 py-1.5 mt-1 text-xs font-mono dark:text-zinc-200 focus:border-blue-500 outline-none transition-colors"/>
-                      </div>
-                      <div>
-                          <label className="text-[10px] font-bold text-slate-500 dark:text-zinc-400 uppercase tracking-widest">Pulso Reposo (ppm)</label>
-                          <input type="number" name="fcReposo" value={formData.fcReposo} onChange={handleChange} className="w-full bg-transparent border border-slate-200 dark:border-zinc-700 rounded px-3 py-1.5 mt-1 text-xs font-mono dark:text-zinc-200 focus:border-blue-500 outline-none transition-colors"/>
-                      </div>
-                  </div>
-              </div>
-
-              {/* SEGURIDAD DE LA CUENTA (NUEVO) */}
-              <div className="bg-white dark:bg-zinc-900 rounded-lg border border-slate-200 dark:border-zinc-800 p-4 shadow-sm">
-                  <PanelHeader icon={Lock} title="Seguridad" subtitle="Gestión de cuenta" />
+              {/* SEGURIDAD */}
+              <div className="bg-white dark:bg-zinc-900 rounded-lg border border-slate-200 dark:border-zinc-800 p-5 shadow-sm">
+                  <PanelHeader icon={Lock} title="Seguridad" subtitle="Gestión de credenciales" />
                   <form onSubmit={handleUpdatePassword} className="space-y-3">
-                      <div>
+                      <div className="relative">
+                          <Key size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 dark:text-zinc-500" />
                           <input 
                               type="password" 
                               value={newPassword}
                               onChange={(e) => setNewPassword(e.target.value)}
                               placeholder="Nueva contraseña..."
-                              className="w-full bg-transparent border border-slate-200 dark:border-zinc-700 rounded px-3 py-2 text-xs font-mono dark:text-zinc-200 focus:border-blue-500 outline-none transition-colors"
+                              className="w-full pl-9 pr-3 py-2 bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 rounded text-xs font-mono text-slate-800 dark:text-zinc-200 focus:border-blue-500 outline-none transition-colors"
                           />
                       </div>
-                      <button 
-                          type="submit" 
-                          disabled={isUpdatingPwd || !newPassword}
-                          className="w-full py-2 rounded font-bold text-[10px] uppercase tracking-wider flex items-center justify-center gap-2 bg-slate-100 dark:bg-zinc-800 hover:bg-slate-200 dark:hover:bg-zinc-700 transition-colors disabled:opacity-50 text-slate-800 dark:text-zinc-200"
-                      >
-                          {isUpdatingPwd ? <Loader2 size={12} className="animate-spin"/> : <Key size={12}/>}
-                          Actualizar Clave
+                      <button type="submit" disabled={isUpdatingPwd || !newPassword} className="w-full py-2 bg-slate-800 hover:bg-slate-700 text-white dark:bg-zinc-800 dark:hover:bg-zinc-700 dark:text-zinc-200 rounded text-[10px] font-bold uppercase tracking-widest transition-colors disabled:opacity-50 flex justify-center items-center gap-2">
+                          {isUpdatingPwd ? <Loader2 size={12} className="animate-spin"/> : 'Actualizar Clave'}
                       </button>
                   </form>
               </div>
 
-              {/* ESCÁNER */}
-              <div className="bg-white dark:bg-zinc-900 rounded-lg border border-slate-200 dark:border-zinc-800 p-4 relative overflow-hidden shadow-sm">
-                  <PanelHeader icon={Zap} title="Auto-Detectar Umbral" subtitle="Escaneo histórico de Streams (LTHR)" />
-                  <p className="text-[10px] text-slate-500 dark:text-zinc-400 leading-relaxed mb-4">Busca bloques de esfuerzo máximo (10m a 60m) en todo tu historial y aplica los factores de Friel/Coggan.</p>
-                  <button onClick={handleAutoDetectLTHR} disabled={isScanning || pureActs.length === 0} className="w-full py-2 rounded font-bold text-[10px] uppercase tracking-wider flex items-center justify-center gap-2 bg-slate-100 dark:bg-zinc-800 hover:bg-slate-200 dark:hover:bg-zinc-700 transition-colors disabled:opacity-50 text-slate-800 dark:text-zinc-200">
-                      {isScanning ? <><Loader2 size={12} className="animate-spin"/> Analizando...</> : <><RefreshCw size={12}/> Ejecutar Escáner</>}
-                  </button>
-              </div>
-
-              {/* INTEGRIDAD */}
-              <div className="bg-white dark:bg-zinc-900 rounded-lg border border-slate-200 dark:border-zinc-800 p-4 shadow-sm">
-                  <PanelHeader icon={Database} title="Integridad de Datos" subtitle="Estado de telemetría local" />
+              {/* INTEGRIDAD DE DATOS (DEEP SYNC) */}
+              <div className="bg-white dark:bg-zinc-900 rounded-lg border border-slate-200 dark:border-zinc-800 p-5 shadow-sm">
+                  <PanelHeader icon={Database} title="Integridad de Datos" subtitle="Estado de la base de datos local" />
                   <div className="flex justify-between items-end mb-2">
-                      <span className="text-[10px] font-bold text-slate-500 dark:text-zinc-400 uppercase tracking-widest">Sincronización</span>
+                      <span className="text-[10px] font-bold text-slate-500 dark:text-zinc-400 uppercase tracking-widest">Nivel de Precisión</span>
                       <span className="text-[10px] font-mono font-bold text-slate-700 dark:text-zinc-300">{pureActs.length} / {stravaActs.length}</span>
                   </div>
-                  <div className="w-full h-1 bg-slate-100 dark:bg-zinc-800 rounded-none overflow-hidden mb-4">
-                      <div className="h-full bg-blue-500" style={{ width: `${syncPct}%` }}></div>
+                  <div className="w-full h-1.5 bg-slate-100 dark:bg-zinc-800 rounded-full overflow-hidden mb-4">
+                      <div className={`h-full transition-all duration-500 ${syncPct === 100 ? 'bg-emerald-500' : 'bg-blue-500'}`} style={{ width: `${syncPct}%` }}></div>
                   </div>
-                  <button onClick={onDeepSync} disabled={isDeepSyncing || syncPct === 100} className={`w-full py-2 rounded font-bold text-[10px] uppercase tracking-wider flex items-center justify-center gap-2 transition-colors ${syncPct === 100 ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-500' : 'bg-slate-800 text-white dark:bg-zinc-800 dark:text-zinc-200 hover:bg-slate-700 dark:hover:bg-zinc-700'}`}>
-                      {isDeepSyncing ? <><Loader2 size={12} className="animate-spin"/> Procesando...</> : syncPct === 100 ? <><CheckCircle2 size={12}/> 100% Sincronizado</> : 'Deep Sync'}
+                  <button onClick={onDeepSync} disabled={isDeepSyncing || syncPct === 100} className={`w-full py-2 rounded text-[10px] font-bold uppercase tracking-widest transition-colors flex justify-center items-center gap-2 ${syncPct === 100 ? 'bg-emerald-50 text-emerald-600 border border-emerald-200 dark:bg-emerald-900/10 dark:border-emerald-900/30' : 'bg-slate-100 dark:bg-zinc-800 hover:bg-slate-200 dark:hover:bg-zinc-700 text-slate-800 dark:text-zinc-200'}`}>
+                      {isDeepSyncing ? <><Loader2 size={12} className="animate-spin"/> Procesando...</> : syncPct === 100 ? <><CheckCircle2 size={12}/> 100% Sincronizado</> : 'Forzar Sincronización Profunda'}
                   </button>
               </div>
+
+              {/* AUTO-DETECT LTHR */}
+              <div className="bg-white dark:bg-zinc-900 rounded-lg border border-slate-200 dark:border-zinc-800 p-5 shadow-sm bg-gradient-to-br from-indigo-50/50 to-transparent dark:from-indigo-950/10">
+                  <PanelHeader icon={Zap} title="Motor Analítico" subtitle="Auto-Detección de Umbrales" />
+                  <p className="text-[10px] text-slate-500 dark:text-zinc-400 leading-relaxed mb-4">
+                      Escanea milisegundo a milisegundo tu historial en busca de tus mejores picos de esfuerzo sostenido para actualizar tus umbrales automáticamente.
+                  </p>
+                  <button onClick={handleAutoDetectLTHR} disabled={isScanning || pureActs.length === 0} className="w-full py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded text-[10px] font-bold uppercase tracking-widest transition-colors disabled:opacity-50 flex justify-center items-center gap-2 shadow-sm">
+                      {isScanning ? <><Loader2 size={12} className="animate-spin"/> Analizando...</> : <><RefreshCw size={12}/> Escanear Historial</>}
+                  </button>
+              </div>
+
           </div>
 
-          <div className="lg:col-span-8 space-y-4">
-              {['bike', 'run'].map((sport) => (
-                  <div key={sport} className="bg-white dark:bg-zinc-900 rounded-lg border border-slate-200 dark:border-zinc-800 p-4 shadow-sm">
-                      <PanelHeader icon={Activity} title={`Fisiología - ${sport === 'bike' ? 'Ciclismo' : 'Carrera'}`} subtitle="Definición de rangos de intensidad y umbrales" />
+          {/* COLUMNA DERECHA: Fisiología (8/12) */}
+          <div className="lg:col-span-8 space-y-6">
+              
+              {/* DATOS BÁSICOS */}
+              <div className="bg-white dark:bg-zinc-900 rounded-lg border border-slate-200 dark:border-zinc-800 p-5 shadow-sm">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <div>
+                          <label className="text-[10px] font-bold text-slate-500 dark:text-zinc-400 uppercase tracking-widest block mb-1.5">Peso Corporal (kg)</label>
+                          <div className="relative">
+                              <Weight size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 dark:text-zinc-500" />
+                              <input type="number" name="weight" value={formData.weight} onChange={handleChange} className="w-full pl-9 pr-3 py-2 bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 rounded text-sm font-mono text-slate-800 dark:text-zinc-200 focus:border-blue-500 outline-none transition-colors"/>
+                          </div>
+                      </div>
+                      <div>
+                          <label className="text-[10px] font-bold text-slate-500 dark:text-zinc-400 uppercase tracking-widest block mb-1.5">Frecuencia Cardíaca Reposo</label>
+                          <div className="relative">
+                              <Heart size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-rose-400 dark:text-rose-500" />
+                              <input type="number" name="fcReposo" value={formData.fcReposo} onChange={handleChange} className="w-full pl-9 pr-3 py-2 bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 rounded text-sm font-mono text-slate-800 dark:text-zinc-200 focus:border-blue-500 outline-none transition-colors"/>
+                          </div>
+                      </div>
+                  </div>
+              </div>
+
+              {/* ZONAS POR DEPORTE */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  
+                  {/* RUNNING */}
+                  <div className="bg-white dark:bg-zinc-900 rounded-lg border border-orange-200 dark:border-orange-900/30 p-5 shadow-sm relative overflow-hidden">
+                      <div className="absolute top-0 left-0 w-full h-1 bg-orange-500"></div>
+                      <div className="flex justify-between items-end mb-5">
+                          <h3 className="text-[11px] font-black text-orange-600 dark:text-orange-500 uppercase tracking-widest flex items-center gap-1.5"><Footprints size={14}/> Running</h3>
+                      </div>
                       
                       <div className="grid grid-cols-2 gap-4 mb-6">
                           <div>
-                              <label className="text-[10px] font-bold text-slate-500 dark:text-zinc-400 uppercase tracking-widest block mb-1">Pulso Máximo (FCMáx)</label>
-                              <input type="number" value={formData[sport].max} onChange={(e) => handleChange(e, sport, 'max')} className="w-full bg-transparent border border-slate-200 dark:border-zinc-700 rounded px-3 py-2 text-sm font-mono dark:text-zinc-200 focus:border-blue-500 outline-none transition-colors"/>
+                              <label className="text-[9px] font-bold text-slate-500 dark:text-zinc-400 uppercase tracking-widest block mb-1">FC Máxima</label>
+                              <input type="number" value={formData.run.max} onChange={(e) => handleChange(e, 'run', 'max')} className="w-full bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 rounded px-3 py-2 text-sm font-mono dark:text-zinc-200 focus:border-orange-500 outline-none transition-colors"/>
                           </div>
                           <div>
-                              <label className="text-[10px] font-bold text-blue-600 dark:text-blue-500 uppercase tracking-widest block mb-1">Umbral Láctico (LTHR)</label>
-                              <input type="number" value={formData[sport].lthr} onChange={(e) => handleChange(e, sport, 'lthr')} className="w-full bg-blue-50/50 dark:bg-blue-500/5 border border-blue-200 dark:border-blue-500/20 rounded px-3 py-2 text-sm font-mono text-blue-700 dark:text-blue-400 focus:border-blue-500 outline-none transition-colors"/>
+                              <label className="text-[9px] font-bold text-orange-600 dark:text-orange-500 uppercase tracking-widest block mb-1">Umbral (LTHR)</label>
+                              <input type="number" value={formData.run.lthr} onChange={(e) => handleChange(e, 'run', 'lthr')} className="w-full bg-orange-50 dark:bg-orange-900/10 border border-orange-200 dark:border-orange-500/30 rounded px-3 py-2 text-sm font-mono text-orange-700 dark:text-orange-400 focus:border-orange-500 outline-none transition-colors"/>
                           </div>
                       </div>
 
                       <div>
                           <div className="flex justify-between items-center mb-3">
-                              <label className="text-[10px] font-bold text-slate-500 dark:text-zinc-400 uppercase tracking-widest">Zonas de Entrenamiento (ppm)</label>
-                              <button onClick={() => calculateZonesBasedOnLTHR(sport)} className="flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider text-slate-600 dark:text-zinc-400 hover:text-slate-800 dark:hover:text-zinc-200 transition-colors bg-slate-100 dark:bg-zinc-800 px-2 py-1 rounded">
-                                  <Calculator size={10}/> Auto-Calcular (Friel)
+                              <label className="text-[9px] font-bold text-slate-500 dark:text-zinc-400 uppercase tracking-widest">Zonas Cardíacas</label>
+                              <button onClick={() => calculateZonesBasedOnLTHR('run')} className="flex items-center gap-1 text-[9px] font-bold uppercase tracking-wider text-orange-600 dark:text-orange-400 hover:bg-orange-50 dark:hover:bg-orange-900/20 transition-colors px-2 py-1 rounded">
+                                  <Calculator size={10}/> Auto-Calcular
                               </button>
                           </div>
-                          <div className="space-y-1.5">
-                              {formData[sport].zones.map((zone, i) => (
-                                  <div key={i} className="flex items-center gap-3">
-                                      <span className="w-32 text-[10px] font-bold text-slate-600 dark:text-zinc-400 uppercase tracking-wider">{ZONE_LABELS[i]}</span>
-                                      <input type="number" value={zone.min} onChange={(e) => handleZoneChange(e, sport, i, 'min')} className="w-16 bg-transparent border border-slate-200 dark:border-zinc-700 rounded px-2 py-1 text-[11px] font-mono text-center dark:text-zinc-200 outline-none focus:border-blue-500 transition-colors" />
+                          <div className="space-y-2">
+                              {formData.run.zones.map((zone, i) => (
+                                  <div key={i} className="flex items-center gap-2">
+                                      <span className="w-24 text-[9px] font-bold text-slate-600 dark:text-zinc-400 uppercase tracking-widest">{ZONE_LABELS[i]}</span>
+                                      <input type="number" value={zone.min} onChange={(e) => handleZoneChange(e, 'run', i, 'min')} className="w-16 bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 rounded px-2 py-1 text-[11px] font-mono text-center dark:text-zinc-200 outline-none focus:border-orange-500 transition-colors" />
                                       <span className="text-slate-400 dark:text-zinc-600 font-bold">-</span>
-                                      <input type="number" value={zone.max} onChange={(e) => handleZoneChange(e, sport, i, 'max')} className="w-16 bg-transparent border border-slate-200 dark:border-zinc-700 rounded px-2 py-1 text-[11px] font-mono text-center dark:text-zinc-200 outline-none focus:border-blue-500 transition-colors" />
+                                      <input type="number" value={zone.max} onChange={(e) => handleZoneChange(e, 'run', i, 'max')} className="w-16 bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 rounded px-2 py-1 text-[11px] font-mono text-center dark:text-zinc-200 outline-none focus:border-orange-500 transition-colors" />
                                   </div>
                               ))}
                           </div>
                       </div>
                   </div>
-              ))}
+
+                  {/* CICLISMO */}
+                  <div className="bg-white dark:bg-zinc-900 rounded-lg border border-blue-200 dark:border-blue-900/30 p-5 shadow-sm relative overflow-hidden">
+                      <div className="absolute top-0 left-0 w-full h-1 bg-blue-500"></div>
+                      <div className="flex justify-between items-end mb-5">
+                          <h3 className="text-[11px] font-black text-blue-600 dark:text-blue-500 uppercase tracking-widest flex items-center gap-1.5"><Bike size={14}/> Ciclismo</h3>
+                      </div>
+                      
+                      <div className="grid grid-cols-2 gap-4 mb-6">
+                          <div>
+                              <label className="text-[9px] font-bold text-slate-500 dark:text-zinc-400 uppercase tracking-widest block mb-1">FC Máxima</label>
+                              <input type="number" value={formData.bike.max} onChange={(e) => handleChange(e, 'bike', 'max')} className="w-full bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 rounded px-3 py-2 text-sm font-mono dark:text-zinc-200 focus:border-blue-500 outline-none transition-colors"/>
+                          </div>
+                          <div>
+                              <label className="text-[9px] font-bold text-blue-600 dark:text-blue-500 uppercase tracking-widest block mb-1">Umbral (LTHR)</label>
+                              <input type="number" value={formData.bike.lthr} onChange={(e) => handleChange(e, 'bike', 'lthr')} className="w-full bg-blue-50 dark:bg-blue-900/10 border border-blue-200 dark:border-blue-500/30 rounded px-3 py-2 text-sm font-mono text-blue-700 dark:text-blue-400 focus:border-blue-500 outline-none transition-colors"/>
+                          </div>
+                      </div>
+
+                      <div>
+                          <div className="flex justify-between items-center mb-3">
+                              <label className="text-[9px] font-bold text-slate-500 dark:text-zinc-400 uppercase tracking-widest">Zonas Cardíacas</label>
+                              <button onClick={() => calculateZonesBasedOnLTHR('bike')} className="flex items-center gap-1 text-[9px] font-bold uppercase tracking-wider text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors px-2 py-1 rounded">
+                                  <Calculator size={10}/> Auto-Calcular
+                              </button>
+                          </div>
+                          <div className="space-y-2">
+                              {formData.bike.zones.map((zone, i) => (
+                                  <div key={i} className="flex items-center gap-2">
+                                      <span className="w-24 text-[9px] font-bold text-slate-600 dark:text-zinc-400 uppercase tracking-widest">{ZONE_LABELS[i]}</span>
+                                      <input type="number" value={zone.min} onChange={(e) => handleZoneChange(e, 'bike', i, 'min')} className="w-16 bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 rounded px-2 py-1 text-[11px] font-mono text-center dark:text-zinc-200 outline-none focus:border-blue-500 transition-colors" />
+                                      <span className="text-slate-400 dark:text-zinc-600 font-bold">-</span>
+                                      <input type="number" value={zone.max} onChange={(e) => handleZoneChange(e, 'bike', i, 'max')} className="w-16 bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 rounded px-2 py-1 text-[11px] font-mono text-center dark:text-zinc-200 outline-none focus:border-blue-500 transition-colors" />
+                                  </div>
+                              ))}
+                          </div>
+                      </div>
+                  </div>
+
+              </div>
           </div>
       </div>
     </div>
