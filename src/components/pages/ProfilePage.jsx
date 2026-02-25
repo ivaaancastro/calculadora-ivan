@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Save, Activity, Heart, Zap, User, Database, Loader2, RefreshCw, CheckCircle2, ArrowLeft, Calculator } from 'lucide-react';
+import { Save, Activity, Heart, Zap, User, Database, Loader2, RefreshCw, CheckCircle2, ArrowLeft, Calculator, Lock, Key } from 'lucide-react';
+import { supabase } from '../../supabase'; // Asegúrate de que esta ruta es correcta
 
 const getPeakByTime = (hrData, timeData, windowSeconds) => {
     if (!hrData || !timeData || hrData.length < 2) return 0;
@@ -19,6 +20,10 @@ const getPeakByTime = (hrData, timeData, windowSeconds) => {
 export const ProfilePage = ({ currentSettings, onUpdate, activities, isDeepSyncing, deepSyncProgress, onDeepSync, onBack }) => {
   const [formData, setFormData] = useState(null);
   const [isScanning, setIsScanning] = useState(false);
+  
+  // Estados para el cambio de contraseña
+  const [newPassword, setNewPassword] = useState('');
+  const [isUpdatingPwd, setIsUpdatingPwd] = useState(false);
 
   useEffect(() => {
     if (currentSettings) setFormData(currentSettings);
@@ -29,6 +34,23 @@ export const ProfilePage = ({ currentSettings, onUpdate, activities, isDeepSynci
   const stravaActs = activities?.filter(a => a.strava_id) || [];
   const pureActs = stravaActs.filter(a => a.streams_data);
   const syncPct = stravaActs.length > 0 ? Math.round((pureActs.length / stravaActs.length) * 100) : 0;
+
+  // FUNCIÓN PARA CAMBIAR CONTRASEÑA
+  const handleUpdatePassword = async (e) => {
+    e.preventDefault();
+    if (newPassword.length < 6) return alert("La contraseña debe tener al menos 6 caracteres.");
+    
+    setIsUpdatingPwd(true);
+    const { error } = await supabase.auth.updateUser({ password: newPassword });
+    setIsUpdatingPwd(false);
+
+    if (error) {
+      alert("Error al actualizar: " + error.message);
+    } else {
+      alert("¡Contraseña actualizada con éxito! Tu sesión sigue activa.");
+      setNewPassword('');
+    }
+  };
 
   const handleAutoDetectLTHR = () => {
       setIsScanning(true);
@@ -121,14 +143,14 @@ export const ProfilePage = ({ currentSettings, onUpdate, activities, isDeepSynci
       
       <div className="flex items-center justify-between mb-8 border-b border-slate-200 dark:border-zinc-800 pb-4">
           <div>
-              <button onClick={onBack} className="flex items-center gap-1.5 text-slate-500 hover:text-slate-800 dark:text-zinc-400 dark:hover:text-zinc-100 transition font-bold mb-4 px-3 py-1.5 text-[10px] uppercase tracking-wider rounded border border-slate-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 w-max">
+              <button onClick={onBack} className="flex items-center gap-1.5 text-slate-500 hover:text-slate-800 dark:text-zinc-400 dark:hover:text-zinc-100 transition font-bold mb-4 px-3 py-1.5 text-[10px] uppercase tracking-wider rounded border border-slate-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 w-max shadow-sm">
                   <ArrowLeft size={14} /> Volver al Dashboard
               </button>
               <h1 className="text-2xl font-black text-slate-900 dark:text-zinc-100 tracking-tight uppercase flex items-center gap-2">
                   Perfil Fisiológico
               </h1>
           </div>
-          <button onClick={() => onUpdate(formData)} className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded text-[11px] font-bold uppercase tracking-wider transition-colors">
+          <button onClick={() => onUpdate(formData)} className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded text-[11px] font-bold uppercase tracking-wider transition-colors shadow-md">
               <Save size={14} /> Guardar
           </button>
       </div>
@@ -136,7 +158,8 @@ export const ProfilePage = ({ currentSettings, onUpdate, activities, isDeepSynci
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
           <div className="lg:col-span-4 space-y-4">
               
-              <div className="bg-white dark:bg-zinc-900 rounded-lg border border-slate-200 dark:border-zinc-800 p-4">
+              {/* DATOS BIOMÉTRICOS */}
+              <div className="bg-white dark:bg-zinc-900 rounded-lg border border-slate-200 dark:border-zinc-800 p-4 shadow-sm">
                   <PanelHeader icon={Heart} title="Datos Biométricos" subtitle="Base para cálculos calóricos" />
                   <div className="space-y-4">
                       <div>
@@ -150,7 +173,32 @@ export const ProfilePage = ({ currentSettings, onUpdate, activities, isDeepSynci
                   </div>
               </div>
 
-              <div className="bg-white dark:bg-zinc-900 rounded-lg border border-slate-200 dark:border-zinc-800 p-4">
+              {/* SEGURIDAD DE LA CUENTA (NUEVO) */}
+              <div className="bg-white dark:bg-zinc-900 rounded-lg border border-slate-200 dark:border-zinc-800 p-4 shadow-sm">
+                  <PanelHeader icon={Lock} title="Seguridad" subtitle="Gestión de cuenta" />
+                  <form onSubmit={handleUpdatePassword} className="space-y-3">
+                      <div>
+                          <input 
+                              type="password" 
+                              value={newPassword}
+                              onChange={(e) => setNewPassword(e.target.value)}
+                              placeholder="Nueva contraseña..."
+                              className="w-full bg-transparent border border-slate-200 dark:border-zinc-700 rounded px-3 py-2 text-xs font-mono dark:text-zinc-200 focus:border-blue-500 outline-none transition-colors"
+                          />
+                      </div>
+                      <button 
+                          type="submit" 
+                          disabled={isUpdatingPwd || !newPassword}
+                          className="w-full py-2 rounded font-bold text-[10px] uppercase tracking-wider flex items-center justify-center gap-2 bg-slate-100 dark:bg-zinc-800 hover:bg-slate-200 dark:hover:bg-zinc-700 transition-colors disabled:opacity-50 text-slate-800 dark:text-zinc-200"
+                      >
+                          {isUpdatingPwd ? <Loader2 size={12} className="animate-spin"/> : <Key size={12}/>}
+                          Actualizar Clave
+                      </button>
+                  </form>
+              </div>
+
+              {/* ESCÁNER */}
+              <div className="bg-white dark:bg-zinc-900 rounded-lg border border-slate-200 dark:border-zinc-800 p-4 relative overflow-hidden shadow-sm">
                   <PanelHeader icon={Zap} title="Auto-Detectar Umbral" subtitle="Escaneo histórico de Streams (LTHR)" />
                   <p className="text-[10px] text-slate-500 dark:text-zinc-400 leading-relaxed mb-4">Busca bloques de esfuerzo máximo (10m a 60m) en todo tu historial y aplica los factores de Friel/Coggan.</p>
                   <button onClick={handleAutoDetectLTHR} disabled={isScanning || pureActs.length === 0} className="w-full py-2 rounded font-bold text-[10px] uppercase tracking-wider flex items-center justify-center gap-2 bg-slate-100 dark:bg-zinc-800 hover:bg-slate-200 dark:hover:bg-zinc-700 transition-colors disabled:opacity-50 text-slate-800 dark:text-zinc-200">
@@ -158,7 +206,8 @@ export const ProfilePage = ({ currentSettings, onUpdate, activities, isDeepSynci
                   </button>
               </div>
 
-              <div className="bg-white dark:bg-zinc-900 rounded-lg border border-slate-200 dark:border-zinc-800 p-4">
+              {/* INTEGRIDAD */}
+              <div className="bg-white dark:bg-zinc-900 rounded-lg border border-slate-200 dark:border-zinc-800 p-4 shadow-sm">
                   <PanelHeader icon={Database} title="Integridad de Datos" subtitle="Estado de telemetría local" />
                   <div className="flex justify-between items-end mb-2">
                       <span className="text-[10px] font-bold text-slate-500 dark:text-zinc-400 uppercase tracking-widest">Sincronización</span>
@@ -175,7 +224,7 @@ export const ProfilePage = ({ currentSettings, onUpdate, activities, isDeepSynci
 
           <div className="lg:col-span-8 space-y-4">
               {['bike', 'run'].map((sport) => (
-                  <div key={sport} className="bg-white dark:bg-zinc-900 rounded-lg border border-slate-200 dark:border-zinc-800 p-4">
+                  <div key={sport} className="bg-white dark:bg-zinc-900 rounded-lg border border-slate-200 dark:border-zinc-800 p-4 shadow-sm">
                       <PanelHeader icon={Activity} title={`Fisiología - ${sport === 'bike' ? 'Ciclismo' : 'Carrera'}`} subtitle="Definición de rangos de intensidad y umbrales" />
                       
                       <div className="grid grid-cols-2 gap-4 mb-6">
