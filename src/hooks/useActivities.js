@@ -144,7 +144,7 @@ export const useActivities = () => {
       } catch (e) { return null; }
   };
 
-  // --- SINCRONIZACIÓN BÁSICA CON PAGINACIÓN ---
+  // --- SINCRONIZACIÓN TOTAL (BÁSICA + DEEP SYNC AUTOMÁTICO) ---
   const handleStravaSync = async () => {
     try {
         const userId = await getCurrentUserId();
@@ -159,6 +159,7 @@ export const useActivities = () => {
         let totalNew = 0;
         const existingIds = new Set(activities.map(a => String(a.strava_id)));
 
+        // FASE 1: DESCARGA DE RESÚMENES (Paginación)
         while (hasMore) {
             setUploadStatus(`Sincronizando pág. ${page}...`);
             const response = await fetch(`https://www.strava.com/api/v3/athlete/activities?per_page=200&page=${page}`, {
@@ -201,15 +202,45 @@ export const useActivities = () => {
             }
         }
 
+        // Refrescar estado local para tener los IDs de la base de datos de los entrenos nuevos
+        let currentList = activities;
         if (totalNew > 0) {
-            await fetchActivities();
-            setUploadStatus(`¡${totalNew} nuevas!`);
-        } else {
-            setUploadStatus("Todo al día");
+            setUploadStatus("Procesando base de datos...");
+            const { data } = await supabase.from('activities').select('*').eq('user_id', userId);
+            if (data) {
+                currentList = data.map(a => ({...a, dateObj: new Date(a.date)})).sort((a, b) => a.dateObj - b.dateObj);
+                setActivities(currentList);
+            }
         }
 
-    } catch (err) { alert(err.message); } 
-    finally { setUploading(false); setTimeout(() => setUploadStatus(null), 3000); }
+        // FASE 2: DEEP SYNC AUTOMÁTICO (Telemetría y GPS)
+        const activitiesToSync = currentList.filter(a => a.strava_id && !a.streams_data);
+        
+        if (activitiesToSync.length > 0) {
+            setIsDeepSyncing(true); // Encendemos el flag por si tienes la UI en algún sitio
+            let count = 0;
+            for (const act of activitiesToSync) {
+                // Actualizamos la barra superior para que el usuario vea que está bajando datos densos
+                setUploadStatus(`Telemetría: ${count + 1} de ${activitiesToSync.length}...`);
+                setDeepSyncProgress({ current: count + 1, total: activitiesToSync.length });
+                
+                await fetchActivityStreams(act.id, act.strava_id);
+                await new Promise(resolve => setTimeout(resolve, 100)); // Turbo mode
+                count++;
+            }
+        }
+
+        // FASE 3: CONFIRMACIÓN FINAL
+        setUploadStatus(totalNew > 0 ? `¡Éxito! ${totalNew} actividades completas al 100%` : "Todo al día y 100% sincronizado");
+
+    } catch (err) { 
+        alert(err.message); 
+    } finally { 
+        setUploading(false); 
+        setIsDeepSyncing(false);
+        setDeepSyncProgress(null);
+        setTimeout(() => setUploadStatus(null), 4000); 
+    }
   };
 
   // --- SINCRONIZACIÓN PROFUNDA (MODO PRODUCCIÓN - MÁXIMA VELOCIDAD) ---
