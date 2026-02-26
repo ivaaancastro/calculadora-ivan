@@ -216,7 +216,7 @@ const Dashboard = () => {
               {/* SECCIÓN AVANZADA */}
               <div className="pt-4 border-t border-slate-200 dark:border-zinc-800 mt-4">
                 <AdvancedAnalytics
-                  activities={filteredData}
+                  activities={activities}
                   settings={settings}
                   onSelectActivity={(act) => setActiveActivity(act)}
                 />
@@ -252,7 +252,7 @@ const Dashboard = () => {
               </div>
               <div className="h-[calc(100vh-250px)]">
                 <HistoryList
-                  activities={filteredData}
+                  activities={activities}
                   onDelete={deleteActivity}
                   onSelectActivity={(act) => setActiveActivity(act)}
                 />
