@@ -3,6 +3,7 @@ import { supabase } from "../supabase";
 
 export const useActivities = () => {
   const [activities, setActivities] = useState([]);
+  const [plannedWorkouts, setPlannedWorkouts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
   const [uploadStatus, setUploadStatus] = useState(null);
@@ -32,9 +33,12 @@ export const useActivities = () => {
   });
 
   useEffect(() => {
-    Promise.all([fetchProfile(), fetchActivities()]).then(() =>
-      setLoading(false),
-    );
+    Promise.all([fetchProfile(), fetchActivities(), fetchPlannedWorkouts()])
+      .then(() => setLoading(false))
+      .catch((err) => {
+        console.error("Error fetching initial data:", err);
+        setLoading(false);
+      });
   }, []);
 
   const getCurrentUserId = async () => {
@@ -115,14 +119,89 @@ export const useActivities = () => {
     }
   };
 
+  // Columnas ligeras (todo menos streams_data y map_polyline que son pesados)
+  const LIGHT_COLS = "id,created_at,date,type,duration,distance,hr_avg,calories,effort_perceived,notes,user_id,strava_id,elevation_gain,watts_avg,name,description,speed_avg";
+
   const fetchActivities = async () => {
-    const { data, error } = await supabase.from("activities").select("*");
-    if (!error && data) {
-      const sorted = data
-        .map((a) => ({ ...a, dateObj: new Date(a.date) }))
+    try {
+      // Fase 1: Carga rápida — solo metadatos ligeros de TODAS las actividades
+      const { data: baseData, error } = await supabase
+        .from("activities")
+        .select(LIGHT_COLS);
+
+      if (error) {
+        console.error("Error fetching activities:", error);
+        return;
+      }
+
+      // Mostrar el dashboard inmediatamente con datos básicos
+      const sorted = (baseData || [])
+        .map((a) => ({ ...a, dateObj: new Date(a.date), streams_data: null }))
         .sort((a, b) => a.dateObj - b.dateObj);
       setActivities(sorted);
+
+      // Fase 2: En segundo plano, cargar streams_data solo de los últimos 90 días
+      const cutoff = new Date();
+      cutoff.setDate(cutoff.getDate() - 95);
+      const { data: streamsData } = await supabase
+        .from("activities")
+        .select("id,streams_data")
+        .gte("date", cutoff.toISOString().split("T")[0])
+        .not("streams_data", "is", null);
+
+      if (streamsData && streamsData.length > 0) {
+        const streamMap = new Map();
+        streamsData.forEach((s) => streamMap.set(s.id, s.streams_data));
+
+        // Actualizar actividades con los streams cargados
+        setActivities((prev) =>
+          prev.map((a) =>
+            streamMap.has(a.id) ? { ...a, streams_data: streamMap.get(a.id) } : a
+          )
+        );
+      }
+    } catch (e) {
+      console.error("fetchActivities failed:", e);
     }
+  };
+
+  const fetchPlannedWorkouts = async () => {
+    try {
+      const { data, error } = await supabase.from("planned_workouts").select("*");
+      if (!error && data) {
+        const sorted = data
+          .map((a) => ({ ...a, dateObj: new Date(a.date), isPlanned: true }))
+          .sort((a, b) => a.dateObj - b.dateObj);
+        setPlannedWorkouts(sorted);
+      }
+    } catch (e) {
+      console.warn("planned_workouts table not available:", e);
+    }
+  };
+
+  const addPlannedWorkout = async (workoutData) => {
+    const userId = await getCurrentUserId();
+    if (!userId) throw new Error("No hay sesión activa");
+
+    // El workoutData vendrá del CalendarPage con date, type, name, duration, tss, description (JSON stringified)
+    const { data, error } = await supabase
+      .from("planned_workouts")
+      .insert([{ ...workoutData, user_id: userId }])
+      .select()
+      .single();
+
+    if (error) throw error;
+
+    // Update local state immediately
+    const newWorkout = { ...data, dateObj: new Date(data.date), isPlanned: true };
+    setPlannedWorkouts(prev => [...prev, newWorkout].sort((a, b) => a.dateObj - b.dateObj));
+    return newWorkout;
+  };
+
+  const deletePlannedWorkout = async (id) => {
+    const { error } = await supabase.from("planned_workouts").delete().eq("id", id);
+    if (error) throw error;
+    setPlannedWorkouts(prev => prev.filter(w => w.id !== id));
   };
 
   const refreshStravaToken = async (refreshToken) => {
@@ -663,6 +742,9 @@ export const useActivities = () => {
 
   return {
     activities: metrics.activities,
+    plannedWorkouts,
+    addPlannedWorkout,
+    deletePlannedWorkout,
     loading,
     uploading,
     uploadStatus,

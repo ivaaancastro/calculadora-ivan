@@ -135,6 +135,7 @@ export const AdvancedAnalytics = ({ activities, settings, onSelectActivity }) =>
 
         let currentCTL = 0; let currentATL = 0;
         const loadHistory = [];
+        const pmcHistory = [];
         const allDates = Array.from(dailyTSS.keys()).sort();
         if (allDates.length > 0) {
             const firstDate = new Date(allDates[0]);
@@ -146,11 +147,20 @@ export const AdvancedAnalytics = ({ activities, settings, onSelectActivity }) =>
                 const tss = dailyTSS.get(dateStr) || 0;
                 currentCTL = currentCTL + (tss - currentCTL) / 42;
                 currentATL = currentATL + (tss - currentATL) / 7;
-                if (i <= 7) loadHistory.push(tss);
+                if (i <= 180) {
+                    pmcHistory.push({
+                        dateLabel: d.toLocaleDateString('es-ES', { day: '2-digit', month: 'short' }),
+                        ctl: Math.round(currentCTL * 10) / 10,
+                        atl: Math.round(currentATL * 10) / 10,
+                        tsb: Math.round((currentCTL - currentATL) * 10) / 10,
+                    });
+                }
+                if (i <= 7 && i > 0) loadHistory.push(tss);
             }
         }
         const tsb = currentCTL - currentATL;
 
+        // Calcular Ramp Rate (tendencia a 7 días)
         let pastCTL = 0;
         for (let i = 67; i >= 7; i--) {
             const d = new Date(today); d.setDate(d.getDate() - i);
@@ -187,7 +197,7 @@ export const AdvancedAnalytics = ({ activities, settings, onSelectActivity }) =>
         });
 
         return {
-            zonesChart, focusChart, weeklyChart, curves, scatterData, dailyTSS,
+            zonesChart, focusChart, weeklyChart, curves, scatterData, dailyTSS, pmcHistory,
             vo2Max: { run: Number(bestRunVo2.toFixed(1)), bike: Number(bestBikeVo2.toFixed(1)), bikeEstimated: bikeVo2IsEstimated },
             model: { ctl: currentCTL, atl: currentATL, tsb, rampRate, monotony, strain, load7d: sum7 }
         };
@@ -489,13 +499,13 @@ export const AdvancedAnalytics = ({ activities, settings, onSelectActivity }) =>
         const r = wellnessMetrics.todayReadiness;
         const t = analytics.model.tsb;
 
-        if (r === '--') return { title: 'Faltan Datos de Salud', desc: 'Sincroniza tu reloj para evaluar tu Nivel de Preparación (Readiness).', color: 'bg-slate-900 border-zinc-800 text-slate-400', icon: ActivityPulse };
-        if (r >= 85 && t > -10) return { title: 'Estado Óptimo', desc: 'Tu cuerpo ha absorbido el entrenamiento y tu VFC está equilibrada. Es un día ideal para meter intensidad, series o superar un récord.', color: 'bg-emerald-950/50 border-emerald-900/50 text-emerald-400', icon: Sparkles };
-        if (r >= 60 && t > -20) return { title: 'Productivo', desc: 'Estás asimilando bien el entrenamiento. Tienes energía suficiente para cumplir el plan previsto hoy sin riesgo excesivo.', color: 'bg-blue-950/50 border-blue-900/50 text-blue-400', icon: Target };
-        if (r < 60 && r >= 40) return { title: 'Fatiga Acumulada', desc: 'Tu sistema nervioso muestra signos de fatiga. Considera bajar la intensidad hoy o hacer un rodaje en Zona 1-2 para facilitar la recuperación.', color: 'bg-orange-950/50 border-orange-900/50 text-orange-400', icon: Coffee };
-        if (r < 40) return { title: 'Sobrecarga Sistémica', desc: 'Tu VFC y tu sueño indican un estrés severo. Entrenar fuerte hoy es contraproducente. Prioriza el descanso o estiramientos.', color: 'bg-red-950/50 border-red-900/50 text-red-400', icon: AlertTriangle };
+        if (r === '--') return { title: 'Faltan Datos de Salud', desc: 'Sincroniza tu reloj para evaluar tu Nivel de Preparación (Readiness).', accent: 'border-l-slate-500', badge: 'bg-slate-500/10 text-slate-400', badgeLabel: 'SIN DATOS', icon: ActivityPulse };
+        if (r >= 85 && t > -10) return { title: 'Estado Óptimo', desc: 'Tu cuerpo ha absorbido el entrenamiento y tu VFC está equilibrada. Es un día ideal para meter intensidad, series o superar un récord.', accent: 'border-l-emerald-500', badge: 'bg-emerald-500/10 text-emerald-400', badgeLabel: 'PEAK', icon: Sparkles };
+        if (r >= 60 && t > -20) return { title: 'Productivo', desc: 'Estás asimilando bien el entrenamiento. Tienes energía suficiente para cumplir el plan previsto hoy sin riesgo excesivo.', accent: 'border-l-blue-500', badge: 'bg-blue-500/10 text-blue-400', badgeLabel: 'OK', icon: Target };
+        if (r < 60 && r >= 40) return { title: 'Fatiga Acumulada', desc: 'Tu sistema nervioso muestra signos de fatiga. Considera bajar la intensidad hoy o hacer un rodaje en Zona 1-2 para facilitar la recuperación.', accent: 'border-l-amber-500', badge: 'bg-amber-500/10 text-amber-400', badgeLabel: 'CUIDADO', icon: Coffee };
+        if (r < 40) return { title: 'Sobrecarga Sistémica', desc: 'Tu VFC y tu sueño indican un estrés severo. Entrenar fuerte hoy es contraproducente. Prioriza el descanso o estiramientos.', accent: 'border-l-red-500', badge: 'bg-red-500/10 text-red-400', badgeLabel: 'ALERTA', icon: AlertTriangle };
 
-        return { title: 'Mantenimiento', desc: 'Tu cuerpo está en equilibrio. Escucha a tus sensaciones para decidir el entrenamiento de hoy.', color: 'bg-slate-900 border-zinc-800 text-slate-300', icon: ActivityPulse };
+        return { title: 'Mantenimiento', desc: 'Tu cuerpo está en equilibrio. Escucha a tus sensaciones para decidir el entrenamiento de hoy.', accent: 'border-l-slate-500', badge: 'bg-slate-500/10 text-slate-400', badgeLabel: 'NEUTRO', icon: ActivityPulse };
     };
 
     const getVo2Assessment = (vo2Value) => {
@@ -577,8 +587,8 @@ export const AdvancedAnalytics = ({ activities, settings, onSelectActivity }) =>
                     </div>
                 </div>
 
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-                    <div className={`p-6 rounded-lg border flex flex-col justify-center ${status.bg}`}>
+                <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
+                    <div className={`p-6 rounded-lg border flex flex-col justify-center lg:col-span-1 ${status.bg}`}>
                         <div className="flex items-center gap-3 mb-4">
                             <div className={`p-2 rounded-full bg-white dark:bg-zinc-950 shadow-sm ${status.color}`}><status.icon size={24} strokeWidth={2.5} /></div>
                             <h2 className={`text-2xl font-black uppercase tracking-tight ${status.color}`}>{status.phase}</h2>
@@ -586,10 +596,10 @@ export const AdvancedAnalytics = ({ activities, settings, onSelectActivity }) =>
                         <p className="text-sm font-medium text-slate-700 dark:text-zinc-300 leading-relaxed">{status.desc}</p>
                     </div>
 
-                    <div className="bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 p-4 h-[240px] rounded-lg lg:col-span-2 flex flex-col">
+                    <div className="bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 p-4 h-[300px] rounded-lg lg:col-span-3 flex flex-col">
                         <div className="flex items-center mb-2">
                             <h4 className="text-[10px] font-bold text-slate-600 dark:text-zinc-400 uppercase tracking-widest flex items-center gap-1.5"><CalendarDays size={12} /> Carga Semanal (TSS)</h4>
-                            <Subtitle text="Últimos 90 Días" />
+                            <Subtitle text="Últ. 3 Meses" />
                         </div>
                         <div className="flex-1 w-full">
                             <ResponsiveContainer width="100%" height="100%">
@@ -786,15 +796,18 @@ export const AdvancedAnalytics = ({ activities, settings, onSelectActivity }) =>
                 </div>
 
                 {!wellnessLoading && (
-                    <div className={`mb-6 p-5 rounded-lg border ${dailyInsight.color} animate-in fade-in slide-in-from-top-4 duration-500`}>
-                        <div className="flex items-start gap-4">
-                            <div className="p-3 bg-black/20 rounded-full shrink-0 mt-1">
-                                <dailyInsight.icon size={24} strokeWidth={2} />
+                    <div className={`mb-6 rounded-lg border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 border-l-4 ${dailyInsight.accent} animate-in fade-in slide-in-from-top-4 duration-500 overflow-hidden`}>
+                        <div className="p-5 flex items-start gap-4">
+                            <div className="p-2.5 bg-slate-100 dark:bg-zinc-800 rounded-lg shrink-0 mt-0.5">
+                                <dailyInsight.icon size={20} strokeWidth={2} className="text-slate-600 dark:text-zinc-300" />
                             </div>
-                            <div>
-                                <h3 className="text-[10px] font-bold uppercase tracking-widest opacity-80 mb-1">Morning Report</h3>
-                                <h2 className="text-xl font-black tracking-tight mb-1.5">{dailyInsight.title}</h2>
-                                <p className="text-sm font-medium opacity-90 leading-relaxed max-w-3xl">
+                            <div className="flex-1 min-w-0">
+                                <div className="flex items-center gap-2.5 mb-1.5">
+                                    <h3 className="text-[10px] font-bold uppercase tracking-widest text-slate-400 dark:text-zinc-500">Morning Report</h3>
+                                    <span className={`text-[8px] font-black uppercase tracking-widest px-2 py-0.5 rounded-full ${dailyInsight.badge}`}>{dailyInsight.badgeLabel}</span>
+                                </div>
+                                <h2 className="text-lg font-black tracking-tight text-slate-800 dark:text-zinc-100 mb-1">{dailyInsight.title}</h2>
+                                <p className="text-xs font-medium text-slate-500 dark:text-zinc-400 leading-relaxed max-w-3xl">
                                     {dailyInsight.desc}
                                 </p>
                             </div>
