@@ -24,7 +24,157 @@ const getSportIcon = (type) => {
     return <Activity size={12} />;
 };
 
-export const CalendarPage = ({ activities, plannedWorkouts = [], addPlannedWorkout, deletePlannedWorkout, currentMetrics, onDelete, onSelectActivity }) => {
+// --- ESTIMATED PACE PER ZONE (min/km for Run, min/10km for Ride) ---
+const ZONE_PACE = {
+    Run: { Z1: 7.0, Z2: 6.0, Z3: 5.2, Z4: 4.5, Z5: 3.8, Z6: 3.2 },
+    Ride: { Z1: 3.0, Z2: 2.5, Z3: 2.2, Z4: 2.0, Z5: 1.7, Z6: 1.5 },
+    Swim: { Z1: 3.0, Z2: 2.5, Z3: 2.2, Z4: 2.0, Z5: 1.7, Z6: 1.5 },
+};
+
+// --- WORKOUT TEMPLATES BY SPORT ---
+const WORKOUT_TEMPLATES = {
+    Run: [
+        {
+            name: 'Rodaje fácil', cat: 'BASE', tss: 40, duration: 45, blocks: [
+                { id: 1, type: 'warmup', duration: 10, zone: 'Z1', details: '', unit: 'time' },
+                { id: 2, type: 'main', duration: 8, zone: 'Z2', details: 'Ritmo cómodo conversacional', unit: 'dist' },
+                { id: 3, type: 'cooldown', duration: 5, zone: 'Z1', details: '', unit: 'time' }
+            ]
+        },
+        {
+            name: 'Series 4x1km', cat: 'INT', tss: 70, duration: 50, blocks: [
+                { id: 1, type: 'warmup', duration: 10, zone: 'Z2', details: '', unit: 'time' },
+                {
+                    id: 2, type: 'repeat', repeats: 4, steps: [
+                        { id: 1, type: 'active', duration: 1, zone: 'Z4', unit: 'dist' },
+                        { id: 2, type: 'recovery', duration: 2, zone: 'Z1', unit: 'time' }
+                    ]
+                },
+                { id: 3, type: 'cooldown', duration: 10, zone: 'Z1', details: '', unit: 'time' }
+            ]
+        },
+        {
+            name: 'Tempo 30\'', cat: 'UMBRAL', tss: 65, duration: 50, blocks: [
+                { id: 1, type: 'warmup', duration: 10, zone: 'Z2', details: '', unit: 'time' },
+                { id: 2, type: 'main', duration: 30, zone: 'Z3', details: 'Ritmo tempo sostenido', unit: 'time' },
+                { id: 3, type: 'cooldown', duration: 10, zone: 'Z1', details: '', unit: 'time' }
+            ]
+        },
+        {
+            name: 'Tirada larga', cat: 'FONDO', tss: 90, duration: 90, blocks: [
+                { id: 1, type: 'warmup', duration: 15, zone: 'Z1', details: '', unit: 'time' },
+                { id: 2, type: 'main', duration: 15, zone: 'Z2', details: 'Ritmo constante aeróbico', unit: 'dist' },
+                { id: 3, type: 'cooldown', duration: 10, zone: 'Z1', details: '', unit: 'time' }
+            ]
+        },
+        {
+            name: 'Fartlek 6x500m', cat: 'MIXTO', tss: 55, duration: 40, blocks: [
+                { id: 1, type: 'warmup', duration: 10, zone: 'Z2', details: '', unit: 'time' },
+                {
+                    id: 2, type: 'repeat', repeats: 6, steps: [
+                        { id: 1, type: 'active', duration: 0.5, zone: 'Z4', unit: 'dist' },
+                        { id: 2, type: 'recovery', duration: 0.5, zone: 'Z2', unit: 'dist' }
+                    ]
+                },
+                { id: 3, type: 'cooldown', duration: 6, zone: 'Z1', details: '', unit: 'time' }
+            ]
+        },
+    ],
+    Ride: [
+        {
+            name: 'Base aeróbica', cat: 'BASE', tss: 70, duration: 90, blocks: [
+                { id: 1, type: 'warmup', duration: 15, zone: 'Z1', details: '', unit: 'time' },
+                { id: 2, type: 'main', duration: 65, zone: 'Z2', details: 'Pedaleo suave constante', unit: 'time' },
+                { id: 3, type: 'cooldown', duration: 10, zone: 'Z1', details: '', unit: 'time' }
+            ]
+        },
+        {
+            name: 'Sweet Spot 2x20', cat: 'SST', tss: 85, duration: 75, blocks: [
+                { id: 1, type: 'warmup', duration: 15, zone: 'Z2', details: '', unit: 'time' },
+                {
+                    id: 2, type: 'repeat', repeats: 2, steps: [
+                        { id: 1, type: 'active', duration: 20, zone: 'Z3', unit: 'time' },
+                        { id: 2, type: 'recovery', duration: 5, zone: 'Z1', unit: 'time' }
+                    ]
+                },
+                { id: 3, type: 'cooldown', duration: 10, zone: 'Z1', details: '', unit: 'time' }
+            ]
+        },
+        {
+            name: 'Intervalos VO2', cat: 'VO2', tss: 80, duration: 60, blocks: [
+                { id: 1, type: 'warmup', duration: 15, zone: 'Z2', details: '', unit: 'time' },
+                {
+                    id: 2, type: 'repeat', repeats: 5, steps: [
+                        { id: 1, type: 'active', duration: 3, zone: 'Z5', unit: 'time' },
+                        { id: 2, type: 'recovery', duration: 3, zone: 'Z1', unit: 'time' }
+                    ]
+                },
+                { id: 3, type: 'cooldown', duration: 15, zone: 'Z1', details: '', unit: 'time' }
+            ]
+        },
+        {
+            name: 'Recuperación', cat: 'REC', tss: 25, duration: 45, blocks: [
+                { id: 1, type: 'main', duration: 45, zone: 'Z1', details: 'Pedaleo muy suave regenerativo', unit: 'time' }
+            ]
+        },
+    ],
+    WeightTraining: [
+        {
+            name: 'Tren inferior', cat: 'PIERNA', tss: 50, duration: 55, blocks: [
+                { id: 1, type: 'warmup', duration: 10, zone: 'Z1', details: '', unit: 'time' },
+                {
+                    id: 2, type: 'repeat', repeats: 4, steps: [
+                        { id: 1, type: 'active', duration: 8, zone: 'Z3', unit: 'time' },
+                        { id: 2, type: 'recovery', duration: 2, zone: 'Z1', unit: 'time' }
+                    ]
+                },
+                { id: 3, type: 'cooldown', duration: 5, zone: 'Z1', details: '', unit: 'time' }
+            ]
+        },
+        {
+            name: 'Tren superior', cat: 'TORSO', tss: 45, duration: 50, blocks: [
+                { id: 1, type: 'warmup', duration: 10, zone: 'Z1', details: '', unit: 'time' },
+                {
+                    id: 2, type: 'repeat', repeats: 4, steps: [
+                        { id: 1, type: 'active', duration: 7, zone: 'Z3', unit: 'time' },
+                        { id: 2, type: 'recovery', duration: 2, zone: 'Z1', unit: 'time' }
+                    ]
+                },
+                { id: 3, type: 'cooldown', duration: 5, zone: 'Z1', details: '', unit: 'time' }
+            ]
+        },
+        {
+            name: 'Full body', cat: 'FULL', tss: 60, duration: 60, blocks: [
+                { id: 1, type: 'warmup', duration: 10, zone: 'Z1', details: '', unit: 'time' },
+                {
+                    id: 2, type: 'repeat', repeats: 3, steps: [
+                        { id: 1, type: 'active', duration: 12, zone: 'Z3', unit: 'time' },
+                        { id: 2, type: 'recovery', duration: 3, zone: 'Z1', unit: 'time' }
+                    ]
+                },
+                { id: 3, type: 'cooldown', duration: 5, zone: 'Z1', details: '', unit: 'time' }
+            ]
+        },
+        {
+            name: 'Core + estabilidad', cat: 'CORE', tss: 25, duration: 30, blocks: [
+                { id: 1, type: 'warmup', duration: 5, zone: 'Z1', details: '', unit: 'time' },
+                { id: 2, type: 'main', duration: 20, zone: 'Z2', details: 'Plancha, bird-dog, pallof press', unit: 'time' },
+                { id: 3, type: 'cooldown', duration: 5, zone: 'Z1', details: '', unit: 'time' }
+            ]
+        },
+    ],
+    Swim: [
+        {
+            name: 'Técnica + base', cat: 'BASE', tss: 45, duration: 45, blocks: [
+                { id: 1, type: 'warmup', duration: 10, zone: 'Z1', details: '', unit: 'time' },
+                { id: 2, type: 'main', duration: 30, zone: 'Z2', details: 'Drills + nado continuo', unit: 'time' },
+                { id: 3, type: 'cooldown', duration: 5, zone: 'Z1', details: '', unit: 'time' }
+            ]
+        },
+    ],
+};
+
+export const CalendarPage = ({ activities, plannedWorkouts = [], addPlannedWorkout, deletePlannedWorkout, updatePlannedWorkout, currentMetrics, settings, onDelete, onSelectActivity }) => {
 
     const [currentDate, setCurrentDate] = useState(() => {
         const savedDate = sessionStorage.getItem('forma_calendar_date');
@@ -64,6 +214,25 @@ export const CalendarPage = ({ activities, plannedWorkouts = [], addPlannedWorko
     const nextMonth = () => setCurrentDate(new Date(year, month + 1, 1));
     const goToday = () => setCurrentDate(new Date());
 
+    // --- VIEW MODE ---
+    const [viewMode, setViewMode] = useState('month'); // 'month' | 'week'
+
+    // Current week for weekly view
+    const currentWeekDays = useMemo(() => {
+        const today = new Date(currentDate);
+        const dow = today.getDay() || 7; // Monday = 1
+        const monday = new Date(today);
+        monday.setDate(today.getDate() - dow + 1);
+        return Array.from({ length: 7 }, (_, i) => {
+            const d = new Date(monday);
+            d.setDate(monday.getDate() + i);
+            return d;
+        });
+    }, [currentDate]);
+
+    const prevWeek = () => setCurrentDate(prev => { const d = new Date(prev); d.setDate(d.getDate() - 7); return d; });
+    const nextWeek = () => setCurrentDate(prev => { const d = new Date(prev); d.setDate(d.getDate() + 7); return d; });
+
     // Using DB instead of localStorage for planned activities
 
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -77,26 +246,102 @@ export const CalendarPage = ({ activities, plannedWorkouts = [], addPlannedWorko
         blocks: []
     });
 
-    // --- INTENSITY FACTORS PER ZONE (para estimación de TSS) ---
-    const ZONE_IF = { Z1: 0.55, Z2: 0.75, Z3: 0.88, Z4: 1.0, Z5: 1.15, Z6: 1.3 };
+    // --- DRAG & DROP STATE ---
+    const [draggedWorkout, setDraggedWorkout] = useState(null);
+    const [dragOverDate, setDragOverDate] = useState(null);
+
+    const handleDragStart = (e, workout) => {
+        setDraggedWorkout(workout);
+        e.dataTransfer.effectAllowed = 'move';
+        e.dataTransfer.setData('text/plain', workout.id);
+    };
+
+    const handleDragOver = (e, dateKey) => {
+        e.preventDefault();
+        e.dataTransfer.dropEffect = 'move';
+        setDragOverDate(dateKey);
+    };
+
+    const handleDragLeave = () => setDragOverDate(null);
+
+    const handleDrop = async (e, targetDate) => {
+        e.preventDefault();
+        setDragOverDate(null);
+        if (!draggedWorkout || !updatePlannedWorkout) return;
+        const newDateStr = targetDate.toISOString();
+        const oldDateKey = new Date(draggedWorkout.date).toLocaleDateString('en-CA');
+        const newDateKey = targetDate.toLocaleDateString('en-CA');
+        if (oldDateKey === newDateKey) { setDraggedWorkout(null); return; }
+        try {
+            await updatePlannedWorkout(draggedWorkout.id, { date: newDateStr });
+        } catch (err) {
+            console.error('Error moving workout:', err);
+        }
+        setDraggedWorkout(null);
+    };
+
+    // --- APPLY TEMPLATE ---
+    const applyTemplate = (template) => {
+        const stampBlocks = template.blocks.map(b => ({
+            ...b,
+            id: Date.now() + Math.random(),
+            steps: b.steps ? b.steps.map(s => ({ ...s, id: Date.now() + Math.random() })) : undefined
+        }));
+        setNewPlan(prev => ({
+            ...prev,
+            name: template.name,
+            tss: template.tss,
+            duration: template.duration,
+            blocks: stampBlocks
+        }));
+    };
+
+    // --- INTENSITY FACTORS PER ZONE (dynamic from profile, fallback to defaults) ---
+    const DEFAULT_ZONE_IF = { Z1: 0.55, Z2: 0.75, Z3: 0.88, Z4: 1.0, Z5: 1.15, Z6: 1.3 };
+    const ZONE_IF = useMemo(() => {
+        // Try to derive IF from user's configured LTHR zones
+        const sportKey = newPlan.type === 'Ride' ? 'ciclismo' : newPlan.type === 'Swim' ? 'natacion' : 'carrera';
+        const sportSettings = settings?.[sportKey];
+        if (!sportSettings?.lthr || !sportSettings?.zones?.length) return DEFAULT_ZONE_IF;
+        const lthr = sportSettings.lthr;
+        // Each zone's IF = midpoint HR / LTHR
+        const zones = sportSettings.zones;
+        const derived = {};
+        zones.forEach((z, i) => {
+            const mid = (z.min + z.max) / 2;
+            derived[`Z${i + 1}`] = Math.round((mid / lthr) * 100) / 100;
+        });
+        // Z6 if not defined
+        if (!derived.Z6) derived.Z6 = 1.3;
+        return { ...DEFAULT_ZONE_IF, ...derived };
+    }, [settings, newPlan.type]);
 
     // --- AUTO TSS ESTIMATION FROM BLOCKS ---
     const estimatedTSS = useMemo(() => {
         if (newPlan.blocks.length === 0) return null;
         let totalMinutes = 0;
         let weightedIF = 0;
+        const sportPace = ZONE_PACE[newPlan.type] || ZONE_PACE.Run;
+
+        const toMinutes = (val, unit, zone) => {
+            if (unit === 'dist') {
+                const pace = sportPace[zone] || 5.0;
+                return (Number(val) || 0) * pace;
+            }
+            return Number(val) || 0;
+        };
 
         const processBlock = (block) => {
             if (block.type === 'repeat') {
                 const reps = block.repeats || 1;
                 block.steps.forEach(step => {
-                    const mins = Number(step.duration) || 0;
+                    const mins = toMinutes(step.duration, step.unit, step.zone);
                     const ifVal = ZONE_IF[step.zone] || 0.75;
                     totalMinutes += mins * reps;
                     weightedIF += mins * reps * ifVal * ifVal;
                 });
             } else {
-                const mins = Number(block.duration) || 0;
+                const mins = toMinutes(block.duration, block.unit, block.zone);
                 const ifVal = ZONE_IF[block.zone] || 0.75;
                 totalMinutes += mins;
                 weightedIF += mins * ifVal * ifVal;
@@ -106,20 +351,28 @@ export const CalendarPage = ({ activities, plannedWorkouts = [], addPlannedWorko
         newPlan.blocks.forEach(processBlock);
         if (totalMinutes === 0) return null;
         return Math.round((weightedIF * 100) / 60);
-    }, [newPlan.blocks]);
+    }, [newPlan.blocks, newPlan.type]);
 
     // Auto-update TSS and duration when blocks change
     useEffect(() => {
         if (estimatedTSS !== null) {
+            const sportPace = ZONE_PACE[newPlan.type] || ZONE_PACE.Run;
             let totalMins = 0;
             newPlan.blocks.forEach(b => {
                 if (b.type === 'repeat') {
-                    b.steps.forEach(s => { totalMins += (Number(s.duration) || 0) * (b.repeats || 1); });
+                    b.steps.forEach(s => {
+                        const mins = s.unit === 'dist'
+                            ? (Number(s.duration) || 0) * (sportPace[s.zone] || 5)
+                            : (Number(s.duration) || 0);
+                        totalMins += mins * (b.repeats || 1);
+                    });
                 } else {
-                    totalMins += Number(b.duration) || 0;
+                    totalMins += b.unit === 'dist'
+                        ? (Number(b.duration) || 0) * (sportPace[b.zone] || 5)
+                        : (Number(b.duration) || 0);
                 }
             });
-            setNewPlan(prev => ({ ...prev, tss: estimatedTSS, duration: totalMins }));
+            setNewPlan(prev => ({ ...prev, tss: estimatedTSS, duration: Math.round(totalMins) }));
         }
     }, [estimatedTSS]);
 
@@ -256,7 +509,7 @@ export const CalendarPage = ({ activities, plannedWorkouts = [], addPlannedWorko
         } else {
             setNewPlan(prev => ({
                 ...prev,
-                blocks: [...prev.blocks, { id: Date.now(), type: blockType, duration: 10, zone: 'Z2', details: '' }]
+                blocks: [...prev.blocks, { id: Date.now(), type: blockType, duration: 10, zone: 'Z2', details: '', unit: 'time' }]
             }));
         }
     };
@@ -266,7 +519,7 @@ export const CalendarPage = ({ activities, plannedWorkouts = [], addPlannedWorko
             ...prev,
             blocks: prev.blocks.map(b => b.id === blockId ? {
                 ...b,
-                steps: [...b.steps, { id: Date.now() + Math.random(), type: stepType, duration: 2, zone: stepType === 'active' ? 'Z4' : 'Z1' }]
+                steps: [...b.steps, { id: Date.now() + Math.random(), type: stepType, duration: 2, zone: stepType === 'active' ? 'Z4' : 'Z1', unit: 'time' }]
             } : b)
         }));
     };
@@ -364,6 +617,35 @@ export const CalendarPage = ({ activities, plannedWorkouts = [], addPlannedWorko
         return map;
     }, [activities, plannedWorkouts]);
 
+    const plannedByDate = useMemo(() => {
+        const map = {};
+        if (plannedWorkouts) {
+            plannedWorkouts.forEach(p => {
+                const dateKey = new Date(p.date).toLocaleDateString('en-CA');
+                if (!map[dateKey]) map[dateKey] = [];
+                map[dateKey].push(p);
+            });
+        }
+        return map;
+    }, [plannedWorkouts]);
+
+    // --- COMPLIANCE: Plan vs Execution ---
+    const getComplianceForDay = (dateKey, acts) => {
+        const planned = acts.filter(a => a.isPlanned);
+        const real = acts.filter(a => !a.isPlanned);
+        if (planned.length === 0) return null;
+        const plannedTSS = planned.reduce((s, a) => s + (a.tss || 0), 0);
+        const realTSS = real.reduce((s, a) => s + (a.tss || 0), 0);
+        const today = new Date(); today.setHours(0, 0, 0, 0);
+        const dayDate = new Date(dateKey + 'T00:00:00');
+        if (dayDate > today) return { status: 'future', pct: 0, plannedTSS, realTSS };
+        if (real.length === 0) return { status: 'missed', pct: 0, plannedTSS, realTSS };
+        const pct = plannedTSS > 0 ? (realTSS / plannedTSS) * 100 : 100;
+        if (pct >= 90) return { status: 'done', pct: Math.round(pct), plannedTSS, realTSS };
+        if (pct >= 50) return { status: 'partial', pct: Math.round(pct), plannedTSS, realTSS };
+        return { status: 'missed', pct: Math.round(pct), plannedTSS, realTSS };
+    };
+
     const calendarGrid = useMemo(() => {
         const firstDay = new Date(year, month, 1);
         const lastDay = new Date(year, month + 1, 0);
@@ -404,191 +686,394 @@ export const CalendarPage = ({ activities, plannedWorkouts = [], addPlannedWorko
                     <div className="flex items-center gap-2 sm:gap-4">
                         <h2 className="text-lg sm:text-xl font-black text-slate-800 dark:text-zinc-100 capitalize flex items-center gap-1.5 sm:gap-2 tracking-tight">
                             <CalIcon className="text-blue-600 dark:text-blue-500 w-4 h-4 sm:w-5 sm:h-5" />
-                            {new Date(year, month).toLocaleDateString('es-ES', { month: 'long', year: 'numeric' })}
+                            {viewMode === 'month'
+                                ? new Date(year, month).toLocaleDateString('es-ES', { month: 'long', year: 'numeric' })
+                                : `${currentWeekDays[0].toLocaleDateString('es-ES', { day: 'numeric', month: 'short' })} — ${currentWeekDays[6].toLocaleDateString('es-ES', { day: 'numeric', month: 'short', year: 'numeric' })}`
+                            }
                         </h2>
                         <button onClick={goToday} className="text-[10px] sm:text-xs font-bold uppercase tracking-wider px-2 sm:px-3 py-1 bg-white dark:bg-zinc-800 border border-slate-300 dark:border-zinc-700 text-slate-600 dark:text-zinc-300 rounded hover:bg-slate-50 dark:hover:bg-zinc-700 transition-colors">Hoy</button>
                     </div>
-                    <div className="flex items-center border border-slate-200 dark:border-zinc-700 rounded overflow-hidden">
-                        <button onClick={prevMonth} className="p-1.5 sm:p-2 bg-transparent hover:bg-slate-100 dark:hover:bg-zinc-800 text-slate-500 dark:text-zinc-400 transition-colors"><ChevronLeft size={18} /></button>
-                        <div className="w-px h-5 bg-slate-200 dark:bg-zinc-700"></div>
-                        <button onClick={nextMonth} className="p-1.5 sm:p-2 bg-transparent hover:bg-slate-100 dark:hover:bg-zinc-800 text-slate-500 dark:text-zinc-400 transition-colors"><ChevronRight size={18} /></button>
-                    </div>
-                </div>
-
-                <div className="w-full relative">
-
-                    {/* CABECERA DÍAS DE LA SEMANA */}
-                    <div className="grid grid-cols-7 lg:grid-cols-[repeat(7,1fr)_130px] bg-slate-50/95 dark:bg-zinc-950/90 backdrop-blur-sm border-b border-slate-200 dark:border-zinc-800 sticky top-0 z-20">
-                        {WEEKDAYS.map(day => (
-                            <div key={day} className="py-2 text-center text-[9px] sm:text-[10px] font-bold text-slate-500 dark:text-zinc-400 uppercase tracking-widest">{day}</div>
-                        ))}
-                        <div className="hidden lg:block py-2 text-center text-[10px] font-black text-slate-600 dark:text-zinc-300 uppercase tracking-widest border-l border-slate-200 dark:border-zinc-800">
-                            Resumen Semanal
+                    <div className="flex items-center gap-2">
+                        {/* VIEW MODE TOGGLE */}
+                        <div className="hidden sm:flex items-center bg-slate-100 dark:bg-zinc-800 rounded overflow-hidden">
+                            <button onClick={() => setViewMode('month')}
+                                className={`px-2.5 py-1.5 text-[9px] font-bold uppercase tracking-wider transition-colors ${viewMode === 'month' ? 'bg-slate-800 dark:bg-zinc-100 text-white dark:text-zinc-900' : 'text-slate-500 dark:text-zinc-400 hover:text-slate-700'}`}
+                            >Mes</button>
+                            <button onClick={() => setViewMode('week')}
+                                className={`px-2.5 py-1.5 text-[9px] font-bold uppercase tracking-wider transition-colors ${viewMode === 'week' ? 'bg-slate-800 dark:bg-zinc-100 text-white dark:text-zinc-900' : 'text-slate-500 dark:text-zinc-400 hover:text-slate-700'}`}
+                            >Semana</button>
+                        </div>
+                        <div className="flex items-center border border-slate-200 dark:border-zinc-700 rounded overflow-hidden">
+                            <button onClick={viewMode === 'month' ? prevMonth : prevWeek} className="p-1.5 sm:p-2 bg-transparent hover:bg-slate-100 dark:hover:bg-zinc-800 text-slate-500 dark:text-zinc-400 transition-colors"><ChevronLeft size={18} /></button>
+                            <div className="w-px h-5 bg-slate-200 dark:bg-zinc-700"></div>
+                            <button onClick={viewMode === 'month' ? nextMonth : nextWeek} className="p-1.5 sm:p-2 bg-transparent hover:bg-slate-100 dark:hover:bg-zinc-800 text-slate-500 dark:text-zinc-400 transition-colors"><ChevronRight size={18} /></button>
                         </div>
                     </div>
+                </div>
 
-                    {/* CUERPO DEL CALENDARIO */}
-                    <div className="pb-2">
-                        {calendarGrid.map((week, wIdx) => {
-                            let weekTSS = 0; let weekDuration = 0; let weekDist = 0;
-                            const weekKey = week[0].date.toLocaleDateString('en-CA');
-                            const targetTSS = weeklyTargets[weekKey] || 0;
+                {viewMode === 'month' && (
+                    <div className="w-full relative">
 
-                            week.forEach(day => {
-                                const dateKey = day.date.toLocaleDateString('en-CA');
-                                const acts = activitiesByDate[dateKey] || [];
-                                acts.forEach(a => { weekTSS += (a.tss || 0); weekDuration += a.duration; weekDist += a.distance; });
-                            });
+                        {/* CABECERA DÍAS DE LA SEMANA */}
+                        <div className="grid grid-cols-7 lg:grid-cols-[repeat(7,1fr)_130px] bg-slate-50/95 dark:bg-zinc-950/90 backdrop-blur-sm border-b border-slate-200 dark:border-zinc-800 sticky top-0 z-20">
+                            {WEEKDAYS.map(day => (
+                                <div key={day} className="py-2 text-center text-[9px] sm:text-[10px] font-bold text-slate-500 dark:text-zinc-400 uppercase tracking-widest">{day}</div>
+                            ))}
+                            <div className="hidden lg:block py-2 text-center text-[10px] font-black text-slate-600 dark:text-zinc-300 uppercase tracking-widest border-l border-slate-200 dark:border-zinc-800">
+                                Resumen Semanal
+                            </div>
+                        </div>
 
-                            const compliance = targetTSS > 0 ? Math.min((weekTSS / targetTSS) * 100, 100) : 0;
-                            let complianceColor = 'bg-slate-300 dark:bg-zinc-600';
-                            if (targetTSS > 0) {
-                                if (compliance > 115) complianceColor = 'bg-red-500';
-                                else if (compliance >= 90) complianceColor = 'bg-emerald-500';
-                                else if (compliance >= 70) complianceColor = 'bg-blue-500';
-                                else complianceColor = 'bg-orange-400';
-                            }
+                        {/* CUERPO DEL CALENDARIO */}
+                        <div className="pb-2">
+                            {calendarGrid.map((week, wIdx) => {
+                                let weekTSS = 0; let weekDuration = 0; let weekDist = 0;
+                                const weekKey = week[0].date.toLocaleDateString('en-CA');
+                                const targetTSS = weeklyTargets[weekKey] || 0;
 
-                            return (
-                                // FILA PRINCIPAL: Aquí está la altura fija (lg:h-[140px])
-                                <div key={wIdx} className="grid grid-cols-7 lg:grid-cols-[repeat(7,1fr)_130px] border-b border-slate-200 dark:border-zinc-800 last:border-b-0 lg:h-[140px]">
+                                week.forEach(day => {
+                                    const dateKey = day.date.toLocaleDateString('en-CA');
+                                    const acts = activitiesByDate[dateKey] || [];
+                                    acts.forEach(a => {
+                                        weekTSS += (a.tss || 0);
+                                        weekDuration += (a.duration || 0);
+                                        if (a.isPlanned) {
+                                            // Extract distance from planned blocks
+                                            let planDist = 0;
+                                            try {
+                                                const desc = typeof a.description === 'string' ? JSON.parse(a.description) : a.description;
+                                                (desc?.blocks || []).forEach(b => {
+                                                    if (b.type === 'repeat') {
+                                                        (b.steps || []).forEach(s => {
+                                                            if (s.unit === 'dist') planDist += (Number(s.duration) || 0) * (b.repeats || 1);
+                                                        });
+                                                    } else if (b.unit === 'dist') {
+                                                        planDist += Number(b.duration) || 0;
+                                                    }
+                                                });
+                                            } catch (e) { }
+                                            weekDist += planDist * 1000; // convert km to meters
+                                        } else {
+                                            weekDist += (a.distance || 0);
+                                        }
+                                    });
+                                });
 
-                                    {/* 7 DÍAS INDIVIDUALES (Ahora toman la altura del padre con lg:h-full) */}
-                                    {week.map((day, dIdx) => {
-                                        const dateKey = day.date.toLocaleDateString('en-CA');
-                                        const acts = activitiesByDate[dateKey] || [];
-                                        const isToday = new Date().toLocaleDateString('en-CA') === dateKey;
+                                const compliance = targetTSS > 0 ? Math.min((weekTSS / targetTSS) * 100, 100) : 0;
+                                let complianceColor = 'bg-slate-300 dark:bg-zinc-600';
+                                if (targetTSS > 0) {
+                                    if (compliance > 115) complianceColor = 'bg-red-500';
+                                    else if (compliance >= 90) complianceColor = 'bg-emerald-500';
+                                    else if (compliance >= 70) complianceColor = 'bg-blue-500';
+                                    else complianceColor = 'bg-orange-400';
+                                }
 
-                                        return (
-                                            <div key={dIdx} className={`relative p-1 lg:p-1.5 border-r border-slate-200 dark:border-zinc-800 flex flex-col h-[90px] sm:h-[110px] lg:h-full overflow-hidden
+                                return (
+                                    // FILA PRINCIPAL: Aquí está la altura fija (lg:h-[140px])
+                                    <div key={wIdx} className="grid grid-cols-7 lg:grid-cols-[repeat(7,1fr)_130px] border-b border-slate-200 dark:border-zinc-800 last:border-b-0 lg:h-[140px]">
+
+                                        {/* 7 DÍAS INDIVIDUALES (Ahora toman la altura del padre con lg:h-full) */}
+                                        {week.map((day, dIdx) => {
+                                            const dateKey = day.date.toLocaleDateString('en-CA');
+                                            const acts = activitiesByDate[dateKey] || [];
+                                            const isToday = new Date().toLocaleDateString('en-CA') === dateKey;
+
+                                            const compliance = getComplianceForDay(dateKey, acts);
+                                            return (
+                                                <div key={dIdx}
+                                                    onDragOver={(e) => handleDragOver(e, dateKey)}
+                                                    onDragLeave={handleDragLeave}
+                                                    onDrop={(e) => handleDrop(e, day.date)}
+                                                    className={`relative p-1 lg:p-1.5 border-r border-slate-200 dark:border-zinc-800 flex flex-col h-[90px] sm:h-[110px] lg:h-full overflow-hidden transition-colors
                                       ${!day.isCurrentMonth ? 'bg-slate-50/50 dark:bg-zinc-950/30' : 'bg-white dark:bg-zinc-900'}
                                       ${isToday ? 'bg-blue-50/30 dark:bg-blue-900/10 border-blue-200 dark:border-blue-800/50' : ''}
+                                      ${dragOverDate === dateKey ? 'bg-blue-100/50 dark:bg-blue-900/30 ring-2 ring-blue-400 ring-inset' : ''}
                                   `}>
-                                                {/* Número del día */}
-                                                <div className="flex justify-center lg:justify-between items-start px-1 mb-1 shrink-0 group/dayheader">
-                                                    <span className={`text-[9px] lg:text-[11px] font-bold ${!day.isCurrentMonth ? 'text-slate-300 dark:text-zinc-600' : isToday ? 'text-blue-600 dark:text-blue-400 bg-blue-100 dark:bg-blue-900/50 px-1.5 rounded-sm' : 'text-slate-500 dark:text-zinc-400'}`}>
-                                                        {day.date.getDate()}
-                                                    </span>
-                                                    <button onClick={(e) => handleOpenPlanModal(e, day.date)} className="hidden lg:flex opacity-0 group-hover/dayheader:opacity-100 items-center justify-center text-slate-400 hover:text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/40 p-0.5 rounded transition-all">
-                                                        <Plus size={12} />
-                                                    </button>
-                                                </div>
+                                                    {/* Número del día */}
+                                                    <div className="flex justify-center lg:justify-between items-start px-1 mb-1 shrink-0 group/dayheader">
+                                                        <span className={`text-[9px] lg:text-[11px] font-bold ${!day.isCurrentMonth ? 'text-slate-300 dark:text-zinc-600' : isToday ? 'text-blue-600 dark:text-blue-400 bg-blue-100 dark:bg-blue-900/50 px-1.5 rounded-sm' : 'text-slate-500 dark:text-zinc-400'}`}>
+                                                            {day.date.getDate()}
+                                                        </span>
+                                                        <button onClick={(e) => handleOpenPlanModal(e, day.date)} className="hidden lg:flex opacity-0 group-hover/dayheader:opacity-100 items-center justify-center text-slate-400 hover:text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/40 p-0.5 rounded transition-all">
+                                                            <Plus size={12} />
+                                                        </button>
+                                                    </div>
 
-                                                {/* Contenedor de entrenos con SCROLL si hay más de la cuenta */}
-                                                <div className="flex-1 overflow-y-auto custom-scrollbar flex flex-col gap-1 w-full pr-0.5">
-                                                    {acts.map((act, i) => (
-                                                        <div
-                                                            key={i}
-                                                            onClick={(e) => {
-                                                                e.stopPropagation();
-                                                                if (act.isPlanned) {
-                                                                    let descObj = { blocks: [] };
-                                                                    try { descObj = JSON.parse(act.description) } catch (err) { }
-                                                                    setViewingPlan({ ...act, descriptionObj: descObj });
-                                                                } else {
-                                                                    if (onSelectActivity) onSelectActivity(act);
-                                                                }
-                                                            }}
-                                                            className={`p-1 lg:p-1.5 rounded cursor-pointer transition-colors flex flex-col items-center lg:items-stretch w-full shrink-0 relative group/act
+                                                    {/* Contenedor de entrenos con SCROLL si hay más de la cuenta */}
+                                                    <div className="flex-1 overflow-y-auto custom-scrollbar flex flex-col gap-1 w-full pr-0.5">
+                                                        {/* Compliance badge */}
+                                                        {compliance && compliance.status !== 'future' && (
+                                                            <div className={`absolute top-0.5 right-0.5 lg:top-1 lg:right-1 w-3.5 h-3.5 lg:w-4 lg:h-4 rounded-full flex items-center justify-center text-[7px] lg:text-[8px] font-black z-10 shadow-sm
+                                                            ${compliance.status === 'done' ? 'bg-emerald-500 text-white' : compliance.status === 'partial' ? 'bg-amber-500 text-white' : 'bg-red-500 text-white'}`}
+                                                                title={`${compliance.realTSS}/${compliance.plannedTSS} TSS (${compliance.pct}%)`}
+                                                            >
+                                                                {compliance.status === 'done' ? '✓' : compliance.status === 'partial' ? '~' : '✗'}
+                                                            </div>
+                                                        )}
+                                                        {acts.map((act, i) => (
+                                                            <div
+                                                                key={i}
+                                                                draggable={act.isPlanned}
+                                                                onDragStart={(e) => act.isPlanned && handleDragStart(e, act)}
+                                                                onClick={(e) => {
+                                                                    e.stopPropagation();
+                                                                    if (act.isPlanned) {
+                                                                        let descObj = { blocks: [] };
+                                                                        try { descObj = JSON.parse(act.description) } catch (err) { }
+                                                                        setViewingPlan({ ...act, descriptionObj: descObj });
+                                                                    } else {
+                                                                        if (onSelectActivity) onSelectActivity(act);
+                                                                    }
+                                                                }}
+                                                                className={`p-1 lg:p-1.5 rounded cursor-pointer transition-colors flex flex-col items-center lg:items-stretch w-full shrink-0 relative group/act
                                                     ${getSportColor(act.type)}
-                                                    ${act.isPlanned ? 'border-dashed border-[1.5px] opacity-80' : 'border'}
+                                                    ${act.isPlanned ? 'border-dashed border-[1.5px] opacity-80 cursor-grab active:cursor-grabbing' : 'border'}
                                                 `}
-                                                        >
-                                                            {/* Título truncado inteligentemente */}
-                                                            <div className="flex flex-col lg:flex-row items-center lg:justify-between w-full gap-0.5 lg:gap-1">
-                                                                <div className="flex items-center justify-center lg:justify-start gap-1 font-bold flex-1 min-w-0 w-full" title={act.name || act.type}>
-                                                                    <span className="shrink-0">{getSportIcon(act.type)}</span>
-                                                                    <span className="hidden lg:block text-[9px] xl:text-[10px] truncate w-full text-left">
-                                                                        {act.isPlanned ? <><span className="text-[8px] uppercase tracking-widest mr-1">Plan</span> {act.name || act.type}</> : (act.name || act.type)}
-                                                                    </span>
+                                                            >
+                                                                {/* Título truncado inteligentemente */}
+                                                                <div className="flex flex-col lg:flex-row items-center lg:justify-between w-full gap-0.5 lg:gap-1">
+                                                                    <div className="flex items-center justify-center lg:justify-start gap-1 font-bold flex-1 min-w-0 w-full" title={act.name || act.type}>
+                                                                        <span className="shrink-0">{getSportIcon(act.type)}</span>
+                                                                        <span className="hidden lg:block text-[9px] xl:text-[10px] truncate w-full text-left">
+                                                                            {act.isPlanned ? <><span className="text-[8px] uppercase tracking-widest mr-1">Plan</span> {act.name || act.type}</> : (act.name || act.type)}
+                                                                        </span>
+                                                                    </div>
+                                                                    {act.tss > 0 && <span className="text-[9px] lg:text-[10px] font-black font-mono opacity-90 shrink-0">{Math.round(act.tss)}</span>}
                                                                 </div>
-                                                                {act.tss > 0 && <span className="text-[9px] lg:text-[10px] font-black font-mono opacity-90 shrink-0">{Math.round(act.tss)}</span>}
+                                                                <div className="flex justify-center lg:justify-between opacity-80 text-[8px] lg:text-[9px] mt-0.5 font-mono w-full">
+                                                                    <span>{act.duration}m</span>
+                                                                    {act.distance > 0 && <span className="hidden lg:inline">{(act.distance / 1000).toFixed(0)}k</span>}
+                                                                </div>
+                                                                {act.isPlanned && (
+                                                                    <button onClick={(e) => handleDeletePlan(e, act.id)} className="absolute -top-1.5 -right-1.5 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover/act:opacity-100 shadow-md transition-opacity">
+                                                                        <Trash2 size={8} />
+                                                                    </button>
+                                                                )}
                                                             </div>
-                                                            <div className="flex justify-center lg:justify-between opacity-80 text-[8px] lg:text-[9px] mt-0.5 font-mono w-full">
-                                                                <span>{act.duration}m</span>
-                                                                {act.distance > 0 && <span className="hidden lg:inline">{(act.distance / 1000).toFixed(0)}k</span>}
-                                                            </div>
-                                                            {act.isPlanned && (
-                                                                <button onClick={(e) => handleDeletePlan(e, act.id)} className="absolute -top-1.5 -right-1.5 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover/act:opacity-100 shadow-md transition-opacity">
-                                                                    <Trash2 size={8} />
-                                                                </button>
-                                                            )}
-                                                        </div>
-                                                    ))}
+                                                        ))}
+                                                    </div>
                                                 </div>
-                                            </div>
-                                        );
-                                    })}
+                                            );
+                                        })}
 
-                                    {/* COLUMNA RESUMEN Y OBJETIVO (Ajustada para que no se aplaste) */}
-                                    <div className="col-span-7 lg:col-span-1 bg-slate-50 dark:bg-zinc-950/50 border-t lg:border-t-0 lg:border-l border-slate-200 dark:border-zinc-800 p-2 flex flex-row lg:flex-col justify-between h-[60px] lg:h-full">
+                                        {/* COLUMNA RESUMEN Y OBJETIVO (Ajustada para que no se aplaste) */}
+                                        <div className="col-span-7 lg:col-span-1 bg-slate-50 dark:bg-zinc-950/50 border-t lg:border-t-0 lg:border-l border-slate-200 dark:border-zinc-800 p-2 flex flex-row lg:flex-col justify-between h-[60px] lg:h-full">
 
-                                        {/* MÉTRICAS ALINEADAS IZQUIERDA/DERECHA */}
-                                        <div className="flex flex-row lg:flex-col gap-4 lg:gap-2 flex-1 justify-around lg:justify-center w-full px-1">
+                                            {/* MÉTRICAS ALINEADAS IZQUIERDA/DERECHA */}
+                                            <div className="flex flex-row lg:flex-col gap-4 lg:gap-2 flex-1 justify-around lg:justify-center w-full px-1">
 
-                                            {/* VOLUMEN */}
-                                            <div className="flex flex-col lg:flex-row lg:justify-between items-center text-[10px] lg:text-xs">
-                                                <span className="hidden lg:flex items-center gap-1.5 text-slate-400 dark:text-zinc-500 font-bold uppercase tracking-wider text-[9px]">
-                                                    <Clock size={10} /> Vol
-                                                </span>
-                                                <span className="text-emerald-600 dark:text-emerald-500 font-mono font-bold">
-                                                    {Math.floor(weekDuration / 60)}h <span className="hidden sm:inline">{weekDuration % 60}m</span>
-                                                </span>
-                                            </div>
-
-                                            {/* DISTANCIA */}
-                                            <div className="flex flex-col lg:flex-row lg:justify-between items-center text-[10px] lg:text-xs">
-                                                <span className="hidden lg:flex items-center gap-1.5 text-slate-400 dark:text-zinc-500 font-bold uppercase tracking-wider text-[9px]">
-                                                    <MapPin size={10} /> Dist
-                                                </span>
-                                                <span className="text-blue-600 dark:text-blue-500 font-mono font-bold">
-                                                    {(weekDist / 1000).toFixed(0)}km
-                                                </span>
-                                            </div>
-
-                                            {/* CARGA */}
-                                            <div className="flex flex-col lg:flex-row lg:justify-between items-center text-[10px] lg:text-xs">
-                                                <span className="hidden lg:flex items-center gap-1.5 text-slate-400 dark:text-zinc-500 font-bold uppercase tracking-wider text-[9px]">
-                                                    <Zap size={10} /> TSS
-                                                </span>
-                                                <span className="text-amber-600 dark:text-amber-500 font-mono font-black">
-                                                    {Math.round(weekTSS)}
-                                                </span>
-                                            </div>
-                                        </div>
-
-                                        {/* PANEL DE OBJETIVOS (Fijo en la parte inferior) */}
-                                        <div
-                                            onClick={() => handleEditTarget(weekKey)}
-                                            className="flex-shrink-0 w-1/3 lg:w-full border-l lg:border-l-0 lg:border-t border-slate-200 dark:border-zinc-800 pl-3 lg:pl-0 lg:pt-2 cursor-pointer group hover:bg-slate-100 dark:hover:bg-zinc-800/50 rounded transition-colors mt-auto"
-                                        >
-                                            <div className="flex justify-between items-center mb-1 lg:mb-0.5">
-                                                <span className="text-[9px] font-bold text-slate-500 dark:text-zinc-400 uppercase tracking-widest flex items-center gap-1 px-1">
-                                                    <Target size={10} /> Objetivo
-                                                </span>
-                                            </div>
-                                            <div className="text-right mb-1.5 px-1">
-                                                {targetTSS > 0 ? (
-                                                    <span className="text-[10px] lg:text-[11px] font-bold text-slate-700 dark:text-zinc-200 font-mono">
-                                                        {targetTSS} TSS
+                                                {/* VOLUMEN */}
+                                                <div className="flex flex-col lg:flex-row lg:justify-between items-center text-[10px] lg:text-xs">
+                                                    <span className="hidden lg:flex items-center gap-1.5 text-slate-400 dark:text-zinc-500 font-bold uppercase tracking-wider text-[9px]">
+                                                        <Clock size={10} /> Vol
                                                     </span>
-                                                ) : (
-                                                    <span className="text-[9px] italic text-slate-400 dark:text-zinc-600">Definir</span>
+                                                    <span className="text-emerald-600 dark:text-emerald-500 font-mono font-bold">
+                                                        {Math.floor(weekDuration / 60)}h <span className="hidden sm:inline">{weekDuration % 60}m</span>
+                                                    </span>
+                                                </div>
+
+                                                {/* DISTANCIA */}
+                                                <div className="flex flex-col lg:flex-row lg:justify-between items-center text-[10px] lg:text-xs">
+                                                    <span className="hidden lg:flex items-center gap-1.5 text-slate-400 dark:text-zinc-500 font-bold uppercase tracking-wider text-[9px]">
+                                                        <MapPin size={10} /> Dist
+                                                    </span>
+                                                    <span className="text-blue-600 dark:text-blue-500 font-mono font-bold">
+                                                        {(weekDist / 1000).toFixed(0)}km
+                                                    </span>
+                                                </div>
+
+                                                {/* CARGA */}
+                                                <div className="flex flex-col lg:flex-row lg:justify-between items-center text-[10px] lg:text-xs">
+                                                    <span className="hidden lg:flex items-center gap-1.5 text-slate-400 dark:text-zinc-500 font-bold uppercase tracking-wider text-[9px]">
+                                                        <Zap size={10} /> TSS
+                                                    </span>
+                                                    <span className="text-amber-600 dark:text-amber-500 font-mono font-black">
+                                                        {Math.round(weekTSS)}
+                                                    </span>
+                                                </div>
+
+                                                {/* COMPLIANCE SEMANAL */}
+                                                {(() => {
+                                                    let weekPlanned = 0, weekDone = 0;
+                                                    week.forEach(d => {
+                                                        const dk = d.date.toLocaleDateString('en-CA');
+                                                        const da = activitiesByDate[dk] || [];
+                                                        const comp = getComplianceForDay(dk, da);
+                                                        if (comp && comp.status !== 'future') {
+                                                            weekPlanned++;
+                                                            if (comp.status === 'done') weekDone++;
+                                                        }
+                                                    });
+                                                    if (weekPlanned === 0) return null;
+                                                    const pct = Math.round((weekDone / weekPlanned) * 100);
+                                                    return (
+                                                        <div className="flex flex-col lg:flex-row lg:justify-between items-center text-[10px] lg:text-xs">
+                                                            <span className="hidden lg:flex items-center gap-1.5 text-slate-400 dark:text-zinc-500 font-bold uppercase tracking-wider text-[9px]">
+                                                                <Target size={10} /> Plan
+                                                            </span>
+                                                            <span className={`font-mono font-black ${pct >= 80 ? 'text-emerald-600 dark:text-emerald-500' : pct >= 50 ? 'text-amber-600 dark:text-amber-500' : 'text-red-500'}`}>
+                                                                {weekDone}/{weekPlanned} ✓
+                                                            </span>
+                                                        </div>
+                                                    );
+                                                })()}
+                                            </div>
+
+                                            {/* PANEL DE OBJETIVOS (Fijo en la parte inferior) */}
+                                            <div
+                                                onClick={() => handleEditTarget(weekKey)}
+                                                className="flex-shrink-0 w-1/3 lg:w-full border-l lg:border-l-0 lg:border-t border-slate-200 dark:border-zinc-800 pl-3 lg:pl-0 lg:pt-2 cursor-pointer group hover:bg-slate-100 dark:hover:bg-zinc-800/50 rounded transition-colors mt-auto"
+                                            >
+                                                <div className="flex justify-between items-center mb-1 lg:mb-0.5">
+                                                    <span className="text-[9px] font-bold text-slate-500 dark:text-zinc-400 uppercase tracking-widest flex items-center gap-1 px-1">
+                                                        <Target size={10} /> Objetivo
+                                                    </span>
+                                                </div>
+                                                <div className="text-right mb-1.5 px-1">
+                                                    {targetTSS > 0 ? (
+                                                        <span className="text-[10px] lg:text-[11px] font-bold text-slate-700 dark:text-zinc-200 font-mono">
+                                                            {targetTSS} TSS
+                                                        </span>
+                                                    ) : (
+                                                        <span className="text-[9px] italic text-slate-400 dark:text-zinc-600">Definir</span>
+                                                    )}
+                                                </div>
+                                                {targetTSS > 0 && (
+                                                    <div className="w-full h-1 bg-slate-200 dark:bg-zinc-700 rounded-none overflow-hidden">
+                                                        <div className={`h-full ${complianceColor} transition-all duration-500`} style={{ width: `${compliance}%` }}></div>
+                                                    </div>
                                                 )}
                                             </div>
-                                            {targetTSS > 0 && (
-                                                <div className="w-full h-1 bg-slate-200 dark:bg-zinc-700 rounded-none overflow-hidden">
-                                                    <div className={`h-full ${complianceColor} transition-all duration-500`} style={{ width: `${compliance}%` }}></div>
-                                                </div>
-                                            )}
-                                        </div>
 
+                                        </div>
                                     </div>
-                                </div>
-                            );
-                        })}
+                                );
+                            })}
+                        </div>
                     </div>
-                </div>
+                )}
+
+                {/* === WEEKLY VIEW === */}
+                {viewMode === 'week' && (
+                    <div className="w-full">
+                        {/* WEEK DAY HEADERS */}
+                        <div className="grid grid-cols-7 border-b border-slate-200 dark:border-zinc-800 bg-slate-50/95 dark:bg-zinc-950/90">
+                            {currentWeekDays.map((d, i) => {
+                                const isToday = d.toLocaleDateString('en-CA') === new Date().toLocaleDateString('en-CA');
+                                return (
+                                    <div key={i} className={`py-2.5 px-2 text-center border-r last:border-r-0 border-slate-200 dark:border-zinc-800 ${isToday ? 'bg-blue-50/50 dark:bg-blue-950/20' : ''}`}>
+                                        <span className="text-[9px] font-bold text-slate-500 dark:text-zinc-400 uppercase tracking-widest">{WEEKDAYS[i]}</span>
+                                        <span className={`block text-lg font-black ${isToday ? 'text-blue-600 dark:text-blue-400' : 'text-slate-800 dark:text-zinc-200'}`}>{d.getDate()}</span>
+                                    </div>
+                                );
+                            })}
+                        </div>
+                        {/* WEEK BODY */}
+                        <div className="grid grid-cols-7 min-h-[400px]">
+                            {currentWeekDays.map((d, i) => {
+                                const dateKey = d.toLocaleDateString('en-CA');
+                                const isPast = dateKey < new Date().toLocaleDateString('en-CA');
+                                const isToday = dateKey === new Date().toLocaleDateString('en-CA');
+                                const dayActs = activitiesByDate[dateKey] || [];
+                                const dayPlans = plannedByDate[dateKey] || [];
+
+                                const zoneColor = (z) => {
+                                    const colors = { Z1: 'bg-slate-300 dark:bg-zinc-600', Z2: 'bg-blue-400 dark:bg-blue-600', Z3: 'bg-emerald-400 dark:bg-emerald-600', Z4: 'bg-amber-400 dark:bg-amber-500', Z5: 'bg-red-400 dark:bg-red-500', Z6: 'bg-rose-600 dark:bg-rose-700' };
+                                    return colors[z] || 'bg-slate-300';
+                                };
+
+                                return (
+                                    <div key={i}
+                                        className={`border-r last:border-r-0 border-b border-slate-200 dark:border-zinc-800 p-1.5 flex flex-col gap-1.5
+                                        ${isToday ? 'bg-blue-50/30 dark:bg-blue-950/10' : ''}`}
+                                        onDragOver={(e) => handleDragOver(e, dateKey)}
+                                        onDragLeave={handleDragLeave}
+                                        onDrop={(e) => handleDrop(e, d)}
+                                        style={dragOverDate === dateKey ? { outline: '2px dashed #3b82f6', outlineOffset: '-2px' } : {}}
+                                    >
+                                        {/* PLANNED */}
+                                        {dayPlans.map(p => {
+                                            let blocks = [];
+                                            try {
+                                                const desc = typeof p.description === 'string' ? JSON.parse(p.description) : p.description;
+                                                blocks = desc?.blocks || [];
+                                            } catch (e) { }
+                                            return (
+                                                <div key={p.id}
+                                                    draggable
+                                                    onDragStart={() => setDraggedWorkout(p)}
+                                                    onClick={() => setViewingPlan(p)}
+                                                    className="bg-white dark:bg-zinc-900 border border-dashed border-slate-300 dark:border-zinc-700 rounded p-1.5 cursor-pointer hover:border-blue-400 transition-colors group"
+                                                >
+                                                    <div className="flex items-center gap-1 mb-1">
+                                                        {getSportIcon(p.type)}
+                                                        <span className="text-[9px] font-bold text-slate-600 dark:text-zinc-300 truncate flex-1">{p.name || 'Entreno'}</span>
+                                                        <span className="text-[8px] font-mono text-slate-400">{p.tss}tss</span>
+                                                    </div>
+                                                    {/* Visual blocks */}
+                                                    {blocks.length > 0 && (
+                                                        <div className="flex gap-px rounded overflow-hidden h-4">
+                                                            {blocks.map((b, bi) => {
+                                                                if (b.type === 'repeat') {
+                                                                    return (b.steps || []).map((s, si) => (
+                                                                        <div key={`${bi}-${si}`}
+                                                                            className={`flex-1 ${zoneColor(s.zone)} opacity-80`}
+                                                                            title={`${b.repeats}x ${s.duration}${s.unit === 'dist' ? 'km' : 'min'} ${s.zone}`}
+                                                                        />
+                                                                    ));
+                                                                }
+                                                                return (
+                                                                    <div key={bi}
+                                                                        className={`${zoneColor(b.zone)} opacity-80`}
+                                                                        style={{ flex: Number(b.duration) || 1 }}
+                                                                        title={`${b.duration}${b.unit === 'dist' ? 'km' : 'min'} ${b.zone}`}
+                                                                    />
+                                                                );
+                                                            })}
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            );
+                                        })}
+
+                                        {/* REAL ACTIVITIES */}
+                                        {dayActs.map(a => (
+                                            <div key={a.id}
+                                                onClick={() => onSelectActivity?.(a)}
+                                                className="bg-slate-50 dark:bg-zinc-800/80 border border-slate-200 dark:border-zinc-700 rounded p-1.5 cursor-pointer hover:bg-slate-100 dark:hover:bg-zinc-700 transition-colors"
+                                            >
+                                                <div className="flex items-center gap-1">
+                                                    {getSportIcon(a.type)}
+                                                    <span className="text-[9px] font-bold text-slate-700 dark:text-zinc-200 truncate flex-1">{a.name}</span>
+                                                </div>
+                                                <div className="flex gap-2 mt-0.5">
+                                                    <span className="text-[8px] font-mono text-amber-600">{a.tss}tss</span>
+                                                    <span className="text-[8px] font-mono text-slate-400">{a.duration}min</span>
+                                                    {a.distance > 0 && <span className="text-[8px] font-mono text-slate-400">{(a.distance / 1000).toFixed(1)}km</span>}
+                                                </div>
+                                            </div>
+                                        ))}
+
+                                        {/* ADD BUTTON */}
+                                        {!isPast && dayPlans.length === 0 && dayActs.length === 0 && (
+                                            <button onClick={(e) => handleOpenPlanModal(e, d)}
+                                                className="w-full py-4 text-slate-300 dark:text-zinc-700 hover:text-blue-400 dark:hover:text-blue-500 transition-colors flex items-center justify-center">
+                                                <Plus size={16} />
+                                            </button>
+                                        )}
+                                        {!isPast && (dayPlans.length > 0 || dayActs.length > 0) && (
+                                            <button onClick={(e) => handleOpenPlanModal(e, d)}
+                                                className="text-[9px] font-bold text-slate-400 dark:text-zinc-600 hover:text-blue-500 transition-colors mt-auto text-center">
+                                                + añadir
+                                            </button>
+                                        )}
+                                    </div>
+                                );
+                            })}
+                        </div>
+                    </div>
+                )}
+
             </div>
 
             {/* MODAL PLANIFICADOR */}
@@ -681,6 +1166,25 @@ export const CalendarPage = ({ activities, plannedWorkouts = [], addPlannedWorko
                                             ))}
                                         </div>
                                     </div>
+                                    {/* QUICK TEMPLATES */}
+                                    {(WORKOUT_TEMPLATES[newPlan.type] || []).length > 0 && (
+                                        <div>
+                                            <label className="block text-[10px] font-bold text-slate-600 dark:text-zinc-400 uppercase tracking-widest mb-2">Plantilla</label>
+                                            <div className="flex gap-1.5 flex-wrap">
+                                                {(WORKOUT_TEMPLATES[newPlan.type] || []).map((t, i) => (
+                                                    <button key={i} onClick={() => applyTemplate(t)}
+                                                        className={`inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded text-[10px] font-bold transition-all
+                                                            ${newPlan.name === t.name
+                                                                ? 'bg-slate-800 dark:bg-zinc-100 text-white dark:text-zinc-900 shadow-sm'
+                                                                : 'bg-slate-100 dark:bg-zinc-800/80 text-slate-600 dark:text-zinc-300 hover:bg-slate-200 dark:hover:bg-zinc-700'}`}
+                                                    >
+                                                        <span className={`text-[8px] font-black uppercase tracking-widest px-1 py-px rounded ${newPlan.name === t.name ? 'bg-white/20 dark:bg-black/20' : 'bg-slate-200 dark:bg-zinc-700 text-slate-500 dark:text-zinc-400'}`}>{t.cat}</span>
+                                                        {t.name}
+                                                    </button>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    )}
                                     <div>
                                         <label className="block text-[10px] font-bold text-slate-600 dark:text-zinc-400 uppercase tracking-widest mb-1.5">Título</label>
                                         <input type="text" value={newPlan.name} onChange={e => setNewPlan({ ...newPlan, name: e.target.value })}
@@ -692,15 +1196,15 @@ export const CalendarPage = ({ activities, plannedWorkouts = [], addPlannedWorko
                                         <label className="block text-[10px] font-bold text-slate-600 dark:text-zinc-400 uppercase tracking-widest mb-2">Estructura</label>
                                         <div className="flex gap-1.5 flex-wrap mb-3">
                                             {newPlan.type === 'WeightTraining' ? (<>
-                                                <button onClick={() => addBlock('warmup')} className="px-2.5 py-1.5 bg-amber-50 text-amber-600 dark:bg-amber-900/20 dark:text-amber-400 rounded-lg text-[10px] font-bold transition-colors hover:bg-amber-100">🔥 Calentar</button>
-                                                <button onClick={() => addBlock('main')} className="px-2.5 py-1.5 bg-purple-50 text-purple-600 dark:bg-purple-900/20 dark:text-purple-400 rounded-lg text-[10px] font-bold transition-colors hover:bg-purple-100">💪 Ejercicio</button>
-                                                <button onClick={() => addBlock('repeat')} className="px-2.5 py-1.5 bg-indigo-50 text-indigo-600 dark:bg-indigo-900/20 dark:text-indigo-400 rounded-lg text-[10px] font-bold transition-colors hover:bg-indigo-100">🔄 Circuito</button>
-                                                <button onClick={() => addBlock('cooldown')} className="px-2.5 py-1.5 bg-slate-100 text-slate-500 dark:bg-zinc-800 dark:text-zinc-400 rounded-lg text-[10px] font-bold transition-colors hover:bg-slate-200">🧊 Estirar</button>
+                                                <button onClick={() => addBlock('warmup')} className="px-2.5 py-1.5 bg-slate-100 dark:bg-zinc-800 text-slate-600 dark:text-zinc-300 rounded text-[10px] font-bold transition-colors hover:bg-slate-200 dark:hover:bg-zinc-700">+ Calentar</button>
+                                                <button onClick={() => addBlock('main')} className="px-2.5 py-1.5 bg-slate-100 dark:bg-zinc-800 text-slate-600 dark:text-zinc-300 rounded text-[10px] font-bold transition-colors hover:bg-slate-200 dark:hover:bg-zinc-700">+ Ejercicio</button>
+                                                <button onClick={() => addBlock('repeat')} className="px-2.5 py-1.5 bg-slate-100 dark:bg-zinc-800 text-slate-600 dark:text-zinc-300 rounded text-[10px] font-bold transition-colors hover:bg-slate-200 dark:hover:bg-zinc-700">+ Circuito</button>
+                                                <button onClick={() => addBlock('cooldown')} className="px-2.5 py-1.5 bg-slate-100 dark:bg-zinc-800 text-slate-600 dark:text-zinc-300 rounded text-[10px] font-bold transition-colors hover:bg-slate-200 dark:hover:bg-zinc-700">+ Estirar</button>
                                             </>) : (<>
-                                                <button onClick={() => addBlock('warmup')} className="px-2.5 py-1.5 bg-amber-50 text-amber-600 dark:bg-amber-900/20 dark:text-amber-400 rounded-lg text-[10px] font-bold transition-colors hover:bg-amber-100">🔥 Calentar</button>
-                                                <button onClick={() => addBlock('main')} className="px-2.5 py-1.5 bg-blue-50 text-blue-600 dark:bg-blue-900/20 dark:text-blue-400 rounded-lg text-[10px] font-bold transition-colors hover:bg-blue-100">{newPlan.type === 'Run' ? '🏃' : newPlan.type === 'Ride' ? '🚴' : '🏊'} Bloque</button>
-                                                <button onClick={() => addBlock('repeat')} className="px-2.5 py-1.5 bg-purple-50 text-purple-600 dark:bg-purple-900/20 dark:text-purple-400 rounded-lg text-[10px] font-bold transition-colors hover:bg-purple-100">🔁 Repetir</button>
-                                                <button onClick={() => addBlock('cooldown')} className="px-2.5 py-1.5 bg-slate-100 text-slate-500 dark:bg-zinc-800 dark:text-zinc-400 rounded-lg text-[10px] font-bold transition-colors hover:bg-slate-200">🧊 Soltar</button>
+                                                <button onClick={() => addBlock('warmup')} className="px-2.5 py-1.5 bg-slate-100 dark:bg-zinc-800 text-slate-600 dark:text-zinc-300 rounded text-[10px] font-bold transition-colors hover:bg-slate-200 dark:hover:bg-zinc-700">+ Calentar</button>
+                                                <button onClick={() => addBlock('main')} className="px-2.5 py-1.5 bg-slate-100 dark:bg-zinc-800 text-slate-600 dark:text-zinc-300 rounded text-[10px] font-bold transition-colors hover:bg-slate-200 dark:hover:bg-zinc-700">+ Bloque</button>
+                                                <button onClick={() => addBlock('repeat')} className="px-2.5 py-1.5 bg-slate-100 dark:bg-zinc-800 text-slate-600 dark:text-zinc-300 rounded text-[10px] font-bold transition-colors hover:bg-slate-200 dark:hover:bg-zinc-700">+ Repetir</button>
+                                                <button onClick={() => addBlock('cooldown')} className="px-2.5 py-1.5 bg-slate-100 dark:bg-zinc-800 text-slate-600 dark:text-zinc-300 rounded text-[10px] font-bold transition-colors hover:bg-slate-200 dark:hover:bg-zinc-700">+ Soltar</button>
                                             </>)}
                                         </div>
                                         <div className="space-y-2">
@@ -719,7 +1223,7 @@ export const CalendarPage = ({ activities, plannedWorkouts = [], addPlannedWorko
                                                     return (
                                                         <div key={block.id} className="rounded-lg border-2 border-purple-200 dark:border-purple-800/50 bg-purple-50/30 dark:bg-purple-950/10 overflow-hidden relative group">
                                                             <div className="flex items-center gap-2 px-3 py-2 bg-purple-100/50 dark:bg-purple-900/20 border-b border-purple-200/50 dark:border-purple-800/30">
-                                                                <span className="text-[9px] font-black uppercase tracking-widest text-purple-600 dark:text-purple-400">{isStr ? '🔄 CIRCUITO' : '🔁 REPETIR'}</span>
+                                                                <span className="text-[9px] font-black uppercase tracking-widest text-purple-600 dark:text-purple-400">{isStr ? 'CIRCUITO' : 'REPETIR'}</span>
                                                                 <input type="number" value={block.repeats} min={1} onChange={e => updateBlock(block.id, 'repeats', parseInt(e.target.value) || 1)}
                                                                     className="w-14 bg-white dark:bg-zinc-900 border border-purple-200 dark:border-purple-700 text-xs font-mono p-1.5 rounded text-center" />
                                                                 <span className="text-[10px] text-slate-500 font-bold">veces</span>
@@ -735,7 +1239,11 @@ export const CalendarPage = ({ activities, plannedWorkouts = [], addPlannedWorko
                                                                         </select>
                                                                         <input type="number" value={step.duration} min={0} onChange={e => updateStep(block.id, step.id, 'duration', e.target.value)}
                                                                             className="w-14 bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 text-xs font-mono p-1.5 rounded text-center" />
-                                                                        <span className="text-[9px] text-slate-400">min</span>
+                                                                        {!isStr ? (
+                                                                            <button onClick={() => updateStep(block.id, step.id, 'unit', step.unit === 'dist' ? 'time' : 'dist')}
+                                                                                className={`text-[9px] font-bold px-1.5 py-0.5 rounded transition-colors ${step.unit === 'dist' ? 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400' : 'text-slate-400 hover:text-slate-600'}`}
+                                                                            >{step.unit === 'dist' ? 'km' : 'min'}</button>
+                                                                        ) : <span className="text-[9px] text-slate-400">min</span>}
                                                                         <select value={step.zone} onChange={e => updateStep(block.id, step.id, 'zone', e.target.value)}
                                                                             className="flex-1 bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 text-[10px] font-bold p-1.5 rounded">
                                                                             {zones.map(z => <option key={z.v} value={z.v}>{z.l}</option>)}
@@ -751,15 +1259,19 @@ export const CalendarPage = ({ activities, plannedWorkouts = [], addPlannedWorko
                                                         </div>
                                                     );
                                                 }
-                                                const bLabel = block.type === 'warmup' ? '🔥 CALENTAR' : block.type === 'cooldown' ? (isStr ? '🧊 ESTIRAR' : '🧊 SOLTAR') : (isStr ? '💪 EJERCICIO' : (newPlan.type === 'Run' ? '🏃 BLOQUE' : newPlan.type === 'Ride' ? '🚴 BLOQUE' : '🏊 BLOQUE'));
+                                                const bLabel = block.type === 'warmup' ? 'CALENTAR' : block.type === 'cooldown' ? (isStr ? 'ESTIRAR' : 'SOLTAR') : (isStr ? 'EJERCICIO' : 'BLOQUE');
                                                 const bBg = block.type === 'main' ? 'border-blue-200 dark:border-blue-800/50 bg-blue-50/30 dark:bg-blue-950/10' : 'border-slate-200 dark:border-zinc-800 bg-slate-50/50 dark:bg-zinc-950/30';
                                                 return (
                                                     <div key={block.id} className={`rounded-lg border ${bBg} p-3 relative group`}>
                                                         <div className="flex items-center gap-2 flex-wrap">
                                                             <span className="text-[9px] font-black uppercase tracking-widest text-slate-600 dark:text-zinc-400">{bLabel}</span>
-                                                            <input type="number" placeholder="Min" value={block.duration} min={0} onChange={e => updateBlock(block.id, 'duration', e.target.value)}
+                                                            <input type="number" placeholder={block.unit === 'dist' ? 'km' : 'Min'} value={block.duration} min={0} onChange={e => updateBlock(block.id, 'duration', e.target.value)}
                                                                 className="w-16 bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-700 text-xs font-mono p-1.5 rounded text-center" />
-                                                            <span className="text-[10px] text-slate-400">min</span>
+                                                            {!isStr ? (
+                                                                <button onClick={() => updateBlock(block.id, 'unit', block.unit === 'dist' ? 'time' : 'dist')}
+                                                                    className={`text-[10px] font-bold px-2 py-0.5 rounded transition-all ${block.unit === 'dist' ? 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400' : 'text-slate-400 hover:text-slate-600 dark:hover:text-zinc-300'}`}
+                                                                >{block.unit === 'dist' ? 'km' : 'min'}</button>
+                                                            ) : <span className="text-[10px] text-slate-400">min</span>}
                                                             <select value={block.zone} onChange={e => updateBlock(block.id, 'zone', e.target.value)}
                                                                 className="bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-700 text-[10px] font-bold p-1.5 rounded flex-1 min-w-[80px]">
                                                                 {zones.map(z => <option key={z.v} value={z.v}>{z.l}</option>)}
@@ -841,7 +1353,7 @@ export const CalendarPage = ({ activities, plannedWorkouts = [], addPlannedWorko
                                                             <div key={sIdx} className="flex justify-between text-xs items-center bg-white/50 dark:bg-zinc-900 overflow-hidden rounded px-2 py-1">
                                                                 <span className="font-bold text-slate-700 dark:text-zinc-300 capitalize">{step.type === 'active' ? 'Intensidad' : 'Descanso'}</span>
                                                                 <div className="flex items-center gap-2">
-                                                                    <span className="font-mono text-slate-500 font-bold">{step.duration}m</span>
+                                                                    <span className="font-mono text-slate-500 font-bold">{step.duration}{step.unit === 'dist' ? 'km' : 'm'}</span>
                                                                     <span className={`text-[9px] font-black px-1.5 py-0.5 rounded ${step.zone === 'Z1' || step.zone === 'Z2' ? 'bg-slate-100 text-slate-500 dark:bg-zinc-800 dark:text-zinc-400' : 'bg-rose-100 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400'}`}>
                                                                         {step.zone}
                                                                     </span>
@@ -861,7 +1373,7 @@ export const CalendarPage = ({ activities, plannedWorkouts = [], addPlannedWorko
                                                     {block.details && <span className="text-xs text-slate-600 dark:text-zinc-300">{block.details}</span>}
                                                 </div>
                                                 <div className="flex items-center gap-2">
-                                                    <span className="font-mono text-xs font-bold text-slate-500">{block.duration}m</span>
+                                                    <span className="font-mono text-xs font-bold text-slate-500">{block.duration}{block.unit === 'dist' ? 'km' : 'm'}</span>
                                                     <span className="text-[9px] font-black px-1.5 py-0.5 rounded bg-slate-200 dark:bg-zinc-800 text-slate-600 dark:text-zinc-400">
                                                         {block.zone}
                                                     </span>

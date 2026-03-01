@@ -18,6 +18,7 @@ import { EvolutionChart } from "./dashboard/EvolutionChart";
 import { DistributionChart } from "./dashboard/DistributionChart";
 import { HistoryList } from "./dashboard/HistoryList";
 import { AdvancedAnalytics } from "./dashboard/AdvancedAnalytics";
+import { TrendsChart } from "./dashboard/TrendsChart";
 import AddActivityModal from "./modals/AddActivityModal";
 import { CalendarPage } from "./pages/CalendarPage";
 import { ActivityDetailPage } from "./pages/ActivityDetailPage";
@@ -53,6 +54,7 @@ const Dashboard = () => {
     plannedWorkouts,
     addPlannedWorkout,
     deletePlannedWorkout,
+    updatePlannedWorkout,
   } = useActivities();
 
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -214,6 +216,11 @@ const Dashboard = () => {
                 </div>
               </div>
 
+              {/* TENDENCIAS DE RENDIMIENTO */}
+              <div className="mt-4">
+                <TrendsChart activities={activities} />
+              </div>
+
               {/* SECCIÓN AVANZADA */}
               <div className="pt-4 border-t border-slate-200 dark:border-zinc-800 mt-4">
                 <AdvancedAnalytics
@@ -235,7 +242,9 @@ const Dashboard = () => {
                 plannedWorkouts={plannedWorkouts}
                 addPlannedWorkout={addPlannedWorkout}
                 deletePlannedWorkout={deletePlannedWorkout}
+                updatePlannedWorkout={updatePlannedWorkout}
                 currentMetrics={currentMetrics}
+                settings={settings}
                 onDelete={deleteActivity}
                 onSelectActivity={(act) => setActiveActivity(act)}
               />
