@@ -18,6 +18,7 @@ import { EvolutionChart } from "./dashboard/EvolutionChart";
 import { DistributionChart } from "./dashboard/DistributionChart";
 import { HistoryList } from "./dashboard/HistoryList";
 import { AdvancedAnalytics } from "./dashboard/AdvancedAnalytics";
+import { TrendsChart } from "./dashboard/TrendsChart";
 import AddActivityModal from "./modals/AddActivityModal";
 import { CalendarPage } from "./pages/CalendarPage";
 import { ActivityDetailPage } from "./pages/ActivityDetailPage";
@@ -50,6 +51,10 @@ const Dashboard = () => {
     deepSyncProgress,
     handleDeepSync,
     updateProfile,
+    plannedWorkouts,
+    addPlannedWorkout,
+    deletePlannedWorkout,
+    updatePlannedWorkout,
   } = useActivities();
 
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -139,11 +144,10 @@ const Dashboard = () => {
                   <button
                     key={tab.id}
                     onClick={() => setActiveTab(tab.id)}
-                    className={`px-4 py-1.5 text-[10px] font-bold uppercase tracking-wider transition-colors ${
-                      activeTab === tab.id
-                        ? "bg-slate-800 text-white dark:bg-zinc-200 dark:text-zinc-950"
-                        : "bg-white dark:bg-zinc-900 text-slate-500 dark:text-zinc-400 hover:bg-slate-50 dark:hover:bg-zinc-800 border-l border-slate-200 dark:border-zinc-700 first:border-l-0"
-                    }`}
+                    className={`px-4 py-1.5 text-[10px] font-bold uppercase tracking-wider transition-colors ${activeTab === tab.id
+                      ? "bg-slate-800 text-white dark:bg-zinc-200 dark:text-zinc-950"
+                      : "bg-white dark:bg-zinc-900 text-slate-500 dark:text-zinc-400 hover:bg-slate-50 dark:hover:bg-zinc-800 border-l border-slate-200 dark:border-zinc-700 first:border-l-0"
+                      }`}
                   >
                     {tab.label}
                   </button>
@@ -181,11 +185,10 @@ const Dashboard = () => {
                     <button
                       key={t.id}
                       onClick={() => setTimeRange(t.id)}
-                      className={`px-3 py-1.5 text-[10px] font-bold uppercase transition-colors ${
-                        timeRange === t.id
-                          ? "bg-blue-600 text-white border-blue-600"
-                          : "bg-white dark:bg-zinc-900 text-slate-500 dark:text-zinc-400 hover:bg-slate-50 dark:hover:bg-zinc-800 border-l border-slate-200 dark:border-zinc-700 first:border-l-0"
-                      }`}
+                      className={`px-3 py-1.5 text-[10px] font-bold uppercase transition-colors ${timeRange === t.id
+                        ? "bg-blue-600 text-white border-blue-600"
+                        : "bg-white dark:bg-zinc-900 text-slate-500 dark:text-zinc-400 hover:bg-slate-50 dark:hover:bg-zinc-800 border-l border-slate-200 dark:border-zinc-700 first:border-l-0"
+                        }`}
                     >
                       {t.label}
                     </button>
@@ -213,10 +216,15 @@ const Dashboard = () => {
                 </div>
               </div>
 
+              {/* TENDENCIAS DE RENDIMIENTO */}
+              <div className="mt-4">
+                <TrendsChart activities={activities} />
+              </div>
+
               {/* SECCIÓN AVANZADA */}
               <div className="pt-4 border-t border-slate-200 dark:border-zinc-800 mt-4">
                 <AdvancedAnalytics
-                  activities={filteredData}
+                  activities={activities}
                   settings={settings}
                   onSelectActivity={(act) => setActiveActivity(act)}
                 />
@@ -231,6 +239,12 @@ const Dashboard = () => {
             >
               <CalendarPage
                 activities={activities}
+                plannedWorkouts={plannedWorkouts}
+                addPlannedWorkout={addPlannedWorkout}
+                deletePlannedWorkout={deletePlannedWorkout}
+                updatePlannedWorkout={updatePlannedWorkout}
+                currentMetrics={currentMetrics}
+                settings={settings}
                 onDelete={deleteActivity}
                 onSelectActivity={(act) => setActiveActivity(act)}
               />
@@ -252,7 +266,7 @@ const Dashboard = () => {
               </div>
               <div className="h-[calc(100vh-250px)]">
                 <HistoryList
-                  activities={filteredData}
+                  activities={activities}
                   onDelete={deleteActivity}
                   onSelectActivity={(act) => setActiveActivity(act)}
                 />
