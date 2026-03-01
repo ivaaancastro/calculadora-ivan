@@ -204,6 +204,20 @@ export const useActivities = () => {
     setPlannedWorkouts(prev => prev.filter(w => w.id !== id));
   };
 
+  const updatePlannedWorkout = async (id, updates) => {
+    const { data, error } = await supabase
+      .from("planned_workouts")
+      .update(updates)
+      .eq("id", id)
+      .select()
+      .single();
+    if (error) throw error;
+    setPlannedWorkouts(prev =>
+      prev.map(w => w.id === id ? { ...data, dateObj: new Date(data.date), isPlanned: true } : w)
+        .sort((a, b) => a.dateObj - b.dateObj)
+    );
+  };
+
   const refreshStravaToken = async (refreshToken) => {
     const clientId = import.meta.env.VITE_STRAVA_CLIENT_ID;
     const clientSecret = import.meta.env.VITE_STRAVA_CLIENT_SECRET;
@@ -745,6 +759,7 @@ export const useActivities = () => {
     plannedWorkouts,
     addPlannedWorkout,
     deletePlannedWorkout,
+    updatePlannedWorkout,
     loading,
     uploading,
     uploadStatus,
