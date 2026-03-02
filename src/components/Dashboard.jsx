@@ -23,6 +23,7 @@ import AddActivityModal from "./modals/AddActivityModal";
 import { CalendarPage } from "./pages/CalendarPage";
 import { ActivityDetailPage } from "./pages/ActivityDetailPage";
 import { ProfilePage } from "./pages/ProfilePage";
+import { HealthPage } from "./pages/HealthPage";
 
 const Dashboard = () => {
   const {
@@ -88,6 +89,8 @@ const Dashboard = () => {
         onProfileClick={() => setActiveTab("profile")}
         isStravaConnected={isStravaConnected}
         onSync={handleStravaSync}
+        activeTab={activeTab}
+        onTabChange={handleTabChange}
       />
 
       {uploadStatus && (
@@ -133,27 +136,6 @@ const Dashboard = () => {
           </div>
         ) : (
           <>
-            {/* NAVEGACIÓN SUPERIOR (Selector Segmentado) */}
-            <div className="hidden md:flex justify-start mb-6 border-b border-slate-200 dark:border-zinc-800 pb-3">
-              <div className="flex border border-slate-200 dark:border-zinc-700 rounded overflow-hidden">
-                {[
-                  { id: "overview", label: "Dashboard" },
-                  { id: "calendar", label: "Calendario" },
-                  { id: "history", label: "Actividades" },
-                ].map((tab) => (
-                  <button
-                    key={tab.id}
-                    onClick={() => setActiveTab(tab.id)}
-                    className={`px-4 py-1.5 text-[10px] font-bold uppercase tracking-wider transition-colors ${activeTab === tab.id
-                      ? "bg-slate-800 text-white dark:bg-zinc-200 dark:text-zinc-950"
-                      : "bg-white dark:bg-zinc-900 text-slate-500 dark:text-zinc-400 hover:bg-slate-50 dark:hover:bg-zinc-800 border-l border-slate-200 dark:border-zinc-700 first:border-l-0"
-                      }`}
-                  >
-                    {tab.label}
-                  </button>
-                ))}
-              </div>
-            </div>
 
             {/* VISTA: OVERVIEW */}
             <div
@@ -203,22 +185,22 @@ const Dashboard = () => {
                 timeRange={timeRange}
               />
 
-              {/* GRÁFICAS BÁSICAS */}
+              {/* PMC CHART — FULL WIDTH */}
+              <div className="h-[350px]">
+                <EvolutionChart data={chartData} />
+              </div>
+
+              {/* TRENDS + DISTRIBUTION */}
               <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
-                <div className="lg:col-span-8 h-[300px]">
-                  <EvolutionChart data={chartData} />
+                <div className="lg:col-span-8">
+                  <TrendsChart activities={activities} />
                 </div>
-                <div className="lg:col-span-4 h-[300px]">
+                <div className="lg:col-span-4 h-[420px]">
                   <DistributionChart
                     distribution={distribution}
                     total={summary.count}
                   />
                 </div>
-              </div>
-
-              {/* TENDENCIAS DE RENDIMIENTO */}
-              <div className="mt-4">
-                <TrendsChart activities={activities} />
               </div>
 
               {/* SECCIÓN AVANZADA */}
@@ -245,6 +227,7 @@ const Dashboard = () => {
                 updatePlannedWorkout={updatePlannedWorkout}
                 currentMetrics={currentMetrics}
                 settings={settings}
+                chartData={chartData}
                 onDelete={deleteActivity}
                 onSelectActivity={(act) => setActiveActivity(act)}
               />
@@ -271,6 +254,15 @@ const Dashboard = () => {
                   onSelectActivity={(act) => setActiveActivity(act)}
                 />
               </div>
+            </div>
+
+            {/* VISTA: SALUD */}
+            <div
+              className={
+                activeTab === "health" ? "block animate-in fade-in" : "hidden"
+              }
+            >
+              <HealthPage activities={activities} settings={settings} chartData={chartData} />
             </div>
           </>
         )}
