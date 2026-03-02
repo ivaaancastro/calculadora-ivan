@@ -9,8 +9,8 @@ const TIME_INTERVALS = [1, 5, 15, 30, 60, 180, 300, 600, 1200, 2400, 3600, 7200]
 const formatInterval = (secs) => { if (secs < 60) return `${secs}s`; if (secs < 3600) return `${secs / 60}m`; return `${secs / 3600}h`; };
 const formatPace = (decimalMinutes) => { if (!decimalMinutes || decimalMinutes >= 20) return '>20:00'; const mins = Math.floor(decimalMinutes); const secs = Math.round((decimalMinutes - mins) * 60); return `${mins}:${secs.toString().padStart(2, '0')}`; };
 const getMonday = (d) => { const date = new Date(d); const day = date.getDay(); const diff = date.getDate() - day + (day === 0 ? -6 : 1); return new Date(date.setDate(diff)).toISOString().split('T')[0]; };
-const ZONE_COLORS = ['#94a3b8', '#3b82f6', '#10b981', '#eab308', '#ef4444'];
-const ZONE_LABELS = ['Z1 Recuperación', 'Z2 Base', 'Z3 Tempo', 'Z4 Umbral', 'Z5 VO2Max'];
+const ZONE_COLORS = ['#94a3b8', '#3b82f6', '#22c55e', '#eab308', '#f97316', '#ef4444', '#a855f7'];
+const ZONE_LABELS = ['Z1 Recuperación', 'Z2 Aeróbico', 'Z3 Tempo', 'Z4 SubUmbral', 'Z5 SupraUmbral', 'Z6 VO2Max', 'Z7 Anaeróbico'];
 
 export const AdvancedAnalytics = ({ activities, settings, onSelectActivity }) => {
     const [curveType, setCurveType] = useState('speed');
@@ -18,10 +18,6 @@ export const AdvancedAnalytics = ({ activities, settings, onSelectActivity }) =>
     const [scatterSport, setScatterSport] = useState('run');
     const [vo2Sport, setVo2Sport] = useState('run');
     const [mmpTimeframe, setMmpTimeframe] = useState('90d');
-
-    const [wellnessData, setWellnessData] = useState([]);
-    const [wellnessLoading, setWellnessLoading] = useState(true);
-    const [apiError, setApiError] = useState(null);
 
     const analytics = useMemo(() => {
         const today = new Date();
@@ -33,7 +29,7 @@ export const AdvancedAnalytics = ({ activities, settings, onSelectActivity }) =>
         else if (mmpTimeframe === '1y') dateMmp.setDate(today.getDate() - 365);
         else dateMmp.setFullYear(2000);
 
-        const zonesData = [0, 0, 0, 0, 0];
+        const zonesData = [0, 0, 0, 0, 0, 0, 0];
         const sortedActivities = [...activities].sort((a, b) => new Date(a.date) - new Date(b.date));
         const weeklyMap = new Map();
 
@@ -107,7 +103,7 @@ export const AdvancedAnalytics = ({ activities, settings, onSelectActivity }) =>
                         for (let i = 1; i < hrData.length; i++) {
                             const hr = hrData[i]; const dt = timeData[i] - timeData[i - 1];
                             const zIndex = userZones.findIndex(z => hr >= z.min && hr <= z.max);
-                            if (zIndex !== -1) zonesData[zIndex] += dt; else if (hr > userZones[4].max) zonesData[4] += dt;
+                            if (zIndex !== -1 && zIndex < 7) zonesData[zIndex] += dt; else if (hr > userZones[userZones.length - 1].max) zonesData[6] += dt;
                         }
                     }
                     if (actDate >= dateMmp) {
@@ -180,8 +176,8 @@ export const AdvancedAnalytics = ({ activities, settings, onSelectActivity }) =>
         const totalFocus = zonesData.reduce((a, b) => a + b, 0);
         const focusChart = totalFocus > 0 ? [
             { name: 'Aeróbico', value: Math.round(((zonesData[0] + zonesData[1]) / totalFocus) * 100), color: '#3b82f6' },
-            { name: 'Umbral', value: Math.round(((zonesData[2] + zonesData[3]) / totalFocus) * 100), color: '#eab308' },
-            { name: 'Anaeróbico', value: Math.round((zonesData[4] / totalFocus) * 100), color: '#ef4444' }
+            { name: 'Tempo/Umbral', value: Math.round(((zonesData[2] + zonesData[3]) / totalFocus) * 100), color: '#eab308' },
+            { name: 'Anaeróbico', value: Math.round(((zonesData[4] + zonesData[5] + zonesData[6]) / totalFocus) * 100), color: '#ef4444' }
         ] : [];
 
         const curves = { all: { spd: [], hr: [] }, bike: { spd: [], hr: [] }, run: { spd: [], hr: [] } };
@@ -202,196 +198,6 @@ export const AdvancedAnalytics = ({ activities, settings, onSelectActivity }) =>
             model: { ctl: currentCTL, atl: currentATL, tsb, rampRate, monotony, strain, load7d: sum7 }
         };
     }, [activities, settings, mmpTimeframe]);
-
-    // --- MOTOR DE OBTENCIÓN DE DATOS (DIRECTO Y FIABLE) ---
-    useEffect(() => {
-        const fetchWellness = async () => {
-            setWellnessLoading(true);
-            setApiError(null);
-
-            try {
-                // 1. INTENTO REAL API INTERVALS
-                if (settings?.intervalsId && settings?.intervalsKey) {
-                    const end = new Date().toISOString().split('T')[0];
-                    const start = new Date(Date.now() - 90 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
-
-                    const authString = 'Basic ' + btoa(`API_KEY:${settings.intervalsKey}`);
-
-                    const res = await fetch(`https://intervals.icu/api/v1/athlete/${settings.intervalsId}/wellness?oldest=${start}&newest=${end}`, {
-                        method: 'GET', headers: { 'Authorization': authString, 'Accept': 'application/json' }
-                    });
-
-                    if (!res.ok) throw new Error(`API Error ${res.status}: Revisa tu Athlete ID y API Key.`);
-
-                    const data = await res.json();
-
-                    if (Array.isArray(data) && data.length > 0) {
-                        console.log("INTERVALS ICU WELLNESS RAW DATA:", data[data.length - 1]);
-                        // Usamos la información pura tal cual nos la da Intervals
-                        // Ajustar zona horaria
-                        const realData = data.map(d => {
-                            let dateObj = new Date(d.id || d.date);
-                            // Some dates from intervals come as "YYYY-MM-DD"
-                            if (d.id && typeof d.id === 'string' && d.id.includes('-')) {
-                                dateObj = new Date(d.id + 'T00:00:00');
-                            }
-
-                            const sleepHours = d.sleepSecs ? Number((d.sleepSecs / 3600).toFixed(1)) : (d.sleep || null);
-
-                            return {
-                                date: d.id || d.date,
-                                dateLabel: !isNaN(dateObj) ? dateObj.toLocaleDateString('es-ES', { day: '2-digit', month: 'short' }) : (d.id || d.date),
-                                hrv: d.hrv || null,
-                                sleep: sleepHours,
-                                rhr: d.restingHR || null,
-                                isSimulated: false
-                            };
-                        }).sort((a, b) => new Date(a.date + "T00:00:00") - new Date(b.date + "T00:00:00")); // Orden cronológico asegurado
-
-                        console.log("MAPPED HEALTH DATA FOR CHARTS:", realData[realData.length - 1]);
-
-                        setWellnessData(realData);
-                        setWellnessLoading(false);
-                        return;
-                    } else {
-                        throw new Error("Intervals devolvió datos vacíos. Verifica tus sincronizaciones allí.");
-                    }
-                }
-
-                // 2. SIMULADOR (Si no hay claves)
-                const simData = [];
-                const baseHrv = 65; const baseSleep = 7.5; const baseRhr = settings.fcReposo || 50;
-                const today = new Date();
-                for (let i = 90; i >= 0; i--) {
-                    const d = new Date(today); d.setDate(d.getDate() - i);
-                    const dateStr = d.toISOString().split('T')[0];
-                    const prevDate = new Date(d); prevDate.setDate(d.getDate() - 1);
-                    const yesterdayTSS = analytics.dailyTSS.get(prevDate.toISOString().split('T')[0]) || 0;
-
-                    const fatigueImpact = Math.min(yesterdayTSS / 150, 1);
-                    const randomHrvNoise = (Math.random() * 10) - 5;
-                    const randomSleepNoise = (Math.random() * 1.5) - 0.75;
-
-                    const dateObj = new Date(dateStr + "T00:00:00");
-
-                    simData.push({
-                        date: dateStr,
-                        dateLabel: !isNaN(dateObj) ? dateObj.toLocaleDateString('es-ES', { day: '2-digit', month: 'short' }) : dateStr,
-                        hrv: Math.max(20, Math.round(baseHrv - (baseHrv * 0.2 * fatigueImpact) + randomHrvNoise)),
-                        sleep: Math.max(4, Number((baseSleep - (fatigueImpact * 1.5) + randomSleepNoise).toFixed(1))),
-                        rhr: Math.round(baseRhr + (fatigueImpact * 5) - (randomHrvNoise * 0.2)), isSimulated: true
-                    });
-                }
-                setWellnessData(simData);
-
-            } catch (error) {
-                console.error("Fetch Wellness Error:", error);
-                setApiError(error.message);
-            } finally {
-                setWellnessLoading(false);
-            }
-        };
-
-        fetchWellness();
-    }, [settings, analytics.dailyTSS]);
-
-    // --- MOTOR MATEMÁTICO DE SALUD (Desviación Estándar Garmin) ---
-    const wellnessMetrics = useMemo(() => {
-        if (!wellnessData || wellnessData.length === 0 || apiError) return null;
-
-        // Filtrar sólo valores válidos para calcular la Base Histórica (Baseline)
-        const validHrv = wellnessData.filter(d => d.hrv > 0);
-        const baselineHrv = validHrv.length > 0 ? validHrv.reduce((acc, val) => acc + val.hrv, 0) / validHrv.length : 0;
-
-        // Varianza real (Desviación Estándar) para la banda verde
-        const hrvVariance = validHrv.length > 0 ? validHrv.reduce((acc, val) => acc + Math.pow(val.hrv - baselineHrv, 2), 0) / validHrv.length : 0;
-        const hrvStdDev = Math.max(Math.sqrt(hrvVariance), baselineHrv * 0.05); // Margen mínimo de seguridad
-        const normalHrvRange = [Math.round(baselineHrv - hrvStdDev), Math.round(baselineHrv + hrvStdDev)];
-
-        const validRhr = wellnessData.filter(d => d.rhr > 0);
-        const baselineRhr = validRhr.length > 0 ? Math.round(validRhr.reduce((acc, val) => acc + val.rhr, 0) / validRhr.length) : 50;
-
-        // Generar Medias Móviles de 7 días exactas para cada punto
-        const chartData = wellnessData.map((d, index, arr) => {
-            const startIdx = Math.max(0, index - 6);
-            const window = arr.slice(startIdx, index + 1);
-
-            const validHrvWindow = window.filter(w => w.hrv > 0);
-            const rollHrv = validHrvWindow.length > 0 ? Math.round(validHrvWindow.reduce((sum, curr) => sum + curr.hrv, 0) / validHrvWindow.length) : null;
-
-            const validSleepWindow = window.filter(w => w.sleep > 0);
-            const rollSleep = validSleepWindow.length > 0 ? Number((validSleepWindow.reduce((sum, curr) => sum + curr.sleep, 0) / validSleepWindow.length).toFixed(1)) : null;
-
-            const validRhrWindow = window.filter(w => w.rhr > 0);
-            const rollRhr = validRhrWindow.length > 0 ? Math.round(validRhrWindow.reduce((sum, curr) => sum + curr.rhr, 0) / validRhrWindow.length) : null;
-
-            return {
-                ...d,
-                baselineTop: normalHrvRange[1],
-                baselineBottom: normalHrvRange[0],
-                baselineMid: Math.round(baselineHrv),
-                hrv7dAvg: rollHrv,
-                sleep7dAvg: rollSleep,
-                rhr7dAvg: rollRhr
-            };
-        });
-
-        // Extraer datos del día actual (el último del array)
-        const todayData = chartData[chartData.length - 1];
-        const avgHrv7d = todayData.hrv7dAvg !== null ? todayData.hrv7dAvg : '--';
-        const avgSleep7d = todayData.sleep7dAvg !== null ? todayData.sleep7dAvg : '--';
-        const avgRhr7d = todayData.rhr7dAvg !== null ? todayData.rhr7dAvg : '--';
-
-        // Cálculo Inteligente de Readiness y Factores (Insights)
-        let score = 100;
-        const insights = [];
-
-        // 1. Fatiga Acumulada (TSB)
-        if (analytics.model.tsb < -25) {
-            score -= 20;
-            insights.push({ type: 'danger', label: 'Sobrecarga Alta', desc: 'Fatiga muy elevada por entrenamiento reciente.' });
-        } else if (analytics.model.tsb < -10) {
-            score -= 10;
-            insights.push({ type: 'warning', label: 'Fatiga Moderada', desc: 'Cuerpo cansado por la carga reciente.' });
-        } else if (analytics.model.tsb > 5) {
-            insights.push({ type: 'success', label: 'Fresco', desc: 'Nivel óptimo de recuperación muscular.' });
-        }
-
-        // 2. Sueño (Media 7d)
-        if (avgSleep7d !== '--') {
-            if (avgSleep7d < 6) {
-                score -= 20;
-                insights.push({ type: 'danger', label: 'Déficit de Sueño', desc: `Durmiendo ${avgSleep7d}h media (Meta: 8h).` });
-            } else if (avgSleep7d < 7) {
-                score -= 10;
-                insights.push({ type: 'warning', label: 'Sueño Insuficiente', desc: 'Descanso por debajo de lo óptimo.' });
-            } else if (avgSleep7d >= 8) {
-                insights.push({ type: 'success', label: 'Sueño Óptimo', desc: 'Excelente recuperación nocturna.' });
-            }
-        }
-
-        // 3. VFC (Media 7d vs Base)
-        let hrvStatus = { label: 'Equilibrado', color: 'text-emerald-500' };
-        if (baselineHrv > 0 && avgHrv7d !== '--') {
-            if (avgHrv7d < normalHrvRange[0]) {
-                score -= 25;
-                hrvStatus = { label: 'Tensión Simpática', color: 'text-red-500' };
-                insights.push({ type: 'danger', label: 'VFC Suprimida', desc: 'Sistema nervioso estresado.' });
-            } else if (avgHrv7d > normalHrvRange[1]) {
-                score -= 5;
-                hrvStatus = { label: 'Hiper-Recuperación', color: 'text-blue-500' };
-                insights.push({ type: 'warning', label: 'Hiper-Recuperación', desc: 'Posible fatiga parasimpática.' });
-            } else {
-                insights.push({ type: 'success', label: 'VFC Equilibrada', desc: 'Sistema nervioso adaptado.' });
-            }
-        } else if (avgHrv7d === '--') {
-            hrvStatus = { label: 'Sin Datos Recientes', color: 'text-slate-400' };
-        }
-
-        const todayReadiness = (avgHrv7d === '--' && avgSleep7d === '--') ? '--' : Math.max(0, Math.min(100, score));
-
-        return { avgHrv7d, avgSleep7d, avgRhr7d, normalHrvRange, baselineHrv: Math.round(baselineHrv), baselineRhr, todayReadiness, hrvStatus, insights, chartData, isSimulated: wellnessData[0]?.isSimulated || false };
-    }, [wellnessData, analytics.model.tsb, apiError]);
 
     if (!activities || activities.length === 0) return null;
 
@@ -446,42 +252,6 @@ export const AdvancedAnalytics = ({ activities, settings, onSelectActivity }) =>
         return null;
     };
 
-    const CustomHrvTooltip = ({ active, payload }) => {
-        if (active && payload && payload.length) {
-            const data = payload[0].payload;
-
-            let statusStr = "Rango Normal"; let colorClass = "text-emerald-500";
-            if (data.hrv !== null) {
-                if (data.hrv < data.baselineBottom) { statusStr = "Tensión Simpática (Baja)"; colorClass = "text-red-500"; }
-                else if (data.hrv > data.baselineTop) { statusStr = "Hiper-Recuperación (Alta)"; colorClass = "text-blue-500"; }
-            } else {
-                statusStr = "Dato Diario No Registrado"; colorClass = "text-slate-400";
-            }
-
-            return (
-                <div style={tooltipStyle} className="shadow-xl min-w-[170px]">
-                    <p className="text-[9px] text-zinc-400 uppercase tracking-widest mb-1">{data.dateLabel}</p>
-
-                    {data.hrv !== null ? (
-                        <div className="flex items-baseline gap-1 mb-1">
-                            <span className="text-lg font-black text-white">{data.hrv}</span><span className="text-[9px] text-zinc-400">ms</span>
-                        </div>
-                    ) : (
-                        <div className="text-xs font-bold text-slate-500 mb-1">-- ms</div>
-                    )}
-
-                    <p className={`text-[9px] font-bold uppercase tracking-wider mb-2 ${colorClass}`}>{statusStr}</p>
-
-                    <div className="border-t border-zinc-700 pt-2 space-y-1">
-                        <p className="text-[9px] text-zinc-300 flex justify-between">Media 7d: <strong>{data.hrv7dAvg !== null ? `${data.hrv7dAvg} ms` : '--'}</strong></p>
-                        <p className="text-[9px] text-zinc-500 flex justify-between">Tu Base: <span>{data.baselineBottom} - {data.baselineTop}</span></p>
-                    </div>
-                </div>
-            );
-        }
-        return null;
-    };
-
     const getTrainingStatus = () => {
         const { ctl, tsb, rampRate } = analytics.model;
         if (ctl < 15) return { phase: 'Construyendo Base', color: 'text-slate-500', bg: 'bg-slate-50 border-slate-200 dark:bg-zinc-800/50 dark:border-zinc-700', icon: Brain, desc: 'Tienes poco historial acumulado. Sigue entrenando para asentar el modelo.' };
@@ -490,22 +260,6 @@ export const AdvancedAnalytics = ({ activities, settings, onSelectActivity }) =>
         if (tsb > -10 && tsb <= 5) return { phase: 'Mantenimiento', color: 'text-blue-500', bg: 'bg-blue-50 dark:bg-blue-900/10 border-blue-200 dark:border-blue-900/30', icon: Activity, desc: 'Carga equilibrada. Mantienes nivel sin estresar en exceso el sistema.' };
         if (tsb > 5 && rampRate < -1) return { phase: 'Pérdida de Forma', color: 'text-orange-500', bg: 'bg-orange-50 dark:bg-orange-900/10 border-orange-200 dark:border-orange-900/30', icon: TrendingUp, desc: 'Entrenando menos de lo habitual. Tu estado de forma base está cayendo.' };
         return { phase: 'Pico / Recuperación', color: 'text-purple-500', bg: 'bg-purple-50 dark:bg-purple-900/10 border-purple-200 dark:border-purple-900/30', icon: Battery, desc: 'Estás muy fresco. Has limpiado la fatiga, estado ideal para competir.' };
-    };
-
-    const generateInsight = () => {
-        if (apiError) return { title: 'Fallo de Sincronización', desc: `Revisa la API Key. Error: ${apiError}`, color: 'bg-red-950/20 border-red-900/50 text-red-400', icon: AlertOctagon };
-        if (!wellnessMetrics) return { title: 'Analizando Datos...', desc: 'Calculando tu estado fisiológico actual.', color: 'bg-slate-800 text-slate-100', icon: Brain };
-
-        const r = wellnessMetrics.todayReadiness;
-        const t = analytics.model.tsb;
-
-        if (r === '--') return { title: 'Faltan Datos de Salud', desc: 'Sincroniza tu reloj para evaluar tu Nivel de Preparación (Readiness).', accent: 'border-l-slate-500', badge: 'bg-slate-500/10 text-slate-400', badgeLabel: 'SIN DATOS', icon: ActivityPulse };
-        if (r >= 85 && t > -10) return { title: 'Estado Óptimo', desc: 'Tu cuerpo ha absorbido el entrenamiento y tu VFC está equilibrada. Es un día ideal para meter intensidad, series o superar un récord.', accent: 'border-l-emerald-500', badge: 'bg-emerald-500/10 text-emerald-400', badgeLabel: 'PEAK', icon: Sparkles };
-        if (r >= 60 && t > -20) return { title: 'Productivo', desc: 'Estás asimilando bien el entrenamiento. Tienes energía suficiente para cumplir el plan previsto hoy sin riesgo excesivo.', accent: 'border-l-blue-500', badge: 'bg-blue-500/10 text-blue-400', badgeLabel: 'OK', icon: Target };
-        if (r < 60 && r >= 40) return { title: 'Fatiga Acumulada', desc: 'Tu sistema nervioso muestra signos de fatiga. Considera bajar la intensidad hoy o hacer un rodaje en Zona 1-2 para facilitar la recuperación.', accent: 'border-l-amber-500', badge: 'bg-amber-500/10 text-amber-400', badgeLabel: 'CUIDADO', icon: Coffee };
-        if (r < 40) return { title: 'Sobrecarga Sistémica', desc: 'Tu VFC y tu sueño indican un estrés severo. Entrenar fuerte hoy es contraproducente. Prioriza el descanso o estiramientos.', accent: 'border-l-red-500', badge: 'bg-red-500/10 text-red-400', badgeLabel: 'ALERTA', icon: AlertTriangle };
-
-        return { title: 'Mantenimiento', desc: 'Tu cuerpo está en equilibrio. Escucha a tus sensaciones para decidir el entrenamiento de hoy.', accent: 'border-l-slate-500', badge: 'bg-slate-500/10 text-slate-400', badgeLabel: 'NEUTRO', icon: ActivityPulse };
     };
 
     const getVo2Assessment = (vo2Value) => {
@@ -526,7 +280,6 @@ export const AdvancedAnalytics = ({ activities, settings, onSelectActivity }) =>
     };
 
     const status = getTrainingStatus();
-    const dailyInsight = generateInsight();
     const currentVo2Value = vo2Sport === 'run' ? analytics.vo2Max.run : analytics.vo2Max.bike;
     const vo2Info = getVo2Assessment(currentVo2Value);
 
@@ -608,7 +361,7 @@ export const AdvancedAnalytics = ({ activities, settings, onSelectActivity }) =>
                                     <XAxis dataKey="dateLabel" tick={{ fontSize: 9, fill: '#71717a' }} minTickGap={15} axisLine={{ stroke: '#3f3f46' }} tickLine={false} />
                                     <YAxis yAxisId="left" tick={{ fontSize: 9, fill: '#8b5cf6' }} axisLine={false} tickLine={false} />
                                     <YAxis yAxisId="right" orientation="right" hide />
-                                    <RechartsTooltip contentStyle={tooltipStyle} itemStyle={{ color: '#fff' }} />
+                                    <RechartsTooltip contentStyle={tooltipStyle} itemStyle={{ color: '#fff' }} isAnimationActive={false} cursor={{ stroke: '#71717a', strokeWidth: 1, strokeDasharray: '4 4' }} />
                                     <Legend wrapperStyle={{ fontSize: '10px', color: '#a1a1aa' }} iconType="plainline" />
                                     <Bar yAxisId="left" dataKey="tss" name="Carga (TSS)" fill="#8b5cf6" radius={[2, 2, 0, 0]} maxBarSize={30} />
                                     <Line yAxisId="right" type="step" dataKey="hours" name="Volumen (Horas)" stroke="#10b981" strokeWidth={2} dot={false} />
@@ -656,8 +409,8 @@ export const AdvancedAnalytics = ({ activities, settings, onSelectActivity }) =>
                                     <CartesianGrid strokeDasharray="2 2" stroke="#3f3f46" opacity={0.3} vertical={false} />
                                     <XAxis dataKey="name" tick={{ fontSize: 9, fill: '#71717a' }} minTickGap={10} axisLine={{ stroke: '#3f3f46' }} tickLine={false} />
                                     <YAxis tick={{ fontSize: 9, fill: curveColor }} domain={isPace ? ['dataMin - 0.5', 'dataMax + 1'] : [curveType === 'speed' ? 0 : 'dataMin - 5', 'dataMax + 5']} axisLine={false} tickLine={false} reversed={isPace} tickFormatter={isPace ? formatPace : undefined} />
-                                    <RechartsTooltip content={<CustomCurveTooltip />} />
-                                    <Area type="monotone" dataKey="value" stroke={curveColor} strokeWidth={2} fillOpacity={0.1} fill={curveColor} activeDot={{ onClick: (e, payload) => handleDirectClick(payload.payload), r: 5, cursor: 'pointer' }} />
+                                    <RechartsTooltip content={<CustomCurveTooltip />} isAnimationActive={false} cursor={{ stroke: '#71717a', strokeWidth: 1, strokeDasharray: '4 4' }} />
+                                    <Area type="monotone" dataKey="value" stroke={curveColor} strokeWidth={2} fillOpacity={0.1} fill={curveColor} activeDot={{ onClick: (e, payload) => handleDirectClick(payload.payload), r: 5, stroke: '#fff', strokeWidth: 2, cursor: 'pointer' }} dot={false} isAnimationActive={false} />
                                 </AreaChart>
                             </ResponsiveContainer>
                         </div>
@@ -711,7 +464,7 @@ export const AdvancedAnalytics = ({ activities, settings, onSelectActivity }) =>
                                         <CartesianGrid strokeDasharray="2 2" stroke="#3f3f46" opacity={0.3} />
                                         <XAxis type="number" dataKey="hr" domain={['dataMin - 5', 'dataMax + 5']} tick={{ fontSize: 9, fill: '#71717a' }} axisLine={{ stroke: '#3f3f46' }} tickLine={false} />
                                         <YAxis type="number" dataKey={scatterSport === 'run' ? 'pace' : 'speed'} domain={['dataMin', 'dataMax']} tick={{ fontSize: 9, fill: '#71717a' }} axisLine={false} tickLine={false} reversed={scatterSport === 'run'} tickFormatter={scatterSport === 'run' ? formatPace : undefined} />
-                                        <RechartsTooltip content={<CustomScatterTooltip />} />
+                                        <RechartsTooltip content={<CustomScatterTooltip />} isAnimationActive={false} />
                                         <Scatter data={analytics.scatterData[scatterSport]} fill={scatterSport === 'run' ? '#ea580c' : '#2563eb'} fillOpacity={0.6} r={3} onClick={(e) => handleDirectClick(e.payload)} cursor="pointer" />
                                     </ScatterChart>
                                 </ResponsiveContainer>
@@ -771,187 +524,6 @@ export const AdvancedAnalytics = ({ activities, settings, onSelectActivity }) =>
                         </div>
                     </div>
                 </div>
-            </section>
-
-            {/* -----------------------------------------------------------------------------------------
-          SECCIÓN 4: SALUD Y RECUPERACIÓN (Wellness, Morning Report, VFC)
-      ----------------------------------------------------------------------------------------- */}
-            <section>
-                <div className="flex items-center justify-between mb-4 pb-2 border-b border-slate-300 dark:border-zinc-800">
-                    <div className="flex items-center gap-2">
-                        <h3 className="text-sm font-black text-slate-800 dark:text-zinc-200 uppercase tracking-widest flex items-center gap-2">
-                            <Moon size={16} className="text-indigo-500" /> Salud, Recuperación y VFC
-                        </h3>
-                        <Subtitle text="Últimos 90 Días" />
-                    </div>
-                    {apiError ? (
-                        <span className="text-[9px] font-bold text-red-600 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-900/50 px-2 py-1 rounded uppercase tracking-widest flex items-center gap-1.5">
-                            <AlertTriangle size={10} /> Error API: Revisa tu Clave
-                        </span>
-                    ) : wellnessMetrics?.isSimulated && (
-                        <span className="text-[9px] font-bold text-amber-600 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-900/50 px-2 py-1 rounded uppercase tracking-widest flex items-center gap-1.5">
-                            <AlertTriangle size={10} /> Simulador Activo (Faltan Claves)
-                        </span>
-                    )}
-                </div>
-
-                {!wellnessLoading && (
-                    <div className={`mb-6 rounded-lg border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 border-l-4 ${dailyInsight.accent} animate-in fade-in slide-in-from-top-4 duration-500 overflow-hidden`}>
-                        <div className="p-5 flex items-start gap-4">
-                            <div className="p-2.5 bg-slate-100 dark:bg-zinc-800 rounded-lg shrink-0 mt-0.5">
-                                <dailyInsight.icon size={20} strokeWidth={2} className="text-slate-600 dark:text-zinc-300" />
-                            </div>
-                            <div className="flex-1 min-w-0">
-                                <div className="flex items-center gap-2.5 mb-1.5">
-                                    <h3 className="text-[10px] font-bold uppercase tracking-widest text-slate-400 dark:text-zinc-500">Morning Report</h3>
-                                    <span className={`text-[8px] font-black uppercase tracking-widest px-2 py-0.5 rounded-full ${dailyInsight.badge}`}>{dailyInsight.badgeLabel}</span>
-                                </div>
-                                <h2 className="text-lg font-black tracking-tight text-slate-800 dark:text-zinc-100 mb-1">{dailyInsight.title}</h2>
-                                <p className="text-xs font-medium text-slate-500 dark:text-zinc-400 leading-relaxed max-w-3xl">
-                                    {dailyInsight.desc}
-                                </p>
-                            </div>
-                        </div>
-                    </div>
-                )}
-
-                {wellnessLoading ? (
-                    <div className="h-[200px] flex flex-col gap-2 items-center justify-center text-slate-400">
-                        <Loader2 className="animate-spin text-indigo-500" size={24} />
-                        <span className="text-[10px] font-bold uppercase tracking-widest">Sincronizando Sistema Nervioso...</span>
-                    </div>
-                ) : wellnessMetrics ? (
-                    <div className="space-y-4">
-
-                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                            <div className="bg-white dark:bg-zinc-900 p-5 rounded-lg border border-slate-200 dark:border-zinc-800 flex flex-col justify-center items-center text-center relative overflow-hidden">
-                                <span className="text-[9px] font-bold text-slate-500 dark:text-zinc-400 uppercase tracking-widest mb-1 z-10">Readiness Score</span>
-                                <span className={`text-5xl font-black font-mono tracking-tighter z-10 ${wellnessMetrics.todayReadiness !== '--' ? (wellnessMetrics.todayReadiness > 70 ? 'text-emerald-500' : wellnessMetrics.todayReadiness > 40 ? 'text-amber-500' : 'text-red-500') : 'text-slate-400'}`}>
-                                    {wellnessMetrics.todayReadiness}
-                                </span>
-                            </div>
-
-                            <div className="bg-white dark:bg-zinc-900 p-5 rounded-lg border border-slate-200 dark:border-zinc-800 flex flex-col justify-center items-center text-center">
-                                <span className="text-[9px] font-bold text-slate-500 dark:text-zinc-400 uppercase tracking-widest mb-1">VFC (Media 7d)</span>
-                                <span className="text-3xl font-black font-mono text-slate-800 dark:text-zinc-100">{wellnessMetrics.avgHrv7d} <span className="text-sm font-bold text-slate-400">ms</span></span>
-                                <span className={`text-[9px] font-bold uppercase mt-1 ${wellnessMetrics.hrvStatus.color}`}>{wellnessMetrics.hrvStatus.label}</span>
-                            </div>
-
-                            <div className="bg-white dark:bg-zinc-900 p-5 rounded-lg border border-slate-200 dark:border-zinc-800 flex flex-col justify-center items-center text-center">
-                                <span className="text-[9px] font-bold text-slate-500 dark:text-zinc-400 uppercase tracking-widest mb-1">RHR (Media 7d)</span>
-                                <span className="text-3xl font-black font-mono text-slate-800 dark:text-zinc-100">
-                                    {wellnessMetrics.avgRhr7d} <span className="text-sm font-bold text-slate-400">ppm</span>
-                                </span>
-                                <span className="text-[9px] text-slate-400 uppercase font-bold mt-1">Base: {wellnessMetrics.baselineRhr}</span>
-                            </div>
-
-                            <div className="bg-white dark:bg-zinc-900 p-5 rounded-lg border border-slate-200 dark:border-zinc-800 flex flex-col justify-center gap-3 relative md:col-span-1 col-span-2">
-                                {/* Recovery Insights Estilo Whoop */}
-                                <div className="flex items-center gap-1.5 mb-1">
-                                    <Sparkles size={14} className="text-indigo-500" />
-                                    <span className="text-[10px] font-bold text-slate-800 dark:text-zinc-200 uppercase tracking-widest">Recovery Insights</span>
-                                </div>
-                                <div className="w-full space-y-2.5">
-                                    {wellnessMetrics.insights && wellnessMetrics.insights.length > 0 ? (
-                                        wellnessMetrics.insights.map((insight, i) => (
-                                            <div key={i} className="flex items-start gap-2">
-                                                <div className={`mt-0.5 rounded-full w-2 h-2 shrink-0 ${insight.type === 'danger' ? 'bg-red-500' : insight.type === 'warning' ? 'bg-amber-500' : 'bg-emerald-500'}`}></div>
-                                                <div>
-                                                    <p className={`text-[10px] font-bold uppercase leading-tight ${insight.type === 'danger' ? 'text-red-600 dark:text-red-400' : insight.type === 'warning' ? 'text-amber-600 dark:text-amber-400' : 'text-emerald-600 dark:text-emerald-400'}`}>{insight.label}</p>
-                                                    <p className="text-[10px] text-slate-500 dark:text-zinc-400 leading-snug">{insight.desc}</p>
-                                                </div>
-                                            </div>
-                                        ))
-                                    ) : (
-                                        <div className="text-[10px] text-slate-500 dark:text-zinc-400 italic">No hay suficientes datos para extraer insights.</div>
-                                    )}
-                                </div>
-                            </div>
-                        </div>
-
-                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-
-                            <div className="bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 p-4 rounded-lg flex flex-col h-[280px]">
-                                <div className="flex items-center justify-between mb-4">
-                                    <h4 className="text-[10px] font-bold text-slate-600 dark:text-zinc-400 uppercase tracking-widest flex items-center gap-1.5"><Heart size={12} className="text-indigo-500" /> Variabilidad Cardíaca vs Base</h4>
-                                </div>
-                                <div className="flex-1 w-full mt-2">
-                                    <ResponsiveContainer width="100%" height={220}>
-                                        <ComposedChart data={wellnessMetrics.chartData} margin={{ top: 15, right: 0, bottom: 0, left: -20 }}>
-                                            {/* Añadidos gradientes para un look más moderno */}
-                                            <defs>
-                                                <linearGradient id="colorHrvNormal" x1="0" y1="0" x2="0" y2="1">
-                                                    <stop offset="5%" stopColor="#10b981" stopOpacity={0.15} />
-                                                    <stop offset="95%" stopColor="#10b981" stopOpacity={0.0} />
-                                                </linearGradient>
-                                                <linearGradient id="colorHrvLine" x1="0" y1="0" x2="0" y2="1">
-                                                    <stop offset="5%" stopColor="#6366f1" stopOpacity={0.3} />
-                                                    <stop offset="95%" stopColor="#6366f1" stopOpacity={0} />
-                                                </linearGradient>
-                                            </defs>
-                                            <CartesianGrid strokeDasharray="2 2" stroke="#3f3f46" opacity={0.3} vertical={false} />
-                                            <XAxis dataKey="dateLabel" tick={{ fontSize: 9, fill: '#71717a' }} minTickGap={20} axisLine={{ stroke: '#3f3f46' }} tickLine={false} />
-                                            {/* Fix fatal crash on 'auto' if no HRV data exists */}
-                                            <YAxis domain={wellnessMetrics.chartData.some(d => d.hrv) ? ['dataMin - 5', 'dataMax + 5'] : [40, 100]} tick={{ fontSize: 9, fill: '#71717a' }} axisLine={false} tickLine={false} />
-                                            <RechartsTooltip content={<CustomHrvTooltip />} cursor={{ strokeDasharray: '3 3', stroke: '#71717a' }} />
-
-                                            {/* Área Verde de Rango Normal con gradiente suave */}
-                                            {wellnessMetrics.normalHrvRange[0] > 0 && (
-                                                <ReferenceArea y1={wellnessMetrics.normalHrvRange[0]} y2={wellnessMetrics.normalHrvRange[1]} fill="url(#colorHrvNormal)" />
-                                            )}
-                                            {wellnessMetrics.baselineHrv > 0 && (
-                                                <ReferenceLine y={wellnessMetrics.baselineHrv} stroke="#10b981" strokeDasharray="4 4" strokeWidth={1} opacity={0.5} />
-                                            )}
-
-                                            {/* Área debajo de la media de 7 días */}
-                                            <Area type="monotone" dataKey="hrv7dAvg" stroke="none" fill="url(#colorHrvLine)" connectNulls={true} />
-
-                                            {/* Media de 7 días (Línea sólida gruesa) y VFC diaria (puntos y línea fina) */}
-                                            <Line type="monotone" dataKey="hrv7dAvg" name="Media 7d" stroke="#6366f1" strokeWidth={3} dot={false} activeDot={false} connectNulls={true} />
-                                            {/* Utilizamos un Line con un render de dot personalizado para evitar el bug de Scatter en ComposedCharts con XAxis tipo Category */}
-                                            <Line type="monotone" dataKey="hrv" name="VFC Diaria" stroke="none" strokeWidth={0} dot={(props) => {
-                                                const { cx, cy, payload } = props;
-                                                if (payload.hrv === null || payload.hrv === undefined) return null;
-                                                let dotColor = "#cbd5e1";
-                                                if (payload.hrv < payload.baselineBottom) dotColor = "#ef4444";
-                                                else if (payload.hrv > payload.baselineTop) dotColor = "#3b82f6";
-                                                else dotColor = "#10b981";
-                                                return <circle cx={cx} cy={cy} r={3} fill={dotColor} stroke="none" key={`dot-${payload.date}`} />;
-                                            }} activeDot={{ r: 5, fill: '#818cf8', strokeWidth: 0 }} connectNulls={false} />
-                                        </ComposedChart>
-                                    </ResponsiveContainer>
-                                </div>
-                            </div>
-
-                            <div className="bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 p-4 rounded-lg flex flex-col h-[280px]">
-                                <div className="flex items-center justify-between mb-4">
-                                    <h4 className="text-[10px] font-bold text-slate-600 dark:text-zinc-400 uppercase tracking-widest flex items-center gap-1.5"><Moon size={12} className="text-blue-500" /> Horas de Sueño</h4>
-                                </div>
-                                <div className="flex-1 w-full mt-2 relative">
-                                    <ResponsiveContainer width="100%" height={220}>
-                                        <ComposedChart data={wellnessMetrics.chartData} margin={{ top: 15, right: 0, bottom: 0, left: -20 }}>
-                                            <CartesianGrid strokeDasharray="2 2" stroke="#3f3f46" opacity={0.3} vertical={false} />
-                                            <XAxis dataKey="dateLabel" tick={{ fontSize: 9, fill: '#71717a' }} minTickGap={20} axisLine={{ stroke: '#3f3f46' }} tickLine={false} />
-                                            <YAxis domain={[0, wellnessMetrics.chartData.some(d => d.sleep > 10) ? 'dataMax' : 10]} tick={{ fontSize: 9, fill: '#71717a' }} axisLine={false} tickLine={false} />
-                                            <RechartsTooltip contentStyle={tooltipStyle} itemStyle={{ color: '#fff' }} formatter={(value) => [`${value} h`, 'Sueño']} />
-
-                                            {/* Zona Verde de Meta (>8h) */}
-                                            <ReferenceArea y1={8} y2={12} fill="#10b981" fillOpacity={0.1} />
-                                            <ReferenceLine y={8} stroke="#10b981" strokeDasharray="3 3" strokeWidth={1} label={{ position: 'insideTopLeft', value: 'Meta (8h)', fill: '#10b981', fontSize: 9, fontWeight: 'bold' }} />
-
-                                            <Bar dataKey="sleep" name="Horas de Sueño" radius={[4, 4, 0, 0]} maxBarSize={20}>
-                                                {wellnessMetrics.chartData.map((entry, index) => (
-                                                    <Cell key={`cell-${index}`} fill={entry.sleep >= 8 ? '#10b981' : entry.sleep >= 6 ? '#3b82f6' : '#f59e0b'} />
-                                                ))}
-                                            </Bar>
-                                        </ComposedChart>
-                                    </ResponsiveContainer>
-                                </div>
-                            </div>
-
-                        </div>
-                    </div>
-                ) : null}
             </section>
 
         </div>

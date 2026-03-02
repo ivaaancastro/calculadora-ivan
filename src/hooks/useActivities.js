@@ -617,13 +617,17 @@ export const useActivities = () => {
         return Math.round((trimp / normFactor) * 100);
       }
 
-      // === Fallback: estimate from average HR ===
+      // === Fallback: estimate from average HR using Joe Friel's hrTSS ===
       const hr = Number(act.hr_avg);
       const durationMin = act.duration || 0; // already in minutes
       if (!hr || hr <= 40) return Math.round((durationMin / 60) * 30); // very low estimate
-      const deltaHR = Math.max(0, (hr - hrRest) / hrRange);
-      const trimp = durationMin * deltaHR * kY * Math.exp(kB * deltaHR);
-      return Math.round((trimp / normFactor) * 100);
+
+      const lthr = Number(sportSettings.lthr) || 170;
+      const durationSecs = durationMin * 60;
+      const intensityFactor = hr / lthr;
+
+      const hrTss = (durationSecs * hr * intensityFactor) / (lthr * 3600) * 100;
+      return Math.round(hrTss);
     };
 
     const processedActivities = [...activities].map((act) => ({
