@@ -204,7 +204,8 @@ export const useWellnessInfo = (activities, settings, chartData) => {
             isSimulated: wellnessData[0]?.isSimulated || false,
             latestHrv: todayData.hrv !== null ? todayData.hrv : '--',
             latestSleep: todayData.sleep !== null ? todayData.sleep : '--',
-            latestRhr: todayData.rhr !== null ? todayData.rhr : '--'
+            latestRhr: todayData.rhr !== null ? todayData.rhr : '--',
+            currentTsb
         };
     }, [wellnessData, currentTsb, error]);
 

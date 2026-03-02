@@ -2,8 +2,10 @@ import React, { useState, useMemo, useEffect } from 'react';
 import {
     ChevronLeft, ChevronRight, Calendar as CalIcon,
     Clock, Zap, MapPin, Footprints, Bike, Dumbbell, Activity, Target,
-    Plus, Trash2, X
+    Plus, Trash2, X, Sparkles
 } from 'lucide-react';
+import { BlockGeneratorModal } from '../dashboard/BlockGeneratorModal';
+import { FuelingPanel } from '../dashboard/FuelingPanel';
 
 const WEEKDAYS = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'];
 
@@ -234,6 +236,48 @@ export const CalendarPage = ({ activities, plannedWorkouts = [], addPlannedWorko
     const nextWeek = () => setCurrentDate(prev => { const d = new Date(prev); d.setDate(d.getDate() + 7); return d; });
 
     // Using DB instead of localStorage for planned activities
+
+    const [isGeneratorOpen, setIsGeneratorOpen] = useState(false);
+    const [isDeleteBlockOpen, setIsDeleteBlockOpen] = useState(false);
+    const [deleteBlockFrom, setDeleteBlockFrom] = useState('');
+    const [deleteBlockTo, setDeleteBlockTo] = useState('');
+    const [deletingBlock, setDeletingBlock] = useState(false);
+
+    const handleDeleteBlock = async () => {
+        if (!deleteBlockFrom || !deleteBlockTo) return;
+        setDeletingBlock(true);
+        const toDelete = plannedWorkouts.filter(w => {
+            const d = w.date || (w.dateObj ? w.dateObj.toLocaleDateString('en-CA') : null);
+            return d && d >= deleteBlockFrom && d <= deleteBlockTo;
+        });
+        for (const w of toDelete) {
+            await deletePlannedWorkout(w.id);
+        }
+        setDeletingBlock(false);
+        setIsDeleteBlockOpen(false);
+        setDeleteBlockFrom('');
+        setDeleteBlockTo('');
+    };
+
+    const handleGenerateBlock = async (payload) => {
+        const { sport, projection } = payload;
+
+        if (!projection || projection.length === 0) return;
+
+        for (const week of projection) {
+            for (const session of week.sessions) {
+                const newWorkout = {
+                    date: session.date,
+                    type: sport,
+                    name: session.name,
+                    tss: session.tss,
+                    duration: session.duration,
+                    description: JSON.stringify({ blocks: session.blocks })
+                };
+                await addPlannedWorkout(newWorkout);
+            }
+        }
+    };
 
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [viewingPlan, setViewingPlan] = useState(null);
@@ -775,8 +819,17 @@ export const CalendarPage = ({ activities, plannedWorkouts = [], addPlannedWorko
                         <button onClick={goToday} className="text-[10px] sm:text-xs font-bold uppercase tracking-wider px-2 sm:px-3 py-1 bg-white dark:bg-zinc-800 border border-slate-300 dark:border-zinc-700 text-slate-600 dark:text-zinc-300 rounded hover:bg-slate-50 dark:hover:bg-zinc-700 transition-colors">Hoy</button>
                     </div>
                     <div className="flex items-center gap-2">
+                        {/* AI BUILDER BUTTON */}
+                        <button onClick={() => setIsGeneratorOpen(true)} className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 bg-indigo-50 dark:bg-indigo-900/20 text-indigo-600 dark:text-indigo-400 border border-indigo-200 dark:border-indigo-800/50 rounded-lg text-[9px] font-black uppercase tracking-widest hover:bg-indigo-100 dark:hover:bg-indigo-900/40 transition-colors shadow-sm">
+                            <Sparkles size={12} /> Generar Bloque
+                        </button>
+                        {/* DELETE BLOCK BUTTON */}
+                        <button onClick={() => setIsDeleteBlockOpen(prev => !prev)} className={`hidden sm:flex items-center gap-1.5 px-3 py-1.5 border rounded-lg text-[9px] font-black uppercase tracking-widest transition-colors shadow-sm ${isDeleteBlockOpen ? 'bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 border-red-200 dark:border-red-800/50' : 'bg-white dark:bg-zinc-900 text-slate-500 dark:text-zinc-400 border-slate-200 dark:border-zinc-700 hover:border-slate-400'}`}>
+                            <Trash2 size={12} /> Borrar Bloque
+                        </button>
+
                         {/* VIEW MODE TOGGLE */}
-                        <div className="hidden sm:flex items-center bg-slate-100 dark:bg-zinc-800 rounded overflow-hidden">
+                        <div className="hidden sm:flex items-center bg-slate-100 dark:bg-zinc-800 rounded overflow-hidden ml-2">
                             <button onClick={() => setViewMode('month')}
                                 className={`px-2.5 py-1.5 text-[9px] font-bold uppercase tracking-wider transition-colors ${viewMode === 'month' ? 'bg-slate-800 dark:bg-zinc-100 text-white dark:text-zinc-900' : 'text-slate-500 dark:text-zinc-400 hover:text-slate-700'}`}
                             >Mes</button>
@@ -791,6 +844,41 @@ export const CalendarPage = ({ activities, plannedWorkouts = [], addPlannedWorko
                         </div>
                     </div>
                 </div>
+
+                {/* DELETE BLOCK PANEL */}
+                {isDeleteBlockOpen && (
+                    <div className="border-b border-slate-200 dark:border-zinc-800 bg-slate-50 dark:bg-zinc-900/50 px-4 py-3 flex flex-wrap items-center gap-3">
+                        <span className="text-xs font-bold text-slate-500 dark:text-zinc-400 uppercase tracking-widest">Borrar entrenos planificados:</span>
+                        <div className="flex items-center gap-2">
+                            <label className="text-[10px] font-bold text-slate-400 uppercase">Desde</label>
+                            <input type="date" value={deleteBlockFrom} onChange={e => setDeleteBlockFrom(e.target.value)} className="px-2 py-1 text-xs border border-slate-200 dark:border-zinc-700 rounded bg-white dark:bg-zinc-900 text-slate-700 dark:text-zinc-300 font-mono" />
+                        </div>
+                        <div className="flex items-center gap-2">
+                            <label className="text-[10px] font-bold text-slate-400 uppercase">Hasta</label>
+                            <input type="date" value={deleteBlockTo} onChange={e => setDeleteBlockTo(e.target.value)} className="px-2 py-1 text-xs border border-slate-200 dark:border-zinc-700 rounded bg-white dark:bg-zinc-900 text-slate-700 dark:text-zinc-300 font-mono" />
+                        </div>
+                        {deleteBlockFrom && deleteBlockTo && (
+                            <span className="text-[10px] text-slate-400 dark:text-zinc-500">
+                                ({plannedWorkouts.filter(w => { const d = w.date || w.dateObj?.toLocaleDateString('en-CA'); return d && d >= deleteBlockFrom && d <= deleteBlockTo; }).length} entrenos)
+                            </span>
+                        )}
+                        <div className="flex items-center gap-2 ml-auto">
+                            <button onClick={() => { setIsDeleteBlockOpen(false); setDeleteBlockFrom(''); setDeleteBlockTo(''); }} className="px-3 py-1 text-xs font-bold text-slate-500 dark:text-zinc-400 hover:text-slate-700 dark:hover:text-zinc-200 transition-colors">Cancelar</button>
+                            <button onClick={handleDeleteBlock} disabled={!deleteBlockFrom || !deleteBlockTo || deletingBlock}
+                                className="px-3 py-1 text-xs font-bold bg-red-500 hover:bg-red-600 text-white rounded transition-colors disabled:opacity-50">
+                                {deletingBlock ? 'Borrando...' : 'Confirmar borrado'}
+                            </button>
+                        </div>
+                    </div>
+                )}
+
+                <BlockGeneratorModal
+                    isOpen={isGeneratorOpen}
+                    onClose={() => setIsGeneratorOpen(false)}
+                    onGenerate={handleGenerateBlock}
+                    currentPmcData={Object.values(fullPmcByDate)}
+                    plannedWorkouts={plannedWorkouts}
+                />
 
                 {viewMode === 'month' && (
                     <div className="w-full relative">
@@ -1464,63 +1552,68 @@ export const CalendarPage = ({ activities, plannedWorkouts = [], addPlannedWorko
             {/* MODAL VER ENTRENAMIENTO PLANEADO */}
             {
                 viewingPlan && (
-                    <div className="fixed inset-0 bg-slate-900/40 dark:bg-black/60 backdrop-blur-sm z-[60] flex items-center justify-center p-4">
-                        <div className="bg-white dark:bg-zinc-900 rounded-xl max-w-md w-full shadow-xl overflow-hidden animate-in zoom-in-95 duration-200 border border-slate-200/50 dark:border-zinc-800">
-                            <div className="flex items-center justify-between px-5 py-4 border-b border-slate-100 dark:border-zinc-800/50 bg-white dark:bg-zinc-900">
+                    <div className="fixed inset-0 bg-slate-900/50 dark:bg-black/70 backdrop-blur-sm z-[60] flex items-center justify-center p-4 sm:p-6">
+                        <div className="bg-white dark:bg-zinc-900 rounded-xl w-full max-w-3xl shadow-2xl overflow-hidden border border-slate-200/50 dark:border-zinc-800 flex flex-col max-h-[90vh]">
+
+                            {/* Header */}
+                            <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100 dark:border-zinc-800 shrink-0">
                                 <div>
-                                    <h3 className="text-[13px] font-bold text-slate-800 dark:text-zinc-100 uppercase tracking-widest flex items-center gap-2">
+                                    <h3 className="text-sm font-bold text-slate-800 dark:text-zinc-100 uppercase tracking-widest flex items-center gap-2">
                                         {getSportIcon(viewingPlan.type)} {viewingPlan.name || `Entrenamiento de ${viewingPlan.type}`}
                                     </h3>
                                     <p className="text-[10px] text-slate-400 dark:text-zinc-500 font-medium uppercase tracking-wider mt-0.5">
                                         {new Date(viewingPlan.date).toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long' })}
                                     </p>
                                 </div>
-                                <button onClick={() => setViewingPlan(null)} className="p-1.5 text-slate-400 hover:text-slate-600 hover:bg-slate-50 dark:hover:text-zinc-300 dark:hover:bg-zinc-800 rounded-md transition-colors"><X size={16} /></button>
-                            </div>
-
-                            <div className="p-5 space-y-5 max-h-[60vh] overflow-y-auto custom-scrollbar bg-slate-50/30 dark:bg-zinc-900">
-                                <div className="flex justify-around items-center bg-white dark:bg-zinc-900/50 p-4 rounded-lg border border-slate-100 dark:border-zinc-800/50">
+                                {/* Stats row in header */}
+                                <div className="flex items-center gap-6 mr-4">
                                     <div className="text-center">
-                                        <span className="block text-[9px] font-semibold text-slate-400 dark:text-zinc-500 uppercase tracking-wider mb-1"><Zap size={10} className="inline mr-1 text-slate-300 dark:text-zinc-600" />TSS</span>
-                                        <strong className="text-lg font-bold text-slate-700 dark:text-zinc-300">{viewingPlan.tss}</strong>
+                                        <span className="block text-[9px] font-bold text-slate-400 dark:text-zinc-500 uppercase tracking-wider"><Zap size={9} className="inline mr-0.5" />TSS</span>
+                                        <strong className="text-xl font-black font-mono text-slate-700 dark:text-zinc-200">{viewingPlan.tss}</strong>
                                     </div>
-                                    <div className="w-px h-8 bg-slate-200 dark:bg-zinc-800"></div>
+                                    <div className="w-px h-8 bg-slate-200 dark:bg-zinc-800" />
                                     <div className="text-center">
-                                        <span className="block text-[9px] font-semibold text-slate-400 dark:text-zinc-500 uppercase tracking-wider mb-1"><Clock size={10} className="inline mr-1 text-slate-300 dark:text-zinc-600" />Tiempo</span>
-                                        <strong className="text-lg font-bold text-slate-700 dark:text-zinc-300">{viewingPlan.duration}<span className="text-xs text-slate-400 font-normal ml-0.5">m</span></strong>
+                                        <span className="block text-[9px] font-bold text-slate-400 dark:text-zinc-500 uppercase tracking-wider"><Clock size={9} className="inline mr-0.5" />Duración</span>
+                                        <strong className="text-xl font-black font-mono text-slate-700 dark:text-zinc-200">{viewingPlan.duration}<span className="text-sm text-slate-400 font-normal ml-0.5">m</span></strong>
                                     </div>
                                 </div>
+                                <button onClick={() => setViewingPlan(null)} className="p-1.5 text-slate-400 hover:text-slate-600 hover:bg-slate-50 dark:hover:text-zinc-300 dark:hover:bg-zinc-800 rounded-md transition-colors shrink-0">
+                                    <X size={18} />
+                                </button>
+                            </div>
 
-                                <div className="space-y-3">
-                                    <h4 className="text-[10px] font-semibold text-slate-400 dark:text-zinc-500 uppercase tracking-wider mb-2">Estructura del entrenamiento</h4>
+                            {/* Two-column body */}
+                            <div className="flex flex-1 overflow-hidden">
+
+                                {/* LEFT: Workout structure */}
+                                <div className="flex-1 overflow-y-auto p-6 border-r border-slate-100 dark:border-zinc-800 space-y-3">
+                                    <h4 className="text-[10px] font-bold text-slate-400 dark:text-zinc-500 uppercase tracking-wider">Estructura del entrenamiento</h4>
+
                                     {(!viewingPlan.descriptionObj?.blocks || viewingPlan.descriptionObj.blocks.length === 0) ? (
-                                        <div className="flex flex-col items-center justify-center py-8 border border-dashed border-slate-200 dark:border-zinc-800 rounded-lg bg-white/50 dark:bg-zinc-900/50">
-                                            <p className="text-xs text-slate-400 dark:text-zinc-500 font-medium tracking-wide">Sin estructura definida</p>
+                                        <div className="flex flex-col items-center justify-center py-10 border border-dashed border-slate-200 dark:border-zinc-800 rounded-lg">
+                                            <p className="text-xs text-slate-400 dark:text-zinc-500 font-medium">Sin estructura definida</p>
                                         </div>
                                     ) : (
                                         viewingPlan.descriptionObj.blocks.map((block, idx) => {
                                             if (block.type === 'repeat') {
                                                 return (
-                                                    <div key={idx} className="rounded-md border-l-4 border-l-slate-400 border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 overflow-hidden shadow-sm group">
-                                                        <div className="flex items-center gap-3 px-3 py-2 bg-slate-50/50 dark:bg-zinc-950 border-b border-slate-100 dark:border-zinc-800/50">
+                                                    <div key={idx} className="rounded-md border-l-4 border-l-slate-400 border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 overflow-hidden shadow-sm">
+                                                        <div className="flex items-center gap-3 px-3 py-2 bg-slate-50 dark:bg-zinc-950 border-b border-slate-100 dark:border-zinc-800">
                                                             <div className="text-[10px] font-semibold text-slate-600 dark:text-zinc-400 uppercase tracking-wider">
-                                                                <span className="text-lg font-mono text-slate-700 dark:text-zinc-300 mr-1">{block.repeats}x</span> Intervalos
+                                                                <span className="text-lg font-mono text-slate-700 dark:text-zinc-300 mr-1">{block.repeats}×</span> Intervalos
                                                             </div>
                                                         </div>
                                                         <div className="p-3 pl-6 space-y-2 relative">
-                                                            <div className="absolute left-2.5 top-3 bottom-0 w-px bg-slate-200 dark:border-zinc-800"></div>
+                                                            <div className="absolute left-2.5 top-3 bottom-0 w-px bg-slate-200 dark:bg-zinc-800" />
                                                             {block.steps.map((step, sIdx) => {
                                                                 const isActive = step.type === 'active';
                                                                 return (
-                                                                    <div key={sIdx} className="flex items-center gap-3 relative z-10 m-0 py-1">
-                                                                        <div className={`w-2 h-2 rounded-full border ${isActive ? 'border-slate-400 bg-slate-200 dark:border-zinc-500 dark:bg-zinc-700' : 'border-slate-300 bg-white dark:border-zinc-600 dark:bg-zinc-900'} absolute -left-[23px] top-1/2 -translate-y-1/2`}></div>
+                                                                    <div key={sIdx} className="flex items-center gap-3 relative z-10 py-1">
+                                                                        <div className={`w-2 h-2 rounded-full border ${isActive ? 'border-slate-400 bg-slate-200 dark:border-zinc-500 dark:bg-zinc-700' : 'border-slate-300 bg-white dark:border-zinc-600 dark:bg-zinc-900'} absolute -left-[23px] top-1/2 -translate-y-1/2`} />
                                                                         <span className={`w-16 text-[10px] font-semibold uppercase tracking-wider ${isActive ? 'text-slate-700 dark:text-zinc-300' : 'text-slate-400 dark:text-zinc-500'}`}>{isActive ? 'Trabajo' : 'Pausa'}</span>
-
                                                                         <div className="flex-1 flex justify-end gap-3 items-center">
                                                                             <span className="font-mono text-xs font-semibold text-slate-600 dark:text-zinc-300">{step.duration}<span className="text-[10px] font-sans text-slate-400 font-normal ml-px">{step.unit === 'dist' ? 'km' : 'm'}</span></span>
-                                                                            <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-sm w-12 text-center border ${step.zone === 'Z1' || step.zone === 'Z2' ? 'bg-slate-50 border-slate-200 text-slate-500 dark:bg-zinc-800/50 dark:border-zinc-700 dark:text-zinc-400' : 'bg-slate-100 border-slate-300 text-slate-700 dark:bg-zinc-800 dark:border-zinc-600 dark:text-zinc-300'}`}>
-                                                                                {step.zone}
-                                                                            </span>
+                                                                            <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-sm w-12 text-center border ${step.zone === 'Z1' || step.zone === 'Z2' ? 'bg-slate-50 border-slate-200 text-slate-500 dark:bg-zinc-800/50 dark:border-zinc-700 dark:text-zinc-400' : 'bg-slate-100 border-slate-300 text-slate-700 dark:bg-zinc-800 dark:border-zinc-600 dark:text-zinc-300'}`}>{step.zone}</span>
                                                                         </div>
                                                                     </div>
                                                                 );
@@ -1529,24 +1622,18 @@ export const CalendarPage = ({ activities, plannedWorkouts = [], addPlannedWorko
                                                     </div>
                                                 );
                                             }
-
                                             const bLabelStyle = block.type === 'warmup' ? 'text-orange-500' : block.type === 'cooldown' ? 'text-blue-500' : 'text-slate-600 dark:text-zinc-300';
                                             const bLabel = block.type === 'warmup' ? 'Calentamiento' : block.type === 'cooldown' ? 'Vuelta a la calma' : 'Trabajo continuo';
-
                                             return (
                                                 <div key={idx} className="rounded-md border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-3 shadow-sm">
                                                     <div className="flex justify-between items-start">
                                                         <div>
-                                                            <span className={`text-[10px] font-semibold uppercase tracking-wider block ${bLabelStyle}`}>
-                                                                {bLabel}
-                                                            </span>
+                                                            <span className={`text-[10px] font-semibold uppercase tracking-wider block ${bLabelStyle}`}>{bLabel}</span>
                                                             {block.details && <span className="text-[11px] text-slate-500 dark:text-zinc-400 mt-1 block font-medium">{block.details}</span>}
                                                         </div>
-                                                        <div className="flex items-center gap-3 bg-slate-50 dark:bg-zinc-950 px-2 py-1 rounded-sm border border-slate-100 dark:border-zinc-800/50">
+                                                        <div className="flex items-center gap-3 bg-slate-50 dark:bg-zinc-950 px-2 py-1 rounded-sm border border-slate-100 dark:border-zinc-800">
                                                             <span className="font-mono text-xs font-semibold text-slate-600 dark:text-zinc-300">{block.duration}<span className="text-[10px] font-sans text-slate-400 font-normal ml-px">{block.unit === 'dist' ? 'km' : 'm'}</span></span>
-                                                            <span className="text-[10px] font-semibold bg-white dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 px-1.5 py-px rounded-sm text-slate-600 dark:text-zinc-400">
-                                                                {block.zone}
-                                                            </span>
+                                                            <span className="text-[10px] font-semibold bg-white dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 px-1.5 py-px rounded-sm text-slate-600 dark:text-zinc-400">{block.zone}</span>
                                                         </div>
                                                     </div>
                                                 </div>
@@ -1554,9 +1641,16 @@ export const CalendarPage = ({ activities, plannedWorkouts = [], addPlannedWorko
                                         })
                                     )}
                                 </div>
+
+                                {/* RIGHT: Fueling Panel */}
+                                <div className="w-80 shrink-0 overflow-y-auto p-6">
+                                    <FuelingPanel workout={viewingPlan} />
+                                </div>
+
                             </div>
 
-                            <div className="px-5 py-4 bg-white dark:bg-zinc-900 border-t border-slate-100 dark:border-zinc-800/50 flex justify-end gap-2 text-xs">
+                            {/* Footer */}
+                            <div className="px-6 py-3 bg-white dark:bg-zinc-900 border-t border-slate-100 dark:border-zinc-800 flex justify-end gap-2 text-xs shrink-0">
                                 <button onClick={(e) => { setViewingPlan(null); handleDeletePlan(e, viewingPlan.id); }} className="px-4 py-2 rounded-md font-semibold text-red-500 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/10 transition-colors">Eliminar</button>
                                 <button onClick={() => setViewingPlan(null)} className="px-4 py-2 bg-white border border-slate-200 dark:bg-zinc-900 dark:border-zinc-700 font-semibold text-slate-600 dark:text-zinc-300 rounded-md hover:bg-slate-50 dark:hover:bg-zinc-800 transition-colors">Cerrar</button>
                                 <button onClick={() => handleEditPlan(viewingPlan)} className="px-5 py-2 bg-slate-800 dark:bg-zinc-100 text-white dark:text-zinc-900 font-bold rounded-md hover:bg-slate-700 dark:hover:bg-white transition-colors shadow-sm">Editar</button>

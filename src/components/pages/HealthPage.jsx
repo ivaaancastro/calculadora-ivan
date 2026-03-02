@@ -181,7 +181,7 @@ export const HealthPage = ({ activities, settings, chartData }) => {
             </div>
 
             {/* SECCIÓN 2: MÉTRICAS BASE GRID (Como Oura/Whoop diarios) */}
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+            <div className="grid grid-cols-2 lg:grid-cols-5 gap-4 mb-6">
                 <div className="bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 p-5 rounded-2xl flex flex-col items-center text-center justify-center shadow-sm relative overflow-hidden group">
                     <span className="text-[10px] font-bold text-slate-500 dark:text-zinc-400 uppercase tracking-widest mb-1">VFC Anoche</span>
                     <div className="flex items-baseline gap-1 mt-1 z-10">
@@ -217,6 +217,23 @@ export const HealthPage = ({ activities, settings, chartData }) => {
                         <span className="text-xs font-bold text-slate-400">h</span>
                     </div>
                     <span className="text-[9px] font-bold uppercase tracking-widest text-slate-400 mt-2 bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded">Media 7d: {wellnessMetrics?.avgSleep7d || '--'}h</span>
+                </div>
+
+                <div className="bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 p-5 rounded-2xl flex flex-col items-center text-center justify-center shadow-sm">
+                    <span className="text-[10px] font-bold text-slate-500 dark:text-zinc-400 uppercase tracking-widest mb-1">TSB (Forma)</span>
+                    <div className="flex items-baseline gap-1 mt-1">
+                        <span className={`text-4xl font-black font-mono ${wellnessMetrics?.currentTsb === undefined ? 'text-slate-400' :
+                            wellnessMetrics.currentTsb < -25 ? 'text-red-500' :
+                                wellnessMetrics.currentTsb < -10 ? 'text-amber-500' :
+                                    wellnessMetrics.currentTsb > 5 ? 'text-blue-500' :
+                                        'text-emerald-500'
+                            }`}>
+                            {wellnessMetrics?.currentTsb !== undefined ? (wellnessMetrics.currentTsb > 0 ? '+' : '') + Math.round(wellnessMetrics.currentTsb) : '--'}
+                        </span>
+                    </div>
+                    <span className="text-[9px] font-bold uppercase tracking-widest text-slate-400 mt-2 bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded">
+                        Fatiga Acumulada
+                    </span>
                 </div>
             </div>
 
