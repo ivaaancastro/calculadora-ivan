@@ -14,20 +14,21 @@ export const useActivities = () => {
   const [isStravaConnected, setIsStravaConnected] = useState(false);
 
   const defaultZones = [
-    { min: 0, max: 135 },
-    { min: 136, max: 150 },
-    { min: 151, max: 165 },
-    { min: 166, max: 178 },
-    { min: 179, max: 200 },
+    { min: 0, max: 153 },       // Z1 Recovery: 0-85%
+    { min: 154, max: 162 },     // Z2 Aerobic: 85-90%
+    { min: 163, max: 170 },     // Z3 Tempo: 90-94%
+    { min: 171, max: 180 },     // Z4 SubThreshold: 94-99%
+    { min: 181, max: 185 },     // Z5 SuperThreshold: 100-102%
+    { min: 186, max: 191 },     // Z6 Aerobic Capacity: 103-106%
+    { min: 192, max: 200 },     // Z7 Anaerobic: 106%+
   ];
 
   const [settings, setSettings] = useState({
     gender: "male",
     fcReposo: 50,
     weight: 70,
-    zonesMode: "manual",
-    run: { max: 200, lthr: 178, zones: defaultZones },
-    bike: { max: 190, lthr: 168, zones: defaultZones },
+    run: { max: 200, lthr: 178, zones: defaultZones, zonesMode: 'lthr', thresholdPace: '4:30', paceZones: null },
+    bike: { max: 190, lthr: 168, zones: defaultZones, zonesMode: 'lthr', ftp: 200 },
     ta: 42,
     tf: 7,
   });
@@ -74,11 +75,16 @@ export const useActivities = () => {
           max: Number(data.run_fc_max) || 200,
           lthr: Number(data.run_lthr) || 178,
           zones: data.run_zones || defaultZones,
+          zonesMode: data.run_zones_mode || 'lthr',
+          thresholdPace: data.run_threshold_pace || '4:30',
+          paceZones: data.run_pace_zones || null,
         },
         bike: {
           max: Number(data.bike_fc_max) || 190,
           lthr: Number(data.bike_lthr) || 168,
           zones: data.bike_zones || defaultZones,
+          zonesMode: data.bike_zones_mode || 'lthr',
+          ftp: Number(data.bike_ftp) || 200,
         },
         intervalsId: data.intervalsId || "",
         intervalsKey: data.intervalsKey || "",
@@ -99,9 +105,14 @@ export const useActivities = () => {
           run_fc_max: newSettings.run.max,
           run_lthr: newSettings.run.lthr,
           run_zones: newSettings.run.zones,
+          run_zones_mode: newSettings.run.zonesMode,
+          run_threshold_pace: newSettings.run.thresholdPace,
+          run_pace_zones: newSettings.run.paceZones,
           bike_fc_max: newSettings.bike.max,
           bike_lthr: newSettings.bike.lthr,
           bike_zones: newSettings.bike.zones,
+          bike_zones_mode: newSettings.bike.zonesMode,
+          bike_ftp: newSettings.bike.ftp,
           // --- NUEVAS LÍNEAS DE INTERVALS ---
           intervalsId: newSettings.intervalsId,
           intervalsKey: newSettings.intervalsKey,
@@ -561,48 +572,58 @@ export const useActivities = () => {
         summary: { count: 0 },
       };
 
+    // --- HRSS (intervals.icu style): Banister TRIMP normalized to LTHR ---
+    // Formula: TRIMP = Σ(dt_minutes × ΔHR × y × e^(b × ΔHR))
+    // Where ΔHR = (HR - HRrest) / (HRmax - HRrest)
+    // Male: y=0.64, b=1.92  |  Female: y=0.86, b=1.67
+    // HRSS = (TRIMP / TRIMP_1h_at_LTHR) × 100
+    const isMale = settings.gender !== 'female';
+    const kY = isMale ? 0.64 : 0.86;
+    const kB = isMale ? 1.92 : 1.67;
+    const hrRest = Number(settings.fcReposo) || 50;
+
+    // Pre-calculate the normalization factor: TRIMP for 1 hour at LTHR
+    const trimpAtLthr = (sport) => {
+      const lthr = Number(sport.lthr) || 170;
+      const hrMax = Number(sport.max) || 200;
+      const deltaHR = (lthr - hrRest) / (hrMax - hrRest);
+      return 60 * deltaHR * kY * Math.exp(kB * deltaHR); // 60 minutes at LTHR
+    };
+    const runTrimpNorm = trimpAtLthr(settings.run);
+    const bikeTrimpNorm = trimpAtLthr(settings.bike);
+
     const calculateTSS = (act) => {
       const t = String(act.type).toLowerCase();
       const isBike = t.includes("ciclismo") || t.includes("bici");
       const sportSettings = isBike ? settings.bike : settings.run;
-      const lthr = Number(sportSettings.lthr) || (isBike ? 168 : 178);
+      const hrMax = Number(sportSettings.max) || (isBike ? 190 : 200);
+      const hrRange = hrMax - hrRest;
+      const normFactor = isBike ? bikeTrimpNorm : runTrimpNorm;
 
-      if (
-        act.streams_data &&
-        act.streams_data.heartrate &&
-        act.streams_data.time
-      ) {
+      if (hrRange <= 0) return 0;
+
+      // === With detailed HR stream data: exact TRIMP calculation ===
+      if (act.streams_data?.heartrate?.data && act.streams_data?.time?.data) {
         const hrData = act.streams_data.heartrate.data;
         const timeData = act.streams_data.time.data;
-        let exactTSS = 0;
+        let trimp = 0;
         for (let i = 1; i < hrData.length; i++) {
-          let dt = timeData[i] - timeData[i - 1];
-          let hr = hrData[i];
-          let pctLthr = hr / lthr;
-          let tssPerHour = 0;
-          if (pctLthr < 0.81) tssPerHour = 20;
-          else if (pctLthr < 0.9) tssPerHour = 50;
-          else if (pctLthr < 0.94) tssPerHour = 70;
-          else if (pctLthr < 1.0) tssPerHour = 90;
-          else if (pctLthr < 1.03) tssPerHour = 105;
-          else if (pctLthr < 1.06) tssPerHour = 120;
-          else tssPerHour = 140;
-          exactTSS += (dt / 3600) * tssPerHour;
+          const dtMin = (timeData[i] - timeData[i - 1]) / 60; // seconds → minutes
+          const hr = Math.max(hrData[i], hrRest); // clamp to resting HR minimum
+          const deltaHR = (hr - hrRest) / hrRange;
+          trimp += dtMin * deltaHR * kY * Math.exp(kB * deltaHR);
         }
-        return Math.round(exactTSS);
+        // Normalize: TRIMP / (TRIMP for 1h at LTHR) × 100
+        return Math.round((trimp / normFactor) * 100);
       }
 
+      // === Fallback: estimate from average HR ===
       const hr = Number(act.hr_avg);
-      const durationHours = act.duration / 60;
-      if (!hr || hr <= 40) return Math.round(durationHours * 30);
-      let pctLthr = hr / lthr;
-      let tssPerHour = 0;
-      if (pctLthr < 0.81) tssPerHour = 20;
-      else if (pctLthr < 0.9) tssPerHour = 50;
-      else if (pctLthr < 0.94) tssPerHour = 70;
-      else if (pctLthr < 1.0) tssPerHour = 85;
-      else tssPerHour = 100;
-      return Math.round(durationHours * tssPerHour);
+      const durationMin = act.duration || 0; // already in minutes
+      if (!hr || hr <= 40) return Math.round((durationMin / 60) * 30); // very low estimate
+      const deltaHR = Math.max(0, (hr - hrRest) / hrRange);
+      const trimp = durationMin * deltaHR * kY * Math.exp(kB * deltaHR);
+      return Math.round((trimp / normFactor) * 100);
     };
 
     const processedActivities = [...activities].map((act) => ({

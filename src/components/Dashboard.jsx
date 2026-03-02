@@ -245,6 +245,7 @@ const Dashboard = () => {
                 updatePlannedWorkout={updatePlannedWorkout}
                 currentMetrics={currentMetrics}
                 settings={settings}
+                chartData={chartData}
                 onDelete={deleteActivity}
                 onSelectActivity={(act) => setActiveActivity(act)}
               />

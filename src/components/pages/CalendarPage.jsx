@@ -174,7 +174,7 @@ const WORKOUT_TEMPLATES = {
     ],
 };
 
-export const CalendarPage = ({ activities, plannedWorkouts = [], addPlannedWorkout, deletePlannedWorkout, updatePlannedWorkout, currentMetrics, settings, onDelete, onSelectActivity }) => {
+export const CalendarPage = ({ activities, plannedWorkouts = [], addPlannedWorkout, deletePlannedWorkout, updatePlannedWorkout, currentMetrics, settings, chartData = [], onDelete, onSelectActivity }) => {
 
     const [currentDate, setCurrentDate] = useState(() => {
         const savedDate = sessionStorage.getItem('forma_calendar_date');
@@ -237,6 +237,7 @@ export const CalendarPage = ({ activities, plannedWorkouts = [], addPlannedWorko
 
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [viewingPlan, setViewingPlan] = useState(null);
+    const [editingPlanId, setEditingPlanId] = useState(null);
     const [selectedDateForPlan, setSelectedDateForPlan] = useState(null);
     const [newPlan, setNewPlan] = useState({
         type: 'Run',
@@ -561,6 +562,27 @@ export const CalendarPage = ({ activities, plannedWorkouts = [], addPlannedWorko
     const handleOpenPlanModal = (e, date) => {
         e.stopPropagation();
         setSelectedDateForPlan(date);
+        setEditingPlanId(null);
+        setNewPlan({ type: 'Run', name: '', tss: 50, duration: 60, blocks: [] });
+        setIsModalOpen(true);
+    };
+
+    const handleEditPlan = (plan) => {
+        let blocks = [];
+        try {
+            const desc = typeof plan.description === 'string' ? JSON.parse(plan.description) : plan.description;
+            blocks = desc?.blocks || [];
+        } catch (e) { }
+        setSelectedDateForPlan(new Date(plan.date));
+        setEditingPlanId(plan.id);
+        setNewPlan({
+            type: plan.type || 'Run',
+            name: plan.name || '',
+            tss: plan.tss || 50,
+            duration: plan.duration || 60,
+            blocks: blocks,
+        });
+        setViewingPlan(null);
         setIsModalOpen(true);
     };
 
@@ -570,15 +592,21 @@ export const CalendarPage = ({ activities, plannedWorkouts = [], addPlannedWorko
         if (!selectedDateForPlan) return;
         setIsSaving(true);
         try {
-            await addPlannedWorkout({
+            const planData = {
                 date: selectedDateForPlan.toISOString(),
                 type: newPlan.type,
                 name: newPlan.name || `Plan ${newPlan.type}`,
                 tss: Number(newPlan.tss),
                 duration: Number(newPlan.duration),
                 description: JSON.stringify({ blocks: newPlan.blocks })
-            });
+            };
+            if (editingPlanId) {
+                await updatePlannedWorkout(editingPlanId, planData);
+            } else {
+                await addPlannedWorkout(planData);
+            }
             setIsModalOpen(false);
+            setEditingPlanId(null);
             setNewPlan({ type: 'Run', name: '', tss: 50, duration: 60, blocks: [] });
         } catch (e) {
             alert("Error guardando plan: " + e.message);
@@ -628,6 +656,54 @@ export const CalendarPage = ({ activities, plannedWorkouts = [], addPlannedWorko
         }
         return map;
     }, [plannedWorkouts]);
+
+    // --- PMC data indexed by date ---
+    const pmcByDate = useMemo(() => {
+        const map = {};
+        (chartData || []).forEach(d => { map[d.date] = d; });
+        return map;
+    }, [chartData]);
+
+    // --- Forward PMC projection using planned workouts ---
+    const fullPmcByDate = useMemo(() => {
+        const map = {};
+        const today = new Date().toLocaleDateString('en-CA');
+
+        // Copy only past/today actual data
+        const sortedDates = Object.keys(pmcByDate).sort();
+        sortedDates.forEach(dk => {
+            if (dk <= today) map[dk] = pmcByDate[dk];
+        });
+
+        // Find the last actual PMC entry (up to today)
+        const pastDates = sortedDates.filter(dk => dk <= today);
+        if (pastDates.length === 0) return map;
+        const lastDate = pastDates[pastDates.length - 1];
+        const lastPmc = pmcByDate[lastDate];
+        if (!lastPmc || lastPmc.ctl == null) return map;
+
+        // Build a map of planned TSS per date
+        const plannedTssByDate = {};
+        (plannedWorkouts || []).forEach(p => {
+            const dk = new Date(p.date).toLocaleDateString('en-CA');
+            plannedTssByDate[dk] = (plannedTssByDate[dk] || 0) + (p.tss || 0);
+        });
+
+        // Project forward day by day from today up to 90 days out
+        let ctl = lastPmc.ctl;
+        let atl = lastPmc.atl;
+        const startDate = new Date(lastDate + 'T00:00:00');
+        for (let i = 1; i <= 90; i++) {
+            const d = new Date(startDate);
+            d.setDate(d.getDate() + i);
+            const dk = d.toLocaleDateString('en-CA');
+            const dayTSS = plannedTssByDate[dk] || 0;
+            ctl = ctl + (dayTSS - ctl) / 42;
+            atl = atl + (dayTSS - atl) / 7;
+            map[dk] = { date: dk, ctl, atl, tcb: ctl - atl, projected: true };
+        }
+        return map;
+    }, [pmcByDate, plannedWorkouts]);
 
     // --- COMPLIANCE: Plan vs Execution ---
     const getComplianceForDay = (dateKey, acts) => {
@@ -714,14 +790,12 @@ export const CalendarPage = ({ activities, plannedWorkouts = [], addPlannedWorko
                 {viewMode === 'month' && (
                     <div className="w-full relative">
 
-                        {/* CABECERA DÍAS DE LA SEMANA */}
-                        <div className="grid grid-cols-7 lg:grid-cols-[repeat(7,1fr)_130px] bg-slate-50/95 dark:bg-zinc-950/90 backdrop-blur-sm border-b border-slate-200 dark:border-zinc-800 sticky top-0 z-20">
+                        {/* CABECERA DÍAS DE LA SEMANA — con columna izquierda para panel semanal */}
+                        <div className="grid grid-cols-7 lg:grid-cols-[160px_repeat(7,1fr)] bg-slate-50/95 dark:bg-zinc-950/90 backdrop-blur-sm border-b border-slate-200 dark:border-zinc-800 sticky top-0 z-20">
+                            <div className="hidden lg:block py-2 text-center text-[9px] font-bold text-slate-400 dark:text-zinc-500 uppercase tracking-widest border-r border-slate-200 dark:border-zinc-800"></div>
                             {WEEKDAYS.map(day => (
                                 <div key={day} className="py-2 text-center text-[9px] sm:text-[10px] font-bold text-slate-500 dark:text-zinc-400 uppercase tracking-widest">{day}</div>
                             ))}
-                            <div className="hidden lg:block py-2 text-center text-[10px] font-black text-slate-600 dark:text-zinc-300 uppercase tracking-widest border-l border-slate-200 dark:border-zinc-800">
-                                Resumen Semanal
-                            </div>
                         </div>
 
                         {/* CUERPO DEL CALENDARIO */}
@@ -731,6 +805,7 @@ export const CalendarPage = ({ activities, plannedWorkouts = [], addPlannedWorko
                                 const weekKey = week[0].date.toLocaleDateString('en-CA');
                                 const targetTSS = weeklyTargets[weekKey] || 0;
 
+                                // Calculate per-week stats
                                 week.forEach(day => {
                                     const dateKey = day.date.toLocaleDateString('en-CA');
                                     const acts = activitiesByDate[dateKey] || [];
@@ -738,7 +813,6 @@ export const CalendarPage = ({ activities, plannedWorkouts = [], addPlannedWorko
                                         weekTSS += (a.tss || 0);
                                         weekDuration += (a.duration || 0);
                                         if (a.isPlanned) {
-                                            // Extract distance from planned blocks
                                             let planDist = 0;
                                             try {
                                                 const desc = typeof a.description === 'string' ? JSON.parse(a.description) : a.description;
@@ -752,200 +826,296 @@ export const CalendarPage = ({ activities, plannedWorkouts = [], addPlannedWorko
                                                     }
                                                 });
                                             } catch (e) { }
-                                            weekDist += planDist * 1000; // convert km to meters
+                                            weekDist += planDist * 1000;
                                         } else {
                                             weekDist += (a.distance || 0);
                                         }
                                     });
                                 });
 
-                                const compliance = targetTSS > 0 ? Math.min((weekTSS / targetTSS) * 100, 100) : 0;
-                                let complianceColor = 'bg-slate-300 dark:bg-zinc-600';
-                                if (targetTSS > 0) {
-                                    if (compliance > 115) complianceColor = 'bg-red-500';
-                                    else if (compliance >= 90) complianceColor = 'bg-emerald-500';
-                                    else if (compliance >= 70) complianceColor = 'bg-blue-500';
-                                    else complianceColor = 'bg-orange-400';
-                                }
+                                // Get PMC values — actual or projected
+                                const lastDayKey = week[6].date.toLocaleDateString('en-CA');
+                                const weekPmc = (() => {
+                                    // Scan week days from last to first for PMC data
+                                    for (let di = 6; di >= 0; di--) {
+                                        const dk = week[di].date.toLocaleDateString('en-CA');
+                                        if (fullPmcByDate[dk]) return fullPmcByDate[dk];
+                                    }
+                                    return {};
+                                })();
+                                const prevWeekPmc = (() => {
+                                    const d = new Date(week[0].date);
+                                    d.setDate(d.getDate() - 1);
+                                    for (let i = 0; i < 7; i++) {
+                                        const dk = d.toLocaleDateString('en-CA');
+                                        if (fullPmcByDate[dk]) return fullPmcByDate[dk];
+                                        d.setDate(d.getDate() - 1);
+                                    }
+                                    return {};
+                                })();
+                                const ramp = weekPmc.ctl && prevWeekPmc.ctl ? (weekPmc.ctl - prevWeekPmc.ctl).toFixed(1) : null;
+                                const isProjected = weekPmc.projected;
+
+                                // Week number
+                                const weekNum = (() => {
+                                    const d = new Date(week[3].date); // Thursday of the week
+                                    d.setDate(d.getDate() + 4 - (d.getDay() || 7));
+                                    const yearStart = new Date(d.getFullYear(), 0, 1);
+                                    return Math.ceil(((d - yearStart) / 86400000 + 1) / 7);
+                                })();
+
+                                const formatDuration = (mins) => {
+                                    const h = Math.floor(mins / 60);
+                                    const m = mins % 60;
+                                    return h > 0 ? `${h}h${m > 0 ? m + 'm' : ''}` : `${m}m`;
+                                };
 
                                 return (
-                                    // FILA PRINCIPAL: Aquí está la altura fija (lg:h-[140px])
-                                    <div key={wIdx} className="grid grid-cols-7 lg:grid-cols-[repeat(7,1fr)_130px] border-b border-slate-200 dark:border-zinc-800 last:border-b-0 lg:h-[140px]">
+                                    <div key={wIdx} className="grid grid-cols-7 lg:grid-cols-[160px_repeat(7,1fr)] border-b border-slate-200 dark:border-zinc-800 last:border-b-0">
 
-                                        {/* 7 DÍAS INDIVIDUALES (Ahora toman la altura del padre con lg:h-full) */}
+                                        {/* ====== PANEL SEMANAL IZQUIERDO (estilo intervals.icu) ====== */}
+                                        <div className="hidden lg:flex flex-col border-r border-slate-200 dark:border-zinc-800 bg-slate-50/80 dark:bg-zinc-950/50 p-2 text-[10px] relative">
+                                            {/* Week number + totals */}
+                                            <div className="flex items-baseline justify-between mb-1.5">
+                                                <span className="text-[11px] font-black text-slate-700 dark:text-zinc-200">
+                                                    #{weekNum}
+                                                    {isProjected && <span className="ml-1 text-[8px] font-bold text-blue-500 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/30 px-1 py-px rounded">PROY.</span>}
+                                                </span>
+                                                <span className="text-[10px] font-bold text-slate-500 dark:text-zinc-400">
+                                                    total {formatDuration(weekDuration)}
+                                                </span>
+                                            </div>
+
+                                            {/* PMC metrics grid */}
+                                            <div className="space-y-0.5 mb-2">
+                                                <div className="flex justify-between">
+                                                    <span className="text-slate-400 dark:text-zinc-500 font-semibold">Carga</span>
+                                                    <span className="font-black font-mono text-amber-600 dark:text-amber-500">{Math.round(weekTSS)}</span>
+                                                </div>
+                                                {weekPmc.ctl != null && (
+                                                    <>
+                                                        <div className="flex justify-between">
+                                                            <span className="text-slate-400 dark:text-zinc-500 font-semibold">Aptitud</span>
+                                                            <span className="font-bold font-mono text-blue-600 dark:text-blue-400">{Math.round(weekPmc.ctl)}</span>
+                                                        </div>
+                                                        <div className="flex justify-between">
+                                                            <span className="text-slate-400 dark:text-zinc-500 font-semibold">Fatiga</span>
+                                                            <span className="font-bold font-mono text-purple-600 dark:text-purple-400">{Math.round(weekPmc.atl)}</span>
+                                                        </div>
+                                                        {ramp !== null && (
+                                                            <div className="flex justify-between">
+                                                                <span className="text-slate-400 dark:text-zinc-500 font-semibold">Rampa</span>
+                                                                <span className={`font-bold font-mono ${Number(ramp) > 0 ? 'text-emerald-600' : Number(ramp) < -2 ? 'text-red-500' : 'text-slate-500 dark:text-zinc-400'}`}>
+                                                                    {Number(ramp) > 0 ? '+' : ''}{ramp}
+                                                                </span>
+                                                            </div>
+                                                        )}
+                                                        <div className="flex justify-between">
+                                                            <span className="text-slate-400 dark:text-zinc-500 font-semibold">Forma</span>
+                                                            <span className={`font-bold font-mono ${weekPmc.tcb > 5 ? 'text-emerald-600' : weekPmc.tcb < -15 ? 'text-red-500' : 'text-slate-600 dark:text-zinc-300'}`}>
+                                                                {weekPmc.tcb > 0 ? '+' : ''}{Math.round(weekPmc.tcb)}
+                                                            </span>
+                                                        </div>
+                                                    </>
+                                                )}
+                                            </div>
+
+                                            {/* Target TSS */}
+                                            <div
+                                                onClick={() => handleEditTarget(weekKey)}
+                                                className="mt-auto cursor-pointer hover:bg-slate-200/50 dark:hover:bg-zinc-800/50 rounded px-1 py-0.5 transition-colors"
+                                            >
+                                                {targetTSS > 0 ? (
+                                                    <div>
+                                                        <div className="flex justify-between text-[9px]">
+                                                            <span className="text-slate-400 dark:text-zinc-500 font-semibold">Objetivo</span>
+                                                            <span className="font-mono font-bold text-slate-600 dark:text-zinc-300">{Math.round(weekTSS)}/{targetTSS}</span>
+                                                        </div>
+                                                        <div className="w-full h-1 bg-slate-200 dark:bg-zinc-700 rounded-full overflow-hidden mt-0.5">
+                                                            <div className={`h-full rounded-full transition-all ${Math.min((weekTSS / targetTSS) * 100, 100) >= 90 ? 'bg-emerald-500' : Math.min((weekTSS / targetTSS) * 100, 100) >= 70 ? 'bg-blue-500' : 'bg-amber-500'}`}
+                                                                style={{ width: `${Math.min((weekTSS / targetTSS) * 100, 100)}%` }}></div>
+                                                        </div>
+                                                    </div>
+                                                ) : (
+                                                    <span className="text-[9px] text-slate-400 dark:text-zinc-600 italic">+ Objetivo</span>
+                                                )}
+                                            </div>
+                                        </div>
+
+                                        {/* ====== 7 DÍAS ====== */}
                                         {week.map((day, dIdx) => {
                                             const dateKey = day.date.toLocaleDateString('en-CA');
                                             const acts = activitiesByDate[dateKey] || [];
                                             const isToday = new Date().toLocaleDateString('en-CA') === dateKey;
 
                                             const compliance = getComplianceForDay(dateKey, acts);
+
+                                            // Zone color helper for activity blocks
+                                            const zoneBarColor = (zone) => {
+                                                const colors = { Z1: '#94a3b8', Z2: '#3b82f6', Z3: '#22c55e', Z4: '#eab308', Z5: '#f97316', Z6: '#ef4444', Z7: '#a855f7' };
+                                                return colors[zone] || '#94a3b8';
+                                            };
+
                                             return (
                                                 <div key={dIdx}
                                                     onDragOver={(e) => handleDragOver(e, dateKey)}
                                                     onDragLeave={handleDragLeave}
                                                     onDrop={(e) => handleDrop(e, day.date)}
-                                                    className={`relative p-1 lg:p-1.5 border-r border-slate-200 dark:border-zinc-800 flex flex-col h-[90px] sm:h-[110px] lg:h-full overflow-hidden transition-colors
-                                      ${!day.isCurrentMonth ? 'bg-slate-50/50 dark:bg-zinc-950/30' : 'bg-white dark:bg-zinc-900'}
-                                      ${isToday ? 'bg-blue-50/30 dark:bg-blue-900/10 border-blue-200 dark:border-blue-800/50' : ''}
-                                      ${dragOverDate === dateKey ? 'bg-blue-100/50 dark:bg-blue-900/30 ring-2 ring-blue-400 ring-inset' : ''}
-                                  `}>
-                                                    {/* Número del día */}
-                                                    <div className="flex justify-center lg:justify-between items-start px-1 mb-1 shrink-0 group/dayheader">
-                                                        <span className={`text-[9px] lg:text-[11px] font-bold ${!day.isCurrentMonth ? 'text-slate-300 dark:text-zinc-600' : isToday ? 'text-blue-600 dark:text-blue-400 bg-blue-100 dark:bg-blue-900/50 px-1.5 rounded-sm' : 'text-slate-500 dark:text-zinc-400'}`}>
+                                                    className={`relative p-1 lg:p-1.5 border-r border-slate-200 dark:border-zinc-800 flex flex-col min-h-[100px] lg:min-h-[130px] overflow-hidden transition-colors group/daycell
+                                                        ${!day.isCurrentMonth ? 'bg-slate-50/50 dark:bg-zinc-950/30' : 'bg-white dark:bg-zinc-900'}
+                                                        ${isToday ? 'bg-blue-50/40 dark:bg-blue-900/10' : ''}
+                                                        ${dragOverDate === dateKey ? 'bg-blue-100/50 dark:bg-blue-900/30 ring-2 ring-blue-400 ring-inset' : ''}
+                                                    `}>
+                                                    {/* Day number + add button */}
+                                                    <div className="flex justify-between items-start px-0.5 mb-1 shrink-0">
+                                                        <span className={`text-[10px] lg:text-[11px] font-bold ${!day.isCurrentMonth ? 'text-slate-300 dark:text-zinc-700' : isToday ? 'text-blue-600 dark:text-blue-400 bg-blue-100 dark:bg-blue-900/50 px-1.5 py-0.5 rounded' : 'text-slate-500 dark:text-zinc-400'}`}>
                                                             {day.date.getDate()}
                                                         </span>
-                                                        <button onClick={(e) => handleOpenPlanModal(e, day.date)} className="hidden lg:flex opacity-0 group-hover/dayheader:opacity-100 items-center justify-center text-slate-400 hover:text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/40 p-0.5 rounded transition-all">
+                                                        <button onClick={(e) => handleOpenPlanModal(e, day.date)} className="opacity-0 group-hover/daycell:opacity-100 text-slate-400 hover:text-blue-500 p-0.5 rounded transition-all">
                                                             <Plus size={12} />
                                                         </button>
                                                     </div>
 
-                                                    {/* Contenedor de entrenos con SCROLL si hay más de la cuenta */}
-                                                    <div className="flex-1 overflow-y-auto custom-scrollbar flex flex-col gap-1 w-full pr-0.5">
-                                                        {/* Compliance badge */}
-                                                        {compliance && compliance.status !== 'future' && (
-                                                            <div className={`absolute top-0.5 right-0.5 lg:top-1 lg:right-1 w-3.5 h-3.5 lg:w-4 lg:h-4 rounded-full flex items-center justify-center text-[7px] lg:text-[8px] font-black z-10 shadow-sm
+                                                    {/* Compliance badge */}
+                                                    {compliance && compliance.status !== 'future' && (
+                                                        <div className={`absolute top-0.5 right-0.5 w-3 h-3 rounded-full flex items-center justify-center text-[7px] font-black z-10
                                                             ${compliance.status === 'done' ? 'bg-emerald-500 text-white' : compliance.status === 'partial' ? 'bg-amber-500 text-white' : 'bg-red-500 text-white'}`}
-                                                                title={`${compliance.realTSS}/${compliance.plannedTSS} TSS (${compliance.pct}%)`}
-                                                            >
-                                                                {compliance.status === 'done' ? '✓' : compliance.status === 'partial' ? '~' : '✗'}
-                                                            </div>
-                                                        )}
-                                                        {acts.map((act, i) => (
-                                                            <div
-                                                                key={i}
-                                                                draggable={act.isPlanned}
-                                                                onDragStart={(e) => act.isPlanned && handleDragStart(e, act)}
-                                                                onClick={(e) => {
-                                                                    e.stopPropagation();
-                                                                    if (act.isPlanned) {
-                                                                        let descObj = { blocks: [] };
-                                                                        try { descObj = JSON.parse(act.description) } catch (err) { }
-                                                                        setViewingPlan({ ...act, descriptionObj: descObj });
-                                                                    } else {
-                                                                        if (onSelectActivity) onSelectActivity(act);
-                                                                    }
-                                                                }}
-                                                                className={`p-1 lg:p-1.5 rounded cursor-pointer transition-colors flex flex-col items-center lg:items-stretch w-full shrink-0 relative group/act
-                                                    ${getSportColor(act.type)}
-                                                    ${act.isPlanned ? 'border-dashed border-[1.5px] opacity-80 cursor-grab active:cursor-grabbing' : 'border'}
-                                                `}
-                                                            >
-                                                                {/* Título truncado inteligentemente */}
-                                                                <div className="flex flex-col lg:flex-row items-center lg:justify-between w-full gap-0.5 lg:gap-1">
-                                                                    <div className="flex items-center justify-center lg:justify-start gap-1 font-bold flex-1 min-w-0 w-full" title={act.name || act.type}>
-                                                                        <span className="shrink-0">{getSportIcon(act.type)}</span>
-                                                                        <span className="hidden lg:block text-[9px] xl:text-[10px] truncate w-full text-left">
-                                                                            {act.isPlanned ? <><span className="text-[8px] uppercase tracking-widest mr-1">Plan</span> {act.name || act.type}</> : (act.name || act.type)}
+                                                            title={`${compliance.realTSS}/${compliance.plannedTSS} TSS (${compliance.pct}%)`}
+                                                        >
+                                                            {compliance.status === 'done' ? '✓' : compliance.status === 'partial' ? '~' : '✗'}
+                                                        </div>
+                                                    )}
+
+                                                    {/* Activity cards — intervals.icu style */}
+                                                    <div className="flex-1 overflow-y-auto custom-scrollbar flex flex-col gap-1 w-full">
+                                                        {acts.map((act, i) => {
+                                                            // Parse blocks for zone visualization
+                                                            let blocks = [];
+                                                            if (act.isPlanned) {
+                                                                try {
+                                                                    const desc = typeof act.description === 'string' ? JSON.parse(act.description) : act.description;
+                                                                    blocks = desc?.blocks || [];
+                                                                } catch (e) { }
+                                                            }
+
+                                                            // Sport color for card background
+                                                            const sportBg = (() => {
+                                                                const t = String(act.type).toLowerCase();
+                                                                if (t.includes('run') || t.includes('carrera')) return 'bg-green-50 border-green-200 dark:bg-green-950/30 dark:border-green-900/50';
+                                                                if (t.includes('bike') || t.includes('bici') || t.includes('ciclismo')) return 'bg-blue-50 border-blue-200 dark:bg-blue-950/30 dark:border-blue-900/50';
+                                                                if (t.includes('gym') || t.includes('fuerza')) return 'bg-purple-50 border-purple-200 dark:bg-purple-950/30 dark:border-purple-900/50';
+                                                                if (t.includes('swim') || t.includes('nadar')) return 'bg-cyan-50 border-cyan-200 dark:bg-cyan-950/30 dark:border-cyan-900/50';
+                                                                return 'bg-slate-50 border-slate-200 dark:bg-zinc-800 dark:border-zinc-700';
+                                                            })();
+
+                                                            const formatActDuration = (mins) => {
+                                                                const h = Math.floor(mins / 60);
+                                                                const m = mins % 60;
+                                                                return h > 0 ? `${h}h${m > 0 ? String(m).padStart(2, '0') + 'm' : ''}` : `${m}m`;
+                                                            };
+
+                                                            return (
+                                                                <div
+                                                                    key={i}
+                                                                    draggable={act.isPlanned}
+                                                                    onDragStart={(e) => act.isPlanned && handleDragStart(e, act)}
+                                                                    onClick={(e) => {
+                                                                        e.stopPropagation();
+                                                                        if (act.isPlanned) {
+                                                                            let descObj = { blocks: [] };
+                                                                            try { descObj = JSON.parse(act.description) } catch (err) { }
+                                                                            setViewingPlan({ ...act, descriptionObj: descObj });
+                                                                        } else {
+                                                                            if (onSelectActivity) onSelectActivity(act);
+                                                                        }
+                                                                    }}
+                                                                    className={`rounded cursor-pointer transition-all w-full shrink-0 relative group/act overflow-hidden border
+                                                                        ${sportBg}
+                                                                        ${act.isPlanned ? 'border-dashed opacity-80 cursor-grab active:cursor-grabbing' : ''}
+                                                                        hover:shadow-sm
+                                                                    `}
+                                                                >
+                                                                    {/* Top: icon + duration + carga */}
+                                                                    <div className="flex items-center justify-between px-1.5 pt-1 pb-0.5">
+                                                                        <div className="flex items-center gap-1">
+                                                                            <span className="shrink-0 opacity-70">{getSportIcon(act.type)}</span>
+                                                                            <span className="text-[11px] font-black text-slate-700 dark:text-zinc-200">
+                                                                                {formatActDuration(act.duration || 0)}
+                                                                            </span>
+                                                                        </div>
+                                                                    </div>
+
+                                                                    {/* Carga */}
+                                                                    <div className="px-1.5 pb-0.5">
+                                                                        <span className="text-[9px] font-bold text-slate-500 dark:text-zinc-400">
+                                                                            Carga <span className="font-black text-slate-700 dark:text-zinc-200">{Math.round(act.tss || 0)}</span>
                                                                         </span>
                                                                     </div>
-                                                                    {act.tss > 0 && <span className="text-[9px] lg:text-[10px] font-black font-mono opacity-90 shrink-0">{Math.round(act.tss)}</span>}
+
+                                                                    {/* Zone bars — bar chart style for planned workouts only */}
+                                                                    {blocks.length > 0 && (
+                                                                        <div className="flex items-end h-8 mx-1 mb-1 gap-px">
+                                                                            {(() => {
+                                                                                const zoneHeight = { Z1: '25%', Z2: '40%', Z3: '55%', Z4: '70%', Z5: '85%', Z6: '100%' };
+                                                                                const allBars = [];
+                                                                                blocks.forEach((b, bi) => {
+                                                                                    if (b.type === 'repeat') {
+                                                                                        for (let r = 0; r < (b.repeats || 1); r++) {
+                                                                                            (b.steps || []).forEach((s, si) => {
+                                                                                                allBars.push({
+                                                                                                    key: `${bi}-${r}-${si}`,
+                                                                                                    zone: s.zone || 'Z2',
+                                                                                                    duration: Number(s.duration) || 1,
+                                                                                                    title: `${s.duration}${s.unit === 'dist' ? 'km' : 'min'} ${s.zone}`,
+                                                                                                });
+                                                                                            });
+                                                                                        }
+                                                                                    } else {
+                                                                                        allBars.push({
+                                                                                            key: `${bi}`,
+                                                                                            zone: b.zone || 'Z2',
+                                                                                            duration: Number(b.duration) || 1,
+                                                                                            title: `${b.duration}${b.unit === 'dist' ? 'km' : 'min'} ${b.zone}`,
+                                                                                        });
+                                                                                    }
+                                                                                });
+                                                                                return allBars.map(bar => (
+                                                                                    <div key={bar.key}
+                                                                                        className="rounded-t-sm"
+                                                                                        style={{
+                                                                                            flex: bar.duration,
+                                                                                            height: zoneHeight[bar.zone] || '40%',
+                                                                                            backgroundColor: zoneBarColor(bar.zone),
+                                                                                            opacity: 0.85,
+                                                                                            minWidth: '3px',
+                                                                                        }}
+                                                                                        title={bar.title}
+                                                                                    />
+                                                                                ));
+                                                                            })()}
+                                                                        </div>
+                                                                    )}
+
+                                                                    {/* Name */}
+                                                                    <div className="px-1.5 pb-1">
+                                                                        <span className="text-[8px] lg:text-[9px] font-semibold text-slate-500 dark:text-zinc-400 truncate block leading-tight">
+                                                                            {act.isPlanned ? `Plan: ${act.name || act.type}` : (act.name || act.type)}
+                                                                        </span>
+                                                                    </div>
+
+                                                                    {/* Delete button for planned */}
+                                                                    {act.isPlanned && (
+                                                                        <button onClick={(e) => handleDeletePlan(e, act.id)} className="absolute -top-1 -right-1 bg-red-500 text-white rounded-full p-0.5 opacity-0 group-hover/act:opacity-100 shadow transition-opacity">
+                                                                            <Trash2 size={8} />
+                                                                        </button>
+                                                                    )}
                                                                 </div>
-                                                                <div className="flex justify-center lg:justify-between opacity-80 text-[8px] lg:text-[9px] mt-0.5 font-mono w-full">
-                                                                    <span>{act.duration}m</span>
-                                                                    {act.distance > 0 && <span className="hidden lg:inline">{(act.distance / 1000).toFixed(0)}k</span>}
-                                                                </div>
-                                                                {act.isPlanned && (
-                                                                    <button onClick={(e) => handleDeletePlan(e, act.id)} className="absolute -top-1.5 -right-1.5 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover/act:opacity-100 shadow-md transition-opacity">
-                                                                        <Trash2 size={8} />
-                                                                    </button>
-                                                                )}
-                                                            </div>
-                                                        ))}
+                                                            );
+                                                        })}
                                                     </div>
                                                 </div>
                                             );
                                         })}
-
-                                        {/* COLUMNA RESUMEN Y OBJETIVO (Ajustada para que no se aplaste) */}
-                                        <div className="col-span-7 lg:col-span-1 bg-slate-50 dark:bg-zinc-950/50 border-t lg:border-t-0 lg:border-l border-slate-200 dark:border-zinc-800 p-2 flex flex-row lg:flex-col justify-between h-[60px] lg:h-full">
-
-                                            {/* MÉTRICAS ALINEADAS IZQUIERDA/DERECHA */}
-                                            <div className="flex flex-row lg:flex-col gap-4 lg:gap-2 flex-1 justify-around lg:justify-center w-full px-1">
-
-                                                {/* VOLUMEN */}
-                                                <div className="flex flex-col lg:flex-row lg:justify-between items-center text-[10px] lg:text-xs">
-                                                    <span className="hidden lg:flex items-center gap-1.5 text-slate-400 dark:text-zinc-500 font-bold uppercase tracking-wider text-[9px]">
-                                                        <Clock size={10} /> Vol
-                                                    </span>
-                                                    <span className="text-emerald-600 dark:text-emerald-500 font-mono font-bold">
-                                                        {Math.floor(weekDuration / 60)}h <span className="hidden sm:inline">{weekDuration % 60}m</span>
-                                                    </span>
-                                                </div>
-
-                                                {/* DISTANCIA */}
-                                                <div className="flex flex-col lg:flex-row lg:justify-between items-center text-[10px] lg:text-xs">
-                                                    <span className="hidden lg:flex items-center gap-1.5 text-slate-400 dark:text-zinc-500 font-bold uppercase tracking-wider text-[9px]">
-                                                        <MapPin size={10} /> Dist
-                                                    </span>
-                                                    <span className="text-blue-600 dark:text-blue-500 font-mono font-bold">
-                                                        {(weekDist / 1000).toFixed(0)}km
-                                                    </span>
-                                                </div>
-
-                                                {/* CARGA */}
-                                                <div className="flex flex-col lg:flex-row lg:justify-between items-center text-[10px] lg:text-xs">
-                                                    <span className="hidden lg:flex items-center gap-1.5 text-slate-400 dark:text-zinc-500 font-bold uppercase tracking-wider text-[9px]">
-                                                        <Zap size={10} /> TSS
-                                                    </span>
-                                                    <span className="text-amber-600 dark:text-amber-500 font-mono font-black">
-                                                        {Math.round(weekTSS)}
-                                                    </span>
-                                                </div>
-
-                                                {/* COMPLIANCE SEMANAL */}
-                                                {(() => {
-                                                    let weekPlanned = 0, weekDone = 0;
-                                                    week.forEach(d => {
-                                                        const dk = d.date.toLocaleDateString('en-CA');
-                                                        const da = activitiesByDate[dk] || [];
-                                                        const comp = getComplianceForDay(dk, da);
-                                                        if (comp && comp.status !== 'future') {
-                                                            weekPlanned++;
-                                                            if (comp.status === 'done') weekDone++;
-                                                        }
-                                                    });
-                                                    if (weekPlanned === 0) return null;
-                                                    const pct = Math.round((weekDone / weekPlanned) * 100);
-                                                    return (
-                                                        <div className="flex flex-col lg:flex-row lg:justify-between items-center text-[10px] lg:text-xs">
-                                                            <span className="hidden lg:flex items-center gap-1.5 text-slate-400 dark:text-zinc-500 font-bold uppercase tracking-wider text-[9px]">
-                                                                <Target size={10} /> Plan
-                                                            </span>
-                                                            <span className={`font-mono font-black ${pct >= 80 ? 'text-emerald-600 dark:text-emerald-500' : pct >= 50 ? 'text-amber-600 dark:text-amber-500' : 'text-red-500'}`}>
-                                                                {weekDone}/{weekPlanned} ✓
-                                                            </span>
-                                                        </div>
-                                                    );
-                                                })()}
-                                            </div>
-
-                                            {/* PANEL DE OBJETIVOS (Fijo en la parte inferior) */}
-                                            <div
-                                                onClick={() => handleEditTarget(weekKey)}
-                                                className="flex-shrink-0 w-1/3 lg:w-full border-l lg:border-l-0 lg:border-t border-slate-200 dark:border-zinc-800 pl-3 lg:pl-0 lg:pt-2 cursor-pointer group hover:bg-slate-100 dark:hover:bg-zinc-800/50 rounded transition-colors mt-auto"
-                                            >
-                                                <div className="flex justify-between items-center mb-1 lg:mb-0.5">
-                                                    <span className="text-[9px] font-bold text-slate-500 dark:text-zinc-400 uppercase tracking-widest flex items-center gap-1 px-1">
-                                                        <Target size={10} /> Objetivo
-                                                    </span>
-                                                </div>
-                                                <div className="text-right mb-1.5 px-1">
-                                                    {targetTSS > 0 ? (
-                                                        <span className="text-[10px] lg:text-[11px] font-bold text-slate-700 dark:text-zinc-200 font-mono">
-                                                            {targetTSS} TSS
-                                                        </span>
-                                                    ) : (
-                                                        <span className="text-[9px] italic text-slate-400 dark:text-zinc-600">Definir</span>
-                                                    )}
-                                                </div>
-                                                {targetTSS > 0 && (
-                                                    <div className="w-full h-1 bg-slate-200 dark:bg-zinc-700 rounded-none overflow-hidden">
-                                                        <div className={`h-full ${complianceColor} transition-all duration-500`} style={{ width: `${compliance}%` }}></div>
-                                                    </div>
-                                                )}
-                                            </div>
-
-                                        </div>
                                     </div>
                                 );
                             })}
@@ -1084,7 +1254,7 @@ export const CalendarPage = ({ activities, plannedWorkouts = [], addPlannedWorko
                         <div className="flex items-center justify-between p-5 border-b border-slate-200 dark:border-zinc-800 bg-slate-50 dark:bg-zinc-950/50">
                             <div>
                                 <h3 className="text-sm font-black text-slate-800 dark:text-zinc-100 uppercase tracking-widest flex items-center gap-2">
-                                    <Target size={16} className="text-blue-500" /> Planificar Entreno
+                                    <Target size={16} className="text-blue-500" /> {editingPlanId ? 'Editar Entreno' : 'Planificar Entreno'}
                                 </h3>
                                 <p className="text-[10px] text-slate-500 dark:text-zinc-400 font-bold uppercase tracking-widest mt-1">
                                     {selectedDateForPlan?.toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long' })}
@@ -1094,199 +1264,163 @@ export const CalendarPage = ({ activities, plannedWorkouts = [], addPlannedWorko
                         </div>
 
                         <div className="p-5 max-h-[70vh] overflow-y-auto custom-scrollbar">
-                            <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+                            <div className="space-y-4">
 
-                                {/* LEFT COLUMN: Coach + Context */}
-                                <div className="space-y-4">
-                                    {(() => {
-                                        const rec = getSmartRecommendation();
-                                        if (!rec) return null;
-                                        const intensityColor = { rest: 'border-l-red-500', recovery: 'border-l-amber-500', endurance: 'border-l-blue-500', moderate: 'border-l-cyan-500', hard: 'border-l-emerald-500' }[rec.intensity] || 'border-l-slate-500';
-                                        return (
-                                            <>
-                                                <div className="bg-slate-50 dark:bg-zinc-950/50 rounded-lg border border-slate-200 dark:border-zinc-800 p-3">
-                                                    <div className="flex justify-between items-center mb-2">
-                                                        <span className="text-[9px] font-bold uppercase tracking-widest text-slate-500 dark:text-zinc-400">Carga Semanal</span>
-                                                        <span className="text-[10px] font-mono font-bold text-slate-600 dark:text-zinc-300">{rec.weekContext.actual + rec.weekContext.planned} / {rec.weekContext.target} TSS</span>
-                                                    </div>
-                                                    <div className="w-full h-2 bg-slate-200 dark:bg-zinc-700 rounded-full overflow-hidden">
-                                                        <div className="h-full flex">
-                                                            <div className="bg-blue-500 h-full transition-all" style={{ width: `${Math.min((rec.weekContext.actual / Math.max(rec.weekContext.target, 1)) * 100, 100)}%` }} />
-                                                            <div className="bg-blue-300 dark:bg-blue-700 h-full transition-all" style={{ width: `${Math.min((rec.weekContext.planned / Math.max(rec.weekContext.target, 1)) * 100, 100 - (rec.weekContext.actual / Math.max(rec.weekContext.target, 1)) * 100)}%` }} />
-                                                        </div>
-                                                    </div>
-                                                    <div className="flex justify-between mt-1.5 text-[8px] font-bold uppercase tracking-widest">
-                                                        <span className="text-blue-500">Hecho: {rec.weekContext.actual}</span>
-                                                        <span className="text-blue-400 dark:text-blue-600">Plan: {rec.weekContext.planned}</span>
-                                                        <span className="text-slate-400">Restante: ~{rec.weekContext.remaining}</span>
-                                                    </div>
-                                                </div>
-                                                <div className={`rounded-lg border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 border-l-4 ${intensityColor} overflow-hidden`}>
-                                                    <div className="p-3">
-                                                        <div className="flex items-center gap-2 mb-1">
-                                                            <span className="text-[9px] font-black uppercase tracking-widest text-slate-400 dark:text-zinc-500">Coach IA</span>
-                                                            <span className="text-[8px] font-bold text-slate-500 dark:text-zinc-500">TSB: {rec.tsb > 0 ? '+' : ''}{rec.tsb} · 7d: {rec.last7.tss} TSS</span>
-                                                        </div>
-                                                        <p className="text-xs font-black text-slate-800 dark:text-zinc-100 mb-0.5">{rec.type} — {rec.tssRange[0]}-{rec.tssRange[1]} TSS</p>
-                                                        <p className="text-[10px] text-slate-500 dark:text-zinc-400 leading-relaxed">{rec.reason}</p>
-                                                    </div>
-                                                </div>
-                                            </>
-                                        );
-                                    })()}
-                                    <div className="grid grid-cols-2 gap-3">
-                                        <div className="bg-slate-50 dark:bg-zinc-950/50 border border-slate-200 dark:border-zinc-800 rounded-lg p-3 text-center">
-                                            <span className="text-[9px] font-bold uppercase tracking-widest text-slate-400 dark:text-zinc-500 block mb-1"><Zap size={10} className="inline mr-1" />TSS</span>
-                                            <span className="text-2xl font-black font-mono text-amber-600 dark:text-amber-500">{newPlan.tss}</span>
-                                            {estimatedTSS !== null && <span className="text-[8px] text-slate-400 block mt-0.5">auto</span>}
-                                        </div>
-                                        <div className="bg-slate-50 dark:bg-zinc-950/50 border border-slate-200 dark:border-zinc-800 rounded-lg p-3 text-center">
-                                            <span className="text-[9px] font-bold uppercase tracking-widest text-slate-400 dark:text-zinc-500 block mb-1"><Clock size={10} className="inline mr-1" />Duración</span>
-                                            <span className="text-2xl font-black font-mono text-blue-600 dark:text-blue-500">{newPlan.duration}<span className="text-sm">m</span></span>
-                                        </div>
+                                {/* SPORT SELECTOR */}
+                                <div>
+                                    <label className="block text-[10px] font-bold text-slate-600 dark:text-zinc-400 uppercase tracking-widest mb-2">Deporte</label>
+                                    <div className="grid grid-cols-5 gap-1.5">
+                                        {[
+                                            { key: 'Run', label: 'Carrera', icon: <Footprints size={14} />, color: 'bg-orange-500 text-white' },
+                                            { key: 'Ride', label: 'Bici', icon: <Bike size={14} />, color: 'bg-blue-500 text-white' },
+                                            { key: 'Swim', label: 'Nadar', icon: <Activity size={14} />, color: 'bg-cyan-500 text-white' },
+                                            { key: 'WeightTraining', label: 'Fuerza', icon: <Dumbbell size={14} />, color: 'bg-purple-500 text-white' },
+                                            { key: 'Workout', label: 'Otro', icon: <Activity size={14} />, color: 'bg-slate-500 text-white' },
+                                        ].map(s => (
+                                            <button key={s.key} onClick={() => setNewPlan(prev => ({ ...prev, type: s.key, blocks: [] }))}
+                                                className={`flex flex-col items-center gap-1 p-2 rounded-lg text-[9px] font-bold uppercase tracking-wider transition-all ${newPlan.type === s.key ? s.color + ' shadow-md scale-105' : 'bg-slate-100 dark:bg-zinc-800 text-slate-500 dark:text-zinc-400 hover:bg-slate-200 dark:hover:bg-zinc-700'}`}>
+                                                {s.icon}{s.label}
+                                            </button>
+                                        ))}
                                     </div>
                                 </div>
 
-                                {/* RIGHT COLUMN: Form */}
-                                <div className="space-y-4">
+                                {/* QUICK TEMPLATES */}
+                                {(WORKOUT_TEMPLATES[newPlan.type] || []).length > 0 && (
                                     <div>
-                                        <label className="block text-[10px] font-bold text-slate-600 dark:text-zinc-400 uppercase tracking-widest mb-2">Deporte</label>
-                                        <div className="grid grid-cols-5 gap-1.5">
-                                            {[
-                                                { key: 'Run', label: 'Carrera', icon: <Footprints size={14} />, color: 'bg-orange-500 text-white' },
-                                                { key: 'Ride', label: 'Bici', icon: <Bike size={14} />, color: 'bg-blue-500 text-white' },
-                                                { key: 'Swim', label: 'Nadar', icon: <Activity size={14} />, color: 'bg-cyan-500 text-white' },
-                                                { key: 'WeightTraining', label: 'Fuerza', icon: <Dumbbell size={14} />, color: 'bg-purple-500 text-white' },
-                                                { key: 'Workout', label: 'Otro', icon: <Activity size={14} />, color: 'bg-slate-500 text-white' },
-                                            ].map(s => (
-                                                <button key={s.key} onClick={() => setNewPlan(prev => ({ ...prev, type: s.key, blocks: [] }))}
-                                                    className={`flex flex-col items-center gap-1 p-2 rounded-lg text-[9px] font-bold uppercase tracking-wider transition-all ${newPlan.type === s.key ? s.color + ' shadow-md scale-105' : 'bg-slate-100 dark:bg-zinc-800 text-slate-500 dark:text-zinc-400 hover:bg-slate-200 dark:hover:bg-zinc-700'}`}>
-                                                    {s.icon}{s.label}
+                                        <label className="block text-[10px] font-bold text-slate-600 dark:text-zinc-400 uppercase tracking-widest mb-2">Plantilla rápida</label>
+                                        <div className="flex gap-1.5 flex-wrap">
+                                            {(WORKOUT_TEMPLATES[newPlan.type] || []).map((t, i) => (
+                                                <button key={i} onClick={() => applyTemplate(t)}
+                                                    className={`inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded text-[10px] font-bold transition-all
+                                                        ${newPlan.name === t.name
+                                                            ? 'bg-slate-800 dark:bg-zinc-100 text-white dark:text-zinc-900 shadow-sm'
+                                                            : 'bg-slate-100 dark:bg-zinc-800/80 text-slate-600 dark:text-zinc-300 hover:bg-slate-200 dark:hover:bg-zinc-700'}`}
+                                                >
+                                                    <span className={`text-[8px] font-black uppercase tracking-widest px-1 py-px rounded ${newPlan.name === t.name ? 'bg-white/20 dark:bg-black/20' : 'bg-slate-200 dark:bg-zinc-700 text-slate-500 dark:text-zinc-400'}`}>{t.cat}</span>
+                                                    {t.name}
                                                 </button>
                                             ))}
                                         </div>
                                     </div>
-                                    {/* QUICK TEMPLATES */}
-                                    {(WORKOUT_TEMPLATES[newPlan.type] || []).length > 0 && (
-                                        <div>
-                                            <label className="block text-[10px] font-bold text-slate-600 dark:text-zinc-400 uppercase tracking-widest mb-2">Plantilla</label>
-                                            <div className="flex gap-1.5 flex-wrap">
-                                                {(WORKOUT_TEMPLATES[newPlan.type] || []).map((t, i) => (
-                                                    <button key={i} onClick={() => applyTemplate(t)}
-                                                        className={`inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded text-[10px] font-bold transition-all
-                                                            ${newPlan.name === t.name
-                                                                ? 'bg-slate-800 dark:bg-zinc-100 text-white dark:text-zinc-900 shadow-sm'
-                                                                : 'bg-slate-100 dark:bg-zinc-800/80 text-slate-600 dark:text-zinc-300 hover:bg-slate-200 dark:hover:bg-zinc-700'}`}
-                                                    >
-                                                        <span className={`text-[8px] font-black uppercase tracking-widest px-1 py-px rounded ${newPlan.name === t.name ? 'bg-white/20 dark:bg-black/20' : 'bg-slate-200 dark:bg-zinc-700 text-slate-500 dark:text-zinc-400'}`}>{t.cat}</span>
-                                                        {t.name}
-                                                    </button>
-                                                ))}
-                                            </div>
-                                        </div>
-                                    )}
-                                    <div>
+                                )}
+
+                                {/* TITLE + TSS/DURATION ROW */}
+                                <div className="flex gap-3 items-end">
+                                    <div className="flex-1">
                                         <label className="block text-[10px] font-bold text-slate-600 dark:text-zinc-400 uppercase tracking-widest mb-1.5">Título</label>
                                         <input type="text" value={newPlan.name} onChange={e => setNewPlan({ ...newPlan, name: e.target.value })}
                                             placeholder={newPlan.type === 'Run' ? 'Ej: Series en umbral' : newPlan.type === 'Ride' ? 'Ej: Sweet spot 2x20' : newPlan.type === 'WeightTraining' ? 'Ej: Fuerza tren inferior' : 'Ej: Sesión mixta'}
-                                            className="w-full bg-slate-50 dark:bg-zinc-950 text-sm font-medium text-slate-800 dark:text-zinc-200 rounded-lg p-3 outline-none ring-1 ring-slate-200 dark:ring-zinc-800 focus:ring-2 focus:ring-blue-500 placeholder:text-slate-300 dark:placeholder:text-zinc-600"
+                                            className="w-full bg-slate-50 dark:bg-zinc-950 text-sm font-medium text-slate-800 dark:text-zinc-200 rounded-lg p-2.5 outline-none ring-1 ring-slate-200 dark:ring-zinc-800 focus:ring-2 focus:ring-blue-500 placeholder:text-slate-300 dark:placeholder:text-zinc-600"
                                         />
                                     </div>
-                                    <div>
-                                        <label className="block text-[10px] font-bold text-slate-600 dark:text-zinc-400 uppercase tracking-widest mb-2">Estructura</label>
-                                        <div className="flex gap-1.5 flex-wrap mb-3">
-                                            {newPlan.type === 'WeightTraining' ? (<>
-                                                <button onClick={() => addBlock('warmup')} className="px-2.5 py-1.5 bg-slate-100 dark:bg-zinc-800 text-slate-600 dark:text-zinc-300 rounded text-[10px] font-bold transition-colors hover:bg-slate-200 dark:hover:bg-zinc-700">+ Calentar</button>
-                                                <button onClick={() => addBlock('main')} className="px-2.5 py-1.5 bg-slate-100 dark:bg-zinc-800 text-slate-600 dark:text-zinc-300 rounded text-[10px] font-bold transition-colors hover:bg-slate-200 dark:hover:bg-zinc-700">+ Ejercicio</button>
-                                                <button onClick={() => addBlock('repeat')} className="px-2.5 py-1.5 bg-slate-100 dark:bg-zinc-800 text-slate-600 dark:text-zinc-300 rounded text-[10px] font-bold transition-colors hover:bg-slate-200 dark:hover:bg-zinc-700">+ Circuito</button>
-                                                <button onClick={() => addBlock('cooldown')} className="px-2.5 py-1.5 bg-slate-100 dark:bg-zinc-800 text-slate-600 dark:text-zinc-300 rounded text-[10px] font-bold transition-colors hover:bg-slate-200 dark:hover:bg-zinc-700">+ Estirar</button>
-                                            </>) : (<>
-                                                <button onClick={() => addBlock('warmup')} className="px-2.5 py-1.5 bg-slate-100 dark:bg-zinc-800 text-slate-600 dark:text-zinc-300 rounded text-[10px] font-bold transition-colors hover:bg-slate-200 dark:hover:bg-zinc-700">+ Calentar</button>
-                                                <button onClick={() => addBlock('main')} className="px-2.5 py-1.5 bg-slate-100 dark:bg-zinc-800 text-slate-600 dark:text-zinc-300 rounded text-[10px] font-bold transition-colors hover:bg-slate-200 dark:hover:bg-zinc-700">+ Bloque</button>
-                                                <button onClick={() => addBlock('repeat')} className="px-2.5 py-1.5 bg-slate-100 dark:bg-zinc-800 text-slate-600 dark:text-zinc-300 rounded text-[10px] font-bold transition-colors hover:bg-slate-200 dark:hover:bg-zinc-700">+ Repetir</button>
-                                                <button onClick={() => addBlock('cooldown')} className="px-2.5 py-1.5 bg-slate-100 dark:bg-zinc-800 text-slate-600 dark:text-zinc-300 rounded text-[10px] font-bold transition-colors hover:bg-slate-200 dark:hover:bg-zinc-700">+ Soltar</button>
-                                            </>)}
+                                    <div className="flex gap-2 shrink-0">
+                                        <div className="bg-slate-50 dark:bg-zinc-950/50 border border-slate-200 dark:border-zinc-800 rounded-lg px-3 py-2 text-center">
+                                            <span className="text-[8px] font-bold uppercase tracking-widest text-slate-400 block">TSS</span>
+                                            <span className="text-lg font-black font-mono text-amber-600 dark:text-amber-500">{newPlan.tss}</span>
                                         </div>
-                                        <div className="space-y-2">
-                                            {newPlan.blocks.length === 0 && (
-                                                <div className="text-center py-6 border-2 border-dashed border-slate-200 dark:border-zinc-700 rounded-lg">
-                                                    <p className="text-slate-400 dark:text-zinc-500 text-xs font-medium">Pulsa los botones para construir tu sesión</p>
-                                                    <p className="text-slate-300 dark:text-zinc-600 text-[10px] mt-1">El TSS se estimará automáticamente</p>
-                                                </div>
-                                            )}
-                                            {newPlan.blocks.map((block) => {
-                                                const isStr = newPlan.type === 'WeightTraining';
-                                                const zones = isStr
-                                                    ? [{ v: 'Z1', l: 'Ligero' }, { v: 'Z2', l: 'Moderado' }, { v: 'Z3', l: 'Duro' }, { v: 'Z4', l: 'Máximo' }]
-                                                    : [{ v: 'Z1', l: 'Z1 Rec' }, { v: 'Z2', l: 'Z2 Base' }, { v: 'Z3', l: 'Z3 Tempo' }, { v: 'Z4', l: 'Z4 Umbral' }, { v: 'Z5', l: 'Z5 VO2' }, { v: 'Z6', l: 'Z6 Sprint' }];
-                                                if (block.type === 'repeat') {
-                                                    return (
-                                                        <div key={block.id} className="rounded-lg border-2 border-purple-200 dark:border-purple-800/50 bg-purple-50/30 dark:bg-purple-950/10 overflow-hidden relative group">
-                                                            <div className="flex items-center gap-2 px-3 py-2 bg-purple-100/50 dark:bg-purple-900/20 border-b border-purple-200/50 dark:border-purple-800/30">
-                                                                <span className="text-[9px] font-black uppercase tracking-widest text-purple-600 dark:text-purple-400">{isStr ? 'CIRCUITO' : 'REPETIR'}</span>
-                                                                <input type="number" value={block.repeats} min={1} onChange={e => updateBlock(block.id, 'repeats', parseInt(e.target.value) || 1)}
-                                                                    className="w-14 bg-white dark:bg-zinc-900 border border-purple-200 dark:border-purple-700 text-xs font-mono p-1.5 rounded text-center" />
-                                                                <span className="text-[10px] text-slate-500 font-bold">veces</span>
-                                                                <button onClick={() => removeBlock(block.id)} className="ml-auto text-slate-400 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity"><Trash2 size={14} /></button>
-                                                            </div>
-                                                            <div className="p-2 space-y-1.5">
-                                                                {block.steps.map(step => (
-                                                                    <div key={step.id} className="flex items-center gap-2 bg-white dark:bg-zinc-900 p-2 rounded-md border border-slate-100 dark:border-zinc-800 group/step">
-                                                                        <select value={step.type} onChange={e => updateStep(block.id, step.id, 'type', e.target.value)}
-                                                                            className="bg-transparent text-[10px] font-bold text-slate-600 dark:text-zinc-400 uppercase outline-none cursor-pointer">
-                                                                            <option value="active">{isStr ? 'Trabajo' : 'Activo'}</option>
-                                                                            <option value="recovery">{isStr ? 'Pausa' : 'Recu'}</option>
-                                                                        </select>
-                                                                        <input type="number" value={step.duration} min={0} onChange={e => updateStep(block.id, step.id, 'duration', e.target.value)}
-                                                                            className="w-14 bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 text-xs font-mono p-1.5 rounded text-center" />
-                                                                        {!isStr ? (
-                                                                            <button onClick={() => updateStep(block.id, step.id, 'unit', step.unit === 'dist' ? 'time' : 'dist')}
-                                                                                className={`text-[9px] font-bold px-1.5 py-0.5 rounded transition-colors ${step.unit === 'dist' ? 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400' : 'text-slate-400 hover:text-slate-600'}`}
-                                                                            >{step.unit === 'dist' ? 'km' : 'min'}</button>
-                                                                        ) : <span className="text-[9px] text-slate-400">min</span>}
-                                                                        <select value={step.zone} onChange={e => updateStep(block.id, step.id, 'zone', e.target.value)}
-                                                                            className="flex-1 bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 text-[10px] font-bold p-1.5 rounded">
-                                                                            {zones.map(z => <option key={z.v} value={z.v}>{z.l}</option>)}
-                                                                        </select>
-                                                                        <button onClick={() => removeStep(block.id, step.id)} className="text-slate-300 hover:text-red-500 opacity-0 group-hover/step:opacity-100 transition-opacity"><X size={14} /></button>
-                                                                    </div>
-                                                                ))}
-                                                                <div className="flex gap-2 pt-1">
-                                                                    <button onClick={() => addStepToRepeat(block.id, 'active')} className="text-[10px] font-bold text-purple-600 dark:text-purple-400 hover:bg-purple-50 dark:hover:bg-purple-900/20 px-2 py-1 rounded">+ {isStr ? 'Trabajo' : 'Activo'}</button>
-                                                                    <button onClick={() => addStepToRepeat(block.id, 'recovery')} className="text-[10px] font-bold text-slate-500 dark:text-zinc-500 hover:bg-slate-50 dark:hover:bg-zinc-800 px-2 py-1 rounded">+ {isStr ? 'Pausa' : 'Descanso'}</button>
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                    );
-                                                }
-                                                const bLabel = block.type === 'warmup' ? 'CALENTAR' : block.type === 'cooldown' ? (isStr ? 'ESTIRAR' : 'SOLTAR') : (isStr ? 'EJERCICIO' : 'BLOQUE');
-                                                const bBg = block.type === 'main' ? 'border-blue-200 dark:border-blue-800/50 bg-blue-50/30 dark:bg-blue-950/10' : 'border-slate-200 dark:border-zinc-800 bg-slate-50/50 dark:bg-zinc-950/30';
+                                        <div className="bg-slate-50 dark:bg-zinc-950/50 border border-slate-200 dark:border-zinc-800 rounded-lg px-3 py-2 text-center">
+                                            <span className="text-[8px] font-bold uppercase tracking-widest text-slate-400 block">Min</span>
+                                            <span className="text-lg font-black font-mono text-blue-600 dark:text-blue-500">{newPlan.duration}</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* ESTRUCTURA */}
+                                <div>
+                                    <label className="block text-[10px] font-bold text-slate-600 dark:text-zinc-400 uppercase tracking-widest mb-2">Estructura</label>
+                                    <div className="flex gap-1.5 flex-wrap mb-3">
+                                        {newPlan.type === 'WeightTraining' ? (<>
+                                            <button onClick={() => addBlock('warmup')} className="px-2.5 py-1.5 bg-slate-100 dark:bg-zinc-800 text-slate-600 dark:text-zinc-300 rounded text-[10px] font-bold transition-colors hover:bg-slate-200 dark:hover:bg-zinc-700">+ Calentar</button>
+                                            <button onClick={() => addBlock('main')} className="px-2.5 py-1.5 bg-slate-100 dark:bg-zinc-800 text-slate-600 dark:text-zinc-300 rounded text-[10px] font-bold transition-colors hover:bg-slate-200 dark:hover:bg-zinc-700">+ Ejercicio</button>
+                                            <button onClick={() => addBlock('repeat')} className="px-2.5 py-1.5 bg-slate-100 dark:bg-zinc-800 text-slate-600 dark:text-zinc-300 rounded text-[10px] font-bold transition-colors hover:bg-slate-200 dark:hover:bg-zinc-700">+ Circuito</button>
+                                            <button onClick={() => addBlock('cooldown')} className="px-2.5 py-1.5 bg-slate-100 dark:bg-zinc-800 text-slate-600 dark:text-zinc-300 rounded text-[10px] font-bold transition-colors hover:bg-slate-200 dark:hover:bg-zinc-700">+ Estirar</button>
+                                        </>) : (<>
+                                            <button onClick={() => addBlock('warmup')} className="px-2.5 py-1.5 bg-slate-100 dark:bg-zinc-800 text-slate-600 dark:text-zinc-300 rounded text-[10px] font-bold transition-colors hover:bg-slate-200 dark:hover:bg-zinc-700">+ Calentar</button>
+                                            <button onClick={() => addBlock('main')} className="px-2.5 py-1.5 bg-slate-100 dark:bg-zinc-800 text-slate-600 dark:text-zinc-300 rounded text-[10px] font-bold transition-colors hover:bg-slate-200 dark:hover:bg-zinc-700">+ Bloque</button>
+                                            <button onClick={() => addBlock('repeat')} className="px-2.5 py-1.5 bg-slate-100 dark:bg-zinc-800 text-slate-600 dark:text-zinc-300 rounded text-[10px] font-bold transition-colors hover:bg-slate-200 dark:hover:bg-zinc-700">+ Repetir</button>
+                                            <button onClick={() => addBlock('cooldown')} className="px-2.5 py-1.5 bg-slate-100 dark:bg-zinc-800 text-slate-600 dark:text-zinc-300 rounded text-[10px] font-bold transition-colors hover:bg-slate-200 dark:hover:bg-zinc-700">+ Soltar</button>
+                                        </>)}
+                                    </div>
+                                    <div className="space-y-2">
+                                        {newPlan.blocks.length === 0 && (
+                                            <div className="text-center py-6 border-2 border-dashed border-slate-200 dark:border-zinc-700 rounded-lg">
+                                                <p className="text-slate-400 dark:text-zinc-500 text-xs font-medium">Pulsa los botones para construir tu sesión</p>
+                                                <p className="text-slate-300 dark:text-zinc-600 text-[10px] mt-1">El TSS se estimará automáticamente</p>
+                                            </div>
+                                        )}
+                                        {newPlan.blocks.map((block) => {
+                                            const isStr = newPlan.type === 'WeightTraining';
+                                            const zones = isStr
+                                                ? [{ v: 'Z1', l: 'Ligero' }, { v: 'Z2', l: 'Moderado' }, { v: 'Z3', l: 'Duro' }, { v: 'Z4', l: 'Máximo' }]
+                                                : [{ v: 'Z1', l: 'Z1 Rec' }, { v: 'Z2', l: 'Z2 Base' }, { v: 'Z3', l: 'Z3 Tempo' }, { v: 'Z4', l: 'Z4 Umbral' }, { v: 'Z5', l: 'Z5 VO2' }, { v: 'Z6', l: 'Z6 Sprint' }];
+                                            if (block.type === 'repeat') {
                                                 return (
-                                                    <div key={block.id} className={`rounded-lg border ${bBg} p-3 relative group`}>
-                                                        <div className="flex items-center gap-2 flex-wrap">
-                                                            <span className="text-[9px] font-black uppercase tracking-widest text-slate-600 dark:text-zinc-400">{bLabel}</span>
-                                                            <input type="number" placeholder={block.unit === 'dist' ? 'km' : 'Min'} value={block.duration} min={0} onChange={e => updateBlock(block.id, 'duration', e.target.value)}
-                                                                className="w-16 bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-700 text-xs font-mono p-1.5 rounded text-center" />
-                                                            {!isStr ? (
-                                                                <button onClick={() => updateBlock(block.id, 'unit', block.unit === 'dist' ? 'time' : 'dist')}
-                                                                    className={`text-[10px] font-bold px-2 py-0.5 rounded transition-all ${block.unit === 'dist' ? 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400' : 'text-slate-400 hover:text-slate-600 dark:hover:text-zinc-300'}`}
-                                                                >{block.unit === 'dist' ? 'km' : 'min'}</button>
-                                                            ) : <span className="text-[10px] text-slate-400">min</span>}
-                                                            <select value={block.zone} onChange={e => updateBlock(block.id, 'zone', e.target.value)}
-                                                                className="bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-700 text-[10px] font-bold p-1.5 rounded flex-1 min-w-[80px]">
-                                                                {zones.map(z => <option key={z.v} value={z.v}>{z.l}</option>)}
-                                                            </select>
+                                                    <div key={block.id} className="rounded-lg border-2 border-purple-200 dark:border-purple-800/50 bg-purple-50/30 dark:bg-purple-950/10 overflow-hidden relative group">
+                                                        <div className="flex items-center gap-2 px-3 py-2 bg-purple-100/50 dark:bg-purple-900/20 border-b border-purple-200/50 dark:border-purple-800/30">
+                                                            <span className="text-[9px] font-black uppercase tracking-widest text-purple-600 dark:text-purple-400">{isStr ? 'CIRCUITO' : 'REPETIR'}</span>
+                                                            <input type="number" value={block.repeats} min={1} onChange={e => updateBlock(block.id, 'repeats', parseInt(e.target.value) || 1)}
+                                                                className="w-14 bg-white dark:bg-zinc-900 border border-purple-200 dark:border-purple-700 text-xs font-mono p-1.5 rounded text-center" />
+                                                            <span className="text-[10px] text-slate-500 font-bold">veces</span>
                                                             <button onClick={() => removeBlock(block.id)} className="ml-auto text-slate-400 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity"><Trash2 size={14} /></button>
                                                         </div>
-                                                        {block.type === 'main' && (
-                                                            <input type="text" value={block.details} onChange={e => updateBlock(block.id, 'details', e.target.value)}
-                                                                placeholder={isStr ? 'Ej: Sentadilla 4x8, Peso muerto 3x6' : 'Ej: Progresivo de Z2 a Z3'}
-                                                                className="w-full mt-2 bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-700 text-xs p-2 rounded placeholder-slate-300 dark:placeholder-zinc-600" />
-                                                        )}
+                                                        <div className="p-2 space-y-1.5">
+                                                            {block.steps.map(step => (
+                                                                <div key={step.id} className="flex items-center gap-2 bg-white dark:bg-zinc-900 p-2 rounded-md border border-slate-100 dark:border-zinc-800 group/step">
+                                                                    <select value={step.type} onChange={e => updateStep(block.id, step.id, 'type', e.target.value)}
+                                                                        className="bg-transparent text-[10px] font-bold text-slate-600 dark:text-zinc-400 uppercase outline-none cursor-pointer">
+                                                                        <option value="active">{isStr ? 'Trabajo' : 'Activo'}</option>
+                                                                        <option value="recovery">{isStr ? 'Pausa' : 'Recu'}</option>
+                                                                    </select>
+                                                                    <input type="number" value={step.duration} min={0} onChange={e => updateStep(block.id, step.id, 'duration', e.target.value)}
+                                                                        className="w-14 bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 text-xs font-mono p-1.5 rounded text-center" />
+                                                                    {!isStr ? (
+                                                                        <button onClick={() => updateStep(block.id, step.id, 'unit', step.unit === 'dist' ? 'time' : 'dist')}
+                                                                            className={`text-[9px] font-bold px-1.5 py-0.5 rounded transition-colors ${step.unit === 'dist' ? 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400' : 'text-slate-400 hover:text-slate-600'}`}
+                                                                        >{step.unit === 'dist' ? 'km' : 'min'}</button>
+                                                                    ) : <span className="text-[9px] text-slate-400">min</span>}
+                                                                    <select value={step.zone} onChange={e => updateStep(block.id, step.id, 'zone', e.target.value)}
+                                                                        className="flex-1 bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 text-[10px] font-bold p-1.5 rounded">
+                                                                        {zones.map(z => <option key={z.v} value={z.v}>{z.l}</option>)}
+                                                                    </select>
+                                                                    <button onClick={() => removeStep(block.id, step.id)} className="text-slate-300 hover:text-red-500 opacity-0 group-hover/step:opacity-100 transition-opacity"><X size={14} /></button>
+                                                                </div>
+                                                            ))}
+                                                            <div className="flex gap-2 pt-1">
+                                                                <button onClick={() => addStepToRepeat(block.id, 'active')} className="text-[10px] font-bold text-purple-600 dark:text-purple-400 hover:bg-purple-50 dark:hover:bg-purple-900/20 px-2 py-1 rounded">+ {isStr ? 'Trabajo' : 'Activo'}</button>
+                                                                <button onClick={() => addStepToRepeat(block.id, 'recovery')} className="text-[10px] font-bold text-slate-500 dark:text-zinc-500 hover:bg-slate-50 dark:hover:bg-zinc-800 px-2 py-1 rounded">+ {isStr ? 'Pausa' : 'Descanso'}</button>
+                                                            </div>
+                                                        </div>
                                                     </div>
                                                 );
-                                            })}
-                                        </div>
+                                            }
+                                            const bLabel = block.type === 'warmup' ? 'CALENTAR' : block.type === 'cooldown' ? (isStr ? 'ESTIRAR' : 'SOLTAR') : (isStr ? 'EJERCICIO' : 'BLOQUE');
+                                            const bBg = block.type === 'main' ? 'border-blue-200 dark:border-blue-800/50 bg-blue-50/30 dark:bg-blue-950/10' : 'border-slate-200 dark:border-zinc-800 bg-slate-50/50 dark:bg-zinc-950/30';
+                                            return (
+                                                <div key={block.id} className={`rounded-lg border ${bBg} p-3 relative group`}>
+                                                    <div className="flex items-center gap-2 flex-wrap">
+                                                        <span className="text-[9px] font-black uppercase tracking-widest text-slate-600 dark:text-zinc-400">{bLabel}</span>
+                                                        <input type="number" placeholder={block.unit === 'dist' ? 'km' : 'Min'} value={block.duration} min={0} onChange={e => updateBlock(block.id, 'duration', e.target.value)}
+                                                            className="w-16 bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-700 text-xs font-mono p-1.5 rounded text-center" />
+                                                        {!isStr ? (
+                                                            <button onClick={() => updateBlock(block.id, 'unit', block.unit === 'dist' ? 'time' : 'dist')}
+                                                                className={`text-[10px] font-bold px-2 py-0.5 rounded transition-all ${block.unit === 'dist' ? 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400' : 'text-slate-400 hover:text-slate-600 dark:hover:text-zinc-300'}`}
+                                                            >{block.unit === 'dist' ? 'km' : 'min'}</button>
+                                                        ) : <span className="text-[10px] text-slate-400">min</span>}
+                                                        <select value={block.zone} onChange={e => updateBlock(block.id, 'zone', e.target.value)}
+                                                            className="bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-700 text-[10px] font-bold p-1.5 rounded flex-1 min-w-[80px]">
+                                                            {zones.map(z => <option key={z.v} value={z.v}>{z.l}</option>)}
+                                                        </select>
+                                                        <button onClick={() => removeBlock(block.id)} className="ml-auto text-slate-400 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity"><Trash2 size={14} /></button>
+                                                    </div>
+                                                    {block.type === 'main' && (
+                                                        <input type="text" value={block.details} onChange={e => updateBlock(block.id, 'details', e.target.value)}
+                                                            placeholder={isStr ? 'Ej: Sentadilla 4x8, Peso muerto 3x6' : 'Ej: Progresivo de Z2 a Z3'}
+                                                            className="w-full mt-2 bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-700 text-xs p-2 rounded placeholder-slate-300 dark:placeholder-zinc-600" />
+                                                    )}
+                                                </div>
+                                            );
+                                        })}
                                     </div>
                                 </div>
 
@@ -1300,98 +1434,101 @@ export const CalendarPage = ({ activities, plannedWorkouts = [], addPlannedWorko
                             <div className="flex gap-2">
                                 <button onClick={() => setIsModalOpen(false)} className="px-4 py-2 rounded-lg text-xs font-bold text-slate-600 dark:text-zinc-400 hover:bg-slate-200 dark:hover:bg-zinc-800 uppercase tracking-wider transition-colors">Cancelar</button>
                                 <button onClick={handleSavePlan} disabled={isSaving} className="px-5 py-2 rounded-lg text-xs font-black text-white bg-blue-600 hover:bg-blue-500 disabled:opacity-50 uppercase tracking-wider transition-colors shadow-lg shadow-blue-500/20">
-                                    {isSaving ? 'Guardando...' : 'Añadir al Plan'}
+                                    {isSaving ? 'Guardando...' : editingPlanId ? 'Guardar Cambios' : 'Añadir al Plan'}
                                 </button>
                             </div>
                         </div>
-                    </div>
-                </div>
+                    </div >
+                </div >
             )}
             {/* MODAL VER ENTRENAMIENTO PLANEADO */}
-            {viewingPlan && (
-                <div className="fixed inset-0 bg-slate-900/50 dark:bg-black/50 backdrop-blur-sm z-[60] flex items-center justify-center p-4">
-                    <div className="bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-xl max-w-md w-full shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200">
-                        <div className="flex items-center justify-between p-4 border-b border-slate-200 dark:border-zinc-800 bg-slate-50 dark:bg-zinc-950/50">
-                            <div>
-                                <h3 className="text-sm font-black text-slate-800 dark:text-zinc-100 uppercase tracking-widest flex items-center gap-2">
-                                    {getSportIcon(viewingPlan.type)} {viewingPlan.name || `Entrenamiento de ${viewingPlan.type}`}
-                                </h3>
-                                <p className="text-[10px] text-slate-500 dark:text-zinc-400 font-bold uppercase tracking-widest mt-1">
-                                    {new Date(viewingPlan.date).toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long' })}
-                                </p>
-                            </div>
-                            <button onClick={() => setViewingPlan(null)} className="p-1.5 text-slate-400 hover:bg-slate-200 dark:hover:bg-zinc-800 rounded-lg transition-colors"><X size={16} /></button>
-                        </div>
-
-                        <div className="p-4 space-y-4 max-h-[60vh] overflow-y-auto custom-scrollbar">
-                            <div className="flex justify-around items-center bg-slate-50 dark:bg-zinc-950/50 p-3 rounded-lg border border-slate-200 dark:border-zinc-800">
-                                <div className="text-center">
-                                    <span className="block text-[9px] font-bold text-slate-500 dark:text-zinc-500 uppercase tracking-widest mb-1"><Zap size={10} className="inline mr-1" />TSS</span>
-                                    <strong className="text-sm font-black text-amber-600 dark:text-amber-500">{viewingPlan.tss}</strong>
+            {
+                viewingPlan && (
+                    <div className="fixed inset-0 bg-slate-900/50 dark:bg-black/50 backdrop-blur-sm z-[60] flex items-center justify-center p-4">
+                        <div className="bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-xl max-w-md w-full shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200">
+                            <div className="flex items-center justify-between p-4 border-b border-slate-200 dark:border-zinc-800 bg-slate-50 dark:bg-zinc-950/50">
+                                <div>
+                                    <h3 className="text-sm font-black text-slate-800 dark:text-zinc-100 uppercase tracking-widest flex items-center gap-2">
+                                        {getSportIcon(viewingPlan.type)} {viewingPlan.name || `Entrenamiento de ${viewingPlan.type}`}
+                                    </h3>
+                                    <p className="text-[10px] text-slate-500 dark:text-zinc-400 font-bold uppercase tracking-widest mt-1">
+                                        {new Date(viewingPlan.date).toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long' })}
+                                    </p>
                                 </div>
-                                <div className="w-px h-8 bg-slate-200 dark:bg-zinc-800"></div>
-                                <div className="text-center">
-                                    <span className="block text-[9px] font-bold text-slate-500 dark:text-zinc-500 uppercase tracking-widest mb-1"><Clock size={10} className="inline mr-1" />Tiempo</span>
-                                    <strong className="text-sm font-black text-blue-600 dark:text-blue-500">{viewingPlan.duration}m</strong>
-                                </div>
+                                <button onClick={() => setViewingPlan(null)} className="p-1.5 text-slate-400 hover:bg-slate-200 dark:hover:bg-zinc-800 rounded-lg transition-colors"><X size={16} /></button>
                             </div>
 
-                            <div className="space-y-2">
-                                <h4 className="text-[10px] font-bold text-slate-600 dark:text-zinc-400 uppercase tracking-widest mb-2 border-b border-slate-100 dark:border-zinc-800 pb-1">Estructura</h4>
-                                {(!viewingPlan.descriptionObj?.blocks || viewingPlan.descriptionObj.blocks.length === 0) ? (
-                                    <p className="text-xs text-slate-500 dark:text-zinc-500 italic">No hay estructura definida.</p>
-                                ) : (
-                                    viewingPlan.descriptionObj.blocks.map((block, idx) => {
-                                        if (block.type === 'repeat') {
-                                            return (
-                                                <div key={idx} className="p-2 rounded bg-purple-50/50 dark:bg-purple-900/10 border border-purple-200/50 dark:border-purple-800/30">
-                                                    <div className="text-[10px] font-black text-purple-700 dark:text-purple-400 uppercase tracking-widest mb-2 border-b border-purple-200/50 dark:border-purple-800/30 pb-1">
-                                                        {block.repeats}x Repeticiones
-                                                    </div>
-                                                    <div className="pl-2 border-l-2 border-purple-300 dark:border-purple-700 space-y-1">
-                                                        {block.steps.map((step, sIdx) => (
-                                                            <div key={sIdx} className="flex justify-between text-xs items-center bg-white/50 dark:bg-zinc-900 overflow-hidden rounded px-2 py-1">
-                                                                <span className="font-bold text-slate-700 dark:text-zinc-300 capitalize">{step.type === 'active' ? 'Intensidad' : 'Descanso'}</span>
-                                                                <div className="flex items-center gap-2">
-                                                                    <span className="font-mono text-slate-500 font-bold">{step.duration}{step.unit === 'dist' ? 'km' : 'm'}</span>
-                                                                    <span className={`text-[9px] font-black px-1.5 py-0.5 rounded ${step.zone === 'Z1' || step.zone === 'Z2' ? 'bg-slate-100 text-slate-500 dark:bg-zinc-800 dark:text-zinc-400' : 'bg-rose-100 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400'}`}>
-                                                                        {step.zone}
-                                                                    </span>
+                            <div className="p-4 space-y-4 max-h-[60vh] overflow-y-auto custom-scrollbar">
+                                <div className="flex justify-around items-center bg-slate-50 dark:bg-zinc-950/50 p-3 rounded-lg border border-slate-200 dark:border-zinc-800">
+                                    <div className="text-center">
+                                        <span className="block text-[9px] font-bold text-slate-500 dark:text-zinc-500 uppercase tracking-widest mb-1"><Zap size={10} className="inline mr-1" />TSS</span>
+                                        <strong className="text-sm font-black text-amber-600 dark:text-amber-500">{viewingPlan.tss}</strong>
+                                    </div>
+                                    <div className="w-px h-8 bg-slate-200 dark:bg-zinc-800"></div>
+                                    <div className="text-center">
+                                        <span className="block text-[9px] font-bold text-slate-500 dark:text-zinc-500 uppercase tracking-widest mb-1"><Clock size={10} className="inline mr-1" />Tiempo</span>
+                                        <strong className="text-sm font-black text-blue-600 dark:text-blue-500">{viewingPlan.duration}m</strong>
+                                    </div>
+                                </div>
+
+                                <div className="space-y-2">
+                                    <h4 className="text-[10px] font-bold text-slate-600 dark:text-zinc-400 uppercase tracking-widest mb-2 border-b border-slate-100 dark:border-zinc-800 pb-1">Estructura</h4>
+                                    {(!viewingPlan.descriptionObj?.blocks || viewingPlan.descriptionObj.blocks.length === 0) ? (
+                                        <p className="text-xs text-slate-500 dark:text-zinc-500 italic">No hay estructura definida.</p>
+                                    ) : (
+                                        viewingPlan.descriptionObj.blocks.map((block, idx) => {
+                                            if (block.type === 'repeat') {
+                                                return (
+                                                    <div key={idx} className="p-2 rounded bg-purple-50/50 dark:bg-purple-900/10 border border-purple-200/50 dark:border-purple-800/30">
+                                                        <div className="text-[10px] font-black text-purple-700 dark:text-purple-400 uppercase tracking-widest mb-2 border-b border-purple-200/50 dark:border-purple-800/30 pb-1">
+                                                            {block.repeats}x Repeticiones
+                                                        </div>
+                                                        <div className="pl-2 border-l-2 border-purple-300 dark:border-purple-700 space-y-1">
+                                                            {block.steps.map((step, sIdx) => (
+                                                                <div key={sIdx} className="flex justify-between text-xs items-center bg-white/50 dark:bg-zinc-900 overflow-hidden rounded px-2 py-1">
+                                                                    <span className="font-bold text-slate-700 dark:text-zinc-300 capitalize">{step.type === 'active' ? 'Intensidad' : 'Descanso'}</span>
+                                                                    <div className="flex items-center gap-2">
+                                                                        <span className="font-mono text-slate-500 font-bold">{step.duration}{step.unit === 'dist' ? 'km' : 'm'}</span>
+                                                                        <span className={`text-[9px] font-black px-1.5 py-0.5 rounded ${step.zone === 'Z1' || step.zone === 'Z2' ? 'bg-slate-100 text-slate-500 dark:bg-zinc-800 dark:text-zinc-400' : 'bg-rose-100 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400'}`}>
+                                                                            {step.zone}
+                                                                        </span>
+                                                                    </div>
                                                                 </div>
-                                                            </div>
-                                                        ))}
+                                                            ))}
+                                                        </div>
+                                                    </div>
+                                                );
+                                            }
+                                            return (
+                                                <div key={idx} className={`p-2 rounded flex justify-between items-center ${block.type === 'main' ? 'bg-blue-50/50 dark:bg-blue-900/10 border border-blue-200/50 dark:border-blue-800/30' : 'bg-slate-50 dark:bg-zinc-900 border border-slate-100 dark:border-zinc-800'}`}>
+                                                    <div>
+                                                        <span className={`text-[9px] font-black uppercase tracking-widest mr-2 ${block.type === 'main' ? 'text-blue-600 dark:text-blue-400' : 'text-slate-500 dark:text-zinc-400'}`}>
+                                                            {block.type === 'warmup' ? 'CALENT.' : block.type === 'cooldown' ? 'SOLTAR' : 'BLOQUE'}
+                                                        </span>
+                                                        {block.details && <span className="text-xs text-slate-600 dark:text-zinc-300">{block.details}</span>}
+                                                    </div>
+                                                    <div className="flex items-center gap-2">
+                                                        <span className="font-mono text-xs font-bold text-slate-500">{block.duration}{block.unit === 'dist' ? 'km' : 'm'}</span>
+                                                        <span className="text-[9px] font-black px-1.5 py-0.5 rounded bg-slate-200 dark:bg-zinc-800 text-slate-600 dark:text-zinc-400">
+                                                            {block.zone}
+                                                        </span>
                                                     </div>
                                                 </div>
                                             );
-                                        }
-                                        return (
-                                            <div key={idx} className={`p-2 rounded flex justify-between items-center ${block.type === 'main' ? 'bg-blue-50/50 dark:bg-blue-900/10 border border-blue-200/50 dark:border-blue-800/30' : 'bg-slate-50 dark:bg-zinc-900 border border-slate-100 dark:border-zinc-800'}`}>
-                                                <div>
-                                                    <span className={`text-[9px] font-black uppercase tracking-widest mr-2 ${block.type === 'main' ? 'text-blue-600 dark:text-blue-400' : 'text-slate-500 dark:text-zinc-400'}`}>
-                                                        {block.type === 'warmup' ? 'CALENT.' : block.type === 'cooldown' ? 'SOLTAR' : 'BLOQUE'}
-                                                    </span>
-                                                    {block.details && <span className="text-xs text-slate-600 dark:text-zinc-300">{block.details}</span>}
-                                                </div>
-                                                <div className="flex items-center gap-2">
-                                                    <span className="font-mono text-xs font-bold text-slate-500">{block.duration}{block.unit === 'dist' ? 'km' : 'm'}</span>
-                                                    <span className="text-[9px] font-black px-1.5 py-0.5 rounded bg-slate-200 dark:bg-zinc-800 text-slate-600 dark:text-zinc-400">
-                                                        {block.zone}
-                                                    </span>
-                                                </div>
-                                            </div>
-                                        );
-                                    })
-                                )}
+                                        })
+                                    )}
+                                </div>
+                            </div>
+
+                            <div className="p-4 bg-slate-50 dark:bg-zinc-950/50 border-t border-slate-200 dark:border-zinc-800 flex justify-end gap-2 text-xs">
+                                <button onClick={(e) => { setViewingPlan(null); handleDeletePlan(e, viewingPlan.id); }} className="px-4 py-2 rounded-lg font-bold text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 active:scale-95 transition-all">Eliminar</button>
+                                <button onClick={() => handleEditPlan(viewingPlan)} className="px-4 py-2 bg-blue-600 text-white font-bold rounded-lg hover:bg-blue-500 active:scale-95 transition-all shadow-sm">Editar</button>
+                                <button onClick={() => setViewingPlan(null)} className="px-4 py-2 bg-slate-200 dark:bg-zinc-800 font-bold text-slate-700 dark:text-zinc-200 rounded-lg hover:bg-slate-300 dark:hover:bg-zinc-700 active:scale-95 transition-all">Cerrar</button>
                             </div>
                         </div>
-
-                        <div className="p-4 bg-slate-50 dark:bg-zinc-950/50 border-t border-slate-200 dark:border-zinc-800 flex justify-end gap-2 text-xs">
-                            <button onClick={(e) => { setViewingPlan(null); handleDeletePlan(e, viewingPlan.id); }} className="px-4 py-2 rounded-lg font-bold text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 active:scale-95 transition-all">Eliminar</button>
-                            <button onClick={() => setViewingPlan(null)} className="px-4 py-2 bg-slate-200 dark:bg-zinc-800 font-bold text-slate-700 dark:text-zinc-200 rounded-lg hover:bg-slate-300 dark:hover:bg-zinc-700 active:scale-95 transition-all">Cerrar</button>
-                        </div>
                     </div>
-                </div>
-            )}
+                )
+            }
         </>
     );
 };
