@@ -36,7 +36,7 @@ const InteractiveMap = ({ polyline, highResCoords, color, currentPosition }) => 
 
     if (!coords || coords.length === 0) return (
         <div className="w-full h-full flex flex-col items-center justify-center bg-slate-50 dark:bg-zinc-900 rounded-lg border border-slate-200 dark:border-zinc-800">
-            <MapPin size={24} className="text-slate-400 dark:text-zinc-600 mb-2"/>
+            <MapPin size={24} className="text-slate-400 dark:text-zinc-600 mb-2" />
             <span className="text-slate-500 dark:text-zinc-500 font-bold text-xs uppercase tracking-widest">Sin datos GPS</span>
         </div>
     );
@@ -51,15 +51,15 @@ const InteractiveMap = ({ polyline, highResCoords, color, currentPosition }) => 
         <div className="w-full h-full rounded-lg overflow-hidden relative border border-slate-200 dark:border-zinc-800 z-0 bg-slate-100 dark:bg-zinc-900 shadow-sm flex flex-col">
             <div className="absolute top-3 right-3 z-[400] flex border border-slate-200 dark:border-zinc-700/80 rounded bg-white/90 dark:bg-zinc-900/90 backdrop-blur-sm shadow-sm overflow-hidden p-0.5">
                 {['light', 'dark', 'satellite'].map((type) => (
-                    <button 
-                        key={type} onClick={(e) => { e.stopPropagation(); setMapType(type); }} 
+                    <button
+                        key={type} onClick={(e) => { e.stopPropagation(); setMapType(type); }}
                         className={`px-2.5 py-1 text-[9px] font-bold uppercase transition-colors rounded-sm ${mapType === type ? 'bg-slate-800 text-white dark:bg-zinc-200 dark:text-zinc-900' : 'text-slate-500 dark:text-zinc-400 hover:text-slate-800 dark:hover:text-zinc-200'}`}
                     >
                         {type === 'satellite' ? 'Sat' : type}
                     </button>
                 ))}
             </div>
-            
+
             <MapContainer center={coords[0]} zoom={13} scrollWheelZoom={true} className="w-full h-full z-0" zoomControl={false}>
                 <TileLayer key={mapType} url={mapSources[mapType].url} attribution={mapSources[mapType].attribution} />
                 <Polyline positions={coords} pathOptions={{ color: mapType === 'light' ? "#ffffff" : "#000000", weight: 6, opacity: 0.3 }} />
@@ -103,403 +103,414 @@ const formatPace = (decimalMinutes) => {
 };
 
 export const ActivityDetailPage = ({ activity, settings, fetchStreams, onBack, onDelete }) => {
-  const [streams, setStreams] = useState(null);
-  const [loadingStreams, setLoadingStreams] = useState(true);
-  const fetchedRef = useRef(null);
-  const [activePayload, setActivePayload] = useState(null);
+    const [streams, setStreams] = useState(null);
+    const [loadingStreams, setLoadingStreams] = useState(true);
+    const fetchedRef = useRef(null);
+    const [activePayload, setActivePayload] = useState(null);
 
-  const isPaceBased = useMemo(() => {
-      if (!activity) return false;
-      const t = String(activity.type).toLowerCase();
-      return t.includes('carrera') || t.includes('run') || t.includes('correr') || t.includes('andar') || t.includes('walk') || t.includes('caminata');
-  }, [activity]);
+    const isPaceBased = useMemo(() => {
+        if (!activity) return false;
+        const t = String(activity.type).toLowerCase();
+        return t.includes('carrera') || t.includes('run') || t.includes('correr') || t.includes('andar') || t.includes('walk') || t.includes('caminata');
+    }, [activity]);
 
-  useEffect(() => {
-      if (!activity) return;
-      if (fetchedRef.current !== activity.id) {
-          fetchedRef.current = activity.id;
-          setLoadingStreams(true); setStreams(null);
-          if (activity.streams_data) { setStreams(activity.streams_data); setLoadingStreams(false); }
-          else if (activity.strava_id) { fetchStreams(activity.id, activity.strava_id).then(data => { setStreams(data); setLoadingStreams(false); }); }
-          else { setLoadingStreams(false); }
-      }
-  }, [activity, fetchStreams]);
+    useEffect(() => {
+        if (!activity) return;
+        if (fetchedRef.current !== activity.id) {
+            fetchedRef.current = activity.id;
+            setLoadingStreams(true); setStreams(null);
+            if (activity.streams_data) { setStreams(activity.streams_data); setLoadingStreams(false); }
+            else if (activity.strava_id) { fetchStreams(activity.id, activity.strava_id).then(data => { setStreams(data); setLoadingStreams(false); }); }
+            else { setLoadingStreams(false); }
+        }
+    }, [activity, fetchStreams]);
 
-  const exactZoneAnalysis = useMemo(() => {
-      if (!streams || !streams.heartrate || !streams.time) return null;
-      const type = activity.type.toLowerCase();
-      const isBike = type.includes('bici') || type.includes('ciclismo');
-      const userZones = isBike ? settings.bike.zones : settings.run.zones;
-      const hrData = streams.heartrate.data; const timeData = streams.time.data;
-      let zoneSeconds = [0, 0, 0, 0, 0];
-      
-      for (let i = 1; i < hrData.length; i++) {
-          const hr = hrData[i]; const dt = timeData[i] - timeData[i-1]; 
-          const zIndex = userZones.findIndex(z => hr >= z.min && hr <= z.max);
-          if (zIndex !== -1) zoneSeconds[zIndex] += dt; else if (hr > userZones[4].max) zoneSeconds[4] += dt; 
-      }
-      const totalSeconds = zoneSeconds.reduce((a, b) => a + b, 0);
-      return zoneSeconds.map((sec, i) => ({ zone: i + 1, minutes: sec / 60, pct: totalSeconds > 0 ? (sec / totalSeconds) * 100 : 0 }));
-  }, [streams, activity, settings]);
+    const exactZoneAnalysis = useMemo(() => {
+        if (!streams || !streams.heartrate || !streams.time) return null;
+        const type = activity.type.toLowerCase();
+        const isBike = type.includes('bici') || type.includes('ciclismo');
+        const userZones = isBike ? settings.bike.zones : settings.run.zones;
+        const hrData = streams.heartrate.data; const timeData = streams.time.data;
+        let zoneSeconds = [0, 0, 0, 0, 0];
 
-  const proMetrics = useMemo(() => {
-      if (!streams || !streams.time) return { cadenceAvg: 0, maxSpeedObj: null, decoupling: null };
-      
-      let cadenceAvg = 0; let decoupling = null;
-      if (streams.cadence?.data?.length > 0) {
-          const validCadences = streams.cadence.data.filter(c => c > 0);
-          if (validCadences.length > 0) {
-              const sum = validCadences.reduce((a, b) => a + b, 0);
-              cadenceAvg = Math.round(sum / validCadences.length);
-              if (isPaceBased) cadenceAvg *= 2; 
-          }
-      }
+        for (let i = 1; i < hrData.length; i++) {
+            const hr = hrData[i]; const dt = timeData[i] - timeData[i - 1];
+            const zIndex = userZones.findIndex(z => hr >= z.min && hr <= z.max);
+            if (zIndex !== -1) zoneSeconds[zIndex] += dt; else if (hr > userZones[4].max) zoneSeconds[4] += dt;
+        }
+        const totalSeconds = zoneSeconds.reduce((a, b) => a + b, 0);
+        return zoneSeconds.map((sec, i) => ({ zone: i + 1, minutes: sec / 60, pct: totalSeconds > 0 ? (sec / totalSeconds) * 100 : 0 }));
+    }, [streams, activity, settings]);
 
-      let maxSpeedObj = null;
-      if (streams.velocity_smooth?.data?.length > 0) {
-          const maxMs = Math.max(...streams.velocity_smooth.data);
-          if (isPaceBased) {
-              if (maxMs > 0.1) maxSpeedObj = { value: formatPace(16.6666667 / maxMs), unit: '/km', label: 'Ritmo Máx' };
-          } else { maxSpeedObj = { value: (maxMs * 3.6).toFixed(1), unit: 'km/h', label: 'Vel. Máxima' }; }
-      }
+    const proMetrics = useMemo(() => {
+        if (!streams || !streams.time) return { cadenceAvg: 0, maxSpeedObj: null, decoupling: null };
 
-      if (streams.heartrate?.data && streams.velocity_smooth?.data && streams.time.data.length > 300) {
-          const hrData = streams.heartrate.data; const spdData = streams.velocity_smooth.data;
-          const midPoint = Math.floor(hrData.length / 2);
-          let hr1 = 0, spd1 = 0, count1 = 0; let hr2 = 0, spd2 = 0, count2 = 0;
+        let cadenceAvg = 0; let decoupling = null;
+        if (streams.cadence?.data?.length > 0) {
+            const validCadences = streams.cadence.data.filter(c => c > 0);
+            if (validCadences.length > 0) {
+                const sum = validCadences.reduce((a, b) => a + b, 0);
+                cadenceAvg = Math.round(sum / validCadences.length);
+                if (isPaceBased) cadenceAvg *= 2;
+            }
+        }
 
-          for(let i=0; i<midPoint; i++) { if(hrData[i] > 80 && spdData[i] > 1) { hr1 += hrData[i]; spd1 += spdData[i]; count1++; } }
-          for(let i=midPoint; i<hrData.length; i++) { if(hrData[i] > 80 && spdData[i] > 1) { hr2 += hrData[i]; spd2 += spdData[i]; count2++; } }
+        let maxSpeedObj = null;
+        if (streams.velocity_smooth?.data?.length > 0) {
+            const maxMs = Math.max(...streams.velocity_smooth.data);
+            if (isPaceBased) {
+                if (maxMs > 0.1) maxSpeedObj = { value: formatPace(16.6666667 / maxMs), unit: '/km', label: 'Ritmo Máx' };
+            } else { maxSpeedObj = { value: (maxMs * 3.6).toFixed(1), unit: 'km/h', label: 'Vel. Máxima' }; }
+        }
 
-          if (count1 > 100 && count2 > 100) {
-              const ef1 = (spd1/count1) / (hr1/count1); const ef2 = (spd2/count2) / (hr2/count2); 
-              decoupling = (((ef1 - ef2) / ef1) * 100).toFixed(1);
-          }
-      }
+        if (streams.heartrate?.data && streams.velocity_smooth?.data && streams.time.data.length > 300) {
+            const hrData = streams.heartrate.data; const spdData = streams.velocity_smooth.data;
+            const midPoint = Math.floor(hrData.length / 2);
+            let hr1 = 0, spd1 = 0, count1 = 0; let hr2 = 0, spd2 = 0, count2 = 0;
 
-      return { cadenceAvg, maxSpeedObj, decoupling };
-  }, [streams, isPaceBased]);
+            for (let i = 0; i < midPoint; i++) { if (hrData[i] > 80 && spdData[i] > 1) { hr1 += hrData[i]; spd1 += spdData[i]; count1++; } }
+            for (let i = midPoint; i < hrData.length; i++) { if (hrData[i] > 80 && spdData[i] > 1) { hr2 += hrData[i]; spd2 += spdData[i]; count2++; } }
 
-  // 🔥 TRAINING EFFECT ALGORITHM (Estilo Garmin) 🔥
-  const trainingEffect = useMemo(() => {
-      if (!exactZoneAnalysis) return null;
+            if (count1 > 100 && count2 > 100) {
+                const ef1 = (spd1 / count1) / (hr1 / count1); const ef2 = (spd2 / count2) / (hr2 / count2);
+                decoupling = (((ef1 - ef2) / ef1) * 100).toFixed(1);
+            }
+        }
 
-      const z1m = exactZoneAnalysis[0].minutes;
-      const z2m = exactZoneAnalysis[1].minutes;
-      const z3m = exactZoneAnalysis[2].minutes;
-      const z4m = exactZoneAnalysis[3].minutes;
-      const z5m = exactZoneAnalysis[4].minutes;
+        return { cadenceAvg, maxSpeedObj, decoupling };
+    }, [streams, isPaceBased]);
 
-      // Puntos base Aeróbicos (Z2 y Z3 dan base, Z4 da umbral)
-      let aerobicPoints = (z1m * 0.03) + (z2m * 0.08) + (z3m * 0.15) + (z4m * 0.25) + (z5m * 0.10);
-      let aerobicScore = Math.min(5.0, aerobicPoints / 1.8).toFixed(1); // Normalizado a max 5.0
+    // 🔥 TRAINING EFFECT ALGORITHM (Estilo Garmin) 🔥
+    const trainingEffect = useMemo(() => {
+        if (!exactZoneAnalysis) return null;
 
-      // Puntos base Anaeróbicos (Z5 puro y algo de Z4)
-      let anaerobicPoints = (z4m * 0.05) + (z5m * 0.35);
-      let anaerobicScore = Math.min(5.0, anaerobicPoints / 1.2).toFixed(1); // Normalizado a max 5.0
+        const z1m = exactZoneAnalysis[0].minutes;
+        const z2m = exactZoneAnalysis[1].minutes;
+        const z3m = exactZoneAnalysis[2].minutes;
+        const z4m = exactZoneAnalysis[3].minutes;
+        const z5m = exactZoneAnalysis[4].minutes;
 
-      let primaryBenefit = "Recuperación";
-      let benefitColor = "text-slate-500 dark:text-zinc-400";
+        // Puntos base Aeróbicos (Z2 y Z3 dan base, Z4 da umbral)
+        let aerobicPoints = (z1m * 0.03) + (z2m * 0.08) + (z3m * 0.15) + (z4m * 0.25) + (z5m * 0.10);
+        let aerobicScore = Math.min(5.0, aerobicPoints / 1.8).toFixed(1); // Normalizado a max 5.0
 
-      if (parseFloat(aerobicScore) < 1.5 && parseFloat(anaerobicScore) < 1.0) {
-          primaryBenefit = "Recuperación Activa";
-          benefitColor = "text-slate-500 dark:text-zinc-400";
-      } else if (parseFloat(anaerobicScore) >= 3.0 && parseFloat(anaerobicScore) > parseFloat(aerobicScore) - 1.0) {
-          primaryBenefit = "Capacidad Anaeróbica";
-          benefitColor = "text-purple-600 dark:text-purple-400";
-      } else if (z5m > 6) {
-          primaryBenefit = "VO2 Max";
-          benefitColor = "text-rose-600 dark:text-rose-500";
-      } else if (z4m > 15) {
-          primaryBenefit = "Umbral de Lactato";
-          benefitColor = "text-amber-600 dark:text-amber-500";
-      } else if (z3m > 20) {
-          primaryBenefit = "Tempo";
-          benefitColor = "text-emerald-600 dark:text-emerald-500";
-      } else {
-          primaryBenefit = "Base Aeróbica";
-          benefitColor = "text-blue-600 dark:text-blue-400";
-      }
+        // Puntos base Anaeróbicos (Z5 puro y algo de Z4)
+        let anaerobicPoints = (z4m * 0.05) + (z5m * 0.35);
+        let anaerobicScore = Math.min(5.0, anaerobicPoints / 1.2).toFixed(1); // Normalizado a max 5.0
 
-      const getLabel = (score) => {
-          if (score < 1.0) return "Ninguno";
-          if (score < 2.0) return "Menor";
-          if (score < 3.0) return "Mantenimiento";
-          if (score < 4.0) return "Mejora";
-          if (score < 5.0) return "Mejora alta";
-          return "Sobreesfuerzo";
-      };
+        let primaryBenefit = "Recuperación";
+        let benefitColor = "text-slate-500 dark:text-zinc-400";
 
-      return {
-          aerobic: parseFloat(aerobicScore),
-          anaerobic: parseFloat(anaerobicScore),
-          aerobicLabel: getLabel(parseFloat(aerobicScore)),
-          anaerobicLabel: getLabel(parseFloat(anaerobicScore)),
-          primaryBenefit,
-          benefitColor
-      };
-  }, [exactZoneAnalysis]);
+        if (parseFloat(aerobicScore) < 1.5 && parseFloat(anaerobicScore) < 1.0) {
+            primaryBenefit = "Recuperación Activa";
+            benefitColor = "text-slate-500 dark:text-zinc-400";
+        } else if (parseFloat(anaerobicScore) >= 3.0 && parseFloat(anaerobicScore) > parseFloat(aerobicScore) - 1.0) {
+            primaryBenefit = "Capacidad Anaeróbica";
+            benefitColor = "text-purple-600 dark:text-purple-400";
+        } else if (z5m > 6) {
+            primaryBenefit = "VO2 Max";
+            benefitColor = "text-rose-600 dark:text-rose-500";
+        } else if (z4m > 15) {
+            primaryBenefit = "Umbral de Lactato";
+            benefitColor = "text-amber-600 dark:text-amber-500";
+        } else if (z3m > 20) {
+            primaryBenefit = "Tempo";
+            benefitColor = "text-emerald-600 dark:text-emerald-500";
+        } else {
+            primaryBenefit = "Base Aeróbica";
+            benefitColor = "text-blue-600 dark:text-blue-400";
+        }
 
-  const chartData = useMemo(() => {
-      if (!streams || !streams.time) return [];
-      const timeData = streams.time.data; const latlngStream = streams.latlng?.data;
-      const step = Math.max(1, Math.floor(timeData.length / 150));
-      const data = [];
-      
-      for (let i = 0; i < timeData.length; i += step) {
-          const ms = streams.velocity_smooth ? streams.velocity_smooth.data[i] : null;
-          let speed = null; let pace = null;
-          if (ms !== null) {
-              speed = Number((ms * 3.6).toFixed(1)); 
-              if (ms > 0.1) { pace = Number((16.666666666667 / ms).toFixed(2)); if (pace > 20) pace = 20; } 
-              else { pace = 20; }
-          }
-          data.push({
-              time: Math.floor(timeData[i] / 60), hr: streams.heartrate ? streams.heartrate.data[i] : null,
-              speed: speed, pace: pace, alt: streams.altitude ? Math.round(streams.altitude.data[i]) : null,
-              latlng: latlngStream ? latlngStream[i] : null
-          });
-      }
-      return data;
-  }, [streams]);
+        const getLabel = (score) => {
+            if (score < 1.0) return "Ninguno";
+            if (score < 2.0) return "Menor";
+            if (score < 3.0) return "Mantenimiento";
+            if (score < 4.0) return "Mejora";
+            if (score < 5.0) return "Mejora alta";
+            return "Sobreesfuerzo";
+        };
 
-  const maxHr = useMemo(() => streams?.heartrate?.data?.length > 0 ? Math.max(...streams.heartrate.data) : null, [streams]);
+        return {
+            aerobic: parseFloat(aerobicScore),
+            anaerobic: parseFloat(anaerobicScore),
+            aerobicLabel: getLabel(parseFloat(aerobicScore)),
+            anaerobicLabel: getLabel(parseFloat(anaerobicScore)),
+            primaryBenefit,
+            benefitColor
+        };
+    }, [exactZoneAnalysis]);
 
-  if (!activity) return null;
+    const chartData = useMemo(() => {
+        if (!streams || !streams.time) return [];
+        const timeData = streams.time.data; const latlngStream = streams.latlng?.data;
+        const step = Math.max(1, Math.floor(timeData.length / 600));
+        const data = [];
 
-  const formatTimeStr = (mins) => { const h = Math.floor(mins / 60); const m = Math.floor(mins % 60); return h > 0 ? `${h}h ${m}m` : `${m}m`; };
-  const dateStr = new Date(activity.date).toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'short', year: 'numeric' });
-  
-  const getSpeedOrPace = () => {
-      const speedMs = activity.speed_avg || 0; if (speedMs === 0) return null;
-      if (!isPaceBased) return { value: (speedMs * 3.6).toFixed(1), unit: 'km/h', label: 'Vel. Media' };
-      const minPerKm = 16.666666666667 / speedMs; 
-      return { value: formatPace(minPerKm), unit: '/km', label: 'Ritmo Medio' };
-  };
-  const speedMetric = getSpeedOrPace();
+        for (let i = 0; i < timeData.length; i += step) {
+            const ms = streams.velocity_smooth ? streams.velocity_smooth.data[i] : null;
+            let speed = null; let pace = null;
+            if (ms !== null) {
+                speed = Number((ms * 3.6).toFixed(1));
+                if (ms > 0.1) { pace = Number((16.666666666667 / ms).toFixed(2)); if (pace > 20) pace = 20; }
+                else { pace = 20; }
+            }
+            data.push({
+                time: Math.floor(timeData[i] / 60), hr: streams.heartrate ? streams.heartrate.data[i] : null,
+                speed: speed, pace: pace, alt: streams.altitude ? Math.round(streams.altitude.data[i]) : null,
+                latlng: latlngStream ? latlngStream[i] : null
+            });
+        }
+        return data;
+    }, [streams]);
 
-  const getTheme = (type) => {
-    const t = String(type).toLowerCase();
-    if (t.includes('run') || t.includes('carrera')) return '#ea580c';
-    if (t.includes('andar') || t.includes('walk') || t.includes('caminata')) return '#10b981';
-    if (t.includes('bike') || t.includes('bici')) return '#2563eb';
-    if (t.includes('gym') || t.includes('fuerza')) return '#7c3aed';
-    return '#71717a';
-  };
-  const themeColor = getTheme(activity.type);
+    const maxHr = useMemo(() => streams?.heartrate?.data?.length > 0 ? Math.max(...streams.heartrate.data) : null, [streams]);
 
-  const ZONE_LABELS = ['Z1 Recuperación', 'Z2 Base', 'Z3 Tempo', 'Z4 Umbral', 'Z5 VO2Max'];
-  const ZONE_COLORS = ['#94a3b8', '#3b82f6', '#10b981', '#eab308', '#ef4444'];
-  const tooltipStyle = { backgroundColor: '#18181b', border: '1px solid #27272a', borderRadius: '4px', color: '#f4f4f5', fontSize: '11px', fontWeight: '500', padding: '8px 12px' };
+    if (!activity) return null;
 
-  const handleMouseMove = (state) => {
-    if (state && state.activePayload && state.activePayload.length > 0) setActivePayload(state.activePayload[0].payload);
-  };
+    const formatTimeStr = (mins) => { const h = Math.floor(mins / 60); const m = Math.floor(mins % 60); return h > 0 ? `${h}h ${m}m` : `${m}m`; };
+    const dateStr = new Date(activity.date).toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'short', year: 'numeric' });
 
-  return (
-    <div className="animate-in fade-in duration-300 pb-12 max-w-[1600px] mx-auto">
-      
-      {/* BOTONERA SUPERIOR */}
-      <div className="flex items-center justify-between mb-4">
-          <button onClick={onBack} className="flex items-center gap-1.5 text-slate-500 hover:text-slate-800 dark:text-zinc-400 dark:hover:text-zinc-100 transition font-bold px-3 py-1.5 text-[10px] uppercase rounded border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 shadow-sm">
-              <ArrowLeft size={14} /> Volver
-          </button>
-          <div className="flex gap-2">
-              {activity.strava_id && (
-                  <a href={`https://www.strava.com/activities/${activity.strava_id}`} target="_blank" rel="noreferrer" className="flex items-center gap-1.5 px-3 py-1.5 bg-transparent border border-[#FC4C02]/30 text-[#FC4C02] hover:bg-[#FC4C02]/10 rounded text-[10px] font-bold uppercase transition">
-                      <ExternalLink size={12} /> Strava
-                  </a>
-              )}
-              {onDelete && (
-                  <button onClick={() => { if(window.confirm("¿Borrar actividad?")) { onDelete(activity.id); onBack(); } }} className="p-1.5 text-slate-400 hover:text-red-500 dark:text-zinc-500 dark:hover:text-red-400 rounded border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 transition">
-                      <Trash2 size={14} />
-                  </button>
-              )}
-          </div>
-      </div>
+    const getSpeedOrPace = () => {
+        const speedMs = activity.speed_avg || 0; if (speedMs === 0) return null;
+        if (!isPaceBased) return { value: (speedMs * 3.6).toFixed(1), unit: 'km/h', label: 'Vel. Media' };
+        const minPerKm = 16.666666666667 / speedMs;
+        return { value: formatPace(minPerKm), unit: '/km', label: 'Ritmo Medio' };
+    };
+    const speedMetric = getSpeedOrPace();
 
-      {/* CABECERA (KPIs) */}
-      <div className="bg-white dark:bg-zinc-900 rounded-lg p-5 border border-slate-200 dark:border-zinc-800 mb-4 shadow-sm">
-          <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-slate-500 dark:text-zinc-400 mb-1">
-              <Calendar size={12} /> {dateStr}
-              <span className="px-1.5 py-0.5 rounded text-[9px] text-white ml-1" style={{backgroundColor: themeColor}}>{activity.type}</span>
-          </div>
-          <h1 className="text-xl md:text-2xl font-black text-slate-900 dark:text-zinc-100 tracking-tight leading-tight mb-6">
-              {activity.name || `${activity.type} Activity`}
-          </h1>
-          
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 border-t border-slate-200 dark:border-zinc-800 pt-5">
-              <div>
-                  <h4 className="text-[10px] font-bold text-slate-400 dark:text-zinc-500 uppercase tracking-widest mb-3 flex items-center gap-1.5"><MapPin size={12}/> Carga Externa</h4>
-                  <div className="grid grid-cols-2 gap-4">
-                      <MetricBox label="Tiempo" value={formatTimeStr(activity.duration)} />
-                      <MetricBox label="Distancia" value={(activity.distance/1000).toFixed(2)} unit="km" />
-                      <MetricBox label="Desnivel" value={activity.elevation_gain || 0} unit="m" />
-                      {activity.calories > 0 && <MetricBox label="Energía" value={activity.calories} unit="kcal" />}
-                  </div>
-              </div>
-              <div>
-                  <h4 className="text-[10px] font-bold text-slate-400 dark:text-zinc-500 uppercase tracking-widest mb-3 flex items-center gap-1.5"><Target size={12}/> Rendimiento</h4>
-                  <div className="grid grid-cols-2 gap-4">
-                      {speedMetric && <MetricBox label={speedMetric.label} value={speedMetric.value} unit={speedMetric.unit} />}
-                      {proMetrics.maxSpeedObj && <MetricBox label={proMetrics.maxSpeedObj.label} value={proMetrics.maxSpeedObj.value} unit={proMetrics.maxSpeedObj.unit} />}
-                      {proMetrics.cadenceAvg > 0 && <MetricBox label="Cadencia Med" value={proMetrics.cadenceAvg} unit={isPaceBased ? 'spm' : 'rpm'} />}
-                      {activity.watts_avg > 0 && <MetricBox label="Potencia Med" value={Math.round(activity.watts_avg)} unit="W" colorClass="border-amber-500" />}
-                  </div>
-              </div>
-              <div>
-                  <h4 className="text-[10px] font-bold text-slate-400 dark:text-zinc-500 uppercase tracking-widest mb-3 flex items-center gap-1.5"><Heart size={12}/> Fisiología</h4>
-                  <div className="grid grid-cols-2 gap-4">
-                      <MetricBox label="Carga" value={activity.tss} unit="TSS" colorClass="border-blue-500" valueColor="text-blue-600 dark:text-blue-400" />
-                      {activity.hr_avg > 0 && <MetricBox label="Pulso Medio" value={Math.round(activity.hr_avg)} unit="ppm" colorClass="border-rose-500" />}
-                      {maxHr > 0 && <MetricBox label="Pulso Máx" value={maxHr} unit="ppm" />}
-                      {proMetrics.decoupling !== null && (
-                          <MetricBox 
-                              label="Desacople" 
-                              value={`${proMetrics.decoupling > 0 ? '+' : ''}${proMetrics.decoupling}`} unit="%" 
-                              colorClass={proMetrics.decoupling <= 5 ? "border-emerald-500" : "border-rose-500"} 
-                              valueColor={proMetrics.decoupling <= 5 ? "text-emerald-600 dark:text-emerald-500" : "text-rose-600 dark:text-rose-500"}
-                              tooltip="Compara la eficiencia (Velocidad / Pulso) de la 1ª mitad del entreno con la 2ª. Un valor menor al 5% indica una gran resistencia base."
-                          />
-                      )}
-                  </div>
-              </div>
-          </div>
-      </div>
+    const getTheme = (type) => {
+        const t = String(type).toLowerCase();
+        if (t.includes('run') || t.includes('carrera')) return '#ea580c';
+        if (t.includes('andar') || t.includes('walk') || t.includes('caminata')) return '#10b981';
+        if (t.includes('bike') || t.includes('bici')) return '#2563eb';
+        if (t.includes('gym') || t.includes('fuerza')) return '#7c3aed';
+        return '#71717a';
+    };
+    const themeColor = getTheme(activity.type);
 
-      {/* MAPA Y GRÁFICAS */}
-      <div className="flex flex-col lg:flex-row gap-4 h-auto lg:h-[calc(100vh-200px)] lg:min-h-[700px] mb-4">
-          <div className="w-full lg:w-5/12 flex flex-col gap-4 h-full sticky top-[80px] z-10">
-              <div className="flex-1 min-h-[350px] lg:min-h-0 relative">
-                  <InteractiveMap polyline={activity.map_polyline} highResCoords={streams?.latlng?.data} color={themeColor} currentPosition={activePayload?.latlng} />
-              </div>
-              <div className="shrink-0 bg-white dark:bg-zinc-900 rounded-lg border border-slate-200 dark:border-zinc-800 p-4 shadow-sm">
-                  <div className="flex justify-between items-center mb-3 border-b border-slate-200 dark:border-zinc-800 pb-2">
-                      <h3 className="text-[11px] font-bold text-slate-700 dark:text-zinc-300 uppercase tracking-widest">Zonas Cardíacas</h3>
-                      {loadingStreams && <Loader2 size={12} className="animate-spin text-slate-500"/>}
-                  </div>
-                  {loadingStreams ? (
-                      <div className="space-y-3 animate-pulse">
-                          {[1,2,3,4,5].map(i => <div key={i} className="h-1.5 bg-slate-200 dark:bg-zinc-800 rounded w-full"></div>)}
-                      </div>
-                  ) : exactZoneAnalysis ? (
-                      <div className="space-y-2.5">
-                          {exactZoneAnalysis.map((data, i) => (
-                              <div key={i} className="flex items-center gap-3">
-                                  <div className="w-24 shrink-0"><span className="text-[9px] font-bold text-slate-500 dark:text-zinc-400 uppercase tracking-wider">{ZONE_LABELS[i]}</span></div>
-                                  <div className="flex-1 h-1.5 bg-slate-100 dark:bg-zinc-800 rounded-none overflow-hidden flex">
-                                      <div className="h-full" style={{ width: `${data.pct}%`, backgroundColor: ZONE_COLORS[i] }}></div>
-                                  </div>
-                                  <div className="w-16 shrink-0 flex justify-between items-center text-[10px] font-mono">
-                                      <span className="text-slate-800 dark:text-zinc-200">{Math.round(data.minutes)}m</span>
-                                      <span className="text-slate-500 dark:text-zinc-500">{Math.round(data.pct)}%</span>
-                                  </div>
-                              </div>
-                          ))}
-                      </div>
-                  ) : <p className="text-[10px] text-slate-500 dark:text-zinc-500">Sin datos cardíacos.</p>}
-              </div>
-          </div>
+    const ZONE_LABELS = ['Z1 Recuperación', 'Z2 Base', 'Z3 Tempo', 'Z4 Umbral', 'Z5 VO2Max'];
+    const ZONE_COLORS = ['#94a3b8', '#3b82f6', '#10b981', '#eab308', '#ef4444'];
+    const tooltipStyle = { backgroundColor: '#18181b', border: '1px solid #27272a', borderRadius: '4px', color: '#f4f4f5', fontSize: '11px', fontWeight: '500', padding: '8px 12px' };
 
-          <div className="w-full lg:w-7/12 flex flex-col gap-4 overflow-y-auto custom-scrollbar h-full pr-1">
-              <div className="bg-white dark:bg-zinc-900 rounded-lg border border-slate-200 dark:border-zinc-800 p-4 shadow-sm flex flex-col flex-1 min-h-[500px]">
-                  <div className="flex justify-between items-center mb-4 border-b border-slate-200 dark:border-zinc-800 pb-2 shrink-0">
-                      <h3 className="text-[11px] font-bold text-slate-700 dark:text-zinc-300 uppercase tracking-widest">Telemetría (Streams)</h3>
-                  </div>
+    const handleMouseMove = (state) => {
+        if (state && state.activePayload && state.activePayload.length > 0) setActivePayload(state.activePayload[0].payload);
+    };
 
-                  {loadingStreams ? (
-                      <div className="flex-1 flex items-center justify-center"><Loader2 size={24} className="animate-spin text-slate-500 dark:text-zinc-600"/></div>
-                  ) : chartData.length > 0 ? (
-                      <div className="flex-1 space-y-6">
-                          <div className="h-[220px] w-full">
-                              <h4 className="text-[10px] font-bold text-slate-500 dark:text-zinc-400 uppercase mb-1 tracking-wider">
-                                  {isPaceBased ? 'Ritmo y Altimetría' : 'Velocidad y Altimetría'}
-                              </h4>
-                              <ResponsiveContainer width="100%" height="100%">
-                                  <AreaChart data={chartData} margin={{ top: 10, right: 0, left: -25, bottom: 0 }} syncId="telemetry" onMouseMove={handleMouseMove} onMouseLeave={() => setActivePayload(null)}>
-                                      <CartesianGrid strokeDasharray="2 2" vertical={false} stroke="#3f3f46" opacity={0.3} />
-                                      <XAxis dataKey="time" tick={{fontSize: 9, fill: '#71717a'}} tickFormatter={(val) => `${val}m`} minTickGap={30} axisLine={{stroke: '#3f3f46'}} tickLine={false}/>
-                                      <YAxis yAxisId="left" tick={{fontSize: 9, fill: themeColor}} domain={isPaceBased ? ['dataMin - 0.5', 'dataMax + 1'] : [0, dataMax => Math.ceil(dataMax * 1.1)]} axisLine={false} tickLine={false} reversed={isPaceBased} tickFormatter={isPaceBased ? formatPace : undefined}/>
-                                      <YAxis yAxisId="right" orientation="right" hide domain={['dataMin', dataMax => Math.ceil(dataMax * 1.15)]} />
-                                      <RechartsTooltip contentStyle={tooltipStyle} labelFormatter={(val) => `Minuto ${val}`} formatter={(value, name) => {
-                                              if (name === 'pace') return [`${formatPace(value)} /km`, 'Ritmo'];
-                                              if (name === 'speed') return [`${value} km/h`, 'Velocidad'];
-                                              if (name === 'alt') return [`${value} m`, 'Altitud'];
-                                              return [value, name];
-                                          }}
-                                      />
-                                      <Area yAxisId="right" type="monotone" dataKey="alt" name="alt" stroke="#71717a" fillOpacity={0.1} fill="#71717a" isAnimationActive={false} />
-                                      <Area yAxisId="left" type="monotone" dataKey={isPaceBased ? "pace" : "speed"} name={isPaceBased ? "pace" : "speed"} stroke={themeColor} strokeWidth={2} fillOpacity={0.1} fill={themeColor} isAnimationActive={false} />
-                                  </AreaChart>
-                              </ResponsiveContainer>
-                          </div>
+    return (
+        <div className="animate-in fade-in duration-300 pb-12 max-w-[1600px] mx-auto">
 
-                          <div className="h-[220px] w-full">
-                              <h4 className="text-[10px] font-bold text-slate-500 dark:text-zinc-400 uppercase mb-1 tracking-wider">Pulsaciones</h4>
-                              <ResponsiveContainer width="100%" height="100%">
-                                  <AreaChart data={chartData} margin={{ top: 10, right: 0, left: -25, bottom: 0 }} syncId="telemetry" onMouseMove={handleMouseMove} onMouseLeave={() => setActivePayload(null)}>
-                                      <CartesianGrid strokeDasharray="2 2" vertical={false} stroke="#3f3f46" opacity={0.3} />
-                                      <XAxis dataKey="time" tick={{fontSize: 9, fill: '#71717a'}} tickFormatter={(val) => `${val}m`} minTickGap={30} axisLine={{stroke: '#3f3f46'}} tickLine={false}/>
-                                      <YAxis tick={{fontSize: 9, fill: '#ef4444'}} domain={['dataMin - 5', dataMax => Math.ceil(dataMax * 1.1)]} axisLine={false} tickLine={false}/>
-                                      <RechartsTooltip contentStyle={tooltipStyle} labelFormatter={(val) => `Minuto ${val}`} formatter={(value, name) => name === 'hr' ? [`${value} ppm`, 'Pulso'] : [value, name]} />
-                                      <Area type="monotone" dataKey="hr" name="hr" stroke="#ef4444" strokeWidth={2} fillOpacity={0.1} fill="#ef4444" isAnimationActive={false} />
-                                  </AreaChart>
-                              </ResponsiveContainer>
-                          </div>
+            {/* BOTONERA SUPERIOR */}
+            <div className="flex items-center justify-between mb-4">
+                <button onClick={onBack} className="flex items-center gap-1.5 text-slate-500 hover:text-slate-800 dark:text-zinc-400 dark:hover:text-zinc-100 transition font-bold px-3 py-1.5 text-[10px] uppercase rounded border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 shadow-sm">
+                    <ArrowLeft size={14} /> Volver
+                </button>
+                <div className="flex gap-2">
+                    {activity.strava_id && (
+                        <a href={`https://www.strava.com/activities/${activity.strava_id}`} target="_blank" rel="noreferrer" className="flex items-center gap-1.5 px-3 py-1.5 bg-transparent border border-[#FC4C02]/30 text-[#FC4C02] hover:bg-[#FC4C02]/10 rounded text-[10px] font-bold uppercase transition">
+                            <ExternalLink size={12} /> Strava
+                        </a>
+                    )}
+                    {onDelete && (
+                        <button onClick={() => { if (window.confirm("¿Borrar actividad?")) { onDelete(activity.id); onBack(); } }} className="p-1.5 text-slate-400 hover:text-red-500 dark:text-zinc-500 dark:hover:text-red-400 rounded border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 transition">
+                            <Trash2 size={14} />
+                        </button>
+                    )}
+                </div>
+            </div>
 
-                      </div>
-                  ) : (
-                      <div className="flex-1 flex flex-col items-center justify-center text-slate-500 dark:text-zinc-600">
-                          <p className="text-[10px] uppercase tracking-widest font-bold">Sin datos de telemetría</p>
-                      </div>
-                  )}
-              </div>
-          </div>
-      </div>
+            {/* CABECERA (KPIs) */}
+            <div className="bg-white dark:bg-zinc-900 rounded-lg p-5 border border-slate-200 dark:border-zinc-800 mb-4 shadow-sm">
+                <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-slate-500 dark:text-zinc-400 mb-1">
+                    <Calendar size={12} /> {dateStr}
+                    <span className="px-1.5 py-0.5 rounded text-[9px] text-white ml-1" style={{ backgroundColor: themeColor }}>{activity.type}</span>
+                </div>
+                <h1 className="text-xl md:text-2xl font-black text-slate-900 dark:text-zinc-100 tracking-tight leading-tight mb-6">
+                    {activity.name || `${activity.type} Activity`}
+                </h1>
 
-      {/* 🔥 TRAINING EFFECT (GARMIN STYLE) 🔥 */}
-      {trainingEffect && !loadingStreams && (
-          <div className="bg-white dark:bg-zinc-900 rounded-lg p-5 border border-slate-200 dark:border-zinc-800 shadow-sm mt-6">
-              <h3 className="text-[11px] font-bold text-slate-700 dark:text-zinc-300 uppercase tracking-widest mb-4 flex items-center gap-1.5 border-b border-slate-200 dark:border-zinc-800 pb-2">
-                  <Target size={14} className="text-slate-400 dark:text-zinc-500" strokeWidth={2.5}/> Beneficio del Entrenamiento (Training Effect)
-              </h3>
-              
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-center">
-                  {/* Etiqueta Principal */}
-                  <div className="flex flex-col items-center justify-center p-4 bg-slate-50 dark:bg-zinc-950 rounded-lg border border-slate-100 dark:border-zinc-800/50">
-                      <span className="text-[10px] font-bold text-slate-500 dark:text-zinc-400 uppercase tracking-widest mb-1">Impacto Principal</span>
-                      <span className={`text-lg font-black uppercase tracking-tight ${trainingEffect.benefitColor}`}>
-                          {trainingEffect.primaryBenefit}
-                      </span>
-                  </div>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 border-t border-slate-200 dark:border-zinc-800 pt-5">
+                    <div>
+                        <h4 className="text-[10px] font-bold text-slate-400 dark:text-zinc-500 uppercase tracking-widest mb-3 flex items-center gap-1.5"><MapPin size={12} /> Carga Externa</h4>
+                        <div className="grid grid-cols-2 gap-4">
+                            <MetricBox label="Tiempo" value={formatTimeStr(activity.duration)} />
+                            <MetricBox label="Distancia" value={(activity.distance / 1000).toFixed(2)} unit="km" />
+                            <MetricBox label="Desnivel" value={activity.elevation_gain || 0} unit="m" />
+                            {activity.calories > 0 && <MetricBox label="Energía" value={activity.calories} unit="kcal" />}
+                        </div>
+                    </div>
+                    <div>
+                        <h4 className="text-[10px] font-bold text-slate-400 dark:text-zinc-500 uppercase tracking-widest mb-3 flex items-center gap-1.5"><Target size={12} /> Rendimiento</h4>
+                        <div className="grid grid-cols-2 gap-4">
+                            {speedMetric && <MetricBox label={speedMetric.label} value={speedMetric.value} unit={speedMetric.unit} />}
+                            {proMetrics.maxSpeedObj && <MetricBox label={proMetrics.maxSpeedObj.label} value={proMetrics.maxSpeedObj.value} unit={proMetrics.maxSpeedObj.unit} />}
+                            {proMetrics.cadenceAvg > 0 && <MetricBox label="Cadencia Med" value={proMetrics.cadenceAvg} unit={isPaceBased ? 'spm' : 'rpm'} />}
+                            {activity.watts_avg > 0 && <MetricBox label="Potencia Med" value={Math.round(activity.watts_avg)} unit="W" colorClass="border-amber-500" />}
+                        </div>
+                    </div>
+                    <div>
+                        <h4 className="text-[10px] font-bold text-slate-400 dark:text-zinc-500 uppercase tracking-widest mb-3 flex items-center gap-1.5"><Heart size={12} /> Fisiología</h4>
+                        <div className="grid grid-cols-2 gap-4">
+                            <MetricBox label="Carga" value={activity.tss} unit="TSS" colorClass="border-blue-500" valueColor="text-blue-600 dark:text-blue-400" />
+                            {activity.hr_avg > 0 && <MetricBox label="Pulso Medio" value={Math.round(activity.hr_avg)} unit="ppm" colorClass="border-rose-500" />}
+                            {maxHr > 0 && <MetricBox label="Pulso Máx" value={maxHr} unit="ppm" />}
+                            {proMetrics.decoupling !== null && (
+                                <MetricBox
+                                    label="Desacople"
+                                    value={`${proMetrics.decoupling > 0 ? '+' : ''}${proMetrics.decoupling}`} unit="%"
+                                    colorClass={proMetrics.decoupling <= 5 ? "border-emerald-500" : "border-rose-500"}
+                                    valueColor={proMetrics.decoupling <= 5 ? "text-emerald-600 dark:text-emerald-500" : "text-rose-600 dark:text-rose-500"}
+                                    tooltip="Compara la eficiencia (Velocidad / Pulso) de la 1ª mitad del entreno con la 2ª. Un valor menor al 5% indica una gran resistencia base."
+                                />
+                            )}
+                        </div>
+                    </div>
+                </div>
+            </div>
 
-                  {/* Barra Aeróbica */}
-                  <div className="flex flex-col gap-2">
-                      <div className="flex justify-between items-end">
-                          <span className="text-[11px] font-bold text-slate-700 dark:text-zinc-300 uppercase tracking-wider">Carga Aeróbica</span>
-                          <span className="text-base font-black text-blue-500">{trainingEffect.aerobic.toFixed(1)}</span>
-                      </div>
-                      <div className="w-full h-2.5 bg-slate-200 dark:bg-zinc-800 rounded-full overflow-hidden">
-                          <div className="h-full bg-blue-500 transition-all duration-1000" style={{ width: `${(trainingEffect.aerobic / 5) * 100}%` }}></div>
-                      </div>
-                      <span className="text-[9px] font-bold text-slate-500 dark:text-zinc-500 uppercase text-right tracking-widest">{trainingEffect.aerobicLabel}</span>
-                  </div>
+            {/* MAPA Y GRÁFICAS */}
+            <div className="flex flex-col lg:flex-row gap-4 h-auto lg:h-[calc(100vh-200px)] lg:min-h-[700px] mb-4">
+                <div className="w-full lg:w-5/12 flex flex-col gap-4 h-full sticky top-[80px] z-10">
+                    <div className="flex-1 min-h-[350px] lg:min-h-0 relative">
+                        <InteractiveMap polyline={activity.map_polyline} highResCoords={streams?.latlng?.data} color={themeColor} currentPosition={activePayload?.latlng} />
+                    </div>
+                    <div className="shrink-0 bg-white dark:bg-zinc-900 rounded-lg border border-slate-200 dark:border-zinc-800 p-4 shadow-sm">
+                        <div className="flex justify-between items-center mb-3 border-b border-slate-200 dark:border-zinc-800 pb-2">
+                            <h3 className="text-[11px] font-bold text-slate-700 dark:text-zinc-300 uppercase tracking-widest">Zonas Cardíacas</h3>
+                            {loadingStreams && <Loader2 size={12} className="animate-spin text-slate-500" />}
+                        </div>
+                        {loadingStreams ? (
+                            <div className="space-y-3 animate-pulse">
+                                {[1, 2, 3, 4, 5].map(i => <div key={i} className="h-1.5 bg-slate-200 dark:bg-zinc-800 rounded w-full"></div>)}
+                            </div>
+                        ) : exactZoneAnalysis ? (
+                            <div className="space-y-2.5">
+                                {exactZoneAnalysis.map((data, i) => (
+                                    <div key={i} className="flex items-center gap-3">
+                                        <div className="w-24 shrink-0"><span className="text-[9px] font-bold text-slate-500 dark:text-zinc-400 uppercase tracking-wider">{ZONE_LABELS[i]}</span></div>
+                                        <div className="flex-1 h-1.5 bg-slate-100 dark:bg-zinc-800 rounded-none overflow-hidden flex">
+                                            <div className="h-full" style={{ width: `${data.pct}%`, backgroundColor: ZONE_COLORS[i] }}></div>
+                                        </div>
+                                        <div className="w-16 shrink-0 flex justify-between items-center text-[10px] font-mono">
+                                            <span className="text-slate-800 dark:text-zinc-200">{Math.round(data.minutes)}m</span>
+                                            <span className="text-slate-500 dark:text-zinc-500">{Math.round(data.pct)}%</span>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        ) : <p className="text-[10px] text-slate-500 dark:text-zinc-500">Sin datos cardíacos.</p>}
+                    </div>
+                </div>
 
-                  {/* Barra Anaeróbica */}
-                  <div className="flex flex-col gap-2">
-                      <div className="flex justify-between items-end">
-                          <span className="text-[11px] font-bold text-slate-700 dark:text-zinc-300 uppercase tracking-wider">Carga Anaeróbica</span>
-                          <span className="text-base font-black text-purple-500">{trainingEffect.anaerobic.toFixed(1)}</span>
-                      </div>
-                      <div className="w-full h-2.5 bg-slate-200 dark:bg-zinc-800 rounded-full overflow-hidden">
-                          <div className="h-full bg-purple-500 transition-all duration-1000" style={{ width: `${(trainingEffect.anaerobic / 5) * 100}%` }}></div>
-                      </div>
-                      <span className="text-[9px] font-bold text-slate-500 dark:text-zinc-500 uppercase text-right tracking-widest">{trainingEffect.anaerobicLabel}</span>
-                  </div>
-              </div>
-          </div>
-      )}
+                <div className="w-full lg:w-7/12 flex flex-col gap-4 overflow-y-auto custom-scrollbar h-full pr-1">
+                    <div className="bg-white dark:bg-zinc-900 rounded-lg border border-slate-200 dark:border-zinc-800 p-4 shadow-sm flex flex-col flex-1 min-h-[500px]">
+                        <div className="flex justify-between items-center mb-4 border-b border-slate-200 dark:border-zinc-800 pb-2 shrink-0">
+                            <h3 className="text-[11px] font-bold text-slate-700 dark:text-zinc-300 uppercase tracking-widest">Telemetría (Streams)</h3>
+                        </div>
 
-    </div>
-  );
+                        {loadingStreams ? (
+                            <div className="flex-1 flex items-center justify-center"><Loader2 size={24} className="animate-spin text-slate-500 dark:text-zinc-600" /></div>
+                        ) : chartData.length > 0 ? (
+                            <div className="flex-1 space-y-6">
+                                <div className="h-[220px] w-full">
+                                    <h4 className="text-[10px] font-bold text-slate-500 dark:text-zinc-400 uppercase mb-1 tracking-wider">
+                                        {isPaceBased ? 'Ritmo y Altimetría' : 'Velocidad y Altimetría'}
+                                    </h4>
+                                    <ResponsiveContainer width="100%" height="100%">
+                                        <AreaChart data={chartData} margin={{ top: 10, right: 0, left: -25, bottom: 0 }} syncId="telemetry" onMouseMove={handleMouseMove} onMouseLeave={() => setActivePayload(null)}>
+                                            <CartesianGrid strokeDasharray="2 2" vertical={false} stroke="#3f3f46" opacity={0.3} />
+                                            <XAxis dataKey="time" tick={{ fontSize: 9, fill: '#71717a' }} tickFormatter={(val) => `${val}m`} minTickGap={30} axisLine={{ stroke: '#3f3f46' }} tickLine={false} />
+                                            <YAxis yAxisId="left" tick={{ fontSize: 9, fill: themeColor }} domain={isPaceBased ? ['dataMin - 0.5', 'dataMax + 1'] : [0, dataMax => Math.ceil(dataMax * 1.1)]} axisLine={false} tickLine={false} reversed={isPaceBased} tickFormatter={isPaceBased ? formatPace : undefined} />
+                                            <YAxis yAxisId="right" orientation="right" hide domain={['dataMin', dataMax => Math.ceil(dataMax * 1.15)]} />
+                                            <RechartsTooltip
+                                                contentStyle={tooltipStyle}
+                                                labelFormatter={(val) => `Minuto ${val}`}
+                                                formatter={(value, name) => {
+                                                    if (name === 'pace') return [`${formatPace(value)} /km`, 'Ritmo'];
+                                                    if (name === 'speed') return [`${value} km/h`, 'Velocidad'];
+                                                    if (name === 'alt') return [`${value} m`, 'Altitud'];
+                                                    return [value, name];
+                                                }}
+                                                cursor={{ stroke: '#71717a', strokeWidth: 1, strokeDasharray: '4 4' }}
+                                                isAnimationActive={false}
+                                            />
+                                            <Area yAxisId="right" type="monotone" dataKey="alt" name="alt" stroke="#71717a" fillOpacity={0.1} fill="#71717a" isAnimationActive={false} activeDot={false} dot={false} />
+                                            <Area yAxisId="left" type="monotone" dataKey={isPaceBased ? "pace" : "speed"} name={isPaceBased ? "pace" : "speed"} stroke={themeColor} strokeWidth={2} fillOpacity={0.1} fill={themeColor} isAnimationActive={false} activeDot={{ r: 5, stroke: '#fff', strokeWidth: 2, fill: themeColor }} dot={false} />
+                                        </AreaChart>
+                                    </ResponsiveContainer>
+                                </div>
+
+                                <div className="h-[220px] w-full">
+                                    <h4 className="text-[10px] font-bold text-slate-500 dark:text-zinc-400 uppercase mb-1 tracking-wider">Pulsaciones</h4>
+                                    <ResponsiveContainer width="100%" height="100%">
+                                        <AreaChart data={chartData} margin={{ top: 10, right: 0, left: -25, bottom: 0 }} syncId="telemetry" onMouseMove={handleMouseMove} onMouseLeave={() => setActivePayload(null)}>
+                                            <CartesianGrid strokeDasharray="2 2" vertical={false} stroke="#3f3f46" opacity={0.3} />
+                                            <XAxis dataKey="time" tick={{ fontSize: 9, fill: '#71717a' }} tickFormatter={(val) => `${val}m`} minTickGap={30} axisLine={{ stroke: '#3f3f46' }} tickLine={false} />
+                                            <YAxis tick={{ fontSize: 9, fill: '#ef4444' }} domain={['dataMin - 5', dataMax => Math.ceil(dataMax * 1.1)]} axisLine={false} tickLine={false} />
+                                            <RechartsTooltip
+                                                contentStyle={tooltipStyle}
+                                                labelFormatter={(val) => `Minuto ${val}`}
+                                                formatter={(value, name) => name === 'hr' ? [`${value} ppm`, 'Pulso'] : [value, name]}
+                                                cursor={{ stroke: '#71717a', strokeWidth: 1, strokeDasharray: '4 4' }}
+                                                isAnimationActive={false}
+                                            />
+                                            <Area type="monotone" dataKey="hr" name="hr" stroke="#ef4444" strokeWidth={2} fillOpacity={0.1} fill="#ef4444" isAnimationActive={false} activeDot={{ r: 5, stroke: '#fff', strokeWidth: 2, fill: '#ef4444' }} dot={false} />
+                                        </AreaChart>
+                                    </ResponsiveContainer>
+                                </div>
+
+                            </div>
+                        ) : (
+                            <div className="flex-1 flex flex-col items-center justify-center text-slate-500 dark:text-zinc-600">
+                                <p className="text-[10px] uppercase tracking-widest font-bold">Sin datos de telemetría</p>
+                            </div>
+                        )}
+                    </div>
+                </div>
+            </div>
+
+            {/* 🔥 TRAINING EFFECT (GARMIN STYLE) 🔥 */}
+            {trainingEffect && !loadingStreams && (
+                <div className="bg-white dark:bg-zinc-900 rounded-lg p-5 border border-slate-200 dark:border-zinc-800 shadow-sm mt-6">
+                    <h3 className="text-[11px] font-bold text-slate-700 dark:text-zinc-300 uppercase tracking-widest mb-4 flex items-center gap-1.5 border-b border-slate-200 dark:border-zinc-800 pb-2">
+                        <Target size={14} className="text-slate-400 dark:text-zinc-500" strokeWidth={2.5} /> Beneficio del Entrenamiento (Training Effect)
+                    </h3>
+
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-center">
+                        {/* Etiqueta Principal */}
+                        <div className="flex flex-col items-center justify-center p-4 bg-slate-50 dark:bg-zinc-950 rounded-lg border border-slate-100 dark:border-zinc-800/50">
+                            <span className="text-[10px] font-bold text-slate-500 dark:text-zinc-400 uppercase tracking-widest mb-1">Impacto Principal</span>
+                            <span className={`text-lg font-black uppercase tracking-tight ${trainingEffect.benefitColor}`}>
+                                {trainingEffect.primaryBenefit}
+                            </span>
+                        </div>
+
+                        {/* Barra Aeróbica */}
+                        <div className="flex flex-col gap-2">
+                            <div className="flex justify-between items-end">
+                                <span className="text-[11px] font-bold text-slate-700 dark:text-zinc-300 uppercase tracking-wider">Carga Aeróbica</span>
+                                <span className="text-base font-black text-blue-500">{trainingEffect.aerobic.toFixed(1)}</span>
+                            </div>
+                            <div className="w-full h-2.5 bg-slate-200 dark:bg-zinc-800 rounded-full overflow-hidden">
+                                <div className="h-full bg-blue-500 transition-all duration-1000" style={{ width: `${(trainingEffect.aerobic / 5) * 100}%` }}></div>
+                            </div>
+                            <span className="text-[9px] font-bold text-slate-500 dark:text-zinc-500 uppercase text-right tracking-widest">{trainingEffect.aerobicLabel}</span>
+                        </div>
+
+                        {/* Barra Anaeróbica */}
+                        <div className="flex flex-col gap-2">
+                            <div className="flex justify-between items-end">
+                                <span className="text-[11px] font-bold text-slate-700 dark:text-zinc-300 uppercase tracking-wider">Carga Anaeróbica</span>
+                                <span className="text-base font-black text-purple-500">{trainingEffect.anaerobic.toFixed(1)}</span>
+                            </div>
+                            <div className="w-full h-2.5 bg-slate-200 dark:bg-zinc-800 rounded-full overflow-hidden">
+                                <div className="h-full bg-purple-500 transition-all duration-1000" style={{ width: `${(trainingEffect.anaerobic / 5) * 100}%` }}></div>
+                            </div>
+                            <span className="text-[9px] font-bold text-slate-500 dark:text-zinc-500 uppercase text-right tracking-widest">{trainingEffect.anaerobicLabel}</span>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+        </div>
+    );
 };
