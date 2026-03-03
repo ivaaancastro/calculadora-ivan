@@ -2,10 +2,230 @@ import React, { useState, useMemo, useEffect } from 'react';
 import {
     ChevronLeft, ChevronRight, Calendar as CalIcon,
     Clock, Zap, MapPin, Footprints, Bike, Dumbbell, Activity, Target,
-    Plus, Trash2, X
+    Plus, Trash2, X, Sparkles
 } from 'lucide-react';
+import { BlockGeneratorModal } from '../dashboard/BlockGeneratorModal';
+import { FuelingPanel } from '../dashboard/FuelingPanel';
+import { formatDuration, formatBlockDuration } from '../../utils/formatDuration';
 
 const WEEKDAYS = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'];
+
+// Compact HH:MM:SS input — stores value as decimal minutes, supports seconds for sprints
+const DurationInput = ({ value, onChange, className = '' }) => {
+    const totalSecs = Math.round((Number(value) || 0) * 60);
+    const h = Math.floor(totalSecs / 3600);
+    const m = Math.floor((totalSecs % 3600) / 60);
+    const s = totalSecs % 60;
+    const commit = (newH, newM, newS) => {
+        const clampH = Math.max(0, Math.min(23, Number(newH) || 0));
+        const clampM = Math.max(0, Math.min(59, Number(newM) || 0));
+        const clampS = Math.max(0, Math.min(59, Number(newS) || 0));
+        onChange((clampH * 3600 + clampM * 60 + clampS) / 60);
+    };
+    const inCls = 'w-7 bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 text-[11px] font-mono py-0.5 text-center outline-none focus:border-slate-400 dark:focus:border-zinc-500 transition-colors';
+    const sep = <span className="text-slate-300 dark:text-zinc-600 text-[10px] select-none">:</span>;
+    return (
+        <div className={`inline-flex items-center rounded-sm overflow-hidden ${className}`} title="hh:mm:ss">
+            <input type="number" value={h} min={0} max={23} tabIndex={-1}
+                onChange={e => commit(e.target.value, m, s)}
+                className={`${inCls} ${h > 0 ? '' : 'w-0 border-0 p-0 opacity-0 pointer-events-none'}`} />
+            {h > 0 && sep}
+            <input type="number" value={m} min={0} max={59}
+                onChange={e => commit(h, e.target.value, s)}
+                className={inCls} />
+            {sep}
+            <input type="number" value={s} min={0} max={59}
+                onChange={e => commit(h, m, e.target.value)}
+                className={inCls} />
+        </div>
+    );
+};
+// ── Floating draggable PMC projection chart ─────────────────────────────────
+const PmcFloatingChart = ({ pmcByDate, onClose, initPos }) => {
+    const [pos, setPos] = React.useState(initPos);
+    const [hover, setHover] = React.useState(null); // { idx, x }
+    const dragRef = React.useRef(null);
+
+    const allEntries = Object.values(pmcByDate)
+        .filter(e => e.ctl != null)
+        .sort((a, b) => a.date.localeCompare(b.date));
+    const today = new Date().toLocaleDateString('en-CA');
+    const cutoff = new Date(); cutoff.setDate(cutoff.getDate() - 90);
+    const visible = allEntries.filter(e => e.date >= cutoff.toLocaleDateString('en-CA'));
+    if (visible.length === 0) return null;
+
+    const W = 580; const H = 220; const PAD = { t: 16, r: 12, b: 28, l: 40 };
+    const cw = W - PAD.l - PAD.r; const ch = H - PAD.t - PAD.b;
+    const allVals = visible.flatMap(e => [e.ctl, e.atl, e.tcb].filter(v => v != null));
+    const minV = Math.min(...allVals, -30);
+    const maxV = Math.max(...allVals, 20);
+    const range = maxV - minV || 1;
+    const xS = i => PAD.l + (i / (visible.length - 1 || 1)) * cw;
+    const yS = v => PAD.t + ch - ((v - minV) / range) * ch;
+
+    const realE = visible.filter(e => !e.projected);
+    const lastRealIdx = visible.findLastIndex(e => !e.projected);
+    const projWithJoin = lastRealIdx >= 0
+        ? [visible[lastRealIdx], ...visible.slice(lastRealIdx + 1).filter(e => e.projected)]
+        : visible.filter(e => e.projected);
+    const segPath = (key, entries) => entries.map((e, li) => {
+        const i = visible.indexOf(e);
+        return `${li === 0 ? 'M' : 'L'}${xS(i).toFixed(1)},${yS(e[key] ?? 0).toFixed(1)}`;
+    }).join(' ');
+    const projPath = (key) => projWithJoin.map((e, li) => {
+        const i = visible.indexOf(e);
+        return `${li === 0 ? 'M' : 'L'}${xS(i).toFixed(1)},${yS(e[key] ?? 0).toFixed(1)}`;
+    }).join(' ');
+    const todayIdx = visible.findIndex(e => e.date === today);
+    const todayX = todayIdx >= 0 ? xS(todayIdx) : null;
+    const zeroY = yS(0);
+    const labelStep = Math.max(1, Math.floor(visible.length / 7));
+    const labels = visible.filter((_, i) => i % labelStep === 0);
+    const lastReal = realE[realE.length - 1];
+
+    const handleDragDown = (e) => {
+        e.currentTarget.setPointerCapture(e.pointerId);
+        dragRef.current = { ox: e.clientX - pos.x, oy: e.clientY - pos.y };
+    };
+    const handleDragMove = (e) => {
+        if (!dragRef.current) return;
+        setPos({ x: e.clientX - dragRef.current.ox, y: e.clientY - dragRef.current.oy });
+    };
+    const handleDragUp = () => { dragRef.current = null; };
+
+    const handleSvgMouseMove = (e) => {
+        const rect = e.currentTarget.getBoundingClientRect();
+        const svgX = ((e.clientX - rect.left) / rect.width) * W;
+        const relX = svgX - PAD.l;
+        if (relX < 0 || relX > cw) { setHover(null); return; }
+        const idx = Math.round((relX / cw) * (visible.length - 1));
+        setHover({ idx: Math.max(0, Math.min(visible.length - 1, idx)), x: xS(Math.max(0, Math.min(visible.length - 1, idx))) });
+    };
+
+    const hoverEntry = hover != null ? visible[hover.idx] : null;
+
+    return (
+        <div className="fixed z-50 bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-700 rounded-xl shadow-2xl overflow-visible select-none"
+            style={{ left: pos.x, top: pos.y, width: 600 }}>
+            {/* Title / drag bar */}
+            <div className="flex items-center justify-between px-3 py-2 bg-slate-50 dark:bg-zinc-950 border-b border-slate-100 dark:border-zinc-800 rounded-t-xl cursor-grab active:cursor-grabbing"
+                onPointerDown={handleDragDown} onPointerMove={handleDragMove} onPointerUp={handleDragUp}>
+                <div className="flex items-center gap-2">
+                    <Activity size={12} className="text-violet-500" />
+                    <span className="text-[10px] font-black text-slate-600 dark:text-zinc-300 uppercase tracking-widest">Proyección de Forma</span>
+                </div>
+                {lastReal && (
+                    <div className="flex items-center gap-3 mr-2">
+                        <span className="text-[9px] font-bold text-blue-500">CTL {Math.round(lastReal.ctl)}</span>
+                        <span className="text-[9px] font-bold text-red-400">ATL {Math.round(lastReal.atl)}</span>
+                        <span className={`text-[9px] font-bold ${lastReal.tcb >= 0 ? 'text-emerald-500' : 'text-orange-400'}`}>
+                            TSB {lastReal.tcb >= 0 ? '+' : ''}{Math.round(lastReal.tcb)}
+                        </span>
+                    </div>
+                )}
+                <button onClick={onClose} className="p-0.5 text-slate-400 hover:text-slate-700 dark:hover:text-zinc-200 rounded transition-colors">
+                    <X size={13} />
+                </button>
+            </div>
+
+            {/* Legend */}
+            <div className="flex items-center gap-4 px-4 pt-2.5 text-[9px] font-bold text-slate-500 dark:text-zinc-400">
+                <span className="flex items-center gap-1.5"><span className="w-5 h-0.5 bg-blue-500 inline-block rounded" />Fitness (CTL)</span>
+                <span className="flex items-center gap-1.5"><span className="w-5 h-0.5 bg-red-400 inline-block rounded" />Fatiga (ATL)</span>
+                <span className="flex items-center gap-1.5"><span className="w-5 h-0.5 bg-emerald-500 inline-block rounded" />Forma (TSB)</span>
+                <span className="flex items-center gap-1.5 ml-auto opacity-50 text-[8px]">
+                    <span className="w-5 h-0 border-t-2 border-dashed border-slate-400 inline-block" />proyectado
+                </span>
+            </div>
+
+            {/* Chart */}
+            <div className="px-2 pb-3 pt-1 relative">
+                <svg viewBox={`0 0 ${W} ${H}`} className="w-full cursor-crosshair" style={{ height: 220 }}
+                    onMouseMove={handleSvgMouseMove} onMouseLeave={() => setHover(null)}>
+
+                    {/* Zero line */}
+                    <line x1={PAD.l} y1={zeroY} x2={W - PAD.r} y2={zeroY} stroke="#e2e8f0" strokeWidth="1" strokeDasharray="4,3" />
+                    <text x={PAD.l - 4} y={zeroY + 3} textAnchor="end" fontSize={8} fill="#94a3b8">0</text>
+
+                    {/* Y axis ticks */}
+                    {[minV, (minV + maxV) / 2, maxV].map(v => (
+                        <g key={v}>
+                            <line x1={PAD.l - 3} y1={yS(v)} x2={PAD.l} y2={yS(v)} stroke="#e2e8f0" strokeWidth="1" />
+                            <text x={PAD.l - 5} y={yS(v) + 3} textAnchor="end" fontSize={8} fill="#94a3b8">{Math.round(v)}</text>
+                        </g>
+                    ))}
+
+                    {/* Today marker */}
+                    {todayX != null && <>
+                        <rect x={todayX} y={PAD.t} width={W - PAD.r - todayX} height={ch} fill="#6366f1" fillOpacity="0.03" />
+                        <line x1={todayX} y1={PAD.t} x2={todayX} y2={H - PAD.b} stroke="#6366f1" strokeWidth="1.5" strokeDasharray="4,3" opacity="0.5" />
+                        <text x={todayX + 3} y={PAD.t + 9} fontSize={8} fill="#6366f1" fontWeight="700">HOY</text>
+                    </>}
+
+                    {/* Real lines */}
+                    <path d={segPath('ctl', realE)} fill="none" stroke="#3b82f6" strokeWidth="2" strokeLinejoin="round" strokeLinecap="round" />
+                    <path d={segPath('atl', realE)} fill="none" stroke="#f87171" strokeWidth="2" strokeLinejoin="round" strokeLinecap="round" />
+                    <path d={segPath('tcb', realE)} fill="none" stroke="#10b981" strokeWidth="2" strokeLinejoin="round" strokeLinecap="round" />
+
+                    {/* Projected lines */}
+                    {projWithJoin.length > 1 && <>
+                        <path d={projPath('ctl')} fill="none" stroke="#3b82f6" strokeWidth="2" strokeDasharray="6,4" opacity="0.4" strokeLinejoin="round" />
+                        <path d={projPath('atl')} fill="none" stroke="#f87171" strokeWidth="2" strokeDasharray="6,4" opacity="0.4" strokeLinejoin="round" />
+                        <path d={projPath('tcb')} fill="none" stroke="#10b981" strokeWidth="2" strokeDasharray="6,4" opacity="0.4" strokeLinejoin="round" />
+                    </>}
+
+                    {/* Hover crosshair */}
+                    {hover != null && <>
+                        <line x1={hover.x} y1={PAD.t} x2={hover.x} y2={H - PAD.b} stroke="#475569" strokeWidth="1" strokeDasharray="3,2" opacity="0.6" />
+                        {hoverEntry?.ctl != null && <circle cx={hover.x} cy={yS(hoverEntry.ctl)} r={3} fill="#3b82f6" stroke="white" strokeWidth="1.5" />}
+                        {hoverEntry?.atl != null && <circle cx={hover.x} cy={yS(hoverEntry.atl)} r={3} fill="#f87171" stroke="white" strokeWidth="1.5" />}
+                        {hoverEntry?.tcb != null && <circle cx={hover.x} cy={yS(hoverEntry.tcb)} r={3} fill="#10b981" stroke="white" strokeWidth="1.5" />}
+                    </>}
+
+                    {/* X axis */}
+                    <line x1={PAD.l} y1={H - PAD.b} x2={W - PAD.r} y2={H - PAD.b} stroke="#e2e8f0" strokeWidth="1" />
+                    {labels.map((e, li) => {
+                        const i = visible.indexOf(e);
+                        const d = new Date(e.date + 'T00:00:00');
+                        return <text key={li} x={xS(i)} y={H - PAD.b + 12} textAnchor="middle" fontSize={8} fill="#94a3b8">
+                            {d.toLocaleDateString('es-ES', { day: 'numeric', month: 'short' })}
+                        </text>;
+                    })}
+                </svg>
+
+                {/* Hover tooltip */}
+                {hoverEntry && (() => {
+                    const tooltipLeft = hover.x > W * 0.65;
+                    return (
+                        <div className="absolute top-3 pointer-events-none bg-white dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 rounded-lg shadow-lg px-3 py-2 text-[10px] z-10 min-w-[130px]"
+                            style={{ [tooltipLeft ? 'right' : 'left']: tooltipLeft ? 16 : 50 }}>
+                            <p className="font-bold text-slate-600 dark:text-zinc-300 mb-1.5">
+                                {new Date(hoverEntry.date + 'T00:00:00').toLocaleDateString('es-ES', { weekday: 'short', day: 'numeric', month: 'short' })}
+                                {hoverEntry.projected && <span className="ml-1.5 text-[8px] font-normal text-violet-400 uppercase tracking-wide">proyectado</span>}
+                            </p>
+                            <div className="space-y-1">
+                                <div className="flex justify-between gap-4">
+                                    <span className="text-blue-500 font-semibold">Fitness</span>
+                                    <span className="font-mono font-bold text-slate-700 dark:text-zinc-200">{Math.round(hoverEntry.ctl)}</span>
+                                </div>
+                                <div className="flex justify-between gap-4">
+                                    <span className="text-red-400 font-semibold">Fatiga</span>
+                                    <span className="font-mono font-bold text-slate-700 dark:text-zinc-200">{Math.round(hoverEntry.atl)}</span>
+                                </div>
+                                <div className="flex justify-between gap-4">
+                                    <span className={`font-semibold ${hoverEntry.tcb >= 0 ? 'text-emerald-500' : 'text-orange-400'}`}>Forma</span>
+                                    <span className={`font-mono font-bold ${hoverEntry.tcb >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-orange-500'}`}>
+                                        {hoverEntry.tcb >= 0 ? '+' : ''}{Math.round(hoverEntry.tcb)}
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    );
+                })()}
+            </div>
+        </div>
+    );
+};
 
 const getSportColor = (type) => {
     const t = String(type).toLowerCase();
@@ -26,9 +246,9 @@ const getSportIcon = (type) => {
 
 // --- ESTIMATED PACE PER ZONE (min/km for Run, min/10km for Ride) ---
 const ZONE_PACE = {
-    Run: { Z1: 7.0, Z2: 6.0, Z3: 5.2, Z4: 4.5, Z5: 3.8, Z6: 3.2 },
-    Ride: { Z1: 3.0, Z2: 2.5, Z3: 2.2, Z4: 2.0, Z5: 1.7, Z6: 1.5 },
-    Swim: { Z1: 3.0, Z2: 2.5, Z3: 2.2, Z4: 2.0, Z5: 1.7, Z6: 1.5 },
+    Run: { Z1: 7.0, R12: 6.5, Z2: 6.0, R23: 5.6, Z3: 5.2, Z4: 4.5, Z5: 3.8, Z6: 3.2 },
+    Ride: { Z1: 3.0, R12: 2.75, Z2: 2.5, R23: 2.35, Z3: 2.2, Z4: 2.0, Z5: 1.7, Z6: 1.5 },
+    Swim: { Z1: 3.0, R12: 2.75, Z2: 2.5, R23: 2.35, Z3: 2.2, Z4: 2.0, Z5: 1.7, Z6: 1.5 },
 };
 
 // --- WORKOUT TEMPLATES BY SPORT ---
@@ -235,6 +455,51 @@ export const CalendarPage = ({ activities, plannedWorkouts = [], addPlannedWorko
 
     // Using DB instead of localStorage for planned activities
 
+    const [isGeneratorOpen, setIsGeneratorOpen] = useState(false);
+    const [isDeleteBlockOpen, setIsDeleteBlockOpen] = useState(false);
+    const [showPmcChart, setShowPmcChart] = useState(false);
+    const [pmcPos, setPmcPos] = useState({ x: window.innerWidth - 380, y: 120 });
+    const pmcDragRef = React.useRef(null);
+    const [deleteBlockFrom, setDeleteBlockFrom] = useState('');
+    const [deleteBlockTo, setDeleteBlockTo] = useState('');
+    const [deletingBlock, setDeletingBlock] = useState(false);
+
+    const handleDeleteBlock = async () => {
+        if (!deleteBlockFrom || !deleteBlockTo) return;
+        setDeletingBlock(true);
+        const toDelete = plannedWorkouts.filter(w => {
+            const d = w.date || (w.dateObj ? w.dateObj.toLocaleDateString('en-CA') : null);
+            return d && d >= deleteBlockFrom && d <= deleteBlockTo;
+        });
+        for (const w of toDelete) {
+            await deletePlannedWorkout(w.id);
+        }
+        setDeletingBlock(false);
+        setIsDeleteBlockOpen(false);
+        setDeleteBlockFrom('');
+        setDeleteBlockTo('');
+    };
+
+    const handleGenerateBlock = async (payload) => {
+        const { sport, projection } = payload;
+
+        if (!projection || projection.length === 0) return;
+
+        for (const week of projection) {
+            for (const session of week.sessions) {
+                const newWorkout = {
+                    date: session.date,
+                    type: sport,
+                    name: session.name,
+                    tss: session.tss,
+                    duration: session.duration,
+                    description: JSON.stringify({ blocks: session.blocks })
+                };
+                await addPlannedWorkout(newWorkout);
+            }
+        }
+    };
+
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [viewingPlan, setViewingPlan] = useState(null);
     const [editingPlanId, setEditingPlanId] = useState(null);
@@ -314,6 +579,11 @@ export const CalendarPage = ({ activities, plannedWorkouts = [], addPlannedWorko
         });
         // Z6 if not defined
         if (!derived.Z6) derived.Z6 = 1.3;
+
+        // Ramps (averages between zones for TSS estimation)
+        derived.R12 = derived.Z1 && derived.Z2 ? (derived.Z1 + derived.Z2) / 2 : 0.65;
+        derived.R23 = derived.Z2 && derived.Z3 ? (derived.Z2 + derived.Z3) / 2 : 0.81;
+
         return { ...DEFAULT_ZONE_IF, ...derived };
     }, [settings, newPlan.type]);
 
@@ -770,8 +1040,19 @@ export const CalendarPage = ({ activities, plannedWorkouts = [], addPlannedWorko
                         <button onClick={goToday} className="text-[10px] sm:text-xs font-bold uppercase tracking-wider px-2 sm:px-3 py-1 bg-white dark:bg-zinc-800 border border-slate-300 dark:border-zinc-700 text-slate-600 dark:text-zinc-300 rounded hover:bg-slate-50 dark:hover:bg-zinc-700 transition-colors">Hoy</button>
                     </div>
                     <div className="flex items-center gap-2">
-                        {/* VIEW MODE TOGGLE */}
-                        <div className="hidden sm:flex items-center bg-slate-100 dark:bg-zinc-800 rounded overflow-hidden">
+                        {/* AI BUILDER BUTTON */}
+                        <button onClick={() => setIsGeneratorOpen(true)} className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 bg-indigo-50 dark:bg-indigo-900/20 text-indigo-600 dark:text-indigo-400 border border-indigo-200 dark:border-indigo-800/50 rounded-lg text-[9px] font-black uppercase tracking-widest hover:bg-indigo-100 dark:hover:bg-indigo-900/40 transition-colors shadow-sm">
+                            <Sparkles size={12} /> Generar Bloque
+                        </button>
+                        {/* DELETE BLOCK BUTTON */}
+                        <button onClick={() => setIsDeleteBlockOpen(prev => !prev)} className={`hidden sm:flex items-center gap-1.5 px-3 py-1.5 border rounded-lg text-[9px] font-black uppercase tracking-widest transition-colors shadow-sm ${isDeleteBlockOpen ? 'bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 border-red-200 dark:border-red-800/50' : 'bg-white dark:bg-zinc-900 text-slate-500 dark:text-zinc-400 border-slate-200 dark:border-zinc-700 hover:border-slate-400'}`}>
+                            <Trash2 size={12} /> Borrar Bloque
+                        </button>
+                        {/* PMC CHART TOGGLE */}
+                        <button onClick={() => setShowPmcChart(p => !p)} className={`hidden sm:flex items-center gap-1.5 px-3 py-1.5 border rounded-lg text-[9px] font-black uppercase tracking-widest transition-colors shadow-sm ${showPmcChart ? 'bg-violet-50 dark:bg-violet-900/20 text-violet-600 dark:text-violet-400 border-violet-200 dark:border-violet-800/50' : 'bg-white dark:bg-zinc-900 text-slate-500 dark:text-zinc-400 border-slate-200 dark:border-zinc-700 hover:border-slate-400'}`}>
+                            <Activity size={12} /> Forma
+                        </button>
+                        <div className="hidden sm:flex items-center bg-slate-100 dark:bg-zinc-800 rounded overflow-hidden ml-2">
                             <button onClick={() => setViewMode('month')}
                                 className={`px-2.5 py-1.5 text-[9px] font-bold uppercase tracking-wider transition-colors ${viewMode === 'month' ? 'bg-slate-800 dark:bg-zinc-100 text-white dark:text-zinc-900' : 'text-slate-500 dark:text-zinc-400 hover:text-slate-700'}`}
                             >Mes</button>
@@ -787,14 +1068,50 @@ export const CalendarPage = ({ activities, plannedWorkouts = [], addPlannedWorko
                     </div>
                 </div>
 
+                {/* DELETE BLOCK PANEL */}
+                {isDeleteBlockOpen && (
+                    <div className="border-b border-slate-200 dark:border-zinc-800 bg-slate-50 dark:bg-zinc-900/50 px-4 py-3 flex flex-wrap items-center gap-3">
+                        <span className="text-xs font-bold text-slate-500 dark:text-zinc-400 uppercase tracking-widest">Borrar entrenos planificados:</span>
+                        <div className="flex items-center gap-2">
+                            <label className="text-[10px] font-bold text-slate-400 uppercase">Desde</label>
+                            <input type="date" value={deleteBlockFrom} onChange={e => setDeleteBlockFrom(e.target.value)} className="px-2 py-1 text-xs border border-slate-200 dark:border-zinc-700 rounded bg-white dark:bg-zinc-900 text-slate-700 dark:text-zinc-300 font-mono" />
+                        </div>
+                        <div className="flex items-center gap-2">
+                            <label className="text-[10px] font-bold text-slate-400 uppercase">Hasta</label>
+                            <input type="date" value={deleteBlockTo} onChange={e => setDeleteBlockTo(e.target.value)} className="px-2 py-1 text-xs border border-slate-200 dark:border-zinc-700 rounded bg-white dark:bg-zinc-900 text-slate-700 dark:text-zinc-300 font-mono" />
+                        </div>
+                        {deleteBlockFrom && deleteBlockTo && (
+                            <span className="text-[10px] text-slate-400 dark:text-zinc-500">
+                                ({plannedWorkouts.filter(w => { const d = w.date || w.dateObj?.toLocaleDateString('en-CA'); return d && d >= deleteBlockFrom && d <= deleteBlockTo; }).length} entrenos)
+                            </span>
+                        )}
+                        <div className="flex items-center gap-2 ml-auto">
+                            <button onClick={() => { setIsDeleteBlockOpen(false); setDeleteBlockFrom(''); setDeleteBlockTo(''); }} className="px-3 py-1 text-xs font-bold text-slate-500 dark:text-zinc-400 hover:text-slate-700 dark:hover:text-zinc-200 transition-colors">Cancelar</button>
+                            <button onClick={handleDeleteBlock} disabled={!deleteBlockFrom || !deleteBlockTo || deletingBlock}
+                                className="px-3 py-1 text-xs font-bold bg-red-500 hover:bg-red-600 text-white rounded transition-colors disabled:opacity-50">
+                                {deletingBlock ? 'Borrando...' : 'Confirmar borrado'}
+                            </button>
+                        </div>
+                    </div>
+                )}
+
+
+                <BlockGeneratorModal
+                    isOpen={isGeneratorOpen}
+                    onClose={() => setIsGeneratorOpen(false)}
+                    onGenerate={handleGenerateBlock}
+                    currentPmcData={Object.values(fullPmcByDate)}
+                    plannedWorkouts={plannedWorkouts}
+                />
+
                 {viewMode === 'month' && (
                     <div className="w-full relative">
 
-                        {/* CABECERA DÍAS DE LA SEMANA — con columna izquierda para panel semanal */}
-                        <div className="grid grid-cols-7 lg:grid-cols-[160px_repeat(7,1fr)] bg-slate-50/95 dark:bg-zinc-950/90 backdrop-blur-sm border-b border-slate-200 dark:border-zinc-800 sticky top-0 z-20">
-                            <div className="hidden lg:block py-2 text-center text-[9px] font-bold text-slate-400 dark:text-zinc-500 uppercase tracking-widest border-r border-slate-200 dark:border-zinc-800"></div>
+                        {/* CABECERA DÍAS DE LA SEMANA — con columna izquierda para panel semanal (Solo Desktop) */}
+                        <div className="hidden lg:grid grid-cols-[160px_repeat(7,1fr)] bg-slate-50/95 dark:bg-zinc-950/90 backdrop-blur-sm border-b border-slate-200 dark:border-zinc-800 sticky top-0 z-20">
+                            <div className="py-2 text-center text-[9px] font-bold text-slate-400 dark:text-zinc-500 uppercase tracking-widest border-r border-slate-200 dark:border-zinc-800"></div>
                             {WEEKDAYS.map(day => (
-                                <div key={day} className="py-2 text-center text-[9px] sm:text-[10px] font-bold text-slate-500 dark:text-zinc-400 uppercase tracking-widest">{day}</div>
+                                <div key={day} className="py-2 text-center text-[10px] font-bold text-slate-500 dark:text-zinc-400 uppercase tracking-widest">{day}</div>
                             ))}
                         </div>
 
@@ -871,7 +1188,7 @@ export const CalendarPage = ({ activities, plannedWorkouts = [], addPlannedWorko
                                 };
 
                                 return (
-                                    <div key={wIdx} className="grid grid-cols-7 lg:grid-cols-[160px_repeat(7,1fr)] border-b border-slate-200 dark:border-zinc-800 last:border-b-0">
+                                    <div key={wIdx} className="grid grid-cols-1 lg:grid-cols-[160px_repeat(7,1fr)] border-b border-slate-200 dark:border-zinc-800 last:border-b-0">
 
                                         {/* ====== PANEL SEMANAL IZQUIERDO (estilo intervals.icu) ====== */}
                                         <div className="hidden lg:flex flex-col border-r border-slate-200 dark:border-zinc-800 bg-slate-50/80 dark:bg-zinc-950/50 p-2 text-[10px] relative">
@@ -1218,7 +1535,7 @@ export const CalendarPage = ({ activities, plannedWorkouts = [], addPlannedWorko
                                                 </div>
                                                 <div className="flex gap-2 mt-0.5">
                                                     <span className="text-[8px] font-mono text-amber-600">{a.tss}tss</span>
-                                                    <span className="text-[8px] font-mono text-slate-400">{a.duration}min</span>
+                                                    <span className="text-[8px] font-mono text-slate-400">{formatDuration(a.duration)}</span>
                                                     {a.distance > 0 && <span className="text-[8px] font-mono text-slate-400">{(a.distance / 1000).toFixed(1)}km</span>}
                                                 </div>
                                             </div>
@@ -1248,175 +1565,197 @@ export const CalendarPage = ({ activities, plannedWorkouts = [], addPlannedWorko
 
             {/* MODAL PLANIFICADOR */}
             {isModalOpen && (
-                <div className="fixed inset-0 bg-slate-900/50 dark:bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-                    <div className="bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-xl max-w-2xl w-full shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200">
+                <div className="fixed inset-0 bg-slate-900/40 dark:bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+                    <div className="bg-white dark:bg-zinc-900 rounded-xl max-w-2xl w-full shadow-xl overflow-hidden animate-in zoom-in-95 duration-200 border border-slate-200/50 dark:border-zinc-800">
                         {/* HEADER */}
-                        <div className="flex items-center justify-between p-5 border-b border-slate-200 dark:border-zinc-800 bg-slate-50 dark:bg-zinc-950/50">
+                        <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100 dark:border-zinc-800/50 bg-white dark:bg-zinc-900">
                             <div>
-                                <h3 className="text-sm font-black text-slate-800 dark:text-zinc-100 uppercase tracking-widest flex items-center gap-2">
-                                    <Target size={16} className="text-blue-500" /> {editingPlanId ? 'Editar Entreno' : 'Planificar Entreno'}
+                                <h3 className="text-[13px] font-bold text-slate-800 dark:text-zinc-100 uppercase tracking-widest flex items-center gap-2">
+                                    <Target size={14} className="text-slate-500" /> {editingPlanId ? 'Editar Entreno' : 'Planificar Entreno'}
                                 </h3>
-                                <p className="text-[10px] text-slate-500 dark:text-zinc-400 font-bold uppercase tracking-widest mt-1">
+                                <p className="text-[10px] text-slate-400 dark:text-zinc-500 font-medium uppercase tracking-wider mt-0.5">
                                     {selectedDateForPlan?.toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long' })}
                                 </p>
                             </div>
-                            <button onClick={() => setIsModalOpen(false)} className="p-2 text-slate-400 hover:bg-slate-200 dark:hover:bg-zinc-800 rounded-lg transition-colors"><X size={18} /></button>
+                            <button onClick={() => setIsModalOpen(false)} className="p-1.5 text-slate-400 hover:text-slate-600 hover:bg-slate-50 dark:hover:text-zinc-300 dark:hover:bg-zinc-800 rounded-md transition-colors"><X size={16} /></button>
                         </div>
 
-                        <div className="p-5 max-h-[70vh] overflow-y-auto custom-scrollbar">
-                            <div className="space-y-4">
+                        <div className="p-6 max-h-[70vh] overflow-y-auto custom-scrollbar bg-slate-50/30 dark:bg-zinc-900">
+                            <div className="space-y-6">
 
-                                {/* SPORT SELECTOR */}
-                                <div>
-                                    <label className="block text-[10px] font-bold text-slate-600 dark:text-zinc-400 uppercase tracking-widest mb-2">Deporte</label>
-                                    <div className="grid grid-cols-5 gap-1.5">
-                                        {[
-                                            { key: 'Run', label: 'Carrera', icon: <Footprints size={14} />, color: 'bg-orange-500 text-white' },
-                                            { key: 'Ride', label: 'Bici', icon: <Bike size={14} />, color: 'bg-blue-500 text-white' },
-                                            { key: 'Swim', label: 'Nadar', icon: <Activity size={14} />, color: 'bg-cyan-500 text-white' },
-                                            { key: 'WeightTraining', label: 'Fuerza', icon: <Dumbbell size={14} />, color: 'bg-purple-500 text-white' },
-                                            { key: 'Workout', label: 'Otro', icon: <Activity size={14} />, color: 'bg-slate-500 text-white' },
-                                        ].map(s => (
-                                            <button key={s.key} onClick={() => setNewPlan(prev => ({ ...prev, type: s.key, blocks: [] }))}
-                                                className={`flex flex-col items-center gap-1 p-2 rounded-lg text-[9px] font-bold uppercase tracking-wider transition-all ${newPlan.type === s.key ? s.color + ' shadow-md scale-105' : 'bg-slate-100 dark:bg-zinc-800 text-slate-500 dark:text-zinc-400 hover:bg-slate-200 dark:hover:bg-zinc-700'}`}>
-                                                {s.icon}{s.label}
-                                            </button>
-                                        ))}
-                                    </div>
-                                </div>
-
-                                {/* QUICK TEMPLATES */}
-                                {(WORKOUT_TEMPLATES[newPlan.type] || []).length > 0 && (
+                                {/* SPORT SELECTOR & QUICK TEMPLATES ROW */}
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                     <div>
-                                        <label className="block text-[10px] font-bold text-slate-600 dark:text-zinc-400 uppercase tracking-widest mb-2">Plantilla rápida</label>
-                                        <div className="flex gap-1.5 flex-wrap">
-                                            {(WORKOUT_TEMPLATES[newPlan.type] || []).map((t, i) => (
-                                                <button key={i} onClick={() => applyTemplate(t)}
-                                                    className={`inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded text-[10px] font-bold transition-all
-                                                        ${newPlan.name === t.name
-                                                            ? 'bg-slate-800 dark:bg-zinc-100 text-white dark:text-zinc-900 shadow-sm'
-                                                            : 'bg-slate-100 dark:bg-zinc-800/80 text-slate-600 dark:text-zinc-300 hover:bg-slate-200 dark:hover:bg-zinc-700'}`}
-                                                >
-                                                    <span className={`text-[8px] font-black uppercase tracking-widest px-1 py-px rounded ${newPlan.name === t.name ? 'bg-white/20 dark:bg-black/20' : 'bg-slate-200 dark:bg-zinc-700 text-slate-500 dark:text-zinc-400'}`}>{t.cat}</span>
-                                                    {t.name}
+                                        <label className="block text-[10px] font-semibold text-slate-500 dark:text-zinc-400 uppercase tracking-wider mb-2">Deporte</label>
+                                        <div className="grid grid-cols-5 gap-1.5">
+                                            {[
+                                                { key: 'Run', label: 'Carrera', icon: <Footprints size={14} /> },
+                                                { key: 'Ride', label: 'Bici', icon: <Bike size={14} /> },
+                                                { key: 'Swim', label: 'Nadar', icon: <Activity size={14} /> },
+                                                { key: 'WeightTraining', label: 'Fuerza', icon: <Dumbbell size={14} /> },
+                                                { key: 'Workout', label: 'Otro', icon: <Activity size={14} /> },
+                                            ].map(s => (
+                                                <button key={s.key} onClick={() => setNewPlan(prev => ({ ...prev, type: s.key, blocks: [] }))}
+                                                    className={`flex flex-col items-center justify-center gap-1.5 p-2 rounded-md text-[9px] font-medium tracking-wide transition-all border ${newPlan.type === s.key ? 'bg-white dark:bg-zinc-800 border-slate-300 dark:border-zinc-600 text-slate-800 dark:text-zinc-100 shadow-sm' : 'bg-transparent border-transparent text-slate-500 dark:text-zinc-500 hover:bg-slate-100 dark:hover:bg-zinc-800/50'}`}>
+                                                    {s.icon}<span>{s.label}</span>
                                                 </button>
                                             ))}
                                         </div>
                                     </div>
-                                )}
 
-                                {/* TITLE + TSS/DURATION ROW */}
-                                <div className="flex gap-3 items-end">
+                                    {(WORKOUT_TEMPLATES[newPlan.type] || []).length > 0 && (
+                                        <div>
+                                            <label className="block text-[10px] font-semibold text-slate-500 dark:text-zinc-400 uppercase tracking-wider mb-2">Plantillas rápidas</label>
+                                            <div className="flex gap-1.5 flex-wrap">
+                                                {(WORKOUT_TEMPLATES[newPlan.type] || []).map((t, i) => (
+                                                    <button key={i} onClick={() => applyTemplate(t)}
+                                                        className={`inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-[10px] font-medium transition-all border
+                                                            ${newPlan.name === t.name
+                                                                ? 'bg-white dark:bg-zinc-800 border-slate-300 dark:border-zinc-600 text-slate-800 dark:text-zinc-100 shadow-sm'
+                                                                : 'bg-white/50 dark:bg-zinc-900 border-slate-200/50 dark:border-zinc-800/50 text-slate-500 dark:text-zinc-400 hover:bg-slate-50 dark:hover:bg-zinc-800'}`}
+                                                    >
+                                                        {t.name}
+                                                    </button>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
+
+                                {/* TITLE + METRICS ROW */}
+                                <div className="flex gap-4 items-end bg-white dark:bg-zinc-900/50 p-4 rounded-lg border border-slate-100 dark:border-zinc-800/50">
                                     <div className="flex-1">
-                                        <label className="block text-[10px] font-bold text-slate-600 dark:text-zinc-400 uppercase tracking-widest mb-1.5">Título</label>
+                                        <label className="block text-[9px] font-semibold text-slate-400 dark:text-zinc-500 uppercase tracking-wider mb-1.5">Título del entrenamiento</label>
                                         <input type="text" value={newPlan.name} onChange={e => setNewPlan({ ...newPlan, name: e.target.value })}
                                             placeholder={newPlan.type === 'Run' ? 'Ej: Series en umbral' : newPlan.type === 'Ride' ? 'Ej: Sweet spot 2x20' : newPlan.type === 'WeightTraining' ? 'Ej: Fuerza tren inferior' : 'Ej: Sesión mixta'}
-                                            className="w-full bg-slate-50 dark:bg-zinc-950 text-sm font-medium text-slate-800 dark:text-zinc-200 rounded-lg p-2.5 outline-none ring-1 ring-slate-200 dark:ring-zinc-800 focus:ring-2 focus:ring-blue-500 placeholder:text-slate-300 dark:placeholder:text-zinc-600"
+                                            className="w-full bg-transparent text-sm font-medium text-slate-800 dark:text-zinc-200 border-b border-slate-200 dark:border-zinc-700 py-1.5 outline-none focus:border-slate-400 dark:focus:border-zinc-500 transition-colors placeholder:text-slate-300 dark:placeholder:text-zinc-600"
                                         />
                                     </div>
-                                    <div className="flex gap-2 shrink-0">
-                                        <div className="bg-slate-50 dark:bg-zinc-950/50 border border-slate-200 dark:border-zinc-800 rounded-lg px-3 py-2 text-center">
-                                            <span className="text-[8px] font-bold uppercase tracking-widest text-slate-400 block">TSS</span>
-                                            <span className="text-lg font-black font-mono text-amber-600 dark:text-amber-500">{newPlan.tss}</span>
+                                    <div className="flex gap-3 shrink-0">
+                                        <div className="text-right">
+                                            <span className="text-[9px] font-semibold uppercase tracking-wider text-slate-400 block mb-0.5">TSS</span>
+                                            <span className="text-lg font-bold font-mono text-slate-700 dark:text-zinc-300">{newPlan.tss}</span>
                                         </div>
-                                        <div className="bg-slate-50 dark:bg-zinc-950/50 border border-slate-200 dark:border-zinc-800 rounded-lg px-3 py-2 text-center">
-                                            <span className="text-[8px] font-bold uppercase tracking-widest text-slate-400 block">Min</span>
-                                            <span className="text-lg font-black font-mono text-blue-600 dark:text-blue-500">{newPlan.duration}</span>
+                                        <div className="w-px h-8 bg-slate-200 dark:bg-zinc-800 mx-1 self-center"></div>
+                                        <div className="text-right">
+                                            <span className="text-[9px] font-semibold uppercase tracking-wider text-slate-400 block mb-0.5">Duración</span>
+                                            <span className="text-lg font-bold font-mono text-slate-700 dark:text-zinc-300">{formatDuration(newPlan.duration)}</span>
                                         </div>
                                     </div>
                                 </div>
 
                                 {/* ESTRUCTURA */}
                                 <div>
-                                    <label className="block text-[10px] font-bold text-slate-600 dark:text-zinc-400 uppercase tracking-widest mb-2">Estructura</label>
-                                    <div className="flex gap-1.5 flex-wrap mb-3">
-                                        {newPlan.type === 'WeightTraining' ? (<>
-                                            <button onClick={() => addBlock('warmup')} className="px-2.5 py-1.5 bg-slate-100 dark:bg-zinc-800 text-slate-600 dark:text-zinc-300 rounded text-[10px] font-bold transition-colors hover:bg-slate-200 dark:hover:bg-zinc-700">+ Calentar</button>
-                                            <button onClick={() => addBlock('main')} className="px-2.5 py-1.5 bg-slate-100 dark:bg-zinc-800 text-slate-600 dark:text-zinc-300 rounded text-[10px] font-bold transition-colors hover:bg-slate-200 dark:hover:bg-zinc-700">+ Ejercicio</button>
-                                            <button onClick={() => addBlock('repeat')} className="px-2.5 py-1.5 bg-slate-100 dark:bg-zinc-800 text-slate-600 dark:text-zinc-300 rounded text-[10px] font-bold transition-colors hover:bg-slate-200 dark:hover:bg-zinc-700">+ Circuito</button>
-                                            <button onClick={() => addBlock('cooldown')} className="px-2.5 py-1.5 bg-slate-100 dark:bg-zinc-800 text-slate-600 dark:text-zinc-300 rounded text-[10px] font-bold transition-colors hover:bg-slate-200 dark:hover:bg-zinc-700">+ Estirar</button>
-                                        </>) : (<>
-                                            <button onClick={() => addBlock('warmup')} className="px-2.5 py-1.5 bg-slate-100 dark:bg-zinc-800 text-slate-600 dark:text-zinc-300 rounded text-[10px] font-bold transition-colors hover:bg-slate-200 dark:hover:bg-zinc-700">+ Calentar</button>
-                                            <button onClick={() => addBlock('main')} className="px-2.5 py-1.5 bg-slate-100 dark:bg-zinc-800 text-slate-600 dark:text-zinc-300 rounded text-[10px] font-bold transition-colors hover:bg-slate-200 dark:hover:bg-zinc-700">+ Bloque</button>
-                                            <button onClick={() => addBlock('repeat')} className="px-2.5 py-1.5 bg-slate-100 dark:bg-zinc-800 text-slate-600 dark:text-zinc-300 rounded text-[10px] font-bold transition-colors hover:bg-slate-200 dark:hover:bg-zinc-700">+ Repetir</button>
-                                            <button onClick={() => addBlock('cooldown')} className="px-2.5 py-1.5 bg-slate-100 dark:bg-zinc-800 text-slate-600 dark:text-zinc-300 rounded text-[10px] font-bold transition-colors hover:bg-slate-200 dark:hover:bg-zinc-700">+ Soltar</button>
-                                        </>)}
+                                    <div className="flex justify-between items-center mb-3">
+                                        <label className="block text-[10px] font-semibold text-slate-500 dark:text-zinc-400 uppercase tracking-wider">Plan de Entrenamiento</label>
+                                        <div className="flex gap-1.5">
+                                            {newPlan.type === 'WeightTraining' ? (<>
+                                                <button onClick={() => addBlock('warmup')} className="px-2 py-1 bg-white dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 text-slate-600 dark:text-zinc-300 rounded-md text-[9px] font-medium transition-colors hover:bg-slate-50 dark:hover:bg-zinc-700 shadow-sm">Calentar</button>
+                                                <button onClick={() => addBlock('main')} className="px-2 py-1 bg-white dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 text-slate-600 dark:text-zinc-300 rounded-md text-[9px] font-medium transition-colors hover:bg-slate-50 dark:hover:bg-zinc-700 shadow-sm">Ejercicio</button>
+                                                <button onClick={() => addBlock('repeat')} className="px-2 py-1 bg-slate-800 dark:bg-zinc-100 text-white dark:text-zinc-900 rounded-md text-[9px] font-medium transition-colors shadow-sm">Circuito</button>
+                                                <button onClick={() => addBlock('cooldown')} className="px-2 py-1 bg-white dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 text-slate-600 dark:text-zinc-300 rounded-md text-[9px] font-medium transition-colors hover:bg-slate-50 dark:hover:bg-zinc-700 shadow-sm">Estirar</button>
+                                            </>) : (<>
+                                                <button onClick={() => addBlock('warmup')} className="px-2 py-1 bg-white dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 text-slate-600 dark:text-zinc-300 rounded-md text-[9px] font-medium transition-colors hover:bg-slate-50 dark:hover:bg-zinc-700 shadow-sm">Calentar</button>
+                                                <button onClick={() => addBlock('main')} className="px-2 py-1 bg-white dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 text-slate-600 dark:text-zinc-300 rounded-md text-[9px] font-medium transition-colors hover:bg-slate-50 dark:hover:bg-zinc-700 shadow-sm">Bloque</button>
+                                                <button onClick={() => addBlock('repeat')} className="px-2 py-1 bg-slate-800 dark:bg-zinc-100 text-white dark:text-zinc-900 rounded-md text-[9px] font-medium transition-colors shadow-sm">Intervalos</button>
+                                                <button onClick={() => addBlock('cooldown')} className="px-2 py-1 bg-white dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 text-slate-600 dark:text-zinc-300 rounded-md text-[9px] font-medium transition-colors hover:bg-slate-50 dark:hover:bg-zinc-700 shadow-sm">Soltar</button>
+                                            </>)}
+                                        </div>
                                     </div>
+
                                     <div className="space-y-2">
                                         {newPlan.blocks.length === 0 && (
-                                            <div className="text-center py-6 border-2 border-dashed border-slate-200 dark:border-zinc-700 rounded-lg">
-                                                <p className="text-slate-400 dark:text-zinc-500 text-xs font-medium">Pulsa los botones para construir tu sesión</p>
-                                                <p className="text-slate-300 dark:text-zinc-600 text-[10px] mt-1">El TSS se estimará automáticamente</p>
+                                            <div className="flex flex-col items-center justify-center py-10 border border-dashed border-slate-200 dark:border-zinc-800 rounded-lg bg-white/50 dark:bg-zinc-900/50">
+                                                <Target size={24} className="text-slate-300 dark:text-zinc-600 mb-2" />
+                                                <p className="text-slate-500 dark:text-zinc-400 text-xs font-semibold">Diseña tu entrenamiento</p>
+                                                <p className="text-slate-400 dark:text-zinc-500 text-[10px] mt-1">Añade bloques de calentamiento o intervalos</p>
                                             </div>
                                         )}
                                         {newPlan.blocks.map((block) => {
                                             const isStr = newPlan.type === 'WeightTraining';
                                             const zones = isStr
                                                 ? [{ v: 'Z1', l: 'Ligero' }, { v: 'Z2', l: 'Moderado' }, { v: 'Z3', l: 'Duro' }, { v: 'Z4', l: 'Máximo' }]
-                                                : [{ v: 'Z1', l: 'Z1 Rec' }, { v: 'Z2', l: 'Z2 Base' }, { v: 'Z3', l: 'Z3 Tempo' }, { v: 'Z4', l: 'Z4 Umbral' }, { v: 'Z5', l: 'Z5 VO2' }, { v: 'Z6', l: 'Z6 Sprint' }];
+                                                : [{ v: 'Z1', l: 'Z1 Rec' }, { v: 'R12', l: 'Rampa Z1-Z2' }, { v: 'Z2', l: 'Z2 Base' }, { v: 'R23', l: 'Rampa Z2-Z3' }, { v: 'Z3', l: 'Z3 Tempo' }, { v: 'Z4', l: 'Z4 Umbral' }, { v: 'Z5', l: 'Z5 VO2' }, { v: 'Z6', l: 'Z6 Sprint' }];
+
+                                            // REPEAT BLOCK
                                             if (block.type === 'repeat') {
                                                 return (
-                                                    <div key={block.id} className="rounded-lg border-2 border-purple-200 dark:border-purple-800/50 bg-purple-50/30 dark:bg-purple-950/10 overflow-hidden relative group">
-                                                        <div className="flex items-center gap-2 px-3 py-2 bg-purple-100/50 dark:bg-purple-900/20 border-b border-purple-200/50 dark:border-purple-800/30">
-                                                            <span className="text-[9px] font-black uppercase tracking-widest text-purple-600 dark:text-purple-400">{isStr ? 'CIRCUITO' : 'REPETIR'}</span>
+                                                    <div key={block.id} className="rounded-md border-l-4 border-l-slate-400 border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 overflow-hidden shadow-sm group">
+                                                        <div className="flex items-center gap-3 px-3 py-2 bg-slate-50/50 dark:bg-zinc-950 border-b border-slate-100 dark:border-zinc-800/50">
                                                             <input type="number" value={block.repeats} min={1} onChange={e => updateBlock(block.id, 'repeats', parseInt(e.target.value) || 1)}
-                                                                className="w-14 bg-white dark:bg-zinc-900 border border-purple-200 dark:border-purple-700 text-xs font-mono p-1.5 rounded text-center" />
-                                                            <span className="text-[10px] text-slate-500 font-bold">veces</span>
-                                                            <button onClick={() => removeBlock(block.id)} className="ml-auto text-slate-400 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity"><Trash2 size={14} /></button>
+                                                                className="w-12 bg-transparent border-b border-slate-300 dark:border-zinc-600 focus:border-slate-500 text-xs font-mono py-0.5 text-center outline-none transition-colors" />
+                                                            <span className="text-[10px] text-slate-500 dark:text-zinc-400 font-semibold uppercase tracking-wider">veces (Intervalos)</span>
+                                                            <button onClick={() => removeBlock(block.id)} className="ml-auto text-slate-300 hover:text-red-500 transition-colors"><X size={14} /></button>
                                                         </div>
-                                                        <div className="p-2 space-y-1.5">
+                                                        <div className="p-3 pl-6 space-y-2 relative">
+                                                            <div className="absolute left-2.5 top-3 bottom-8 w-px bg-slate-200 dark:bg-zinc-800"></div>
                                                             {block.steps.map(step => (
-                                                                <div key={step.id} className="flex items-center gap-2 bg-white dark:bg-zinc-900 p-2 rounded-md border border-slate-100 dark:border-zinc-800 group/step">
+                                                                <div key={step.id} className="flex items-center gap-2 relative z-10 mr-4">
+                                                                    <div className="w-2 h-2 rounded-full border border-slate-300 dark:border-zinc-700 bg-white dark:bg-zinc-900 absolute -left-[23px] top-1/2 -translate-y-1/2"></div>
                                                                     <select value={step.type} onChange={e => updateStep(block.id, step.id, 'type', e.target.value)}
-                                                                        className="bg-transparent text-[10px] font-bold text-slate-600 dark:text-zinc-400 uppercase outline-none cursor-pointer">
+                                                                        className="w-20 bg-transparent text-[10px] font-semibold text-slate-600 dark:text-zinc-400 uppercase outline-none cursor-pointer border-b border-transparent focus:border-slate-200">
                                                                         <option value="active">{isStr ? 'Trabajo' : 'Activo'}</option>
                                                                         <option value="recovery">{isStr ? 'Pausa' : 'Recu'}</option>
                                                                     </select>
-                                                                    <input type="number" value={step.duration} min={0} onChange={e => updateStep(block.id, step.id, 'duration', e.target.value)}
-                                                                        className="w-14 bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 text-xs font-mono p-1.5 rounded text-center" />
+                                                                    {step.unit === 'dist' ? (
+                                                                        <input type="number" value={step.duration} min={0} onChange={e => updateStep(block.id, step.id, 'duration', e.target.value)}
+                                                                            className="w-12 bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 text-xs font-mono p-1 rounded-sm text-center outline-none focus:border-slate-400" />
+                                                                    ) : (
+                                                                        <DurationInput value={step.duration} onChange={v => updateStep(block.id, step.id, 'duration', v)} />
+                                                                    )}
                                                                     {!isStr ? (
                                                                         <button onClick={() => updateStep(block.id, step.id, 'unit', step.unit === 'dist' ? 'time' : 'dist')}
-                                                                            className={`text-[9px] font-bold px-1.5 py-0.5 rounded transition-colors ${step.unit === 'dist' ? 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400' : 'text-slate-400 hover:text-slate-600'}`}
+                                                                            className={`text-[9px] font-medium w-8 py-1 rounded-sm transition-colors text-center ${step.unit === 'dist' ? 'bg-slate-200 text-slate-700 dark:bg-zinc-700 dark:text-zinc-300' : 'bg-slate-100 text-slate-500 dark:bg-zinc-800 dark:text-zinc-400'}`}
                                                                         >{step.unit === 'dist' ? 'km' : 'min'}</button>
-                                                                    ) : <span className="text-[9px] text-slate-400">min</span>}
+                                                                    ) : <span className="text-[10px] text-slate-400 w-8 text-center">min</span>}
                                                                     <select value={step.zone} onChange={e => updateStep(block.id, step.id, 'zone', e.target.value)}
-                                                                        className="flex-1 bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 text-[10px] font-bold p-1.5 rounded">
+                                                                        className="flex-1 min-w-[80px] bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 text-[10px] font-medium p-1 rounded-sm outline-none focus:border-slate-400">
                                                                         {zones.map(z => <option key={z.v} value={z.v}>{z.l}</option>)}
                                                                     </select>
-                                                                    <button onClick={() => removeStep(block.id, step.id)} className="text-slate-300 hover:text-red-500 opacity-0 group-hover/step:opacity-100 transition-opacity"><X size={14} /></button>
+                                                                    <button onClick={() => removeStep(block.id, step.id)} className="text-slate-300 hover:text-red-500 ml-1"><X size={12} /></button>
                                                                 </div>
                                                             ))}
-                                                            <div className="flex gap-2 pt-1">
-                                                                <button onClick={() => addStepToRepeat(block.id, 'active')} className="text-[10px] font-bold text-purple-600 dark:text-purple-400 hover:bg-purple-50 dark:hover:bg-purple-900/20 px-2 py-1 rounded">+ {isStr ? 'Trabajo' : 'Activo'}</button>
-                                                                <button onClick={() => addStepToRepeat(block.id, 'recovery')} className="text-[10px] font-bold text-slate-500 dark:text-zinc-500 hover:bg-slate-50 dark:hover:bg-zinc-800 px-2 py-1 rounded">+ {isStr ? 'Pausa' : 'Descanso'}</button>
+                                                            <div className="flex gap-2 pt-1 pl-1">
+                                                                <button onClick={() => addStepToRepeat(block.id, 'active')} className="text-[9px] font-semibold text-slate-500 hover:text-slate-700 dark:hover:text-zinc-300 uppercase tracking-widest">+ Activo</button>
+                                                                <span className="text-slate-300 dark:text-zinc-700">·</span>
+                                                                <button onClick={() => addStepToRepeat(block.id, 'recovery')} className="text-[9px] font-semibold text-slate-500 hover:text-slate-700 dark:hover:text-zinc-300 uppercase tracking-widest">+ Pausa</button>
                                                             </div>
                                                         </div>
                                                     </div>
                                                 );
                                             }
-                                            const bLabel = block.type === 'warmup' ? 'CALENTAR' : block.type === 'cooldown' ? (isStr ? 'ESTIRAR' : 'SOLTAR') : (isStr ? 'EJERCICIO' : 'BLOQUE');
-                                            const bBg = block.type === 'main' ? 'border-blue-200 dark:border-blue-800/50 bg-blue-50/30 dark:bg-blue-950/10' : 'border-slate-200 dark:border-zinc-800 bg-slate-50/50 dark:bg-zinc-950/30';
+
+                                            // NORMAL BLOCK (Warmup/Main/Cooldown)
+                                            const bLabelStyle = block.type === 'warmup' ? 'text-orange-500' : block.type === 'cooldown' ? 'text-blue-500' : 'text-slate-600 dark:text-zinc-300';
+                                            const bLabel = block.type === 'warmup' ? 'Calentamiento' : block.type === 'cooldown' ? 'Vuelta a la calma' : 'Trabajo continuo';
+
                                             return (
-                                                <div key={block.id} className={`rounded-lg border ${bBg} p-3 relative group`}>
-                                                    <div className="flex items-center gap-2 flex-wrap">
-                                                        <span className="text-[9px] font-black uppercase tracking-widest text-slate-600 dark:text-zinc-400">{bLabel}</span>
-                                                        <input type="number" placeholder={block.unit === 'dist' ? 'km' : 'Min'} value={block.duration} min={0} onChange={e => updateBlock(block.id, 'duration', e.target.value)}
-                                                            className="w-16 bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-700 text-xs font-mono p-1.5 rounded text-center" />
+                                                <div key={block.id} className="rounded-md border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-3 shadow-sm relative group">
+                                                    <div className="flex items-center gap-2 flex-wrap sm:flex-nowrap">
+                                                        <span className={`text-[10px] font-semibold w-28 uppercase tracking-wider ${bLabelStyle}`}>{bLabel}</span>
+                                                        {block.unit === 'dist' ? (
+                                                            <input type="number" placeholder="km" value={block.duration} min={0} onChange={e => updateBlock(block.id, 'duration', e.target.value)}
+                                                                className="w-14 bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 text-xs font-mono p-1 rounded-sm text-center outline-none focus:border-slate-400" />
+                                                        ) : (
+                                                            <DurationInput value={block.duration} onChange={v => updateBlock(block.id, 'duration', v)} />
+                                                        )}
                                                         {!isStr ? (
                                                             <button onClick={() => updateBlock(block.id, 'unit', block.unit === 'dist' ? 'time' : 'dist')}
-                                                                className={`text-[10px] font-bold px-2 py-0.5 rounded transition-all ${block.unit === 'dist' ? 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400' : 'text-slate-400 hover:text-slate-600 dark:hover:text-zinc-300'}`}
+                                                                className={`text-[9px] font-medium w-8 py-1 rounded-sm transition-colors text-center ${block.unit === 'dist' ? 'bg-slate-200 text-slate-700 dark:bg-zinc-700 dark:text-zinc-300' : 'bg-slate-100 text-slate-500 dark:bg-zinc-800 dark:text-zinc-400'}`}
                                                             >{block.unit === 'dist' ? 'km' : 'min'}</button>
-                                                        ) : <span className="text-[10px] text-slate-400">min</span>}
+                                                        ) : <span className="text-[10px] text-slate-400 w-8 text-center">min</span>}
                                                         <select value={block.zone} onChange={e => updateBlock(block.id, 'zone', e.target.value)}
-                                                            className="bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-700 text-[10px] font-bold p-1.5 rounded flex-1 min-w-[80px]">
+                                                            className="flex-1 bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 text-[10px] font-medium p-1 rounded-sm outline-none focus:border-slate-400 min-w-[80px]">
                                                             {zones.map(z => <option key={z.v} value={z.v}>{z.l}</option>)}
                                                         </select>
-                                                        <button onClick={() => removeBlock(block.id)} className="ml-auto text-slate-400 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity"><Trash2 size={14} /></button>
+                                                        <button onClick={() => removeBlock(block.id)} className="ml-auto text-slate-300 hover:text-red-500"><X size={14} /></button>
                                                     </div>
                                                     {block.type === 'main' && (
-                                                        <input type="text" value={block.details} onChange={e => updateBlock(block.id, 'details', e.target.value)}
-                                                            placeholder={isStr ? 'Ej: Sentadilla 4x8, Peso muerto 3x6' : 'Ej: Progresivo de Z2 a Z3'}
-                                                            className="w-full mt-2 bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-700 text-xs p-2 rounded placeholder-slate-300 dark:placeholder-zinc-600" />
+                                                        <div className="mt-2 pl-2">
+                                                            <input type="text" value={block.details} onChange={e => updateBlock(block.id, 'details', e.target.value)}
+                                                                placeholder={isStr ? 'Ej: Sentadilla 4x8, Peso muerto 3x6' : 'Ej: Progresivo suave'}
+                                                                className="w-full bg-transparent border-b border-slate-200 dark:border-zinc-700 text-[11px] font-medium py-1 outline-none focus:border-slate-400 dark:focus:border-zinc-500 placeholder-slate-400 dark:placeholder-zinc-600 transition-colors" />
+                                                        </div>
                                                     )}
                                                 </div>
                                             );
@@ -1427,13 +1766,14 @@ export const CalendarPage = ({ activities, plannedWorkouts = [], addPlannedWorko
                             </div>
                         </div>
 
-                        <div className="p-4 bg-slate-50 dark:bg-zinc-950/50 border-t border-slate-200 dark:border-zinc-800 flex justify-between items-center">
-                            <div className="text-[10px] text-slate-400 dark:text-zinc-500 font-mono">
-                                {estimatedTSS !== null && <span>TSS auto: <strong className="text-amber-600">{estimatedTSS}</strong> · {newPlan.duration}min</span>}
+                        {/* FOOTER */}
+                        <div className="px-6 py-4 bg-white dark:bg-zinc-900 border-t border-slate-100 dark:border-zinc-800/50 flex justify-between items-center">
+                            <div className="text-[10px] text-slate-400 dark:text-zinc-500 font-medium tracking-wide">
+                                {estimatedTSS !== null && <span>TSS Est: <strong className="text-slate-700 dark:text-zinc-300">{estimatedTSS}</strong></span>}
                             </div>
                             <div className="flex gap-2">
-                                <button onClick={() => setIsModalOpen(false)} className="px-4 py-2 rounded-lg text-xs font-bold text-slate-600 dark:text-zinc-400 hover:bg-slate-200 dark:hover:bg-zinc-800 uppercase tracking-wider transition-colors">Cancelar</button>
-                                <button onClick={handleSavePlan} disabled={isSaving} className="px-5 py-2 rounded-lg text-xs font-black text-white bg-blue-600 hover:bg-blue-500 disabled:opacity-50 uppercase tracking-wider transition-colors shadow-lg shadow-blue-500/20">
+                                <button onClick={() => setIsModalOpen(false)} className="px-4 py-2 rounded-md text-[11px] font-semibold text-slate-500 dark:text-zinc-400 hover:text-slate-800 dark:hover:text-zinc-200 hover:bg-slate-100 dark:hover:bg-zinc-800 transition-colors">Cancelar</button>
+                                <button onClick={handleSavePlan} disabled={isSaving} className="px-5 py-2 rounded-md text-[11px] font-bold text-white bg-slate-800 dark:bg-zinc-100 dark:text-zinc-900 hover:bg-slate-700 dark:hover:bg-white disabled:opacity-50 transition-colors shadow-sm">
                                     {isSaving ? 'Guardando...' : editingPlanId ? 'Guardar Cambios' : 'Añadir al Plan'}
                                 </button>
                             </div>
@@ -1443,92 +1783,192 @@ export const CalendarPage = ({ activities, plannedWorkouts = [], addPlannedWorko
             )}
             {/* MODAL VER ENTRENAMIENTO PLANEADO */}
             {
-                viewingPlan && (
-                    <div className="fixed inset-0 bg-slate-900/50 dark:bg-black/50 backdrop-blur-sm z-[60] flex items-center justify-center p-4">
-                        <div className="bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-xl max-w-md w-full shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200">
-                            <div className="flex items-center justify-between p-4 border-b border-slate-200 dark:border-zinc-800 bg-slate-50 dark:bg-zinc-950/50">
-                                <div>
-                                    <h3 className="text-sm font-black text-slate-800 dark:text-zinc-100 uppercase tracking-widest flex items-center gap-2">
-                                        {getSportIcon(viewingPlan.type)} {viewingPlan.name || `Entrenamiento de ${viewingPlan.type}`}
-                                    </h3>
-                                    <p className="text-[10px] text-slate-500 dark:text-zinc-400 font-bold uppercase tracking-widest mt-1">
-                                        {new Date(viewingPlan.date).toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long' })}
-                                    </p>
-                                </div>
-                                <button onClick={() => setViewingPlan(null)} className="p-1.5 text-slate-400 hover:bg-slate-200 dark:hover:bg-zinc-800 rounded-lg transition-colors"><X size={16} /></button>
-                            </div>
+                viewingPlan && (() => {
+                    // Build zone timeline data from blocks
+                    const blocks = viewingPlan.descriptionObj?.blocks || [];
+                    // Same hex colors as the calendar card zone bars (line ~1048)
+                    const KNOWN_ZONES = ['Z1', 'R12', 'Z2', 'R23', 'Z3', 'Z4', 'Z5', 'Z6'];
+                    const zoneColors = {
+                        Z1: '#94a3b8', R12: '#60a5fa', Z2: '#3b82f6', R23: '#34d399',
+                        Z3: '#22c55e', Z4: '#eab308', Z5: '#f97316', Z6: '#ef4444',
+                    };
+                    const getZoneColor = (z) => zoneColors[z] || '#94a3b8';
+                    // Don't normalize — preserve R12/R23 so they show correctly
 
-                            <div className="p-4 space-y-4 max-h-[60vh] overflow-y-auto custom-scrollbar">
-                                <div className="flex justify-around items-center bg-slate-50 dark:bg-zinc-950/50 p-3 rounded-lg border border-slate-200 dark:border-zinc-800">
-                                    <div className="text-center">
-                                        <span className="block text-[9px] font-bold text-slate-500 dark:text-zinc-500 uppercase tracking-widest mb-1"><Zap size={10} className="inline mr-1" />TSS</span>
-                                        <strong className="text-sm font-black text-amber-600 dark:text-amber-500">{viewingPlan.tss}</strong>
+                    // Flatten all time segments — expand repeats individually so the pattern shows
+                    const segments = [];
+                    const addSeg = (zone, min) => { const m = Number(min) || 0; if (m > 0) segments.push({ zone, min: m }); };
+                    blocks.forEach(b => {
+                        if (b.type === 'repeat') {
+                            const r = Number(b.repeats) || 1;
+                            for (let i = 0; i < r; i++) {
+                                (b.steps || []).forEach(s => {
+                                    if (s.unit !== 'dist') addSeg(s.zone || 'Z2', Number(s.duration) || 0);
+                                });
+                            }
+                        } else if (b.unit !== 'dist') {
+                            addSeg(b.zone || 'Z2', Number(b.duration) || 0);
+                        }
+                    });
+                    const totalMin = segments.reduce((s, x) => s + x.min, 0) || viewingPlan.duration || 1;
+
+                    // Zone totals for legend (aggregate)
+                    const zoneTotals = {};
+                    segments.forEach(s => { zoneTotals[s.zone] = (zoneTotals[s.zone] || 0) + s.min; });
+
+
+                    return (
+                        <div className="fixed inset-0 bg-slate-900/50 dark:bg-black/70 backdrop-blur-sm z-[60] flex items-center justify-center p-4 sm:p-6">
+                            <div className="bg-white dark:bg-zinc-900 rounded-xl w-full max-w-3xl shadow-2xl overflow-hidden border border-slate-200/50 dark:border-zinc-800 flex flex-col" style={{ maxHeight: '88vh' }}>
+
+                                {/* ── Header ── */}
+                                <div className="flex items-center justify-between px-6 py-3 border-b border-slate-100 dark:border-zinc-800 shrink-0">
+                                    <div>
+                                        <h3 className="text-sm font-bold text-slate-800 dark:text-zinc-100 flex items-center gap-2">
+                                            {getSportIcon(viewingPlan.type)}
+                                            {viewingPlan.name || `Entrenamiento de ${viewingPlan.type}`}
+                                        </h3>
+                                        <p className="text-[10px] text-slate-400 dark:text-zinc-500 font-medium uppercase tracking-wider mt-0.5 capitalize">
+                                            {new Date(viewingPlan.date).toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long' })}
+                                        </p>
                                     </div>
-                                    <div className="w-px h-8 bg-slate-200 dark:bg-zinc-800"></div>
-                                    <div className="text-center">
-                                        <span className="block text-[9px] font-bold text-slate-500 dark:text-zinc-500 uppercase tracking-widest mb-1"><Clock size={10} className="inline mr-1" />Tiempo</span>
-                                        <strong className="text-sm font-black text-blue-600 dark:text-blue-500">{viewingPlan.duration}m</strong>
+                                    <div className="flex items-center gap-5">
+                                        <div className="text-center">
+                                            <p className="text-[9px] font-bold text-slate-400 dark:text-zinc-500 uppercase tracking-widest">TSS</p>
+                                            <p className="text-xl font-black font-mono text-slate-700 dark:text-zinc-200">{viewingPlan.tss}</p>
+                                        </div>
+                                        <div className="w-px h-8 bg-slate-200 dark:bg-zinc-700" />
+                                        <div className="text-center">
+                                            <p className="text-[9px] font-bold text-slate-400 dark:text-zinc-500 uppercase tracking-widest">Duración</p>
+                                            <p className="text-xl font-black font-mono text-slate-700 dark:text-zinc-200">{formatDuration(viewingPlan.duration)}</p>
+                                        </div>
+                                        <button onClick={() => setViewingPlan(null)} className="ml-2 p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 dark:hover:text-zinc-200 dark:hover:bg-zinc-800 rounded-lg transition-colors">
+                                            <X size={18} />
+                                        </button>
                                     </div>
                                 </div>
 
-                                <div className="space-y-2">
-                                    <h4 className="text-[10px] font-bold text-slate-600 dark:text-zinc-400 uppercase tracking-widest mb-2 border-b border-slate-100 dark:border-zinc-800 pb-1">Estructura</h4>
-                                    {(!viewingPlan.descriptionObj?.blocks || viewingPlan.descriptionObj.blocks.length === 0) ? (
-                                        <p className="text-xs text-slate-500 dark:text-zinc-500 italic">No hay estructura definida.</p>
-                                    ) : (
-                                        viewingPlan.descriptionObj.blocks.map((block, idx) => {
-                                            if (block.type === 'repeat') {
-                                                return (
-                                                    <div key={idx} className="p-2 rounded bg-purple-50/50 dark:bg-purple-900/10 border border-purple-200/50 dark:border-purple-800/30">
-                                                        <div className="text-[10px] font-black text-purple-700 dark:text-purple-400 uppercase tracking-widest mb-2 border-b border-purple-200/50 dark:border-purple-800/30 pb-1">
-                                                            {block.repeats}x Repeticiones
-                                                        </div>
-                                                        <div className="pl-2 border-l-2 border-purple-300 dark:border-purple-700 space-y-1">
-                                                            {block.steps.map((step, sIdx) => (
-                                                                <div key={sIdx} className="flex justify-between text-xs items-center bg-white/50 dark:bg-zinc-900 overflow-hidden rounded px-2 py-1">
-                                                                    <span className="font-bold text-slate-700 dark:text-zinc-300 capitalize">{step.type === 'active' ? 'Intensidad' : 'Descanso'}</span>
-                                                                    <div className="flex items-center gap-2">
-                                                                        <span className="font-mono text-slate-500 font-bold">{step.duration}{step.unit === 'dist' ? 'km' : 'm'}</span>
-                                                                        <span className={`text-[9px] font-black px-1.5 py-0.5 rounded ${step.zone === 'Z1' || step.zone === 'Z2' ? 'bg-slate-100 text-slate-500 dark:bg-zinc-800 dark:text-zinc-400' : 'bg-rose-100 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400'}`}>
-                                                                            {step.zone}
-                                                                        </span>
-                                                                    </div>
+                                {/* ── Zone Timeline Strip ── */}
+                                {segments.length > 0 && (
+                                    <div className="px-6 pt-4 pb-2 border-b border-slate-100 dark:border-zinc-800 shrink-0">
+                                        <p className="text-[9px] font-bold uppercase tracking-widest text-slate-400 dark:text-zinc-500 mb-2">Distribución de zonas</p>
+                                        {/* Bar */}
+                                        <div className="flex h-5 rounded-full overflow-hidden gap-px">
+                                            {segments.map((s, i) => (
+                                                <div key={i} title={`${s.zone} — ${s.min}m`}
+                                                    style={{ flex: s.min / totalMin, background: getZoneColor(s.zone) }}
+                                                    className="dark:opacity-80 transition-all"
+                                                />
+                                            ))}
+                                        </div>
+                                        {/* Legend */}
+                                        <div className="flex flex-wrap gap-3 mt-2">
+                                            {Object.entries(zoneTotals).sort().map(([zone, min]) => (
+                                                <span key={zone} className="flex items-center gap-1 text-[10px] font-bold text-slate-500 dark:text-zinc-400">
+                                                    <span className="w-2.5 h-2.5 rounded-sm inline-block" style={{ background: getZoneColor(zone) }} />
+                                                    {zone} <span className="font-mono">{Math.round(min)}m</span>
+                                                    <span className="text-slate-300 dark:text-zinc-600">({Math.round(min / totalMin * 100)}%)</span>
+                                                </span>
+                                            ))}
+                                        </div>
+                                    </div>
+                                )}
+
+                                {/* ── Two columns ── */}
+                                <div className="flex flex-1 overflow-hidden min-h-0">
+
+                                    {/* LEFT — Block list */}
+                                    <div className="flex-1 overflow-y-auto p-5 border-r border-slate-100 dark:border-zinc-800">
+                                        <p className="text-[9px] font-bold uppercase tracking-widest text-slate-400 dark:text-zinc-500 mb-3">Estructura</p>
+
+                                        {blocks.length === 0 ? (
+                                            <div className="flex items-center justify-center h-24 border border-dashed border-slate-200 dark:border-zinc-800 rounded-lg">
+                                                <p className="text-xs text-slate-400 dark:text-zinc-500">Sin estructura definida</p>
+                                            </div>
+                                        ) : (
+                                            <div className="space-y-1.5">
+                                                {blocks.map((block, idx) => {
+                                                    if (block.type === 'repeat') {
+                                                        return (
+                                                            <div key={idx} className="rounded-lg border border-slate-200 dark:border-zinc-800 overflow-hidden">
+                                                                <div className="flex items-center px-3 py-1.5 bg-slate-50 dark:bg-zinc-900 border-b border-slate-100 dark:border-zinc-800">
+                                                                    <span className="text-xs font-black text-slate-700 dark:text-zinc-300 font-mono mr-1">{block.repeats}×</span>
+                                                                    <span className="text-[10px] font-bold text-slate-400 dark:text-zinc-500 uppercase tracking-wide">Intervalos</span>
                                                                 </div>
-                                                            ))}
+                                                                <div className="divide-y divide-slate-100 dark:divide-zinc-800">
+                                                                    {block.steps.map((step, sIdx) => {
+                                                                        const isActive = step.type === 'active';
+                                                                        return (
+                                                                            <div key={sIdx} className="flex items-center justify-between px-3 py-2">
+                                                                                <div className="flex items-center gap-2">
+                                                                                    <div className="w-1 h-5 rounded-full" style={{ background: isActive ? (zoneColors[step.zone] || '#6366f1') : '#e2e8f0' }} />
+                                                                                    <span className={`text-[10px] font-bold uppercase tracking-wide ${isActive ? 'text-slate-700 dark:text-zinc-200' : 'text-slate-400 dark:text-zinc-500'}`}>
+                                                                                        {isActive ? 'Trabajo' : 'Pausa'}
+                                                                                    </span>
+                                                                                </div>
+                                                                                <div className="flex items-center gap-2">
+                                                                                    <span className="font-mono text-xs font-bold text-slate-600 dark:text-zinc-300">
+                                                                                        {formatBlockDuration(step.duration)}<span className="text-[10px] font-normal text-slate-400 ml-px">{step.unit === 'dist' ? 'km' : ''}</span>
+                                                                                    </span>
+                                                                                    <span className="text-[9px] font-bold px-1.5 py-px rounded border border-slate-200 dark:border-zinc-700 text-slate-500 dark:text-zinc-400 bg-white dark:bg-zinc-900">{step.zone}</span>
+                                                                                </div>
+                                                                            </div>
+                                                                        );
+                                                                    })}
+                                                                </div>
+                                                            </div>
+                                                        );
+                                                    }
+                                                    const typeColor = block.type === 'warmup' ? 'bg-orange-100 dark:bg-orange-900/20 text-orange-600 dark:text-orange-400' : block.type === 'cooldown' ? 'bg-blue-100 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400' : 'bg-slate-100 dark:bg-zinc-800 text-slate-600 dark:text-zinc-300';
+                                                    const typeLabel = block.type === 'warmup' ? 'Cal.' : block.type === 'cooldown' ? 'Vuelta' : 'Trabajo';
+                                                    return (
+                                                        <div key={idx} className="flex items-center justify-between px-3 py-2 rounded-lg border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900">
+                                                            <div className="flex items-center gap-2 min-w-0">
+                                                                <div className="w-1 h-8 rounded-full flex-shrink-0" style={{ background: zoneColors[block.zone] || '#94a3b8' }} />
+                                                                <div className="min-w-0">
+                                                                    <span className={`inline-block text-[9px] font-black uppercase tracking-wider px-1.5 py-px rounded mr-1.5 ${typeColor}`}>{typeLabel}</span>
+                                                                    {block.details && <p className="text-[10px] text-slate-500 dark:text-zinc-400 truncate">{block.details}</p>}
+                                                                </div>
+                                                            </div>
+                                                            <div className="flex items-center gap-2 shrink-0">
+                                                                <span className="font-mono text-xs font-bold text-slate-600 dark:text-zinc-300">
+                                                                    {formatBlockDuration(block.duration)}<span className="text-[10px] font-normal text-slate-400 ml-px">{block.unit === 'dist' ? 'km' : ''}</span>
+                                                                </span>
+                                                                <span className="text-[9px] font-bold px-1.5 py-px rounded border border-slate-200 dark:border-zinc-700 text-slate-500 dark:text-zinc-400 bg-white dark:bg-zinc-900">{block.zone}</span>
+                                                            </div>
                                                         </div>
-                                                    </div>
-                                                );
-                                            }
-                                            return (
-                                                <div key={idx} className={`p-2 rounded flex justify-between items-center ${block.type === 'main' ? 'bg-blue-50/50 dark:bg-blue-900/10 border border-blue-200/50 dark:border-blue-800/30' : 'bg-slate-50 dark:bg-zinc-900 border border-slate-100 dark:border-zinc-800'}`}>
-                                                    <div>
-                                                        <span className={`text-[9px] font-black uppercase tracking-widest mr-2 ${block.type === 'main' ? 'text-blue-600 dark:text-blue-400' : 'text-slate-500 dark:text-zinc-400'}`}>
-                                                            {block.type === 'warmup' ? 'CALENT.' : block.type === 'cooldown' ? 'SOLTAR' : 'BLOQUE'}
-                                                        </span>
-                                                        {block.details && <span className="text-xs text-slate-600 dark:text-zinc-300">{block.details}</span>}
-                                                    </div>
-                                                    <div className="flex items-center gap-2">
-                                                        <span className="font-mono text-xs font-bold text-slate-500">{block.duration}{block.unit === 'dist' ? 'km' : 'm'}</span>
-                                                        <span className="text-[9px] font-black px-1.5 py-0.5 rounded bg-slate-200 dark:bg-zinc-800 text-slate-600 dark:text-zinc-400">
-                                                            {block.zone}
-                                                        </span>
-                                                    </div>
-                                                </div>
-                                            );
-                                        })
-                                    )}
-                                </div>
-                            </div>
+                                                    );
+                                                })}
+                                            </div>
+                                        )}
+                                    </div>
 
-                            <div className="p-4 bg-slate-50 dark:bg-zinc-950/50 border-t border-slate-200 dark:border-zinc-800 flex justify-end gap-2 text-xs">
-                                <button onClick={(e) => { setViewingPlan(null); handleDeletePlan(e, viewingPlan.id); }} className="px-4 py-2 rounded-lg font-bold text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 active:scale-95 transition-all">Eliminar</button>
-                                <button onClick={() => handleEditPlan(viewingPlan)} className="px-4 py-2 bg-blue-600 text-white font-bold rounded-lg hover:bg-blue-500 active:scale-95 transition-all shadow-sm">Editar</button>
-                                <button onClick={() => setViewingPlan(null)} className="px-4 py-2 bg-slate-200 dark:bg-zinc-800 font-bold text-slate-700 dark:text-zinc-200 rounded-lg hover:bg-slate-300 dark:hover:bg-zinc-700 active:scale-95 transition-all">Cerrar</button>
+                                    {/* RIGHT — Fueling */}
+                                    <div className="w-[340px] shrink-0 overflow-y-auto p-5">
+                                        <FuelingPanel workout={viewingPlan} />
+                                    </div>
+                                </div>
+
+                                {/* Footer */}
+                                <div className="px-6 py-3 border-t border-slate-100 dark:border-zinc-800 flex justify-end gap-2 shrink-0 bg-white dark:bg-zinc-900">
+                                    <button onClick={(e) => { setViewingPlan(null); handleDeletePlan(e, viewingPlan.id); }} className="px-4 py-2 text-xs rounded-lg font-bold text-red-500 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/10 transition-colors">Eliminar</button>
+                                    <button onClick={() => setViewingPlan(null)} className="px-4 py-2 text-xs font-bold bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-700 text-slate-600 dark:text-zinc-300 rounded-lg hover:bg-slate-50 dark:hover:bg-zinc-800 transition-colors">Cerrar</button>
+                                    <button onClick={() => handleEditPlan(viewingPlan)} className="px-5 py-2 text-xs bg-slate-800 dark:bg-zinc-100 text-white dark:text-zinc-900 font-bold rounded-lg hover:bg-slate-700 transition-colors shadow-sm">Editar</button>
+                                </div>
                             </div>
                         </div>
-                    </div>
-                )
-            }
+                    );
+                })()}
+
+            {/* FLOATING DRAGGABLE PMC CHART */}
+            {showPmcChart && (
+                <PmcFloatingChart
+                    pmcByDate={fullPmcByDate}
+                    onClose={() => setShowPmcChart(false)}
+                    initPos={pmcPos}
+                />
+            )}
+
         </>
     );
 };
