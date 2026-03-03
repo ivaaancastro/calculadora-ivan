@@ -40,6 +40,192 @@ const DurationInput = ({ value, onChange, className = '' }) => {
         </div>
     );
 };
+// ── Floating draggable PMC projection chart ─────────────────────────────────
+const PmcFloatingChart = ({ pmcByDate, onClose, initPos }) => {
+    const [pos, setPos] = React.useState(initPos);
+    const [hover, setHover] = React.useState(null); // { idx, x }
+    const dragRef = React.useRef(null);
+
+    const allEntries = Object.values(pmcByDate)
+        .filter(e => e.ctl != null)
+        .sort((a, b) => a.date.localeCompare(b.date));
+    const today = new Date().toLocaleDateString('en-CA');
+    const cutoff = new Date(); cutoff.setDate(cutoff.getDate() - 90);
+    const visible = allEntries.filter(e => e.date >= cutoff.toLocaleDateString('en-CA'));
+    if (visible.length === 0) return null;
+
+    const W = 580; const H = 220; const PAD = { t: 16, r: 12, b: 28, l: 40 };
+    const cw = W - PAD.l - PAD.r; const ch = H - PAD.t - PAD.b;
+    const allVals = visible.flatMap(e => [e.ctl, e.atl, e.tcb].filter(v => v != null));
+    const minV = Math.min(...allVals, -30);
+    const maxV = Math.max(...allVals, 20);
+    const range = maxV - minV || 1;
+    const xS = i => PAD.l + (i / (visible.length - 1 || 1)) * cw;
+    const yS = v => PAD.t + ch - ((v - minV) / range) * ch;
+
+    const realE = visible.filter(e => !e.projected);
+    const lastRealIdx = visible.findLastIndex(e => !e.projected);
+    const projWithJoin = lastRealIdx >= 0
+        ? [visible[lastRealIdx], ...visible.slice(lastRealIdx + 1).filter(e => e.projected)]
+        : visible.filter(e => e.projected);
+    const segPath = (key, entries) => entries.map((e, li) => {
+        const i = visible.indexOf(e);
+        return `${li === 0 ? 'M' : 'L'}${xS(i).toFixed(1)},${yS(e[key] ?? 0).toFixed(1)}`;
+    }).join(' ');
+    const projPath = (key) => projWithJoin.map((e, li) => {
+        const i = visible.indexOf(e);
+        return `${li === 0 ? 'M' : 'L'}${xS(i).toFixed(1)},${yS(e[key] ?? 0).toFixed(1)}`;
+    }).join(' ');
+    const todayIdx = visible.findIndex(e => e.date === today);
+    const todayX = todayIdx >= 0 ? xS(todayIdx) : null;
+    const zeroY = yS(0);
+    const labelStep = Math.max(1, Math.floor(visible.length / 7));
+    const labels = visible.filter((_, i) => i % labelStep === 0);
+    const lastReal = realE[realE.length - 1];
+
+    const handleDragDown = (e) => {
+        e.currentTarget.setPointerCapture(e.pointerId);
+        dragRef.current = { ox: e.clientX - pos.x, oy: e.clientY - pos.y };
+    };
+    const handleDragMove = (e) => {
+        if (!dragRef.current) return;
+        setPos({ x: e.clientX - dragRef.current.ox, y: e.clientY - dragRef.current.oy });
+    };
+    const handleDragUp = () => { dragRef.current = null; };
+
+    const handleSvgMouseMove = (e) => {
+        const rect = e.currentTarget.getBoundingClientRect();
+        const svgX = ((e.clientX - rect.left) / rect.width) * W;
+        const relX = svgX - PAD.l;
+        if (relX < 0 || relX > cw) { setHover(null); return; }
+        const idx = Math.round((relX / cw) * (visible.length - 1));
+        setHover({ idx: Math.max(0, Math.min(visible.length - 1, idx)), x: xS(Math.max(0, Math.min(visible.length - 1, idx))) });
+    };
+
+    const hoverEntry = hover != null ? visible[hover.idx] : null;
+
+    return (
+        <div className="fixed z-50 bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-700 rounded-xl shadow-2xl overflow-visible select-none"
+            style={{ left: pos.x, top: pos.y, width: 600 }}>
+            {/* Title / drag bar */}
+            <div className="flex items-center justify-between px-3 py-2 bg-slate-50 dark:bg-zinc-950 border-b border-slate-100 dark:border-zinc-800 rounded-t-xl cursor-grab active:cursor-grabbing"
+                onPointerDown={handleDragDown} onPointerMove={handleDragMove} onPointerUp={handleDragUp}>
+                <div className="flex items-center gap-2">
+                    <Activity size={12} className="text-violet-500" />
+                    <span className="text-[10px] font-black text-slate-600 dark:text-zinc-300 uppercase tracking-widest">Proyección de Forma</span>
+                </div>
+                {lastReal && (
+                    <div className="flex items-center gap-3 mr-2">
+                        <span className="text-[9px] font-bold text-blue-500">CTL {Math.round(lastReal.ctl)}</span>
+                        <span className="text-[9px] font-bold text-red-400">ATL {Math.round(lastReal.atl)}</span>
+                        <span className={`text-[9px] font-bold ${lastReal.tcb >= 0 ? 'text-emerald-500' : 'text-orange-400'}`}>
+                            TSB {lastReal.tcb >= 0 ? '+' : ''}{Math.round(lastReal.tcb)}
+                        </span>
+                    </div>
+                )}
+                <button onClick={onClose} className="p-0.5 text-slate-400 hover:text-slate-700 dark:hover:text-zinc-200 rounded transition-colors">
+                    <X size={13} />
+                </button>
+            </div>
+
+            {/* Legend */}
+            <div className="flex items-center gap-4 px-4 pt-2.5 text-[9px] font-bold text-slate-500 dark:text-zinc-400">
+                <span className="flex items-center gap-1.5"><span className="w-5 h-0.5 bg-blue-500 inline-block rounded" />Fitness (CTL)</span>
+                <span className="flex items-center gap-1.5"><span className="w-5 h-0.5 bg-red-400 inline-block rounded" />Fatiga (ATL)</span>
+                <span className="flex items-center gap-1.5"><span className="w-5 h-0.5 bg-emerald-500 inline-block rounded" />Forma (TSB)</span>
+                <span className="flex items-center gap-1.5 ml-auto opacity-50 text-[8px]">
+                    <span className="w-5 h-0 border-t-2 border-dashed border-slate-400 inline-block" />proyectado
+                </span>
+            </div>
+
+            {/* Chart */}
+            <div className="px-2 pb-3 pt-1 relative">
+                <svg viewBox={`0 0 ${W} ${H}`} className="w-full cursor-crosshair" style={{ height: 220 }}
+                    onMouseMove={handleSvgMouseMove} onMouseLeave={() => setHover(null)}>
+
+                    {/* Zero line */}
+                    <line x1={PAD.l} y1={zeroY} x2={W - PAD.r} y2={zeroY} stroke="#e2e8f0" strokeWidth="1" strokeDasharray="4,3" />
+                    <text x={PAD.l - 4} y={zeroY + 3} textAnchor="end" fontSize={8} fill="#94a3b8">0</text>
+
+                    {/* Y axis ticks */}
+                    {[minV, (minV + maxV) / 2, maxV].map(v => (
+                        <g key={v}>
+                            <line x1={PAD.l - 3} y1={yS(v)} x2={PAD.l} y2={yS(v)} stroke="#e2e8f0" strokeWidth="1" />
+                            <text x={PAD.l - 5} y={yS(v) + 3} textAnchor="end" fontSize={8} fill="#94a3b8">{Math.round(v)}</text>
+                        </g>
+                    ))}
+
+                    {/* Today marker */}
+                    {todayX != null && <>
+                        <rect x={todayX} y={PAD.t} width={W - PAD.r - todayX} height={ch} fill="#6366f1" fillOpacity="0.03" />
+                        <line x1={todayX} y1={PAD.t} x2={todayX} y2={H - PAD.b} stroke="#6366f1" strokeWidth="1.5" strokeDasharray="4,3" opacity="0.5" />
+                        <text x={todayX + 3} y={PAD.t + 9} fontSize={8} fill="#6366f1" fontWeight="700">HOY</text>
+                    </>}
+
+                    {/* Real lines */}
+                    <path d={segPath('ctl', realE)} fill="none" stroke="#3b82f6" strokeWidth="2" strokeLinejoin="round" strokeLinecap="round" />
+                    <path d={segPath('atl', realE)} fill="none" stroke="#f87171" strokeWidth="2" strokeLinejoin="round" strokeLinecap="round" />
+                    <path d={segPath('tcb', realE)} fill="none" stroke="#10b981" strokeWidth="2" strokeLinejoin="round" strokeLinecap="round" />
+
+                    {/* Projected lines */}
+                    {projWithJoin.length > 1 && <>
+                        <path d={projPath('ctl')} fill="none" stroke="#3b82f6" strokeWidth="2" strokeDasharray="6,4" opacity="0.4" strokeLinejoin="round" />
+                        <path d={projPath('atl')} fill="none" stroke="#f87171" strokeWidth="2" strokeDasharray="6,4" opacity="0.4" strokeLinejoin="round" />
+                        <path d={projPath('tcb')} fill="none" stroke="#10b981" strokeWidth="2" strokeDasharray="6,4" opacity="0.4" strokeLinejoin="round" />
+                    </>}
+
+                    {/* Hover crosshair */}
+                    {hover != null && <>
+                        <line x1={hover.x} y1={PAD.t} x2={hover.x} y2={H - PAD.b} stroke="#475569" strokeWidth="1" strokeDasharray="3,2" opacity="0.6" />
+                        {hoverEntry?.ctl != null && <circle cx={hover.x} cy={yS(hoverEntry.ctl)} r={3} fill="#3b82f6" stroke="white" strokeWidth="1.5" />}
+                        {hoverEntry?.atl != null && <circle cx={hover.x} cy={yS(hoverEntry.atl)} r={3} fill="#f87171" stroke="white" strokeWidth="1.5" />}
+                        {hoverEntry?.tcb != null && <circle cx={hover.x} cy={yS(hoverEntry.tcb)} r={3} fill="#10b981" stroke="white" strokeWidth="1.5" />}
+                    </>}
+
+                    {/* X axis */}
+                    <line x1={PAD.l} y1={H - PAD.b} x2={W - PAD.r} y2={H - PAD.b} stroke="#e2e8f0" strokeWidth="1" />
+                    {labels.map((e, li) => {
+                        const i = visible.indexOf(e);
+                        const d = new Date(e.date + 'T00:00:00');
+                        return <text key={li} x={xS(i)} y={H - PAD.b + 12} textAnchor="middle" fontSize={8} fill="#94a3b8">
+                            {d.toLocaleDateString('es-ES', { day: 'numeric', month: 'short' })}
+                        </text>;
+                    })}
+                </svg>
+
+                {/* Hover tooltip */}
+                {hoverEntry && (() => {
+                    const tooltipLeft = hover.x > W * 0.65;
+                    return (
+                        <div className="absolute top-3 pointer-events-none bg-white dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 rounded-lg shadow-lg px-3 py-2 text-[10px] z-10 min-w-[130px]"
+                            style={{ [tooltipLeft ? 'right' : 'left']: tooltipLeft ? 16 : 50 }}>
+                            <p className="font-bold text-slate-600 dark:text-zinc-300 mb-1.5">
+                                {new Date(hoverEntry.date + 'T00:00:00').toLocaleDateString('es-ES', { weekday: 'short', day: 'numeric', month: 'short' })}
+                                {hoverEntry.projected && <span className="ml-1.5 text-[8px] font-normal text-violet-400 uppercase tracking-wide">proyectado</span>}
+                            </p>
+                            <div className="space-y-1">
+                                <div className="flex justify-between gap-4">
+                                    <span className="text-blue-500 font-semibold">Fitness</span>
+                                    <span className="font-mono font-bold text-slate-700 dark:text-zinc-200">{Math.round(hoverEntry.ctl)}</span>
+                                </div>
+                                <div className="flex justify-between gap-4">
+                                    <span className="text-red-400 font-semibold">Fatiga</span>
+                                    <span className="font-mono font-bold text-slate-700 dark:text-zinc-200">{Math.round(hoverEntry.atl)}</span>
+                                </div>
+                                <div className="flex justify-between gap-4">
+                                    <span className={`font-semibold ${hoverEntry.tcb >= 0 ? 'text-emerald-500' : 'text-orange-400'}`}>Forma</span>
+                                    <span className={`font-mono font-bold ${hoverEntry.tcb >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-orange-500'}`}>
+                                        {hoverEntry.tcb >= 0 ? '+' : ''}{Math.round(hoverEntry.tcb)}
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    );
+                })()}
+            </div>
+        </div>
+    );
+};
 
 const getSportColor = (type) => {
     const t = String(type).toLowerCase();
@@ -271,6 +457,9 @@ export const CalendarPage = ({ activities, plannedWorkouts = [], addPlannedWorko
 
     const [isGeneratorOpen, setIsGeneratorOpen] = useState(false);
     const [isDeleteBlockOpen, setIsDeleteBlockOpen] = useState(false);
+    const [showPmcChart, setShowPmcChart] = useState(false);
+    const [pmcPos, setPmcPos] = useState({ x: window.innerWidth - 380, y: 120 });
+    const pmcDragRef = React.useRef(null);
     const [deleteBlockFrom, setDeleteBlockFrom] = useState('');
     const [deleteBlockTo, setDeleteBlockTo] = useState('');
     const [deletingBlock, setDeletingBlock] = useState(false);
@@ -859,8 +1048,10 @@ export const CalendarPage = ({ activities, plannedWorkouts = [], addPlannedWorko
                         <button onClick={() => setIsDeleteBlockOpen(prev => !prev)} className={`hidden sm:flex items-center gap-1.5 px-3 py-1.5 border rounded-lg text-[9px] font-black uppercase tracking-widest transition-colors shadow-sm ${isDeleteBlockOpen ? 'bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 border-red-200 dark:border-red-800/50' : 'bg-white dark:bg-zinc-900 text-slate-500 dark:text-zinc-400 border-slate-200 dark:border-zinc-700 hover:border-slate-400'}`}>
                             <Trash2 size={12} /> Borrar Bloque
                         </button>
-
-                        {/* VIEW MODE TOGGLE */}
+                        {/* PMC CHART TOGGLE */}
+                        <button onClick={() => setShowPmcChart(p => !p)} className={`hidden sm:flex items-center gap-1.5 px-3 py-1.5 border rounded-lg text-[9px] font-black uppercase tracking-widest transition-colors shadow-sm ${showPmcChart ? 'bg-violet-50 dark:bg-violet-900/20 text-violet-600 dark:text-violet-400 border-violet-200 dark:border-violet-800/50' : 'bg-white dark:bg-zinc-900 text-slate-500 dark:text-zinc-400 border-slate-200 dark:border-zinc-700 hover:border-slate-400'}`}>
+                            <Activity size={12} /> Forma
+                        </button>
                         <div className="hidden sm:flex items-center bg-slate-100 dark:bg-zinc-800 rounded overflow-hidden ml-2">
                             <button onClick={() => setViewMode('month')}
                                 className={`px-2.5 py-1.5 text-[9px] font-bold uppercase tracking-wider transition-colors ${viewMode === 'month' ? 'bg-slate-800 dark:bg-zinc-100 text-white dark:text-zinc-900' : 'text-slate-500 dark:text-zinc-400 hover:text-slate-700'}`}
@@ -903,6 +1094,7 @@ export const CalendarPage = ({ activities, plannedWorkouts = [], addPlannedWorko
                         </div>
                     </div>
                 )}
+
 
                 <BlockGeneratorModal
                     isOpen={isGeneratorOpen}
@@ -1767,7 +1959,16 @@ export const CalendarPage = ({ activities, plannedWorkouts = [], addPlannedWorko
                         </div>
                     );
                 })()}
-            }
+
+            {/* FLOATING DRAGGABLE PMC CHART */}
+            {showPmcChart && (
+                <PmcFloatingChart
+                    pmcByDate={fullPmcByDate}
+                    onClose={() => setShowPmcChart(false)}
+                    initPos={pmcPos}
+                />
+            )}
+
         </>
     );
 };
