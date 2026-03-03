@@ -50,13 +50,17 @@ export const useWellnessInfo = (activities, settings, chartData) => {
                                 dateObj = new Date(d.id + 'T00:00:00');
                             }
                             const sleepHours = d.sleepSecs ? Number((d.sleepSecs / 3600).toFixed(1)) : (d.sleep || null);
+                            const calcSleepScore = sleepHours ? Math.min(100, Math.round((sleepHours / 8) * 100)) : null;
 
                             return {
                                 date: d.id || d.date,
                                 dateLabel: !isNaN(dateObj) ? dateObj.toLocaleDateString('es-ES', { day: '2-digit', month: 'short' }) : (d.id || d.date),
                                 hrv: d.hrv || null,
                                 sleep: sleepHours,
+                                sleepScore: d.sleepScore || calcSleepScore || null,
                                 rhr: d.restingHR || null,
+                                stress: d.stress || null, // Stress level 0-100
+                                soreness: d.soreness || null, // Soreness level 0-4
                                 isSimulated: false
                             };
                         }).sort((a, b) => new Date(a.date + "T00:00:00") - new Date(b.date + "T00:00:00"));
@@ -84,13 +88,21 @@ export const useWellnessInfo = (activities, settings, chartData) => {
                     const randomSleepNoise = (Math.random() * 1.5) - 0.75;
 
                     const dateObj = new Date(dateStr + "T00:00:00");
+                    const simSleep = Math.max(4, Number((baseSleep - (fatigueImpact * 1.5) + randomSleepNoise).toFixed(1)));
+                    const simSleepScore = Math.min(100, Math.round((simSleep / 8) * 100));
+                    const simStress = Math.min(100, Math.max(0, Math.round(20 + (fatigueImpact * 50) + (Math.random() * 20 - 10))));
+                    const simSoreness = Math.round(fatigueImpact * 3); // 0-3 scale usually
 
                     simData.push({
                         date: dateStr,
                         dateLabel: !isNaN(dateObj) ? dateObj.toLocaleDateString('es-ES', { day: '2-digit', month: 'short' }) : dateStr,
                         hrv: Math.max(20, Math.round(baseHrv - (baseHrv * 0.2 * fatigueImpact) + randomHrvNoise)),
-                        sleep: Math.max(4, Number((baseSleep - (fatigueImpact * 1.5) + randomSleepNoise).toFixed(1))),
-                        rhr: Math.round(baseRhr + (fatigueImpact * 5) - (randomHrvNoise * 0.2)), isSimulated: true
+                        sleep: simSleep,
+                        sleepScore: simSleepScore,
+                        stress: simStress,
+                        soreness: simSoreness,
+                        rhr: Math.round(baseRhr + (fatigueImpact * 5) - (randomHrvNoise * 0.2)),
+                        isSimulated: true
                     });
                 }
                 setWellnessData(simData);
@@ -149,6 +161,24 @@ export const useWellnessInfo = (activities, settings, chartData) => {
         const avgSleep7d = todayData.sleep7dAvg !== null ? todayData.sleep7dAvg : '--';
         const avgRhr7d = todayData.rhr7dAvg !== null ? todayData.rhr7dAvg : '--';
 
+        const yesterdayData = finalChartData.length > 1 ? finalChartData[finalChartData.length - 2] : null;
+        const yesterdayTSS = yesterdayData ? (dailyTSS.get(yesterdayData.date) || 0) : 0;
+
+        // 0. Estrés Fisiológico Sintetizado (0-100)
+        let calcStress = 25; // Base normal
+        if (baselineHrv > 0 && avgHrv7d !== '--') {
+            const hrvDropPct = ((baselineHrv - avgHrv7d) / baselineHrv) * 100;
+            if (hrvDropPct > 0) calcStress += Math.min(35, hrvDropPct * 1.5);
+        }
+        if (baselineRhr > 0 && avgRhr7d !== '--') {
+            const rhrRise = avgRhr7d - baselineRhr;
+            if (rhrRise > 0) calcStress += Math.min(25, rhrRise * 4); // +4 points of stress per BPM elevated
+        }
+        if (currentTsb < 0) {
+            calcStress += Math.min(25, Math.abs(currentTsb) * 0.8);
+        }
+        calcStress = Math.min(100, Math.round(calcStress));
+
         let score = 100;
         const insights = [];
 
@@ -196,6 +226,23 @@ export const useWellnessInfo = (activities, settings, chartData) => {
 
         const todayReadiness = (avgHrv7d === '--' && avgSleep7d === '--') ? '--' : Math.max(0, Math.min(100, score));
 
+        // 4. Calculate Effort Score (Strain 0-100) logarithmic based on yesterday's TSS
+        let effortScore = 0;
+        let effortLabel = "Recuperación";
+        let effortColor = "text-blue-500";
+        if (yesterdayTSS > 0) {
+            // Logarithmic human effort curve: 100 * (1 - e^(-TSS/180))
+            effortScore = Math.min(100, Math.round(100 * (1 - Math.exp(-yesterdayTSS / 180))));
+
+            if (effortScore > 85) { effortLabel = "Sobreesfuerzo"; effortColor = "text-purple-500"; }
+            else if (effortScore > 60) { effortLabel = "Alto"; effortColor = "text-red-500"; }
+            else if (effortScore > 30) { effortLabel = "Moderado"; effortColor = "text-amber-500"; }
+            else { effortLabel = "Ligero"; effortColor = "text-emerald-500"; }
+        }
+
+        // Use synthesized stress if actual device stress is missing
+        const finalStress = todayData.stress !== null && todayData.stress !== undefined ? todayData.stress : calcStress;
+
         return {
             avgHrv7d, avgSleep7d, avgRhr7d, normalHrvRange,
             baselineHrv: Math.round(baselineHrv), baselineRhr, todayReadiness,
@@ -204,10 +251,14 @@ export const useWellnessInfo = (activities, settings, chartData) => {
             isSimulated: wellnessData[0]?.isSimulated || false,
             latestHrv: todayData.hrv !== null ? todayData.hrv : '--',
             latestSleep: todayData.sleep !== null ? todayData.sleep : '--',
+            latestSleepScore: todayData.sleepScore !== null ? todayData.sleepScore : '--',
             latestRhr: todayData.rhr !== null ? todayData.rhr : '--',
+            latestStress: finalStress,
+            latestSoreness: todayData.soreness !== null ? todayData.soreness : '--',
+            effort: { score: effortScore, label: effortLabel, color: effortColor, tss: yesterdayTSS },
             currentTsb
         };
-    }, [wellnessData, currentTsb, error]);
+    }, [wellnessData, currentTsb, dailyTSS, error]);
 
     return { wellnessMetrics, loading, error };
 };
