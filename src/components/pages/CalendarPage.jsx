@@ -6,8 +6,40 @@ import {
 } from 'lucide-react';
 import { BlockGeneratorModal } from '../dashboard/BlockGeneratorModal';
 import { FuelingPanel } from '../dashboard/FuelingPanel';
+import { formatDuration, formatBlockDuration } from '../../utils/formatDuration';
 
 const WEEKDAYS = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'];
+
+// Compact HH:MM:SS input — stores value as decimal minutes, supports seconds for sprints
+const DurationInput = ({ value, onChange, className = '' }) => {
+    const totalSecs = Math.round((Number(value) || 0) * 60);
+    const h = Math.floor(totalSecs / 3600);
+    const m = Math.floor((totalSecs % 3600) / 60);
+    const s = totalSecs % 60;
+    const commit = (newH, newM, newS) => {
+        const clampH = Math.max(0, Math.min(23, Number(newH) || 0));
+        const clampM = Math.max(0, Math.min(59, Number(newM) || 0));
+        const clampS = Math.max(0, Math.min(59, Number(newS) || 0));
+        onChange((clampH * 3600 + clampM * 60 + clampS) / 60);
+    };
+    const inCls = 'w-7 bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 text-[11px] font-mono py-0.5 text-center outline-none focus:border-slate-400 dark:focus:border-zinc-500 transition-colors';
+    const sep = <span className="text-slate-300 dark:text-zinc-600 text-[10px] select-none">:</span>;
+    return (
+        <div className={`inline-flex items-center rounded-sm overflow-hidden ${className}`} title="hh:mm:ss">
+            <input type="number" value={h} min={0} max={23} tabIndex={-1}
+                onChange={e => commit(e.target.value, m, s)}
+                className={`${inCls} ${h > 0 ? '' : 'w-0 border-0 p-0 opacity-0 pointer-events-none'}`} />
+            {h > 0 && sep}
+            <input type="number" value={m} min={0} max={59}
+                onChange={e => commit(h, e.target.value, s)}
+                className={inCls} />
+            {sep}
+            <input type="number" value={s} min={0} max={59}
+                onChange={e => commit(h, m, e.target.value)}
+                className={inCls} />
+        </div>
+    );
+};
 
 const getSportColor = (type) => {
     const t = String(type).toLowerCase();
@@ -1311,7 +1343,7 @@ export const CalendarPage = ({ activities, plannedWorkouts = [], addPlannedWorko
                                                 </div>
                                                 <div className="flex gap-2 mt-0.5">
                                                     <span className="text-[8px] font-mono text-amber-600">{a.tss}tss</span>
-                                                    <span className="text-[8px] font-mono text-slate-400">{a.duration}min</span>
+                                                    <span className="text-[8px] font-mono text-slate-400">{formatDuration(a.duration)}</span>
                                                     {a.distance > 0 && <span className="text-[8px] font-mono text-slate-400">{(a.distance / 1000).toFixed(1)}km</span>}
                                                 </div>
                                             </div>
@@ -1415,7 +1447,7 @@ export const CalendarPage = ({ activities, plannedWorkouts = [], addPlannedWorko
                                         <div className="w-px h-8 bg-slate-200 dark:bg-zinc-800 mx-1 self-center"></div>
                                         <div className="text-right">
                                             <span className="text-[9px] font-semibold uppercase tracking-wider text-slate-400 block mb-0.5">Duración</span>
-                                            <span className="text-lg font-bold font-mono text-slate-700 dark:text-zinc-300">{newPlan.duration}<span className="text-xs text-slate-400 ml-0.5">m</span></span>
+                                            <span className="text-lg font-bold font-mono text-slate-700 dark:text-zinc-300">{formatDuration(newPlan.duration)}</span>
                                         </div>
                                     </div>
                                 </div>
@@ -1473,8 +1505,12 @@ export const CalendarPage = ({ activities, plannedWorkouts = [], addPlannedWorko
                                                                         <option value="active">{isStr ? 'Trabajo' : 'Activo'}</option>
                                                                         <option value="recovery">{isStr ? 'Pausa' : 'Recu'}</option>
                                                                     </select>
-                                                                    <input type="number" value={step.duration} min={0} onChange={e => updateStep(block.id, step.id, 'duration', e.target.value)}
-                                                                        className="w-12 bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 text-xs font-mono p-1 rounded-sm text-center outline-none focus:border-slate-400" />
+                                                                    {step.unit === 'dist' ? (
+                                                                        <input type="number" value={step.duration} min={0} onChange={e => updateStep(block.id, step.id, 'duration', e.target.value)}
+                                                                            className="w-12 bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 text-xs font-mono p-1 rounded-sm text-center outline-none focus:border-slate-400" />
+                                                                    ) : (
+                                                                        <DurationInput value={step.duration} onChange={v => updateStep(block.id, step.id, 'duration', v)} />
+                                                                    )}
                                                                     {!isStr ? (
                                                                         <button onClick={() => updateStep(block.id, step.id, 'unit', step.unit === 'dist' ? 'time' : 'dist')}
                                                                             className={`text-[9px] font-medium w-8 py-1 rounded-sm transition-colors text-center ${step.unit === 'dist' ? 'bg-slate-200 text-slate-700 dark:bg-zinc-700 dark:text-zinc-300' : 'bg-slate-100 text-slate-500 dark:bg-zinc-800 dark:text-zinc-400'}`}
@@ -1505,8 +1541,12 @@ export const CalendarPage = ({ activities, plannedWorkouts = [], addPlannedWorko
                                                 <div key={block.id} className="rounded-md border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-3 shadow-sm relative group">
                                                     <div className="flex items-center gap-2 flex-wrap sm:flex-nowrap">
                                                         <span className={`text-[10px] font-semibold w-28 uppercase tracking-wider ${bLabelStyle}`}>{bLabel}</span>
-                                                        <input type="number" placeholder={block.unit === 'dist' ? 'km' : 'Min'} value={block.duration} min={0} onChange={e => updateBlock(block.id, 'duration', e.target.value)}
-                                                            className="w-14 bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 text-xs font-mono p-1 rounded-sm text-center outline-none focus:border-slate-400" />
+                                                        {block.unit === 'dist' ? (
+                                                            <input type="number" placeholder="km" value={block.duration} min={0} onChange={e => updateBlock(block.id, 'duration', e.target.value)}
+                                                                className="w-14 bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 text-xs font-mono p-1 rounded-sm text-center outline-none focus:border-slate-400" />
+                                                        ) : (
+                                                            <DurationInput value={block.duration} onChange={v => updateBlock(block.id, 'duration', v)} />
+                                                        )}
                                                         {!isStr ? (
                                                             <button onClick={() => updateBlock(block.id, 'unit', block.unit === 'dist' ? 'time' : 'dist')}
                                                                 className={`text-[9px] font-medium w-8 py-1 rounded-sm transition-colors text-center ${block.unit === 'dist' ? 'bg-slate-200 text-slate-700 dark:bg-zinc-700 dark:text-zinc-300' : 'bg-slate-100 text-slate-500 dark:bg-zinc-800 dark:text-zinc-400'}`}
@@ -1551,113 +1591,182 @@ export const CalendarPage = ({ activities, plannedWorkouts = [], addPlannedWorko
             )}
             {/* MODAL VER ENTRENAMIENTO PLANEADO */}
             {
-                viewingPlan && (
-                    <div className="fixed inset-0 bg-slate-900/50 dark:bg-black/70 backdrop-blur-sm z-[60] flex items-center justify-center p-4 sm:p-6">
-                        <div className="bg-white dark:bg-zinc-900 rounded-xl w-full max-w-3xl shadow-2xl overflow-hidden border border-slate-200/50 dark:border-zinc-800 flex flex-col max-h-[90vh]">
+                viewingPlan && (() => {
+                    // Build zone timeline data from blocks
+                    const blocks = viewingPlan.descriptionObj?.blocks || [];
+                    // Same hex colors as the calendar card zone bars (line ~1048)
+                    const KNOWN_ZONES = ['Z1', 'R12', 'Z2', 'R23', 'Z3', 'Z4', 'Z5', 'Z6'];
+                    const zoneColors = {
+                        Z1: '#94a3b8', R12: '#60a5fa', Z2: '#3b82f6', R23: '#34d399',
+                        Z3: '#22c55e', Z4: '#eab308', Z5: '#f97316', Z6: '#ef4444',
+                    };
+                    const getZoneColor = (z) => zoneColors[z] || '#94a3b8';
+                    // Don't normalize — preserve R12/R23 so they show correctly
 
-                            {/* Header */}
-                            <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100 dark:border-zinc-800 shrink-0">
-                                <div>
-                                    <h3 className="text-sm font-bold text-slate-800 dark:text-zinc-100 uppercase tracking-widest flex items-center gap-2">
-                                        {getSportIcon(viewingPlan.type)} {viewingPlan.name || `Entrenamiento de ${viewingPlan.type}`}
-                                    </h3>
-                                    <p className="text-[10px] text-slate-400 dark:text-zinc-500 font-medium uppercase tracking-wider mt-0.5">
-                                        {new Date(viewingPlan.date).toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long' })}
-                                    </p>
-                                </div>
-                                {/* Stats row in header */}
-                                <div className="flex items-center gap-6 mr-4">
-                                    <div className="text-center">
-                                        <span className="block text-[9px] font-bold text-slate-400 dark:text-zinc-500 uppercase tracking-wider"><Zap size={9} className="inline mr-0.5" />TSS</span>
-                                        <strong className="text-xl font-black font-mono text-slate-700 dark:text-zinc-200">{viewingPlan.tss}</strong>
+                    // Flatten all time segments — expand repeats individually so the pattern shows
+                    const segments = [];
+                    const addSeg = (zone, min) => { const m = Number(min) || 0; if (m > 0) segments.push({ zone, min: m }); };
+                    blocks.forEach(b => {
+                        if (b.type === 'repeat') {
+                            const r = Number(b.repeats) || 1;
+                            for (let i = 0; i < r; i++) {
+                                (b.steps || []).forEach(s => {
+                                    if (s.unit !== 'dist') addSeg(s.zone || 'Z2', Number(s.duration) || 0);
+                                });
+                            }
+                        } else if (b.unit !== 'dist') {
+                            addSeg(b.zone || 'Z2', Number(b.duration) || 0);
+                        }
+                    });
+                    const totalMin = segments.reduce((s, x) => s + x.min, 0) || viewingPlan.duration || 1;
+
+                    // Zone totals for legend (aggregate)
+                    const zoneTotals = {};
+                    segments.forEach(s => { zoneTotals[s.zone] = (zoneTotals[s.zone] || 0) + s.min; });
+
+
+                    return (
+                        <div className="fixed inset-0 bg-slate-900/50 dark:bg-black/70 backdrop-blur-sm z-[60] flex items-center justify-center p-4 sm:p-6">
+                            <div className="bg-white dark:bg-zinc-900 rounded-xl w-full max-w-3xl shadow-2xl overflow-hidden border border-slate-200/50 dark:border-zinc-800 flex flex-col" style={{ maxHeight: '88vh' }}>
+
+                                {/* ── Header ── */}
+                                <div className="flex items-center justify-between px-6 py-3 border-b border-slate-100 dark:border-zinc-800 shrink-0">
+                                    <div>
+                                        <h3 className="text-sm font-bold text-slate-800 dark:text-zinc-100 flex items-center gap-2">
+                                            {getSportIcon(viewingPlan.type)}
+                                            {viewingPlan.name || `Entrenamiento de ${viewingPlan.type}`}
+                                        </h3>
+                                        <p className="text-[10px] text-slate-400 dark:text-zinc-500 font-medium uppercase tracking-wider mt-0.5 capitalize">
+                                            {new Date(viewingPlan.date).toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long' })}
+                                        </p>
                                     </div>
-                                    <div className="w-px h-8 bg-slate-200 dark:bg-zinc-800" />
-                                    <div className="text-center">
-                                        <span className="block text-[9px] font-bold text-slate-400 dark:text-zinc-500 uppercase tracking-wider"><Clock size={9} className="inline mr-0.5" />Duración</span>
-                                        <strong className="text-xl font-black font-mono text-slate-700 dark:text-zinc-200">{viewingPlan.duration}<span className="text-sm text-slate-400 font-normal ml-0.5">m</span></strong>
-                                    </div>
-                                </div>
-                                <button onClick={() => setViewingPlan(null)} className="p-1.5 text-slate-400 hover:text-slate-600 hover:bg-slate-50 dark:hover:text-zinc-300 dark:hover:bg-zinc-800 rounded-md transition-colors shrink-0">
-                                    <X size={18} />
-                                </button>
-                            </div>
-
-                            {/* Two-column body */}
-                            <div className="flex flex-1 overflow-hidden">
-
-                                {/* LEFT: Workout structure */}
-                                <div className="flex-1 overflow-y-auto p-6 border-r border-slate-100 dark:border-zinc-800 space-y-3">
-                                    <h4 className="text-[10px] font-bold text-slate-400 dark:text-zinc-500 uppercase tracking-wider">Estructura del entrenamiento</h4>
-
-                                    {(!viewingPlan.descriptionObj?.blocks || viewingPlan.descriptionObj.blocks.length === 0) ? (
-                                        <div className="flex flex-col items-center justify-center py-10 border border-dashed border-slate-200 dark:border-zinc-800 rounded-lg">
-                                            <p className="text-xs text-slate-400 dark:text-zinc-500 font-medium">Sin estructura definida</p>
+                                    <div className="flex items-center gap-5">
+                                        <div className="text-center">
+                                            <p className="text-[9px] font-bold text-slate-400 dark:text-zinc-500 uppercase tracking-widest">TSS</p>
+                                            <p className="text-xl font-black font-mono text-slate-700 dark:text-zinc-200">{viewingPlan.tss}</p>
                                         </div>
-                                    ) : (
-                                        viewingPlan.descriptionObj.blocks.map((block, idx) => {
-                                            if (block.type === 'repeat') {
-                                                return (
-                                                    <div key={idx} className="rounded-md border-l-4 border-l-slate-400 border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 overflow-hidden shadow-sm">
-                                                        <div className="flex items-center gap-3 px-3 py-2 bg-slate-50 dark:bg-zinc-950 border-b border-slate-100 dark:border-zinc-800">
-                                                            <div className="text-[10px] font-semibold text-slate-600 dark:text-zinc-400 uppercase tracking-wider">
-                                                                <span className="text-lg font-mono text-slate-700 dark:text-zinc-300 mr-1">{block.repeats}×</span> Intervalos
+                                        <div className="w-px h-8 bg-slate-200 dark:bg-zinc-700" />
+                                        <div className="text-center">
+                                            <p className="text-[9px] font-bold text-slate-400 dark:text-zinc-500 uppercase tracking-widest">Duración</p>
+                                            <p className="text-xl font-black font-mono text-slate-700 dark:text-zinc-200">{formatDuration(viewingPlan.duration)}</p>
+                                        </div>
+                                        <button onClick={() => setViewingPlan(null)} className="ml-2 p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 dark:hover:text-zinc-200 dark:hover:bg-zinc-800 rounded-lg transition-colors">
+                                            <X size={18} />
+                                        </button>
+                                    </div>
+                                </div>
+
+                                {/* ── Zone Timeline Strip ── */}
+                                {segments.length > 0 && (
+                                    <div className="px-6 pt-4 pb-2 border-b border-slate-100 dark:border-zinc-800 shrink-0">
+                                        <p className="text-[9px] font-bold uppercase tracking-widest text-slate-400 dark:text-zinc-500 mb-2">Distribución de zonas</p>
+                                        {/* Bar */}
+                                        <div className="flex h-5 rounded-full overflow-hidden gap-px">
+                                            {segments.map((s, i) => (
+                                                <div key={i} title={`${s.zone} — ${s.min}m`}
+                                                    style={{ flex: s.min / totalMin, background: getZoneColor(s.zone) }}
+                                                    className="dark:opacity-80 transition-all"
+                                                />
+                                            ))}
+                                        </div>
+                                        {/* Legend */}
+                                        <div className="flex flex-wrap gap-3 mt-2">
+                                            {Object.entries(zoneTotals).sort().map(([zone, min]) => (
+                                                <span key={zone} className="flex items-center gap-1 text-[10px] font-bold text-slate-500 dark:text-zinc-400">
+                                                    <span className="w-2.5 h-2.5 rounded-sm inline-block" style={{ background: getZoneColor(zone) }} />
+                                                    {zone} <span className="font-mono">{Math.round(min)}m</span>
+                                                    <span className="text-slate-300 dark:text-zinc-600">({Math.round(min / totalMin * 100)}%)</span>
+                                                </span>
+                                            ))}
+                                        </div>
+                                    </div>
+                                )}
+
+                                {/* ── Two columns ── */}
+                                <div className="flex flex-1 overflow-hidden min-h-0">
+
+                                    {/* LEFT — Block list */}
+                                    <div className="flex-1 overflow-y-auto p-5 border-r border-slate-100 dark:border-zinc-800">
+                                        <p className="text-[9px] font-bold uppercase tracking-widest text-slate-400 dark:text-zinc-500 mb-3">Estructura</p>
+
+                                        {blocks.length === 0 ? (
+                                            <div className="flex items-center justify-center h-24 border border-dashed border-slate-200 dark:border-zinc-800 rounded-lg">
+                                                <p className="text-xs text-slate-400 dark:text-zinc-500">Sin estructura definida</p>
+                                            </div>
+                                        ) : (
+                                            <div className="space-y-1.5">
+                                                {blocks.map((block, idx) => {
+                                                    if (block.type === 'repeat') {
+                                                        return (
+                                                            <div key={idx} className="rounded-lg border border-slate-200 dark:border-zinc-800 overflow-hidden">
+                                                                <div className="flex items-center px-3 py-1.5 bg-slate-50 dark:bg-zinc-900 border-b border-slate-100 dark:border-zinc-800">
+                                                                    <span className="text-xs font-black text-slate-700 dark:text-zinc-300 font-mono mr-1">{block.repeats}×</span>
+                                                                    <span className="text-[10px] font-bold text-slate-400 dark:text-zinc-500 uppercase tracking-wide">Intervalos</span>
+                                                                </div>
+                                                                <div className="divide-y divide-slate-100 dark:divide-zinc-800">
+                                                                    {block.steps.map((step, sIdx) => {
+                                                                        const isActive = step.type === 'active';
+                                                                        return (
+                                                                            <div key={sIdx} className="flex items-center justify-between px-3 py-2">
+                                                                                <div className="flex items-center gap-2">
+                                                                                    <div className="w-1 h-5 rounded-full" style={{ background: isActive ? (zoneColors[step.zone] || '#6366f1') : '#e2e8f0' }} />
+                                                                                    <span className={`text-[10px] font-bold uppercase tracking-wide ${isActive ? 'text-slate-700 dark:text-zinc-200' : 'text-slate-400 dark:text-zinc-500'}`}>
+                                                                                        {isActive ? 'Trabajo' : 'Pausa'}
+                                                                                    </span>
+                                                                                </div>
+                                                                                <div className="flex items-center gap-2">
+                                                                                    <span className="font-mono text-xs font-bold text-slate-600 dark:text-zinc-300">
+                                                                                        {formatBlockDuration(step.duration)}<span className="text-[10px] font-normal text-slate-400 ml-px">{step.unit === 'dist' ? 'km' : ''}</span>
+                                                                                    </span>
+                                                                                    <span className="text-[9px] font-bold px-1.5 py-px rounded border border-slate-200 dark:border-zinc-700 text-slate-500 dark:text-zinc-400 bg-white dark:bg-zinc-900">{step.zone}</span>
+                                                                                </div>
+                                                                            </div>
+                                                                        );
+                                                                    })}
+                                                                </div>
+                                                            </div>
+                                                        );
+                                                    }
+                                                    const typeColor = block.type === 'warmup' ? 'bg-orange-100 dark:bg-orange-900/20 text-orange-600 dark:text-orange-400' : block.type === 'cooldown' ? 'bg-blue-100 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400' : 'bg-slate-100 dark:bg-zinc-800 text-slate-600 dark:text-zinc-300';
+                                                    const typeLabel = block.type === 'warmup' ? 'Cal.' : block.type === 'cooldown' ? 'Vuelta' : 'Trabajo';
+                                                    return (
+                                                        <div key={idx} className="flex items-center justify-between px-3 py-2 rounded-lg border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900">
+                                                            <div className="flex items-center gap-2 min-w-0">
+                                                                <div className="w-1 h-8 rounded-full flex-shrink-0" style={{ background: zoneColors[block.zone] || '#94a3b8' }} />
+                                                                <div className="min-w-0">
+                                                                    <span className={`inline-block text-[9px] font-black uppercase tracking-wider px-1.5 py-px rounded mr-1.5 ${typeColor}`}>{typeLabel}</span>
+                                                                    {block.details && <p className="text-[10px] text-slate-500 dark:text-zinc-400 truncate">{block.details}</p>}
+                                                                </div>
+                                                            </div>
+                                                            <div className="flex items-center gap-2 shrink-0">
+                                                                <span className="font-mono text-xs font-bold text-slate-600 dark:text-zinc-300">
+                                                                    {formatBlockDuration(block.duration)}<span className="text-[10px] font-normal text-slate-400 ml-px">{block.unit === 'dist' ? 'km' : ''}</span>
+                                                                </span>
+                                                                <span className="text-[9px] font-bold px-1.5 py-px rounded border border-slate-200 dark:border-zinc-700 text-slate-500 dark:text-zinc-400 bg-white dark:bg-zinc-900">{block.zone}</span>
                                                             </div>
                                                         </div>
-                                                        <div className="p-3 pl-6 space-y-2 relative">
-                                                            <div className="absolute left-2.5 top-3 bottom-0 w-px bg-slate-200 dark:bg-zinc-800" />
-                                                            {block.steps.map((step, sIdx) => {
-                                                                const isActive = step.type === 'active';
-                                                                return (
-                                                                    <div key={sIdx} className="flex items-center gap-3 relative z-10 py-1">
-                                                                        <div className={`w-2 h-2 rounded-full border ${isActive ? 'border-slate-400 bg-slate-200 dark:border-zinc-500 dark:bg-zinc-700' : 'border-slate-300 bg-white dark:border-zinc-600 dark:bg-zinc-900'} absolute -left-[23px] top-1/2 -translate-y-1/2`} />
-                                                                        <span className={`w-16 text-[10px] font-semibold uppercase tracking-wider ${isActive ? 'text-slate-700 dark:text-zinc-300' : 'text-slate-400 dark:text-zinc-500'}`}>{isActive ? 'Trabajo' : 'Pausa'}</span>
-                                                                        <div className="flex-1 flex justify-end gap-3 items-center">
-                                                                            <span className="font-mono text-xs font-semibold text-slate-600 dark:text-zinc-300">{step.duration}<span className="text-[10px] font-sans text-slate-400 font-normal ml-px">{step.unit === 'dist' ? 'km' : 'm'}</span></span>
-                                                                            <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-sm w-12 text-center border ${step.zone === 'Z1' || step.zone === 'Z2' ? 'bg-slate-50 border-slate-200 text-slate-500 dark:bg-zinc-800/50 dark:border-zinc-700 dark:text-zinc-400' : 'bg-slate-100 border-slate-300 text-slate-700 dark:bg-zinc-800 dark:border-zinc-600 dark:text-zinc-300'}`}>{step.zone}</span>
-                                                                        </div>
-                                                                    </div>
-                                                                );
-                                                            })}
-                                                        </div>
-                                                    </div>
-                                                );
-                                            }
-                                            const bLabelStyle = block.type === 'warmup' ? 'text-orange-500' : block.type === 'cooldown' ? 'text-blue-500' : 'text-slate-600 dark:text-zinc-300';
-                                            const bLabel = block.type === 'warmup' ? 'Calentamiento' : block.type === 'cooldown' ? 'Vuelta a la calma' : 'Trabajo continuo';
-                                            return (
-                                                <div key={idx} className="rounded-md border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-3 shadow-sm">
-                                                    <div className="flex justify-between items-start">
-                                                        <div>
-                                                            <span className={`text-[10px] font-semibold uppercase tracking-wider block ${bLabelStyle}`}>{bLabel}</span>
-                                                            {block.details && <span className="text-[11px] text-slate-500 dark:text-zinc-400 mt-1 block font-medium">{block.details}</span>}
-                                                        </div>
-                                                        <div className="flex items-center gap-3 bg-slate-50 dark:bg-zinc-950 px-2 py-1 rounded-sm border border-slate-100 dark:border-zinc-800">
-                                                            <span className="font-mono text-xs font-semibold text-slate-600 dark:text-zinc-300">{block.duration}<span className="text-[10px] font-sans text-slate-400 font-normal ml-px">{block.unit === 'dist' ? 'km' : 'm'}</span></span>
-                                                            <span className="text-[10px] font-semibold bg-white dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 px-1.5 py-px rounded-sm text-slate-600 dark:text-zinc-400">{block.zone}</span>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            );
-                                        })
-                                    )}
+                                                    );
+                                                })}
+                                            </div>
+                                        )}
+                                    </div>
+
+                                    {/* RIGHT — Fueling */}
+                                    <div className="w-[340px] shrink-0 overflow-y-auto p-5">
+                                        <FuelingPanel workout={viewingPlan} />
+                                    </div>
                                 </div>
 
-                                {/* RIGHT: Fueling Panel */}
-                                <div className="w-80 shrink-0 overflow-y-auto p-6">
-                                    <FuelingPanel workout={viewingPlan} />
+                                {/* Footer */}
+                                <div className="px-6 py-3 border-t border-slate-100 dark:border-zinc-800 flex justify-end gap-2 shrink-0 bg-white dark:bg-zinc-900">
+                                    <button onClick={(e) => { setViewingPlan(null); handleDeletePlan(e, viewingPlan.id); }} className="px-4 py-2 text-xs rounded-lg font-bold text-red-500 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/10 transition-colors">Eliminar</button>
+                                    <button onClick={() => setViewingPlan(null)} className="px-4 py-2 text-xs font-bold bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-700 text-slate-600 dark:text-zinc-300 rounded-lg hover:bg-slate-50 dark:hover:bg-zinc-800 transition-colors">Cerrar</button>
+                                    <button onClick={() => handleEditPlan(viewingPlan)} className="px-5 py-2 text-xs bg-slate-800 dark:bg-zinc-100 text-white dark:text-zinc-900 font-bold rounded-lg hover:bg-slate-700 transition-colors shadow-sm">Editar</button>
                                 </div>
-
-                            </div>
-
-                            {/* Footer */}
-                            <div className="px-6 py-3 bg-white dark:bg-zinc-900 border-t border-slate-100 dark:border-zinc-800 flex justify-end gap-2 text-xs shrink-0">
-                                <button onClick={(e) => { setViewingPlan(null); handleDeletePlan(e, viewingPlan.id); }} className="px-4 py-2 rounded-md font-semibold text-red-500 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/10 transition-colors">Eliminar</button>
-                                <button onClick={() => setViewingPlan(null)} className="px-4 py-2 bg-white border border-slate-200 dark:bg-zinc-900 dark:border-zinc-700 font-semibold text-slate-600 dark:text-zinc-300 rounded-md hover:bg-slate-50 dark:hover:bg-zinc-800 transition-colors">Cerrar</button>
-                                <button onClick={() => handleEditPlan(viewingPlan)} className="px-5 py-2 bg-slate-800 dark:bg-zinc-100 text-white dark:text-zinc-900 font-bold rounded-md hover:bg-slate-700 dark:hover:bg-white transition-colors shadow-sm">Editar</button>
                             </div>
                         </div>
-                    </div>
-                )
+                    );
+                })()}
             }
         </>
     );
