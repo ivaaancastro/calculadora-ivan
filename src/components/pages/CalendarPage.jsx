@@ -7,6 +7,10 @@ import {
 import { BlockGeneratorModal } from '../dashboard/BlockGeneratorModal';
 import { FuelingPanel } from '../dashboard/FuelingPanel';
 import { formatDuration, formatBlockDuration } from '../../utils/formatDuration';
+import {
+    getSportCategory, SPORT_LOAD_CONFIG,
+    getEffectiveTSS, computeZoneTssPerHour, estimateTssFromBlocks,
+} from '../../utils/tssEngine';
 
 const WEEKDAYS = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'];
 
@@ -562,67 +566,16 @@ export const CalendarPage = ({ activities, plannedWorkouts = [], addPlannedWorko
         }));
     };
 
-    // --- INTENSITY FACTORS PER ZONE (dynamic from profile, fallback to defaults) ---
-    const DEFAULT_ZONE_IF = { Z1: 0.55, Z2: 0.75, Z3: 0.88, Z4: 1.0, Z5: 1.15, Z6: 1.3 };
-    const ZONE_IF = useMemo(() => {
-        // Try to derive IF from user's configured LTHR zones
-        const sportKey = newPlan.type === 'Ride' ? 'ciclismo' : newPlan.type === 'Swim' ? 'natacion' : 'carrera';
-        const sportSettings = settings?.[sportKey];
-        if (!sportSettings?.lthr || !sportSettings?.zones?.length) return DEFAULT_ZONE_IF;
-        const lthr = sportSettings.lthr;
-        // Each zone's IF = midpoint HR / LTHR
-        const zones = sportSettings.zones;
-        const derived = {};
-        zones.forEach((z, i) => {
-            const mid = (z.min + z.max) / 2;
-            derived[`Z${i + 1}`] = Math.round((mid / lthr) * 100) / 100;
-        });
-        // Z6 if not defined
-        if (!derived.Z6) derived.Z6 = 1.3;
-
-        // Ramps (averages between zones for TSS estimation)
-        derived.R12 = derived.Z1 && derived.Z2 ? (derived.Z1 + derived.Z2) / 2 : 0.65;
-        derived.R23 = derived.Z2 && derived.Z3 ? (derived.Z2 + derived.Z3) / 2 : 0.81;
-
-        return { ...DEFAULT_ZONE_IF, ...derived };
-    }, [settings, newPlan.type]);
+    // --- TSS PER HOUR at each zone, dynamic per sport ---
+    const ZONE_TSS_PER_HOUR = useMemo(() =>
+        computeZoneTssPerHour(newPlan.type, settings)
+        , [settings, newPlan.type]);
 
     // --- AUTO TSS ESTIMATION FROM BLOCKS ---
     const estimatedTSS = useMemo(() => {
         if (newPlan.blocks.length === 0) return null;
-        let totalMinutes = 0;
-        let weightedIF = 0;
-        const sportPace = ZONE_PACE[newPlan.type] || ZONE_PACE.Run;
-
-        const toMinutes = (val, unit, zone) => {
-            if (unit === 'dist') {
-                const pace = sportPace[zone] || 5.0;
-                return (Number(val) || 0) * pace;
-            }
-            return Number(val) || 0;
-        };
-
-        const processBlock = (block) => {
-            if (block.type === 'repeat') {
-                const reps = block.repeats || 1;
-                block.steps.forEach(step => {
-                    const mins = toMinutes(step.duration, step.unit, step.zone);
-                    const ifVal = ZONE_IF[step.zone] || 0.75;
-                    totalMinutes += mins * reps;
-                    weightedIF += mins * reps * ifVal * ifVal;
-                });
-            } else {
-                const mins = toMinutes(block.duration, block.unit, block.zone);
-                const ifVal = ZONE_IF[block.zone] || 0.75;
-                totalMinutes += mins;
-                weightedIF += mins * ifVal * ifVal;
-            }
-        };
-
-        newPlan.blocks.forEach(processBlock);
-        if (totalMinutes === 0) return null;
-        return Math.round((weightedIF * 100) / 60);
-    }, [newPlan.blocks, newPlan.type]);
+        return estimateTssFromBlocks(newPlan.blocks, newPlan.type, settings);
+    }, [newPlan.blocks, newPlan.type, settings]);
 
     // Auto-update TSS and duration when blocks change
     useEffect(() => {
@@ -661,7 +614,7 @@ export const CalendarPage = ({ activities, plannedWorkouts = [], addPlannedWorko
             activities.forEach(a => {
                 const ad = new Date(a.date);
                 if (ad >= sevenDaysAgo && ad < selectedDate && !a.isPlanned) {
-                    last7TSS += (a.tss || 0);
+                    last7TSS += getEffectiveTSS(a);
                     last7Count++;
                 }
             });
@@ -682,7 +635,7 @@ export const CalendarPage = ({ activities, plannedWorkouts = [], addPlannedWorko
             activities.forEach(a => {
                 const ad = new Date(a.date);
                 if (ad >= weekStart && ad < weekEnd) {
-                    weekActualTSS += (a.tss || 0);
+                    weekActualTSS += getEffectiveTSS(a);
                     actualDays.add(ad.toLocaleDateString('en-CA'));
                 }
             });
@@ -691,7 +644,7 @@ export const CalendarPage = ({ activities, plannedWorkouts = [], addPlannedWorko
             plannedWorkouts.forEach(p => {
                 const pd = new Date(p.date);
                 if (pd >= weekStart && pd < weekEnd && pd.toLocaleDateString('en-CA') !== selectedDate.toLocaleDateString('en-CA')) {
-                    weekPlannedTSS += (p.tss || 0);
+                    weekPlannedTSS += getEffectiveTSS(p);
                     plannedDays.add(pd.toLocaleDateString('en-CA'));
                 }
             });
@@ -715,7 +668,7 @@ export const CalendarPage = ({ activities, plannedWorkouts = [], addPlannedWorko
         let yesterdayTSS = 0;
         if (activities) {
             activities.forEach(a => {
-                if (new Date(a.date).toLocaleDateString('en-CA') === yesterdayKey) yesterdayTSS += (a.tss || 0);
+                if (new Date(a.date).toLocaleDateString('en-CA') === yesterdayKey) yesterdayTSS += getEffectiveTSS(a);
             });
         }
 
@@ -956,7 +909,7 @@ export const CalendarPage = ({ activities, plannedWorkouts = [], addPlannedWorko
         const plannedTssByDate = {};
         (plannedWorkouts || []).forEach(p => {
             const dk = new Date(p.date).toLocaleDateString('en-CA');
-            plannedTssByDate[dk] = (plannedTssByDate[dk] || 0) + (p.tss || 0);
+            plannedTssByDate[dk] = (plannedTssByDate[dk] || 0) + getEffectiveTSS(p);
         });
 
         // Project forward day by day from today up to 90 days out
@@ -1118,7 +1071,7 @@ export const CalendarPage = ({ activities, plannedWorkouts = [], addPlannedWorko
                         {/* CUERPO DEL CALENDARIO */}
                         <div className="pb-2">
                             {calendarGrid.map((week, wIdx) => {
-                                let weekTSS = 0; let weekDuration = 0; let weekDist = 0;
+                                let weekTSS = 0; let weekTSSRaw = 0; let weekDuration = 0; let weekDist = 0;
                                 const weekKey = week[0].date.toLocaleDateString('en-CA');
                                 const targetTSS = weeklyTargets[weekKey] || 0;
 
@@ -1127,7 +1080,10 @@ export const CalendarPage = ({ activities, plannedWorkouts = [], addPlannedWorko
                                     const dateKey = day.date.toLocaleDateString('en-CA');
                                     const acts = activitiesByDate[dateKey] || [];
                                     acts.forEach(a => {
-                                        weekTSS += (a.tss || 0);
+                                        const cat = a.sportCategory || getSportCategory(a.type || '');
+                                        const cfg = SPORT_LOAD_CONFIG[cat] || SPORT_LOAD_CONFIG.other;
+                                        if (cfg.countsForWeekly) weekTSS += (a.tss || 0);
+                                        weekTSSRaw += (a.tss || 0);
                                         weekDuration += (a.duration || 0);
                                         if (a.isPlanned) {
                                             let planDist = 0;
@@ -1207,7 +1163,10 @@ export const CalendarPage = ({ activities, plannedWorkouts = [], addPlannedWorko
                                             <div className="space-y-0.5 mb-2">
                                                 <div className="flex justify-between">
                                                     <span className="text-slate-400 dark:text-zinc-500 font-semibold">Carga</span>
-                                                    <span className="font-black font-mono text-amber-600 dark:text-amber-500">{Math.round(weekTSS)}</span>
+                                                    <span className="font-black font-mono text-amber-600 dark:text-amber-500">
+                                                        {Math.round(weekTSS)}
+                                                        {weekTSSRaw !== weekTSS && <span className="text-[8px] font-medium text-slate-400 dark:text-zinc-500 ml-0.5">({Math.round(weekTSSRaw)})</span>}
+                                                    </span>
                                                 </div>
                                                 {weekPmc.ctl != null && (
                                                     <>
@@ -1673,9 +1632,22 @@ export const CalendarPage = ({ activities, plannedWorkouts = [], addPlannedWorko
                                         )}
                                         {newPlan.blocks.map((block) => {
                                             const isStr = newPlan.type === 'WeightTraining';
+                                            // Sport-specific zone labels with BPM ranges
+                                            const sportKey = newPlan.type === 'Ride' ? 'bike' : newPlan.type === 'Swim' ? 'swim' : 'run';
+                                            const sportZones = settings?.[sportKey]?.zones || settings?.run?.zones || [];
+                                            const zoneLabels = ['Rec', 'Base', 'Tempo', 'Umbral', 'VO2', 'Capacidad', 'Sprint'];
                                             const zones = isStr
                                                 ? [{ v: 'Z1', l: 'Ligero' }, { v: 'Z2', l: 'Moderado' }, { v: 'Z3', l: 'Duro' }, { v: 'Z4', l: 'Máximo' }]
-                                                : [{ v: 'Z1', l: 'Z1 Rec' }, { v: 'R12', l: 'Rampa Z1-Z2' }, { v: 'Z2', l: 'Z2 Base' }, { v: 'R23', l: 'Rampa Z2-Z3' }, { v: 'Z3', l: 'Z3 Tempo' }, { v: 'Z4', l: 'Z4 Umbral' }, { v: 'Z5', l: 'Z5 VO2' }, { v: 'Z6', l: 'Z6 Sprint' }];
+                                                : [
+                                                    ...sportZones.map((z, i) => ({
+                                                        v: `Z${i + 1}`,
+                                                        l: `Z${i + 1} ${zoneLabels[i] || ''} ${z.min}-${z.max}`,
+                                                    })),
+                                                    ...(sportZones.length >= 2 ? [
+                                                        { v: 'R12', l: `Rampa Z1-Z2` },
+                                                        { v: 'R23', l: `Rampa Z2-Z3` },
+                                                    ] : []),
+                                                ];
 
                                             // REPEAT BLOCK
                                             if (block.type === 'repeat') {

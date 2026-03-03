@@ -1,5 +1,10 @@
 import { useState, useEffect, useMemo } from "react";
 import { supabase } from "../supabase";
+import {
+  LTHR_ZONE_PCT, SPORT_LOAD_CONFIG,
+  getSportCategory, calcZonesFromLTHR,
+  calculateActivityTSS, recalcTssFromBlocks,
+} from "../utils/tssEngine";
 
 export const useActivities = () => {
   const [activities, setActivities] = useState([]);
@@ -13,22 +18,12 @@ export const useActivities = () => {
 
   const [isStravaConnected, setIsStravaConnected] = useState(false);
 
-  const defaultZones = [
-    { min: 0, max: 153 },       // Z1 Recovery: 0-85%
-    { min: 154, max: 162 },     // Z2 Aerobic: 85-90%
-    { min: 163, max: 170 },     // Z3 Tempo: 90-94%
-    { min: 171, max: 180 },     // Z4 SubThreshold: 94-99%
-    { min: 181, max: 185 },     // Z5 SuperThreshold: 100-102%
-    { min: 186, max: 191 },     // Z6 Aerobic Capacity: 103-106%
-    { min: 192, max: 200 },     // Z7 Anaerobic: 106%+
-  ];
-
   const [settings, setSettings] = useState({
     gender: "male",
     fcReposo: 50,
     weight: 70,
-    run: { max: 200, lthr: 178, zones: defaultZones, zonesMode: 'lthr', thresholdPace: '4:30', paceZones: null },
-    bike: { max: 190, lthr: 168, zones: defaultZones, zonesMode: 'lthr', ftp: 200 },
+    run: { max: 200, lthr: 178, zones: calcZonesFromLTHR(178, 200), zonesMode: 'lthr', thresholdPace: '4:30', paceZones: null },
+    bike: { max: 190, lthr: 168, zones: calcZonesFromLTHR(168, 190), zonesMode: 'lthr', ftp: 200 },
     ta: 42,
     tf: 7,
   });
@@ -74,7 +69,7 @@ export const useActivities = () => {
         run: {
           max: Number(data.run_fc_max) || 200,
           lthr: Number(data.run_lthr) || 178,
-          zones: data.run_zones || defaultZones,
+          zones: data.run_zones || calcZonesFromLTHR(Number(data.run_lthr) || 178, Number(data.run_fc_max) || 200),
           zonesMode: data.run_zones_mode || 'lthr',
           thresholdPace: data.run_threshold_pace || '4:30',
           paceZones: data.run_pace_zones || null,
@@ -82,7 +77,7 @@ export const useActivities = () => {
         bike: {
           max: Number(data.bike_fc_max) || 190,
           lthr: Number(data.bike_lthr) || 168,
-          zones: data.bike_zones || defaultZones,
+          zones: data.bike_zones || calcZonesFromLTHR(Number(data.bike_lthr) || 168, Number(data.bike_fc_max) || 190),
           zonesMode: data.bike_zones_mode || 'lthr',
           ftp: Number(data.bike_ftp) || 200,
         },
@@ -181,7 +176,12 @@ export const useActivities = () => {
       const { data, error } = await supabase.from("planned_workouts").select("*");
       if (!error && data) {
         const sorted = data
-          .map((a) => ({ ...a, dateObj: new Date(a.date), isPlanned: true }))
+          .map((a) => ({
+            ...a,
+            tss: recalcTssFromBlocks(a, settings),
+            dateObj: new Date(a.date),
+            isPlanned: true,
+          }))
           .sort((a, b) => a.dateObj - b.dateObj);
         setPlannedWorkouts(sorted);
       }
@@ -189,6 +189,14 @@ export const useActivities = () => {
       console.warn("planned_workouts table not available:", e);
     }
   };
+
+  // Re-calculate planned workout TSS when settings change (profile loads from DB)
+  useEffect(() => {
+    setPlannedWorkouts(prev => {
+      if (prev.length === 0) return prev;
+      return prev.map(p => ({ ...p, tss: recalcTssFromBlocks(p, settings) }));
+    });
+  }, [settings]);
 
   const addPlannedWorkout = async (workoutData) => {
     const userId = await getCurrentUserId();
@@ -572,67 +580,10 @@ export const useActivities = () => {
         summary: { count: 0 },
       };
 
-    // --- HRSS (intervals.icu style): Banister TRIMP normalized to LTHR ---
-    // Formula: TRIMP = Σ(dt_minutes × ΔHR × y × e^(b × ΔHR))
-    // Where ΔHR = (HR - HRrest) / (HRmax - HRrest)
-    // Male: y=0.64, b=1.92  |  Female: y=0.86, b=1.67
-    // HRSS = (TRIMP / TRIMP_1h_at_LTHR) × 100
-    const isMale = settings.gender !== 'female';
-    const kY = isMale ? 0.64 : 0.86;
-    const kB = isMale ? 1.92 : 1.67;
-    const hrRest = Number(settings.fcReposo) || 50;
-
-    // Pre-calculate the normalization factor: TRIMP for 1 hour at LTHR
-    const trimpAtLthr = (sport) => {
-      const lthr = Number(sport.lthr) || 170;
-      const hrMax = Number(sport.max) || 200;
-      const deltaHR = (lthr - hrRest) / (hrMax - hrRest);
-      return 60 * deltaHR * kY * Math.exp(kB * deltaHR); // 60 minutes at LTHR
-    };
-    const runTrimpNorm = trimpAtLthr(settings.run);
-    const bikeTrimpNorm = trimpAtLthr(settings.bike);
-
-    const calculateTSS = (act) => {
-      const t = String(act.type).toLowerCase();
-      const isBike = t.includes("ciclismo") || t.includes("bici");
-      const sportSettings = isBike ? settings.bike : settings.run;
-      const hrMax = Number(sportSettings.max) || (isBike ? 190 : 200);
-      const hrRange = hrMax - hrRest;
-      const normFactor = isBike ? bikeTrimpNorm : runTrimpNorm;
-
-      if (hrRange <= 0) return 0;
-
-      // === With detailed HR stream data: exact TRIMP calculation ===
-      if (act.streams_data?.heartrate?.data && act.streams_data?.time?.data) {
-        const hrData = act.streams_data.heartrate.data;
-        const timeData = act.streams_data.time.data;
-        let trimp = 0;
-        for (let i = 1; i < hrData.length; i++) {
-          const dtMin = (timeData[i] - timeData[i - 1]) / 60; // seconds → minutes
-          const hr = Math.max(hrData[i], hrRest); // clamp to resting HR minimum
-          const deltaHR = (hr - hrRest) / hrRange;
-          trimp += dtMin * deltaHR * kY * Math.exp(kB * deltaHR);
-        }
-        // Normalize: TRIMP / (TRIMP for 1h at LTHR) × 100
-        return Math.round((trimp / normFactor) * 100);
-      }
-
-      // === Fallback: estimate from average HR using Joe Friel's hrTSS ===
-      const hr = Number(act.hr_avg);
-      const durationMin = act.duration || 0; // already in minutes
-      if (!hr || hr <= 40) return Math.round((durationMin / 60) * 30); // very low estimate
-
-      const lthr = Number(sportSettings.lthr) || 170;
-      const durationSecs = durationMin * 60;
-      const intensityFactor = hr / lthr;
-
-      const hrTss = (durationSecs * hr * intensityFactor) / (lthr * 3600) * 100;
-      return Math.round(hrTss);
-    };
-
     const processedActivities = [...activities].map((act) => ({
       ...act,
-      tss: calculateTSS(act),
+      tss: calculateActivityTSS(act, settings),
+      sportCategory: getSportCategory(act.type),
     }));
     const sortedActs = processedActivities;
     const startDate = new Date(sortedActs[0].date);
@@ -669,18 +620,23 @@ export const useActivities = () => {
       const daysActs = activitiesMap.get(dateStr) || [];
 
       let dailyTss = 0;
+      let dailyCtlContrib = 0;
+      let dailyAtlContrib = 0;
       daysActs.forEach((act) => {
+        const cfg = SPORT_LOAD_CONFIG[act.sportCategory] || SPORT_LOAD_CONFIG.other;
         dailyTss += act.tss;
+        dailyCtlContrib += act.tss * cfg.fitness;
+        dailyAtlContrib += act.tss * cfg.fatigue;
       });
 
-      if (time <= todayUTC) loadHistory.push(dailyTss);
+      if (time <= todayUTC) loadHistory.push(Math.round(dailyAtlContrib));
 
       if (fullSeries.length === 0 && dailyTss > 0) {
-        ctl = dailyTss;
-        atl = dailyTss;
+        ctl = dailyCtlContrib;
+        atl = dailyAtlContrib;
       } else {
-        ctl = ctl + (dailyTss - ctl) / settings.ta;
-        atl = atl + (dailyTss - atl) / settings.tf;
+        ctl = ctl + (dailyCtlContrib - ctl) / settings.ta;
+        atl = atl + (dailyAtlContrib - atl) / settings.tf;
       }
 
       fullSeries.push({
@@ -689,6 +645,7 @@ export const useActivities = () => {
         atl: parseFloat(atl.toFixed(1)),
         tcb: parseFloat((ctl - atl).toFixed(1)),
         dailyTss: Math.round(dailyTss),
+        dailyTssEffective: Math.round(dailyAtlContrib),
       });
     }
 
@@ -742,12 +699,15 @@ export const useActivities = () => {
     let sumDur = 0,
       sumDist = 0,
       sumElev = 0,
-      sumTSS = 0;
+      sumTSS = 0,
+      sumTSSEffective = 0;
     visibleActs.forEach((a) => {
+      const cfg = SPORT_LOAD_CONFIG[a.sportCategory] || SPORT_LOAD_CONFIG.other;
       sumDur += a.duration;
       sumDist += a.distance;
       sumElev += a.elevation_gain;
       sumTSS += a.tss;
+      sumTSSEffective += Math.round(a.tss * cfg.fatigue);
     });
     const summary = {
       count: visibleActs.length,
@@ -755,6 +715,7 @@ export const useActivities = () => {
       distance: Math.round(sumDist / 1000),
       elevation: sumElev,
       tss: sumTSS,
+      tssEffective: sumTSSEffective,
     };
 
     const currentMetrics = {
