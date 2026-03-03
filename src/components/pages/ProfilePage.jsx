@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Save, Activity, Heart, Zap, Database, Loader2, RefreshCw, CheckCircle2, ArrowLeft, Lock, Key, Bike, Footprints, Weight, Link2, Timer, Gauge } from 'lucide-react';
 import { supabase } from '../../supabase';
+import { LTHR_ZONE_PCT, calcZonesFromLTHR } from '../../utils/tssEngine';
 
 const getPeakByTime = (hrData, timeData, windowSeconds) => {
     if (!hrData || !timeData || hrData.length < 2) return 0;
@@ -17,31 +18,18 @@ const getPeakByTime = (hrData, timeData, windowSeconds) => {
     return maxAvg;
 };
 
-// --- intervals.icu zone definitions (% of LTHR) ---
-const LTHR_PCT = [
-    { label: 'Recovery', pMin: 0, pMax: 0.85 },
-    { label: 'Aerobic', pMin: 0.85, pMax: 0.90 },
-    { label: 'Tempo', pMin: 0.90, pMax: 0.94 },
-    { label: 'SubThreshold', pMin: 0.94, pMax: 0.99 },
-    { label: 'SuperThreshold', pMin: 1.00, pMax: 1.02 },
-    { label: 'Aerobic Capacity', pMin: 1.03, pMax: 1.06 },
-    { label: 'Anaerobic', pMin: 1.06, pMax: 1.15 },
-];
+// Zone labels for profile display (matches LTHR_ZONE_PCT order)
+const ZONE_LABELS = ['Recovery', 'Aerobic', 'Tempo', 'SubThreshold', 'SuperThreshold', 'Aerobic Capacity', 'Anaerobic'];
+
 const FCMAX_PCT = [
-    { label: 'Recovery', pMin: 0, pMax: 0.60 },
-    { label: 'Aerobic', pMin: 0.60, pMax: 0.70 },
-    { label: 'Tempo', pMin: 0.70, pMax: 0.80 },
-    { label: 'SubThreshold', pMin: 0.80, pMax: 0.87 },
-    { label: 'SuperThreshold', pMin: 0.87, pMax: 0.92 },
-    { label: 'Aerobic Capacity', pMin: 0.92, pMax: 0.97 },
+    { label: 'Recovery', pMin: 0, pMax: 0.59 },
+    { label: 'Aerobic', pMin: 0.59, pMax: 0.74 },
+    { label: 'Tempo', pMin: 0.74, pMax: 0.84 },
+    { label: 'SubThreshold', pMin: 0.84, pMax: 0.90 },
+    { label: 'SuperThreshold', pMin: 0.90, pMax: 0.94 },
+    { label: 'Aerobic Capacity', pMin: 0.94, pMax: 0.97 },
     { label: 'Anaerobic', pMin: 0.97, pMax: 1.00 },
 ];
-
-const calcZonesFromLTHR = (lthr, maxHr) =>
-    LTHR_PCT.map((z, i) => ({
-        min: i === 0 ? 0 : Math.round(lthr * z.pMin),
-        max: i === 6 ? (maxHr || Math.round(lthr * z.pMax)) : Math.round(lthr * z.pMax),
-    }));
 
 const calcZonesFromFCMax = (maxHr) =>
     FCMAX_PCT.map((z, i) => ({
@@ -207,8 +195,8 @@ export const ProfilePage = ({ currentSettings, onUpdate, activities, isDeepSynci
             {[{ k: 'lthr', l: '% LTHR' }, { k: 'fcmax', l: '% FCmax' }, { k: 'custom', l: 'Manual' }].map(m => (
                 <button key={m.k} onClick={() => handleZonesMode(sport, m.k)}
                     className={`px-2 py-1 rounded-md text-[8px] font-bold uppercase tracking-wider transition-all ${formData[sport].zonesMode === m.k
-                            ? 'bg-white dark:bg-zinc-900 shadow-sm text-blue-600 dark:text-blue-400'
-                            : 'text-slate-500 dark:text-zinc-500 hover:text-slate-700'
+                        ? 'bg-white dark:bg-zinc-900 shadow-sm text-blue-600 dark:text-blue-400'
+                        : 'text-slate-500 dark:text-zinc-500 hover:text-slate-700'
                         }`}>{m.l}</button>
             ))}
         </div>
@@ -229,7 +217,7 @@ export const ProfilePage = ({ currentSettings, onUpdate, activities, isDeepSynci
     const SportZonesSection = ({ sport, sportLabel, icon: Icon, color, showPace, showPower }) => {
         const data = formData[sport];
         const isReadOnly = data.zonesMode !== 'custom';
-        const lthrPcts = LTHR_PCT;
+        const lthrPcts = LTHR_ZONE_PCT;
         const fcmaxPcts = FCMAX_PCT;
 
         return (
