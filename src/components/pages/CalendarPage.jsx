@@ -26,21 +26,21 @@ const DurationInput = ({ value, onChange, className = '' }) => {
         const clampS = Math.max(0, Math.min(59, Number(newS) || 0));
         onChange((clampH * 3600 + clampM * 60 + clampS) / 60);
     };
-    const inCls = 'w-7 bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 text-[11px] font-mono py-0.5 text-center outline-none focus:border-slate-400 dark:focus:border-zinc-500 transition-colors';
-    const sep = <span className="text-slate-300 dark:text-zinc-600 text-[10px] select-none">:</span>;
+    const inCls = 'w-10 bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 text-sm font-mono py-1 text-center outline-none focus:border-slate-400 dark:focus:border-zinc-500 transition-colors';
+    const sep = <span className="text-slate-300 dark:text-zinc-600 text-[11px] font-bold select-none mx-0.5">:</span>;
     return (
-        <div className={`inline-flex items-center rounded-sm overflow-hidden ${className}`} title="hh:mm:ss">
-            <input type="number" value={h} min={0} max={23} tabIndex={-1}
+        <div className={`inline-flex items-center rounded-md overflow-hidden bg-white dark:bg-zinc-900 shadow-sm border border-slate-200 dark:border-zinc-800 p-0.5 ${className}`} title="HH:MM:SS">
+            <input type="number" value={h} min={0} max={23}
                 onChange={e => commit(e.target.value, m, s)}
-                className={`${inCls} ${h > 0 ? '' : 'w-0 border-0 p-0 opacity-0 pointer-events-none'}`} />
-            {h > 0 && sep}
+                className={`${inCls} rounded-sm`} placeholder="00" />
+            {sep}
             <input type="number" value={m} min={0} max={59}
                 onChange={e => commit(h, e.target.value, s)}
-                className={inCls} />
+                className={`${inCls} rounded-sm`} placeholder="00" />
             {sep}
             <input type="number" value={s} min={0} max={59}
                 onChange={e => commit(h, m, e.target.value)}
-                className={inCls} />
+                className={`${inCls} rounded-sm`} placeholder="00" />
         </div>
     );
 };
@@ -536,7 +536,7 @@ export const CalendarPage = ({ activities, plannedWorkouts = [], addPlannedWorko
     const goToday = () => setCurrentDate(new Date());
 
     // --- VIEW MODE ---
-    const [viewMode, setViewMode] = useState('month'); // 'month' | 'week'
+
 
     // Current week for weekly view
     const currentWeekDays = useMemo(() => {
@@ -602,6 +602,9 @@ export const CalendarPage = ({ activities, plannedWorkouts = [], addPlannedWorko
     };
 
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const [isPastingString, setIsPastingString] = useState(false);
+    const [pasteText, setPasteText] = useState('');
+    const [draggedBlockIdx, setDraggedBlockIdx] = useState(null);
     const [viewingPlan, setViewingPlan] = useState(null);
     const [editingPlanId, setEditingPlanId] = useState(null);
     const [selectedDateForPlan, setSelectedDateForPlan] = useState(null);
@@ -821,6 +824,30 @@ export const CalendarPage = ({ activities, plannedWorkouts = [], addPlannedWorko
         };
     };
 
+    // --- BLOCK DRAG & DROP REORDERING ---
+    const handleDragBlockStart = (e, idx) => {
+        setDraggedBlockIdx(idx);
+        e.dataTransfer.effectAllowed = 'move';
+    };
+    const handleDragBlockOver = (e, idx) => {
+        e.preventDefault();
+        e.dataTransfer.dropEffect = 'move';
+    };
+    const handleDropBlock = (e, idx) => {
+        e.preventDefault();
+        if (draggedBlockIdx === null || draggedBlockIdx === idx) return;
+        setNewPlan(prev => {
+            const newBlocks = [...prev.blocks];
+            const [draggedItem] = newBlocks.splice(draggedBlockIdx, 1);
+            newBlocks.splice(idx, 0, draggedItem);
+            return { ...prev, blocks: newBlocks };
+        });
+        setDraggedBlockIdx(null);
+    };
+    const handleDragBlockEnd = () => {
+        setDraggedBlockIdx(null);
+    };
+
     const addBlock = (blockType) => {
         if (blockType === 'repeat') {
             setNewPlan(prev => ({
@@ -863,6 +890,90 @@ export const CalendarPage = ({ activities, plannedWorkouts = [], addPlannedWorko
                 steps: b.steps.filter(s => s.id !== stepId)
             } : b)
         }));
+    };
+
+    // --- AI SMART PASTE PARSER ---
+    const handleMagicPaste = () => {
+        if (!pasteText.trim()) return;
+        const lines = pasteText.split('\n').map(l => l.trim()).filter(Boolean);
+        const newBlocks = [];
+        let currentRepeat = null;
+
+        lines.forEach((line) => {
+            const lowerLine = line.toLowerCase();
+            const id = Date.now() + Math.random();
+
+            // Extract duration
+            let duration = 0;
+            let durationMatch = lowerLine.match(/^(\d+(?:\.\d+)?)(m|min|s|sec|h)\b/);
+            if (durationMatch) {
+                const val = parseFloat(durationMatch[1]);
+                if (durationMatch[2] === 'm' || durationMatch[2] === 'min') duration = val;
+                else if (durationMatch[2] === 's' || durationMatch[2] === 'sec') duration = val / 60;
+                else if (durationMatch[2] === 'h') duration = val * 60;
+            }
+
+            // Extract Zone
+            let zone = newPlan.type === 'WeightTraining' ? 'Z3' : 'Z2';
+            let zoneMatch = lowerLine.match(/z([1-7])/);
+            if (zoneMatch) zone = `Z${zoneMatch[1]}`;
+
+            // Circuit Start ("4x")
+            let repeatMatch = lowerLine.match(/^(\d+)\s*x\s*$/) || lowerLine.match(/^(\d+)\s*series\s*$/);
+            if (repeatMatch) {
+                currentRepeat = {
+                    id, type: 'repeat', repeats: parseInt(repeatMatch[1]),
+                    details: 'Circuito Auto-generado', steps: []
+                };
+                newBlocks.push(currentRepeat);
+                return;
+            }
+
+            const isRecovery = lowerLine.includes('descanso') || lowerLine.includes('recu') || lowerLine.includes('pausa');
+
+            if (currentRepeat) {
+                if (lowerLine.includes('calent') || lowerLine.includes('warmup') || lowerLine.includes('movilidad') || lowerLine.includes('enfri') || lowerLine.includes('estirar') || lowerLine.includes('cooldown') || lowerLine.includes('vuelta a la calma')) {
+                    currentRepeat = null;
+                } else {
+                    currentRepeat.steps.push({
+                        id: Date.now() + Math.random(),
+                        type: isRecovery ? 'recovery' : 'active',
+                        duration: duration || (isRecovery ? 2 : 5),
+                        unit: 'time',
+                        zone: zoneMatch ? zone : (isRecovery ? 'Z1' : zone),
+                        details: line.replace(/^(\d+(?:\.\d+)?)(m|min|s|sec|h)/i, '').trim()
+                    });
+                    return;
+                }
+            }
+
+            // Warmup
+            if (lowerLine.includes('calent') || lowerLine.includes('warmup') || lowerLine.includes('movilidad')) {
+                newBlocks.push({ id, type: 'warmup', duration: duration || 10, unit: 'time', zone: zoneMatch ? zone : 'Z1', details: line });
+            }
+            // Cooldown
+            else if (lowerLine.includes('enfri') || lowerLine.includes('estirar') || lowerLine.includes('cooldown') || lowerLine.includes('vuelta a la calma')) {
+                newBlocks.push({ id, type: 'cooldown', duration: duration || 10, unit: 'time', zone: zoneMatch ? zone : 'Z1', details: line });
+            }
+            // Inline Repeat ("3x10 Press Banca")
+            else if (lowerLine.match(/(\d+)\s*x/)) {
+                const match = lowerLine.match(/(\d+)\s*x/);
+                newBlocks.push({
+                    id, type: 'repeat', repeats: match ? parseInt(match[1]) : 3, details: line,
+                    steps: [{ id: Date.now() + Math.random(), type: 'active', duration: duration || 5, unit: 'time', zone: zoneMatch ? zone : (newPlan.type === 'WeightTraining' ? 'Z3' : 'Z4'), details: line.replace(/^(\d+)\s*x/i, '').trim() }]
+                });
+            }
+            // Normal Working Set
+            else {
+                newBlocks.push({ id, type: 'main', duration: duration || 15, unit: 'time', zone: zone, details: line });
+            }
+        });
+
+        if (newBlocks.length > 0) {
+            setNewPlan(prev => ({ ...prev, blocks: [...prev.blocks, ...newBlocks] }));
+        }
+        setIsPastingString(false);
+        setPasteText('');
     };
 
     const updateBlock = (id, field, value) => {
@@ -1082,10 +1193,7 @@ export const CalendarPage = ({ activities, plannedWorkouts = [], addPlannedWorko
                     <div className="flex items-center gap-2 sm:gap-4">
                         <h2 className="text-lg sm:text-xl font-black text-slate-800 dark:text-zinc-100 capitalize flex items-center gap-1.5 sm:gap-2 tracking-tight">
                             <CalIcon className="text-blue-600 dark:text-blue-500 w-4 h-4 sm:w-5 sm:h-5" />
-                            {viewMode === 'month'
-                                ? new Date(year, month).toLocaleDateString('es-ES', { month: 'long', year: 'numeric' })
-                                : `${currentWeekDays[0].toLocaleDateString('es-ES', { day: 'numeric', month: 'short' })} — ${currentWeekDays[6].toLocaleDateString('es-ES', { day: 'numeric', month: 'short', year: 'numeric' })}`
-                            }
+                            {new Date(year, month).toLocaleDateString('es-ES', { month: 'long', year: 'numeric' })}
                         </h2>
                         <button onClick={goToday} className="text-[10px] sm:text-xs font-bold uppercase tracking-wider px-2 sm:px-3 py-1 bg-white dark:bg-zinc-800 border border-slate-300 dark:border-zinc-700 text-slate-600 dark:text-zinc-300 rounded hover:bg-slate-50 dark:hover:bg-zinc-700 transition-colors">Hoy</button>
                     </div>
@@ -1102,18 +1210,10 @@ export const CalendarPage = ({ activities, plannedWorkouts = [], addPlannedWorko
                         <button onClick={() => setShowPmcChart(p => !p)} className={`hidden sm:flex items-center gap-1.5 px-3 py-1.5 border rounded-lg text-[9px] font-black uppercase tracking-widest transition-colors shadow-sm ${showPmcChart ? 'bg-violet-50 dark:bg-violet-900/20 text-violet-600 dark:text-violet-400 border-violet-200 dark:border-violet-800/50' : 'bg-white dark:bg-zinc-900 text-slate-500 dark:text-zinc-400 border-slate-200 dark:border-zinc-700 hover:border-slate-400'}`}>
                             <Activity size={12} /> Forma
                         </button>
-                        <div className="hidden sm:flex items-center bg-slate-100 dark:bg-zinc-800 rounded overflow-hidden ml-2">
-                            <button onClick={() => setViewMode('month')}
-                                className={`px-2.5 py-1.5 text-[9px] font-bold uppercase tracking-wider transition-colors ${viewMode === 'month' ? 'bg-slate-800 dark:bg-zinc-100 text-white dark:text-zinc-900' : 'text-slate-500 dark:text-zinc-400 hover:text-slate-700'}`}
-                            >Mes</button>
-                            <button onClick={() => setViewMode('week')}
-                                className={`px-2.5 py-1.5 text-[9px] font-bold uppercase tracking-wider transition-colors ${viewMode === 'week' ? 'bg-slate-800 dark:bg-zinc-100 text-white dark:text-zinc-900' : 'text-slate-500 dark:text-zinc-400 hover:text-slate-700'}`}
-                            >Semana</button>
-                        </div>
-                        <div className="flex items-center border border-slate-200 dark:border-zinc-700 rounded overflow-hidden">
-                            <button onClick={viewMode === 'month' ? prevMonth : prevWeek} className="p-1.5 sm:p-2 bg-transparent hover:bg-slate-100 dark:hover:bg-zinc-800 text-slate-500 dark:text-zinc-400 transition-colors"><ChevronLeft size={18} /></button>
+                        <div className="flex items-center border border-slate-200 dark:border-zinc-700 rounded overflow-hidden ml-2">
+                            <button onClick={prevMonth} className="p-1.5 sm:p-2 bg-transparent hover:bg-slate-100 dark:hover:bg-zinc-800 text-slate-500 dark:text-zinc-400 transition-colors"><ChevronLeft size={18} /></button>
                             <div className="w-px h-5 bg-slate-200 dark:bg-zinc-700"></div>
-                            <button onClick={viewMode === 'month' ? nextMonth : nextWeek} className="p-1.5 sm:p-2 bg-transparent hover:bg-slate-100 dark:hover:bg-zinc-800 text-slate-500 dark:text-zinc-400 transition-colors"><ChevronRight size={18} /></button>
+                            <button onClick={nextMonth} className="p-1.5 sm:p-2 bg-transparent hover:bg-slate-100 dark:hover:bg-zinc-800 text-slate-500 dark:text-zinc-400 transition-colors"><ChevronRight size={18} /></button>
                         </div>
                     </div>
                 </div>
@@ -1154,7 +1254,7 @@ export const CalendarPage = ({ activities, plannedWorkouts = [], addPlannedWorko
                     plannedWorkouts={plannedWorkouts}
                 />
 
-                {viewMode === 'month' && (
+                <>
                     <div className="w-full relative">
 
                         {/* CABECERA DÍAS DE LA SEMANA */}
@@ -1502,128 +1602,9 @@ export const CalendarPage = ({ activities, plannedWorkouts = [], addPlannedWorko
                             })}
                         </div>
                     </div>
-                )}
+                </>
 
-                {/* === WEEKLY VIEW === */}
-                {viewMode === 'week' && (
-                    <div className="w-full">
-                        {/* WEEK DAY HEADERS */}
-                        <div className="grid grid-cols-7 border-b border-slate-200 dark:border-zinc-800 bg-slate-50/95 dark:bg-zinc-950/90">
-                            {currentWeekDays.map((d, i) => {
-                                const isToday = d.toLocaleDateString('en-CA') === new Date().toLocaleDateString('en-CA');
-                                return (
-                                    <div key={i} className={`py-2.5 px-2 text-center border-r last:border-r-0 border-slate-200 dark:border-zinc-800 ${isToday ? 'bg-blue-50/50 dark:bg-blue-950/20' : ''}`}>
-                                        <span className="text-[9px] font-bold text-slate-500 dark:text-zinc-400 uppercase tracking-widest">{WEEKDAYS[i]}</span>
-                                        <span className={`block text-lg font-black ${isToday ? 'text-blue-600 dark:text-blue-400' : 'text-slate-800 dark:text-zinc-200'}`}>{d.getDate()}</span>
-                                    </div>
-                                );
-                            })}
-                        </div>
-                        {/* WEEK BODY */}
-                        <div className="grid grid-cols-7 min-h-[400px]">
-                            {currentWeekDays.map((d, i) => {
-                                const dateKey = d.toLocaleDateString('en-CA');
-                                const isPast = dateKey < new Date().toLocaleDateString('en-CA');
-                                const isToday = dateKey === new Date().toLocaleDateString('en-CA');
-                                const dayActs = activitiesByDate[dateKey] || [];
-                                const dayPlans = plannedByDate[dateKey] || [];
 
-                                const zoneColor = (z) => {
-                                    const colors = { Z1: 'bg-slate-300 dark:bg-zinc-600', Z2: 'bg-blue-400 dark:bg-blue-600', Z3: 'bg-emerald-400 dark:bg-emerald-600', Z4: 'bg-amber-400 dark:bg-amber-500', Z5: 'bg-red-400 dark:bg-red-500', Z6: 'bg-rose-600 dark:bg-rose-700' };
-                                    return colors[z] || 'bg-slate-300';
-                                };
-
-                                return (
-                                    <div key={i}
-                                        className={`border-r last:border-r-0 border-b border-slate-200 dark:border-zinc-800 p-1.5 flex flex-col gap-1.5
-                                        ${isToday ? 'bg-blue-50/30 dark:bg-blue-950/10' : ''}`}
-                                        onDragOver={(e) => handleDragOver(e, dateKey)}
-                                        onDragLeave={handleDragLeave}
-                                        onDrop={(e) => handleDrop(e, d)}
-                                        style={dragOverDate === dateKey ? { outline: '2px dashed #3b82f6', outlineOffset: '-2px' } : {}}
-                                    >
-                                        {/* PLANNED */}
-                                        {dayPlans.map(p => {
-                                            let blocks = [];
-                                            try {
-                                                const desc = typeof p.description === 'string' ? JSON.parse(p.description) : p.description;
-                                                blocks = desc?.blocks || [];
-                                            } catch (e) { }
-                                            return (
-                                                <div key={p.id}
-                                                    draggable
-                                                    onDragStart={() => setDraggedWorkout(p)}
-                                                    onClick={() => setViewingPlan(p)}
-                                                    className="bg-white dark:bg-zinc-900 border border-dashed border-slate-300 dark:border-zinc-700 rounded p-1.5 cursor-pointer hover:border-blue-400 transition-colors group"
-                                                >
-                                                    <div className="flex items-center gap-1 mb-1">
-                                                        {getSportIcon(p.type)}
-                                                        <span className="text-[9px] font-bold text-slate-600 dark:text-zinc-300 truncate flex-1">{p.name || 'Entreno'}</span>
-                                                        <span className="text-[8px] font-mono text-slate-400">{p.tss}tss</span>
-                                                    </div>
-                                                    {/* Visual blocks */}
-                                                    {blocks.length > 0 && (
-                                                        <div className="flex gap-px rounded overflow-hidden h-4">
-                                                            {blocks.map((b, bi) => {
-                                                                if (b.type === 'repeat') {
-                                                                    return (b.steps || []).map((s, si) => (
-                                                                        <div key={`${bi}-${si}`}
-                                                                            className={`flex-1 ${zoneColor(s.zone)} opacity-80`}
-                                                                            title={`${b.repeats}x ${s.duration}${s.unit === 'dist' ? 'km' : 'min'} ${s.zone}`}
-                                                                        />
-                                                                    ));
-                                                                }
-                                                                return (
-                                                                    <div key={bi}
-                                                                        className={`${zoneColor(b.zone)} opacity-80`}
-                                                                        style={{ flex: Number(b.duration) || 1 }}
-                                                                        title={`${b.duration}${b.unit === 'dist' ? 'km' : 'min'} ${b.zone}`}
-                                                                    />
-                                                                );
-                                                            })}
-                                                        </div>
-                                                    )}
-                                                </div>
-                                            );
-                                        })}
-
-                                        {/* REAL ACTIVITIES */}
-                                        {dayActs.map(a => (
-                                            <div key={a.id}
-                                                onClick={() => onSelectActivity?.(a)}
-                                                className="bg-slate-50 dark:bg-zinc-800/80 border border-slate-200 dark:border-zinc-700 rounded p-1.5 cursor-pointer hover:bg-slate-100 dark:hover:bg-zinc-700 transition-colors"
-                                            >
-                                                <div className="flex items-center gap-1">
-                                                    {getSportIcon(a.type)}
-                                                    <span className="text-[9px] font-bold text-slate-700 dark:text-zinc-200 truncate flex-1">{a.name}</span>
-                                                </div>
-                                                <div className="flex gap-2 mt-0.5">
-                                                    <span className="text-[8px] font-mono text-amber-600">{a.tss}tss</span>
-                                                    <span className="text-[8px] font-mono text-slate-400">{formatDuration(a.duration)}</span>
-                                                    {a.distance > 0 && <span className="text-[8px] font-mono text-slate-400">{(a.distance / 1000).toFixed(1)}km</span>}
-                                                </div>
-                                            </div>
-                                        ))}
-
-                                        {/* ADD BUTTON */}
-                                        {!isPast && dayPlans.length === 0 && dayActs.length === 0 && (
-                                            <button onClick={(e) => handleOpenPlanModal(e, d)}
-                                                className="w-full py-4 text-slate-300 dark:text-zinc-700 hover:text-blue-400 dark:hover:text-blue-500 transition-colors flex items-center justify-center">
-                                                <Plus size={16} />
-                                            </button>
-                                        )}
-                                        {!isPast && (dayPlans.length > 0 || dayActs.length > 0) && (
-                                            <button onClick={(e) => handleOpenPlanModal(e, d)}
-                                                className="text-[9px] font-bold text-slate-400 dark:text-zinc-600 hover:text-blue-500 transition-colors mt-auto text-center">
-                                                + añadir
-                                            </button>
-                                        )}
-                                    </div>
-                                );
-                            })}
-                        </div>
-                    </div>
-                )}
 
             </div>
 
@@ -1711,8 +1692,13 @@ export const CalendarPage = ({ activities, plannedWorkouts = [], addPlannedWorko
                                 {/* ESTRUCTURA */}
                                 <div>
                                     <div className="flex justify-between items-center mb-3">
-                                        <label className="block text-[10px] font-semibold text-slate-500 dark:text-zinc-400 uppercase tracking-wider">Plan de Entrenamiento</label>
-                                        <div className="flex gap-1.5">
+                                        <div className="flex items-center gap-2">
+                                            <label className="block text-[10px] font-semibold text-slate-500 dark:text-zinc-400 uppercase tracking-wider">Plan de Entrenamiento</label>
+                                            <button onClick={() => setIsPastingString(!isPastingString)} className={`p-1 rounded-md transition-colors ${isPastingString ? 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400' : 'bg-slate-100 text-slate-500 dark:bg-zinc-800 dark:text-zinc-400 hover:text-slate-700 dark:hover:text-zinc-200'}`} title="Pegar texto y convertir a bloques">
+                                                <Sparkles size={14} />
+                                            </button>
+                                        </div>
+                                        <div className="flex gap-1.5 flex-wrap justify-end">
                                             {newPlan.type === 'WeightTraining' ? (<>
                                                 <button onClick={() => addBlock('warmup')} className="px-2 py-1 bg-white dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 text-slate-600 dark:text-zinc-300 rounded-md text-[9px] font-medium transition-colors hover:bg-slate-50 dark:hover:bg-zinc-700 shadow-sm">Calentar</button>
                                                 <button onClick={() => addBlock('main')} className="px-2 py-1 bg-white dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 text-slate-600 dark:text-zinc-300 rounded-md text-[9px] font-medium transition-colors hover:bg-slate-50 dark:hover:bg-zinc-700 shadow-sm">Ejercicio</button>
@@ -1727,6 +1713,25 @@ export const CalendarPage = ({ activities, plannedWorkouts = [], addPlannedWorko
                                         </div>
                                     </div>
 
+                                    {/* AI SMART PASTE AREA */}
+                                    {isPastingString && (
+                                        <div className="mb-4 p-4 rounded-lg bg-indigo-50/50 dark:bg-indigo-900/10 border border-indigo-100 dark:border-indigo-800/50">
+                                            <label className="block text-[10px] font-semibold text-indigo-500 uppercase tracking-wider mb-2 flex items-center gap-1"><Sparkles size={12} /> Auto-Crear bloque a bloque</label>
+                                            <textarea
+                                                value={pasteText}
+                                                onChange={e => setPasteText(e.target.value)}
+                                                placeholder={`Pega el texto aquí línea a línea.\nEj:\no Calentamiento articular\no 4x8 Sentadillas Búlgaras\no 3x10 Press Banca`}
+                                                className="w-full bg-white dark:bg-zinc-950 border border-indigo-200 dark:border-indigo-800/80 rounded-md p-3 text-sm text-slate-700 dark:text-zinc-300 resize-y min-h-[100px] outline-none focus:border-indigo-400 dark:focus:border-indigo-500 mb-3 placeholder:text-slate-400 dark:placeholder:text-zinc-600"
+                                            />
+                                            <div className="flex justify-end gap-2">
+                                                <button onClick={() => setIsPastingString(false)} className="px-4 py-1.5 rounded-md text-xs font-semibold text-slate-500 hover:bg-slate-100 dark:text-zinc-400 dark:hover:bg-zinc-800 transition-colors">Cancelar</button>
+                                                <button onClick={handleMagicPaste} disabled={!pasteText.trim()} className="px-4 py-1.5 rounded-md text-xs font-bold bg-indigo-600 text-white hover:bg-indigo-700 disabled:opacity-50 transition-colors shadow-sm flex items-center gap-1.5">
+                                                    Analizar e Insertar <Target size={12} />
+                                                </button>
+                                            </div>
+                                        </div>
+                                    )}
+
                                     <div className="space-y-2">
                                         {newPlan.blocks.length === 0 && (
                                             <div className="flex flex-col items-center justify-center py-10 border border-dashed border-slate-200 dark:border-zinc-800 rounded-lg bg-white/50 dark:bg-zinc-900/50">
@@ -1735,7 +1740,7 @@ export const CalendarPage = ({ activities, plannedWorkouts = [], addPlannedWorko
                                                 <p className="text-slate-400 dark:text-zinc-500 text-[10px] mt-1">Añade bloques de calentamiento o intervalos</p>
                                             </div>
                                         )}
-                                        {newPlan.blocks.map((block) => {
+                                        {newPlan.blocks.map((block, idx) => {
                                             const isStr = newPlan.type === 'WeightTraining';
                                             // Sport-specific zone labels with BPM ranges
                                             const sportKey = newPlan.type === 'Ride' ? 'bike' : newPlan.type === 'Swim' ? 'swim' : 'run';
@@ -1757,7 +1762,13 @@ export const CalendarPage = ({ activities, plannedWorkouts = [], addPlannedWorko
                                             // REPEAT BLOCK
                                             if (block.type === 'repeat') {
                                                 return (
-                                                    <div key={block.id} className="rounded-md border-l-4 border-l-slate-400 border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 overflow-hidden shadow-sm group">
+                                                    <div key={block.id}
+                                                        draggable
+                                                        onDragStart={(e) => handleDragBlockStart(e, idx)}
+                                                        onDragOver={(e) => handleDragBlockOver(e, idx)}
+                                                        onDrop={(e) => handleDropBlock(e, idx)}
+                                                        onDragEnd={handleDragBlockEnd}
+                                                        className={`rounded-md border-l-4 border-l-slate-400 border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 overflow-hidden shadow-sm group cursor-move transition-opacity ${draggedBlockIdx === idx ? 'opacity-40' : 'opacity-100'}`}>
                                                         <div className="flex items-center gap-3 px-3 py-2 bg-slate-50/50 dark:bg-zinc-950 border-b border-slate-100 dark:border-zinc-800/50">
                                                             <input type="number" value={block.repeats} min={1} onChange={e => updateBlock(block.id, 'repeats', parseInt(e.target.value) || 1)}
                                                                 className="w-12 bg-transparent border-b border-slate-300 dark:border-zinc-600 focus:border-slate-500 text-xs font-mono py-0.5 text-center outline-none transition-colors" />
@@ -1766,30 +1777,37 @@ export const CalendarPage = ({ activities, plannedWorkouts = [], addPlannedWorko
                                                         </div>
                                                         <div className="p-3 pl-6 space-y-2 relative">
                                                             <div className="absolute left-2.5 top-3 bottom-8 w-px bg-slate-200 dark:bg-zinc-800"></div>
-                                                            {block.steps.map(step => (
-                                                                <div key={step.id} className="flex items-center gap-2 relative z-10 mr-4">
-                                                                    <div className="w-2 h-2 rounded-full border border-slate-300 dark:border-zinc-700 bg-white dark:bg-zinc-900 absolute -left-[23px] top-1/2 -translate-y-1/2"></div>
-                                                                    <select value={step.type} onChange={e => updateStep(block.id, step.id, 'type', e.target.value)}
-                                                                        className="w-20 bg-transparent text-[10px] font-semibold text-slate-600 dark:text-zinc-400 uppercase outline-none cursor-pointer border-b border-transparent focus:border-slate-200">
-                                                                        <option value="active">{isStr ? 'Trabajo' : 'Activo'}</option>
-                                                                        <option value="recovery">{isStr ? 'Pausa' : 'Recu'}</option>
-                                                                    </select>
-                                                                    {step.unit === 'dist' ? (
-                                                                        <input type="number" value={step.duration} min={0} onChange={e => updateStep(block.id, step.id, 'duration', e.target.value)}
-                                                                            className="w-12 bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 text-xs font-mono p-1 rounded-sm text-center outline-none focus:border-slate-400" />
-                                                                    ) : (
-                                                                        <DurationInput value={step.duration} onChange={v => updateStep(block.id, step.id, 'duration', v)} />
-                                                                    )}
-                                                                    {!isStr ? (
-                                                                        <button onClick={() => updateStep(block.id, step.id, 'unit', step.unit === 'dist' ? 'time' : 'dist')}
-                                                                            className={`text-[9px] font-medium w-8 py-1 rounded-sm transition-colors text-center ${step.unit === 'dist' ? 'bg-slate-200 text-slate-700 dark:bg-zinc-700 dark:text-zinc-300' : 'bg-slate-100 text-slate-500 dark:bg-zinc-800 dark:text-zinc-400'}`}
-                                                                        >{step.unit === 'dist' ? 'km' : 'min'}</button>
-                                                                    ) : <span className="text-[10px] text-slate-400 w-8 text-center">min</span>}
-                                                                    <select value={step.zone} onChange={e => updateStep(block.id, step.id, 'zone', e.target.value)}
-                                                                        className="flex-1 min-w-[80px] bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 text-[10px] font-medium p-1 rounded-sm outline-none focus:border-slate-400">
-                                                                        {zones.map(z => <option key={z.v} value={z.v}>{z.l}</option>)}
-                                                                    </select>
-                                                                    <button onClick={() => removeStep(block.id, step.id)} className="text-slate-300 hover:text-red-500 ml-1"><X size={12} /></button>
+                                                            {block.steps.map((step, idx) => (
+                                                                <div key={step.id} className={`relative z-10 mr-4 mb-2 ${idx !== block.steps.length - 1 ? 'border-b border-slate-100 dark:border-zinc-800/50 pb-2' : ''}`}>
+                                                                    <div className="flex items-center gap-2">
+                                                                        <div className="w-2 h-2 rounded-full border border-slate-300 dark:border-zinc-700 bg-white dark:bg-zinc-900 absolute -left-[23px] top-4 -translate-y-1/2"></div>
+                                                                        <select value={step.type} onChange={e => updateStep(block.id, step.id, 'type', e.target.value)}
+                                                                            className="w-20 bg-transparent text-[10px] font-semibold text-slate-600 dark:text-zinc-400 uppercase outline-none cursor-pointer border-b border-transparent focus:border-slate-200">
+                                                                            <option value="active">{isStr ? 'Trabajo' : 'Activo'}</option>
+                                                                            <option value="recovery">{isStr ? 'Pausa' : 'Recu'}</option>
+                                                                        </select>
+                                                                        {step.unit === 'dist' ? (
+                                                                            <input type="number" value={step.duration} min={0} onChange={e => updateStep(block.id, step.id, 'duration', e.target.value)}
+                                                                                className="w-12 bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 text-xs font-mono p-1 rounded-sm text-center outline-none focus:border-slate-400" />
+                                                                        ) : (
+                                                                            <DurationInput value={step.duration} onChange={v => updateStep(block.id, step.id, 'duration', v)} />
+                                                                        )}
+                                                                        {!isStr ? (
+                                                                            <button onClick={() => updateStep(block.id, step.id, 'unit', step.unit === 'dist' ? 'time' : 'dist')}
+                                                                                className={`text-[9px] font-medium w-8 py-1 rounded-sm transition-colors text-center ${step.unit === 'dist' ? 'bg-slate-200 text-slate-700 dark:bg-zinc-700 dark:text-zinc-300' : 'bg-slate-100 text-slate-500 dark:bg-zinc-800 dark:text-zinc-400'}`}
+                                                                            >{step.unit === 'dist' ? 'km' : 'min'}</button>
+                                                                        ) : <span className="text-[10px] text-slate-400 w-8 text-center">min</span>}
+                                                                        <select value={step.zone} onChange={e => updateStep(block.id, step.id, 'zone', e.target.value)}
+                                                                            className="flex-1 min-w-[80px] bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 text-[10px] font-medium p-1 rounded-sm outline-none focus:border-slate-400">
+                                                                            {zones.map(z => <option key={z.v} value={z.v}>{z.l}</option>)}
+                                                                        </select>
+                                                                        <button onClick={() => removeStep(block.id, step.id)} className="text-slate-300 hover:text-red-500 ml-1"><X size={12} /></button>
+                                                                    </div>
+                                                                    <div className="mt-1 pl-[90px]">
+                                                                        <input type="text" value={step.details || ''} onChange={e => updateStep(block.id, step.id, 'details', e.target.value)}
+                                                                            placeholder={isStr ? 'Ej: Sentadillas (12-15 reps)' : 'Nota del intervalo'}
+                                                                            className="w-full bg-transparent border-b border-transparent hover:border-slate-200 dark:hover:border-zinc-700 focus:border-slate-400 dark:focus:border-zinc-500 text-[10px] font-medium py-0.5 outline-none placeholder-slate-400 dark:placeholder-zinc-600 transition-colors" />
+                                                                    </div>
                                                                 </div>
                                                             ))}
                                                             <div className="flex gap-2 pt-1 pl-1">
@@ -1797,6 +1815,12 @@ export const CalendarPage = ({ activities, plannedWorkouts = [], addPlannedWorko
                                                                 <span className="text-slate-300 dark:text-zinc-700">·</span>
                                                                 <button onClick={() => addStepToRepeat(block.id, 'recovery')} className="text-[9px] font-semibold text-slate-500 hover:text-slate-700 dark:hover:text-zinc-300 uppercase tracking-widest">+ Pausa</button>
                                                             </div>
+                                                        </div>
+                                                        {/* Repeat block description */}
+                                                        <div className="border-t border-slate-100 dark:border-zinc-800/50 pt-2 px-3 pb-2 mt-1">
+                                                            <input type="text" value={block.details || ''} onChange={e => updateBlock(block.id, 'details', e.target.value)}
+                                                                placeholder={isStr ? 'Ej: Sentadillas con multipower' : 'Notas del circuito / intervalos'}
+                                                                className="w-full bg-transparent border-b border-transparent hover:border-slate-200 dark:hover:border-zinc-700 focus:border-slate-400 dark:focus:border-zinc-500 text-[11px] font-medium py-1 outline-none placeholder-slate-400 dark:placeholder-zinc-600 transition-colors" />
                                                         </div>
                                                     </div>
                                                 );
@@ -1807,12 +1831,18 @@ export const CalendarPage = ({ activities, plannedWorkouts = [], addPlannedWorko
                                             const bLabel = block.type === 'warmup' ? 'Calentamiento' : block.type === 'cooldown' ? 'Vuelta a la calma' : 'Trabajo continuo';
 
                                             return (
-                                                <div key={block.id} className="rounded-md border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-3 shadow-sm relative group">
+                                                <div key={block.id}
+                                                    draggable
+                                                    onDragStart={(e) => handleDragBlockStart(e, idx)}
+                                                    onDragOver={(e) => handleDragBlockOver(e, idx)}
+                                                    onDrop={(e) => handleDropBlock(e, idx)}
+                                                    onDragEnd={handleDragBlockEnd}
+                                                    className={`rounded-md border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-3 shadow-sm relative group overflow-hidden cursor-move transition-opacity ${draggedBlockIdx === idx ? 'opacity-40' : 'opacity-100'}`}>
                                                     <div className="flex items-center gap-2 flex-wrap sm:flex-nowrap">
                                                         <span className={`text-[10px] font-semibold w-28 uppercase tracking-wider ${bLabelStyle}`}>{bLabel}</span>
                                                         {block.unit === 'dist' ? (
                                                             <input type="number" placeholder="km" value={block.duration} min={0} onChange={e => updateBlock(block.id, 'duration', e.target.value)}
-                                                                className="w-14 bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 text-xs font-mono p-1 rounded-sm text-center outline-none focus:border-slate-400" />
+                                                                className="w-14 bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 text-sm font-mono p-1 rounded-sm text-center outline-none focus:border-slate-400" />
                                                         ) : (
                                                             <DurationInput value={block.duration} onChange={v => updateBlock(block.id, 'duration', v)} />
                                                         )}
@@ -1822,18 +1852,16 @@ export const CalendarPage = ({ activities, plannedWorkouts = [], addPlannedWorko
                                                             >{block.unit === 'dist' ? 'km' : 'min'}</button>
                                                         ) : <span className="text-[10px] text-slate-400 w-8 text-center">min</span>}
                                                         <select value={block.zone} onChange={e => updateBlock(block.id, 'zone', e.target.value)}
-                                                            className="flex-1 bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 text-[10px] font-medium p-1 rounded-sm outline-none focus:border-slate-400 min-w-[80px]">
+                                                            className="flex-1 bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 text-[10px] font-medium p-1.5 rounded-sm outline-none focus:border-slate-400 min-w-[80px]">
                                                             {zones.map(z => <option key={z.v} value={z.v}>{z.l}</option>)}
                                                         </select>
                                                         <button onClick={() => removeBlock(block.id)} className="ml-auto text-slate-300 hover:text-red-500"><X size={14} /></button>
                                                     </div>
-                                                    {block.type === 'main' && (
-                                                        <div className="mt-2 pl-2">
-                                                            <input type="text" value={block.details} onChange={e => updateBlock(block.id, 'details', e.target.value)}
-                                                                placeholder={isStr ? 'Ej: Sentadilla 4x8, Peso muerto 3x6' : 'Ej: Progresivo suave'}
-                                                                className="w-full bg-transparent border-b border-slate-200 dark:border-zinc-700 text-[11px] font-medium py-1 outline-none focus:border-slate-400 dark:focus:border-zinc-500 placeholder-slate-400 dark:placeholder-zinc-600 transition-colors" />
-                                                        </div>
-                                                    )}
+                                                    <div className="mt-2 pl-2">
+                                                        <input type="text" value={block.details || ''} onChange={e => updateBlock(block.id, 'details', e.target.value)}
+                                                            placeholder={isStr ? 'Ej: Press Militar 3x8, Core al final' : 'Añadir notas / descripciones'}
+                                                            className="w-full bg-transparent border-b border-transparent hover:border-slate-200 dark:hover:border-zinc-700 text-[11px] font-medium py-1 outline-none focus:border-slate-400 dark:focus:border-zinc-500 placeholder-slate-400 dark:placeholder-zinc-600 transition-colors" />
+                                                    </div>
                                                 </div>
                                             );
                                         })}
@@ -2025,18 +2053,23 @@ const WorkoutViewerModal = ({ workout, onClose, onDelete, onEdit }) => {
                                                 {(block.steps || []).map((step, sIdx) => {
                                                     const isActive = step.type === 'active';
                                                     return (
-                                                        <div key={sIdx} className="flex items-center justify-between px-4 py-2.5 bg-white dark:bg-zinc-900">
-                                                            <div className="flex items-center gap-3">
-                                                                <div className="w-1.5 h-6 rounded-full" style={{ background: isActive ? (zoneColors[step.zone] || '#6366f1') : '#cbd5e1' }} />
-                                                                <span className={`text-[11px] font-bold uppercase tracking-wider ${isActive ? 'text-slate-700 dark:text-zinc-200' : 'text-slate-500 dark:text-zinc-400'}`}>
-                                                                    {isActive ? 'Trabajo' : 'Recuperación'}
-                                                                </span>
-                                                            </div>
-                                                            <div className="flex items-center gap-3">
-                                                                <span className="font-mono text-sm font-bold text-slate-800 dark:text-zinc-100">
-                                                                    {formatBlockDuration(step.duration)}{step.unit === 'dist' ? <span className="text-[10px] text-slate-400 ml-0.5">km</span> : ''}
-                                                                </span>
-                                                                <span className="text-[10px] font-bold px-2 py-0.5 rounded border border-slate-200 dark:border-zinc-700 text-slate-600 dark:text-zinc-300">{step.zone}</span>
+                                                        <div key={sIdx} className="flex flex-col px-4 py-2.5 bg-white dark:bg-zinc-900 border-b border-slate-100 dark:border-zinc-800/50 last:border-0">
+                                                            <div className="flex items-center justify-between">
+                                                                <div className="flex items-center gap-3">
+                                                                    <div className="w-1.5 h-6 rounded-full" style={{ background: isActive ? (zoneColors[step.zone] || '#6366f1') : '#cbd5e1' }} />
+                                                                    <div className="flex flex-col">
+                                                                        <span className={`text-[11px] font-bold uppercase tracking-wider ${isActive ? 'text-slate-700 dark:text-zinc-200' : 'text-slate-500 dark:text-zinc-400'}`}>
+                                                                            {isActive ? 'Trabajo' : 'Recuperación'}
+                                                                        </span>
+                                                                        {step.details && <span className="text-[10px] font-medium text-slate-500 dark:text-zinc-400 line-clamp-1">{step.details}</span>}
+                                                                    </div>
+                                                                </div>
+                                                                <div className="flex items-center gap-3">
+                                                                    <span className="font-mono text-sm font-bold text-slate-800 dark:text-zinc-100">
+                                                                        {formatBlockDuration(step.duration)}{step.unit === 'dist' ? <span className="text-[10px] text-slate-400 ml-0.5">km</span> : ''}
+                                                                    </span>
+                                                                    <span className="text-[10px] font-bold px-2 py-0.5 rounded border border-slate-200 dark:border-zinc-700 text-slate-600 dark:text-zinc-300">{step.zone}</span>
+                                                                </div>
                                                             </div>
                                                         </div>
                                                     );
