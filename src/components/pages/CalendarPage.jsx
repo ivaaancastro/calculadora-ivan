@@ -2,7 +2,7 @@ import React, { useState, useMemo, useEffect } from 'react';
 import {
     ChevronLeft, ChevronRight, Calendar as CalIcon,
     Clock, Zap, MapPin, Footprints, Bike, Dumbbell, Activity, Target,
-    Plus, Trash2, X, Sparkles
+    Plus, Trash2, X, Sparkles, RotateCcw
 } from 'lucide-react';
 import { BlockGeneratorModal } from '../dashboard/BlockGeneratorModal';
 import { FuelingPanel } from '../dashboard/FuelingPanel';
@@ -46,45 +46,92 @@ const DurationInput = ({ value, onChange, className = '' }) => {
 };
 // ── Floating draggable PMC projection chart ─────────────────────────────────
 const PmcFloatingChart = ({ pmcByDate, onClose, initPos }) => {
-    const [pos, setPos] = React.useState(initPos);
+    const [pos, setPos] = React.useState({ x: window.innerWidth / 2 - 320, y: Math.max(50, window.innerHeight / 2 - 200) });
     const [hover, setHover] = React.useState(null); // { idx, x }
+    const [viewOpts, setViewOpts] = React.useState({ top: true, mid: true, bot: true });
     const dragRef = React.useRef(null);
 
     const allEntries = Object.values(pmcByDate)
         .filter(e => e.ctl != null)
         .sort((a, b) => a.date.localeCompare(b.date));
-    const today = new Date().toLocaleDateString('en-CA');
-    const cutoff = new Date(); cutoff.setDate(cutoff.getDate() - 90);
-    const visible = allEntries.filter(e => e.date >= cutoff.toLocaleDateString('en-CA'));
+    const today = new Date();
+    const todayStr = today.toLocaleDateString('en-CA');
+    const cutoffPast = new Date(today); cutoffPast.setDate(today.getDate() - 30);
+    const cutoffFuture = new Date(today); cutoffFuture.setDate(today.getDate() + 30);
+
+    const visible = allEntries.filter(e => {
+        const d = new Date(e.date + 'T00:00:00');
+        return d >= cutoffPast && d <= cutoffFuture;
+    });
     if (visible.length === 0) return null;
 
-    const W = 580; const H = 220; const PAD = { t: 16, r: 12, b: 28, l: 40 };
-    const cw = W - PAD.l - PAD.r; const ch = H - PAD.t - PAD.b;
-    const allVals = visible.flatMap(e => [e.ctl, e.atl, e.tcb].filter(v => v != null));
-    const minV = Math.min(...allVals, -30);
-    const maxV = Math.max(...allVals, 20);
-    const range = maxV - minV || 1;
-    const xS = i => PAD.l + (i / (visible.length - 1 || 1)) * cw;
-    const yS = v => PAD.t + ch - ((v - minV) / range) * ch;
+    const W = 640; const H = 340;
+    const PAD = { t: 16, r: 40, b: 24, l: 40 };
 
-    const realE = visible.filter(e => !e.projected);
-    const lastRealIdx = visible.findLastIndex(e => !e.projected);
+    const cw = W - PAD.l - PAD.r;
+
+    // Calculate values for scaling
+    const ctlAtlVals = visible.flatMap(e => [e.ctl, e.atl].filter(v => v != null));
+    const minTop = Math.max(0, Math.min(...ctlAtlVals) - 10);
+    const maxTop = Math.max(...ctlAtlVals) + 10;
+    const rangeTop = maxTop - minTop || 1;
+
+    const tcbVals = visible.map(e => e.tcb).filter(v => v != null);
+    const minMid = Math.min(...tcbVals, -25) - 5;
+    const maxMid = Math.max(...tcbVals, 25) + 5;
+
+    // Ramp rate approximation (daily ctl change * 7 for weekly ramp rate)
+    // For smooth visual, we just plot the daily difference * 7 as "ramp"
+    const visibleWithRamp = visible.map((e, i, arr) => {
+        if (i === 0) return { ...e, ramp: 0 };
+        const prev = arr[i - 1];
+        return { ...e, ramp: ((e.ctl || 0) - (prev.ctl || 0)) * 7 };
+    });
+
+    const rampVals = visibleWithRamp.map(e => e.ramp).filter(v => v != null);
+    const minBot = Math.min(...rampVals, -5) - 2;
+    const maxBot = Math.max(...rampVals, 5) + 2;
+
+    // Define Heights for the 3 sections: Top (50%), Middle (30%), Bottom (20%)
+    const availH = H - PAD.t - PAD.b;
+    const hTop = availH * 0.5;
+    const hMid = availH * 0.3;
+    const hBot = availH * 0.2;
+
+    const yTopLine = PAD.t + hTop;
+    const yMidLine = yTopLine + hMid;
+
+    // Scales
+    const xS = i => PAD.l + (i / (visible.length - 1 || 1)) * cw;
+    const yTopS = v => PAD.t + hTop - ((v - minTop) / rangeTop) * hTop;
+    const yMidS = v => yTopLine + hMid - ((v - minMid) / (maxMid - minMid || 1)) * hMid;
+    const yBotS = v => yMidLine + hBot - ((v - minBot) / (maxBot - minBot || 1)) * hBot;
+
+    const realE = visibleWithRamp.filter(e => !e.projected);
+    const lastRealIdx = visibleWithRamp.findLastIndex(e => !e.projected);
     const projWithJoin = lastRealIdx >= 0
-        ? [visible[lastRealIdx], ...visible.slice(lastRealIdx + 1).filter(e => e.projected)]
-        : visible.filter(e => e.projected);
-    const segPath = (key, entries) => entries.map((e, li) => {
-        const i = visible.indexOf(e);
-        return `${li === 0 ? 'M' : 'L'}${xS(i).toFixed(1)},${yS(e[key] ?? 0).toFixed(1)}`;
+        ? [visibleWithRamp[lastRealIdx], ...visibleWithRamp.slice(lastRealIdx + 1).filter(e => e.projected)]
+        : visibleWithRamp.filter(e => e.projected);
+    const buildPath = (key, entries, scaleY) => entries.map((e, li) => {
+        const i = visibleWithRamp.findIndex(v => v.date === e.date);
+        return `${li === 0 ? 'M' : 'L'}${xS(i).toFixed(1)},${scaleY(e[key] ?? 0).toFixed(1)}`;
     }).join(' ');
-    const projPath = (key) => projWithJoin.map((e, li) => {
-        const i = visible.indexOf(e);
-        return `${li === 0 ? 'M' : 'L'}${xS(i).toFixed(1)},${yS(e[key] ?? 0).toFixed(1)}`;
+
+    const buildRampPath = (entries) => entries.map((e, li) => {
+        const i = visibleWithRamp.findIndex(v => v.date === e.date);
+        const yH = yBotS(e.ramp ?? 0);
+        // Step path for ramp rate
+        if (li === 0) return `M${xS(i).toFixed(1)},${yH.toFixed(1)}`;
+        const prevX = xS(i - 1).toFixed(1);
+        return `L${prevX},${yH.toFixed(1)} L${xS(i).toFixed(1)},${yH.toFixed(1)}`;
     }).join(' ');
-    const todayIdx = visible.findIndex(e => e.date === today);
+
+    const todayIdx = visibleWithRamp.findIndex(e => e.date === todayStr);
     const todayX = todayIdx >= 0 ? xS(todayIdx) : null;
-    const zeroY = yS(0);
-    const labelStep = Math.max(1, Math.floor(visible.length / 7));
-    const labels = visible.filter((_, i) => i % labelStep === 0);
+    const zeroYMid = yMidS(0);
+    const zeroYBot = yBotS(0);
+    const labelStep = Math.max(1, Math.floor(visibleWithRamp.length / 7));
+    const labels = visibleWithRamp.filter((_, i) => i % labelStep === 0);
     const lastReal = realE[realE.length - 1];
 
     const handleDragDown = (e) => {
@@ -106,11 +153,11 @@ const PmcFloatingChart = ({ pmcByDate, onClose, initPos }) => {
         setHover({ idx: Math.max(0, Math.min(visible.length - 1, idx)), x: xS(Math.max(0, Math.min(visible.length - 1, idx))) });
     };
 
-    const hoverEntry = hover != null ? visible[hover.idx] : null;
+    const hoverEntry = hover != null ? visibleWithRamp[hover.idx] : null;
 
     return (
-        <div className="fixed z-50 bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-700 rounded-xl shadow-2xl overflow-visible select-none"
-            style={{ left: pos.x, top: pos.y, width: 600 }}>
+        <div className="fixed z-[100] bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-700 rounded-xl shadow-2xl overflow-visible select-none"
+            style={{ left: pos.x, top: pos.y, width: 480 }}>
             {/* Title / drag bar */}
             <div className="flex items-center justify-between px-3 py-2 bg-slate-50 dark:bg-zinc-950 border-b border-slate-100 dark:border-zinc-800 rounded-t-xl cursor-grab active:cursor-grabbing"
                 onPointerDown={handleDragDown} onPointerMove={handleDragMove} onPointerUp={handleDragUp}>
@@ -132,101 +179,148 @@ const PmcFloatingChart = ({ pmcByDate, onClose, initPos }) => {
                 </button>
             </div>
 
-            {/* Legend */}
-            <div className="flex items-center gap-4 px-4 pt-2.5 text-[9px] font-bold text-slate-500 dark:text-zinc-400">
-                <span className="flex items-center gap-1.5"><span className="w-5 h-0.5 bg-blue-500 inline-block rounded" />Fitness (CTL)</span>
-                <span className="flex items-center gap-1.5"><span className="w-5 h-0.5 bg-red-400 inline-block rounded" />Fatiga (ATL)</span>
-                <span className="flex items-center gap-1.5"><span className="w-5 h-0.5 bg-emerald-500 inline-block rounded" />Forma (TSB)</span>
-                <span className="flex items-center gap-1.5 ml-auto opacity-50 text-[8px]">
-                    <span className="w-5 h-0 border-t-2 border-dashed border-slate-400 inline-block" />proyectado
-                </span>
+            {/* Legend / Toolbar */}
+            <div className="flex items-center gap-4 px-4 pt-2.5 text-[10px] font-bold text-slate-500 dark:text-zinc-400">
+                <label className="flex items-center gap-1.5 cursor-pointer hover:text-blue-500 transition-colors">
+                    <input type="checkbox" checked={viewOpts.top} onChange={e => setViewOpts(v => ({ ...v, top: e.target.checked }))} className="accent-blue-500 rounded-sm w-3 h-3" />
+                    <span>Aptitud / Fatiga</span>
+                </label>
+                <label className="flex items-center gap-1.5 cursor-pointer hover:text-emerald-500 transition-colors">
+                    <input type="checkbox" checked={viewOpts.mid} onChange={e => setViewOpts(v => ({ ...v, mid: e.target.checked }))} className="accent-emerald-500 rounded-sm w-3 h-3" />
+                    <span>Forma</span>
+                </label>
+                <label className="flex items-center gap-1.5 cursor-pointer hover:text-amber-500 transition-colors">
+                    <input type="checkbox" checked={viewOpts.bot} onChange={e => setViewOpts(v => ({ ...v, bot: e.target.checked }))} className="accent-amber-500 rounded-sm w-3 h-3" />
+                    <span>Rampa</span>
+                </label>
             </div>
 
             {/* Chart */}
-            <div className="px-2 pb-3 pt-1 relative">
-                <svg viewBox={`0 0 ${W} ${H}`} className="w-full cursor-crosshair" style={{ height: 220 }}
-                    onMouseMove={handleSvgMouseMove} onMouseLeave={() => setHover(null)}>
+            <svg viewBox={`0 0 ${W} ${H}`} className="w-full cursor-crosshair" style={{ height: 340 }}
+                onMouseMove={handleSvgMouseMove} onMouseLeave={() => setHover(null)}>
 
-                    {/* Zero line */}
-                    <line x1={PAD.l} y1={zeroY} x2={W - PAD.r} y2={zeroY} stroke="#e2e8f0" strokeWidth="1" strokeDasharray="4,3" />
-                    <text x={PAD.l - 4} y={zeroY + 3} textAnchor="end" fontSize={8} fill="#94a3b8">0</text>
+                <defs>
+                    <linearGradient id="tcbGrad" x1="0" x2="0" y1="0" y2="1">
+                        <stop offset="0%" stopColor="#10b981" stopOpacity="0.2" />
+                        <stop offset="100%" stopColor="#f87171" stopOpacity="0.2" />
+                    </linearGradient>
+                </defs>
 
-                    {/* Y axis ticks */}
-                    {[minV, (minV + maxV) / 2, maxV].map(v => (
-                        <g key={v}>
-                            <line x1={PAD.l - 3} y1={yS(v)} x2={PAD.l} y2={yS(v)} stroke="#e2e8f0" strokeWidth="1" />
-                            <text x={PAD.l - 5} y={yS(v) + 3} textAnchor="end" fontSize={8} fill="#94a3b8">{Math.round(v)}</text>
-                        </g>
-                    ))}
+                {/* Section Dividers */}
+                <line x1={PAD.l} y1={yTopLine} x2={W - PAD.r} y2={yTopLine} stroke="#cbd5e1" strokeWidth="1" />
+                <line x1={PAD.l} y1={yMidLine} x2={W - PAD.r} y2={yMidLine} stroke="#cbd5e1" strokeWidth="1" />
 
-                    {/* Today marker */}
-                    {todayX != null && <>
-                        <rect x={todayX} y={PAD.t} width={W - PAD.r - todayX} height={ch} fill="#6366f1" fillOpacity="0.03" />
-                        <line x1={todayX} y1={PAD.t} x2={todayX} y2={H - PAD.b} stroke="#6366f1" strokeWidth="1.5" strokeDasharray="4,3" opacity="0.5" />
-                        <text x={todayX + 3} y={PAD.t + 9} fontSize={8} fill="#6366f1" fontWeight="700">HOY</text>
-                    </>}
+                {/* Y Axis Grid & Labels - TOP */}
+                {[minTop, (minTop + maxTop) / 2, maxTop].map(v => (
+                    <g key={`top-${v}`}>
+                        <line x1={PAD.l} y1={yTopS(v)} x2={W - PAD.r} y2={yTopS(v)} stroke="#e2e8f0" strokeWidth="0.5" strokeDasharray="3,3" />
+                        <text x={PAD.l - 6} y={yTopS(v) + 3} textAnchor="end" fontSize={9} fill="#94a3b8">{Math.round(v)}</text>
+                    </g>
+                ))}
 
-                    {/* Real lines */}
-                    <path d={segPath('ctl', realE)} fill="none" stroke="#3b82f6" strokeWidth="2" strokeLinejoin="round" strokeLinecap="round" />
-                    <path d={segPath('atl', realE)} fill="none" stroke="#f87171" strokeWidth="2" strokeLinejoin="round" strokeLinecap="round" />
-                    <path d={segPath('tcb', realE)} fill="none" stroke="#10b981" strokeWidth="2" strokeLinejoin="round" strokeLinecap="round" />
+                {/* Y Axis Grid & Labels - MID */}
+                <line x1={PAD.l} y1={zeroYMid} x2={W - PAD.r} y2={zeroYMid} stroke="#cbd5e1" strokeWidth="1" strokeDasharray="3,3" />
+                <rect x={PAD.l} y={yMidS(5)} width={cw} height={yMidS(-20) - yMidS(5)} fill="#f1f5f9" fillOpacity="0.5" />
+                <rect x={PAD.l} y={yMidS(25)} width={cw} height={yMidS(5) - yMidS(25)} fill="#10b981" fillOpacity="0.05" />
+                <rect x={PAD.l} y={yMidS(-10)} width={cw} height={yMidS(-30) - yMidS(-10)} fill="#f87171" fillOpacity="0.05" />
+                {[20, 5, -10, -30].map(v => (
+                    <text key={`mid-${v}`} x={PAD.l - 6} y={yMidS(v) + 3} textAnchor="end" fontSize={9} fill="#94a3b8">{v}</text>
+                ))}
 
-                    {/* Projected lines */}
-                    {projWithJoin.length > 1 && <>
-                        <path d={projPath('ctl')} fill="none" stroke="#3b82f6" strokeWidth="2" strokeDasharray="6,4" opacity="0.4" strokeLinejoin="round" />
-                        <path d={projPath('atl')} fill="none" stroke="#f87171" strokeWidth="2" strokeDasharray="6,4" opacity="0.4" strokeLinejoin="round" />
-                        <path d={projPath('tcb')} fill="none" stroke="#10b981" strokeWidth="2" strokeDasharray="6,4" opacity="0.4" strokeLinejoin="round" />
-                    </>}
+                {/* Y Axis Grid & Labels - BOT */}
+                <line x1={PAD.l} y1={zeroYBot} x2={W - PAD.r} y2={zeroYBot} stroke="#cbd5e1" strokeWidth="1" />
+                {[maxBot, 0, minBot].map(v => (
+                    <text key={`bot-${v}`} x={PAD.l - 6} y={yBotS(v) + 3} textAnchor="end" fontSize={9} fill="#94a3b8">{v.toFixed(1)}</text>
+                ))}
 
-                    {/* Hover crosshair */}
-                    {hover != null && <>
-                        <line x1={hover.x} y1={PAD.t} x2={hover.x} y2={H - PAD.b} stroke="#475569" strokeWidth="1" strokeDasharray="3,2" opacity="0.6" />
-                        {hoverEntry?.ctl != null && <circle cx={hover.x} cy={yS(hoverEntry.ctl)} r={3} fill="#3b82f6" stroke="white" strokeWidth="1.5" />}
-                        {hoverEntry?.atl != null && <circle cx={hover.x} cy={yS(hoverEntry.atl)} r={3} fill="#f87171" stroke="white" strokeWidth="1.5" />}
-                        {hoverEntry?.tcb != null && <circle cx={hover.x} cy={yS(hoverEntry.tcb)} r={3} fill="#10b981" stroke="white" strokeWidth="1.5" />}
-                    </>}
+                {/* Today marker (Vertical Line across all sections) */}
+                {todayX != null && <>
+                    <line x1={todayX} y1={PAD.t} x2={todayX} y2={H - PAD.b} stroke="#475569" strokeWidth="1.2" />
+                </>}
 
-                    {/* X axis */}
-                    <line x1={PAD.l} y1={H - PAD.b} x2={W - PAD.r} y2={H - PAD.b} stroke="#e2e8f0" strokeWidth="1" />
-                    {labels.map((e, li) => {
-                        const i = visible.indexOf(e);
-                        const d = new Date(e.date + 'T00:00:00');
-                        return <text key={li} x={xS(i)} y={H - PAD.b + 12} textAnchor="middle" fontSize={8} fill="#94a3b8">
-                            {d.toLocaleDateString('es-ES', { day: 'numeric', month: 'short' })}
-                        </text>;
-                    })}
-                </svg>
+                {/* === TOP SECTION: CTL & ATL === */}
+                <path d={buildPath('atl', realE, yTopS)} fill="none" stroke="#a78bfa" strokeWidth="1.5" strokeLinejoin="round" />
+                <path d={buildPath('ctl', realE, yTopS)} fill="none" stroke="#38bdf8" strokeWidth="2.5" strokeLinejoin="round" />
+                {projWithJoin.length > 1 && <>
+                    <path d={buildPath('atl', projWithJoin, yTopS)} fill="none" stroke="#a78bfa" strokeWidth="1.5" strokeDasharray="4,3" opacity="0.6" strokeLinejoin="round" />
+                    <path d={buildPath('ctl', projWithJoin, yTopS)} fill="none" stroke="#38bdf8" strokeWidth="2.5" strokeDasharray="4,3" opacity="0.6" strokeLinejoin="round" />
+                </>}
 
-                {/* Hover tooltip */}
-                {hoverEntry && (() => {
-                    const tooltipLeft = hover.x > W * 0.65;
-                    return (
-                        <div className="absolute top-3 pointer-events-none bg-white dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 rounded-lg shadow-lg px-3 py-2 text-[10px] z-10 min-w-[130px]"
-                            style={{ [tooltipLeft ? 'right' : 'left']: tooltipLeft ? 16 : 50 }}>
-                            <p className="font-bold text-slate-600 dark:text-zinc-300 mb-1.5">
-                                {new Date(hoverEntry.date + 'T00:00:00').toLocaleDateString('es-ES', { weekday: 'short', day: 'numeric', month: 'short' })}
-                                {hoverEntry.projected && <span className="ml-1.5 text-[8px] font-normal text-violet-400 uppercase tracking-wide">proyectado</span>}
-                            </p>
-                            <div className="space-y-1">
-                                <div className="flex justify-between gap-4">
-                                    <span className="text-blue-500 font-semibold">Fitness</span>
-                                    <span className="font-mono font-bold text-slate-700 dark:text-zinc-200">{Math.round(hoverEntry.ctl)}</span>
-                                </div>
-                                <div className="flex justify-between gap-4">
-                                    <span className="text-red-400 font-semibold">Fatiga</span>
-                                    <span className="font-mono font-bold text-slate-700 dark:text-zinc-200">{Math.round(hoverEntry.atl)}</span>
-                                </div>
-                                <div className="flex justify-between gap-4">
-                                    <span className={`font-semibold ${hoverEntry.tcb >= 0 ? 'text-emerald-500' : 'text-orange-400'}`}>Forma</span>
-                                    <span className={`font-mono font-bold ${hoverEntry.tcb >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-orange-500'}`}>
-                                        {hoverEntry.tcb >= 0 ? '+' : ''}{Math.round(hoverEntry.tcb)}
-                                    </span>
-                                </div>
+                {/* === MID SECTION: TCB (Forma) === */}
+                <path d={buildPath('tcb', realE, yMidS)} fill="none" stroke="#22c55e" strokeWidth="2.5" strokeLinejoin="round" />
+                {projWithJoin.length > 1 && <>
+                    <path d={buildPath('tcb', projWithJoin, yMidS)} fill="none" stroke="#22c55e" strokeWidth="2.5" strokeDasharray="4,3" opacity="0.6" strokeLinejoin="round" />
+                </>}
+
+                {/* === BOTTOM SECTION: Ramp Rate === */}
+                <path d={buildRampPath(realE)} fill="none" stroke="#22c55e" strokeWidth="1.5" />
+                {projWithJoin.length > 1 && <>
+                    <path d={buildRampPath(projWithJoin)} fill="none" stroke="#38bdf8" strokeWidth="1.5" strokeDasharray="2,2" />
+                </>}
+
+                {/* Current latest values on right edge */}
+                {lastReal && (
+                    <g>
+                        <text x={W - PAD.r + 6} y={yTopS(lastReal.ctl) + 3} fontSize={10} fontWeight="bold" fill="#0284c7">{Math.round(lastReal.ctl)}</text>
+                        <text x={W - PAD.r + 6} y={yTopS(lastReal.atl) + 3} fontSize={10} fontWeight="bold" fill="#7c3aed">{Math.round(lastReal.atl)}</text>
+                        <text x={W - PAD.r + 6} y={yMidS(lastReal.tcb) + 3} fontSize={10} fontWeight="bold" fill="#64748b">{Math.round(lastReal.tcb)}</text>
+                        <text x={W - PAD.r + 6} y={yBotS(lastReal.ramp) + 3} fontSize={10} fontWeight="bold" fill="#16a34a">{lastReal.ramp.toFixed(1)}</text>
+                    </g>
+                )}
+
+                {/* Hover crosshair */}
+                {hover != null && <>
+                    <line x1={hover.x} y1={PAD.t} x2={hover.x} y2={H - PAD.b} stroke="#94a3b8" strokeWidth="1" opacity="0.8" />
+                    {hoverEntry?.ctl != null && <circle cx={hover.x} cy={yTopS(hoverEntry.ctl)} r={3.5} fill="#38bdf8" stroke="white" strokeWidth="1.5" />}
+                    {hoverEntry?.atl != null && <circle cx={hover.x} cy={yTopS(hoverEntry.atl)} r={3.5} fill="#a78bfa" stroke="white" strokeWidth="1.5" />}
+                    {hoverEntry?.tcb != null && <circle cx={hover.x} cy={yMidS(hoverEntry.tcb)} r={3.5} fill="#22c55e" stroke="white" strokeWidth="1.5" />}
+                    {hoverEntry?.ramp != null && <circle cx={hover.x} cy={yBotS(hoverEntry.ramp)} r={2.5} fill="#16a34a" />}
+                </>}
+
+                {/* X axis Base Line */}
+                <line x1={PAD.l} y1={H - PAD.b} x2={W - PAD.r} y2={H - PAD.b} stroke="#cbd5e1" strokeWidth="1" />
+                {labels.map((e, li) => {
+                    const i = visibleWithRamp.findIndex(v => v.date === e.date);
+                    const d = new Date(e.date + 'T00:00:00');
+                    return <text key={li} x={xS(i)} y={H - PAD.b + 14} textAnchor="middle" fontSize={10} fill="#64748b">
+                        {d.toLocaleDateString('es-ES', { day: 'numeric', month: 'short' })}
+                    </text>;
+                })}
+            </svg>
+
+            {/* Hover tooltip */}
+            {hoverEntry && (() => {
+                const tooltipLeft = hover.x > W * 0.65;
+                return (
+                    <div className="absolute top-3 pointer-events-none bg-white dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 rounded-lg shadow-lg px-3 py-2 text-[10px] z-10 min-w-[130px]"
+                        style={{ [tooltipLeft ? 'right' : 'left']: tooltipLeft ? 16 : 50 }}>
+                        <p className="font-bold text-slate-600 dark:text-zinc-300 mb-1.5">
+                            {new Date(hoverEntry.date + 'T00:00:00').toLocaleDateString('es-ES', { weekday: 'short', day: 'numeric', month: 'short' })}
+                            {hoverEntry.projected && <span className="ml-1.5 text-[8px] font-normal text-violet-400 uppercase tracking-wide">proyectado</span>}
+                        </p>
+                        <div className="space-y-1">
+                            <div className="flex justify-between gap-4">
+                                <span className="text-sky-500 font-semibold">Aptitud (CTL)</span>
+                                <span className="font-mono font-bold text-slate-700 dark:text-zinc-200">{Math.round(hoverEntry.ctl)}</span>
+                            </div>
+                            <div className="flex justify-between gap-4">
+                                <span className="text-purple-400 font-semibold">Fatiga (ATL)</span>
+                                <span className="font-mono font-bold text-slate-700 dark:text-zinc-200">{Math.round(hoverEntry.atl)}</span>
+                            </div>
+                            <div className="flex justify-between gap-4">
+                                <span className={`font-semibold ${hoverEntry.tcb >= 0 ? 'text-emerald-500' : 'text-orange-400'}`}>Forma (TSB)</span>
+                                <span className={`font-mono font-bold ${hoverEntry.tcb >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-orange-500'}`}>
+                                    {hoverEntry.tcb >= 0 ? '+' : ''}{Math.round(hoverEntry.tcb)}
+                                </span>
+                            </div>
+                            <div className="flex justify-between gap-4 pt-1 border-t border-slate-100 dark:border-zinc-700 mt-1">
+                                <span className="text-emerald-600 font-semibold">Rampa (est)</span>
+                                <span className="font-mono font-bold text-slate-700 dark:text-zinc-200">{hoverEntry.ramp.toFixed(1)}</span>
                             </div>
                         </div>
-                    );
-                })()}
-            </div>
+                    </div>
+                );
+            })()}
         </div>
     );
 };
@@ -240,12 +334,15 @@ const getSportColor = (type) => {
     return 'bg-slate-100 text-slate-700 border-slate-200 dark:bg-zinc-800 dark:text-zinc-400 dark:border-zinc-700 hover:bg-slate-200 dark:hover:bg-zinc-700/50';
 };
 
-const getSportIcon = (type) => {
+const getSportIcon = (type, size = 12) => {
     const t = String(type).toLowerCase();
-    if (t.includes('run') || t.includes('carrera')) return <Footprints size={12} />;
-    if (t.includes('bike') || t.includes('bici')) return <Bike size={12} />;
-    if (t.includes('gym') || t.includes('fuerza')) return <Dumbbell size={12} />;
-    return <Activity size={12} />;
+    if (t.includes('run') || t.includes('carrera') || t.includes('correr')) return <Footprints size={size} />;
+    if (t.includes('ride') || t.includes('bici') || t.includes('ciclismo')) return <Bike size={size} />;
+    if (t.includes('weight') || t.includes('fuerza') || t.includes('crossfit') || t.includes('workout')) return <Dumbbell size={size} />;
+    if (t.includes('swim') || t.includes('natacion') || t.includes('natación')) return <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M2 20c2-1 4-2 6-2s4 1 6 2 4 1 6 0" /><path d="M2 16c2-1 4-2 6-2s4 1 6 2 4 1 6 0" /><path d="M12 12a4 4 0 0 0 4-4V6l-2-2-4 4" /><circle cx="12" cy="4" r="1" /></svg>;
+    if (t.includes('yoga') || t.includes('stretch')) return <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="4" r="1.5" /><path d="M12 8v4l-3 4" /><path d="M12 12l3 4" /><path d="M8 20h8" /><path d="M6 12l6 2 6-2" /></svg>;
+    if (t.includes('walk') || t.includes('hike') || t.includes('caminata') || t.includes('senderismo')) return <MapPin size={size} />;
+    return <Activity size={size} />;
 };
 
 // --- ESTIMATED PACE PER ZONE (min/km for Run, min/10km for Ride) ---
@@ -1060,11 +1157,12 @@ export const CalendarPage = ({ activities, plannedWorkouts = [], addPlannedWorko
                 {viewMode === 'month' && (
                     <div className="w-full relative">
 
-                        {/* CABECERA DÍAS DE LA SEMANA — con columna izquierda para panel semanal (Solo Desktop) */}
-                        <div className="hidden lg:grid grid-cols-[160px_repeat(7,1fr)] bg-slate-50/95 dark:bg-zinc-950/90 backdrop-blur-sm border-b border-slate-200 dark:border-zinc-800 sticky top-0 z-20">
-                            <div className="py-2 text-center text-[9px] font-bold text-slate-400 dark:text-zinc-500 uppercase tracking-widest border-r border-slate-200 dark:border-zinc-800"></div>
-                            {WEEKDAYS.map(day => (
-                                <div key={day} className="py-2 text-center text-[10px] font-bold text-slate-500 dark:text-zinc-400 uppercase tracking-widest">{day}</div>
+                        {/* CABECERA DÍAS DE LA SEMANA */}
+                        <div className="hidden lg:grid grid-cols-[130px_repeat(7,1fr)] bg-slate-100/95 dark:bg-zinc-950/95 backdrop-blur-sm border-b-2 border-slate-300 dark:border-zinc-700 sticky top-0 z-20">
+                            <div className="py-2.5 text-center text-[9px] font-bold text-slate-400 dark:text-zinc-600 uppercase tracking-widest border-r border-slate-200 dark:border-zinc-800"></div>
+                            {WEEKDAYS.map((day, i) => (
+                                <div key={day} className={`py-2.5 text-center text-[10px] font-extrabold uppercase tracking-widest border-r border-slate-200/50 dark:border-zinc-800/50 last:border-r-0
+                                    ${i >= 5 ? 'text-slate-400 dark:text-zinc-500 bg-slate-50/50 dark:bg-zinc-900/30' : 'text-slate-600 dark:text-zinc-300'}`}>{day}</div>
                             ))}
                         </div>
 
@@ -1144,62 +1242,70 @@ export const CalendarPage = ({ activities, plannedWorkouts = [], addPlannedWorko
                                 };
 
                                 return (
-                                    <div key={wIdx} className="grid grid-cols-1 lg:grid-cols-[160px_repeat(7,1fr)] border-b border-slate-200 dark:border-zinc-800 last:border-b-0">
+                                    <div key={wIdx} className="grid grid-cols-1 lg:grid-cols-[130px_repeat(7,1fr)] border-b border-slate-200 dark:border-zinc-800 last:border-b-0">
 
-                                        {/* ====== PANEL SEMANAL IZQUIERDO (estilo intervals.icu) ====== */}
-                                        <div className="hidden lg:flex flex-col border-r border-slate-200 dark:border-zinc-800 bg-slate-50/80 dark:bg-zinc-950/50 p-2 text-[10px] relative">
-                                            {/* Week number + totals */}
-                                            <div className="flex items-baseline justify-between mb-1.5">
-                                                <span className="text-[11px] font-black text-slate-700 dark:text-zinc-200">
-                                                    #{weekNum}
-                                                    {isProjected && <span className="ml-1 text-[8px] font-bold text-blue-500 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/30 px-1 py-px rounded">PROY.</span>}
-                                                </span>
-                                                <span className="text-[10px] font-bold text-slate-500 dark:text-zinc-400">
-                                                    total {formatDuration(weekDuration)}
+                                        {/* ====== PANEL SEMANAL IZQUIERDO ====== */}
+                                        <div className="hidden lg:flex flex-col border-r border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-950/60 text-[10px] relative overflow-hidden">
+                                            {/* Header with week number */}
+                                            <div className="px-2 py-1.5 flex items-center justify-between border-b border-slate-100 dark:border-zinc-800/50">
+                                                <span className="text-[11px] font-bold text-slate-400 dark:text-zinc-500 flex items-center gap-1">
+                                                    Semana {weekNum}
+                                                    {isProjected && <span className="text-[7px] font-bold text-blue-500 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/40 px-1 py-px rounded">PROY</span>}
                                                 </span>
                                             </div>
 
-                                            {/* PMC metrics grid */}
-                                            <div className="space-y-0.5 mb-2">
-                                                <div className="flex justify-between">
-                                                    <span className="text-slate-400 dark:text-zinc-500 font-semibold">Carga</span>
-                                                    <span className="font-black font-mono text-amber-600 dark:text-amber-500">
-                                                        {Math.round(weekTSS)}
-                                                        {weekTSSRaw !== weekTSS && <span className="text-[8px] font-medium text-slate-400 dark:text-zinc-500 ml-0.5">({Math.round(weekTSSRaw)})</span>}
-                                                    </span>
+                                            {/* Intervals.icu style PMC layout */}
+                                            <div className="px-1.5 py-2 flex flex-col gap-0.5 flex-1 select-none">
+                                                {/* Row 1: Aptitud & Duration */}
+                                                <div className="flex items-center justify-between">
+                                                    <div className="flex items-center gap-1.5">
+                                                        <span className="text-[10px] text-slate-500 dark:text-zinc-400 w-9">Aptitud</span>
+                                                        <span className="text-[11px] font-bold text-blue-500">{weekPmc.ctl != null ? Math.round(weekPmc.ctl) : '-'}</span>
+                                                    </div>
+                                                    <span className="text-[11px] font-bold text-slate-800 dark:text-zinc-200">{formatDuration(weekDuration)}</span>
                                                 </div>
-                                                {weekPmc.ctl != null && (
-                                                    <>
-                                                        <div className="flex justify-between">
-                                                            <span className="text-slate-400 dark:text-zinc-500 font-semibold">Aptitud</span>
-                                                            <span className="font-bold font-mono text-blue-600 dark:text-blue-400">{Math.round(weekPmc.ctl)}</span>
-                                                        </div>
-                                                        <div className="flex justify-between">
-                                                            <span className="text-slate-400 dark:text-zinc-500 font-semibold">Fatiga</span>
-                                                            <span className="font-bold font-mono text-purple-600 dark:text-purple-400">{Math.round(weekPmc.atl)}</span>
-                                                        </div>
-                                                        {ramp !== null && (
-                                                            <div className="flex justify-between">
-                                                                <span className="text-slate-400 dark:text-zinc-500 font-semibold">Rampa</span>
-                                                                <span className={`font-bold font-mono ${Number(ramp) > 0 ? 'text-emerald-600' : Number(ramp) < -2 ? 'text-red-500' : 'text-slate-500 dark:text-zinc-400'}`}>
-                                                                    {Number(ramp) > 0 ? '+' : ''}{ramp}
-                                                                </span>
-                                                            </div>
-                                                        )}
-                                                        <div className="flex justify-between">
-                                                            <span className="text-slate-400 dark:text-zinc-500 font-semibold">Forma</span>
-                                                            <span className={`font-bold font-mono ${weekPmc.tcb > 5 ? 'text-emerald-600' : weekPmc.tcb < -15 ? 'text-red-500' : 'text-slate-600 dark:text-zinc-300'}`}>
-                                                                {weekPmc.tcb > 0 ? '+' : ''}{Math.round(weekPmc.tcb)}
+
+                                                {/* Row 2: Fatiga & Carga */}
+                                                <div className="flex items-center justify-between">
+                                                    <div className="flex items-center gap-1.5">
+                                                        <span className="text-[10px] text-slate-500 dark:text-zinc-400 w-9">Fatiga</span>
+                                                        <span className="text-[11px] font-bold text-purple-600 dark:text-purple-400">{weekPmc.atl != null ? Math.round(weekPmc.atl) : '-'}</span>
+                                                    </div>
+                                                    <div className="flex items-center gap-1">
+                                                        <span className="text-[9px] text-slate-400 dark:text-zinc-500">Carga</span>
+                                                        <span className="text-[11px] font-bold text-slate-800 dark:text-zinc-200">{Math.round(weekTSS)}</span>
+                                                    </div>
+                                                </div>
+
+                                                {/* Row 3: Forma & Chart */}
+                                                <div className="flex items-center justify-between">
+                                                    <div className="flex items-center gap-1.5">
+                                                        <span className="text-[10px] text-slate-500 dark:text-zinc-400 w-9">Forma</span>
+                                                        {weekPmc.tcb != null ? (
+                                                            <span className={`text-[11px] font-bold ${weekPmc.tcb > 5 ? 'text-emerald-500' : weekPmc.tcb < -15 ? 'text-red-500' : 'text-slate-600 dark:text-zinc-300'}`}>
+                                                                {Math.round(weekPmc.tcb)}
                                                             </span>
-                                                        </div>
-                                                    </>
-                                                )}
+                                                        ) : (
+                                                            <span className="text-[11px] font-bold text-slate-400">-</span>
+                                                        )}
+                                                    </div>
+                                                    {/* Target or Chart indicator */}
+                                                    <div className="flex items-end h-[12px] gap-[1px]">
+                                                        {weekTSS > 0 && (
+                                                            <>
+                                                                <div className="w-[3px] h-[5px] bg-emerald-400 rounded-t-[1px]"></div>
+                                                                <div className="w-[3px] h-[8px] bg-yellow-400 rounded-t-[1px]"></div>
+                                                                <div className="w-[3px] h-[12px] bg-emerald-400 rounded-t-[1px]"></div>
+                                                            </>
+                                                        )}
+                                                    </div>
+                                                </div>
                                             </div>
 
                                             {/* Target TSS */}
                                             <div
                                                 onClick={() => handleEditTarget(weekKey)}
-                                                className="mt-auto cursor-pointer hover:bg-slate-200/50 dark:hover:bg-zinc-800/50 rounded px-1 py-0.5 transition-colors"
+                                                className="mt-auto cursor-pointer hover:bg-slate-200/50 dark:hover:bg-zinc-800/50 px-2.5 py-1 transition-colors border-t border-slate-200/50 dark:border-zinc-800/50"
                                             >
                                                 {targetTSS > 0 ? (
                                                     <div>
@@ -1207,13 +1313,13 @@ export const CalendarPage = ({ activities, plannedWorkouts = [], addPlannedWorko
                                                             <span className="text-slate-400 dark:text-zinc-500 font-semibold">Objetivo</span>
                                                             <span className="font-mono font-bold text-slate-600 dark:text-zinc-300">{Math.round(weekTSS)}/{targetTSS}</span>
                                                         </div>
-                                                        <div className="w-full h-1 bg-slate-200 dark:bg-zinc-700 rounded-full overflow-hidden mt-0.5">
+                                                        <div className="w-full h-1.5 bg-slate-200 dark:bg-zinc-700 rounded-full overflow-hidden mt-0.5">
                                                             <div className={`h-full rounded-full transition-all ${Math.min((weekTSS / targetTSS) * 100, 100) >= 90 ? 'bg-emerald-500' : Math.min((weekTSS / targetTSS) * 100, 100) >= 70 ? 'bg-blue-500' : 'bg-amber-500'}`}
                                                                 style={{ width: `${Math.min((weekTSS / targetTSS) * 100, 100)}%` }}></div>
                                                         </div>
                                                     </div>
                                                 ) : (
-                                                    <span className="text-[9px] text-slate-400 dark:text-zinc-600 italic">+ Objetivo</span>
+                                                    <span className="text-[9px] text-slate-400 dark:text-zinc-600 italic hover:text-blue-500 transition-colors">+ Objetivo</span>
                                                 )}
                                             </div>
                                         </div>
@@ -1223,13 +1329,30 @@ export const CalendarPage = ({ activities, plannedWorkouts = [], addPlannedWorko
                                             const dateKey = day.date.toLocaleDateString('en-CA');
                                             const acts = activitiesByDate[dateKey] || [];
                                             const isToday = new Date().toLocaleDateString('en-CA') === dateKey;
+                                            const isWeekend = dIdx >= 5;
 
                                             const compliance = getComplianceForDay(dateKey, acts);
 
-                                            // Zone color helper for activity blocks
+                                            // Zone color helper — intervals.icu palette
                                             const zoneBarColor = (zone) => {
-                                                const colors = { Z1: '#94a3b8', Z2: '#3b82f6', Z3: '#22c55e', Z4: '#eab308', Z5: '#f97316', Z6: '#ef4444', Z7: '#a855f7' };
-                                                return colors[zone] || '#94a3b8';
+                                                const colors = {
+                                                    Z1: '#9e9e9e', Z2: '#4db8ff', Z3: '#50c878',
+                                                    Z4: '#ffd700', Z5: '#ff8c00', Z6: '#ff4444', Z7: '#cc44ff',
+                                                    R12: '#78b4e8', R23: '#6ec89b'
+                                                };
+                                                return colors[zone] || '#9e9e9e';
+                                            };
+
+                                            // Sport accent color (left border)
+                                            const sportAccent = (type) => {
+                                                const t = String(type).toLowerCase();
+                                                if (t.includes('run') || t.includes('carrera') || t.includes('correr')) return 'border-l-emerald-500 dark:border-l-emerald-400';
+                                                if (t.includes('ride') || t.includes('bici') || t.includes('ciclismo')) return 'border-l-blue-500 dark:border-l-blue-400';
+                                                if (t.includes('weight') || t.includes('fuerza') || t.includes('crossfit')) return 'border-l-orange-500 dark:border-l-orange-400';
+                                                if (t.includes('swim') || t.includes('natacion')) return 'border-l-cyan-500 dark:border-l-cyan-400';
+                                                if (t.includes('yoga') || t.includes('stretch')) return 'border-l-pink-400 dark:border-l-pink-400';
+                                                if (t.includes('walk') || t.includes('hike') || t.includes('caminata')) return 'border-l-lime-500 dark:border-l-lime-400';
+                                                return 'border-l-slate-400 dark:border-l-zinc-500';
                                             };
 
                                             return (
@@ -1237,33 +1360,25 @@ export const CalendarPage = ({ activities, plannedWorkouts = [], addPlannedWorko
                                                     onDragOver={(e) => handleDragOver(e, dateKey)}
                                                     onDragLeave={handleDragLeave}
                                                     onDrop={(e) => handleDrop(e, day.date)}
-                                                    className={`relative p-1 lg:p-1.5 border-r border-slate-200 dark:border-zinc-800 flex flex-col min-h-[100px] lg:min-h-[130px] overflow-hidden transition-colors group/daycell
-                                                        ${!day.isCurrentMonth ? 'bg-slate-50/50 dark:bg-zinc-950/30' : 'bg-white dark:bg-zinc-900'}
-                                                        ${isToday ? 'bg-blue-50/40 dark:bg-blue-900/10' : ''}
+                                                    className={`relative p-1.5 lg:p-2 border-r border-slate-200/70 dark:border-zinc-800/70 flex flex-col min-h-[110px] lg:min-h-[140px] overflow-hidden transition-colors group/daycell
+                                                        ${!day.isCurrentMonth ? 'bg-slate-100/60 dark:bg-zinc-950/40' : isWeekend ? 'bg-slate-50/70 dark:bg-zinc-900/60' : 'bg-white dark:bg-zinc-900'}
                                                         ${dragOverDate === dateKey ? 'bg-blue-100/50 dark:bg-blue-900/30 ring-2 ring-blue-400 ring-inset' : ''}
                                                     `}>
                                                     {/* Day number + add button */}
-                                                    <div className="flex justify-between items-start px-0.5 mb-1 shrink-0">
-                                                        <span className={`text-[10px] lg:text-[11px] font-bold ${!day.isCurrentMonth ? 'text-slate-300 dark:text-zinc-700' : isToday ? 'text-blue-600 dark:text-blue-400 bg-blue-100 dark:bg-blue-900/50 px-1.5 py-0.5 rounded' : 'text-slate-500 dark:text-zinc-400'}`}>
-                                                            {day.date.getDate()}
-                                                        </span>
+                                                    <div className="flex justify-between items-start mb-1.5 shrink-0">
+                                                        <div className="flex items-center justify-center w-6 h-6 -ml-0.5 -mt-0.5">
+                                                            <span className={`text-[12px] lg:text-[13px] font-bold leading-none flex items-center justify-center
+                                                                ${!day.isCurrentMonth ? 'text-slate-300 dark:text-zinc-700' : isToday ? 'text-white bg-blue-500 w-6 h-6 rounded-full shadow-sm' : 'text-slate-600 dark:text-zinc-300'}`}>
+                                                                {day.date.getDate()}
+                                                            </span>
+                                                        </div>
                                                         <button onClick={(e) => handleOpenPlanModal(e, day.date)} className="opacity-0 group-hover/daycell:opacity-100 text-slate-400 hover:text-blue-500 p-0.5 rounded transition-all">
                                                             <Plus size={12} />
                                                         </button>
                                                     </div>
 
-                                                    {/* Compliance badge */}
-                                                    {compliance && compliance.status !== 'future' && (
-                                                        <div className={`absolute top-0.5 right-0.5 w-3 h-3 rounded-full flex items-center justify-center text-[7px] font-black z-10
-                                                            ${compliance.status === 'done' ? 'bg-emerald-500 text-white' : compliance.status === 'partial' ? 'bg-amber-500 text-white' : 'bg-red-500 text-white'}`}
-                                                            title={`${compliance.realTSS}/${compliance.plannedTSS} TSS (${compliance.pct}%)`}
-                                                        >
-                                                            {compliance.status === 'done' ? '✓' : compliance.status === 'partial' ? '~' : '✗'}
-                                                        </div>
-                                                    )}
-
                                                     {/* Activity cards — intervals.icu style */}
-                                                    <div className="flex-1 overflow-y-auto custom-scrollbar flex flex-col gap-1 w-full">
+                                                    <div className="flex-1 flex flex-col gap-1 w-full">
                                                         {acts.map((act, i) => {
                                                             // Parse blocks for zone visualization
                                                             let blocks = [];
@@ -1274,14 +1389,16 @@ export const CalendarPage = ({ activities, plannedWorkouts = [], addPlannedWorko
                                                                 } catch (e) { }
                                                             }
 
-                                                            // Sport color for card background
-                                                            const sportBg = (() => {
+                                                            // Color mapping (intervals.icu style)
+                                                            const sportColors = (() => {
                                                                 const t = String(act.type).toLowerCase();
-                                                                if (t.includes('run') || t.includes('carrera')) return 'bg-green-50 border-green-200 dark:bg-green-950/30 dark:border-green-900/50';
-                                                                if (t.includes('bike') || t.includes('bici') || t.includes('ciclismo')) return 'bg-blue-50 border-blue-200 dark:bg-blue-950/30 dark:border-blue-900/50';
-                                                                if (t.includes('gym') || t.includes('fuerza')) return 'bg-purple-50 border-purple-200 dark:bg-purple-950/30 dark:border-purple-900/50';
-                                                                if (t.includes('swim') || t.includes('nadar')) return 'bg-cyan-50 border-cyan-200 dark:bg-cyan-950/30 dark:border-cyan-900/50';
-                                                                return 'bg-slate-50 border-slate-200 dark:bg-zinc-800 dark:border-zinc-700';
+                                                                if (t.includes('run') || t.includes('carrera') || t.includes('correr')) return { header: 'bg-emerald-500 dark:bg-emerald-600', text: 'text-emerald-600 dark:text-emerald-400', border: 'border-emerald-500/50' };
+                                                                if (t.includes('ride') || t.includes('bici') || t.includes('ciclismo')) return { header: 'bg-blue-600 dark:bg-blue-600', text: 'text-blue-600 dark:text-blue-400', border: 'border-blue-600/50' };
+                                                                if (t.includes('weight') || t.includes('fuerza') || t.includes('crossfit') || t.includes('workout')) return { header: 'bg-orange-500 dark:bg-orange-600', text: 'text-orange-600 dark:text-orange-400', border: 'border-orange-500/50' };
+                                                                if (t.includes('swim') || t.includes('nadar') || t.includes('natacion')) return { header: 'bg-cyan-500 dark:bg-cyan-600', text: 'text-cyan-600 dark:text-cyan-400', border: 'border-cyan-500/50' };
+                                                                if (t.includes('yoga') || t.includes('stretch')) return { header: 'bg-pink-400 dark:bg-pink-500', text: 'text-pink-500 dark:text-pink-400', border: 'border-pink-400/50' };
+                                                                if (t.includes('walk') || t.includes('hike') || t.includes('caminata')) return { header: 'bg-lime-500 dark:bg-lime-600', text: 'text-lime-600 dark:text-lime-400', border: 'border-lime-500/50' };
+                                                                return { header: 'bg-slate-500 dark:bg-slate-600', text: 'text-slate-600 dark:text-slate-400', border: 'border-slate-400/50' };
                                                             })();
 
                                                             const formatActDuration = (mins) => {
@@ -1305,85 +1422,73 @@ export const CalendarPage = ({ activities, plannedWorkouts = [], addPlannedWorko
                                                                             if (onSelectActivity) onSelectActivity(act);
                                                                         }
                                                                     }}
-                                                                    className={`rounded cursor-pointer transition-all w-full shrink-0 relative group/act overflow-hidden border
-                                                                        ${sportBg}
-                                                                        ${act.isPlanned ? 'border-dashed opacity-80 cursor-grab active:cursor-grabbing' : ''}
-                                                                        hover:shadow-sm
+                                                                    className={`rounded-md cursor-pointer transition-all w-full shrink-0 relative flex flex-col overflow-hidden bg-white dark:bg-zinc-900 group/act
+                                                                        ${act.isPlanned
+                                                                            ? `border ${sportColors.border} opacity-80 shadow-sm cursor-grab active:cursor-grabbing`
+                                                                            : `border border-slate-200 dark:border-zinc-700 shadow-sm`
+                                                                        }
+                                                                        hover:shadow-md hover:scale-[1.01] hover:opacity-100
                                                                     `}
                                                                 >
-                                                                    {/* Top: icon + duration + carga */}
-                                                                    <div className="flex items-center justify-between px-1.5 pt-1 pb-0.5">
-                                                                        <div className="flex items-center gap-1">
-                                                                            <span className="shrink-0 opacity-70">{getSportIcon(act.type)}</span>
-                                                                            <span className="text-[11px] font-black text-slate-700 dark:text-zinc-200">
-                                                                                {formatActDuration(act.duration || 0)}
-                                                                            </span>
-                                                                        </div>
-                                                                    </div>
-
-                                                                    {/* Carga */}
-                                                                    <div className="px-1.5 pb-0.5">
-                                                                        <span className="text-[9px] font-bold text-slate-500 dark:text-zinc-400">
-                                                                            Carga <span className="font-black text-slate-700 dark:text-zinc-200">{Math.round(act.tss || 0)}</span>
-                                                                        </span>
-                                                                    </div>
-
-                                                                    {/* Zone bars — bar chart style for planned workouts only */}
-                                                                    {blocks.length > 0 && (
-                                                                        <div className="flex items-end h-8 mx-1 mb-1 gap-px">
-                                                                            {(() => {
-                                                                                const zoneHeight = { Z1: '25%', Z2: '40%', Z3: '55%', Z4: '70%', Z5: '85%', Z6: '100%' };
-                                                                                const allBars = [];
-                                                                                blocks.forEach((b, bi) => {
-                                                                                    if (b.type === 'repeat') {
-                                                                                        for (let r = 0; r < (b.repeats || 1); r++) {
-                                                                                            (b.steps || []).forEach((s, si) => {
-                                                                                                allBars.push({
-                                                                                                    key: `${bi}-${r}-${si}`,
-                                                                                                    zone: s.zone || 'Z2',
-                                                                                                    duration: Number(s.duration) || 1,
-                                                                                                    title: `${s.duration}${s.unit === 'dist' ? 'km' : 'min'} ${s.zone}`,
-                                                                                                });
-                                                                                            });
-                                                                                        }
-                                                                                    } else {
-                                                                                        allBars.push({
-                                                                                            key: `${bi}`,
-                                                                                            zone: b.zone || 'Z2',
-                                                                                            duration: Number(b.duration) || 1,
-                                                                                            title: `${b.duration}${b.unit === 'dist' ? 'km' : 'min'} ${b.zone}`,
+                                                                    {act.isPlanned ? (
+                                                                        /* ─── PLANNED CARD (intervals.icu style) ─── */
+                                                                        <>
+                                                                            {/* Header: White bg, Sport colored text */}
+                                                                            <div className={`flex items-center gap-1.5 px-1.5 pt-1.5 pb-0.5 ${sportColors.text}`}>
+                                                                                <span className="shrink-0">{getSportIcon(act.type, 14)}</span>
+                                                                                <span className="text-[12px] font-bold">{formatActDuration(act.duration || 0)}</span>
+                                                                            </div>
+                                                                            {/* Body */}
+                                                                            <div className="px-1.5 pb-1 flex flex-col gap-0.5 mt-0.5">
+                                                                                <span className="text-[10px] font-bold text-slate-700 dark:text-zinc-200">
+                                                                                    Carga {Math.round(act.tss || 0)}
+                                                                                </span>
+                                                                                <span className="text-[9px] font-medium text-slate-500 dark:text-zinc-400 truncate">
+                                                                                    {act.name || act.type}
+                                                                                </span>
+                                                                            </div>
+                                                                            {/* Zone bars */}
+                                                                            {blocks.length > 0 && (
+                                                                                <div className="flex items-end h-9 mx-1.5 mb-1.5 gap-[1px] rounded-b overflow-hidden opacity-90">
+                                                                                    {(() => {
+                                                                                        const zoneHeight = { Z1: '25%', Z2: '40%', Z3: '55%', Z4: '70%', Z5: '85%', Z6: '95%', Z7: '100%', R12: '32%', R23: '48%' };
+                                                                                        const allBars = [];
+                                                                                        blocks.forEach((b, bi) => {
+                                                                                            if (b.type === 'repeat') {
+                                                                                                for (let r = 0; r < (b.repeats || 1); r++) {
+                                                                                                    (b.steps || []).forEach((s, si) => {
+                                                                                                        allBars.push({ key: `${bi}-${r}-${si}`, zone: s.zone || 'Z2', duration: Number(s.duration) || 1, title: `${s.duration}${s.unit === 'dist' ? 'km' : 'min'} ${s.zone}` });
+                                                                                                    });
+                                                                                                }
+                                                                                            } else {
+                                                                                                allBars.push({ key: `${bi}`, zone: b.zone || 'Z2', duration: Number(b.duration) || 1, title: `${b.duration}${b.unit === 'dist' ? 'km' : 'min'} ${b.zone}` });
+                                                                                            }
                                                                                         });
-                                                                                    }
-                                                                                });
-                                                                                return allBars.map(bar => (
-                                                                                    <div key={bar.key}
-                                                                                        className="rounded-t-sm"
-                                                                                        style={{
-                                                                                            flex: bar.duration,
-                                                                                            height: zoneHeight[bar.zone] || '40%',
-                                                                                            backgroundColor: zoneBarColor(bar.zone),
-                                                                                            opacity: 0.85,
-                                                                                            minWidth: '3px',
-                                                                                        }}
-                                                                                        title={bar.title}
-                                                                                    />
-                                                                                ));
-                                                                            })()}
-                                                                        </div>
-                                                                    )}
-
-                                                                    {/* Name */}
-                                                                    <div className="px-1.5 pb-1">
-                                                                        <span className="text-[8px] lg:text-[9px] font-semibold text-slate-500 dark:text-zinc-400 truncate block leading-tight">
-                                                                            {act.isPlanned ? `Plan: ${act.name || act.type}` : (act.name || act.type)}
-                                                                        </span>
-                                                                    </div>
-
-                                                                    {/* Delete button for planned */}
-                                                                    {act.isPlanned && (
-                                                                        <button onClick={(e) => handleDeletePlan(e, act.id)} className="absolute -top-1 -right-1 bg-red-500 text-white rounded-full p-0.5 opacity-0 group-hover/act:opacity-100 shadow transition-opacity">
-                                                                            <Trash2 size={8} />
-                                                                        </button>
+                                                                                        return allBars.map(bar => (
+                                                                                            <div key={bar.key} className="rounded-t-[1px]" style={{ flex: bar.duration, height: zoneHeight[bar.zone] || '40%', backgroundColor: zoneBarColor(bar.zone), minWidth: '3px' }} title={bar.title} />
+                                                                                        ));
+                                                                                    })()}
+                                                                                </div>
+                                                                            )}
+                                                                        </>
+                                                                    ) : (
+                                                                        /* ─── COMPLETED CARD (intervals.icu style) ─── */
+                                                                        <>
+                                                                            {/* Header: Solid colored bg, white text */}
+                                                                            <div className={`flex items-center gap-1.5 px-1.5 py-1 ${sportColors.header} text-white`}>
+                                                                                <span className="shrink-0">{getSportIcon(act.type, 13)}</span>
+                                                                                <span className="text-[12px] font-bold">{formatActDuration(act.duration || 0)}</span>
+                                                                            </div>
+                                                                            {/* Body */}
+                                                                            <div className="px-1.5 pt-1 pb-1.5 flex flex-col gap-0.5">
+                                                                                <span className="text-[10px] font-bold text-slate-800 dark:text-zinc-100">
+                                                                                    Carga {Math.round(act.tss || 0)}
+                                                                                </span>
+                                                                                <span className="text-[9px] font-medium text-slate-500 dark:text-zinc-400 truncate">
+                                                                                    {act.name || act.type}
+                                                                                </span>
+                                                                            </div>
+                                                                        </>
                                                                     )}
                                                                 </div>
                                                             );
@@ -1754,193 +1859,233 @@ export const CalendarPage = ({ activities, plannedWorkouts = [], addPlannedWorko
                 </div >
             )}
             {/* MODAL VER ENTRENAMIENTO PLANEADO */}
+            {viewingPlan && (
+                <div className="fixed inset-0 bg-slate-900/40 dark:bg-black/80 backdrop-blur-sm z-[60] flex items-center justify-center p-4 sm:p-8">
+                    <div className="bg-white dark:bg-zinc-900 rounded-2xl w-full max-w-5xl shadow-2xl overflow-hidden border border-slate-200 dark:border-zinc-800 h-full max-h-[85vh] flex flex-col animate-in zoom-in-95 duration-200">
+                        <WorkoutViewerModal
+                            workout={viewingPlan}
+                            onClose={() => setViewingPlan(null)}
+                            onDelete={(e) => handleDeletePlan(e, viewingPlan.id)}
+                            onEdit={() => handleEditPlan(viewingPlan)}
+                        />
+                    </div>
+                </div>
+            )}
+
+            {/* FLOATING DRAGGABLE PMC CHART */}
             {
-                viewingPlan && (() => {
-                    // Build zone timeline data from blocks
-                    const blocks = viewingPlan.descriptionObj?.blocks || [];
-                    // Same hex colors as the calendar card zone bars (line ~1048)
-                    const KNOWN_ZONES = ['Z1', 'R12', 'Z2', 'R23', 'Z3', 'Z4', 'Z5', 'Z6'];
-                    const zoneColors = {
-                        Z1: '#94a3b8', R12: '#60a5fa', Z2: '#3b82f6', R23: '#34d399',
-                        Z3: '#22c55e', Z4: '#eab308', Z5: '#f97316', Z6: '#ef4444',
-                    };
-                    const getZoneColor = (z) => zoneColors[z] || '#94a3b8';
-                    // Don't normalize — preserve R12/R23 so they show correctly
+                showPmcChart && (
+                    <PmcFloatingChart
+                        pmcByDate={fullPmcByDate}
+                        onClose={() => setShowPmcChart(false)}
+                        initPos={pmcPos}
+                    />
+                )
+            }
 
-                    // Flatten all time segments — expand repeats individually so the pattern shows
-                    const segments = [];
-                    const addSeg = (zone, min) => { const m = Number(min) || 0; if (m > 0) segments.push({ zone, min: m }); };
-                    blocks.forEach(b => {
-                        if (b.type === 'repeat') {
-                            const r = Number(b.repeats) || 1;
-                            for (let i = 0; i < r; i++) {
-                                (b.steps || []).forEach(s => {
-                                    if (s.unit !== 'dist') addSeg(s.zone || 'Z2', Number(s.duration) || 0);
-                                });
-                            }
-                        } else if (b.unit !== 'dist') {
-                            addSeg(b.zone || 'Z2', Number(b.duration) || 0);
-                        }
-                    });
-                    const totalMin = segments.reduce((s, x) => s + x.min, 0) || viewingPlan.duration || 1;
+        </>
+    );
+};
 
-                    // Zone totals for legend (aggregate)
-                    const zoneTotals = {};
-                    segments.forEach(s => { zoneTotals[s.zone] = (zoneTotals[s.zone] || 0) + s.min; });
+// ── Workout Viewer Modal Component ──────────────────────────────────────────
+const WorkoutViewerModal = ({ workout, onClose, onDelete, onEdit }) => {
+    // Build zone timeline data from blocks
+    const blocks = workout.descriptionObj?.blocks || [];
+    // Same hex colors as the calendar card zone bars
+    const zoneColors = {
+        Z1: '#94a3b8', R12: '#60a5fa', Z2: '#3b82f6', R23: '#34d399',
+        Z3: '#22c55e', Z4: '#eab308', Z5: '#f97316', Z6: '#ef4444',
+    };
+    const getZoneColor = (z) => zoneColors[z] || '#94a3b8';
 
+    // Flatten all time segments — expand repeats individually so the pattern shows
+    const segments = [];
+    const addSeg = (zone, min) => { const m = Number(min) || 0; if (m > 0) segments.push({ zone, min: m }); };
+    blocks.forEach(b => {
+        if (b.type === 'repeat') {
+            const r = Number(b.repeats) || 1;
+            for (let i = 0; i < r; i++) {
+                (b.steps || []).forEach(s => {
+                    if (s.unit !== 'dist') addSeg(s.zone || 'Z2', Number(s.duration) || 0);
+                });
+            }
+        } else if (b.unit !== 'dist') {
+            addSeg(b.zone || 'Z2', Number(b.duration) || 0);
+        }
+    });
 
-                    return (
-                        <div className="fixed inset-0 bg-slate-900/50 dark:bg-black/70 backdrop-blur-sm z-[60] flex items-center justify-center p-4 sm:p-6">
-                            <div className="bg-white dark:bg-zinc-900 rounded-xl w-full max-w-3xl shadow-2xl overflow-hidden border border-slate-200/50 dark:border-zinc-800 flex flex-col" style={{ maxHeight: '88vh' }}>
+    const totalMin = segments.reduce((s, x) => s + x.min, 0) || workout.duration || 1;
 
-                                {/* ── Header ── */}
-                                <div className="flex items-center justify-between px-6 py-3 border-b border-slate-100 dark:border-zinc-800 shrink-0">
-                                    <div>
-                                        <h3 className="text-sm font-bold text-slate-800 dark:text-zinc-100 flex items-center gap-2">
-                                            {getSportIcon(viewingPlan.type)}
-                                            {viewingPlan.name || `Entrenamiento de ${viewingPlan.type}`}
-                                        </h3>
-                                        <p className="text-[10px] text-slate-400 dark:text-zinc-500 font-medium uppercase tracking-wider mt-0.5 capitalize">
-                                            {new Date(viewingPlan.date).toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long' })}
-                                        </p>
-                                    </div>
-                                    <div className="flex items-center gap-5">
-                                        <div className="text-center">
-                                            <p className="text-[9px] font-bold text-slate-400 dark:text-zinc-500 uppercase tracking-widest">TSS</p>
-                                            <p className="text-xl font-black font-mono text-slate-700 dark:text-zinc-200">{viewingPlan.tss}</p>
-                                        </div>
-                                        <div className="w-px h-8 bg-slate-200 dark:bg-zinc-700" />
-                                        <div className="text-center">
-                                            <p className="text-[9px] font-bold text-slate-400 dark:text-zinc-500 uppercase tracking-widest">Duración</p>
-                                            <p className="text-xl font-black font-mono text-slate-700 dark:text-zinc-200">{formatDuration(viewingPlan.duration)}</p>
-                                        </div>
-                                        <button onClick={() => setViewingPlan(null)} className="ml-2 p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 dark:hover:text-zinc-200 dark:hover:bg-zinc-800 rounded-lg transition-colors">
-                                            <X size={18} />
-                                        </button>
-                                    </div>
+    // Zone totals for legend (aggregate)
+    const zoneTotals = {};
+    segments.forEach(s => { zoneTotals[s.zone] = (zoneTotals[s.zone] || 0) + s.min; });
+
+    // Header sport styling
+    const getSportIcon = (type, size = 18) => {
+        if (type === 'bike') return <Bike size={size} />;
+        if (type === 'run') return <User size={size} />;
+        if (type === 'swim') return <Waves size={size} />;
+        if (type === 'strength') return <Dumbbell size={size} />;
+        return <Activity size={size} />;
+    };
+
+    const sportColorClasses = workout.type === 'run' ? 'bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400' :
+        workout.type === 'swim' ? 'bg-cyan-100 text-cyan-600 dark:bg-cyan-900/30 dark:text-cyan-400' :
+            workout.type === 'strength' ? 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400' :
+                'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400';
+
+    return (
+        <div className="flex flex-col h-full text-slate-700 dark:text-zinc-200">
+            {/* Header: Title and Top Metrics */}
+            <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100 dark:border-zinc-800 shrink-0 bg-white dark:bg-zinc-900">
+                <div className="flex items-center gap-3">
+                    <div className={`w-8 h-8 rounded-full flex items-center justify-center ${sportColorClasses}`}>
+                        {getSportIcon(workout.type, 16)}
+                    </div>
+                    <div>
+                        <h3 className="text-base font-bold text-slate-800 dark:text-zinc-100 tracking-tight">
+                            {workout.name || `Plan de ${workout.type}`}
+                        </h3>
+                        <p className="text-[11px] text-slate-400 dark:text-zinc-500 font-medium capitalize mt-0.5">
+                            {workout.date ? new Date(workout.date).toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long' }) : ''}
+                        </p>
+                    </div>
+                </div>
+                <div className="flex items-center gap-6">
+                    <div className="flex flex-col items-center">
+                        <span className="text-[9px] font-bold text-slate-400 dark:text-zinc-500 uppercase tracking-widest mb-0.5">TSS</span>
+                        <span className="text-2xl font-black font-mono leading-none">{workout.tss}</span>
+                    </div>
+                    <div className="w-px h-8 bg-slate-200 dark:bg-zinc-700"></div>
+                    <div className="flex flex-col items-center">
+                        <span className="text-[9px] font-bold text-slate-400 dark:text-zinc-500 uppercase tracking-widest mb-0.5">Duración</span>
+                        <span className="text-2xl font-black font-mono leading-none">{formatDuration(workout.duration)}</span>
+                    </div>
+                    <button onClick={onClose} className="ml-4 p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 dark:hover:text-zinc-200 dark:hover:bg-zinc-800 rounded-lg transition-colors">
+                        <X size={20} strokeWidth={2.5} />
+                    </button>
+                </div>
+            </div>
+
+            {/* Zone Distribution Bar */}
+            {segments.length > 0 && (
+                <div className="px-6 py-4 border-b border-slate-100 dark:border-zinc-800 shrink-0 bg-slate-50/50 dark:bg-zinc-900/50">
+                    <div className="flex items-center justify-between mb-2">
+                        <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400 dark:text-zinc-500">Distribución de Zonas</span>
+                    </div>
+                    {/* Continuous Bar */}
+                    <div className="flex h-4 rounded overflow-hidden gap-px bg-slate-200 dark:bg-zinc-800">
+                        {segments.map((s, i) => (
+                            <div key={i} title={`${s.zone} — ${s.min}m`}
+                                style={{ flex: s.min / totalMin, background: getZoneColor(s.zone) }}
+                                className="transition-all hover:brightness-110"
+                            />
+                        ))}
+                    </div>
+                    {/* Legend Blocks below bar */}
+                    <div className="flex flex-wrap gap-x-4 gap-y-2 mt-3">
+                        {Object.entries(zoneTotals).sort().map(([zone, min]) => {
+                            const pct = Math.round((min / totalMin) * 100);
+                            return (
+                                <div key={zone} className="flex items-center gap-1.5 text-[11px] font-medium text-slate-600 dark:text-zinc-400">
+                                    <div className="w-2.5 h-2.5 rounded-sm" style={{ background: getZoneColor(zone) }}></div>
+                                    <span className="font-bold">{zone}</span>
+                                    <span>{Math.round(min)}m</span>
+                                    <span className="text-slate-400 dark:text-zinc-500 text-[10px]">({pct}%)</span>
                                 </div>
+                            );
+                        })}
+                    </div>
+                </div>
+            )}
 
-                                {/* ── Zone Timeline Strip ── */}
-                                {segments.length > 0 && (
-                                    <div className="px-6 pt-4 pb-2 border-b border-slate-100 dark:border-zinc-800 shrink-0">
-                                        <p className="text-[9px] font-bold uppercase tracking-widest text-slate-400 dark:text-zinc-500 mb-2">Distribución de zonas</p>
-                                        {/* Bar */}
-                                        <div className="flex h-5 rounded-full overflow-hidden gap-px">
-                                            {segments.map((s, i) => (
-                                                <div key={i} title={`${s.zone} — ${s.min}m`}
-                                                    style={{ flex: s.min / totalMin, background: getZoneColor(s.zone) }}
-                                                    className="dark:opacity-80 transition-all"
-                                                />
-                                            ))}
-                                        </div>
-                                        {/* Legend */}
-                                        <div className="flex flex-wrap gap-3 mt-2">
-                                            {Object.entries(zoneTotals).sort().map(([zone, min]) => (
-                                                <span key={zone} className="flex items-center gap-1 text-[10px] font-bold text-slate-500 dark:text-zinc-400">
-                                                    <span className="w-2.5 h-2.5 rounded-sm inline-block" style={{ background: getZoneColor(zone) }} />
-                                                    {zone} <span className="font-mono">{Math.round(min)}m</span>
-                                                    <span className="text-slate-300 dark:text-zinc-600">({Math.round(min / totalMin * 100)}%)</span>
+            {/* Two Column Content */}
+            <div className="flex flex-1 overflow-hidden">
+                {/* Left Column: List of blocks structure */}
+                <div className="flex-1 overflow-y-auto p-6 border-r border-slate-100 dark:border-zinc-800 bg-white dark:bg-zinc-900">
+                    <h4 className="text-[10px] font-bold uppercase tracking-widest text-slate-400 dark:text-zinc-500 mb-4">Estructura</h4>
+
+                    {blocks.length === 0 ? (
+                        <div className="flex items-center justify-center p-8 border border-dashed border-slate-200 dark:border-zinc-800 rounded-lg">
+                            <p className="text-sm text-slate-400 dark:text-zinc-500">Sin estructura definida</p>
+                        </div>
+                    ) : (
+                        <div className="space-y-3">
+                            {blocks.map((block, idx) => {
+                                if (block.type === 'repeat') {
+                                    return (
+                                        <div key={idx} className="rounded-xl border border-slate-200 dark:border-zinc-800 overflow-hidden shadow-sm">
+                                            <div className="bg-slate-50 dark:bg-zinc-900 px-4 py-2 border-b border-slate-100 dark:border-zinc-800 flex items-center gap-2">
+                                                <RotateCcw size={12} className="text-slate-400" />
+                                                <span className="text-xs font-bold text-slate-600 dark:text-zinc-300">
+                                                    Repetir <span className="font-black text-slate-800 dark:text-zinc-100">{block.repeats}×</span>
                                                 </span>
-                                            ))}
-                                        </div>
-                                    </div>
-                                )}
-
-                                {/* ── Two columns ── */}
-                                <div className="flex flex-1 overflow-hidden min-h-0">
-
-                                    {/* LEFT — Block list */}
-                                    <div className="flex-1 overflow-y-auto p-5 border-r border-slate-100 dark:border-zinc-800">
-                                        <p className="text-[9px] font-bold uppercase tracking-widest text-slate-400 dark:text-zinc-500 mb-3">Estructura</p>
-
-                                        {blocks.length === 0 ? (
-                                            <div className="flex items-center justify-center h-24 border border-dashed border-slate-200 dark:border-zinc-800 rounded-lg">
-                                                <p className="text-xs text-slate-400 dark:text-zinc-500">Sin estructura definida</p>
                                             </div>
-                                        ) : (
-                                            <div className="space-y-1.5">
-                                                {blocks.map((block, idx) => {
-                                                    if (block.type === 'repeat') {
-                                                        return (
-                                                            <div key={idx} className="rounded-lg border border-slate-200 dark:border-zinc-800 overflow-hidden">
-                                                                <div className="flex items-center px-3 py-1.5 bg-slate-50 dark:bg-zinc-900 border-b border-slate-100 dark:border-zinc-800">
-                                                                    <span className="text-xs font-black text-slate-700 dark:text-zinc-300 font-mono mr-1">{block.repeats}×</span>
-                                                                    <span className="text-[10px] font-bold text-slate-400 dark:text-zinc-500 uppercase tracking-wide">Intervalos</span>
-                                                                </div>
-                                                                <div className="divide-y divide-slate-100 dark:divide-zinc-800">
-                                                                    {block.steps.map((step, sIdx) => {
-                                                                        const isActive = step.type === 'active';
-                                                                        return (
-                                                                            <div key={sIdx} className="flex items-center justify-between px-3 py-2">
-                                                                                <div className="flex items-center gap-2">
-                                                                                    <div className="w-1 h-5 rounded-full" style={{ background: isActive ? (zoneColors[step.zone] || '#6366f1') : '#e2e8f0' }} />
-                                                                                    <span className={`text-[10px] font-bold uppercase tracking-wide ${isActive ? 'text-slate-700 dark:text-zinc-200' : 'text-slate-400 dark:text-zinc-500'}`}>
-                                                                                        {isActive ? 'Trabajo' : 'Pausa'}
-                                                                                    </span>
-                                                                                </div>
-                                                                                <div className="flex items-center gap-2">
-                                                                                    <span className="font-mono text-xs font-bold text-slate-600 dark:text-zinc-300">
-                                                                                        {formatBlockDuration(step.duration)}<span className="text-[10px] font-normal text-slate-400 ml-px">{step.unit === 'dist' ? 'km' : ''}</span>
-                                                                                    </span>
-                                                                                    <span className="text-[9px] font-bold px-1.5 py-px rounded border border-slate-200 dark:border-zinc-700 text-slate-500 dark:text-zinc-400 bg-white dark:bg-zinc-900">{step.zone}</span>
-                                                                                </div>
-                                                                            </div>
-                                                                        );
-                                                                    })}
-                                                                </div>
-                                                            </div>
-                                                        );
-                                                    }
-                                                    const typeColor = block.type === 'warmup' ? 'bg-orange-100 dark:bg-orange-900/20 text-orange-600 dark:text-orange-400' : block.type === 'cooldown' ? 'bg-blue-100 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400' : 'bg-slate-100 dark:bg-zinc-800 text-slate-600 dark:text-zinc-300';
-                                                    const typeLabel = block.type === 'warmup' ? 'Cal.' : block.type === 'cooldown' ? 'Vuelta' : 'Trabajo';
+                                            <div className="divide-y divide-slate-100 dark:divide-zinc-800">
+                                                {(block.steps || []).map((step, sIdx) => {
+                                                    const isActive = step.type === 'active';
                                                     return (
-                                                        <div key={idx} className="flex items-center justify-between px-3 py-2 rounded-lg border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900">
-                                                            <div className="flex items-center gap-2 min-w-0">
-                                                                <div className="w-1 h-8 rounded-full flex-shrink-0" style={{ background: zoneColors[block.zone] || '#94a3b8' }} />
-                                                                <div className="min-w-0">
-                                                                    <span className={`inline-block text-[9px] font-black uppercase tracking-wider px-1.5 py-px rounded mr-1.5 ${typeColor}`}>{typeLabel}</span>
-                                                                    {block.details && <p className="text-[10px] text-slate-500 dark:text-zinc-400 truncate">{block.details}</p>}
-                                                                </div>
-                                                            </div>
-                                                            <div className="flex items-center gap-2 shrink-0">
-                                                                <span className="font-mono text-xs font-bold text-slate-600 dark:text-zinc-300">
-                                                                    {formatBlockDuration(block.duration)}<span className="text-[10px] font-normal text-slate-400 ml-px">{block.unit === 'dist' ? 'km' : ''}</span>
+                                                        <div key={sIdx} className="flex items-center justify-between px-4 py-2.5 bg-white dark:bg-zinc-900">
+                                                            <div className="flex items-center gap-3">
+                                                                <div className="w-1.5 h-6 rounded-full" style={{ background: isActive ? (zoneColors[step.zone] || '#6366f1') : '#cbd5e1' }} />
+                                                                <span className={`text-[11px] font-bold uppercase tracking-wider ${isActive ? 'text-slate-700 dark:text-zinc-200' : 'text-slate-500 dark:text-zinc-400'}`}>
+                                                                    {isActive ? 'Trabajo' : 'Recuperación'}
                                                                 </span>
-                                                                <span className="text-[9px] font-bold px-1.5 py-px rounded border border-slate-200 dark:border-zinc-700 text-slate-500 dark:text-zinc-400 bg-white dark:bg-zinc-900">{block.zone}</span>
+                                                            </div>
+                                                            <div className="flex items-center gap-3">
+                                                                <span className="font-mono text-sm font-bold text-slate-800 dark:text-zinc-100">
+                                                                    {formatBlockDuration(step.duration)}{step.unit === 'dist' ? <span className="text-[10px] text-slate-400 ml-0.5">km</span> : ''}
+                                                                </span>
+                                                                <span className="text-[10px] font-bold px-2 py-0.5 rounded border border-slate-200 dark:border-zinc-700 text-slate-600 dark:text-zinc-300">{step.zone}</span>
                                                             </div>
                                                         </div>
                                                     );
                                                 })}
                                             </div>
-                                        )}
+                                        </div>
+                                    );
+                                }
+                                // Normal Block
+                                const bLabel = block.type === 'warmup' ? 'Calentamiento' : block.type === 'cooldown' ? 'Vuelta a la calma' : 'Trabajo continuo';
+                                return (
+                                    <div key={idx} className="flex items-center justify-between px-4 py-3 rounded-xl border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 shadow-sm">
+                                        <div className="flex items-center gap-3">
+                                            <div className="w-1.5 h-8 rounded-full" style={{ background: zoneColors[block.zone] || '#94a3b8' }} />
+                                            <div>
+                                                <p className="text-[11px] font-bold uppercase tracking-wider text-slate-700 dark:text-zinc-200">{bLabel}</p>
+                                                {block.details && <p className="text-xs text-slate-500 dark:text-zinc-400 mt-0.5">{block.details}</p>}
+                                            </div>
+                                        </div>
+                                        <div className="flex items-center gap-3">
+                                            <span className="font-mono text-sm font-bold text-slate-800 dark:text-zinc-100">
+                                                {formatBlockDuration(block.duration)}{block.unit === 'dist' ? <span className="text-[10px] text-slate-400 ml-0.5">km</span> : ''}
+                                            </span>
+                                            <span className="text-[10px] font-bold px-2 py-0.5 rounded border border-slate-200 dark:border-zinc-700 text-slate-600 dark:text-zinc-300">{block.zone}</span>
+                                        </div>
                                     </div>
-
-                                    {/* RIGHT — Fueling */}
-                                    <div className="w-[340px] shrink-0 overflow-y-auto p-5">
-                                        <FuelingPanel workout={viewingPlan} />
-                                    </div>
-                                </div>
-
-                                {/* Footer */}
-                                <div className="px-6 py-3 border-t border-slate-100 dark:border-zinc-800 flex justify-end gap-2 shrink-0 bg-white dark:bg-zinc-900">
-                                    <button onClick={(e) => { setViewingPlan(null); handleDeletePlan(e, viewingPlan.id); }} className="px-4 py-2 text-xs rounded-lg font-bold text-red-500 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/10 transition-colors">Eliminar</button>
-                                    <button onClick={() => setViewingPlan(null)} className="px-4 py-2 text-xs font-bold bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-700 text-slate-600 dark:text-zinc-300 rounded-lg hover:bg-slate-50 dark:hover:bg-zinc-800 transition-colors">Cerrar</button>
-                                    <button onClick={() => handleEditPlan(viewingPlan)} className="px-5 py-2 text-xs bg-slate-800 dark:bg-zinc-100 text-white dark:text-zinc-900 font-bold rounded-lg hover:bg-slate-700 transition-colors shadow-sm">Editar</button>
-                                </div>
-                            </div>
+                                );
+                            })}
                         </div>
-                    );
-                })()}
+                    )}
+                </div>
 
-            {/* FLOATING DRAGGABLE PMC CHART */}
-            {showPmcChart && (
-                <PmcFloatingChart
-                    pmcByDate={fullPmcByDate}
-                    onClose={() => setShowPmcChart(false)}
-                    initPos={pmcPos}
-                />
-            )}
+                {/* Right Column: Fueling / Details */}
+                <div className="w-[360px] overflow-y-auto bg-slate-50 dark:bg-zinc-950 p-6 shrink-0 relative">
+                    <FuelingPanel workout={workout} durationHrs={totalMin / 60} />
+                </div>
+            </div>
 
-        </>
+            {/* Footer actions */}
+            <div className="px-6 py-4 border-t border-slate-200 dark:border-zinc-800 flex justify-end gap-3 shrink-0 bg-white dark:bg-zinc-900">
+                <button onClick={(e) => { onDelete(e); onClose(); }} className="px-4 py-2 text-sm font-bold text-red-500 hover:text-red-700 transition-colors mr-auto">Eliminar</button>
+                <button onClick={onClose} className="px-5 py-2 text-sm font-bold bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-700 text-slate-700 dark:text-zinc-300 rounded-lg hover:bg-slate-50 dark:hover:bg-zinc-800 transition-colors">Cerrar</button>
+                <button onClick={() => { onClose(); onEdit(); }} className="px-6 py-2 text-sm bg-slate-800 dark:bg-zinc-100 text-white dark:text-zinc-900 font-bold rounded-lg hover:bg-slate-700 transition-colors shadow-sm">Editar</button>
+            </div>
+        </div>
     );
 };
+
+// ── Fueling Panel Component ──────────────────────────────────────────────────
+// Now previously defined at EOF.
+
+export default CalendarPage;

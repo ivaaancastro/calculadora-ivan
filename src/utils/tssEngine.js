@@ -153,24 +153,45 @@ export function computeZoneTssPerHour(sportType, settings) {
     return tph;
 }
 
-// ── 3. Estimate TSS from planned workout blocks ──────────────────────────────
+// ── 3. Estimate TSS from planned workout blocks (with sport efficiency) ────────
 export function estimateTssFromBlocks(blocks, sportType, settings) {
     if (!blocks || blocks.length === 0) return null;
     const tph = computeZoneTssPerHour(sportType, settings);
+    const cat = getSportCategory(sportType);
+
+    // Efficiency Factor: How much of the planned time is actually spent in the target zone?
+    // Biking often has coasting, downhills, junctions (estimated 80% target, 20% Z1/Rec)
+    // Running/Swimming is much more constant (estimated 95% target, 5% Z1)
+    const efficiency = cat === 'cardio' && (String(sportType).toLowerCase().includes('ride') || String(sportType).toLowerCase().includes('bici'))
+        ? { target: 0.80, rec: 0.20 }
+        : cat === 'cardio'
+            ? { target: 0.95, rec: 0.05 }
+            : { target: 1.0, rec: 0.0 };
 
     let totalTSS = 0;
+
+    // Helper to calc TSS for a segment with efficiency applied
+    const calcSegment = (mins, zone) => {
+        const tssTarget = tph[zone] ?? tph.Z2;
+        const tssRec = tph.Z1 ?? 20; // Assume downtime is spent recovering in Z1
+        const activeTSS = (mins * efficiency.target / 60) * tssTarget;
+        const passiveTSS = (mins * efficiency.rec / 60) * tssRec;
+        return activeTSS + passiveTSS;
+    };
+
     blocks.forEach(block => {
         if (block.type === 'repeat') {
             const reps = block.repeats || 1;
             (block.steps || []).forEach(step => {
                 const mins = Number(step.duration) || 0;
-                totalTSS += (mins * reps / 60) * (tph[step.zone] ?? tph.Z2);
+                totalTSS += calcSegment(mins * reps, step.zone);
             });
         } else {
             const mins = Number(block.duration) || 0;
-            totalTSS += (mins / 60) * (tph[block.zone] ?? tph.Z2);
+            totalTSS += calcSegment(mins, block.zone);
         }
     });
+
     return Math.round(totalTSS);
 }
 
