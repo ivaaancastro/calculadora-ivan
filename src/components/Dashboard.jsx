@@ -79,7 +79,7 @@ const Dashboard = () => {
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-zinc-950 text-slate-800 dark:text-zinc-200 font-sans pb-24 md:pb-12 transition-colors duration-300 selection:bg-blue-500/30">
+    <div className={`min-h-screen bg-slate-50 dark:bg-zinc-950 text-slate-800 dark:text-zinc-200 font-sans ${activeActivity ? 'pb-0' : 'pb-24 md:pb-12'} transition-colors duration-300 selection:bg-blue-500/30 overflow-hidden`}>
       <Navbar
         activities={activities}
         uploading={uploading}
@@ -99,7 +99,7 @@ const Dashboard = () => {
         </div>
       )}
 
-      <main className="w-full max-w-[1800px] mx-auto px-4 sm:px-6 py-4 sm:py-6 space-y-4">
+      <main className={`w-full max-w-[1800px] mx-auto ${activeActivity ? 'px-4' : 'px-4 sm:px-6 py-4 sm:py-6 space-y-4'}`}>
         {activeActivity ? (
           <ActivityDetailPage
             activity={activeActivity}
@@ -269,7 +269,7 @@ const Dashboard = () => {
       </main>
 
       {/* BOTTOM NAV PARA MÓVIL */}
-      <BottomNav activeTab={activeTab} onTabChange={handleTabChange} />
+      {!activeActivity && <BottomNav activeTab={activeTab} onTabChange={handleTabChange} />}
 
       {/* MODAL PARA AÑADIR MANUALMENTE */}
       <AddActivityModal
