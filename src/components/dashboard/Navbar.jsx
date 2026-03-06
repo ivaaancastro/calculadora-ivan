@@ -24,8 +24,8 @@ export const Navbar = ({
   ];
 
   return (
-    <nav className="bg-white/90 dark:bg-zinc-950/90 backdrop-blur-md border-b border-slate-200 dark:border-zinc-800 px-4 sm:px-6 py-2 sticky top-0 z-40 transition-all duration-300">
-      <div className="flex justify-between items-center max-w-[1800px] mx-auto">
+    <nav className="bg-white/90 dark:bg-zinc-950/90 backdrop-blur-md border-b border-slate-200 dark:border-zinc-800 px-4 sm:px-6 pt-safe py-2 sticky top-0 z-40 transition-all duration-300">
+      <div className="flex justify-between items-center max-w-[1800px] mx-auto mt-1 md:mt-0">
 
         {/* LOGO */}
         <div className="flex items-center gap-2.5">
