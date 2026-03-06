@@ -1,6 +1,6 @@
 import React, { useMemo, useState } from 'react';
-import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, ReferenceLine } from 'recharts';
-import { TrendingUp, TrendingDown, Minus, Footprints, Bike, Dumbbell, Activity, Zap } from 'lucide-react';
+import { ComposedChart, Area, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, ReferenceLine, Scatter } from 'recharts';
+import { TrendingUp, TrendingDown, Minus, Footprints, Bike, Dumbbell, Activity, Zap, Sparkles, AlertCircle, Info } from 'lucide-react';
 
 const PERIODS = [
     { key: '30d', label: '30d', days: 30 },
@@ -167,13 +167,30 @@ export const TrendsChart = ({ activities }) => {
             .filter(a => !a.isPlanned && config.match(a.type || '') && new Date(a.date) >= cutoff)
             .sort((a, b) => new Date(a.date) - new Date(b.date));
 
-        return filtered.map(a => {
+        const baseData = filtered.map(a => {
             const point = { date: new Date(a.date).toLocaleDateString('en-CA'), name: a.name };
             config.metrics.forEach(m => {
                 point[m.key] = m.calc(a);
             });
             return point;
         }).filter(p => p[currentMetric.key] != null);
+
+        // Calculate Moving Average (smooth trend)
+        const windowSize = Math.max(3, Math.floor(baseData.length / 10)); // dinamico segun la cantidad de datos
+        return baseData.map((d, i, arr) => {
+            let sum = 0; let count = 0;
+            for (let j = Math.max(0, i - windowSize + 1); j <= i; j++) {
+                if (arr[j][currentMetric.key] != null) {
+                    sum += arr[j][currentMetric.key];
+                    count++;
+                }
+            }
+            return {
+                ...d,
+                [`${currentMetric.key}_ma`]: count > 0 ? sum / count : null
+            };
+        });
+
     }, [activities, sport, period, config, currentMetric]);
 
     const trend = useMemo(() => linearTrend(chartData, currentMetric.key), [chartData, currentMetric]);
@@ -183,6 +200,57 @@ export const TrendsChart = ({ activities }) => {
         const sum = chartData.reduce((s, d) => s + (d[currentMetric.key] || 0), 0);
         return sum / chartData.length;
     }, [chartData, currentMetric]);
+
+    // Insight generator
+    const insightMessage = useMemo(() => {
+        if (chartData.length < 4) return { text: "Necesitas registrar más actividades para poder analizar tu tendencia.", color: "text-slate-500", bg: "bg-slate-50 border-slate-200 dark:bg-zinc-800 dark:border-zinc-700", icon: Info };
+
+        const isNeutral = currentMetric.neutral;
+        const pct = trend ? trend.pctChange : 0;
+        const isImproving = trend && !isNeutral ? (currentMetric.higherIsBetter === false ? pct < 0 : pct > 0) : false;
+        const isWorsening = trend && !isNeutral ? (currentMetric.higherIsBetter === false ? pct > 0 : pct < 0) : false;
+        const absPct = Math.abs(pct).toFixed(1);
+
+        if (isNeutral) {
+            return {
+                text: `Esta métrica te sirve como contexto. Tu media reciente es de ${currentMetric.format(avg || 0)}. Fíjate en el Factor de Eficiencia (EF) para saber si estás progresando.`,
+                color: "text-slate-600 dark:text-zinc-300",
+                bg: "bg-slate-50 border-slate-200 dark:bg-zinc-800 dark:border-zinc-700",
+                icon: Info
+            };
+        }
+
+        if (Math.abs(pct) < 1.5) {
+            return {
+                text: `Te estás manteniendo estable. Tu ${currentMetric.label.split(' ')[0]} no ha sufrido grandes variaciones (cambio < 1.5%). Entramos en fase de consolidación.`,
+                color: "text-blue-600 dark:text-blue-400",
+                bg: "bg-blue-50 border-blue-200 dark:bg-blue-900/10 dark:border-blue-900/30",
+                icon: Minus
+            };
+        }
+
+        if (isImproving) {
+            const verb = currentMetric.higherIsBetter === false ? "reducido" : "aumentado";
+            return {
+                text: `¡Excelente progreso! Tu ${currentMetric.label.split(' ')[0]} ha ${verb} un ${absPct}%. La curva de tendencia general (línea gruesa) muestra una clara adaptación positiva de tu cuerpo.`,
+                color: "text-emerald-600 dark:text-emerald-400",
+                bg: "bg-emerald-50 border-emerald-200 dark:bg-emerald-900/10 dark:border-emerald-900/30",
+                icon: TrendingUp
+            };
+        }
+
+        if (isWorsening) {
+            const extra = pct > 5 ? "Revisa tu nivel de fatiga o carga." : "Pequeños valles son normales tras semanas duras.";
+            return {
+                text: `Tu ${currentMetric.label.split(' ')[0]} ha empeorado un ${absPct}%. La tendencia está bajando ligeramente. ${extra}`,
+                color: "text-orange-600 dark:text-orange-400",
+                bg: "bg-orange-50 border-orange-200 dark:bg-orange-900/10 dark:border-orange-900/30",
+                icon: TrendingDown
+            };
+        }
+
+        return { text: "Recopilando datos...", color: "text-slate-500", bg: "bg-slate-50 dark:bg-zinc-800", icon: Activity };
+    }, [chartData, trend, currentMetric, avg]);
 
     // Determine trend direction and whether it's good or bad
     const isNeutral = currentMetric.neutral;
@@ -244,33 +312,37 @@ export const TrendsChart = ({ activities }) => {
                 })}
             </div>
 
-            {/* METRIC TABS + TREND BADGE */}
-            <div className="flex items-center justify-between gap-2 mb-3 border-b border-slate-100 dark:border-zinc-800 pb-2">
-                <div className="flex gap-0.5 flex-wrap">
+            {/* METRIC TABS */}
+            <div className="flex items-center gap-2 mb-4 pb-2">
+                <div className="flex gap-1.5 flex-wrap">
                     {config.metrics.map((m, i) => (
                         <button key={m.key} onClick={() => setMetric(i)}
-                            className={`px-2 py-1 text-[9px] font-bold transition-colors rounded
+                            className={`px-2.5 py-1.5 text-[9px] font-bold transition-all rounded-md tracking-wider uppercase
                                 ${metric === i
-                                    ? `text-slate-800 dark:text-zinc-100 bg-slate-100 dark:bg-zinc-800 ${m.primary ? 'ring-1 ring-emerald-400' : ''}`
-                                    : 'text-slate-400 dark:text-zinc-500 hover:text-slate-600 dark:hover:text-zinc-300'}`}
+                                    ? `text-white bg-slate-800 dark:bg-zinc-200 dark:text-zinc-900 shadow-sm`
+                                    : 'text-slate-500 dark:text-zinc-400 bg-slate-100 dark:bg-zinc-800/50 hover:bg-slate-200 dark:hover:bg-zinc-700'}`}
                         >
-                            {m.primary && <Zap size={9} className="inline mr-0.5 text-emerald-500" />}
+                            {m.primary && <Zap size={10} className="inline mr-1 text-emerald-500 dark:text-emerald-600" />}
                             {m.label}
                         </button>
                     ))}
                 </div>
-                {trend && (
-                    <div className={`flex items-center gap-1 px-2 py-1 rounded-full ${trendBg}`}>
-                        <TrendIcon size={11} className={trendColor} />
-                        <span className={`text-[9px] font-bold ${trendColor}`}>{trendLabel}</span>
-                    </div>
-                )}
             </div>
 
-            {/* METRIC DESCRIPTION */}
-            {currentMetric.desc && (
-                <p className="text-[9px] text-slate-400 dark:text-zinc-600 mb-2 italic">{currentMetric.desc}</p>
-            )}
+            {/* INSIGHT BOX */}
+            <div className={`p-3 rounded-lg border mb-4 flex items-start gap-3 transition-colors ${insightMessage.bg}`}>
+                <div className={`mt-0.5 rounded-full p-1.5 shadow-sm bg-white dark:bg-zinc-900 ${insightMessage.color}`}>
+                    <insightMessage.icon size={16} strokeWidth={2.5} />
+                </div>
+                <div className="flex-1">
+                    <h4 className={`text-[10px] font-bold uppercase tracking-widest flex items-center gap-1 mb-1 ${insightMessage.color}`}>
+                        <Sparkles size={10} /> Análisis Automático
+                    </h4>
+                    <p className="text-xs text-slate-700 dark:text-zinc-300 font-medium leading-relaxed">{insightMessage.text}</p>
+                </div>
+            </div>
+
+
 
             {/* CHART */}
             <div className="flex-1 min-h-0">
@@ -282,7 +354,13 @@ export const TrendsChart = ({ activities }) => {
                 ) : (
                     <div className="h-[180px]">
                         <ResponsiveContainer width="100%" height="100%">
-                            <LineChart data={chartData} margin={{ top: 5, right: 10, left: -15, bottom: 0 }}>
+                            <ComposedChart data={chartData} margin={{ top: 5, right: 10, left: -15, bottom: 0 }}>
+                                <defs>
+                                    <linearGradient id="trendGradient" x1="0" y1="0" x2="0" y2="1">
+                                        <stop offset="5%" stopColor={config.color} stopOpacity={0.2} />
+                                        <stop offset="95%" stopColor={config.color} stopOpacity={0} />
+                                    </linearGradient>
+                                </defs>
                                 <CartesianGrid strokeDasharray="2 2" stroke="#3f3f46" opacity={0.2} vertical={false} />
                                 <XAxis
                                     dataKey="date"
@@ -302,7 +380,7 @@ export const TrendsChart = ({ activities }) => {
                                 <Tooltip
                                     contentStyle={tooltipStyle}
                                     labelFormatter={(v) => new Date(v).toLocaleDateString('es-ES', { weekday: 'short', day: 'numeric', month: 'long' })}
-                                    formatter={(value) => [currentMetric.format(value), currentMetric.label]}
+                                    formatter={(value, name) => [currentMetric.format(value), name.includes('_ma') ? 'Tendencia Suavizada' : currentMetric.label]}
                                 />
                                 {avg && (
                                     <ReferenceLine
@@ -310,18 +388,32 @@ export const TrendsChart = ({ activities }) => {
                                         stroke="#71717a"
                                         strokeDasharray="4 4"
                                         strokeWidth={1}
-                                        label={{ position: 'right', value: `avg: ${currentMetric.format(avg)}`, fill: '#71717a', fontSize: 8 }}
+                                        label={{ position: 'right', value: `Media: ${currentMetric.format(avg)}`, fill: '#71717a', fontSize: 9, fontWeight: 'bold' }}
                                     />
                                 )}
+
+                                {/* Raw Values (Faint Scatter/Line) */}
                                 <Line
                                     type="monotone"
                                     dataKey={currentMetric.key}
                                     stroke={config.color}
-                                    strokeWidth={2}
-                                    dot={{ r: 2.5, fill: config.color, strokeWidth: 0 }}
-                                    activeDot={{ r: 5, strokeWidth: 0 }}
+                                    strokeWidth={1}
+                                    strokeOpacity={0.3}
+                                    dot={{ r: 2, fill: config.color, fillOpacity: 0.5, strokeWidth: 0 }}
+                                    activeDot={false}
                                 />
-                            </LineChart>
+
+                                {/* Moving Average / Trend (Thick Area) */}
+                                <Area
+                                    type="monotone"
+                                    dataKey={`${currentMetric.key}_ma`}
+                                    stroke={config.color}
+                                    strokeWidth={3}
+                                    fill="url(#trendGradient)"
+                                    dot={false}
+                                    activeDot={{ r: 5, strokeWidth: 0, fill: config.color }}
+                                />
+                            </ComposedChart>
                         </ResponsiveContainer>
                     </div>
                 )}
