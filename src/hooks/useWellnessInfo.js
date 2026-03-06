@@ -59,8 +59,8 @@ export const useWellnessInfo = (activities, settings, chartData) => {
                                 sleep: sleepHours,
                                 sleepScore: d.sleepScore || calcSleepScore || null,
                                 rhr: d.restingHR || null,
-                                stress: d.stress || null, // Stress level 0-100
-                                soreness: d.soreness || null, // Soreness level 0-4
+                                stress: d.stress || null,
+                                soreness: d.soreness || null,
                                 isSimulated: false
                             };
                         }).sort((a, b) => new Date(a.date + "T00:00:00") - new Date(b.date + "T00:00:00"));
@@ -91,12 +91,12 @@ export const useWellnessInfo = (activities, settings, chartData) => {
                     const simSleep = Math.max(4, Number((baseSleep - (fatigueImpact * 1.5) + randomSleepNoise).toFixed(1)));
                     const simSleepScore = Math.min(100, Math.round((simSleep / 8) * 100));
                     const simStress = Math.min(100, Math.max(0, Math.round(20 + (fatigueImpact * 50) + (Math.random() * 20 - 10))));
-                    const simSoreness = Math.round(fatigueImpact * 3); // 0-3 scale usually
+                    const simSoreness = Math.round(fatigueImpact * 3);
 
                     simData.push({
                         date: dateStr,
                         dateLabel: !isNaN(dateObj) ? dateObj.toLocaleDateString('es-ES', { day: '2-digit', month: 'short' }) : dateStr,
-                        hrv: Math.max(20, Math.round(baseHrv - (baseHrv * 0.2 * fatigueImpact) + randomHrvNoise)),
+                        hrv: Math.max(20, Math.round(baseHrv - (baseHrv * 0.2 * Math.max(0, fatigueImpact)) + randomHrvNoise)),
                         sleep: simSleep,
                         sleepScore: simSleepScore,
                         stress: simStress,
@@ -118,134 +118,197 @@ export const useWellnessInfo = (activities, settings, chartData) => {
         fetchWellness();
     }, [settings, dailyTSS]);
 
-    // MOTOR MATEMÁTICO DE SALUD (Desviación Estándar)
+    // MOTOR MATEMÁTICO DE SALUD AVANZADO (EWMA & Puntuación Ponderada)
     const wellnessMetrics = useMemo(() => {
         if (!wellnessData || wellnessData.length === 0 || error) return null;
 
-        const validHrv = wellnessData.filter(d => d.hrv > 0);
-        const baselineHrv = validHrv.length > 0 ? validHrv.reduce((acc, val) => acc + val.hrv, 0) / validHrv.length : 0;
-
-        const hrvVariance = validHrv.length > 0 ? validHrv.reduce((acc, val) => acc + Math.pow(val.hrv - baselineHrv, 2), 0) / validHrv.length : 0;
-        const hrvStdDev = Math.max(Math.sqrt(hrvVariance), baselineHrv * 0.05);
-        const normalHrvRange = [Math.round(baselineHrv - hrvStdDev), Math.round(baselineHrv + hrvStdDev)];
-
-        const validRhr = wellnessData.filter(d => d.rhr > 0);
-        const baselineRhr = validRhr.length > 0 ? Math.round(validRhr.reduce((acc, val) => acc + val.rhr, 0) / validRhr.length) : 50;
+        // Variables for Exponentially Weighted Moving Average (EWMA) ~30 days
+        const alpha = 2 / (30 + 1);
+        let ewmaHrv = null;
+        let ewmaRhr = null;
 
         const finalChartData = wellnessData.map((d, index, arr) => {
-            const startIdx = Math.max(0, index - 6);
-            const window = arr.slice(startIdx, index + 1);
+            // Update EWMA dynamically day by day to simulate how your baseline adapts over time
+            if (d.hrv > 0) {
+                if (ewmaHrv === null) ewmaHrv = d.hrv;
+                else ewmaHrv = (d.hrv * alpha) + (ewmaHrv * (1 - alpha));
+            }
+            if (d.rhr > 0) {
+                if (ewmaRhr === null) ewmaRhr = d.rhr;
+                else ewmaRhr = (d.rhr * alpha) + (ewmaRhr * (1 - alpha));
+            }
 
-            const validHrvWindow = window.filter(w => w.hrv > 0);
+            // 7-day Trailing Averages
+            const startIdx7 = Math.max(0, index - 6);
+            const window7 = arr.slice(startIdx7, index + 1);
+
+            const validHrvWindow = window7.filter(w => w.hrv > 0);
             const rollHrv = validHrvWindow.length > 0 ? Math.round(validHrvWindow.reduce((sum, curr) => sum + curr.hrv, 0) / validHrvWindow.length) : null;
 
-            const validSleepWindow = window.filter(w => w.sleep > 0);
+            const validSleepWindow = window7.filter(w => w.sleep > 0);
             const rollSleep = validSleepWindow.length > 0 ? Number((validSleepWindow.reduce((sum, curr) => sum + curr.sleep, 0) / validSleepWindow.length).toFixed(1)) : null;
 
-            const validRhrWindow = window.filter(w => w.rhr > 0);
+            const validRhrWindow = window7.filter(w => w.rhr > 0);
             const rollRhr = validRhrWindow.length > 0 ? Math.round(validRhrWindow.reduce((sum, curr) => sum + curr.rhr, 0) / validRhrWindow.length) : null;
+
+            // 30-day Trailing Standard Deviation for the Normal Range
+            const startIdx30 = Math.max(0, index - 29);
+            const window30 = arr.slice(startIdx30, index + 1);
+            const valid30Hrv = window30.filter(w => w.hrv > 0);
+            let stdevHrv = ewmaHrv ? ewmaHrv * 0.05 : 5; // Default 5% variation if not enough data
+
+            if (valid30Hrv.length > 5 && ewmaHrv !== null) {
+                const variance = valid30Hrv.reduce((acc, val) => acc + Math.pow(val.hrv - ewmaHrv, 2), 0) / valid30Hrv.length;
+                stdevHrv = Math.max(Math.sqrt(variance), ewmaHrv * 0.05); // Minimum 5% breathing room
+            }
+
+            const rangeBottom = Math.round(ewmaHrv - stdevHrv);
+            const rangeTop = Math.round(ewmaHrv + stdevHrv);
 
             return {
                 ...d,
-                baselineTop: normalHrvRange[1],
-                baselineBottom: normalHrvRange[0],
-                baselineMid: Math.round(baselineHrv),
+                baselineTop: rangeTop,
+                baselineBottom: rangeBottom,
+                baselineMid: Math.round(ewmaHrv),
                 hrv7dAvg: rollHrv,
                 sleep7dAvg: rollSleep,
-                rhr7dAvg: rollRhr
+                rhr7dAvg: rollRhr,
+                ewmaHrv,
+                ewmaRhr
             };
         });
 
         const todayData = finalChartData[finalChartData.length - 1];
+
+        // Final Baselines
+        const baselineHrv = todayData.ewmaHrv;
+        const baselineRhr = todayData.ewmaRhr;
+        const normalHrvRange = [todayData.baselineBottom, todayData.baselineTop];
+
         const avgHrv7d = todayData.hrv7dAvg !== null ? todayData.hrv7dAvg : '--';
         const avgSleep7d = todayData.sleep7dAvg !== null ? todayData.sleep7dAvg : '--';
         const avgRhr7d = todayData.rhr7dAvg !== null ? todayData.rhr7dAvg : '--';
 
         const yesterdayData = finalChartData.length > 1 ? finalChartData[finalChartData.length - 2] : null;
-        const yesterdayTSS = yesterdayData ? (dailyTSS.get(yesterdayData.date) || 0) : 0;
+        let yesterdayTSS = yesterdayData ? (dailyTSS.get(yesterdayData.date) || 0) : 0;
 
-        // 0. Estrés Fisiológico Sintetizado (0-100)
-        let calcStress = 25; // Base normal
-        if (baselineHrv > 0 && avgHrv7d !== '--') {
-            const hrvDropPct = ((baselineHrv - avgHrv7d) / baselineHrv) * 100;
-            if (hrvDropPct > 0) calcStress += Math.min(35, hrvDropPct * 1.5);
-        }
-        if (baselineRhr > 0 && avgRhr7d !== '--') {
-            const rhrRise = avgRhr7d - baselineRhr;
-            if (rhrRise > 0) calcStress += Math.min(25, rhrRise * 4); // +4 points of stress per BPM elevated
-        }
-        if (currentTsb < 0) {
-            calcStress += Math.min(25, Math.abs(currentTsb) * 0.8);
-        }
-        calcStress = Math.min(100, Math.round(calcStress));
+        // Let's add today's activities TSS if user ran today
+        const todayTSS = dailyTSS.get(todayData.date) || 0;
+        const activeTSS = yesterdayTSS + todayTSS;
 
-        let score = 100;
+        // ==========================================
+        // READINESS ALGORITHM (Weighted Score 0-100)
+        // Inspired by advanced recovery systems
+        // Weights: 45% HRV, 35% Sleep, 20% RHR
+        // ==========================================
         const insights = [];
+        let scoreHRV = 0;
+        let scoreSleep = 0;
+        let scoreRHR = 0;
 
-        // 1. Fatiga Acumulada (TSB)
-        if (currentTsb < -25) {
-            score -= 20;
-            insights.push({ type: 'danger', label: 'Sobrecarga Alta', desc: 'Fatiga muy elevada por entrenamiento reciente.' });
-        } else if (currentTsb < -10) {
-            score -= 10;
-            insights.push({ type: 'warning', label: 'Fatiga Moderada', desc: 'Cuerpo cansado por la carga reciente.' });
-        } else if (currentTsb > 5) {
-            insights.push({ type: 'success', label: 'Fresco', desc: 'Nivel óptimo de recuperación muscular.' });
-        }
+        const latestDailyHrv = todayData.hrv !== null ? todayData.hrv : avgHrv7d;
 
-        // 2. Sueño
-        if (avgSleep7d !== '--') {
-            if (avgSleep7d < 6) {
-                score -= 20;
-                insights.push({ type: 'danger', label: 'Déficit de Sueño', desc: `Durmiendo ${avgSleep7d}h media (Meta: 8h).` });
-            } else if (avgSleep7d < 7) {
-                score -= 10;
-                insights.push({ type: 'warning', label: 'Sueño Insuficiente', desc: 'Descanso por debajo de lo óptimo.' });
-            } else if (avgSleep7d >= 8) {
-                insights.push({ type: 'success', label: 'Sueño Óptimo', desc: 'Excelente recuperación nocturna.' });
-            }
-        }
-
-        // 3. VFC
-        let hrvStatus = { label: 'Equilibrado', color: 'text-emerald-500', id: 'balanced' };
-        if (baselineHrv > 0 && avgHrv7d !== '--') {
-            if (avgHrv7d < normalHrvRange[0]) {
-                score -= 25;
-                hrvStatus = { label: 'Tensión Simpática', color: 'text-red-500', id: 'unbalanced' };
-                insights.push({ type: 'danger', label: 'VFC Suprimida', desc: 'Sistema nervioso estresado.' });
-            } else if (avgHrv7d > normalHrvRange[1]) {
-                score -= 5;
-                hrvStatus = { label: 'Hiper-Recuperación', color: 'text-blue-500', id: 'unbalanced' };
-                insights.push({ type: 'warning', label: 'Hiper-Recuperación', desc: 'Posible fatiga parasimpática.' });
+        // 1. HRV Score (0-45 points)
+        let hrvStatus = { label: 'Adaptado', color: 'text-emerald-500', id: 'balanced' };
+        if (latestDailyHrv !== '--' && baselineHrv > 0) {
+            // Compare daily HRV to baseline range
+            if (latestDailyHrv >= normalHrvRange[0] && latestDailyHrv <= normalHrvRange[1]) {
+                scoreHRV = 45; // Optimal
+                insights.push({ type: 'success', label: 'VFC Óptima', desc: 'Tu corazón indica máxima adaptación al entrenamiento y bajo estrés.' });
+            } else if (latestDailyHrv > normalHrvRange[1]) {
+                // Hyper-recovery (parasympathetic dominance due to accumulated fatigue)
+                scoreHRV = 35; // Still decent, but warning
+                hrvStatus = { label: 'Hiper-Recuperado', color: 'text-amber-500', id: 'unbalanced' };
+                insights.push({ type: 'warning', label: 'Fatiga Parasimpática', desc: 'VFC inusualmente alta. Puede denotar una respuesta protectora ante el sobreentrenamiento.' });
             } else {
-                insights.push({ type: 'success', label: 'VFC Equilibrada', desc: 'Sistema nervioso adaptado.' });
+                // Suppressed HRV
+                const dropRatio = Math.max(0, latestDailyHrv / normalHrvRange[0]); // 0 to 1
+                scoreHRV = Math.round(45 * dropRatio);
+                hrvStatus = { label: 'Suprimido', color: 'text-red-500', id: 'unbalanced' };
+                insights.push({ type: 'danger', label: 'VFC Suprimida', desc: 'Sistema nervioso simpático activado. Prioriza descanso o recuperación activa.' });
             }
-        } else if (avgHrv7d === '--') {
-            hrvStatus = { label: 'Sin Datos Recientes', color: 'text-slate-400', id: 'unknown' };
+        } else {
+            scoreHRV = 22; // Unknown, give middle ground
+            hrvStatus = { label: 'Desconocido', color: 'text-slate-400', id: 'unknown' };
         }
 
-        const todayReadiness = (avgHrv7d === '--' && avgSleep7d === '--') ? '--' : Math.max(0, Math.min(100, score));
+        // 2. Sleep Score (0-35 points)
+        const dailySleepScore = todayData.sleepScore !== null ? todayData.sleepScore :
+            (todayData.sleep ? Math.min(100, Math.round((todayData.sleep / 8) * 100)) : 70);
 
-        // 4. Calculate Effort Score (Strain 0-100) logarithmic based on yesterday's TSS
+        if (dailySleepScore) {
+            scoreSleep = (dailySleepScore / 100) * 35;
+            if (dailySleepScore < 60) {
+                insights.push({ type: 'danger', label: 'Deuda de Sueño', desc: `Tu sueño (${todayData.sleep}h) no fue suficiente para limpiar la fatiga del sistema nervioso.` });
+            } else if (dailySleepScore >= 85) {
+                insights.push({ type: 'success', label: 'Descanso Profundo', desc: 'Patrón de sueño excelente. Gran pico de secreción hormonal.' });
+            }
+        }
+
+        // 3. Resting HR Score (0-20 points)
+        const dailyRHR = todayData.rhr !== null ? todayData.rhr : avgRhr7d;
+        if (dailyRHR !== '--' && baselineRhr > 0) {
+            // Lower is better. If RHR is below or equal to baseline + 2bpm -> 20pts
+            // If it's elevated, we lose points rapidly.
+            const diff = dailyRHR - baselineRhr;
+            if (diff <= 2) {
+                scoreRHR = 20;
+            } else if (diff > 2 && diff <= 8) {
+                scoreRHR = 10;
+                insights.push({ type: 'warning', label: 'Pulsaciones Elevadas', desc: `Tu FC Mínima está ${diff} lpm por encima de la media. Tu cuerpo está combatiendo estrés o fatiga metabólica.` });
+            } else {
+                scoreRHR = 0;
+                insights.push({ type: 'danger', label: 'Alerta Cardiovascular', desc: `RHR significativamente elevado (+${diff} lpm). Riesgo inminente de sobreentrenamiento o enfermedad.` });
+            }
+        } else {
+            scoreRHR = 10; // Unknown
+        }
+
+        const todayReadiness = (avgHrv7d === '--' && avgSleep7d === '--') ? '--' : Math.max(1, Math.min(100, Math.round(scoreHRV + scoreSleep + scoreRHR)));
+
+        // Miscellaneous TSB factor (Just add an insight, doesn't directly hit Readiness unless it affects HRV/RHR)
+        if (currentTsb < -30) {
+            insights.push({ type: 'danger', label: 'Carga Extrema (TSB)', desc: 'Acumulación de fatiga crónica altísima. Riesgo de estancamiento asegurado sin descanso.' });
+        } else if (currentTsb > 10) {
+            insights.push({ type: 'warning', label: 'Desentrenamiento', desc: 'Riesgo de perder estado de forma general. TSB indicando infra-carga.' });
+        }
+
+        // ==========================================
+        // EFFORT / STRAIN ALGORITHM (0-100)
+        // Logarithmic Curve targeting 0-100 scale
+        // ==========================================
         let effortScore = 0;
         let effortLabel = "Recuperación";
         let effortColor = "text-blue-500";
-        if (yesterdayTSS > 0) {
-            // Logarithmic human effort curve: 100 * (1 - e^(-TSS/180))
-            effortScore = Math.min(100, Math.round(100 * (1 - Math.exp(-yesterdayTSS / 180))));
 
-            if (effortScore > 85) { effortLabel = "Sobreesfuerzo"; effortColor = "text-purple-500"; }
-            else if (effortScore > 60) { effortLabel = "Alto"; effortColor = "text-red-500"; }
-            else if (effortScore > 30) { effortLabel = "Moderado"; effortColor = "text-amber-500"; }
+        if (activeTSS > 0) {
+            // Un TSS de 100 equivale aprox a un 60% de strain, 150 = 75%, 300 = 95%
+            effortScore = Math.min(100, Math.round(100 * (1 - Math.exp(-activeTSS / 110))));
+
+            if (effortScore > 85) { effortLabel = "Extremo"; effortColor = "text-purple-500"; }
+            else if (effortScore > 65) { effortLabel = "Alto"; effortColor = "text-red-500"; }
+            else if (effortScore > 40) { effortLabel = "Moderado"; effortColor = "text-amber-500"; }
             else { effortLabel = "Ligero"; effortColor = "text-emerald-500"; }
+        } else {
+            effortColor = "text-slate-400";
+            effortLabel = "Día Base";
         }
 
-        // Use synthesized stress if actual device stress is missing
-        const finalStress = todayData.stress !== null && todayData.stress !== undefined ? todayData.stress : calcStress;
+        // Synthesize Stress if Missing
+        let finalStress = todayData.stress !== null && todayData.stress !== undefined ? todayData.stress : '--';
+        if (finalStress === '--' && baselineHrv > 0 && dailyRHR !== '--') {
+            // Rough approximation if sensor didn't provide stress directly
+            let calc = 20; // base
+            if (dailyRHR > baselineRhr) calc += (dailyRHR - baselineRhr) * 3;
+            if (activeTSS > 0) calc += activeTSS * 0.2;
+            calc = Math.max(10, Math.min(95, calc));
+            finalStress = Math.round(calc);
+        }
 
         return {
             avgHrv7d, avgSleep7d, avgRhr7d, normalHrvRange,
-            baselineHrv: Math.round(baselineHrv), baselineRhr, todayReadiness,
+            baselineHrv: Math.round(baselineHrv), baselineRhr: Math.round(baselineRhr),
+            todayReadiness,
             hrvStatus: hrvStatus.id, hrvStatusObj: hrvStatus,
             insights, chartData: finalChartData,
             isSimulated: wellnessData[0]?.isSimulated || false,
@@ -255,7 +318,7 @@ export const useWellnessInfo = (activities, settings, chartData) => {
             latestRhr: todayData.rhr !== null ? todayData.rhr : '--',
             latestStress: finalStress,
             latestSoreness: todayData.soreness !== null ? todayData.soreness : '--',
-            effort: { score: effortScore, label: effortLabel, color: effortColor, tss: yesterdayTSS },
+            effort: { score: effortScore, label: effortLabel, color: effortColor, tss: activeTSS },
             currentTsb
         };
     }, [wellnessData, currentTsb, dailyTSS, error]);
