@@ -266,7 +266,7 @@ export const ProfilePage = ({ currentSettings, onUpdate, activities, isDeepSynci
                             <label className="text-[9px] font-bold text-slate-500 dark:text-zinc-400 uppercase tracking-widest flex items-center gap-1"><Heart size={10} className="text-rose-500" /> Zonas de frecuencia cardíaca</label>
                             <ModeSelector sport={sport} />
                         </div>
-                        <div className="border border-slate-200 dark:border-zinc-800 rounded-lg overflow-hidden">
+                        <div className="border border-slate-200 dark:border-zinc-800 rounded-lg overflow-x-auto hide-scrollbar">
                             <table className="w-full text-[10px]">
                                 <thead>
                                     <tr className="bg-slate-50 dark:bg-zinc-950/50 text-slate-500 dark:text-zinc-500">
@@ -319,7 +319,7 @@ export const ProfilePage = ({ currentSettings, onUpdate, activities, isDeepSynci
                                 <label className="text-[9px] font-bold text-slate-500 dark:text-zinc-400 uppercase tracking-widest flex items-center gap-1"><Timer size={10} /> Zonas de entrenamiento de ritmo</label>
                                 <span className="text-[8px] font-bold text-slate-400 dark:text-zinc-600">per km</span>
                             </div>
-                            <div className="border border-slate-200 dark:border-zinc-800 rounded-lg overflow-hidden">
+                            <div className="border border-slate-200 dark:border-zinc-800 rounded-lg overflow-x-auto hide-scrollbar">
                                 <table className="w-full text-[10px]">
                                     <thead>
                                         <tr className="bg-slate-50 dark:bg-zinc-950/50 text-slate-500 dark:text-zinc-500">
@@ -359,7 +359,7 @@ export const ProfilePage = ({ currentSettings, onUpdate, activities, isDeepSynci
                             <div className="flex justify-between items-center mb-2">
                                 <label className="text-[9px] font-bold text-slate-500 dark:text-zinc-400 uppercase tracking-widest flex items-center gap-1"><Zap size={10} className="text-amber-500" /> Zonas de potencia para FTP de {data.ftp}w</label>
                             </div>
-                            <div className="border border-slate-200 dark:border-zinc-800 rounded-lg overflow-hidden">
+                            <div className="border border-slate-200 dark:border-zinc-800 rounded-lg overflow-x-auto hide-scrollbar">
                                 <table className="w-full text-[10px]">
                                     <thead>
                                         <tr className="bg-slate-50 dark:bg-zinc-950/50 text-slate-500 dark:text-zinc-500">

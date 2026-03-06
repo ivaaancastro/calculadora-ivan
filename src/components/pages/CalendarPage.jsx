@@ -47,7 +47,9 @@ const DurationInput = ({ value, onChange, className = '' }) => {
 };
 // ── Floating draggable PMC projection chart ─────────────────────────────────
 const PmcFloatingChart = ({ pmcByDate, onClose, initPos }) => {
-    const [pos, setPos] = React.useState({ x: window.innerWidth / 2 - 320, y: Math.max(50, window.innerHeight / 2 - 200) });
+    const initialWidth = Math.min(480, window.innerWidth - 32);
+    const startX = Math.max(16, window.innerWidth / 2 - initialWidth / 2);
+    const [pos, setPos] = React.useState({ x: startX, y: Math.max(50, window.innerHeight / 2 - 170) });
     const [hover, setHover] = React.useState(null); // { idx, x }
     const [viewOpts, setViewOpts] = React.useState({ top: true, mid: true, bot: true });
     const dragRef = React.useRef(null);
@@ -158,7 +160,7 @@ const PmcFloatingChart = ({ pmcByDate, onClose, initPos }) => {
 
     return (
         <div className="fixed z-[100] bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-700 rounded-xl shadow-2xl overflow-visible select-none"
-            style={{ left: pos.x, top: pos.y, width: 480 }}>
+            style={{ left: pos.x, top: pos.y, width: Math.min(480, window.innerWidth - 32) }}>
             {/* Title / drag bar */}
             <div className="flex items-center justify-between px-3 py-2 bg-slate-50 dark:bg-zinc-950 border-b border-slate-100 dark:border-zinc-800 rounded-t-xl cursor-grab active:cursor-grabbing"
                 onPointerDown={handleDragDown} onPointerMove={handleDragMove} onPointerUp={handleDragUp}>
@@ -2030,9 +2032,9 @@ const WorkoutViewerModal = ({ workout, onClose, onDelete, onEdit }) => {
             )}
 
             {/* Two Column Content */}
-            <div className="flex flex-1 overflow-hidden">
+            <div className="flex flex-col md:flex-row flex-1 overflow-y-auto md:overflow-hidden">
                 {/* Left Column: List of blocks structure */}
-                <div className="flex-1 overflow-y-auto p-6 border-r border-slate-100 dark:border-zinc-800 bg-white dark:bg-zinc-900">
+                <div className="flex-1 md:overflow-y-auto p-6 border-b md:border-b-0 md:border-r border-slate-100 dark:border-zinc-800 bg-white dark:bg-zinc-900">
                     <h4 className="text-[10px] font-bold uppercase tracking-widest text-slate-400 dark:text-zinc-500 mb-4">Estructura</h4>
 
                     {blocks.length === 0 ? (
@@ -2105,7 +2107,7 @@ const WorkoutViewerModal = ({ workout, onClose, onDelete, onEdit }) => {
                 </div>
 
                 {/* Right Column: Fueling / Details */}
-                <div className="w-[360px] overflow-y-auto bg-slate-50 dark:bg-zinc-950 p-6 shrink-0 relative">
+                <div className="w-full md:w-[360px] md:overflow-y-auto bg-slate-50 dark:bg-zinc-950 p-6 shrink-0 relative">
                     <FuelingPanel workout={workout} durationHrs={totalMin / 60} />
                 </div>
             </div>
