@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from './supabase'; // Asegúrate de que esta ruta es la tuya correcta
-import Dashboard from './components/Dashboard'; 
-import { LoginPage } from './components/auth/LoginPage'; 
+import Dashboard from './components/Dashboard';
+import { LoginPage } from './components/auth/LoginPage';
+import { Toaster } from 'react-hot-toast';
 
 function App() {
   const [session, setSession] = useState(null);
@@ -36,7 +37,23 @@ function App() {
   }
 
   // Si hay sesión, inyectamos el Dashboard directamente
-  return <Dashboard key={session.user.id} />;
+  return (
+    <>
+      <Dashboard key={session.user.id} />
+      <Toaster
+        position="bottom-center"
+        toastOptions={{
+          style: {
+            background: '#27272a',
+            color: '#fff',
+            fontSize: '12px',
+            fontWeight: '600',
+            fontFamily: 'system-ui, sans-serif'
+          },
+        }}
+      />
+    </>
+  );
 }
 
 export default App;
