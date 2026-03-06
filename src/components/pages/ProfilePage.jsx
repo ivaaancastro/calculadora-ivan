@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Save, Activity, Heart, Zap, Database, Loader2, RefreshCw, CheckCircle2, ArrowLeft, Lock, Key, Bike, Footprints, Weight, Link2, Timer, Gauge } from 'lucide-react';
 import { supabase } from '../../supabase';
+import toast from 'react-hot-toast';
 import { LTHR_ZONE_PCT, calcZonesFromLTHR } from '../../utils/tssEngine';
 
 const getPeakByTime = (hrData, timeData, windowSeconds) => {
@@ -117,12 +118,12 @@ export const ProfilePage = ({ currentSettings, onUpdate, activities, isDeepSynci
 
     const handleUpdatePassword = async (e) => {
         e.preventDefault();
-        if (newPassword.length < 6) return alert("La contraseña debe tener al menos 6 caracteres.");
+        if (newPassword.length < 6) return toast.error("La contraseña debe tener al menos 6 caracteres.");
         setIsUpdatingPwd(true);
         const { error } = await supabase.auth.updateUser({ password: newPassword });
         setIsUpdatingPwd(false);
-        if (error) alert("Error al actualizar: " + error.message);
-        else { alert("¡Contraseña actualizada!"); setNewPassword(''); }
+        if (error) toast.error("Error al actualizar: " + error.message);
+        else { toast.success("¡Contraseña actualizada!"); setNewPassword(''); }
     };
 
     const handleAutoDetectLTHR = () => {
@@ -152,8 +153,8 @@ export const ProfilePage = ({ currentSettings, onUpdate, activities, isDeepSynci
                     if (u.bike.zonesMode === 'lthr') u.bike.zones = calcZonesFromLTHR(bLthr, u.bike.max);
                     return u;
                 });
-                alert(`¡Escáner completado!\n🚴 Bici LTHR: ${bLthr} ppm\n🏃 Run LTHR: ${rLthr} ppm`);
-            } else alert("No hay suficientes datos para calcular.");
+                toast.success(`¡Escáner completado!\n🚴 Bici LTHR: ${bLthr} ppm\n🏃 Run LTHR: ${rLthr} ppm`);
+            } else toast.error("No hay suficientes datos para calcular.");
             setIsScanning(false);
         }, 500);
     };

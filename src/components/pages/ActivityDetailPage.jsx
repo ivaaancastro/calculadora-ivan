@@ -427,39 +427,51 @@ export const ActivityDetailPage = ({ activity, settings, fetchStreams, onBack, o
         const z4m = exactZoneAnalysis[3].minutes;
         const z5m = exactZoneAnalysis[4].minutes;
 
-        // Puntos base Aeróbicos (Z2 y Z3 dan base, Z4 da umbral)
-        let aerobicPoints = (z1m * 0.03) + (z2m * 0.08) + (z3m * 0.15) + (z4m * 0.25) + (z5m * 0.10);
-        let aerobicScore = Math.min(5.0, aerobicPoints / 1.8).toFixed(1); // Normalizado a max 5.0
+        // Puntos base Aeróbicos (Garmin TE aproximado por tiempo)
+        // Incrementamos el peso de Z3 y Z4 para que sesiones de Umbral puntúen correctamente alto (~4.6)
+        const aPoints = (z1m * 0.02) + (z2m * 0.045) + (z3m * 0.08) + (z4m * 0.14) + (z5m * 0.16);
+        // Función exponencial (denominador ajustado a 2.5 para escalar mejor a 5.0)
+        let aScore = 5.0 * (1 - Math.exp(-aPoints / 2.5));
+        let aerobicScore = aScore.toFixed(1);
 
-        // Puntos base Anaeróbicos (Z5 puro y algo de Z4)
-        let anaerobicPoints = (z4m * 0.05) + (z5m * 0.35);
-        let anaerobicScore = Math.min(5.0, anaerobicPoints / 1.2).toFixed(1); // Normalizado a max 5.0
+        // Puntos base Anaeróbicos
+        // Un ritmo sostenido en Z4 da 0 anaeróbico en Garmin. Solo Z5 (sprints/picos) lo genera.
+        const anPoints = z5m * 0.15;
+        let anScore = 5.0 * (1 - Math.exp(-anPoints / 2.0));
+        if (anScore < 0.6) anScore = 0.0; // Si el estímulo es ínfimo, Garmin da 0 de beneficio
+        let anaerobicScore = anScore.toFixed(1);
 
         let primaryBenefit = "Recuperación";
         let benefitColor = "text-slate-500 dark:text-zinc-400";
 
-        if (parseFloat(aerobicScore) < 1.5 && parseFloat(anaerobicScore) < 1.0) {
-            primaryBenefit = "Recuperación Activa";
+        if (aScore < 2.0 && anScore < 2.0) {
+            primaryBenefit = "Recuperación";
             benefitColor = "text-slate-500 dark:text-zinc-400";
-        } else if (parseFloat(anaerobicScore) >= 3.0 && parseFloat(anaerobicScore) > parseFloat(aerobicScore) - 1.0) {
+        } else if (anScore >= 2.5 && anScore >= aScore - 0.5) {
             primaryBenefit = "Capacidad Anaeróbica";
             benefitColor = "text-purple-600 dark:text-purple-400";
-        } else if (z5m > 6) {
-            primaryBenefit = "VO2 Max";
-            benefitColor = "text-rose-600 dark:text-rose-500";
-        } else if (z4m > 15) {
-            primaryBenefit = "Umbral de Lactato";
-            benefitColor = "text-amber-600 dark:text-amber-500";
-        } else if (z3m > 20) {
-            primaryBenefit = "Tempo";
-            benefitColor = "text-emerald-600 dark:text-emerald-500";
         } else {
-            primaryBenefit = "Base Aeróbica";
-            benefitColor = "text-blue-600 dark:text-blue-400";
+            // Predominio Aeróbico: Evaluamos la estructura para clasificar el beneficio aeróbico
+            if (z5m > 8 && z5m >= z4m * 0.3) {
+                primaryBenefit = "VO2 Max";
+                benefitColor = "text-rose-600 dark:text-rose-500";
+            } else if (z4m > 15 && (z4m > (z2m + z3m) * 0.4 || z4m > 30)) {
+                primaryBenefit = "Umbral";
+                benefitColor = "text-amber-600 dark:text-amber-500";
+            } else if (z3m > 15 || z4m > 10 || (z2m > 30 && (z3m > 10 || z4m > 5))) {
+                primaryBenefit = "Tempo";
+                benefitColor = "text-emerald-600 dark:text-emerald-500";
+            } else if (z2m > 15) {
+                primaryBenefit = "Base Aeróbica";
+                benefitColor = "text-blue-600 dark:text-blue-400";
+            } else {
+                primaryBenefit = "Recuperación";
+                benefitColor = "text-slate-500 dark:text-zinc-400";
+            }
         }
 
         const getLabel = (score) => {
-            if (score < 1.0) return "Ninguno";
+            if (score <= 1.0) return "Ninguno";
             if (score < 2.0) return "Menor";
             if (score < 3.0) return "Mantenimiento";
             if (score < 4.0) return "Mejora";
@@ -510,6 +522,49 @@ export const ActivityDetailPage = ({ activity, settings, fetchStreams, onBack, o
     }, [streams]);
 
     const maxHr = useMemo(() => streams?.heartrate?.data?.length > 0 ? Math.max(...streams.heartrate.data) : null, [streams]);
+
+    const fitnessAnalysis = useMemo(() => {
+        if (!trainingEffect || !proMetrics) return null;
+        let title = "";
+        let description = "";
+        let conclusion = "";
+        let score = 0;
+
+        if (trainingEffect.aerobic >= 3.0 || trainingEffect.anaerobic >= 2.5) score += 40;
+        else if (trainingEffect.aerobic >= 2.0 || trainingEffect.anaerobic >= 2.0) score += 20;
+
+        if (proMetrics.decouplingObj) {
+            const dec = parseFloat(proMetrics.decouplingObj.value);
+            if (dec <= 5 && dec >= -5) score += 30;
+            else if (dec <= 8) score += 15;
+            else score -= 10;
+        } else {
+            score += 15; // default si no hay datos de desacople porque fue corto
+        }
+
+        if ((activity.tss || 0) > 50) score += 20;
+        else if ((activity.tss || 0) > 20) score += 10;
+
+        if (score >= 70) {
+            title = "Entrenamiento Altamente Productivo";
+            description = "Has realizado una sesión excelente que aporta directamente a tu mejora física. El estímulo logrado es notable.";
+            if (trainingEffect.primaryBenefit !== "Recuperación") {
+                conclusion = `El enfoque principal en ${trainingEffect.primaryBenefit} ha sido un éxito. Has asimilado bien la carga sin un desfase excesivo. Definitivamente no has perdido el tiempo, este entreno suma a tu forma.`;
+            } else {
+                conclusion = "Un entrenamiento de recuperación ejecutado a la perfección. Es crucial para asimilar la carga de otros días intensos.";
+            }
+        } else if (score >= 40) {
+            title = "Entrenamiento Útil (Mantenimiento / Base)";
+            description = "Una sesión que suma volumen y ayuda a mantener tu estado de forma o construir base aeróbica, aunque sin picos extraordinarios de mejora aguda.";
+            conclusion = "Ha servido para sumar y cumplir el objetivo. No es una sesión de ganancia máxima (a menos que ese fuera el fin), pero es el cimiento necesario para estar en forma. Buen trabajo constante.";
+        } else {
+            title = "Sesión Ligera / Recuperación Activa";
+            description = "El estímulo fisiológico de esta sesión ha sido muy bajo. Puede interpretarse como un esfuerzo de recuperación o un paseo ligero.";
+            conclusion = "Si tu plan era descansar activamente, está perfecto. Si pretendías un entrenamiento duro o mejorar capacidades, lamentablemente hoy no se ha logrado el estímulo suficiente y podría considerarse una sesión vacía o 'tiempo perdido' deportivamente hablando.";
+        }
+
+        return { title, description, conclusion, score };
+    }, [trainingEffect, proMetrics, activity]);
 
     if (!activity) return null;
 
@@ -608,6 +663,12 @@ export const ActivityDetailPage = ({ activity, settings, fetchStreams, onBack, o
                         >
                             <Layers size={14} /> Vueltas
                         </button>
+                        <button
+                            onClick={() => setActiveTab('nivel')}
+                            className={`flex-1 flex items-center justify-center gap-1.5 py-2.5 px-3 rounded-md text-[11px] font-bold uppercase tracking-wider transition-all ${activeTab === 'nivel' ? 'bg-slate-100 dark:bg-zinc-800 text-slate-800 dark:text-zinc-100 shadow-sm' : 'text-slate-500 hover:text-slate-700 dark:text-zinc-400 dark:hover:text-zinc-300 hover:bg-slate-50 dark:hover:bg-zinc-800/50'}`}
+                        >
+                            <Zap size={14} /> Nivel
+                        </button>
                     </div>
 
                     {/* TAB CONTENT (Scrollable Area) */}
@@ -621,7 +682,8 @@ export const ActivityDetailPage = ({ activity, settings, fetchStreams, onBack, o
                                     <MetricBox label="Distancia" value={(activity.distance / 1000).toFixed(2)} unit="km" colorClass="border-blue-500" />
                                     <MetricBox label="Tiempo" value={Math.floor(activity.duration)} unit="min" colorClass="border-slate-400" />
                                     <MetricBox label={isPaceBased ? "Ritmo" : "Velocidad"} value={isPaceBased ? formatPace(activity.duration / (activity.distance / 1000)) : (activity.speed_avg * 3.6).toFixed(1)} unit={isPaceBased ? "/km" : "km/h"} colorClass="border-orange-500" />
-                                    <MetricBox label="Pulsaciones" value={activity.hr_avg || '--'} unit="ppm" colorClass="border-rose-500" />
+                                    <MetricBox label="Pulso Med" value={activity.hr_avg || '--'} unit="ppm" colorClass="border-rose-400" />
+                                    <MetricBox label="Pulso Máx" value={maxHr || activity.hr_max || '--'} unit="ppm" colorClass="border-rose-600" />
                                     <MetricBox label="Elevación" value={activity.elevation_gain || 0} unit="m" colorClass="border-emerald-500" />
                                     <MetricBox label="Calorías" value={activity.calories || 0} unit="kcal" colorClass="border-amber-500" />
 
@@ -633,7 +695,7 @@ export const ActivityDetailPage = ({ activity, settings, fetchStreams, onBack, o
                                         <MetricBox label={proMetrics.maxSpeedObj.label} value={proMetrics.maxSpeedObj.value} unit={proMetrics.maxSpeedObj.unit} colorClass="border-cyan-500" />
                                     )}
                                     {proMetrics.efObj && (
-                                        <MetricBox label="Eficacia (EF)" value={proMetrics.efObj.value} unit={proMetrics.efObj.unit} colorClass="border-violet-500" tooltip="Efficiency Factor: Indica la relación entre el trabajo realizado y el esfuerzo cardiovascular." />
+                                        <MetricBox label="Eficacia (EF)" value={proMetrics.efObj.value} unit={proMetrics.efObj.unit} colorClass="border-violet-500" tooltip="Efficiency Factor (EF): Mide la relación entre la potencia/velocidad y tus pulsaciones. Un valor MÁS ALTO indica que generas más fuerza/ritmo con menos latidos (mejor estado de forma). Útil para comparar con entrenamientos similares." />
                                     )}
                                     {proMetrics.decouplingObj && (
                                         <MetricBox label="Desacople" value={`${proMetrics.decouplingObj.value}%`} unit={proMetrics.decouplingObj.label} colorClass="border-fuchsia-500" valueColor={proMetrics.decouplingObj.color} tooltip="Aerobic Decoupling: Diferencia de eficiencia entre la primera y segunda mitad de la actividad." />
@@ -661,18 +723,24 @@ export const ActivityDetailPage = ({ activity, settings, fetchStreams, onBack, o
                                             </div>
                                             <div className="flex flex-col gap-4">
                                                 <div className="flex flex-col gap-1.5">
-                                                    <div className="flex justify-between items-end">
-                                                        <span className="text-[10px] font-bold text-slate-700 dark:text-zinc-300 uppercase tracking-wider">Carga Aeróbica</span>
-                                                        <span className="text-sm border border-blue-500/30 bg-blue-500/10 px-2 py-0.5 rounded font-black text-blue-600 dark:text-blue-400 leading-none">{trainingEffect.aerobic.toFixed(1)}</span>
+                                                    <div className="flex justify-between items-end pb-1 relative group cursor-help">
+                                                        <span className="text-[10px] font-bold text-slate-700 dark:text-zinc-300 uppercase tracking-wider flex items-center gap-1">Carga Aeróbica <Info size={10} className="text-slate-400" /></span>
+                                                        <span className="text-sm border border-blue-500/30 bg-blue-500/10 px-2 py-0.5 rounded font-black text-blue-600 dark:text-blue-400 leading-none z-10">{trainingEffect.aerobic.toFixed(1)}</span>
+                                                        <div className="absolute bottom-full mb-1 right-0 w-48 p-2 bg-slate-800 text-white text-[10px] leading-relaxed rounded shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-[100] pointer-events-none normal-case">
+                                                            0.0 - 0.9: Ninguno<br />1.0 - 1.9: Beneficio Menor<br />2.0 - 2.9: Mantenimiento<br />3.0 - 3.9: Mejora<br />4.0 - 4.9: Mejora Alta<br />5.0: Sobreesfuerzo
+                                                        </div>
                                                     </div>
                                                     <div className="w-full h-2 bg-slate-200 dark:bg-zinc-800 rounded-full overflow-hidden">
                                                         <div className="h-full bg-blue-500 transition-all" style={{ width: `${(trainingEffect.aerobic / 5) * 100}%` }}></div>
                                                     </div>
                                                 </div>
                                                 <div className="flex flex-col gap-1.5">
-                                                    <div className="flex justify-between items-end">
-                                                        <span className="text-[10px] font-bold text-slate-700 dark:text-zinc-300 uppercase tracking-wider">Carga Anaeróbica</span>
-                                                        <span className="text-sm border border-purple-500/30 bg-purple-500/10 px-2 py-0.5 rounded font-black text-purple-600 dark:text-purple-400 leading-none">{trainingEffect.anaerobic.toFixed(1)}</span>
+                                                    <div className="flex justify-between items-end pb-1 relative group cursor-help">
+                                                        <span className="text-[10px] font-bold text-slate-700 dark:text-zinc-300 uppercase tracking-wider flex items-center gap-1">Carga Anaeróbica <Info size={10} className="text-slate-400" /></span>
+                                                        <span className="text-sm border border-purple-500/30 bg-purple-500/10 px-2 py-0.5 rounded font-black text-purple-600 dark:text-purple-400 leading-none z-10">{trainingEffect.anaerobic.toFixed(1)}</span>
+                                                        <div className="absolute bottom-full mb-1 right-0 w-48 p-2 bg-slate-800 text-white text-[10px] leading-relaxed rounded shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-[100] pointer-events-none normal-case">
+                                                            0.0 - 0.9: Ninguno<br />1.0 - 1.9: Beneficio Menor<br />2.0 - 2.9: Mantenimiento<br />3.0 - 3.9: Mejora<br />4.0 - 4.9: Mejora Alta<br />5.0: Sobreesfuerzo
+                                                        </div>
                                                     </div>
                                                     <div className="w-full h-2 bg-slate-200 dark:bg-zinc-800 rounded-full overflow-hidden">
                                                         <div className="h-full bg-purple-500 transition-all" style={{ width: `${(trainingEffect.anaerobic / 5) * 100}%` }}></div>
@@ -968,6 +1036,61 @@ export const ActivityDetailPage = ({ activity, settings, fetchStreams, onBack, o
                                     <div className="flex-1 flex flex-col items-center justify-center text-slate-500 dark:text-zinc-600 p-8 border border-dashed border-slate-200 dark:border-zinc-800 rounded-lg">
                                         <Layers size={24} className="mb-2 opacity-50" />
                                         <p className="text-[10px] uppercase tracking-widest font-bold">Sin vueltas registradas</p>
+                                    </div>
+                                )}
+                            </div>
+                        )}
+
+                        {/* TAB CONTENT: NIVEL */}
+                        {activeTab === 'nivel' && (
+                            <div className="animate-in fade-in duration-300">
+                                {fitnessAnalysis ? (
+                                    <div className="bg-white dark:bg-zinc-900 rounded-lg p-6 border border-slate-200 dark:border-zinc-800 shadow-sm flex flex-col gap-6">
+
+                                        <div className="flex items-center gap-4 border-b border-slate-200 dark:border-zinc-800 pb-4">
+                                            <div className={`w-12 h-12 rounded-full flex items-center justify-center text-white font-black text-xl shadow-inner ${fitnessAnalysis.score >= 70 ? 'bg-green-500' : fitnessAnalysis.score >= 40 ? 'bg-blue-500' : 'bg-slate-400'}`}>
+                                                {fitnessAnalysis.score}
+                                            </div>
+                                            <div>
+                                                <h3 className="text-sm font-black uppercase text-slate-800 dark:text-zinc-100 tracking-tight">{fitnessAnalysis.title}</h3>
+                                                <p className="text-[11px] font-bold uppercase tracking-widest text-slate-500">Puntuación de Eficacia Global</p>
+                                            </div>
+                                        </div>
+
+                                        <div className="flex flex-col gap-5">
+                                            <div>
+                                                <h4 className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-2 flex items-center gap-1"><Activity size={12} /> Análisis de la sesión</h4>
+                                                <p className="text-sm text-slate-700 dark:text-zinc-300 leading-relaxed font-medium">
+                                                    {fitnessAnalysis.description}
+                                                </p>
+                                            </div>
+
+                                            <div className="bg-slate-50 dark:bg-zinc-950 p-4 rounded-md border border-slate-100 dark:border-zinc-800">
+                                                <h4 className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-2 flex items-center gap-1"><Target size={12} /> Veredicto</h4>
+                                                <p className="text-sm italic text-slate-800 dark:text-zinc-200 font-bold leading-relaxed">
+                                                    "{fitnessAnalysis.conclusion}"
+                                                </p>
+                                            </div>
+                                        </div>
+
+                                        <div className="grid grid-cols-2 gap-4 mt-2">
+                                            <div className="border border-slate-200 dark:border-zinc-800 p-3 rounded flex flex-col items-center justify-center text-center">
+                                                <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1">Carga Base</span>
+                                                <span className="text-lg font-black text-slate-800 dark:text-zinc-100">{Math.round(activity.tss || 0)} pts</span>
+                                            </div>
+                                            <div className="border border-slate-200 dark:border-zinc-800 p-3 rounded flex flex-col items-center justify-center text-center">
+                                                <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1">Estado Forma</span>
+                                                <span className={`text-lg font-black ${fitnessAnalysis.score >= 70 ? 'text-green-500' : fitnessAnalysis.score >= 40 ? 'text-blue-500' : 'text-slate-500'}`}>
+                                                    {fitnessAnalysis.score >= 70 ? 'Positivo' : fitnessAnalysis.score >= 40 ? 'Mantenimiento' : 'Neutro'}
+                                                </span>
+                                            </div>
+                                        </div>
+
+                                    </div>
+                                ) : (
+                                    <div className="flex-1 flex flex-col items-center justify-center bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-lg p-10 mt-2">
+                                        <Zap size={24} className="mb-2 opacity-50 text-slate-500" />
+                                        <p className="text-[10px] uppercase tracking-widest font-bold text-slate-500 text-center">No hay datos suficientes para generar un análisis completo.<br />(Se necesitan streams, pulso y datos de entrenamiento)</p>
                                     </div>
                                 )}
                             </div>

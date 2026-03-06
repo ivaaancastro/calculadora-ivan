@@ -24,6 +24,7 @@ import { CalendarPage } from "./pages/CalendarPage";
 import { ActivityDetailPage } from "./pages/ActivityDetailPage";
 import { ProfilePage } from "./pages/ProfilePage";
 import { HealthPage } from "./pages/HealthPage";
+import { ErrorBoundary } from "./common/ErrorBoundary";
 
 const Dashboard = () => {
   const {
@@ -101,24 +102,28 @@ const Dashboard = () => {
 
       <main className={`w-full max-w-[1800px] mx-auto ${activeActivity ? 'px-4' : 'px-4 sm:px-6 py-4 sm:py-6 space-y-4'}`}>
         {activeActivity ? (
-          <ActivityDetailPage
-            activity={activeActivity}
-            settings={settings}
-            fetchStreams={fetchActivityStreams}
-            onBack={() => setActiveActivity(null)}
-            onDelete={deleteActivity}
-          />
+          <ErrorBoundary>
+            <ActivityDetailPage
+              activity={activeActivity}
+              settings={settings}
+              fetchStreams={fetchActivityStreams}
+              onBack={() => setActiveActivity(null)}
+              onDelete={deleteActivity}
+            />
+          </ErrorBoundary>
         ) : activeTab === "profile" ? (
-          <ProfilePage
-            currentSettings={settings}
-            onUpdate={updateProfile}
-            onAnalyze={analyzeHistory}
-            onBack={() => setActiveTab("overview")}
-            activities={activities}
-            isDeepSyncing={isDeepSyncing}
-            deepSyncProgress={deepSyncProgress}
-            onDeepSync={handleDeepSync}
-          />
+          <ErrorBoundary>
+            <ProfilePage
+              currentSettings={settings}
+              onUpdate={updateProfile}
+              onAnalyze={analyzeHistory}
+              onBack={() => setActiveTab("overview")}
+              activities={activities}
+              isDeepSyncing={isDeepSyncing}
+              deepSyncProgress={deepSyncProgress}
+              onDeepSync={handleDeepSync}
+            />
+          </ErrorBoundary>
         ) : activities.length === 0 ? (
           <div className="text-center py-20 px-4">
             <div className="bg-white dark:bg-zinc-900 rounded-lg border border-slate-200 dark:border-zinc-800 p-8 max-w-md mx-auto">
@@ -205,11 +210,13 @@ const Dashboard = () => {
 
               {/* SECCIÓN AVANZADA */}
               <div className="pt-4 border-t border-slate-200 dark:border-zinc-800 mt-4">
-                <AdvancedAnalytics
-                  activities={activities}
-                  settings={settings}
-                  onSelectActivity={(act) => setActiveActivity(act)}
-                />
+                <ErrorBoundary>
+                  <AdvancedAnalytics
+                    activities={activities}
+                    settings={settings}
+                    onSelectActivity={(act) => setActiveActivity(act)}
+                  />
+                </ErrorBoundary>
               </div>
             </div>
 
@@ -219,18 +226,20 @@ const Dashboard = () => {
                 activeTab === "calendar" ? "block animate-in fade-in" : "hidden"
               }
             >
-              <CalendarPage
-                activities={activities}
-                plannedWorkouts={plannedWorkouts}
-                addPlannedWorkout={addPlannedWorkout}
-                deletePlannedWorkout={deletePlannedWorkout}
-                updatePlannedWorkout={updatePlannedWorkout}
-                currentMetrics={currentMetrics}
-                settings={settings}
-                chartData={chartData}
-                onDelete={deleteActivity}
-                onSelectActivity={(act) => setActiveActivity(act)}
-              />
+              <ErrorBoundary>
+                <CalendarPage
+                  activities={activities}
+                  plannedWorkouts={plannedWorkouts}
+                  addPlannedWorkout={addPlannedWorkout}
+                  deletePlannedWorkout={deletePlannedWorkout}
+                  updatePlannedWorkout={updatePlannedWorkout}
+                  currentMetrics={currentMetrics}
+                  settings={settings}
+                  chartData={chartData}
+                  onDelete={deleteActivity}
+                  onSelectActivity={(act) => setActiveActivity(act)}
+                />
+              </ErrorBoundary>
             </div>
 
             {/* VISTA: HISTORIAL */}
@@ -248,11 +257,13 @@ const Dashboard = () => {
                 </button>
               </div>
               <div className="h-[calc(100vh-250px)]">
-                <HistoryList
-                  activities={activities}
-                  onDelete={deleteActivity}
-                  onSelectActivity={(act) => setActiveActivity(act)}
-                />
+                <ErrorBoundary>
+                  <HistoryList
+                    activities={activities}
+                    onDelete={deleteActivity}
+                    onSelectActivity={(act) => setActiveActivity(act)}
+                  />
+                </ErrorBoundary>
               </div>
             </div>
 
@@ -262,7 +273,9 @@ const Dashboard = () => {
                 activeTab === "health" ? "block animate-in fade-in" : "hidden"
               }
             >
-              <HealthPage activities={activities} settings={settings} chartData={chartData} />
+              <ErrorBoundary>
+                <HealthPage activities={activities} settings={settings} chartData={chartData} />
+              </ErrorBoundary>
             </div>
           </>
         )}

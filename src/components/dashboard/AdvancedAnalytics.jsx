@@ -54,7 +54,7 @@ export const AdvancedAnalytics = ({ activities, settings, onSelectActivity }) =>
 
         const initPeaks = () => { const p = {}; TIME_INTERVALS.forEach(i => { p[i] = { value: 0, actId: null, actName: '', actDate: '' }; }); return p; };
         const peaks = { all: { hr: initPeaks(), spd: initPeaks() }, bike: { hr: initPeaks(), spd: initPeaks() }, run: { hr: initPeaks(), spd: initPeaks() } };
-        const scatterData = { bike: [], run: [] };
+        const efData = { bike: [], run: [] };
         const updatePeak = (sport, metric, window, value, act) => { if (value > peaks[sport][metric][window].value) peaks[sport][metric][window] = { value, actId: act.id, actName: act.name, actDate: act.date }; };
 
         let bestRunVo2 = 0; let bestBikeVo2 = 0; let hasPowerMeter = false;
@@ -77,11 +77,17 @@ export const AdvancedAnalytics = ({ activities, settings, onSelectActivity }) =>
             const isBike = typeLower.includes('bici') || typeLower.includes('ciclismo');
             const isRun = typeLower.includes('run') || typeLower.includes('carrera');
 
-            if (actDate >= date90DaysAgo && (isBike || isRun) && act.hr_avg > 80 && act.speed_avg > 0 && act.duration >= 20) {
-                const speedKmH = Number((act.speed_avg * 3.6).toFixed(1));
-                const paceMinKm = Number((16.6666667 / act.speed_avg).toFixed(2));
-                if (isBike) scatterData.bike.push({ hr: Math.round(act.hr_avg), speed: speedKmH, name: act.name, date: act.date, id: act.id });
-                if (isRun && paceMinKm < 15) scatterData.run.push({ hr: Math.round(act.hr_avg), pace: paceMinKm, name: act.name, date: act.date, id: act.id });
+            if (actDate >= date90DaysAgo && (isBike || isRun) && act.hr_avg > 80 && act.duration >= 20) {
+                const speedMs = act.speed_avg || 0;
+                const baseDateLabel = actDate.toLocaleDateString('es-ES', { day: '2-digit', month: 'short' });
+                if (isBike && act.watts_avg > 40) {
+                    const efBike = act.watts_avg / act.hr_avg;
+                    efData.bike.push({ date: act.date, dateLabel: baseDateLabel, ef: Number(efBike.toFixed(2)), name: act.name, id: act.id, hr: Math.round(act.hr_avg), watts: Math.round(act.watts_avg) });
+                }
+                if (isRun && speedMs > 2) {
+                    const efRun = (speedMs * 60) / act.hr_avg; // Speed (m/min) per heartbeat
+                    efData.run.push({ date: act.date, dateLabel: baseDateLabel, ef: Number(efRun.toFixed(2)), name: act.name, id: act.id, hr: Math.round(act.hr_avg), pace: formatPace((16.6666667 / speedMs)) });
+                }
             }
 
             if (actDate >= date45DaysAgo && act.duration >= 20) {
@@ -209,6 +215,25 @@ export const AdvancedAnalytics = ({ activities, settings, onSelectActivity }) =>
             { name: 'Anaeróbico', value: Math.round(((zonesData[4] + zonesData[5] + zonesData[6]) / totalFocus) * 100), color: '#ef4444' }
         ] : [];
 
+        let trainingProfile = { title: "Sin Datos", desc: "No hay datos de zonas suficientes para determinar un perfil.", color: "text-slate-500", raw: 'none' };
+        if (totalFocus > 0) {
+            const zAerobic = (zonesData[0] + zonesData[1]) / totalFocus;
+            const zTempo = (zonesData[2] + zonesData[3]) / totalFocus;
+            const zAnaerobic = (zonesData[4] + zonesData[5] + zonesData[6]) / totalFocus;
+
+            if (zAerobic >= 0.75 && zAnaerobic >= zTempo) {
+                trainingProfile = { title: "Polarizado", desc: "Mucha base aeróbica y picos de alta intensidad, evitando zonas grises. Muy efectivo.", color: "text-emerald-500", raw: 'polarizado' };
+            } else if (zAerobic >= 0.65 && zTempo > zAnaerobic) {
+                trainingProfile = { title: "Piramidal", desc: "Base enorme, algo de umbral y poco anaeróbico. Gran progresión constante de forma.", color: "text-blue-500", raw: 'piramidal' };
+            } else if (zTempo >= 0.35) {
+                trainingProfile = { title: "Enfocado en Umbral", desc: "Excesivo tiempo en zonas de fatiga alta y media. Riesgo de estancamiento (mucho 'Sweet Spot').", color: "text-amber-500", raw: 'umbral' };
+            } else if (zAerobic < 0.55 && zAnaerobic >= 0.20) {
+                trainingProfile = { title: "Alta Intensidad (HIIT)", desc: "Entrenamiento de corta duración y altísimo impacto. Insostenible a medio plazo.", color: "text-rose-500", raw: 'hiit' };
+            } else {
+                trainingProfile = { title: "Mixto / Base", desc: "Distribución aeróbica general sin un pico polarizado muy claro hacia los extremos.", color: "text-indigo-500", raw: 'mixto' };
+            }
+        }
+
         const curves = { all: { spd: [], hr: [] }, bike: { spd: [], hr: [] }, run: { spd: [], hr: [] } };
         ['all', 'bike', 'run'].forEach(sport => {
             curves[sport].spd = TIME_INTERVALS.map(i => {
@@ -222,7 +247,8 @@ export const AdvancedAnalytics = ({ activities, settings, onSelectActivity }) =>
         });
 
         return {
-            zonesChart, focusChart, weeklyChart, curves, scatterData, dailyTSS, pmcHistory,
+            zonesChart, focusChart, weeklyChart, curves, efData, dailyTSS, pmcHistory,
+            trainingProfile,
             vo2Max: { run: Number(bestRunVo2.toFixed(1)), bike: Number(bestBikeVo2.toFixed(1)), bikeEstimated: bikeVo2IsEstimated },
             model: { ctl: currentCTL, atl: currentATL, tsb, rampRate, monotony, strain, load7d: sum7 }
         };
@@ -260,20 +286,31 @@ export const AdvancedAnalytics = ({ activities, settings, onSelectActivity }) =>
         return null;
     };
 
-    const CustomScatterTooltip = ({ active, payload }) => {
+    const CustomEfTooltip = ({ active, payload }) => {
         if (active && payload && payload.length) {
             const data = payload[0].payload;
             const isRun = scatterSport === 'run';
             return (
-                <div style={tooltipStyle} className="shadow-xl min-w-[150px]">
-                    <p className="text-[9px] text-zinc-400 uppercase tracking-widest mb-1">Punto de Eficiencia</p>
-                    <div className="flex justify-between gap-3 mb-2">
-                        <p className="text-xs font-black text-rose-500">{data.hr} <span className="text-[8px]">ppm</span></p>
-                        <p className="text-xs font-black text-blue-400">{isRun ? formatPace(data.pace) : data.speed} <span className="text-[8px]">{isRun ? '/km' : 'km/h'}</span></p>
+                <div style={tooltipStyle} className="shadow-xl w-48 z-[200]">
+                    <p className="text-[9px] text-zinc-400 uppercase tracking-widest mb-1.5 border-b border-zinc-700 pb-1">Factor de Eficiencia</p>
+                    <div className="flex justify-between items-end mb-2">
+                        <span className="text-xl font-black text-violet-400 leading-none">{data.ef}</span>
+                        <span className="text-[10px] text-zinc-500 font-bold uppercase">{isRun ? 'v/hr' : 'w/hr'}</span>
+                    </div>
+                    <div className="grid grid-cols-2 gap-2 mb-2 bg-zinc-800 p-2 rounded">
+                        <div>
+                            <p className="text-[8px] uppercase text-zinc-500 font-bold mb-0.5">{isRun ? 'Ritmo' : 'Potencia'}</p>
+                            <p className="text-xs font-bold text-zinc-200">{isRun ? data.pace : `${data.watts}w`}</p>
+                        </div>
+                        <div>
+                            <p className="text-[8px] uppercase text-zinc-500 font-bold mb-0.5">Pulso</p>
+                            <p className="text-xs font-bold text-rose-400">{data.hr} ppm</p>
+                        </div>
                     </div>
                     <div className="border-t border-zinc-700 pt-2 mt-1">
-                        <p className="text-[10px] text-zinc-200 truncate font-bold">{data.name}</p>
+                        <p className="text-[10px] text-zinc-200 truncate font-bold" title={data.name}>{data.name}</p>
                         <p className="text-[9px] text-zinc-500">{new Date(data.date).toLocaleDateString()}</p>
+                        <div className="flex items-center gap-1 text-[8px] text-blue-400 mt-2 font-bold uppercase tracking-wider"><MousePointer2 size={8} /> Clic para abrir actividad</div>
                     </div>
                 </div>
             );
@@ -460,19 +497,36 @@ export const AdvancedAnalytics = ({ activities, settings, onSelectActivity }) =>
                         </div>
                     </div>
 
-                    <div className="bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 p-4 rounded-lg flex flex-col md:col-span-2 h-[220px]">
+                    <div className="bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 p-4 rounded-lg flex flex-col h-[220px]">
                         <div className="flex items-center justify-between mb-2">
-                            <h4 className="text-[10px] font-bold text-slate-600 dark:text-zinc-400 uppercase tracking-widest flex items-center gap-1.5"><BarChart2 size={12} /> Tiempo en Zonas (Hr)</h4>
+                            <h4 className="text-[10px] font-bold text-slate-600 dark:text-zinc-400 uppercase tracking-widest flex items-center gap-1.5"><BarChart2 size={12} /> Zonas</h4>
                         </div>
                         <div className="flex-1 w-full mt-2">
                             <ResponsiveContainer width="100%" height="100%">
-                                <BarChart layout="vertical" data={analytics.zonesChart} margin={{ top: 0, right: 20, left: 10, bottom: -5 }}>
-                                    <XAxis type="number" tick={{ fontSize: 9, fill: '#71717a' }} axisLine={false} tickLine={false} />
-                                    <YAxis type="category" dataKey="name" tick={{ fontSize: 8, fill: '#71717a', fontWeight: 600 }} axisLine={false} tickLine={false} width={100} interval={0} />
+                                <BarChart layout="vertical" data={analytics.zonesChart} margin={{ top: 0, right: 10, left: 10, bottom: -5 }}>
+                                    <XAxis type="number" hide />
+                                    <YAxis type="category" dataKey="name" tick={{ fontSize: 8, fill: '#71717a', fontWeight: 600 }} axisLine={false} tickLine={false} width={80} interval={0} tickFormatter={(val) => val.split(' ')[0]} />
                                     <RechartsTooltip cursor={{ fill: 'rgba(255,255,255,0.05)' }} contentStyle={tooltipStyle} itemStyle={{ color: '#fff' }} formatter={(value) => [`${value} h`, 'Tiempo Total']} />
                                     <Bar dataKey="hours" radius={[0, 2, 2, 0]} barSize={14}>{analytics.zonesChart.map((e, i) => <Cell key={i} fill={e.fill} />)}</Bar>
                                 </BarChart>
                             </ResponsiveContainer>
+                        </div>
+                    </div>
+
+                    <div className="bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 p-5 rounded-lg flex flex-col h-[220px] justify-between relative overflow-hidden">
+                        <div className="absolute top-0 right-0 p-4 opacity-5">
+                            <Brain size={120} />
+                        </div>
+                        <div>
+                            <h4 className="text-[10px] font-bold text-slate-500 dark:text-zinc-400 uppercase tracking-widest flex items-center gap-1.5 mb-1"><Sparkles size={12} className="text-purple-500" /> Perfil de Entrenamiento</h4>
+                            <p className={`text-xl font-black uppercase tracking-tight mt-2 ${analytics.trainingProfile.color}`}>
+                                {analytics.trainingProfile.title}
+                            </p>
+                        </div>
+                        <div className="bg-slate-50 dark:bg-black/20 p-3 rounded-md border border-slate-100 dark:border-zinc-800/50 relative z-10">
+                            <p className="text-xs text-slate-700 dark:text-zinc-300 font-medium leading-relaxed">
+                                {analytics.trainingProfile.desc}
+                            </p>
                         </div>
                     </div>
                 </div>
@@ -529,9 +583,13 @@ export const AdvancedAnalytics = ({ activities, settings, onSelectActivity }) =>
 
                     <div className="bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 p-5 rounded-lg flex flex-col min-h-[220px] lg:col-span-2">
                         <div className="flex justify-between items-center mb-3">
-                            <div className="flex items-center">
-                                <h4 className="text-[10px] font-bold text-slate-600 dark:text-zinc-400 uppercase tracking-widest flex items-center gap-1.5"><Heart size={12} className="text-rose-500" /> Correlación de Eficiencia</h4>
+                            <div className="flex items-center group relative cursor-help">
+                                <h4 className="text-[10px] font-bold text-slate-600 dark:text-zinc-400 uppercase tracking-widest flex items-center gap-1.5"><ActivityPulse size={12} className="text-violet-500" /> Tendencia de Eficacia (EF) <Info size={10} className="text-slate-400" /></h4>
                                 <Subtitle text="Últ. 90D" />
+                                <div className="absolute opacity-0 group-hover:opacity-100 transition-opacity duration-200 bg-slate-800 text-slate-100 p-3 rounded-lg top-[calc(100%+10px)] left-0 w-64 text-center pointer-events-none z-[100] shadow-xl border border-slate-700 text-[10px] normal-case tracking-normal">
+                                    <strong>¿Qué es el Factor de Eficiencia?</strong><br /><br />
+                                    Se calcula dividiendo la potencia/ritmo entre las pulsaciones. Si esta línea sube, significa que mejoras: produces más energía o vas más rápido con el mismo (o menor) sobreesfuerzo del corazón.
+                                </div>
                             </div>
                             <div className="flex bg-slate-100 dark:bg-zinc-800 p-0.5 rounded-full shadow-inner">
                                 <button onClick={() => setScatterSport('bike')} className={`px-2.5 py-1 text-[9px] font-bold uppercase rounded-full transition-all ${scatterSport === 'bike' ? 'bg-white dark:bg-zinc-600 text-slate-800 dark:text-zinc-100 shadow' : 'text-slate-500 hover:text-slate-700 dark:hover:text-zinc-300'}`}>Bici</button>
@@ -540,13 +598,19 @@ export const AdvancedAnalytics = ({ activities, settings, onSelectActivity }) =>
                         </div>
                         <div className="flex-1 w-full cursor-pointer mt-2">
                             <ResponsiveContainer width="100%" height="100%">
-                                <ScatterChart margin={{ top: 10, right: 10, bottom: 0, left: -25 }} onClick={handleChartBackgroundClick}>
-                                    <CartesianGrid strokeDasharray="2 2" stroke="#3f3f46" opacity={0.3} />
-                                    <XAxis type="number" dataKey="hr" domain={['dataMin - 5', 'dataMax + 5']} tick={{ fontSize: 9, fill: '#71717a' }} axisLine={{ stroke: '#3f3f46' }} tickLine={false} />
-                                    <YAxis type="number" dataKey={scatterSport === 'run' ? 'pace' : 'speed'} domain={['dataMin', 'dataMax']} tick={{ fontSize: 9, fill: '#71717a' }} axisLine={false} tickLine={false} reversed={scatterSport === 'run'} tickFormatter={scatterSport === 'run' ? formatPace : undefined} />
-                                    <RechartsTooltip content={<CustomScatterTooltip />} isAnimationActive={false} cursor={{ strokeDasharray: '3 3' }} />
-                                    <Scatter data={analytics.scatterData[scatterSport]} fill={scatterSport === 'run' ? '#ea580c' : '#2563eb'} fillOpacity={0.6} r={4} onClick={(e) => handleDirectClick(e.payload)} cursor="pointer" />
-                                </ScatterChart>
+                                <AreaChart data={analytics.efData[scatterSport]} margin={{ top: 10, right: 0, bottom: 0, left: -25 }} onClick={handleChartBackgroundClick}>
+                                    <defs>
+                                        <linearGradient id="efGradientColor" x1="0" y1="0" x2="0" y2="1">
+                                            <stop offset="5%" stopColor="#8b5cf6" stopOpacity={0.4} />
+                                            <stop offset="95%" stopColor="#8b5cf6" stopOpacity={0} />
+                                        </linearGradient>
+                                    </defs>
+                                    <CartesianGrid strokeDasharray="2 2" stroke="#3f3f46" opacity={0.3} vertical={false} />
+                                    <XAxis dataKey="dateLabel" tick={{ fontSize: 9, fill: '#71717a' }} axisLine={{ stroke: '#3f3f46' }} tickLine={false} minTickGap={20} />
+                                    <YAxis type="number" domain={['dataMin - 0.2', 'dataMax + 0.2']} tick={{ fontSize: 9, fill: '#8b5cf6' }} axisLine={false} tickLine={false} />
+                                    <RechartsTooltip content={<CustomEfTooltip />} isAnimationActive={false} cursor={{ stroke: '#71717a', strokeWidth: 1, strokeDasharray: '4 4' }} />
+                                    <Area type="monotone" dataKey="ef" stroke="#8b5cf6" strokeWidth={2.5} fillOpacity={1} fill="url(#efGradientColor)" activeDot={{ onClick: (e, payload) => handleDirectClick(payload.payload), r: 6, stroke: '#fff', strokeWidth: 2, cursor: 'pointer' }} isAnimationActive={false} />
+                                </AreaChart>
                             </ResponsiveContainer>
                         </div>
                     </div>

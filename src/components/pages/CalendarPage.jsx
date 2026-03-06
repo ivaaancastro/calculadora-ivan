@@ -4,6 +4,7 @@ import {
     Clock, Zap, MapPin, Footprints, Bike, Dumbbell, Activity, Target,
     Plus, Trash2, X, Sparkles, RotateCcw
 } from 'lucide-react';
+import toast from 'react-hot-toast';
 import { BlockGeneratorModal } from '../dashboard/BlockGeneratorModal';
 import { FuelingPanel } from '../dashboard/FuelingPanel';
 import { formatDuration, formatBlockDuration } from '../../utils/formatDuration';
@@ -1040,7 +1041,7 @@ export const CalendarPage = ({ activities, plannedWorkouts = [], addPlannedWorko
             setEditingPlanId(null);
             setNewPlan({ type: 'Run', name: '', tss: 50, duration: 60, blocks: [] });
         } catch (e) {
-            alert("Error guardando plan: " + e.message);
+            toast.error("Error guardando plan: " + e.message);
         } finally {
             setIsSaving(false);
         }
@@ -1051,8 +1052,9 @@ export const CalendarPage = ({ activities, plannedWorkouts = [], addPlannedWorko
         if (window.confirm("¿Borrar entrenamiento planeado?")) {
             try {
                 await deletePlannedWorkout(id);
+                toast.success("Plan eliminado.");
             } catch (e) {
-                alert("Error al borrar: " + e.message);
+                toast.error("Error al borrar: " + e.message);
             }
         }
     };

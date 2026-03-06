@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useCallback } from "react";
 import { supabase } from "../supabase";
 import {
   LTHR_ZONE_PCT, SPORT_LOAD_CONFIG,
@@ -6,235 +6,44 @@ import {
   calculateActivityTSS, recalcTssFromBlocks,
 } from "../utils/tssEngine";
 
+import { useAppStore } from "../store/useAppStore";
+import { useQueryClient } from "@tanstack/react-query";
+import { useProfileQuery } from "./queries/useProfileQuery";
+import { useActivitiesQuery } from "./queries/useActivitiesQuery";
+import { usePlannedWorkoutsQuery } from "./queries/usePlannedWorkoutsQuery";
+import toast from "react-hot-toast";
+
 export const useActivities = () => {
-  const [activities, setActivities] = useState([]);
-  const [plannedWorkouts, setPlannedWorkouts] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [uploading, setUploading] = useState(false);
-  const [uploadStatus, setUploadStatus] = useState(null);
-  const [timeRange, setTimeRange] = useState("30d");
-  const [isDeepSyncing, setIsDeepSyncing] = useState(false);
-  const [deepSyncProgress, setDeepSyncProgress] = useState(null);
+  const queryClient = useQueryClient();
 
-  const [isStravaConnected, setIsStravaConnected] = useState(false);
+  const {
+    timeRange, setTimeRange,
+    settings, updateSettings, setSettings,
+    uploading, uploadStatus, setUploadState,
+    isDeepSyncing, deepSyncProgress, setDeepSyncState,
+    isStravaConnected, setStravaConnected
+  } = useAppStore();
 
-  const [settings, setSettings] = useState({
-    gender: "male",
-    fcReposo: 50,
-    weight: 70,
-    run: { max: 200, lthr: 178, zones: calcZonesFromLTHR(178, 200), zonesMode: 'lthr', thresholdPace: '4:30', paceZones: null },
-    bike: { max: 190, lthr: 168, zones: calcZonesFromLTHR(168, 190), zonesMode: 'lthr', ftp: 200 },
-    ta: 42,
-    tf: 7,
-  });
+  const { query: profileQuery, updateProfileMutation } = useProfileQuery();
+  const { query: activitiesQuery, deleteActivityMutation, clearDbMutation } = useActivitiesQuery();
+  const { query: workoutsQuery, addWorkoutMutation, updateWorkoutMutation, deleteWorkoutMutation } = usePlannedWorkoutsQuery();
 
-  useEffect(() => {
-    Promise.all([fetchProfile(), fetchActivities(), fetchPlannedWorkouts()])
-      .then(() => setLoading(false))
-      .catch((err) => {
-        console.error("Error fetching initial data:", err);
-        setLoading(false);
-      });
-  }, []);
+  const activities = activitiesQuery.data || [];
+  const plannedWorkouts = workoutsQuery.data || [];
+  const loading = profileQuery.isLoading || activitiesQuery.isLoading || workoutsQuery.isLoading;
+
+  const fetchProfile = async () => profileQuery.refetch();
+  const updateProfile = async (newSettings) => updateProfileMutation.mutateAsync(newSettings);
+  const fetchActivities = async () => activitiesQuery.refetch();
+  const fetchPlannedWorkouts = async () => workoutsQuery.refetch();
+
+  const addPlannedWorkout = async (workoutData) => addWorkoutMutation.mutateAsync(workoutData);
+  const deletePlannedWorkout = async (id) => deleteWorkoutMutation.mutateAsync(id);
+  const updatePlannedWorkout = async (id, updates) => updateWorkoutMutation.mutateAsync({ id, updates });
 
   const getCurrentUserId = async () => {
-    const {
-      data: { session },
-    } = await supabase.auth.getSession();
+    const { data: { session } } = await supabase.auth.getSession();
     return session?.user?.id || null;
-  };
-
-  const fetchProfile = async () => {
-    const userId = await getCurrentUserId();
-    if (!userId) return;
-
-    const { data, error } = await supabase
-      .from("profiles")
-      .select("*")
-      .eq("user_id", userId)
-      .single();
-
-    if (error && error.code === "PGRST116") {
-      await supabase.from("profiles").insert([{ user_id: userId }]);
-      return;
-    }
-
-    if (!error && data) {
-      if (data.strava_access_token) setIsStravaConnected(true);
-      setSettings((prev) => ({
-        ...prev,
-        gender: data.gender || "male",
-        weight: Number(data.weight) || 70,
-        fcReposo: Number(data.fc_rest) || 50,
-        run: {
-          max: Number(data.run_fc_max) || 200,
-          lthr: Number(data.run_lthr) || 178,
-          zones: data.run_zones || calcZonesFromLTHR(Number(data.run_lthr) || 178, Number(data.run_fc_max) || 200),
-          zonesMode: data.run_zones_mode || 'lthr',
-          thresholdPace: data.run_threshold_pace || '4:30',
-          paceZones: data.run_pace_zones || null,
-        },
-        bike: {
-          max: Number(data.bike_fc_max) || 190,
-          lthr: Number(data.bike_lthr) || 168,
-          zones: data.bike_zones || calcZonesFromLTHR(Number(data.bike_lthr) || 168, Number(data.bike_fc_max) || 190),
-          zonesMode: data.bike_zones_mode || 'lthr',
-          ftp: Number(data.bike_ftp) || 200,
-        },
-        intervalsId: data.intervalsId || "",
-        intervalsKey: data.intervalsKey || "",
-      }));
-    }
-  };
-
-  const updateProfile = async (newSettings) => {
-    try {
-      const userId = await getCurrentUserId();
-      if (!userId) throw new Error("No hay sesión activa");
-
-      const { error } = await supabase.from("profiles").upsert(
-        {
-          user_id: userId,
-          weight: newSettings.weight,
-          fc_rest: newSettings.fcReposo,
-          run_fc_max: newSettings.run.max,
-          run_lthr: newSettings.run.lthr,
-          run_zones: newSettings.run.zones,
-          run_zones_mode: newSettings.run.zonesMode,
-          run_threshold_pace: newSettings.run.thresholdPace,
-          run_pace_zones: newSettings.run.paceZones,
-          bike_fc_max: newSettings.bike.max,
-          bike_lthr: newSettings.bike.lthr,
-          bike_zones: newSettings.bike.zones,
-          bike_zones_mode: newSettings.bike.zonesMode,
-          bike_ftp: newSettings.bike.ftp,
-          // --- NUEVAS LÍNEAS DE INTERVALS ---
-          intervalsId: newSettings.intervalsId,
-          intervalsKey: newSettings.intervalsKey,
-        },
-        { onConflict: "user_id" },
-      );
-
-      if (error) throw error;
-
-      setSettings(newSettings);
-      alert("¡Perfil fisiológico y claves guardadas con éxito!");
-    } catch (error) {
-      console.error("Error guardando perfil:", error);
-      alert("Hubo un error al intentar guardar en la base de datos.");
-    }
-  };
-
-  // Columnas ligeras (todo menos streams_data y map_polyline que son pesados)
-  const LIGHT_COLS = "id,created_at,date,type,duration,distance,hr_avg,calories,effort_perceived,notes,user_id,strava_id,elevation_gain,watts_avg,name,description,speed_avg";
-
-  const fetchActivities = async () => {
-    try {
-      // Fase 1: Carga rápida — solo metadatos ligeros de TODAS las actividades
-      const { data: baseData, error } = await supabase
-        .from("activities")
-        .select(LIGHT_COLS);
-
-      if (error) {
-        console.error("Error fetching activities:", error);
-        return;
-      }
-
-      // Mostrar el dashboard inmediatamente con datos básicos
-      const sorted = (baseData || [])
-        .map((a) => ({ ...a, dateObj: new Date(a.date), streams_data: null }))
-        .sort((a, b) => a.dateObj - b.dateObj);
-      setActivities(sorted);
-
-      // Fase 2: En segundo plano, cargar streams_data solo de los últimos 90 días
-      const cutoff = new Date();
-      cutoff.setDate(cutoff.getDate() - 95);
-      const { data: streamsData } = await supabase
-        .from("activities")
-        .select("id,streams_data")
-        .gte("date", cutoff.toISOString().split("T")[0])
-        .not("streams_data", "is", null);
-
-      if (streamsData && streamsData.length > 0) {
-        const streamMap = new Map();
-        streamsData.forEach((s) => streamMap.set(s.id, s.streams_data));
-
-        // Actualizar actividades con los streams cargados
-        setActivities((prev) =>
-          prev.map((a) =>
-            streamMap.has(a.id) ? { ...a, streams_data: streamMap.get(a.id) } : a
-          )
-        );
-      }
-    } catch (e) {
-      console.error("fetchActivities failed:", e);
-    }
-  };
-
-  const fetchPlannedWorkouts = async () => {
-    try {
-      const { data, error } = await supabase.from("planned_workouts").select("*");
-      if (!error && data) {
-        const sorted = data
-          .map((a) => ({
-            ...a,
-            tss: recalcTssFromBlocks(a, settings),
-            dateObj: new Date(a.date),
-            isPlanned: true,
-          }))
-          .sort((a, b) => a.dateObj - b.dateObj);
-        setPlannedWorkouts(sorted);
-      }
-    } catch (e) {
-      console.warn("planned_workouts table not available:", e);
-    }
-  };
-
-  // Re-calculate planned workout TSS when settings change (profile loads from DB)
-  useEffect(() => {
-    setPlannedWorkouts(prev => {
-      if (prev.length === 0) return prev;
-      return prev.map(p => ({ ...p, tss: recalcTssFromBlocks(p, settings) }));
-    });
-  }, [settings]);
-
-  const addPlannedWorkout = async (workoutData) => {
-    const userId = await getCurrentUserId();
-    if (!userId) throw new Error("No hay sesión activa");
-
-    // El workoutData vendrá del CalendarPage con date, type, name, duration, tss, description (JSON stringified)
-    const { data, error } = await supabase
-      .from("planned_workouts")
-      .insert([{ ...workoutData, user_id: userId }])
-      .select()
-      .single();
-
-    if (error) throw error;
-
-    // Update local state immediately
-    const newWorkout = { ...data, dateObj: new Date(data.date), isPlanned: true };
-    setPlannedWorkouts(prev => [...prev, newWorkout].sort((a, b) => a.dateObj - b.dateObj));
-    return newWorkout;
-  };
-
-  const deletePlannedWorkout = async (id) => {
-    const { error } = await supabase.from("planned_workouts").delete().eq("id", id);
-    if (error) throw error;
-    setPlannedWorkouts(prev => prev.filter(w => w.id !== id));
-  };
-
-  const updatePlannedWorkout = async (id, updates) => {
-    const { data, error } = await supabase
-      .from("planned_workouts")
-      .update(updates)
-      .eq("id", id)
-      .select()
-      .single();
-    if (error) throw error;
-    setPlannedWorkouts(prev =>
-      prev.map(w => w.id === id ? { ...data, dateObj: new Date(data.date), isPlanned: true } : w)
-        .sort((a, b) => a.dateObj - b.dateObj)
-    );
   };
 
   const refreshStravaToken = async (refreshToken) => {
@@ -264,7 +73,7 @@ export const useActivities = () => {
         strava_expires_at: null,
       })
       .eq("user_id", userId);
-    setIsStravaConnected(false);
+    setStravaConnected(false);
   };
 
   const getValidStravaToken = async () => {
@@ -323,11 +132,12 @@ export const useActivities = () => {
         .from("activities")
         .update({ streams_data: streams })
         .eq("id", activityId);
-      setActivities((prev) =>
-        prev.map((a) =>
-          a.id === activityId ? { ...a, streams_data: streams } : a,
-        ),
-      );
+
+      // Update react query cache directly
+      queryClient.setQueryData(["activities"], (oldData) => {
+        if (!oldData) return oldData;
+        return oldData.map((a) => a.id === activityId ? { ...a, streams_data: streams } : a);
+      });
       return streams;
     } catch (e) {
       return null;
@@ -340,8 +150,7 @@ export const useActivities = () => {
       const userId = await getCurrentUserId();
       if (!userId) throw new Error("Sesión no válida");
 
-      setUploading(true);
-      setUploadStatus("Buscando historial...");
+      setUploadState(true, "Buscando historial...");
       const accessToken = await getValidStravaToken();
 
       let page = 1;
@@ -351,7 +160,7 @@ export const useActivities = () => {
 
       // FASE 1: DESCARGA DE RESÚMENES (Paginación)
       while (hasMore) {
-        setUploadStatus(`Sincronizando pág. ${page}...`);
+        setUploadState(true, `Sincronizando pág. ${page}...`);
         const response = await fetch(
           `https://www.strava.com/api/v3/athlete/activities?per_page=200&page=${page}`,
           {
@@ -414,39 +223,22 @@ export const useActivities = () => {
         }
       }
 
-      // Refrescar estado local para tener los IDs de la base de datos de los entrenos nuevos
-      let currentList = activities;
       if (totalNew > 0) {
-        setUploadStatus("Procesando base de datos...");
-        const { data } = await supabase
-          .from("activities")
-          .select("*")
-          .eq("user_id", userId);
-        if (data) {
-          currentList = data
-            .map((a) => ({ ...a, dateObj: new Date(a.date) }))
-            .sort((a, b) => a.dateObj - b.dateObj);
-          setActivities(currentList);
-        }
+        setUploadState(true, "Refrescando base de datos...");
+        await queryClient.invalidateQueries(["activities"]);
       }
 
       // FASE 2: DEEP SYNC AUTOMÁTICO (Telemetría y GPS)
-      const activitiesToSync = currentList.filter(
+      const activitiesToSync = activitiesQuery.data?.filter(
         (a) => a.strava_id && !a.streams_data,
-      );
+      ) || [];
 
       if (activitiesToSync.length > 0) {
-        setIsDeepSyncing(true); // Encendemos el flag por si tienes la UI en algún sitio
+        setDeepSyncState(true, { current: 1, total: activitiesToSync.length });
         let count = 0;
         for (const act of activitiesToSync) {
-          // Actualizamos la barra superior para que el usuario vea que está bajando datos densos
-          setUploadStatus(
-            `Telemetría: ${count + 1} de ${activitiesToSync.length}...`,
-          );
-          setDeepSyncProgress({
-            current: count + 1,
-            total: activitiesToSync.length,
-          });
+          setUploadState(true, `Telemetría: ${count + 1} de ${activitiesToSync.length}...`);
+          setDeepSyncState(true, { current: count + 1, total: activitiesToSync.length });
 
           await fetchActivityStreams(act.id, act.strava_id);
           await new Promise((resolve) => setTimeout(resolve, 100)); // Turbo mode
@@ -455,18 +247,17 @@ export const useActivities = () => {
       }
 
       // FASE 3: CONFIRMACIÓN FINAL
-      setUploadStatus(
+      setUploadState(
+        true,
         totalNew > 0
           ? `¡Éxito! ${totalNew} actividades completas al 100%`
           : "Todo al día y 100% sincronizado",
       );
     } catch (err) {
-      alert(err.message);
+      toast.error(err.message);
     } finally {
-      setUploading(false);
-      setIsDeepSyncing(false);
-      setDeepSyncProgress(null);
-      setTimeout(() => setUploadStatus(null), 4000);
+      setDeepSyncState(false, null);
+      setTimeout(() => setUploadState(false, null), 4000);
     }
   };
 
@@ -477,7 +268,7 @@ export const useActivities = () => {
     );
 
     if (activitiesToSync.length === 0) {
-      alert(
+      toast.success(
         "¡Todo perfecto! Todas tus actividades de Strava ya tienen datos exactos segundo a segundo.",
       );
       return;
@@ -490,15 +281,12 @@ export const useActivities = () => {
     )
       return;
 
-    setIsDeepSyncing(true);
+    setDeepSyncState(true, { current: 1, total: activitiesToSync.length });
     let count = 0;
 
     try {
       for (const act of activitiesToSync) {
-        setDeepSyncProgress({
-          current: count + 1,
-          total: activitiesToSync.length,
-        });
+        setDeepSyncState(true, { current: count + 1, total: activitiesToSync.length });
 
         await fetchActivityStreams(act.id, act.strava_id);
 
@@ -506,15 +294,14 @@ export const useActivities = () => {
         await new Promise((resolve) => setTimeout(resolve, 100));
         count++;
       }
-      alert(
+      toast.success(
         "Sincronización profunda completada a velocidad turbo. ¡Tu motor matemático y el mapa interactivo ahora son 100% exactos!",
       );
     } catch (error) {
       console.error("Error en deep sync:", error);
-      alert("La sincronización profunda se detuvo por un error de conexión.");
+      toast.error("La sincronización profunda se detuvo por un error de conexión.");
     } finally {
-      setIsDeepSyncing(false);
-      setDeepSyncProgress(null);
+      setDeepSyncState(false, null);
     }
   };
 
@@ -523,44 +310,23 @@ export const useActivities = () => {
   };
 
   const handleClearDb = async () => {
-    if (
-      !window.confirm(
-        "¿Estás seguro de borrar TODAS tus actividades? Esto no se puede deshacer.",
-      )
-    )
-      return;
-    const userId = await getCurrentUserId();
-    if (!userId) return;
-
+    if (!window.confirm("¿Estás seguro de borrar TODAS tus actividades? Esto no se puede deshacer.")) return;
     try {
-      const { error } = await supabase
-        .from("activities")
-        .delete()
-        .eq("user_id", userId);
-      if (error) throw error;
-      setActivities([]);
-      alert("Tus actividades han sido borradas de la base de datos.");
+      await clearDbMutation.mutateAsync();
+      toast.success("Tus actividades han sido borradas de la base de datos.");
     } catch (error) {
       console.error("Error al borrar BD:", error);
-      alert("Hubo un error al borrar las actividades.");
+      toast.error("Hubo un error al borrar las actividades.");
     }
   };
 
   const deleteActivity = async (id) => {
-    const userId = await getCurrentUserId();
-    if (!userId) return;
-
     try {
-      const { error } = await supabase
-        .from("activities")
-        .delete()
-        .eq("id", id)
-        .eq("user_id", userId);
-      if (error) throw error;
-      setActivities((prev) => prev.filter((a) => a.id !== id));
+      await deleteActivityMutation.mutateAsync(id);
+      toast.success("Actividad borrada.");
     } catch (error) {
       console.error("Error borrando actividad:", error);
-      alert("No se pudo borrar la actividad.");
+      toast.error("No se pudo borrar la actividad.");
     }
   };
 
