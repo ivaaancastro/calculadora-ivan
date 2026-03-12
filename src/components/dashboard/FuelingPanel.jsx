@@ -62,8 +62,6 @@ export const calculateFueling = (workout) => {
 
     // Estimate energy expenditure (kJ)
     // For cycling: kJ ≈ watts × seconds / 1000; watts ≈ IF × FTP
-    // We use a heuristic: 1 TSS ≈ 1 kJ per minute at high IF
-    // Better: kJ ≈ TSS × duration_h × 3.6 (rough calibration)
     const estimatedKj = Math.round((tss || 50) * durationHours * 3.5);
     const estimatedKcal = estimatedKj; // 1 kJ mechanical ≈ 1 kcal total at ~25% efficiency
 
@@ -71,25 +69,60 @@ export const calculateFueling = (workout) => {
     const zoneMinutes = blocks.length > 0 ? getZoneMinutes(blocks) : { Z2: duration };
     const totalMinutes = Object.values(zoneMinutes).reduce((a, b) => a + b, 0) || duration;
 
-    // Weighted carb rate across zones
-    let weightedCarbRate = 0;
-    let weightedHydroRate = 0;
     let dominantZone = 'Z2';
     let maxZoneMin = 0;
+    let weightedHydroRate = 0;
 
     Object.entries(zoneMinutes).forEach(([zone, min]) => {
         const fraction = min / totalMinutes;
-        weightedCarbRate += fraction * (ZONE_CARB_RATE[zone] || 40);
         weightedHydroRate += fraction * (ZONE_HYDRATION_RATE[zone] || 500);
         if (min > maxZoneMin) { maxZoneMin = min; dominantZone = zone; }
     });
 
-    // Total during-workout carbs (only if > 45min)
-    const duringCarbsNeed = durationHours > 0.75 ? Math.round(weightedCarbRate * durationHours) : 0;
-    // Pre-workout carbs (2-4g/kg, use 40-80g range based on intensity)
-    const preCarbs = estimatedIF > 0.85 ? 60 : estimatedIF > 0.70 ? 45 : 30;
-    // Post-workout carbs: glycogen resynthesis 0.8-1.2g/kg in 2h window (use ~60g flat)
-    const postCarbs = estimatedIF > 0.80 ? 80 : 50;
+    // NEW CARB RATE LOGIC BASED ON DURATION AND INTENSITY (Asker Jeukendrup guidelines)
+    let recommendedCarbRate = 0;
+    
+    if (durationHours < 0.75) {
+        // < 45 min
+        recommendedCarbRate = 0;
+    } else if (durationHours < 1.25) {
+        // 45m - 1h15m
+        recommendedCarbRate = estimatedIF > 0.80 ? 30 : 0; 
+    } else if (durationHours < 2.5) {
+        // 1h15m - 2h30m
+        recommendedCarbRate = estimatedIF > 0.80 ? 60 : (estimatedIF > 0.70 ? 45 : 30);
+    } else {
+        // > 2h30m
+        recommendedCarbRate = estimatedIF > 0.80 ? 90 : (estimatedIF > 0.70 ? 75 : 60);
+    }
+
+    const duringCarbsNeed = Math.round(recommendedCarbRate * durationHours);
+    const isEasySession = durationHours <= 1.0 && estimatedIF < 0.75;
+
+    // Pre-workout carbs
+    let preCarbsVal = "";
+    let preCarbsSub = "";
+    if (isEasySession) {
+        preCarbsVal = "Habitual";
+        preCarbsSub = "Sin necesidades extra";
+    } else {
+        const preAmount = estimatedIF > 0.85 ? 60 : (estimatedIF > 0.70 ? 45 : 30);
+        preCarbsVal = `${preAmount}g`;
+        preCarbsSub = "Pasta, arroz, avena, plátano";
+    }
+
+    // Post-workout carbs
+    let postCarbsVal = "";
+    let postCarbsSub = "";
+    if (isEasySession) {
+        postCarbsVal = "Habitual";
+        postCarbsSub = "Próxima comida principal";
+    } else {
+        const postAmount = estimatedIF > 0.80 || durationHours > 2.0 ? 80 : 50;
+        postCarbsVal = `${postAmount}g + Prot`;
+        postCarbsSub = "Batido recup., yogur, comida sólida";
+    }
+
     // Total hydration
     const duringHydration = Math.round(weightedHydroRate * durationHours);
     const postHydration = Math.round(duringHydration * 0.5);
@@ -104,15 +137,18 @@ export const calculateFueling = (workout) => {
         estimatedIF: estimatedIF.toFixed(2),
         zoneMinutes,
         dominantZone,
-        preCarbs,
+        preCarbsVal,
+        preCarbsSub,
         duringCarbs: duringCarbsNeed,
-        postCarbs,
+        postCarbsVal,
+        postCarbsSub,
         duringHydration,
         postHydration,
         sodiumMg,
         durationHours,
-        needsDuringFueling: durationHours > 0.75,
-        weightedCarbRate: Math.round(weightedCarbRate),
+        needsDuringFueling: recommendedCarbRate > 0,
+        recommendedCarbRate,
+        isEasySession
     };
 };
 
@@ -122,36 +158,49 @@ export const calculateFueling = (workout) => {
 
 const WHY_PRE = ({ fuel }) => (
     <div className="text-[11px] text-slate-500 dark:text-zinc-400 space-y-1.5 leading-relaxed">
-        <p>Tus músculos almacenan glucógeno (azúcar) como combustible principal para el ejercicio. Antes de entrenar, necesitas asegurarte de que esos depósitos están llenos.</p>
-        <p>Para una sesión a {fuel.dominantZone} ({ZONE_DESC[fuel.dominantZone]}), el cuerpo va a necesitar
-            <strong className="text-slate-700 dark:text-zinc-200"> más glucosa de la habitual</strong>. Los {fuel.preCarbs}g recomendados te dan energía disponible sin crear malestar digestivo.</p>
-        <p className="italic text-slate-400 dark:text-zinc-500">Referencia: Burke et al. (2011), IOC Consensus on Nutrition for Athletes.</p>
+        {fuel.isEasySession ? (
+            <p>Al ser una sesión suave y corta, tus reservas basales de glucógeno son suficientes. Haz tu ingesta habitual sin necesidad de añadir carbohidratos extra antes de entrenar.</p>
+        ) : (
+            <>
+                <p>Tus músculos almacenan glucógeno como combustible principal. Antes de entrenar intenso, necesitas asegurar que esos depósitos están llenos.</p>
+                <p>Para una sesión a {fuel.dominantZone} con un IF de {fuel.estimatedIF}, el cuerpo necesitará <strong className="text-slate-700 dark:text-zinc-200">más glucosa de la habitual</strong>. La ingesta de <strong>{fuel.preCarbsVal}</strong> recomendada (1-2h antes) te da energía sin crear pesadez.</p>
+            </>
+        )}
     </div>
 );
 
 const WHY_DURING = ({ fuel }) => (
     <div className="text-[11px] text-slate-500 dark:text-zinc-400 space-y-1.5 leading-relaxed">
-        <p>A partir de los 45-60 minutos, tus reservas de glucógeno empiezan a agotarse. Ingerir carbohidratos durante el ejercicio retrasa la fatiga y mantiene el rendimiento.</p>
-        <p>La zona {fuel.dominantZone} consume aproximadamente <strong className="text-slate-700 dark:text-zinc-200">{fuel.weightedCarbRate}g de carbos por hora</strong>. El intestino puede absorber hasta 60g/hr de glucosa sola, o hasta 90g/hr si combinas glucosa + fructosa (transportadores duales, Jeukendrup 2014).</p>
-        {fuel.weightedCarbRate > 60 &&
-            <p><strong className="text-slate-700 dark:text-zinc-200">Tip:</strong> Para absorber {fuel.weightedCarbRate}g/hr sin malestar, usa productos con mezcla glucosa:fructosa 2:1 (geles, bebidas isotónicas de doble transportador).</p>
-        }
+        <p>Ingerir carbohidratos durante el ejercicio retrasa la fatiga y mantiene el rendimiento.</p>
+        <p>Para esta combinación de duración ({Math.round(fuel.durationHours * 60)} min) e intensidad (IF {fuel.estimatedIF}), se estiman <strong className="text-slate-700 dark:text-zinc-200">{fuel.recommendedCarbRate}g de carbos por hora</strong>.</p>
+        <p>El intestino puede absorber hasta 60g/hr de glucosa sola, o hasta 90g/hr combinando fuentes (Jeukendrup, 2014).</p>
+        {fuel.recommendedCarbRate >= 60 && (
+            <div className="mt-2 p-2 bg-amber-50 dark:bg-amber-900/20 text-amber-800 dark:text-amber-300 rounded border border-amber-200 dark:border-amber-800/30">
+                <strong className="font-bold">⚠️ Alerta Digestiva:</strong> Para tolerar {fuel.recommendedCarbRate}g/h, usa mezclas de Doble Transportador (Glucosa + Fructosa, ratio 2:1 o 1:0.8).
+            </div>
+        )}
     </div>
 );
 
 const WHY_POST = ({ fuel }) => (
     <div className="text-[11px] text-slate-500 dark:text-zinc-400 space-y-1.5 leading-relaxed">
-        <p>Tras el ejercicio se abre una <strong className="text-slate-700 dark:text-zinc-200">ventana de recuperación de 30-60 minutos</strong> en la que el músculo resintetiza glucógeno hasta 2-3 veces más rápido que en reposo.</p>
-        <p>La combinación recomendada es <strong className="text-slate-700 dark:text-zinc-200">1-1.2g carbos/kg + 20-25g proteína</strong> en esa ventana. Aquí se estiman {fuel.postCarbs}g de carbos y se recomienda añadir una fuente de proteína (batido, yogur, huevo).</p>
+        {fuel.isEasySession ? (
+            <p>Sesión suave sin apenas depleción de glucógeno. No necesitas un protocolo especial de recuperación; simplemente come de forma equilibrada en tu próxima ingesta.</p>
+        ) : (
+            <>
+                <p>Tras el ejercicio se abre una <strong className="text-slate-700 dark:text-zinc-200">ventana de 30-60 minutos</strong> donde el músculo resintetiza glucógeno hasta 2-3 veces más rápido.</p>
+                <p>Se recomienda la ingesta de <strong>{fuel.postCarbsVal}</strong> para forzar la resíntesis de glucógeno y la reparación muscular temprana.</p>
+            </>
+        )}
     </div>
 );
 
 const WHY_HYDRA = ({ fuel }) => (
     <div className="text-[11px] text-slate-500 dark:text-zinc-400 space-y-1.5 leading-relaxed">
-        <p>La deshidratación de solo el 2% del peso corporal puede reducir el rendimiento aeróbico hasta un 10% (Cheuvront & Kenefick, 2014).</p>
-        <p>Se estiman {fuel.duringHydration}ml durante el entreno basado en una tasa de sudoración media de {Math.round(fuel.duringHydration / fuel.durationHours)}ml/hr para la intensidad de esta sesión.</p>
+        <p>La deshidratación del 2% del peso puede reducir el rendimiento aeróbico hasta un 10%.</p>
+        <p>Se estiman {fuel.duringHydration}ml en base a tu intensidad ({Math.round(fuel.duringHydration / fuel.durationHours)}ml/hr).</p>
         {fuel.sodiumMg > 0 &&
-            <p><strong className="text-slate-700 dark:text-zinc-200">Electrolitos:</strong> Añadir {fuel.sodiumMg}mg de sodio al fluido repone las pérdidas de sal por sudoración y mejora la retención hídrica.</p>
+            <p><strong className="text-slate-700 dark:text-zinc-200">Electrolitos:</strong> Añadir {fuel.sodiumMg}mg de sodio repone pérdidas por sudoración y mejora la retención hídrica.</p>
         }
     </div>
 );
@@ -184,58 +233,70 @@ export const FuelingPanel = ({ workout }) => {
     const hasBlocks = workout.descriptionObj?.blocks?.length > 0;
 
     return (
-        <div className="space-y-3">
-            {/* Header */}
-            <div className="flex items-center justify-between">
-                <h4 className="text-[10px] font-bold text-slate-400 dark:text-zinc-500 uppercase tracking-wider flex items-center gap-1.5">
-                    <Zap size={11} /> Planificación de Fueling
-                </h4>
-                {!hasBlocks && (
-                    <span className="text-[9px] text-amber-500 font-bold uppercase">Estimación sin estructura</span>
-                )}
-            </div>
-
-            {/* Energy cost */}
-            <div className="bg-slate-50 dark:bg-zinc-900 rounded-lg px-3 py-2.5 border border-slate-100 dark:border-zinc-800 flex items-center justify-between">
-                <div>
-                    <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400 dark:text-zinc-500">Gasto estimado</p>
-                    <p className="text-lg font-black font-mono text-slate-800 dark:text-zinc-100">{fuel.estimatedKj} kcal</p>
+        <div className="space-y-6">
+            {/* Header & Energy Cost Inline */}
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div className="flex items-center gap-3">
+                    <h4 className="text-xs font-bold text-slate-500 dark:text-zinc-400 uppercase tracking-wider flex items-center gap-1.5">
+                        <Zap size={14} /> Estrategia Nutricional
+                    </h4>
+                    {!hasBlocks && (
+                        <span className="px-2 py-0.5 rounded bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-400 text-[10px] font-bold uppercase tracking-wider">
+                            Aprox. sin estructura
+                        </span>
+                    )}
                 </div>
-                <div className="text-right">
-                    <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400 dark:text-zinc-500">IF estimado</p>
-                    <p className="text-lg font-black font-mono text-slate-800 dark:text-zinc-100">{fuel.estimatedIF}</p>
-                </div>
-            </div>
 
-            {/* Carb rows */}
-            <div>
-                <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400 dark:text-zinc-500 mb-2 flex items-center gap-1"><Zap size={10} />Carbohidratos</p>
-                <div className="space-y-1.5">
-                    <Row label="Pre-entreno (1-2h antes)" value={`${fuel.preCarbs}g`} sub="Pasta, arroz, avena, plátano" why={WHY_PRE} fuel={fuel} />
-                    {fuel.needsDuringFueling
-                        ? <Row label="Durante (si >45min)" value={`${fuel.duringCarbs}g total · ${fuel.weightedCarbRate}g/hr`} sub="Geles, bebida isotónica, dátiles" why={WHY_DURING} fuel={fuel} />
-                        : <div className="px-3 py-2.5 rounded-lg border border-slate-100 dark:border-zinc-800 text-[11px] text-slate-400 dark:text-zinc-500 italic">Sesión corta (&lt;45min) — no necesitas carbos durante</div>
-                    }
-                    <Row label="Post-entreno (ventana 30min)" value={`${fuel.postCarbs}g + proteína`} sub="Batido, yogur + fruta, arroz con pollo" why={WHY_POST} fuel={fuel} />
-                </div>
-            </div>
-
-            {/* Hydration rows */}
-            <div>
-                <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400 dark:text-zinc-500 mb-2 flex items-center gap-1"><Droplets size={10} />Hidratación</p>
-                <div className="space-y-1.5">
-                    <Row label="Durante el entreno" value={`${fuel.duringHydration}ml`} sub={`+ ${fuel.sodiumMg}mg sodio${fuel.needsElectrolytes ? ' (electrolitos recomendados)' : ''}`} why={WHY_HYDRA} fuel={fuel} />
-                    <div className="px-3 py-2.5 rounded-lg border border-slate-100 dark:border-zinc-800 flex justify-between">
-                        <div>
-                            <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400 dark:text-zinc-500">Post-entreno</p>
-                            <p className="text-sm font-black font-mono text-slate-800 dark:text-zinc-100">{fuel.postHydration}ml+</p>
-                        </div>
-                        <p className="text-[10px] text-slate-400 dark:text-zinc-500 max-w-[140px] text-right leading-tight self-center">Recupera 1.5ml por ml de sudor perdido. Orina amarillo pálido = bien hidratado.</p>
+                <div className="flex gap-3">
+                    <div className="bg-white dark:bg-zinc-900 rounded-md px-3 py-1.5 border border-slate-200 dark:border-zinc-800 flex items-center gap-2 shadow-sm">
+                        <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400 dark:text-zinc-500">Gasto Est.</span>
+                        <span className="text-sm font-black font-mono text-slate-800 dark:text-zinc-100">{fuel.estimatedKj} kcal</span>
+                    </div>
+                    <div className="bg-white dark:bg-zinc-900 rounded-md px-3 py-1.5 border border-slate-200 dark:border-zinc-800 flex items-center gap-2 shadow-sm">
+                        <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400 dark:text-zinc-500">IF Est.</span>
+                        <span className="text-sm font-black font-mono text-slate-800 dark:text-zinc-100">{fuel.estimatedIF}</span>
                     </div>
                 </div>
             </div>
 
-            <p className="text-[9px] text-slate-300 dark:text-zinc-600 text-right">Estimaciones sin peso corporal. Ajusta por calor, altitud y sudoración individual.</p>
+            {/* Grid for Carbs & Hydration */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                {/* Carb rows */}
+                <div>
+                    <p className="text-xs font-bold uppercase tracking-widest text-slate-700 dark:text-zinc-300 mb-3 flex items-center gap-1.5 border-b border-slate-200 dark:border-zinc-800 pb-2">
+                        <Zap size={14} className="text-yellow-500" />
+                        Carbohidratos
+                    </p>
+                    <div className="space-y-2">
+                        <Row label="Pre-entreno (1-2h antes)" value={fuel.preCarbsVal} sub={fuel.preCarbsSub} why={WHY_PRE} fuel={fuel} />
+                        {fuel.needsDuringFueling
+                            ? <Row label="Durante (si >45min)" value={`${fuel.duringCarbs}g total`} sub={`${fuel.recommendedCarbRate}g/hr · Geles, isotónico`} why={WHY_DURING} fuel={fuel} />
+                            : <div className="px-4 py-3 rounded-lg border border-slate-200 dark:border-zinc-800 text-xs text-slate-500 dark:text-zinc-400 bg-slate-50/50 dark:bg-zinc-900/50">Sesión corta o baja intensidad — no requiere ingesta durante.</div>
+                        }
+                        <Row label="Post-entreno (ventana 30m)" value={fuel.postCarbsVal} sub={fuel.postCarbsSub} why={WHY_POST} fuel={fuel} />
+                    </div>
+                </div>
+
+                {/* Hydration rows */}
+                <div>
+                    <p className="text-xs font-bold uppercase tracking-widest text-slate-700 dark:text-zinc-300 mb-3 flex items-center gap-1.5 border-b border-slate-200 dark:border-zinc-800 pb-2">
+                        <Droplets size={14} className="text-blue-500" />
+                        Hidratación
+                    </p>
+                    <div className="space-y-2">
+                        <Row label="Durante el entreno" value={`${fuel.duringHydration}ml`} sub={`+ ${fuel.sodiumMg}mg sodio${fuel.needsElectrolytes ? ' (vital)' : ''}`} why={WHY_HYDRA} fuel={fuel} />
+                        <div className="px-4 py-3 rounded-lg border border-slate-200 dark:border-zinc-800 flex justify-between bg-white dark:bg-zinc-900">
+                            <div>
+                                <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400 dark:text-zinc-500">Post-entreno</p>
+                                <p className="text-sm font-black font-mono text-slate-800 dark:text-zinc-100">{fuel.postHydration}ml+</p>
+                            </div>
+                            <p className="text-[10px] text-slate-500 dark:text-zinc-400 max-w-[150px] text-right leading-relaxed self-center">Recupera 1.5ml por ml de sudor perdido. Orina clara = hidratado.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <p className="text-[10px] text-slate-400 dark:text-zinc-500 text-center italic pt-4">Estimaciones genéricas. Ajusta por nivel de sudoración, temperatura y peso corporal.</p>
         </div>
     );
 };
