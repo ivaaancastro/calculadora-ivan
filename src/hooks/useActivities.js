@@ -158,11 +158,23 @@ export const useActivities = () => {
       let totalNew = 0;
       const existingIds = new Set(activities.map((a) => String(a.strava_id)));
 
+      // Optimizacion: Solo solicitar entrenos ocurridos despues del ultimo registrado
+      let afterQueryParam = "";
+      const stravaActs = activities.filter(a => a.strava_id);
+      if (stravaActs.length > 0) {
+        const latestAct = stravaActs.reduce((latest, current) => {
+          return new Date(current.date) > new Date(latest.date) ? current : latest;
+        });
+        const epochSeconds = Math.floor(new Date(latestAct.date).getTime() / 1000);
+        // Se le resta 1 día (86400 segundos) para garantizar que no se pierden actividades en ese margen de tiempo
+        afterQueryParam = `&after=${epochSeconds - 86400}`;
+      }
+
       // FASE 1: DESCARGA DE RESÚMENES (Paginación)
       while (hasMore) {
         setUploadState(true, `Sincronizando pág. ${page}...`);
         const response = await fetch(
-          `https://www.strava.com/api/v3/athlete/activities?per_page=200&page=${page}`,
+          `https://www.strava.com/api/v3/athlete/activities?per_page=200&page=${page}${afterQueryParam}`,
           {
             headers: { Authorization: `Bearer ${accessToken}` },
           },
@@ -218,6 +230,29 @@ export const useActivities = () => {
           if (insertError) throw new Error(`Error BD: ${insertError.message}`);
           totalNew += newRows.length;
           page++;
+
+          // --- AUTO-COMPLETAR ENTRENOS PLANIFICADOS ---
+          // Buscamos si hay entrenos planificados para los mismos días y deportes de las nuevas actividades
+          const planned = workoutsQuery.data || [];
+          if (planned.length > 0) {
+            for (const newAct of newRows) {
+              const actDate = new Date(newAct.date).toISOString().split('T')[0];
+              const actCategory = getSportCategory(newAct.type);
+              
+              const match = planned.find(p => {
+                const planDate = new Date(p.date).toISOString().split('T')[0];
+                const planCategory = getSportCategory(p.type);
+                return planDate === actDate && planCategory === actCategory;
+              });
+
+              if (match) {
+                 await deletePlannedWorkout(match.id);
+                 console.log(`Auto-completado (borrado) plan planificado ${match.id} tras sincronizar actividad real de ${actCategory} el ${actDate}`);
+              }
+            }
+          }
+          // ----------------------------------------------
+
         } else {
           hasMore = false;
         }
