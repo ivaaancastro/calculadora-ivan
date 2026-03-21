@@ -104,3 +104,14 @@ body {
     padding-right: env(safe-area-inset-right);
   }
 }
+
+/* Ocultar flechas de inputs numéricos */
+.no-spinner::-webkit-outer-spin-button,
+.no-spinner::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.no-spinner {
+  --moz-appearance: textfield;
+}

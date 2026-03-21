@@ -264,9 +264,16 @@ export const useActivities = () => {
       }
 
       // FASE 2: DEEP SYNC AUTOMÁTICO (Telemetría y GPS)
-      const activitiesToSync = activitiesQuery.data?.filter(
-        (a) => a.strava_id && !a.streams_data,
-      ) || [];
+      const { data: rawActivitiesWithoutStreams, error: streamsError } = await supabase
+        .from("activities")
+        .select("id, strava_id")
+        .eq("user_id", userId)
+        .not("strava_id", "is", null)
+        .is("streams_data", null);
+        
+      if (streamsError) throw new Error("Error consultando pendientes de telemetría");
+      
+      const activitiesToSync = rawActivitiesWithoutStreams || [];
 
       if (activitiesToSync.length > 0) {
         setDeepSyncState(true, { current: 1, total: activitiesToSync.length });
@@ -298,9 +305,25 @@ export const useActivities = () => {
 
   // --- SINCRONIZACIÓN PROFUNDA (MODO PRODUCCIÓN - MÁXIMA VELOCIDAD) ---
   const handleDeepSync = async () => {
-    const activitiesToSync = activities.filter(
-      (a) => a.strava_id && !a.streams_data,
-    );
+    const userId = await getCurrentUserId();
+    if (!userId) {
+      toast.error("Sesión no válida");
+      return;
+    }
+    
+    const { data: rawActivitiesWithoutStreams, error: streamsError } = await supabase
+      .from("activities")
+      .select("id, strava_id")
+      .eq("user_id", userId)
+      .not("strava_id", "is", null)
+      .is("streams_data", null);
+
+    if (streamsError) {
+      toast.error("Error consultando pendientes de telemetría");
+      return;
+    }
+
+    const activitiesToSync = rawActivitiesWithoutStreams || [];
 
     if (activitiesToSync.length === 0) {
       toast.success(
