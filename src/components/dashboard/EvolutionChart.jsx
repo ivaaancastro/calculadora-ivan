@@ -1,5 +1,5 @@
 import React from 'react';
-import { ComposedChart, Area, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend, ReferenceLine } from 'recharts';
+import { ComposedChart, Area, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend, ReferenceLine, Bar } from 'recharts';
 import { Activity } from 'lucide-react';
 
 export const EvolutionChart = ({ data }) => {
@@ -83,9 +83,10 @@ export const EvolutionChart = ({ data }) => {
                 return baseStr;
               }}
               formatter={(value, name) => {
-                if (name === 'ctl') return [value, 'Fitness (CTL)'];
-                if (name === 'atl') return [value, 'Fatiga (ATL)'];
-                if (name === 'tcb') return [value, 'Forma (TSB)'];
+                if (name === 'ctl') return [value.toFixed(1), 'Fitness (CTL)'];
+                if (name === 'atl') return [value.toFixed(1), 'Fatiga (ATL)'];
+                if (name === 'tcb') return [value.toFixed(1), 'Forma (TSB)'];
+                if (name === 'tss') return [value, 'Carga (TSS)'];
                 return [value, name];
               }}
             />
@@ -102,7 +103,10 @@ export const EvolutionChart = ({ data }) => {
               label={{ position: 'insideTopLeft', value: 'HOY', fill: '#10b981', fontSize: 9, fontWeight: 'bold' }}
             />
 
-            {/* LAS 3 MÉTRICAS */}
+            {/* LAS MÉTRICAS */}
+            <Bar yAxisId="left" dataKey="tss" name="tss" fill="#71717a" opacity={0.2} radius={[2, 2, 0, 0]} barSize={8} isAnimationActive={false} />
+            <ReferenceLine yAxisId="left" y={0} stroke="#3f3f46" strokeWidth={1} />
+            
             <Area yAxisId="right" type="monotone" dataKey="tcb" name="tcb" stroke="#f59e0b" strokeWidth={2} fillOpacity={1} fill="url(#colorTcb)" activeDot={{ r: 5, stroke: '#fff', strokeWidth: 2, fill: '#f59e0b' }} dot={false} isAnimationActive={false} />
             <Area yAxisId="left" type="monotone" dataKey="ctl" name="ctl" stroke="#2563eb" strokeWidth={2} fillOpacity={1} fill="url(#colorCtl)" activeDot={{ r: 5, stroke: '#fff', strokeWidth: 2, fill: '#2563eb' }} dot={false} isAnimationActive={false} />
             <Line yAxisId="left" type="monotone" dataKey="atl" name="atl" stroke="#a855f7" strokeWidth={2} dot={false} activeDot={{ r: 5, stroke: '#fff', strokeWidth: 2, fill: '#a855f7' }} isAnimationActive={false} />
