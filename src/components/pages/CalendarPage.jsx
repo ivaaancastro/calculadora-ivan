@@ -2,7 +2,7 @@ import React, { useState, useMemo, useEffect } from 'react';
 import {
     ChevronLeft, ChevronRight, Calendar as CalIcon,
     Clock, Zap, MapPin, Footprints, Bike, Dumbbell, Activity, Target,
-    Plus, Trash2, X, Sparkles, RotateCcw
+    Plus, Trash2, X, Sparkles, RotateCcw, User, Waves
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { BlockGeneratorModal } from '../dashboard/BlockGeneratorModal';
@@ -34,10 +34,10 @@ const DurationInput = ({ value, onChange, className = '' }) => {
         const clampS = Math.max(0, Math.min(59, Number(newS) || 0));
         onChange((clampH * 3600 + clampM * 60 + clampS) / 60);
     };
-    const inCls = 'w-10 bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 text-sm font-mono py-1 text-center outline-none focus:border-slate-400 dark:focus:border-zinc-500 transition-colors';
+    const inCls = 'w-10 shrink-0 bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 text-sm font-mono py-1 text-center outline-none focus:border-slate-400 dark:focus:border-zinc-500 transition-colors';
     const sep = <span className="text-slate-300 dark:text-zinc-600 text-[11px] font-bold select-none mx-0.5">:</span>;
     return (
-        <div className={`inline-flex items-center rounded-md overflow-hidden bg-white dark:bg-zinc-900 shadow-sm border border-slate-200 dark:border-zinc-800 p-0.5 ${className}`} title="HH:MM:SS">
+        <div className={`inline-flex shrink-0 items-center rounded-md overflow-hidden bg-white dark:bg-zinc-900 shadow-sm border border-slate-200 dark:border-zinc-800 p-0.5 ${className}`} title="HH:MM:SS">
             <input type="number" value={h} min={0} max={23}
                 onChange={e => commit(e.target.value, m, s)}
                 className={`${inCls} rounded-sm`} placeholder="00" />
@@ -1802,14 +1802,14 @@ export const CalendarPage = ({ activities, plannedWorkouts = [], addPlannedWorko
                                                         <div className="p-3 bg-white dark:bg-zinc-950">
                                                             <div className="space-y-3">
                                                                 {block.steps.map((step, idx) => (
-                                                                    <div key={step.id} className="flex flex-wrap items-center gap-2 relative">
+                                                                     <div key={step.id} className="flex flex-wrap items-center gap-2 relative">
                                                                         <select value={step.type} onChange={e => updateStep(block.id, step.id, 'type', e.target.value)}
-                                                                            className={`w-24 bg-transparent ${step.type === 'active' ? 'text-slate-800 dark:text-zinc-200 font-semibold' : 'text-slate-500 dark:text-zinc-400'} border-b border-dashed border-slate-300 dark:border-zinc-700 pb-0.5 text-xs outline-none cursor-pointer focus:border-slate-500`}>
+                                                                            className={`w-24 shrink-0 bg-transparent ${step.type === 'active' ? 'text-slate-800 dark:text-zinc-200 font-semibold' : 'text-slate-500 dark:text-zinc-400'} border-b border-dashed border-slate-300 dark:border-zinc-700 pb-0.5 text-xs outline-none cursor-pointer focus:border-slate-500`}>
                                                                             <option value="active">{isStr ? 'Trabajar' : 'Activo'}</option>
                                                                             <option value="recovery">Pausa</option>
                                                                         </select>
 
-                                                                        <div className="flex bg-slate-100 dark:bg-zinc-800 rounded-md p-0.5 border border-slate-200 dark:border-zinc-700/50 shadow-inner">
+                                                                        <div className="flex shrink-0 bg-slate-100 dark:bg-zinc-800 rounded-md p-0.5 border border-slate-200 dark:border-zinc-700/50 shadow-inner">
                                                                              {!isStr && (
                                                                                  <button onClick={() => updateStep(block.id, step.id, 'unit', 'dist')}
                                                                                     className={`px-2 py-0.5 text-[10px] font-bold rounded-sm transition-all duration-200 ${step.unit === 'dist' ? 'bg-white dark:bg-zinc-700 text-slate-800 dark:text-zinc-100 shadow-sm ring-1 ring-slate-900/5 dark:ring-white/10' : 'text-slate-500 hover:text-slate-700 dark:hover:text-zinc-300'}`}
@@ -1822,13 +1822,13 @@ export const CalendarPage = ({ activities, plannedWorkouts = [], addPlannedWorko
 
                                                                         {step.unit === 'dist' && !isStr ? (
                                                                             <input type="number" value={step.duration} min={0} onChange={e => updateStep(block.id, step.id, 'duration', e.target.value)}
-                                                                                className="w-14 bg-slate-50 dark:bg-zinc-900 border border-slate-200 dark:border-zinc-700 text-sm font-mono px-2 py-1 rounded outline-none focus:border-indigo-400 focus:ring-1 focus:ring-indigo-400 no-spinner text-center" />
+                                                                                className="w-14 shrink-0 bg-slate-50 dark:bg-zinc-900 border border-slate-200 dark:border-zinc-700 text-sm font-mono px-2 py-1 rounded outline-none focus:border-indigo-400 focus:ring-1 focus:ring-indigo-400 no-spinner text-center" />
                                                                         ) : (
                                                                             <DurationInput value={step.duration} onChange={v => updateStep(block.id, step.id, 'duration', v)} />
                                                                         )}
 
                                                                         {/* Target & Zone Group */}
-                                                                        <div className="flex items-center bg-slate-50 dark:bg-zinc-900 border border-slate-200 dark:border-zinc-700 rounded p-0.5">
+                                                                        <div className="flex shrink-0 items-center bg-slate-50 dark:bg-zinc-900 border border-slate-200 dark:border-zinc-700 rounded p-0.5">
                                                                             <select value={step.zone} onChange={e => updateStep(block.id, step.id, 'zone', e.target.value)}
                                                                                 className="bg-transparent text-xs font-medium text-slate-700 dark:text-zinc-300 px-1.5 py-1 outline-none cursor-pointer max-w-[100px]">
                                                                                 {zones.map(z => <option key={z.v} value={z.v}>{z.l}</option>)}
@@ -1844,12 +1844,19 @@ export const CalendarPage = ({ activities, plannedWorkouts = [], addPlannedWorko
                                                                                         <option value="pace">⏱ /km</option>
                                                                                     </select>
                                                                                     {(step.targetType === 'power' || step.targetType === 'pace') && (
-                                                                                        <input type={step.targetType === 'power' ? "number" : "text"} 
-                                                                                            placeholder={step.targetType === 'power' ? "200" : "4:30"} 
-                                                                                            value={step.targetValue || ''} 
-                                                                                            onChange={e => updateStep(block.id, step.id, 'targetValue', e.target.value)}
-                                                                                            className="w-12 bg-white dark:bg-zinc-950 border border-slate-200 dark:border-zinc-700 rounded text-xs px-1.5 py-0.5 outline-none no-spinner text-center ml-1 focus:border-indigo-400 focus:ring-1 focus:ring-indigo-400" 
-                                                                                        />
+                                                                                        <div className="flex items-center">
+                                                                                            <input type={step.targetType === 'power' ? "number" : "text"} 
+                                                                                                placeholder={step.targetType === 'power' ? "200" : "4:30"} 
+                                                                                                value={step.targetValue || ''} 
+                                                                                                onChange={e => updateStep(block.id, step.id, 'targetValue', e.target.value)}
+                                                                                                className="w-12 shrink-0 bg-white dark:bg-zinc-950 border border-slate-200 dark:border-zinc-700 rounded text-xs px-1.5 py-0.5 outline-none no-spinner text-center ml-1 focus:border-indigo-400 focus:ring-1 focus:ring-indigo-400" 
+                                                                                            />
+                                                                                            {step.targetType === 'power' && step.targetValue && settings?.bike?.ftp > 0 && (
+                                                                                                <span className="text-[10px] text-slate-400 ml-1.5 font-mono select-none hidden sm:inline-block">
+                                                                                                    {Math.round((Number(step.targetValue) / settings.bike.ftp) * 100)}%
+                                                                                                </span>
+                                                                                            )}
+                                                                                        </div>
                                                                                     )}
                                                                                 </>
                                                                             )}
@@ -1857,9 +1864,9 @@ export const CalendarPage = ({ activities, plannedWorkouts = [], addPlannedWorko
 
                                                                         <input type="text" value={step.details || ''} onChange={e => updateStep(block.id, step.id, 'details', e.target.value)}
                                                                             placeholder="Nota (opc)"
-                                                                            className="flex-1 min-w-[100px] bg-transparent border-b border-dashed border-slate-300 dark:border-zinc-700 py-1 text-xs outline-none focus:border-slate-500 dark:focus:border-zinc-500 placeholder:text-slate-400" />
+                                                                            className="flex-1 min-w-[80px] bg-transparent border-b border-dashed border-slate-300 dark:border-zinc-700 py-1 text-xs outline-none focus:border-slate-500 dark:focus:border-zinc-500 placeholder:text-slate-400" />
                                                                         
-                                                                        <button onClick={() => removeStep(block.id, step.id)} className="text-slate-300 hover:text-red-500 ml-1"><X size={14}/></button>
+                                                                        <button onClick={() => removeStep(block.id, step.id)} className="text-slate-300 hover:text-red-500 ml-1 shrink-0"><X size={14}/></button>
                                                                     </div>
                                                                 ))}
                                                                 
@@ -1887,11 +1894,11 @@ export const CalendarPage = ({ activities, plannedWorkouts = [], addPlannedWorko
                                                     onDragEnd={handleDragBlockEnd}
                                                     className={`py-2 px-3 flex flex-wrap items-center gap-3 border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 rounded cursor-move transition-opacity ${draggedBlockIdx === idx ? 'opacity-50' : ''}`}>
 
-                                                    <div className="flex-1 min-w-[300px] flex items-center gap-2">
-                                                        <div className={`w-1.5 h-6 rounded-sm`} style={{ background: zoneColors[block.zone] || '#cbd5e1' }}></div>
-                                                        <span className={`text-xs font-semibold w-20 py-1 ${bLabelStyle}`}>{bLabel}</span>
+                                                    <div className="flex-1 min-w-0 flex flex-wrap items-center gap-2">
+                                                        <div className={`w-1.5 h-6 rounded-sm shrink-0`} style={{ background: zoneColors[block.zone] || '#cbd5e1' }}></div>
+                                                        <span className={`text-xs font-semibold w-16 md:w-20 py-1 shrink-0 ${bLabelStyle}`}>{bLabel}</span>
                                                         
-                                                        <div className="flex bg-slate-100 dark:bg-zinc-800 rounded-md p-0.5 border border-slate-200 dark:border-zinc-700/50 shadow-inner">
+                                                        <div className="flex shrink-0 bg-slate-100 dark:bg-zinc-800 rounded-md p-0.5 border border-slate-200 dark:border-zinc-700/50 shadow-inner">
                                                             {!isStr && (
                                                                 <button onClick={() => updateBlock(block.id, 'unit', 'dist')}
                                                                     className={`px-2 py-0.5 text-[10px] font-bold rounded-sm transition-all duration-200 ${block.unit === 'dist' ? 'bg-white dark:bg-zinc-700 text-slate-800 dark:text-zinc-100 shadow-sm ring-1 ring-slate-900/5 dark:ring-white/10' : 'text-slate-500 hover:text-slate-700 dark:hover:text-zinc-300'}`}
@@ -1904,13 +1911,13 @@ export const CalendarPage = ({ activities, plannedWorkouts = [], addPlannedWorko
 
                                                         {block.unit === 'dist' && !isStr ? (
                                                             <input type="number" placeholder="km" value={block.duration} min={0} onChange={e => updateBlock(block.id, 'duration', e.target.value)}
-                                                                className="w-14 bg-slate-50 dark:bg-zinc-900 border border-slate-200 dark:border-zinc-700 text-sm font-mono px-2 py-1 rounded outline-none focus:border-indigo-400 focus:ring-1 focus:ring-indigo-400 no-spinner text-center" />
+                                                                className="w-14 shrink-0 bg-slate-50 dark:bg-zinc-900 border border-slate-200 dark:border-zinc-700 text-sm font-mono px-2 py-1 rounded outline-none focus:border-indigo-400 focus:ring-1 focus:ring-indigo-400 no-spinner text-center" />
                                                         ) : (
                                                             <DurationInput value={block.duration} onChange={v => updateBlock(block.id, 'duration', v)} />
                                                         )}
 
                                                         {/* Target & Zone Group */}
-                                                        <div className="flex items-center bg-slate-50 dark:bg-zinc-900 border border-slate-200 dark:border-zinc-700 rounded p-0.5 max-w-fit">
+                                                        <div className="flex shrink-0 items-center bg-slate-50 dark:bg-zinc-900 border border-slate-200 dark:border-zinc-700 rounded p-0.5 max-w-fit">
                                                             <select value={block.zone} onChange={e => updateBlock(block.id, 'zone', e.target.value)}
                                                                 className="bg-transparent text-xs font-medium text-slate-700 dark:text-zinc-300 px-1.5 py-1 outline-none cursor-pointer max-w-[100px]">
                                                                 {zones.map(z => <option key={z.v} value={z.v}>{z.l}</option>)}
@@ -1926,23 +1933,30 @@ export const CalendarPage = ({ activities, plannedWorkouts = [], addPlannedWorko
                                                                         <option value="pace">⏱ /km</option>
                                                                     </select>
                                                                     {(block.targetType === 'power' || block.targetType === 'pace') && (
-                                                                        <input type={block.targetType === 'power' ? "number" : "text"} 
-                                                                            placeholder={block.targetType === 'power' ? "200" : "4:30"} 
-                                                                            value={block.targetValue || ''} 
-                                                                            onChange={e => updateBlock(block.id, 'targetValue', e.target.value)}
-                                                                            className="w-12 bg-white dark:bg-zinc-950 border border-slate-200 dark:border-zinc-700 rounded text-xs px-1.5 py-0.5 outline-none no-spinner text-center ml-1 focus:border-indigo-400 focus:ring-1 focus:ring-indigo-400" 
-                                                                        />
+                                                                        <div className="flex items-center">
+                                                                            <input type={block.targetType === 'power' ? "number" : "text"} 
+                                                                                placeholder={block.targetType === 'power' ? "200" : "4:30"} 
+                                                                                value={block.targetValue || ''} 
+                                                                                onChange={e => updateBlock(block.id, 'targetValue', e.target.value)}
+                                                                                className="w-12 shrink-0 bg-white dark:bg-zinc-950 border border-slate-200 dark:border-zinc-700 rounded text-xs px-1.5 py-0.5 outline-none no-spinner text-center ml-1 focus:border-indigo-400 focus:ring-1 focus:ring-indigo-400" 
+                                                                            />
+                                                                            {block.targetType === 'power' && block.targetValue && settings?.bike?.ftp > 0 && (
+                                                                                <span className="text-[10px] text-slate-400 ml-1.5 font-mono select-none hidden sm:inline-block">
+                                                                                    {Math.round((Number(block.targetValue) / settings.bike.ftp) * 100)}%
+                                                                                </span>
+                                                                            )}
+                                                                        </div>
                                                                     )}
                                                                 </>
                                                             )}
                                                         </div>
+
+                                                        <input type="text" value={block.details || ''} onChange={e => updateBlock(block.id, 'details', e.target.value)}
+                                                            placeholder="Nota (opc)"
+                                                            className="flex-1 min-w-[100px] bg-transparent border-b border-dashed border-slate-300 dark:border-zinc-700 py-1 text-xs outline-none focus:border-slate-500 dark:focus:border-zinc-500 placeholder:text-slate-400" />
                                                     </div>
 
-                                                    <input type="text" value={block.details || ''} onChange={e => updateBlock(block.id, 'details', e.target.value)}
-                                                        placeholder="Nota (opc)"
-                                                        className="flex-[2] min-w-[150px] bg-transparent border-b border-dashed border-slate-300 dark:border-zinc-700 py-1 text-xs outline-none focus:border-slate-500 dark:focus:border-zinc-500 placeholder:text-slate-400" />
-
-                                                    <button onClick={() => removeBlock(block.id)} className="text-slate-300 hover:text-red-500 ml-auto"><X size={16} /></button>
+                                                    <button onClick={() => removeBlock(block.id)} className="text-slate-300 hover:text-red-500 shrink-0 ml-auto"><X size={16} /></button>
                                                 </div>
                                             );
                                         })}
@@ -2167,11 +2181,11 @@ const WorkoutViewerModal = ({ workout, onClose, onDelete, onEdit }) => {
                                                                         </span>
                                                                     </div>
                                                                     {(step.targetType === 'power' && step.targetValue) || (step.targetType === 'pace' && step.targetValue) ? (
-                                                                        <div className={`px-2 py-0.5 rounded text-[10px] font-bold ${bgColor} ${colorClass}`}>
+                                                                        <div className="px-2 py-0.5 rounded text-[10px] font-bold bg-slate-100 dark:bg-zinc-800 text-slate-800 dark:text-zinc-200">
                                                                             {step.targetValue} {step.targetType === 'power' ? 'W' : '/km'}
                                                                         </div>
                                                                     ) : (
-                                                                        <div className={`px-2 py-0.5 rounded text-[10px] font-bold ${bgColor} ${colorClass} tracking-wide`}>
+                                                                        <div className="px-2 py-0.5 rounded text-[10px] font-bold bg-slate-100 dark:bg-zinc-800 text-slate-800 dark:text-zinc-200 tracking-wide">
                                                                             {step.zone}
                                                                         </div>
                                                                     )}
