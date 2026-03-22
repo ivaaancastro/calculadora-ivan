@@ -69,6 +69,7 @@ export const useProfileQuery = () => {
             const { error } = await supabase.from("profiles").upsert(
                 {
                     user_id: userId,
+                    gender: newSettings.gender,
                     weight: newSettings.weight,
                     fc_rest: newSettings.fcReposo,
                     run_fc_max: newSettings.run.max,

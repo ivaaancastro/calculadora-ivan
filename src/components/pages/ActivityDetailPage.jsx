@@ -703,8 +703,11 @@ export const ActivityDetailPage = ({ activity, settings, fetchStreams, onBack, o
                                     {activity.tss > 0 && (
                                         <MetricBox label="Carga (TSS)" value={Math.round(activity.tss)} unit="pts" colorClass="border-yellow-600" />
                                     )}
-                                    {activity.normalized_power > 0 && (
-                                        <MetricBox label="Potencia Norm." value={Math.round(activity.normalized_power)} unit="w" colorClass="border-red-600" />
+                                    {activity.np > 0 && (
+                                        <MetricBox label="NP (Norm.)" value={activity.np} unit="w" colorClass="border-fuchsia-600" tooltip="Potencia Normalizada (algoritmo WKO/Intervals.icu)" />
+                                    )}
+                                    {activity.intensity_factor > 0 && (
+                                        <MetricBox label="Intensidad (IF)" value={(activity.intensity_factor * 100).toFixed(0)} unit="%" colorClass="border-amber-600" tooltip={`Factor de Intensidad basado en NP / FTP. FTP usado: ${Math.round(activity.np / activity.intensity_factor)}w`} />
                                     )}
                                 </div>
                                 {/* TRAINING EFFECT (GARMIN STYLE) */}

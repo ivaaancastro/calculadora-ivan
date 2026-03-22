@@ -73,6 +73,47 @@ function trimpNorm1h(lthr, hrMax, hrRest, kY, kB) {
     return 60 * d * kY * Math.exp(kB * d);
 }
 
+// ── Calculate Normalized Power (NP) intervals.icu style ───────────────────────
+function calculateNPAndDuration(watts, time) {
+    if (!watts || !time || watts.length < 2) return { np: 0, duration: 0 };
+    
+    // Reconstruir el stream de potencia asegurando 1Hz puro en movimiento
+    const activeWatts = [];
+    activeWatts.push(watts[0] || 0);
+    
+    for (let i = 1; i < time.length; i++) {
+        let gap = time[i] - time[i - 1];
+        
+        // Pausas largas comprobadas (>10s) se colapsan a 1 segundo para pausar el NP.
+        if (gap > 10) gap = 1;
+        
+        const w = watts[i] || 0;
+        for (let j = 0; j < gap; j++) {
+            activeWatts.push(w);
+        }
+    }
+    
+    let sumNp = 0;
+    let validCount = 0;
+    let sum = 0;
+    
+    // Media móvil de 30s exacta estilo WKO / Intervals
+    for (let i = 0; i < activeWatts.length; i++) {
+        sum += activeWatts[i];
+        if (i >= 29) {
+            if (i > 29) {
+                sum -= activeWatts[i - 30];
+            }
+            const sma = sum / 30;
+            sumNp += Math.pow(sma, 4);
+            validCount++;
+        }
+    }
+    
+    const np = validCount > 0 ? Math.pow(sumNp / validCount, 0.25) : 0;
+    return { np, duration: activeWatts.length };
+}
+
 // ── 1. Calculate TSS for a REAL activity (from HR stream or avg HR) ──────────
 export function calculateActivityTSS(act, settings) {
     const { kY, kB } = genderConstants(settings.gender);
@@ -83,35 +124,65 @@ export function calculateActivityTSS(act, settings) {
     const hrRange = hrMax - hrRest;
     const durMin = act.duration || 0;
 
-    if (hrRange <= 0 || durMin <= 0) return 0;
+    const isBike = String(act.type).toLowerCase().includes('ride') || String(act.type).toLowerCase().includes('ciclismo') || String(act.type).toLowerCase().includes('bici');
+    
+    // ① Ciclismo: Priorizar Potencia de Vatios para Power TSS
+    if (isBike) {
+        const ftp = Number(settings.bike?.ftp) || 200;
+        
+        if (act.streams_data?.watts?.data && act.streams_data?.time?.data) {
+            const watts = act.streams_data.watts.data;
+            const time = act.streams_data.time.data;
+            const { np, duration } = calculateNPAndDuration(watts, time);
+            
+            if (duration > 0 && ftp > 0 && np > 0) {
+                const intensityFactor = np / ftp;
+                const tss = (duration * np * intensityFactor) / (ftp * 36);
+                return { tss: Math.round(tss), np: Math.round(np), intensity_factor: intensityFactor, method: 'power' };
+            }
+        }
+        
+        if (act.watts_avg && act.watts_avg > 0) {
+            const avgWatts = Number(act.watts_avg);
+            const durationSecs = durMin * 60;
+            if (durationSecs > 0 && ftp > 0) {
+                const intensityFactor = avgWatts / ftp;
+                const tss = (durationSecs * avgWatts * intensityFactor) / (ftp * 36);
+                return { tss: Math.round(tss), np: Math.round(avgWatts), intensity_factor: intensityFactor, method: 'power_avg' };
+            }
+        }
+    }
+
+    if (hrRange <= 0 || durMin <= 0) return { tss: 0, method: 'none' };
 
     const norm = trimpNorm1h(lthr, hrMax, hrRest, kY, kB);
 
-    // ① Stream HR data → exact second-by-second TRIMP
+    // ② Stream HR data → exact hrTSS / TRIMP
     if (act.streams_data?.heartrate?.data && act.streams_data?.time?.data) {
         const hrData = act.streams_data.heartrate.data;
         const timeData = act.streams_data.time.data;
         let trimp = 0;
         for (let i = 1; i < hrData.length; i++) {
             const dt = (timeData[i] - timeData[i - 1]) / 60;
+            if (dt > 5) continue; // ignore huge tracking gaps equivalent to pauses
             const d = Math.max(0, (hrData[i] - hrRest) / hrRange);
             trimp += dt * d * kY * Math.exp(kB * d);
         }
-        return Math.round((trimp / norm) * 100);
+        return { tss: Math.round((trimp / norm) * 100), method: 'hr_stream' };
     }
 
-    // ② Average HR only → TRIMP at constant HR
+    // ③ Average HR only → hrTSS / TRIMP at constant HR
     const hrAvg = Number(act.hr_avg);
     if (hrAvg && hrAvg > hrRest) {
         const d = (hrAvg - hrRest) / hrRange;
         const trimp = durMin * d * kY * Math.exp(kB * d);
-        return Math.round((trimp / norm) * 100);
+        return { tss: Math.round((trimp / norm) * 100), method: 'hr_avg' };
     }
 
-    // ③ No HR data → rough duration estimate
+    // ④ No HR / No Power data → rough duration estimate
     const cat = getSportCategory(act.type);
-    if (cat === 'strength') return Math.round((durMin / 60) * 40);
-    return Math.round((durMin / 60) * 25);
+    if (cat === 'strength') return { tss: Math.round((durMin / 60) * 40), method: 'duration' };
+    return { tss: Math.round((durMin / 60) * 25), method: 'duration' };
 }
 
 // ── 2. Compute TSS/hour for each zone (for planning estimation) ──────────────
@@ -158,10 +229,16 @@ export function estimateTssFromBlocks(blocks, sportType, settings) {
     if (!blocks || blocks.length === 0) return null;
     const tph = computeZoneTssPerHour(sportType, settings);
     const cat = getSportCategory(sportType);
+    const ftp = Number(settings?.bike?.ftp || settings?.ftp || 0);
+
+    const ZONE_PACE = {
+        Run: { Z1: 7.0, R12: 6.5, Z2: 6.0, R23: 5.6, Z3: 5.2, Z4: 4.5, Z5: 3.8, Z6: 3.2 },
+        Ride: { Z1: 3.0, R12: 2.75, Z2: 2.5, R23: 2.35, Z3: 2.2, Z4: 2.0, Z5: 1.7, Z6: 1.5 },
+        Swim: { Z1: 3.0, R12: 2.75, Z2: 2.5, R23: 2.35, Z3: 2.2, Z4: 2.0, Z5: 1.7, Z6: 1.5 },
+    };
+    const sportPace = ZONE_PACE[sportType] || ZONE_PACE.Run;
 
     // Efficiency Factor: How much of the planned time is actually spent in the target zone?
-    // Biking often has coasting, downhills, junctions (estimated 80% target, 20% Z1/Rec)
-    // Running/Swimming is much more constant (estimated 95% target, 5% Z1)
     const efficiency = cat === 'cardio' && (String(sportType).toLowerCase().includes('ride') || String(sportType).toLowerCase().includes('bici'))
         ? { target: 0.80, rec: 0.20 }
         : cat === 'cardio'
@@ -170,10 +247,32 @@ export function estimateTssFromBlocks(blocks, sportType, settings) {
 
     let totalTSS = 0;
 
-    // Helper to calc TSS for a segment with efficiency applied
-    const calcSegment = (mins, zone) => {
-        const tssTarget = tph[zone] ?? tph.Z2;
-        const tssRec = tph.Z1 ?? 20; // Assume downtime is spent recovering in Z1
+    const getMins = (item) => {
+        const dur = Number(item.duration) || 0;
+        if (item.unit === 'dist') return dur * (sportPace[item.zone] || 5);
+        return dur;
+    };
+
+    const calcSegment = (item, reps = 1) => {
+        const mins = getMins(item) * reps;
+        if (mins <= 0) return 0;
+
+        // Si es por Vatios y hay FTP
+        if (item.targetType === 'power' && item.targetValue && ftp > 0 && cat === 'cardio') {
+            const tgtWatts = Number(item.targetValue);
+            if (!isNaN(tgtWatts) && tgtWatts > 0) {
+                const activeMins = mins * efficiency.target;
+                const passiveMins = mins * efficiency.rec;
+                // TSS = (duración_en_segundos * NP^2) / (FTP^2 * 36)
+                const activeTSS = (activeMins * 60 * (tgtWatts * tgtWatts)) / (ftp * ftp * 36);
+                const passiveTSS = (passiveMins / 60) * (tph.Z1 ?? 20);
+                return activeTSS + passiveTSS;
+            }
+        }
+
+        // Fallback a HR predictivo
+        const tssTarget = tph[item.zone] ?? tph.Z2;
+        const tssRec = tph.Z1 ?? 20;
         const activeTSS = (mins * efficiency.target / 60) * tssTarget;
         const passiveTSS = (mins * efficiency.rec / 60) * tssRec;
         return activeTSS + passiveTSS;
@@ -183,12 +282,10 @@ export function estimateTssFromBlocks(blocks, sportType, settings) {
         if (block.type === 'repeat') {
             const reps = block.repeats || 1;
             (block.steps || []).forEach(step => {
-                const mins = Number(step.duration) || 0;
-                totalTSS += calcSegment(mins * reps, step.zone);
+                totalTSS += calcSegment(step, reps);
             });
         } else {
-            const mins = Number(block.duration) || 0;
-            totalTSS += calcSegment(mins, block.zone);
+            totalTSS += calcSegment(block, 1);
         }
     });
 
