@@ -28,15 +28,15 @@ export const Navbar = ({
       <div className="flex justify-between items-center max-w-[1800px] mx-auto mt-1 md:mt-0">
 
         {/* LOGO */}
-        <div className="flex items-center gap-2.5">
+        <button onClick={() => onTabChange('overview')} className="flex items-center gap-2.5 hover:opacity-80 transition-opacity">
           <div className="bg-blue-600 text-white p-1.5 rounded shadow-sm">
             <Activity size={18} strokeWidth={2.5} />
           </div>
-          <div className="flex flex-col justify-center">
+          <div className="flex flex-col justify-center text-left">
             <h1 className="text-sm font-black text-slate-800 dark:text-zinc-100 tracking-tight leading-none uppercase">FORMA<span className="text-blue-500">LAB</span></h1>
             <p className="text-[8px] font-bold text-slate-500 dark:text-zinc-500 uppercase tracking-widest hidden lg:block mt-0.5">Performance Analytics</p>
           </div>
-        </div>
+        </button>
 
         {/* PAGE TABS — Desktop */}
         <div className="hidden md:flex items-center">

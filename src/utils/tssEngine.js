@@ -221,6 +221,8 @@ export function computeZoneTssPerHour(sportType, settings) {
     }
     tph.R12 = Math.round((tph.Z1 + tph.Z2) / 2);
     tph.R23 = Math.round((tph.Z2 + tph.Z3) / 2);
+    tph.R34 = Math.round((tph.Z3 + tph.Z4) / 2);
+    tph.R45 = Math.round((tph.Z4 + tph.Z5) / 2);
     return tph;
 }
 
@@ -232,18 +234,14 @@ export function estimateTssFromBlocks(blocks, sportType, settings) {
     const ftp = Number(settings?.bike?.ftp || settings?.ftp || 0);
 
     const ZONE_PACE = {
-        Run: { Z1: 7.0, R12: 6.5, Z2: 6.0, R23: 5.6, Z3: 5.2, Z4: 4.5, Z5: 3.8, Z6: 3.2 },
-        Ride: { Z1: 3.0, R12: 2.75, Z2: 2.5, R23: 2.35, Z3: 2.2, Z4: 2.0, Z5: 1.7, Z6: 1.5 },
-        Swim: { Z1: 3.0, R12: 2.75, Z2: 2.5, R23: 2.35, Z3: 2.2, Z4: 2.0, Z5: 1.7, Z6: 1.5 },
+        Run: { Z1: 7.0, R12: 6.5, Z2: 6.0, R23: 5.6, Z3: 5.2, R34: 4.85, Z4: 4.5, R45: 4.15, Z5: 3.8, Z6: 3.2 },
+        Ride: { Z1: 3.0, R12: 2.75, Z2: 2.5, R23: 2.35, Z3: 2.2, R34: 2.1, Z4: 2.0, R45: 1.85, Z5: 1.7, Z6: 1.5 },
+        Swim: { Z1: 3.0, R12: 2.75, Z2: 2.5, R23: 2.35, Z3: 2.2, R34: 2.1, Z4: 2.0, R45: 1.85, Z5: 1.7, Z6: 1.5 },
     };
     const sportPace = ZONE_PACE[sportType] || ZONE_PACE.Run;
 
-    // Efficiency Factor: How much of the planned time is actually spent in the target zone?
-    const efficiency = cat === 'cardio' && (String(sportType).toLowerCase().includes('ride') || String(sportType).toLowerCase().includes('bici'))
-        ? { target: 0.80, rec: 0.20 }
-        : cat === 'cardio'
-            ? { target: 0.95, rec: 0.05 }
-            : { target: 1.0, rec: 0.0 };
+    // Efficiency Factor: Structured blocks assume you hit the target for the whole block duration
+    const efficiency = { target: 1.0, rec: 0.0 };
 
     let totalTSS = 0;
 

@@ -3,7 +3,13 @@ import {
     PieChart, Pie, Cell, BarChart, Bar, AreaChart, Area, XAxis, YAxis, Tooltip as RechartsTooltip, ResponsiveContainer, CartesianGrid,
     LineChart, Line, Legend, ComposedChart, ScatterChart, Scatter, ReferenceLine, ReferenceArea
 } from 'recharts';
-import { Activity, Heart, CalendarDays, BarChart2, Target, MousePointer2, TrendingUp, Trophy, AlertTriangle, Battery, Brain, Moon, Info, Activity as ActivityPulse, Loader2, Sparkles, Coffee, AlertOctagon } from 'lucide-react';
+import { 
+    Activity, Heart, CalendarDays, BarChart2, Target, MousePointer2, TrendingUp, Trophy, AlertTriangle, 
+    Battery, Brain, Moon, Info, Activity as ActivityPulse, Loader2, Sparkles, Coffee, AlertOctagon,
+    ArrowUpRight, ArrowDownRight, Zap, TrendingDown
+} from 'lucide-react';
+import { EvolutionChart } from './EvolutionChart';
+import { InfoTooltip } from '../common/InfoTooltip';
 
 const TIME_INTERVALS = [1, 5, 15, 30, 60, 180, 300, 600, 1200, 2400, 3600, 7200];
 const formatInterval = (secs) => { if (secs < 60) return `${secs}s`; if (secs < 3600) return `${secs / 60}m`; return `${secs / 3600}h`; };
@@ -12,9 +18,9 @@ const getMonday = (d) => { const date = new Date(d); const day = date.getDay(); 
 const ZONE_COLORS = ['#94a3b8', '#3b82f6', '#22c55e', '#eab308', '#f97316', '#ef4444', '#a855f7'];
 const ZONE_LABELS = ['Z1 Recuperación', 'Z2 Aeróbico', 'Z3 Tempo', 'Z4 SubUmbral', 'Z5 SupraUmbral', 'Z6 VO2Max', 'Z7 Anaeróbico'];
 
-export const AdvancedAnalytics = ({ activities, settings, onSelectActivity }) => {
-    const [curveType, setCurveType] = useState('speed');
-    const [curveSport, setCurveSport] = useState('run');
+export const AdvancedAnalytics = ({ activities, settings, onSelectActivity, timeRange, setTimeRange, chartData }) => {
+    const [curveType, setCurveType] = useState('power');
+    const [curveSport, setCurveSport] = useState('bike');
     const [scatterSport, setScatterSport] = useState('run');
     const [vo2Sport, setVo2Sport] = useState('run');
     const [mmpTimeframe, setMmpTimeframe] = useState('90d');
@@ -53,18 +59,24 @@ export const AdvancedAnalytics = ({ activities, settings, onSelectActivity }) =>
         };
 
         const initPeaks = () => { const p = {}; TIME_INTERVALS.forEach(i => { p[i] = { value: 0, actId: null, actName: '', actDate: '' }; }); return p; };
-        const peaks = { all: { hr: initPeaks(), spd: initPeaks() }, bike: { hr: initPeaks(), spd: initPeaks() }, run: { hr: initPeaks(), spd: initPeaks() } };
+        const peaks = { all: { hr: initPeaks(), spd: initPeaks(), pwr: initPeaks() }, bike: { hr: initPeaks(), spd: initPeaks(), pwr: initPeaks() }, run: { hr: initPeaks(), spd: initPeaks(), pwr: initPeaks() } };
         const efData = { bike: [], run: [] };
         const updatePeak = (sport, metric, window, value, act) => { if (value > peaks[sport][metric][window].value) peaks[sport][metric][window] = { value, actId: act.id, actName: act.name, actDate: act.date }; };
 
         let bestRunVo2 = 0; let bestBikeVo2 = 0; let hasPowerMeter = false;
         const dailyTSS = new Map();
 
+        let totalVolume = 0; let totalActivities = 0;
         sortedActivities.forEach(act => {
             const actDate = new Date(act.date);
             const actTss = act.tss || 0;
             const dateKey = actDate.toISOString().split('T')[0];
             dailyTSS.set(dateKey, (dailyTSS.get(dateKey) || 0) + actTss);
+            
+            if (actDate >= date90DaysAgo) {
+                totalVolume += (act.duration || 0);
+                totalActivities++;
+            }
 
             if (actDate >= date90DaysAgo) {
                 const weekStart = getMonday(act.date);
@@ -154,6 +166,13 @@ export const AdvancedAnalytics = ({ activities, settings, onSelectActivity }) =>
                         if (peak > 0) { updatePeak('all', 'spd', w, peak, act); if (isBike) updatePeak('bike', 'spd', w, peak, act); if (isRun) updatePeak('run', 'spd', w, peak, act); }
                     });
                 }
+                if (actDate >= dateMmp && act.streams_data.watts) {
+                    const pwrData = act.streams_data.watts.data;
+                    TIME_INTERVALS.forEach(w => {
+                        const peak = getPeakByTime(pwrData, timeData, w);
+                        if (peak > 0) { updatePeak('all', 'pwr', w, peak, act); if (isBike) updatePeak('bike', 'pwr', w, peak, act); if (isRun) updatePeak('run', 'pwr', w, peak, act); }
+                    });
+                }
             }
         });
 
@@ -183,21 +202,23 @@ export const AdvancedAnalytics = ({ activities, settings, onSelectActivity }) =>
                         ctl: Math.round(currentCTL * 10) / 10,
                         atl: Math.round(currentATL * 10) / 10,
                         tsb: Math.round((currentCTL - currentATL) * 10) / 10,
+                        tss: Math.round(tss),
+                        date: dateStr
                     });
                 }
                 if (i < 7) loadHistory.push(tss);
             }
         }
         const tsb = currentCTL - currentATL;
+        const freshness = currentCTL > 0 ? (tsb / currentCTL) * 100 : 0;
 
-        // Calcular Ramp Rate (tendencia a 7 días)
-        let pastCTL = 0;
-        if (pmcHistory.length >= 8) {
-            pastCTL = pmcHistory[pmcHistory.length - 8].ctl;
-        } else if (pmcHistory.length > 0) {
-            pastCTL = pmcHistory[0].ctl;
-        }
-        const rampRate = currentCTL - pastCTL;
+        // Calcular Ramp Rate (tendencia a 7 días) y Carga de hace 28d
+        let pastCTL = 0; let ctl28d = 0;
+        if (pmcHistory.length >= 8) pastCTL = pmcHistory[pmcHistory.length - 8].ctl;
+        if (pmcHistory.length >= 28) ctl28d = pmcHistory[pmcHistory.length - 28].ctl;
+        
+        const rampRate = currentCTL - (pastCTL || currentCTL);
+        const loadTrend = ctl28d > 0 ? ((currentCTL - ctl28d) / ctl28d) * 100 : 0;
 
         const sum7 = loadHistory.reduce((a, b) => a + b, 0);
         const mean7 = sum7 / 7;
@@ -234,7 +255,7 @@ export const AdvancedAnalytics = ({ activities, settings, onSelectActivity }) =>
             }
         }
 
-        const curves = { all: { spd: [], hr: [] }, bike: { spd: [], hr: [] }, run: { spd: [], hr: [] } };
+        const curves = { all: { spd: [], hr: [], pwr: [] }, bike: { spd: [], hr: [], pwr: [] }, run: { spd: [], hr: [], pwr: [] } };
         ['all', 'bike', 'run'].forEach(sport => {
             curves[sport].spd = TIME_INTERVALS.map(i => {
                 const pk = peaks[sport].spd[i];
@@ -244,22 +265,31 @@ export const AdvancedAnalytics = ({ activities, settings, onSelectActivity }) =>
             curves[sport].hr = TIME_INTERVALS.map(i => {
                 const pk = peaks[sport].hr[i]; return { name: formatInterval(i), value: Math.round(pk.value), actId: pk.actId, actName: pk.actName, actDate: pk.actDate };
             }).filter(d => d.value > 0);
+            curves[sport].pwr = TIME_INTERVALS.map(i => {
+                const pk = peaks[sport].pwr[i]; return { name: formatInterval(i), value: Math.round(pk.value), actId: pk.actId, actName: pk.actName, actDate: pk.actDate };
+            }).filter(d => d.value > 0);
         });
 
         return {
             zonesChart, focusChart, weeklyChart, curves, efData, dailyTSS, pmcHistory,
             trainingProfile,
             vo2Max: { run: Number(bestRunVo2.toFixed(1)), bike: Number(bestBikeVo2.toFixed(1)), bikeEstimated: bikeVo2IsEstimated },
-            model: { ctl: currentCTL, atl: currentATL, tsb, rampRate, monotony, strain, load7d: sum7 }
+            model: { ctl: currentCTL, atl: currentATL, tsb, rampRate, monotony, strain, load7d: sum7, freshness, loadTrend, totalActivities, totalVolume },
+            peaksRecord: peaks // Pass raw peaks for table display
         };
     }, [activities, settings, mmpTimeframe, intensityTimeframe]);
 
     if (!activities || activities.length === 0) return null;
 
-    const currentCurve = analytics.curves[curveSport][curveType === 'speed' ? 'spd' : 'hr'];
+    const currentCurve = useMemo(() => {
+        if (curveType === 'power') return analytics.curves[curveSport].pwr;
+        if (curveType === 'speed') return analytics.curves[curveSport].spd;
+        return analytics.curves[curveSport].hr;
+    }, [analytics.curves, curveSport, curveType]);
+
     const isPace = curveSport === 'run' && curveType === 'speed';
-    const curveColor = curveType === 'hr' ? '#ef4444' : (isPace ? '#ea580c' : '#2563eb');
-    const curveUnit = isPace ? '/km' : (curveType === 'speed' ? 'km/h' : 'ppm');
+    const curveColor = curveType === 'hr' ? '#ef4444' : (curveType === 'power' ? '#fbbf24' : (isPace ? '#ea580c' : '#2563eb'));
+    const curveUnit = curveType === 'power' ? 'w' : (isPace ? '/km' : (curveType === 'speed' ? 'km/h' : 'ppm'));
 
     const tooltipStyle = { backgroundColor: '#18181b', border: '1px solid #3f3f46', borderRadius: '4px', color: '#f4f4f5', fontSize: '11px', fontWeight: '500', padding: '8px 10px', zIndex: 1000 };
 
@@ -358,305 +388,372 @@ export const AdvancedAnalytics = ({ activities, settings, onSelectActivity }) =>
     const Subtitle = ({ text }) => <span className="text-[9px] font-bold text-slate-400 dark:text-zinc-500 uppercase tracking-widest ml-2 bg-slate-100 dark:bg-zinc-800 px-2 py-0.5 rounded">{text}</span>;
 
     return (
-        <div className="space-y-8 pt-6 mt-6 border-t border-slate-200 dark:border-zinc-800 font-sans">
-
-            {/* -----------------------------------------------------------------------------------------
-          SECCIÓN 1: ESTADO DE ENTRENAMIENTO Y CARGA 
-      ----------------------------------------------------------------------------------------- */}
-            <section>
-                <div className="flex items-center gap-2 mb-4 pb-2 border-b border-slate-300 dark:border-zinc-800">
-                    <h3 className="text-sm font-black text-slate-800 dark:text-zinc-200 uppercase tracking-widest">Performance Management</h3>
-                </div>
-
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-px bg-slate-200 dark:bg-zinc-800 border border-slate-200 dark:border-zinc-800 mb-4 rounded-sm relative z-10">
-
-
-                    <div className="bg-white dark:bg-zinc-950 p-5 flex flex-col items-center justify-center group relative cursor-help min-h-[100px]">
-                        <span className="text-[10px] uppercase tracking-widest text-slate-500 font-bold mb-1">Carga 7 Días (ATL)</span>
-                        <div className="flex items-baseline gap-1">
-                            <span className="text-2xl font-mono font-black text-slate-800 dark:text-zinc-100">{Math.round(analytics.model.load7d)}</span>
-                            <span className="text-xs text-slate-400 font-sans font-medium">TSS</span>
-                        </div>
-                        {/* Tooltip */}
-                        <div className="absolute opacity-0 group-hover:opacity-100 transition-opacity duration-200 bg-slate-800 dark:bg-black text-slate-100 p-3 rounded-lg top-[calc(100%+10px)] left-1/2 -translate-x-1/2 w-64 text-center pointer-events-none z-[100] shadow-2xl border border-slate-700 dark:border-zinc-800">
-                            <strong>Fatiga a Corto Plazo (ATL)</strong><br /><br /><span className="text-slate-300">Promedio de carga de los últimos 7 días. Refleja tu fatiga reciente.</span>
-                        </div>
+        <div className="space-y-12 pb-12">
+            {/* ZONA 1: CARGA Y RENDIMIENTO (PMC) */}
+            <div className="space-y-6">
+                <div className="flex flex-col md:flex-row md:items-end justify-between items-start gap-4">
+                    <div>
+                        <h2 className="text-xl font-semibold text-slate-900 dark:text-zinc-100 tracking-tight">
+                            Carga y Rendimiento
+                        </h2>
+                        <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400 dark:text-zinc-500">
+                            Evolución de fitness, fatiga y forma a largo plazo
+                        </p>
                     </div>
 
-                    <div className="bg-white dark:bg-zinc-950 p-5 flex flex-col items-center justify-center group relative cursor-help min-h-[100px]">
-                        <span className="text-[10px] uppercase tracking-widest text-slate-500 font-bold mb-1">Monotonía</span>
-                        <span className={`text-2xl font-mono font-black ${analytics.model.monotony > 2.0 ? 'text-red-500' : (analytics.model.monotony > 1.5 ? 'text-orange-500' : 'text-emerald-500')}`}>
-                            {analytics.model.monotony.toFixed(2)}
-                        </span>
-                        <div className="absolute opacity-0 group-hover:opacity-100 transition-opacity duration-200 bg-slate-800 dark:bg-black text-slate-100 p-3 rounded-lg top-[calc(100%+10px)] left-1/2 -translate-x-1/2 w-64 text-center pointer-events-none z-[100] shadow-2xl border border-slate-700 dark:border-zinc-800">
-                            <strong>Variación Diaria</strong><br /><br />
-                            <span className="text-slate-300">¿Alternas días duros y suaves?</span><br />
-                            <span className="text-emerald-400 font-semibold">&lt; 1.5: Bien</span> (Entreno variado).<br />
-                            <span className="text-red-400 font-semibold">&gt; 2.0: Mal</span> (Siempre haces lo mismo).
-                        </div>
-                    </div>
-
-                    <div className="bg-white dark:bg-zinc-950 p-5 flex flex-col items-center justify-center group relative cursor-help min-h-[100px]">
-                        <span className="text-[10px] uppercase tracking-widest text-slate-500 font-bold mb-1">Impacto (Strain)</span>
-                        <span className={`text-2xl font-mono font-black ${analytics.model.strain > 2000 ? 'text-rose-500' : 'text-indigo-500'}`}>
-                            {Math.round(analytics.model.strain)}
-                        </span>
-                        <div className="absolute opacity-0 group-hover:opacity-100 transition-opacity duration-200 bg-slate-800 dark:bg-black text-slate-100 p-3 rounded-lg top-[calc(100%+10px)] left-1/2 -translate-x-1/2 w-64 text-center pointer-events-none z-[100] shadow-2xl border border-slate-700 dark:border-zinc-800">
-                            <strong>Desgaste Global Semanal</strong><br /><br />
-                            <span className="text-slate-300">Calculado multiplicando la Carga por la Monotonía. Un Impacto superior a 2000 continuadamente es garantía de lesión o enfermedad, cuidado.</span>
-                        </div>
-                    </div>
-
-                    <div className="bg-white dark:bg-zinc-950 p-5 flex flex-col items-center justify-center group relative cursor-help min-h-[100px]">
-                        <span className="text-[10px] uppercase tracking-widest text-slate-500 font-bold mb-1">Rampa (Fitness)</span>
-                        <div className="flex items-baseline gap-1 text-slate-600 dark:text-zinc-300">
-                            <span className={`text-2xl font-mono font-black ${analytics.model.rampRate > 5 ? 'text-orange-500' : (analytics.model.rampRate > 1 ? 'text-emerald-500' : '')}`}>
-                                {analytics.model.rampRate > 0 ? '+' : ''}{analytics.model.rampRate.toFixed(1)}
-                            </span>
-                            <span className="text-[10px] uppercase tracking-widest text-slate-400 font-bold">CTL / sem</span>
-                        </div>
-                        <div className="absolute opacity-0 group-hover:opacity-100 transition-opacity duration-200 bg-slate-800 dark:bg-black text-slate-100 p-4 rounded-lg top-[calc(100%+10px)] right-0 md:left-1/2 md:-translate-x-1/2 w-72 text-center pointer-events-none z-[100] shadow-2xl border border-slate-700 dark:border-zinc-800">
-                            <strong>Ritmo de Ganancia de Forma</strong><br /><br />
-                            <span className="text-slate-300">Compara tu Fitness (CTL media 42d) de hoy, respecto al que tenías hace 7 días. Te dice a qué ritmo estás mejorando tu base aeróbica.</span><br /><br />
-                            <span className="text-emerald-400 font-bold">+2 a +5 puntos:</span> Progresión ideal.<br />
-                            <span className="text-red-400 font-bold">+6 o más:</span> Subiendo demasiado rápido, riesgo.
-                        </div>
+                    <div className="flex bg-slate-200/50 dark:bg-zinc-800/50 backdrop-blur-sm p-1 rounded-xl border border-slate-200 dark:border-zinc-800">
+                        {[
+                            { id: "7d", label: "7D" },
+                            { id: "30d", label: "30D" },
+                            { id: "90d", label: "3M" },
+                            { id: "all", label: "Todo" },
+                        ].map((t) => (
+                            <button
+                                key={t.id}
+                                onClick={() => setTimeRange(t.id)}
+                                className={`px-4 py-1.5 text-[10px] font-bold uppercase transition-all rounded-lg ${timeRange === t.id
+                                    ? "bg-white dark:bg-zinc-700 text-blue-600 dark:text-blue-400 shadow-sm"
+                                    : "text-slate-500 dark:text-zinc-400 hover:text-slate-700 dark:hover:text-zinc-200"
+                                    }`}
+                            >
+                                {t.label}
+                            </button>
+                        ))}
                     </div>
                 </div>
 
-                <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
-                    <div className={`p-6 rounded-lg border flex flex-col justify-center lg:col-span-1 ${status.bg}`}>
-                        <div className="flex items-center gap-3 mb-4">
-                            <div className={`p-2 rounded-full bg-white dark:bg-zinc-950 shadow-sm ${status.color}`}><status.icon size={24} strokeWidth={2.5} /></div>
-                            <h2 className={`text-2xl font-black uppercase tracking-tight ${status.color}`}>{status.phase}</h2>
+                <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-4 gap-3">
+                    {[
+                        { label: 'Fitness (CTL)', value: Math.round(analytics.model.ctl), icon: Activity, color: 'text-blue-500', sub: `${analytics.model.loadTrend >= 0 ? '+' : ''}${analytics.model.loadTrend.toFixed(1)}% vs 28d`, subColor: analytics.model.loadTrend >= 0 ? 'text-emerald-500' : 'text-red-500', tip: "Nivel de condición física basado en los últimos 42 días. A mayor CTL, mayor capacidad de asimilar carga." },
+                        { label: 'Fatiga (ATL)', value: Math.round(analytics.model.atl), icon: Battery, color: 'text-purple-500', sub: 'Carga últ. 7 días', tip: "Cansancio acumulado en los últimos 7 días. Sube rápido tras entrenos duros y baja con descanso." },
+                        { label: 'Forma (TSB)', value: Math.round(analytics.model.tsb), icon: Zap, color: analytics.model.tsb < -25 ? 'text-red-500' : (analytics.model.tsb > 0 ? 'text-emerald-500' : 'text-blue-500'), sub: `Frescura: ${Math.round(analytics.model.freshness)}%`, tip: "Balance entre Fitness y Fatiga. Óptimo para competir: +5 a +25. Óptimo para entrenar: -10 a -30." },
+                        { label: 'Rampa Semanal', value: analytics.model.rampRate.toFixed(1), icon: analytics.model.rampRate >= 0 ? ArrowUpRight : ArrowDownRight, color: analytics.model.rampRate > 6 ? 'text-red-500' : (analytics.model.rampRate > 0 ? 'text-emerald-500' : 'text-slate-400'), sub: `${analytics.model.rampRate > 0 ? 'Subiendo' : 'Bajando'}`, tip: "Cuánto sube tu CTL cada semana. Ideal: 2-5 pts. >8 indica riesgo alto de sobreentrenamiento." },
+                        { label: 'Monotonía', value: analytics.model.monotony.toFixed(2), icon: Brain, color: analytics.model.monotony > 2 ? 'text-orange-500' : 'text-slate-400', sub: 'Variedad de carga', tip: "Variedad de la carga diaria. >1.5 significa falta de variedad y mayor riesgo de lesión o estancamiento." },
+                        { label: 'Carga Sem.', value: Math.round(analytics.model.strain), icon: ActivityPulse, color: analytics.model.strain > 2000 ? 'text-red-500' : 'text-slate-400', sub: 'Estrés acumulado', tip: "Estrés total de la semana (TSS x Monotonía). Refleja el impacto sistémico real en tu cuerpo." },
+                        { label: 'Volumen 3M', value: `${Math.round(analytics.model.totalVolume / 60)}h`, icon: CalendarDays, color: 'text-slate-500', sub: `${analytics.model.totalActivities} actividades`, tip: "Horas totales y actividades acumuladas en los últimos 3 meses. Clave para entender tu consistencia." },
+                        { label: 'VO2 Max', value: currentVo2Value || '--', icon: TrendingUp, color: vo2Info.color, sub: vo2Info.label, tip: "Estimación de tu capacidad aeróbica máxima (ml/kg/min). Sube con la intensidad y eficiencia." }
+                    ].map((kpi, i) => (
+                        <div key={i} className="bg-white dark:bg-zinc-900/40 p-3 rounded-xl border border-slate-200 dark:border-zinc-800/50 hover:border-slate-300 dark:hover:border-zinc-700 transition-colors shadow-sm">
+                            <div className="flex items-center justify-between mb-1">
+                                <div className="flex items-center gap-1">
+                                    <span className="text-[8px] font-bold uppercase tracking-widest text-slate-400 dark:text-zinc-500">{kpi.label}</span>
+                                    <InfoTooltip text={kpi.tip} />
+                                </div>
+                                <kpi.icon size={12} className={kpi.color} />
+                            </div>
+                            <div className="flex items-baseline gap-1">
+                                <span className="text-lg font-semibold text-slate-900 dark:text-zinc-100">{kpi.value}</span>
+                            </div>
+                            {kpi.sub && <p className={`text-[7px] font-bold uppercase mt-1 ${kpi.subColor || 'text-slate-400 dark:text-zinc-500'}`}>{kpi.sub}</p>}
                         </div>
-                        <p className="text-sm font-medium text-slate-700 dark:text-zinc-300 leading-relaxed">{status.desc}</p>
+                    ))}
+                </div>
+
+                <div className="bg-white dark:bg-zinc-900/30 p-4 rounded-2xl border border-transparent dark:border-zinc-900 shadow-inner">
+                    <div className="h-[280px]">
+                        <EvolutionChart data={chartData} />
+                    </div>
+                </div>
+            </div>
+
+            {/* ZONA 2: ESTADO FISIOLÓGICO */}
+            <div className="space-y-6">
+                <div>
+                    <h2 className="text-xl font-semibold text-slate-900 dark:text-zinc-100 tracking-tight">
+                        Estado y Perfil Fisiológico
+                    </h2>
+                    <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400 dark:text-zinc-500">
+                        Balance hídrico, fatiga acumulada y capacidad aeróbica
+                    </p>
+                </div>
+
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+                    <div className={`p-4 rounded-2xl border flex flex-col justify-center lg:col-span-1 ${status.bg} border-opacity-50 shadow-sm`}>
+                        <div className="flex items-center gap-3 mb-3">
+                            <div className={`p-1.5 rounded-lg bg-white dark:bg-zinc-900 shadow-sm ${status.color}`}>
+                                <status.icon size={16} strokeWidth={2.5} />
+                            </div>
+                            <div>
+                            <div className="flex items-center gap-1">
+                                <span className="text-[8px] font-bold uppercase tracking-widest text-slate-400 opacity-60">Fase Actual</span>
+                                <InfoTooltip text="Estado sistémico basado en tu balance de fatiga y fitness. Indica si estás en fase productiva, de riesgo o de recuperación." />
+                            </div>
+                            <h3 className={`text-sm font-bold uppercase tracking-tight ${status.color}`}>{status.phase}</h3>
+                            </div>
+                        </div>
+                        <p className="text-[10px] font-medium text-slate-600 dark:text-zinc-400 leading-tight">
+                            {status.desc}
+                        </p>
                     </div>
 
-                    <div className="bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 p-4 h-[300px] rounded-lg lg:col-span-3 flex flex-col">
-                        <div className="flex items-center mb-2">
-                            <h4 className="text-[10px] font-bold text-slate-600 dark:text-zinc-400 uppercase tracking-widest flex items-center gap-1.5"><CalendarDays size={12} /> Carga Semanal (TSS)</h4>
-                            <Subtitle text="Últ. 3 Meses" />
+                    <div className="bg-white dark:bg-zinc-900/40 p-4 rounded-2xl border border-slate-200 dark:border-zinc-800/50 lg:col-span-1 flex flex-col">
+                        <div className="flex justify-between items-center mb-4">
+                            <div className="flex items-center gap-1">
+                                <span className="text-[9px] font-bold uppercase tracking-widest text-slate-400">VO2 Max Estimado</span>
+                                <InfoTooltip text="Consumo máximo de oxígeno. Es una métrica de tu potencia aeróbica total. Varía según el deporte seleccionado." />
+                            </div>
+                            <div className="flex bg-slate-100 dark:bg-zinc-800 p-0.5 rounded-full">
+                                {['bike', 'run'].map(s => (
+                                    <button key={s} onClick={() => setVo2Sport(s)} className={`px-2 py-0.5 text-[7px] font-bold uppercase rounded-full transition-all ${vo2Sport === s ? 'bg-white dark:bg-zinc-700 text-slate-800 dark:text-zinc-100 shadow-sm' : 'text-slate-500'}`}>{s === 'bike' ? 'Bici' : 'Run'}</button>
+                                ))}
+                            </div>
                         </div>
-                        <div className="flex-1 w-full">
+
+                        <div className="flex-1 flex flex-col justify-center">
+                            <div className="flex items-baseline gap-2 justify-center">
+                                <span className="text-3xl font-semibold text-slate-800 dark:text-zinc-100 tracking-tighter">{currentVo2Value > 0 ? currentVo2Value : '--'}</span>
+                                <span className="text-[8px] font-bold text-slate-400 uppercase tracking-widest">ml/kg/min</span>
+                            </div>
+                            <div className="relative w-full h-1 bg-slate-100 dark:bg-zinc-800 rounded-full overflow-hidden mt-2">
+                                <div className="absolute top-0 left-0 h-full bg-red-500/30 w-[20%]"></div>
+                                <div className="absolute top-0 left-[20%] h-full bg-orange-500/30 w-[20%]"></div>
+                                <div className="absolute top-0 left-[40%] h-full bg-emerald-500/30 w-[20%]"></div>
+                                <div className="absolute top-0 left-[60%] h-full bg-blue-500/30 w-[20%]"></div>
+                                <div className="absolute top-0 left-[80%] h-full bg-purple-500/30 w-[20%]"></div>
+                                {currentVo2Value > 0 && (
+                                    <div className="absolute top-0 h-full w-1 bg-slate-800 dark:bg-white shadow-xl z-10 transition-all duration-1000" style={{ left: vo2Info.width }}></div>
+                                )}
+                            </div>
+                            <div className="mt-1 text-center">
+                                <span className={`text-[8px] font-bold uppercase tracking-widest ${vo2Info.color}`}>{vo2Info.label}</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="bg-white dark:bg-zinc-900/40 p-4 rounded-2xl border border-slate-200 dark:border-zinc-800/50 lg:col-span-1 flex flex-col justify-between">
+                        <div className="flex items-center gap-1 mb-2">
+                             <span className="text-[9px] font-bold uppercase tracking-widest text-slate-400">Umbrales Actuales</span>
+                             <InfoTooltip text="Tus valores de referencia (FTP en bici, Ritmo Umbral en carrera) configurados en tu perfil." />
+                        </div>
+                        <div className="grid grid-cols-2 gap-2">
+                            <div className="bg-slate-50 dark:bg-zinc-800/60 p-2 rounded-lg">
+                                <p className="text-[7px] font-bold text-slate-400 uppercase">FTP (Bici)</p>
+                                <p className="text-sm font-black text-slate-800 dark:text-zinc-100">{settings.bike.ftp} <span className="text-[8px] font-bold">W</span></p>
+                            </div>
+                            <div className="bg-slate-50 dark:bg-zinc-800/60 p-2 rounded-lg">
+                                <p className="text-[7px] font-bold text-slate-400 uppercase">TP (Carrera)</p>
+                                <p className="text-sm font-black text-slate-800 dark:text-zinc-100">{formatPace(settings.run.thresholdPace)} <span className="text-[8px] font-bold">/km</span></p>
+                            </div>
+                            <div className="bg-slate-50 dark:bg-zinc-800/60 p-2 rounded-lg">
+                                <p className="text-[7px] font-bold text-slate-400 uppercase">W/Kg</p>
+                                <p className="text-sm font-black text-slate-800 dark:text-zinc-100">{(settings.bike.ftp / (settings.weight || 70)).toFixed(2)}</p>
+                            </div>
+                            <div className="bg-slate-50 dark:bg-zinc-800/60 p-2 rounded-lg">
+                                <p className="text-[7px] font-bold text-slate-400 uppercase">Peso</p>
+                                <p className="text-sm font-black text-slate-800 dark:text-zinc-100">{settings.weight} <span className="text-[8px] font-bold">Kg</span></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                {/* FORMA (TSB) CARD */}
+                <div className="bg-white dark:bg-zinc-900/40 p-4 rounded-2xl border border-slate-200 dark:border-zinc-800/50 flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                        <div className={`p-2 rounded-xl bg-slate-50 dark:bg-zinc-800 ${analytics.model.tsb < -25 ? 'text-red-500' : (analytics.model.tsb > 0 ? 'text-emerald-500' : 'text-blue-500')}`}>
+                            <Activity size={18} />
+                        </div>
+                        <div>
+                            <p className="text-[9px] font-bold uppercase text-slate-400">Balance de Carga (TSB)</p>
+                            <p className="text-xs font-medium text-slate-500 dark:text-zinc-500">Forma actual basada en el balance fatiga/fitness</p>
+                        </div>
+                    </div>
+                    <div className="text-right">
+                        <span className={`text-2xl font-semibold ${analytics.model.tsb < -25 ? 'text-red-500' : (analytics.model.tsb > 0 ? 'text-emerald-500' : 'text-blue-500')}`}>
+                            {Math.round(analytics.model.tsb)}
+                        </span>
+                        <span className="text-[9px] font-bold text-slate-400 uppercase ml-1">pts</span>
+                    </div>
+                </div>
+            </div>
+
+            {/* ZONA 3: DISTRIBUCIÓN Y VOLUMEN */}
+            <div className="space-y-6">
+                <div>
+                    <h2 className="text-xl font-semibold text-slate-900 dark:text-zinc-100 tracking-tight">
+                        Distribución y Volumen
+                    </h2>
+                    <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400 dark:text-zinc-500">
+                        Carga semanal por zonas y tiempo total de entrenamiento
+                    </p>
+                </div>
+
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <div className="bg-white dark:bg-zinc-900/30 p-4 rounded-2xl border border-transparent dark:border-zinc-900 flex flex-col lg:col-span-2 shadow-inner">
+                        <div className="flex justify-between items-center mb-2">
+                             <div className="flex items-center gap-1">
+                                <span className="text-[9px] font-bold uppercase tracking-widest text-slate-400">Volumen Semanal (TSS/Horas)</span>
+                                <InfoTooltip text="Carga de entrenamiento (TSS) y horas totales acumuladas cada semana. Las barras indican el estrés (TSS) y la línea el tiempo." />
+                             </div>
+                        </div>
+                        <div className="h-[180px]">
                             <ResponsiveContainer width="100%" height="100%">
-                                <ComposedChart data={analytics.weeklyChart} margin={{ top: 5, right: 0, bottom: 0, left: -20 }}>
-                                    <CartesianGrid strokeDasharray="2 2" stroke="#3f3f46" opacity={0.3} vertical={false} />
-                                    <XAxis dataKey="dateLabel" tick={{ fontSize: 9, fill: '#71717a' }} minTickGap={15} axisLine={{ stroke: '#3f3f46' }} tickLine={false} />
-                                    <YAxis yAxisId="left" tick={{ fontSize: 9, fill: '#8b5cf6' }} axisLine={false} tickLine={false} />
-                                    <YAxis yAxisId="right" orientation="right" hide />
-                                    <RechartsTooltip contentStyle={tooltipStyle} itemStyle={{ color: '#fff' }} isAnimationActive={false} cursor={{ stroke: '#71717a', strokeWidth: 1, strokeDasharray: '4 4' }} />
-                                    <Legend wrapperStyle={{ fontSize: '10px', color: '#a1a1aa' }} iconType="plainline" />
-                                    <Bar yAxisId="left" dataKey="tss" name="Carga (TSS)" fill="#8b5cf6" radius={[2, 2, 0, 0]} maxBarSize={30} />
-                                    <Line yAxisId="right" type="step" dataKey="hours" name="Volumen (Horas)" stroke="#10b981" strokeWidth={2} dot={false} />
+                                <ComposedChart data={analytics.weeklyChart}>
+                                    <CartesianGrid strokeDasharray="2 2" stroke="#3f3f46" opacity={0.1} vertical={false} />
+                                    <XAxis dataKey="dateLabel" tick={{ fontSize: 8, fill: '#71717a' }} minTickGap={15} axisLine={false} tickLine={false} />
+                                    <YAxis yAxisId="left" tick={{ fontSize: 8, fill: '#8b5cf6' }} axisLine={false} tickLine={false} />
+                                    <RechartsTooltip contentStyle={tooltipStyle} itemStyle={{ color: '#fff' }} isAnimationActive={false} cursor={{ stroke: '#71717a', strokeWidth: 1 }} />
+                                    <Bar yAxisId="left" dataKey="tss" name="TSS" fill="#8b5cf6" opacity={0.6} radius={[2, 2, 0, 0]} barSize={12} />
+                                    <Line yAxisId="left" type="monotone" dataKey="hours" name="Horas" stroke="#10b981" strokeWidth={2} dot={false} />
                                 </ComposedChart>
                             </ResponsiveContainer>
                         </div>
                     </div>
-                </div>
-            </section>
 
-            {/* -----------------------------------------------------------------------------------------
-          SECCIÓN 2: DISTRIBUCIÓN E INTENSIDAD
-      ----------------------------------------------------------------------------------------- */}
-            <section>
-                <div className="flex items-center justify-between mb-4 pb-2 border-b border-slate-300 dark:border-zinc-800">
-                    <h3 className="text-sm font-black text-slate-800 dark:text-zinc-200 uppercase tracking-widest">Distribución de Intensidad</h3>
-                    <div className="flex bg-slate-100 dark:bg-zinc-800 p-0.5 rounded-full shadow-inner">
-                        <button onClick={() => setIntensityTimeframe('28d')} className={`px-2 py-1 text-[8px] sm:px-3 sm:py-1 sm:text-[9px] font-bold uppercase rounded-full transition-all ${intensityTimeframe === '28d' ? 'bg-white dark:bg-zinc-600 text-blue-600 dark:text-blue-400 shadow' : 'text-slate-500 hover:text-slate-700 dark:hover:text-zinc-300'}`}>28D</button>
-                        <button onClick={() => setIntensityTimeframe('90d')} className={`px-2 py-1 text-[8px] sm:px-3 sm:py-1 sm:text-[9px] font-bold uppercase rounded-full transition-all ${intensityTimeframe === '90d' ? 'bg-white dark:bg-zinc-600 text-blue-600 dark:text-blue-400 shadow' : 'text-slate-500 hover:text-slate-700 dark:hover:text-zinc-300'}`}>90D</button>
-                        <button onClick={() => setIntensityTimeframe('1y')} className={`px-2 py-1 text-[8px] sm:px-3 sm:py-1 sm:text-[9px] font-bold uppercase rounded-full transition-all ${intensityTimeframe === '1y' ? 'bg-white dark:bg-zinc-600 text-blue-600 dark:text-blue-400 shadow' : 'text-slate-500 hover:text-slate-700 dark:hover:text-zinc-300'}`}>1 Año</button>
-                        <button onClick={() => setIntensityTimeframe('all')} className={`px-2 py-1 text-[8px] sm:px-3 sm:py-1 sm:text-[9px] font-bold uppercase rounded-full transition-all ${intensityTimeframe === 'all' ? 'bg-white dark:bg-zinc-600 text-blue-600 dark:text-blue-400 shadow' : 'text-slate-500 hover:text-slate-700 dark:hover:text-zinc-300'}`}>Todo</button>
-                    </div>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-                    <div className="bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 p-4 rounded-lg flex flex-col h-[220px]">
-                        <div className="flex items-center justify-center mb-3">
-                            <h4 className="text-[10px] font-bold text-slate-600 dark:text-zinc-400 uppercase tracking-widest flex items-center gap-1.5"><Target size={12} /> Foco Aeróbico</h4>
-                        </div>
-                        <div className="flex-1 flex items-center justify-center gap-4">
-                            <div className="w-[100px] h-[100px] relative">
-                                <ResponsiveContainer width="100%" height="100%">
-                                    <PieChart>
-                                        <Pie data={analytics.focusChart} innerRadius={25} outerRadius={45} paddingAngle={2} dataKey="value" stroke="none">
-                                            {analytics.focusChart.map((e, i) => <Cell key={i} fill={e.color} />)}
-                                        </Pie>
-                                        <RechartsTooltip contentStyle={tooltipStyle} itemStyle={{ color: '#fff' }} cursor={{ fill: 'transparent' }} />
-                                    </PieChart>
-                                </ResponsiveContainer>
-                            </div>
-                            <div className="flex flex-col gap-1.5">
-                                {analytics.focusChart.map((focus, i) => (
-                                    <div key={i} className="flex items-center gap-2 text-[9px] font-bold uppercase tracking-wider text-slate-600 dark:text-zinc-400">
-                                        <div className="w-2 h-2 rounded-full" style={{ backgroundColor: focus.color }}></div>
-                                        <span>{focus.name} <span style={{ color: focus.color }}>{focus.value}%</span></span>
-                                    </div>
+                    <div className="bg-white dark:bg-zinc-900/40 p-4 rounded-2xl border border-slate-200 dark:border-zinc-800/50 flex flex-col lg:col-span-1 shadow-sm">
+                        <div className="flex justify-between items-center mb-4">
+                            <span className="text-[9px] font-bold uppercase tracking-widest text-slate-400">Distribución de Foco</span>
+                            <div className="flex bg-slate-100 dark:bg-zinc-800 p-0.5 rounded-full">
+                                {['28d', '90d'].map(t => (
+                                    <button key={t} onClick={() => setIntensityTimeframe(t)} className={`px-2 py-0.5 text-[7px] font-bold uppercase rounded-full transition-all ${intensityTimeframe === t ? 'bg-white dark:bg-zinc-700 text-slate-800 dark:text-zinc-100 shadow-sm' : 'text-slate-500'}`}>{t.toUpperCase()}</button>
                                 ))}
                             </div>
                         </div>
-                    </div>
+                        
+                        <div className="flex flex-col gap-4">
+                             {/* FOCUS BARS */}
+                             <div className="space-y-3">
+                                {analytics.focusChart.map((focus, i) => (
+                                    <div key={i} className="space-y-1">
+                                        <div className="flex items-center justify-between text-[8px] font-bold uppercase text-slate-500">
+                                            <div className="flex items-center gap-1">
+                                                <span>{focus.name}</span>
+                                                <InfoTooltip text={focus.name === 'AERÓBICO' ? 'Zonas 1 y 2. Base de resistencia.' : (focus.name === 'TEMPO/UMBRAL' ? 'Zonas 3 y 4. Ritmos de carrera sostenidos.' : 'Zonas 5+. Potencia explosiva y series cortas.')} />
+                                            </div>
+                                            <span>{focus.value}%</span>
+                                        </div>
+                                        <div className="h-1 w-full bg-slate-100 dark:bg-zinc-800 rounded-full overflow-hidden">
+                                            <div className="h-full rounded-full transition-all duration-500" style={{ width: `${focus.value}%`, backgroundColor: focus.color }}></div>
+                                        </div>
+                                    </div>
+                                ))}
+                             </div>
 
-                    <div className="bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 p-4 rounded-lg flex flex-col h-[220px]">
-                        <div className="flex items-center justify-between mb-2">
-                            <h4 className="text-[10px] font-bold text-slate-600 dark:text-zinc-400 uppercase tracking-widest flex items-center gap-1.5"><BarChart2 size={12} /> Zonas</h4>
-                        </div>
-                        <div className="flex-1 w-full mt-2">
-                            <ResponsiveContainer width="100%" height="100%">
-                                <BarChart layout="vertical" data={analytics.zonesChart} margin={{ top: 0, right: 10, left: 10, bottom: -5 }}>
-                                    <XAxis type="number" hide />
-                                    <YAxis type="category" dataKey="name" tick={{ fontSize: 8, fill: '#71717a', fontWeight: 600 }} axisLine={false} tickLine={false} width={80} interval={0} tickFormatter={(val) => val.split(' ')[0]} />
-                                    <RechartsTooltip cursor={{ fill: 'rgba(255,255,255,0.05)' }} contentStyle={tooltipStyle} itemStyle={{ color: '#fff' }} formatter={(value) => [`${value} h`, 'Tiempo Total']} />
-                                    <Bar dataKey="hours" radius={[0, 2, 2, 0]} barSize={14}>{analytics.zonesChart.map((e, i) => <Cell key={i} fill={e.fill} />)}</Bar>
-                                </BarChart>
-                            </ResponsiveContainer>
-                        </div>
-                    </div>
-
-                    <div className="bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 p-5 rounded-lg flex flex-col h-[220px] justify-between relative overflow-hidden">
-                        <div className="absolute top-0 right-0 p-4 opacity-5">
-                            <Brain size={120} />
-                        </div>
-                        <div>
-                            <h4 className="text-[10px] font-bold text-slate-500 dark:text-zinc-400 uppercase tracking-widest flex items-center gap-1.5 mb-1"><Sparkles size={12} className="text-purple-500" /> Perfil de Entrenamiento</h4>
-                            <p className={`text-xl font-black uppercase tracking-tight mt-2 ${analytics.trainingProfile.color}`}>
-                                {analytics.trainingProfile.title}
-                            </p>
-                        </div>
-                        <div className="bg-slate-50 dark:bg-black/20 p-3 rounded-md border border-slate-100 dark:border-zinc-800/50 relative z-10">
-                            <p className="text-xs text-slate-700 dark:text-zinc-300 font-medium leading-relaxed">
-                                {analytics.trainingProfile.desc}
-                            </p>
+                             {/* TIME IN ZONES SMALL TABLE */}
+                             <div className="pt-2 border-t border-slate-100 dark:border-zinc-800">
+                                <span className="text-[7px] font-bold uppercase tracking-widest text-slate-400 block mb-2">Desglose por Zona</span>
+                                <div className="grid grid-cols-2 gap-x-4 gap-y-1">
+                                    {analytics.zonesChart.filter(z => z.hours > 0).map((z, i) => (
+                                        <div key={i} className="flex justify-between items-center text-[8px] font-medium">
+                                            <div className="flex items-center gap-1.5">
+                                                <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: z.fill }}></div>
+                                                <span className="text-slate-500 dark:text-zinc-400 truncate max-w-[60px]">{z.name.split(' ')[0]}</span>
+                                            </div>
+                                            <span className="font-bold text-slate-700 dark:text-zinc-200">{z.hours}h</span>
+                                        </div>
+                                    ))}
+                                </div>
+                             </div>
                         </div>
                     </div>
                 </div>
-            </section>
+            </div>
 
-            {/* -----------------------------------------------------------------------------------------
-          SECCIÓN 3: RENDIMIENTO FISIOLÓGICO
-      ----------------------------------------------------------------------------------------- */}
-            <section>
-                <div className="flex items-center gap-2 mb-4 pb-2 border-b border-slate-300 dark:border-zinc-800">
-                    <h3 className="text-sm font-black text-slate-800 dark:text-zinc-200 uppercase tracking-widest">Rendimiento Fisiológico</h3>
+            {/* ZONA 4: RENDIMIENTO Y RÉCORDS */}
+            <div className="space-y-6">
+                <div>
+                    <h2 className="text-xl font-semibold text-slate-900 dark:text-zinc-100 tracking-tight">
+                        Potencial y Récords
+                    </h2>
+                    <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400 dark:text-zinc-500">
+                        Análisis de eficiencia aeróbica y curvas de potencia máxima
+                    </p>
                 </div>
 
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-
-                    {/* Fila Superior: VO2 Max y Eficiencia */}
-                    <div className="bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 p-5 rounded-lg flex flex-col justify-center relative min-h-[220px]">
-                        <div className="flex justify-between items-center mb-6">
-                            <div className="flex items-center">
-                                <h4 className="text-[10px] font-bold text-slate-600 dark:text-zinc-400 uppercase tracking-widest flex items-center gap-1.5"><TrendingUp size={12} className={vo2Info.color} /> VO2 Max</h4>
-                                <Subtitle text="Últ. 45D" />
-                            </div>
-                            <div className="flex bg-slate-100 dark:bg-zinc-800 p-0.5 rounded-full shadow-inner">
-                                <button onClick={() => setVo2Sport('bike')} className={`px-2.5 py-1 text-[9px] font-bold uppercase rounded-full transition-all ${vo2Sport === 'bike' ? 'bg-white dark:bg-zinc-600 text-slate-800 dark:text-zinc-100 shadow' : 'text-slate-500 hover:text-slate-700 dark:hover:text-zinc-300'}`}>Bici</button>
-                                <button onClick={() => setVo2Sport('run')} className={`px-2.5 py-1 text-[9px] font-bold uppercase rounded-full transition-all ${vo2Sport === 'run' ? 'bg-white dark:bg-zinc-600 text-slate-800 dark:text-zinc-100 shadow' : 'text-slate-500 hover:text-slate-700 dark:hover:text-zinc-300'}`}>Run</button>
-                            </div>
+                <div className="bg-white dark:bg-zinc-900/40 p-6 rounded-3xl border border-slate-200 dark:border-zinc-800/50">
+                    <div className="flex items-center justify-between mb-8">
+                        <div className="flex bg-slate-100 dark:bg-zinc-800 p-0.5 rounded-xl border border-slate-200 dark:border-zinc-800/50">
+                            <button onClick={() => setCurveSport('bike')} className={`px-4 py-1.5 text-[9px] font-bold uppercase rounded-lg transition-all ${curveSport === 'bike' ? 'bg-white dark:bg-zinc-700 text-blue-600 dark:text-blue-400 shadow-sm' : 'text-slate-500'}`}>Ciclismo</button>
+                            <button onClick={() => setCurveSport('run')} className={`px-4 py-1.5 text-[9px] font-bold uppercase rounded-lg transition-all ${curveSport === 'run' ? 'bg-white dark:bg-zinc-700 text-orange-600 dark:text-orange-400 shadow-sm' : 'text-slate-500'}`}>Carrera</button>
                         </div>
-
-                        <div className="flex-1 flex flex-col justify-center mb-4">
-                            <div className="flex items-baseline gap-2 justify-center">
-                                <span className="text-5xl font-mono font-black leading-none text-slate-800 dark:text-zinc-100 tracking-tighter">{currentVo2Value > 0 ? currentVo2Value : '--'}</span>
-                                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">ml/kg/min</span>
-                            </div>
-                            <div className="text-center mt-2">
-                                <span className={`text-[11px] font-black uppercase tracking-widest px-3 py-1 bg-slate-50 dark:bg-zinc-950 rounded-full border border-slate-100 dark:border-zinc-800 shadow-sm ${vo2Info.color}`}>{vo2Info.label}</span>
-                            </div>
-                        </div>
-
-                        <div className="relative w-full h-2 mt-auto">
-                            {currentVo2Value > 0 && (
-                                <div className="absolute -top-3 -translate-x-1/2 transition-all duration-1000 ease-out z-10" style={{ left: vo2Info.width }}>
-                                    <div className="w-0 h-0 border-l-[6px] border-r-[6px] border-t-[8px] border-l-transparent border-r-transparent border-t-slate-800 dark:border-t-zinc-200 drop-shadow-md"></div>
-                                </div>
-                            )}
-                            <div className="w-full h-full flex rounded-full overflow-hidden opacity-90 shadow-inner bg-slate-100 dark:bg-zinc-800">
-                                <div className="h-full w-[20%] bg-red-400 dark:bg-red-500"></div>
-                                <div className="h-full w-[20%] bg-orange-400 dark:bg-orange-500"></div>
-                                <div className="h-full w-[20%] bg-emerald-400 dark:bg-emerald-500"></div>
-                                <div className="h-full w-[20%] bg-blue-400 dark:bg-blue-500"></div>
-                                <div className="h-full w-[20%] bg-purple-400 dark:bg-purple-500"></div>
-                            </div>
+                        <div className="flex gap-3">
+                            {['power', 'speed', 'hr'].map(t => (
+                                <button key={t} onClick={() => setCurveType(t)} className={`text-[9px] font-bold uppercase ${curveType === t ? 'text-blue-500 border-b-2 border-blue-500' : 'text-slate-400'}`}>
+                                    {t === 'power' ? 'Potencia' : (t === 'speed' ? (curveSport === 'run' ? 'Ritmo' : 'Veloc.') : 'Pulso')}
+                                </button>
+                            ))}
                         </div>
                     </div>
 
-                    <div className="bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 p-5 rounded-lg flex flex-col min-h-[220px] lg:col-span-2">
-                        <div className="flex justify-between items-center mb-3">
-                            <div className="flex items-center group relative cursor-help">
-                                <h4 className="text-[10px] font-bold text-slate-600 dark:text-zinc-400 uppercase tracking-widest flex items-center gap-1.5"><ActivityPulse size={12} className="text-violet-500" /> Tendencia de Eficacia (EF) <Info size={10} className="text-slate-400" /></h4>
-                                <Subtitle text="Últ. 90D" />
-                                <div className="absolute opacity-0 group-hover:opacity-100 transition-opacity duration-200 bg-slate-800 text-slate-100 p-3 rounded-lg top-[calc(100%+10px)] left-0 w-64 text-center pointer-events-none z-[100] shadow-xl border border-slate-700 text-[10px] normal-case tracking-normal">
-                                    <strong>¿Qué es el Factor de Eficiencia?</strong><br /><br />
-                                    Se calcula dividiendo la potencia/ritmo entre las pulsaciones. Si esta línea sube, significa que mejoras: produces más energía o vas más rápido con el mismo (o menor) sobreesfuerzo del corazón.
-                                </div>
+                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                        {/* EF TREND */}
+                        <div className="flex flex-col lg:col-span-1">
+                            <div className="flex items-center gap-1 mb-4">
+                                <span className="text-[9px] font-bold uppercase tracking-widest text-slate-400">Eficiencia Aeróbica (EF)</span>
+                                <InfoTooltip text="Relación entre potencia/ritmo y pulso. Un EF al alza indica que eres más eficiente (generas más vatios a menos pulso)." />
                             </div>
-                            <div className="flex bg-slate-100 dark:bg-zinc-800 p-0.5 rounded-full shadow-inner">
-                                <button onClick={() => setScatterSport('bike')} className={`px-2.5 py-1 text-[9px] font-bold uppercase rounded-full transition-all ${scatterSport === 'bike' ? 'bg-white dark:bg-zinc-600 text-slate-800 dark:text-zinc-100 shadow' : 'text-slate-500 hover:text-slate-700 dark:hover:text-zinc-300'}`}>Bici</button>
-                                <button onClick={() => setScatterSport('run')} className={`px-2.5 py-1 text-[9px] font-bold uppercase rounded-full transition-all ${scatterSport === 'run' ? 'bg-white dark:bg-zinc-600 text-slate-800 dark:text-zinc-100 shadow' : 'text-slate-500 hover:text-slate-700 dark:hover:text-zinc-300'}`}>Run</button>
+                            <div className="h-[180px] w-full">
+                                <ResponsiveContainer width="100%" height="100%">
+                                    <AreaChart data={analytics.efData[curveSport]} onClick={handleChartBackgroundClick}>
+                                        <defs>
+                                            <linearGradient id="efGrad" x1="0" y1="0" x2="0" y2="1">
+                                                <stop offset="5%" stopColor="#8b5cf6" stopOpacity={0.1} />
+                                                <stop offset="95%" stopColor="#8b5cf6" stopOpacity={0} />
+                                            </linearGradient>
+                                        </defs>
+                                        <CartesianGrid strokeDasharray="2 2" stroke="#3f3f46" opacity={0.1} vertical={false} />
+                                        <XAxis dataKey="dateLabel" hide />
+                                        <YAxis hide domain={['dataMin - 0.1', 'dataMax + 0.1']} />
+                                        <RechartsTooltip content={<CustomEfTooltip />} isAnimationActive={false} />
+                                        <Area type="monotone" dataKey="ef" stroke="#8b5cf6" strokeWidth={2} fill="url(#efGrad)" activeDot={{ r: 4, fill: '#8b5cf6' }} isAnimationActive={false} />
+                                    </AreaChart>
+                                </ResponsiveContainer>
                             </div>
                         </div>
-                        <div className="flex-1 w-full cursor-pointer mt-2">
-                            <ResponsiveContainer width="100%" height="100%">
-                                <AreaChart data={analytics.efData[scatterSport]} margin={{ top: 10, right: 0, bottom: 0, left: -25 }} onClick={handleChartBackgroundClick}>
-                                    <defs>
-                                        <linearGradient id="efGradientColor" x1="0" y1="0" x2="0" y2="1">
-                                            <stop offset="5%" stopColor="#8b5cf6" stopOpacity={0.4} />
-                                            <stop offset="95%" stopColor="#8b5cf6" stopOpacity={0} />
-                                        </linearGradient>
-                                    </defs>
-                                    <CartesianGrid strokeDasharray="2 2" stroke="#3f3f46" opacity={0.3} vertical={false} />
-                                    <XAxis dataKey="dateLabel" tick={{ fontSize: 9, fill: '#71717a' }} axisLine={{ stroke: '#3f3f46' }} tickLine={false} minTickGap={20} />
-                                    <YAxis type="number" domain={['dataMin - 0.2', 'dataMax + 0.2']} tick={{ fontSize: 9, fill: '#8b5cf6' }} axisLine={false} tickLine={false} />
-                                    <RechartsTooltip content={<CustomEfTooltip />} isAnimationActive={false} cursor={{ stroke: '#71717a', strokeWidth: 1, strokeDasharray: '4 4' }} />
-                                    <Area type="monotone" dataKey="ef" stroke="#8b5cf6" strokeWidth={2.5} fillOpacity={1} fill="url(#efGradientColor)" activeDot={{ onClick: (e, payload) => handleDirectClick(payload.payload), r: 6, stroke: '#fff', strokeWidth: 2, cursor: 'pointer' }} isAnimationActive={false} />
-                                </AreaChart>
-                            </ResponsiveContainer>
+
+                        {/* MMP CURVE */}
+                        <div className="flex flex-col lg:col-span-1 border-x border-slate-100 dark:border-zinc-800 px-4">
+                            <div className="flex items-center gap-1 mb-4">
+                                <span className="text-[9px] font-bold uppercase tracking-widest text-slate-400">Curva MMP</span>
+                                <InfoTooltip text="Tu mejor potencia/ritmo para cada duración. Refleja tu perfil de capacidades y récords históricos." />
+                            </div>
+                            <div className="h-[180px] w-full">
+                                <ResponsiveContainer width="100%" height="100%">
+                                    <AreaChart data={currentCurve}>
+                                        <CartesianGrid strokeDasharray="1 1" stroke="#3f3f46" opacity={0.05} />
+                                        <XAxis dataKey="name" tick={{ fontSize: 7, fill: '#71717a' }} />
+                                        <YAxis hide reversed={isPace} domain={['auto', 'auto']} />
+                                        <RechartsTooltip content={<CustomCurveTooltip />} isAnimationActive={false} />
+                                        <Area type="stepAfter" dataKey="value" stroke={curveColor} strokeWidth={2} fill={curveColor} fillOpacity={0.03} dot={false} isAnimationActive={false} />
+                                    </AreaChart>
+                                </ResponsiveContainer>
+                            </div>
+                        </div>
+
+                        {/* MMP PEAKS TABLE */}
+                        <div className="flex flex-col lg:col-span-1">
+                            <div className="flex items-center gap-1 mb-4">
+                                <span className="text-[9px] font-bold uppercase tracking-widest text-slate-400">Récords Históricos</span>
+                                <InfoTooltip text="Tus mejores valores absolutos para las duraciones clave. Se actualizan automáticamente con cada actividad." />
+                            </div>
+                            <div className="space-y-2">
+                                {[1, 60, 300, 1200].map(secs => {
+                                    const pk = analytics.peaksRecord[curveSport][curveType === 'power' ? 'pwr' : (curveType === 'speed' ? 'spd' : 'hr')][secs];
+                                    let displayVal = pk.value;
+                                    if (curveType === 'speed') {
+                                        if (curveSport === 'run') displayVal = formatPace(16.6666667 / pk.value);
+                                        else displayVal = (pk.value * 3.6).toFixed(1);
+                                    } else {
+                                        displayVal = Math.round(pk.value);
+                                    }
+                                    
+                                    return (
+                                        <div key={secs} className="flex items-center justify-between p-2 rounded-lg bg-slate-50 dark:bg-zinc-800/50 border border-slate-100 dark:border-zinc-800">
+                                            <span className="text-[9px] font-bold text-slate-500 uppercase">{formatInterval(secs)}</span>
+                                            <div className="text-right">
+                                                <p className="text-xs font-black text-slate-800 dark:text-zinc-100">
+                                                    {pk.value > 0 ? displayVal : '--'}
+                                                    <span className="text-[8px] ml-0.5 font-bold text-slate-400">{curveUnit}</span>
+                                                </p>
+                                                {pk.actDate && <p className="text-[7px] text-slate-400 uppercase">{new Date(pk.actDate).toLocaleDateString()}</p>}
+                                            </div>
+                                        </div>
+                                    );
+                                })}
+                            </div>
                         </div>
                     </div>
-
-                    {/* Fila Inferior: Mean Maximal Curve (Ancho completo) */}
-                    <div className="bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 p-5 rounded-lg lg:col-span-3 h-[300px] flex flex-col mt-2">
-                        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-5">
-                            <div className="flex items-center">
-                                <h4 className="text-[10px] font-bold text-slate-600 dark:text-zinc-400 uppercase tracking-widest flex items-center gap-1.5"><Trophy size={12} className="text-amber-500" /> Curva de Mejores Marcas (MMP)</h4>
-
-                                <div className="flex bg-slate-100 dark:bg-zinc-800 p-0.5 rounded-full shadow-inner ml-4">
-                                    <button onClick={() => setMmpTimeframe('90d')} className={`px-3 py-1 text-[8px] font-bold uppercase rounded-full transition-all ${mmpTimeframe === '90d' ? 'bg-white dark:bg-zinc-600 text-blue-600 dark:text-blue-400 shadow' : 'text-slate-500 hover:text-slate-700 dark:hover:text-zinc-300'}`}>90D</button>
-                                    <button onClick={() => setMmpTimeframe('1y')} className={`px-3 py-1 text-[8px] font-bold uppercase rounded-full transition-all ${mmpTimeframe === '1y' ? 'bg-white dark:bg-zinc-600 text-blue-600 dark:text-blue-400 shadow' : 'text-slate-500 hover:text-slate-700 dark:hover:text-zinc-300'}`}>1 Año</button>
-                                    <button onClick={() => setMmpTimeframe('all')} className={`px-3 py-1 text-[8px] font-bold uppercase rounded-full transition-all ${mmpTimeframe === 'all' ? 'bg-white dark:bg-zinc-600 text-blue-600 dark:text-blue-400 shadow' : 'text-slate-500 hover:text-slate-700 dark:hover:text-zinc-300'}`}>Histo</button>
-                                </div>
-                            </div>
-
-                            <div className="flex gap-3">
-                                <div className="flex bg-slate-100 dark:bg-zinc-800 p-0.5 rounded-full shadow-inner">
-                                    <button onClick={() => setCurveSport('bike')} className={`px-3 py-1 text-[9px] font-bold uppercase rounded-full transition-all ${curveSport === 'bike' ? 'bg-slate-800 dark:bg-zinc-600 text-white shadow' : 'text-slate-500 hover:text-slate-700 dark:hover:text-zinc-300'}`}>Bicicleta</button>
-                                    <button onClick={() => setCurveSport('run')} className={`px-3 py-1 text-[9px] font-bold uppercase rounded-full transition-all ${curveSport === 'run' ? 'bg-slate-800 dark:bg-zinc-600 text-white shadow' : 'text-slate-500 hover:text-slate-700 dark:hover:text-zinc-300'}`}>Carrera</button>
-                                </div>
-                                <div className="flex bg-slate-100 dark:bg-zinc-800 p-0.5 rounded-full shadow-inner">
-                                    <button onClick={() => setCurveType('speed')} className={`px-3 py-1 text-[9px] font-bold uppercase rounded-full transition-all ${curveType === 'speed' ? 'bg-slate-800 dark:bg-zinc-600 text-white shadow' : 'text-slate-500 hover:text-slate-700 dark:hover:text-zinc-300'}`}>{curveSport === 'run' ? 'Ritmo' : 'Veloc.'}</button>
-                                    <button onClick={() => setCurveType('hr')} className={`px-3 py-1 text-[9px] font-bold uppercase rounded-full transition-all ${curveType === 'hr' ? 'bg-slate-800 dark:bg-zinc-600 text-white shadow' : 'text-slate-500 hover:text-slate-700 dark:hover:text-zinc-300'}`}>Pulso</button>
-                                </div>
-                            </div>
-                        </div>
-                        <div className="flex-1 w-full px-2">
-                            <ResponsiveContainer width="100%" height="100%">
-                                <AreaChart data={currentCurve} margin={{ top: 10, right: 10, bottom: 0, left: -25 }}>
-                                    <CartesianGrid strokeDasharray="2 2" stroke="#3f3f46" opacity={0.3} vertical={false} />
-                                    <XAxis dataKey="name" tick={{ fontSize: 9, fill: '#71717a', fontWeight: 600 }} minTickGap={10} axisLine={{ stroke: '#3f3f46' }} tickLine={false} />
-                                    <YAxis tick={{ fontSize: 9, fill: curveColor, fontWeight: 700 }} domain={isPace ? ['dataMin - 0.5', 'dataMax + 1'] : [curveType === 'speed' ? 0 : 'dataMin - 5', 'dataMax + 5']} axisLine={false} tickLine={false} reversed={isPace} tickFormatter={isPace ? formatPace : undefined} />
-                                    <RechartsTooltip content={<CustomCurveTooltip />} isAnimationActive={false} cursor={{ stroke: '#71717a', strokeWidth: 1, strokeDasharray: '4 4' }} />
-                                    <Area type="monotone" dataKey="value" stroke={curveColor} strokeWidth={2.5} fillOpacity={0.15} fill={curveColor} activeDot={{ onClick: (e, payload) => handleDirectClick(payload.payload), r: 6, stroke: '#fff', strokeWidth: 2, cursor: 'pointer' }} dot={false} isAnimationActive={false} />
-                                </AreaChart>
-                            </ResponsiveContainer>
-                        </div>
-                    </div>
-
                 </div>
-            </section>
-
-
-
+            </div>
         </div>
     );
 };

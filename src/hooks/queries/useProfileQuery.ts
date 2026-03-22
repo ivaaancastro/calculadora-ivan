@@ -9,6 +9,13 @@ const getCurrentUserId = async () => {
     return session?.user?.id || null;
 };
 
+// Helper: safely parse a number from DB, only falling back when truly null/undefined
+const num = (val: any, fallback: number): number => {
+    if (val == null) return fallback;
+    const n = Number(val);
+    return isNaN(n) ? fallback : n;
+};
+
 export const useProfileQuery = () => {
     const queryClient = useQueryClient();
     const { updateSettings, setStravaConnected } = useAppStore();
@@ -32,27 +39,33 @@ export const useProfileQuery = () => {
 
             if (data) {
                 if (data.strava_access_token) setStravaConnected(true);
+
+                const runLthr = num(data.run_lthr, 178);
+                const runMax = num(data.run_fc_max, 200);
+                const bikeLthr = num(data.bike_lthr, 168);
+                const bikeMax = num(data.bike_fc_max, 190);
+
                 updateSettings({
-                    gender: data.gender || "male",
-                    weight: Number(data.weight) || 70,
-                    fcReposo: Number(data.fc_rest) || 50,
+                    gender: data.gender ?? "male",
+                    weight: num(data.weight, 70),
+                    fcReposo: num(data.fc_rest, 50),
                     run: {
-                        max: Number(data.run_fc_max) || 200,
-                        lthr: Number(data.run_lthr) || 178,
-                        zones: data.run_zones || calcZonesFromLTHR(Number(data.run_lthr) || 178, Number(data.run_fc_max) || 200),
-                        zonesMode: data.run_zones_mode || 'lthr',
-                        thresholdPace: data.run_threshold_pace || '4:30',
-                        paceZones: data.run_pace_zones || null,
+                        max: runMax,
+                        lthr: runLthr,
+                        zones: data.run_zones ?? calcZonesFromLTHR(runLthr, runMax),
+                        zonesMode: data.run_zones_mode ?? 'lthr',
+                        thresholdPace: data.run_threshold_pace ?? '4:30',
+                        paceZones: data.run_pace_zones ?? null,
                     },
                     bike: {
-                        max: Number(data.bike_fc_max) || 190,
-                        lthr: Number(data.bike_lthr) || 168,
-                        zones: data.bike_zones || calcZonesFromLTHR(Number(data.bike_lthr) || 168, Number(data.bike_fc_max) || 190),
-                        zonesMode: data.bike_zones_mode || 'lthr',
-                        ftp: Number(data.bike_ftp) || 200,
+                        max: bikeMax,
+                        lthr: bikeLthr,
+                        zones: data.bike_zones ?? calcZonesFromLTHR(bikeLthr, bikeMax),
+                        zonesMode: data.bike_zones_mode ?? 'lthr',
+                        ftp: num(data.bike_ftp, 200),
                     },
-                    intervalsId: data.intervalsId || "",
-                    intervalsKey: data.intervalsKey || "",
+                    intervalsId: data.intervalsId ?? "",
+                    intervalsKey: data.intervalsKey ?? "",
                 });
             }
 
@@ -66,26 +79,29 @@ export const useProfileQuery = () => {
             const userId = await getCurrentUserId();
             if (!userId) throw new Error("No hay sesión activa");
 
+            // Convert app-format settings to DB column names
+            const dbPayload = {
+                user_id: userId,
+                gender: newSettings.gender,
+                weight: newSettings.weight,
+                fc_rest: newSettings.fcReposo,
+                run_fc_max: newSettings.run?.max,
+                run_lthr: newSettings.run?.lthr,
+                run_zones: newSettings.run?.zones,
+                run_zones_mode: newSettings.run?.zonesMode,
+                run_threshold_pace: newSettings.run?.thresholdPace,
+                run_pace_zones: newSettings.run?.paceZones,
+                bike_fc_max: newSettings.bike?.max,
+                bike_lthr: newSettings.bike?.lthr,
+                bike_zones: newSettings.bike?.zones,
+                bike_zones_mode: newSettings.bike?.zonesMode,
+                bike_ftp: newSettings.bike?.ftp,
+                intervalsId: newSettings.intervalsId,
+                intervalsKey: newSettings.intervalsKey,
+            };
+
             const { error } = await supabase.from("profiles").upsert(
-                {
-                    user_id: userId,
-                    gender: newSettings.gender,
-                    weight: newSettings.weight,
-                    fc_rest: newSettings.fcReposo,
-                    run_fc_max: newSettings.run.max,
-                    run_lthr: newSettings.run.lthr,
-                    run_zones: newSettings.run.zones,
-                    run_zones_mode: newSettings.run.zonesMode,
-                    run_threshold_pace: newSettings.run.thresholdPace,
-                    run_pace_zones: newSettings.run.paceZones,
-                    bike_fc_max: newSettings.bike.max,
-                    bike_lthr: newSettings.bike.lthr,
-                    bike_zones: newSettings.bike.zones,
-                    bike_zones_mode: newSettings.bike.zonesMode,
-                    bike_ftp: newSettings.bike.ftp,
-                    intervalsId: newSettings.intervalsId,
-                    intervalsKey: newSettings.intervalsKey,
-                },
+                dbPayload,
                 { onConflict: "user_id" },
             );
 
@@ -93,8 +109,30 @@ export const useProfileQuery = () => {
             return newSettings;
         },
         onSuccess: (newSettings) => {
+            // 1. Update Zustand store with the app-format settings
             updateSettings(newSettings);
-            queryClient.setQueryData(["profile"], (oldData: any) => ({ ...(oldData || {}), ...newSettings }));
+
+            // 2. Update React Query cache with DB-format columns (matching what queryFn returns)
+            //    This prevents the cache from being corrupted with app-format keys
+            queryClient.setQueryData(["profile"], (oldData: any) => ({
+                ...(oldData || {}),
+                gender: newSettings.gender,
+                weight: newSettings.weight,
+                fc_rest: newSettings.fcReposo,
+                run_fc_max: newSettings.run?.max,
+                run_lthr: newSettings.run?.lthr,
+                run_zones: newSettings.run?.zones,
+                run_zones_mode: newSettings.run?.zonesMode,
+                run_threshold_pace: newSettings.run?.thresholdPace,
+                run_pace_zones: newSettings.run?.paceZones,
+                bike_fc_max: newSettings.bike?.max,
+                bike_lthr: newSettings.bike?.lthr,
+                bike_zones: newSettings.bike?.zones,
+                bike_zones_mode: newSettings.bike?.zonesMode,
+                bike_ftp: newSettings.bike?.ftp,
+                intervalsId: newSettings.intervalsId,
+                intervalsKey: newSettings.intervalsKey,
+            }));
             toast.success("¡Perfil fisiológico y claves guardadas con éxito!");
         },
         onError: (error) => {
