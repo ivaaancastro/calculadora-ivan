@@ -291,7 +291,7 @@ export const AdvancedAnalytics = ({ activities, settings, onSelectActivity, time
     const curveColor = curveType === 'hr' ? '#ef4444' : (curveType === 'power' ? '#fbbf24' : (isPace ? '#ea580c' : '#2563eb'));
     const curveUnit = curveType === 'power' ? 'w' : (isPace ? '/km' : (curveType === 'speed' ? 'km/h' : 'ppm'));
 
-    const tooltipStyle = { backgroundColor: '#18181b', border: '1px solid #3f3f46', borderRadius: '4px', color: '#f4f4f5', fontSize: '11px', fontWeight: '500', padding: '8px 10px', zIndex: 1000 };
+    const tooltipStyle = { backgroundColor: '#18181b', border: '1px solid #3f3f46', borderRadius: '4px', color: '#f4f4f5', fontSize: '11px', fontWeight: '500', padding: '8px 10px', zIndex: 1000, pointerEvents: 'none' };
 
     const handleDirectClick = (payload) => { if (!onSelectActivity) return; if (payload?.actId || payload?.id) onSelectActivity(activities.find(a => a.id === (payload.actId || payload.id))); };
     const handleChartBackgroundClick = (data) => { if (data && data.activePayload && data.activePayload.length > 0) handleDirectClick(data.activePayload[0].payload); };
@@ -307,7 +307,7 @@ export const AdvancedAnalytics = ({ activities, settings, onSelectActivity, time
                         <div className="border-t border-zinc-700 pt-2 mt-1">
                             <p className="text-[10px] text-zinc-200 truncate font-bold">{data.actName}</p>
                             <p className="text-[9px] text-zinc-500">{new Date(data.actDate).toLocaleDateString()}</p>
-                            <div className="flex items-center gap-1 text-[8px] text-blue-400 mt-1 font-bold uppercase tracking-wider"><MousePointer2 size={8} /> Clic para abrir</div>
+                            <div className="flex items-center gap-1 text-[8px] text-blue-400 mt-1 font-bold uppercase tracking-widest"><MousePointer2 size={8} /> Clic en el punto para abrir</div>
                         </div>
                     )}
                 </div>
@@ -319,13 +319,13 @@ export const AdvancedAnalytics = ({ activities, settings, onSelectActivity, time
     const CustomEfTooltip = ({ active, payload }) => {
         if (active && payload && payload.length) {
             const data = payload[0].payload;
-            const isRun = scatterSport === 'run';
+            const isRun = curveSport === 'run';
             return (
                 <div style={tooltipStyle} className="shadow-xl w-48 z-[200]">
                     <p className="text-[9px] text-zinc-400 uppercase tracking-widest mb-1.5 border-b border-zinc-700 pb-1">Factor de Eficiencia</p>
                     <div className="flex justify-between items-end mb-2">
                         <span className="text-xl font-black text-violet-400 leading-none">{data.ef}</span>
-                        <span className="text-[10px] text-zinc-500 font-bold uppercase">{isRun ? 'v/hr' : 'w/hr'}</span>
+                        <span className="text-[10px] text-zinc-500 font-bold uppercase">{isRun ? 'm/bpm' : 'w/bpm'}</span>
                     </div>
                     <div className="grid grid-cols-2 gap-2 mb-2 bg-zinc-800 p-2 rounded">
                         <div>
@@ -340,7 +340,7 @@ export const AdvancedAnalytics = ({ activities, settings, onSelectActivity, time
                     <div className="border-t border-zinc-700 pt-2 mt-1">
                         <p className="text-[10px] text-zinc-200 truncate font-bold" title={data.name}>{data.name}</p>
                         <p className="text-[9px] text-zinc-500">{new Date(data.date).toLocaleDateString()}</p>
-                        <div className="flex items-center gap-1 text-[8px] text-blue-400 mt-2 font-bold uppercase tracking-wider"><MousePointer2 size={8} /> Clic para abrir actividad</div>
+                        <div className="flex items-center gap-1 text-[8px] text-blue-400 mt-2 font-bold uppercase tracking-widest"><MousePointer2 size={8} /> Clic en el punto para abrir</div>
                     </div>
                 </div>
             );
@@ -677,13 +677,16 @@ export const AdvancedAnalytics = ({ activities, settings, onSelectActivity, time
                     <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                         {/* EF TREND */}
                         <div className="flex flex-col lg:col-span-1">
-                            <div className="flex items-center gap-1 mb-4">
+                            <div className="flex items-center gap-2 mb-4">
                                 <span className="text-[9px] font-bold uppercase tracking-widest text-slate-400">Eficiencia Aeróbica (EF)</span>
-                                <InfoTooltip text="Relación entre potencia/ritmo y pulso. Un EF al alza indica que eres más eficiente (generas más vatios a menos pulso)." />
+                                <div className={`px-2 py-0.5 rounded-full text-[7px] font-black uppercase ${curveSport === 'bike' ? 'bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-500' : 'bg-orange-100 dark:bg-orange-900/30 text-orange-600 dark:text-orange-500'}`}>
+                                    {curveSport === 'bike' ? 'Potencia / FC' : 'Ritmo / FC'}
+                                </div>
+                                <InfoTooltip text={curveSport === 'bike' ? "Relación entre vatios medios y pulso medio. Un EF al alza indica que eres más eficiente (generas más vatios a menos pulso)." : "Relación entre velocidad (m/min) y pulso medio. Un EF al alza indica que eres más eficiente (corres más rápido a menos pulso)."} />
                             </div>
                             <div className="h-[180px] w-full">
                                 <ResponsiveContainer width="100%" height="100%">
-                                    <AreaChart data={analytics.efData[curveSport]} onClick={handleChartBackgroundClick}>
+                                    <ComposedChart data={analytics.efData[curveSport]}>
                                         <defs>
                                             <linearGradient id="efGrad" x1="0" y1="0" x2="0" y2="1">
                                                 <stop offset="5%" stopColor="#8b5cf6" stopOpacity={0.1} />
@@ -695,7 +698,16 @@ export const AdvancedAnalytics = ({ activities, settings, onSelectActivity, time
                                         <YAxis hide domain={['dataMin - 0.1', 'dataMax + 0.1']} />
                                         <RechartsTooltip content={<CustomEfTooltip />} isAnimationActive={false} />
                                         <Area type="monotone" dataKey="ef" stroke="#8b5cf6" strokeWidth={2} fill="url(#efGrad)" activeDot={{ r: 4, fill: '#8b5cf6' }} isAnimationActive={false} />
-                                    </AreaChart>
+                                        <Scatter 
+                                            dataKey="ef" 
+                                            fill="transparent" 
+                                            cursor="pointer" 
+                                            onClick={(data) => { 
+                                                const act = activities.find(a => a.id === data.id);
+                                                if (act && onSelectActivity) onSelectActivity(act);
+                                            }} 
+                                        />
+                                    </ComposedChart>
                                 </ResponsiveContainer>
                             </div>
                         </div>
@@ -708,13 +720,24 @@ export const AdvancedAnalytics = ({ activities, settings, onSelectActivity, time
                             </div>
                             <div className="h-[180px] w-full">
                                 <ResponsiveContainer width="100%" height="100%">
-                                    <AreaChart data={currentCurve}>
+                                    <ComposedChart data={currentCurve}>
                                         <CartesianGrid strokeDasharray="1 1" stroke="#3f3f46" opacity={0.05} />
                                         <XAxis dataKey="name" tick={{ fontSize: 7, fill: '#71717a' }} />
                                         <YAxis hide reversed={isPace} domain={['auto', 'auto']} />
                                         <RechartsTooltip content={<CustomCurveTooltip />} isAnimationActive={false} />
                                         <Area type="stepAfter" dataKey="value" stroke={curveColor} strokeWidth={2} fill={curveColor} fillOpacity={0.03} dot={false} isAnimationActive={false} />
-                                    </AreaChart>
+                                        <Scatter 
+                                            dataKey="value" 
+                                            fill="transparent" 
+                                            cursor="pointer" 
+                                            onClick={(data) => { 
+                                                if (data.actId && onSelectActivity) {
+                                                    const act = activities.find(a => a.id === data.actId);
+                                                    if (act) onSelectActivity(act);
+                                                }
+                                            }} 
+                                        />
+                                    </ComposedChart>
                                 </ResponsiveContainer>
                             </div>
                         </div>
