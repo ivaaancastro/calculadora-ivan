@@ -49,17 +49,23 @@ export const useActivities = () => {
   const refreshStravaToken = async (refreshToken) => {
     const clientId = import.meta.env.VITE_STRAVA_CLIENT_ID;
     const clientSecret = import.meta.env.VITE_STRAVA_CLIENT_SECRET;
-    const response = await fetch("https://www.strava.com/oauth/token", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        client_id: clientId,
-        client_secret: clientSecret,
-        grant_type: "refresh_token",
-        refresh_token: refreshToken,
-      }),
+    
+    const params = new URLSearchParams({
+      client_id: clientId,
+      client_secret: clientSecret,
+      grant_type: "refresh_token",
+      refresh_token: refreshToken,
     });
-    if (!response.ok) throw new Error("Error refrescando token Strava");
+
+    const response = await fetch(`https://www.strava.com/oauth/token?${params.toString()}`, {
+      method: "POST"
+    });
+
+    if (!response.ok) {
+        const err = await response.json().catch(() => ({}));
+        console.error("Strava refresh fail:", err);
+        throw new Error("Error refrescando token Strava");
+    }
     return await response.json();
   };
 
@@ -404,11 +410,18 @@ export const useActivities = () => {
         summary: { count: 0 },
       };
 
-    const processedActivities = [...activities].map((act) => ({
-      ...act,
-      tss: calculateActivityTSS(act, settings),
-      sportCategory: getSportCategory(act.type),
-    }));
+    const processedActivities = [...activities].map((act) => {
+      const calcTss = calculateActivityTSS(act, settings);
+      const tssVal = typeof calcTss === 'number' ? calcTss : (calcTss?.tss || 0);
+      return {
+        ...act,
+        tss: tssVal,
+        np: calcTss?.np || null,
+        intensity_factor: calcTss?.intensity_factor || null,
+        tssMethod: calcTss?.method || 'unknown',
+        sportCategory: getSportCategory(act.type),
+      };
+    });
     const sortedActs = processedActivities;
     const startDate = new Date(sortedActs[0].date);
     const today = new Date();

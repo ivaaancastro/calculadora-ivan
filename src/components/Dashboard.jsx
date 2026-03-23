@@ -13,12 +13,8 @@ import { useActivities } from "../hooks/useActivities";
 // Componentes
 import { Navbar } from "./dashboard/Navbar";
 import { BottomNav } from "./layout/BottomNav";
-import { KpiGrid } from "./dashboard/KpiGrid";
-import { EvolutionChart } from "./dashboard/EvolutionChart";
-import { DistributionChart } from "./dashboard/DistributionChart";
-import { HistoryList } from "./dashboard/HistoryList";
 import { AdvancedAnalytics } from "./dashboard/AdvancedAnalytics";
-import { TrendsChart } from "./dashboard/TrendsChart";
+import { HistoryList } from "./dashboard/HistoryList";
 import AddActivityModal from "./modals/AddActivityModal";
 import { CalendarPage } from "./pages/CalendarPage";
 import { ActivityDetailPage } from "./pages/ActivityDetailPage";
@@ -65,6 +61,7 @@ const Dashboard = () => {
 
   const handleTabChange = (tab) => {
     setActiveTab(tab);
+    setActiveActivity(null);
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
@@ -80,14 +77,14 @@ const Dashboard = () => {
   }
 
   return (
-    <div className={`min-h-screen bg-slate-50 dark:bg-zinc-950 text-slate-800 dark:text-zinc-200 font-sans ${activeActivity ? 'pb-0' : 'pb-24 md:pb-12'} transition-colors duration-300 selection:bg-blue-500/30 overflow-hidden`}>
+    <div className="min-h-screen bg-slate-50 dark:bg-zinc-950 text-slate-800 dark:text-zinc-200 font-sans pb-24 md:pb-12 transition-colors duration-300 selection:bg-blue-500/30 overflow-hidden">
       <Navbar
         activities={activities}
         uploading={uploading}
         handleClearDb={handleClearDb}
         onFileUpload={processFile}
         onAddClick={() => setIsModalOpen(true)}
-        onProfileClick={() => setActiveTab("profile")}
+        onProfileClick={() => handleTabChange("profile")}
         isStravaConnected={isStravaConnected}
         onSync={handleStravaSync}
         activeTab={activeTab}
@@ -150,74 +147,16 @@ const Dashboard = () => {
                   : "hidden"
               }
             >
-              <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-2">
-                <div>
-                  <h2 className="text-xl font-black text-slate-900 dark:text-zinc-100 tracking-tight uppercase">
-                    Panel de Rendimiento
-                  </h2>
-                  <p className="text-[10px] font-bold uppercase tracking-widest text-slate-500 dark:text-zinc-500">
-                    Métricas y Adaptaciones Fisiológicas
-                  </p>
-                </div>
 
-                {/* SELECTOR DE TIEMPO */}
-                <div className="flex border border-slate-200 dark:border-zinc-700 rounded overflow-hidden self-start sm:self-auto">
-                  {[
-                    { id: "7d", label: "7D" },
-                    { id: "30d", label: "30D" },
-                    { id: "90d", label: "3M" },
-                    { id: "1y", label: "1A" },
-                    { id: "all", label: "Todo" },
-                  ].map((t) => (
-                    <button
-                      key={t.id}
-                      onClick={() => setTimeRange(t.id)}
-                      className={`px-3 py-1.5 text-[10px] font-bold uppercase transition-colors ${timeRange === t.id
-                        ? "bg-blue-600 text-white border-blue-600"
-                        : "bg-white dark:bg-zinc-900 text-slate-500 dark:text-zinc-400 hover:bg-slate-50 dark:hover:bg-zinc-800 border-l border-slate-200 dark:border-zinc-700 first:border-l-0"
-                        }`}
-                    >
-                      {t.label}
-                    </button>
-                  ))}
-                </div>
-              </div>
 
-              {/* KPI GRID */}
-              <KpiGrid
-                metrics={currentMetrics}
-                summary={summary}
-                timeRange={timeRange}
-              />
-
-              {/* PMC CHART — FULL WIDTH */}
-              <div className="h-[350px]">
-                <EvolutionChart data={chartData} />
-              </div>
-
-              {/* TRENDS + DISTRIBUTION */}
-              <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
-                <div className="lg:col-span-8">
-                  <TrendsChart activities={activities} />
-                </div>
-                <div className="lg:col-span-4 h-[420px]">
-                  <DistributionChart
-                    distribution={distribution}
-                    total={summary.count}
-                  />
-                </div>
-              </div>
-
-              {/* SECCIÓN AVANZADA */}
-              <div className="pt-4 border-t border-slate-200 dark:border-zinc-800 mt-4">
-                <ErrorBoundary>
                   <AdvancedAnalytics
                     activities={activities}
                     settings={settings}
                     onSelectActivity={(act) => setActiveActivity(act)}
+                    timeRange={timeRange}
+                    setTimeRange={setTimeRange}
+                    chartData={chartData}
                   />
-                </ErrorBoundary>
-              </div>
             </div>
 
             {/* VISTA: CALENDARIO */}
@@ -282,7 +221,7 @@ const Dashboard = () => {
       </main>
 
       {/* BOTTOM NAV PARA MÓVIL */}
-      {!activeActivity && <BottomNav activeTab={activeTab} onTabChange={handleTabChange} />}
+      <BottomNav activeTab={activeTab} onTabChange={handleTabChange} />
 
       {/* MODAL PARA AÑADIR MANUALMENTE */}
       <AddActivityModal
