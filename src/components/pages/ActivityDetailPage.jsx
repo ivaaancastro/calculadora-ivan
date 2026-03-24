@@ -119,9 +119,13 @@ const formatPace = (decimalMinutes) => {
 
 const CustomChartTooltip = ({ active, payload, label, unit = '' }) => {
     if (active && payload && payload.length) {
+        const data = payload[0]?.payload;
         return (
-            <div className="bg-zinc-900 border border-zinc-700 p-2 rounded shadow-xl text-[10px] font-bold text-zinc-100 min-w-[80px]">
+            <div className="bg-zinc-900 border border-zinc-700 p-2.5 rounded shadow-xl text-[10px] font-bold text-zinc-100 min-w-[90px]">
                 <p className="mb-1 uppercase text-zinc-500 tracking-tighter text-[8px]">{label}</p>
+                {data?.range && (
+                    <p className="mb-1.5 text-[9px] text-zinc-400 font-medium">{data.range}</p>
+                )}
                 <div className="flex items-baseline gap-1">
                     <span className="text-indigo-400 text-xs">{payload[0].value}</span>
                     <span className="text-[9px] text-zinc-500">{unit}</span>
@@ -798,6 +802,7 @@ export const ActivityDetailPage = ({ activity, settings, fetchStreams, onBack, o
                                                     <CartesianGrid vertical={false} strokeDasharray="3 3" stroke="#f1f5f9" />
                                                     <XAxis dataKey="time" hide />
                                                     <YAxis reversed={isPaceBased} hide domain={['dataMin', 'dataMax']} />
+                                                    <RechartsTooltip content={() => null} cursor={{ stroke: '#6366f1', strokeWidth: 1, strokeDasharray: '4 4' }} />
                                                     <Area type="monotone" dataKey={isPaceBased ? "pace" : "speed"} stroke="#6366f1" fill="#6366f1" fillOpacity={0.04} strokeWidth={1.5} dot={false} activeDot={{ r: 3, stroke: '#fff', strokeWidth: 1.5, fill: '#6366f1' }} />
                                                 </AreaChart>
                                             </ResponsiveContainer>
@@ -815,6 +820,7 @@ export const ActivityDetailPage = ({ activity, settings, fetchStreams, onBack, o
                                                         <CartesianGrid vertical={false} strokeDasharray="3 3" stroke="#f1f5f9" />
                                                         <XAxis dataKey="time" hide />
                                                         <YAxis hide domain={['dataMin - 5', 'dataMax + 5']} />
+                                                        <RechartsTooltip content={() => null} cursor={{ stroke: '#f43f5e', strokeWidth: 1, strokeDasharray: '4 4' }} />
                                                         <Area type="monotone" dataKey="hr" stroke="#f43f5e" fill="#f43f5e" fillOpacity={0.04} strokeWidth={1.5} dot={false} activeDot={{ r: 3, stroke: '#fff', strokeWidth: 1.5, fill: '#f43f5e' }} />
                                                     </AreaChart>
                                                 </ResponsiveContainer>
@@ -833,6 +839,7 @@ export const ActivityDetailPage = ({ activity, settings, fetchStreams, onBack, o
                                                         <CartesianGrid vertical={false} strokeDasharray="3 3" stroke="#f1f5f9" />
                                                         <XAxis dataKey="time" hide />
                                                         <YAxis hide domain={['dataMin', 'dataMax']} />
+                                                        <RechartsTooltip content={() => null} cursor={{ stroke: '#f59e0b', strokeWidth: 1, strokeDasharray: '4 4' }} />
                                                         <Area type="monotone" dataKey="watts" stroke="#f59e0b" fill="#f59e0b" fillOpacity={0.04} strokeWidth={1.5} dot={false} activeDot={{ r: 3, stroke: '#fff', strokeWidth: 1.5, fill: '#f59e0b' }} />
                                                     </AreaChart>
                                                 </ResponsiveContainer>
@@ -851,6 +858,7 @@ export const ActivityDetailPage = ({ activity, settings, fetchStreams, onBack, o
                                                         <CartesianGrid vertical={false} strokeDasharray="3 3" stroke="#f1f5f9" />
                                                         <XAxis dataKey="time" hide />
                                                         <YAxis hide domain={['dataMin - 10', 'dataMax + 10']} />
+                                                        <RechartsTooltip content={() => null} cursor={{ stroke: '#94a3b8', strokeWidth: 1, strokeDasharray: '4 4' }} />
                                                         <Area type="monotone" dataKey="alt" stroke="#94a3b8" fill="#94a3b8" fillOpacity={0.04} strokeWidth={1.5} dot={false} activeDot={{ r: 3, stroke: '#fff', strokeWidth: 1.5, fill: '#94a3b8' }} />
                                                     </AreaChart>
                                                 </ResponsiveContainer>
@@ -869,6 +877,7 @@ export const ActivityDetailPage = ({ activity, settings, fetchStreams, onBack, o
                                                         <CartesianGrid vertical={false} strokeDasharray="3 3" stroke="#f1f5f9" />
                                                         <XAxis dataKey="time" hide />
                                                         <YAxis hide domain={['dataMin - 5', 'dataMax + 5']} />
+                                                        <RechartsTooltip content={() => null} cursor={{ stroke: '#10b981', strokeWidth: 1, strokeDasharray: '4 4' }} />
                                                         <Area type="monotone" dataKey="cadence" stroke="#10b981" fill="#10b981" fillOpacity={0.04} strokeWidth={1.5} dot={false} activeDot={{ r: 3, stroke: '#fff', strokeWidth: 1.5, fill: '#10b981' }} />
                                                     </AreaChart>
                                                 </ResponsiveContainer>
@@ -944,8 +953,13 @@ export const ActivityDetailPage = ({ activity, settings, fetchStreams, onBack, o
                                     </div>
                                     
                                     <div className="space-y-1.5">
-                                        {(zoneType === 'hr' ? exactZoneAnalysis : exactPacePowerZoneAnalysis)?.map((z, i) => (
-                                            <div key={i}>
+                                        {(zoneType === 'hr' ? exactZoneAnalysis : exactPacePowerZoneAnalysis)?.map((z, i) => {
+                                            const zoneNames = zoneType === 'hr' 
+                                                ? ZONE_LABELS 
+                                                : ['Z1 Recuperación', 'Z2 Resistencia', 'Z3 Tempo', 'Z4 Umbral', 'Z5 VO2 Max', 'Z6 Anaeróbico', 'Z7 Neuromusc.'];
+                                            const fullName = zoneNames[i] || z.label;
+                                            return (
+                                            <div key={i} title={`${fullName}\n${z.range}\n${Math.round(z.minutes)} min · ${Math.round(z.pct)}%`} className="cursor-default">
                                                 <div className="flex justify-between text-[9px] font-medium text-slate-400 dark:text-zinc-500 mb-0.5 px-0.5">
                                                     <span>{z.label}</span>
                                                     <span>{z.range}</span>
@@ -966,7 +980,8 @@ export const ActivityDetailPage = ({ activity, settings, fetchStreams, onBack, o
                                                     </span>
                                                 </div>
                                             </div>
-                                        ))}
+                                            );
+                                        })}
                                     </div>
                                 </div>
                             )}
