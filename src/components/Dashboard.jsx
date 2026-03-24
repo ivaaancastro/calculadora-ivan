@@ -20,6 +20,7 @@ import { CalendarPage } from "./pages/CalendarPage";
 import { ActivityDetailPage } from "./pages/ActivityDetailPage";
 import { ProfilePage } from "./pages/ProfilePage";
 import { HealthPage } from "./pages/HealthPage";
+import { FitnessStatsPage } from "./pages/FitnessStatsPage";
 import { ErrorBoundary } from "./common/ErrorBoundary";
 
 const Dashboard = () => {
@@ -157,6 +158,22 @@ const Dashboard = () => {
                     setTimeRange={setTimeRange}
                     chartData={chartData}
                   />
+            </div>
+
+            {/* VISTA: RENDIMIENTO */}
+            <div
+              className={
+                activeTab === "stats" ? "block animate-in fade-in" : "hidden"
+              }
+            >
+              <ErrorBoundary>
+                <FitnessStatsPage
+                  activities={activities}
+                  settings={settings}
+                  chartData={chartData}
+                  onSelectActivity={(act) => setActiveActivity(act)}
+                />
+              </ErrorBoundary>
             </div>
 
             {/* VISTA: CALENDARIO */}
