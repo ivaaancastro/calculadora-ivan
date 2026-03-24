@@ -520,23 +520,6 @@ export const CalendarPage = ({ activities, plannedWorkouts = [], addPlannedWorko
         sessionStorage.setItem('forma_calendar_date', currentDate.toISOString());
     }, [currentDate]);
 
-    const [weeklyTargets, setWeeklyTargets] = useState(() => {
-        const saved = localStorage.getItem('planner_targets');
-        return saved ? JSON.parse(saved) : {};
-    });
-
-    useEffect(() => {
-        localStorage.setItem('planner_targets', JSON.stringify(weeklyTargets));
-    }, [weeklyTargets]);
-
-    const handleEditTarget = (weekKey) => {
-        const current = weeklyTargets[weekKey] || 0;
-        const newVal = prompt("Define el objetivo de TSS para esta semana:", current);
-        if (newVal !== null) {
-            const val = parseInt(newVal);
-            if (!isNaN(val)) setWeeklyTargets(prev => ({ ...prev, [weekKey]: val }));
-        }
-    };
 
     const year = currentDate.getFullYear();
     const month = currentDate.getMonth();
@@ -1241,9 +1224,8 @@ export const CalendarPage = ({ activities, plannedWorkouts = [], addPlannedWorko
                         {/* CUERPO DEL CALENDARIO */}
                         <div className="pb-2">
                             {calendarGrid.map((week, wIdx) => {
-                                let weekTSS = 0; let weekTSSRaw = 0; let weekDuration = 0; let weekDist = 0;
+                                let weekRealizedTSS = 0; let weekPlannedTSS = 0; let weekDuration = 0; let weekDist = 0;
                                 const weekKey = week[0].date.toLocaleDateString('en-CA');
-                                const targetTSS = weeklyTargets[weekKey] || 0;
 
                                 // Calculate per-week stats
                                 week.forEach(day => {
@@ -1252,8 +1234,10 @@ export const CalendarPage = ({ activities, plannedWorkouts = [], addPlannedWorko
                                     acts.forEach(a => {
                                         const cat = a.sportCategory || getSportCategory(a.type || '');
                                         const cfg = SPORT_LOAD_CONFIG[cat] || SPORT_LOAD_CONFIG.other;
-                                        if (cfg.countsForWeekly) weekTSS += (a.tss || 0);
-                                        weekTSSRaw += (a.tss || 0);
+                                        if (cfg.countsForWeekly) {
+                                            if (a.isPlanned) weekPlannedTSS += (a.tss || 0);
+                                            else weekRealizedTSS += (a.tss || 0);
+                                        }
                                         weekDuration += (a.duration || 0);
                                         if (a.isPlanned) {
                                             let planDist = 0;
@@ -1345,7 +1329,7 @@ export const CalendarPage = ({ activities, plannedWorkouts = [], addPlannedWorko
                                                     </div>
                                                     <div className="flex items-center gap-1">
                                                         <span className="text-[9px] text-slate-400 dark:text-zinc-500">Carga</span>
-                                                        <span className="text-[11px] font-bold text-slate-800 dark:text-zinc-200">{Math.round(weekTSS)}</span>
+                                                        <span className="text-[11px] font-bold text-slate-800 dark:text-zinc-200">{Math.round(weekRealizedTSS)}</span>
                                                     </div>
                                                 </div>
 
@@ -1384,23 +1368,20 @@ export const CalendarPage = ({ activities, plannedWorkouts = [], addPlannedWorko
 
                                             {/* Target TSS */}
                                             <div
-                                                onClick={() => handleEditTarget(weekKey)}
-                                                className="mt-auto cursor-pointer hover:bg-slate-200/50 dark:hover:bg-zinc-800/50 px-2.5 py-1 transition-colors border-t border-slate-200/50 dark:border-zinc-800/50"
+                                                className="mt-auto px-2.5 py-1 transition-colors border-t border-slate-200/50 dark:border-zinc-800/50"
                                             >
-                                                {targetTSS > 0 ? (
-                                                    <div>
-                                                        <div className="flex justify-between text-[9px]">
-                                                            <span className="text-slate-400 dark:text-zinc-500 font-semibold">Objetivo</span>
-                                                            <span className="font-mono font-bold text-slate-600 dark:text-zinc-300">{Math.round(weekTSS)}/{targetTSS}</span>
-                                                        </div>
-                                                        <div className="w-full h-1.5 bg-slate-200 dark:bg-zinc-700 rounded-full overflow-hidden mt-0.5">
-                                                            <div className={`h-full rounded-full transition-all ${Math.min((weekTSS / targetTSS) * 100, 100) >= 90 ? 'bg-emerald-500' : Math.min((weekTSS / targetTSS) * 100, 100) >= 70 ? 'bg-blue-500' : 'bg-amber-500'}`}
-                                                                style={{ width: `${Math.min((weekTSS / targetTSS) * 100, 100)}%` }}></div>
-                                                        </div>
-                                                    </div>
-                                                ) : (
-                                                    <span className="text-[9px] text-slate-400 dark:text-zinc-600 italic hover:text-blue-500 transition-colors">+ Objetivo</span>
-                                                )}
+                                                <div className="flex justify-between text-[9px]">
+                                                    <span className="text-slate-400 dark:text-zinc-500 font-semibold">Progreso Plan</span>
+                                                    <span className="font-mono font-bold text-slate-600 dark:text-zinc-300">
+                                                        {Math.round(weekRealizedTSS)}/{Math.round(weekPlannedTSS)}
+                                                    </span>
+                                                </div>
+                                                <div className="w-full h-1.5 bg-slate-200 dark:bg-zinc-700 rounded-full overflow-hidden mt-0.5">
+                                                    <div className={`h-full rounded-full transition-all ${
+                                                        Math.min((weekRealizedTSS / (weekPlannedTSS || 1)) * 100, 100) >= 90 ? 'bg-emerald-500' : 
+                                                        Math.min((weekRealizedTSS / (weekPlannedTSS || 1)) * 100, 100) >= 70 ? 'bg-blue-500' : 'bg-amber-500'}`}
+                                                        style={{ width: `${Math.min((weekRealizedTSS / (weekPlannedTSS || 1)) * 100, 100)}%` }}></div>
+                                                </div>
                                             </div>
                                         </div>
 
@@ -1448,7 +1429,45 @@ export const CalendarPage = ({ activities, plannedWorkouts = [], addPlannedWorko
 
                                                     {/* Activity cards — Apple Style */}
                                                     <div className="flex-1 flex flex-col gap-1.5 w-full">
-                                                        {acts.map((act, i) => {
+                                                        {(() => {
+                                                            // Smart matching: hide planned workouts that have a matching real activity
+                                                            const realActs = acts.filter(a => !a.isPlanned);
+                                                            const plannedActs = acts.filter(a => a.isPlanned);
+                                                            const matchedPlanIds = new Set();
+                                                            const matchedRealIdxs = new Set();
+
+                                                            plannedActs.forEach(plan => {
+                                                                const planCat = getSportCategory(plan.type);
+                                                                const planDur = plan.duration || 0;
+                                                                const matchIdx = realActs.findIndex((real, idx) => {
+                                                                    if (matchedRealIdxs.has(idx)) return false;
+                                                                    const realCat = getSportCategory(real.type || '');
+                                                                    if (realCat !== planCat) return false;
+                                                                    const realDur = real.duration || 0;
+                                                                    if (planDur > 0 && realDur > 0) {
+                                                                        const ratio = realDur / planDur;
+                                                                        return ratio >= 0.4 && ratio <= 2.0;
+                                                                    }
+                                                                    return true;
+                                                                });
+                                                                if (matchIdx >= 0) {
+                                                                    matchedPlanIds.add(plan.id);
+                                                                    matchedRealIdxs.add(matchIdx);
+                                                                }
+                                                            });
+
+                                                            // Filter: show real activities + unmatched plans only
+                                                            const visibleActs = acts.filter(a => {
+                                                                if (a.isPlanned && matchedPlanIds.has(a.id)) return false;
+                                                                return true;
+                                                            });
+                                                            // Track which real activities fulfilled a plan
+                                                            const fulfilledRealIds = new Set(
+                                                                [...matchedRealIdxs].map(idx => realActs[idx]?.id).filter(Boolean)
+                                                            );
+
+                                                            return visibleActs.map((act, i) => {
+                                                            const isFulfilled = !act.isPlanned && fulfilledRealIds.has(act.id);
                                                             let blocks = [];
                                                             if (act.isPlanned) {
                                                                 try {
@@ -1576,6 +1595,7 @@ export const CalendarPage = ({ activities, plannedWorkouts = [], addPlannedWorko
                                                                                 <span className={`shrink-0 ${sportColors.accent}`}>{getSportIcon(act.type, 13)}</span>
                                                                                 <span className="text-[11px] font-semibold tracking-tight leading-none text-slate-800 dark:text-zinc-200">{formatActDuration(act.duration || 0)}</span>
                                                                                 {act.tss > 0 && <span className="ml-auto text-[9px] font-bold text-slate-500 dark:text-zinc-400">{Math.round(act.tss)} TSS</span>}
+                                                                                {isFulfilled && <span className="ml-1 text-[9px] font-bold text-emerald-500" title="Plan completado">✓</span>}
                                                                             </div>
                                                                             <div className="flex flex-col gap-0.5">
                                                                                 <span className="text-[11px] font-medium leading-tight truncate text-slate-700 dark:text-zinc-300">
@@ -1593,7 +1613,8 @@ export const CalendarPage = ({ activities, plannedWorkouts = [], addPlannedWorko
                                                                     )}
                                                                 </div>
                                                             );
-                                                        })}
+                                                        });
+                                                        })()}
                                                     </div>
                                                 </div>
                                             );

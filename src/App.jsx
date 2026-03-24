@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from './supabase'; // Asegúrate de que esta ruta es la tuya correcta
 import Dashboard from './components/Dashboard';
-import { LoginPage } from './components/auth/LoginPage';
+import { LandingPage } from './components/pages/LandingPage';
 import { Toaster } from 'react-hot-toast';
 
 function App() {
@@ -33,7 +33,7 @@ function App() {
 
   // Si no hay sesión, obligamos a ver la pantalla de Login
   if (!session) {
-    return <LoginPage />;
+    return <LandingPage />;
   }
 
   // Si hay sesión, inyectamos el Dashboard directamente

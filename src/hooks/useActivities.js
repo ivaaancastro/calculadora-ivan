@@ -238,22 +238,33 @@ export const useActivities = () => {
           page++;
 
           // --- AUTO-COMPLETAR ENTRENOS PLANIFICADOS ---
-          // Buscamos si hay entrenos planificados para los mismos días y deportes de las nuevas actividades
+          // Match inteligente: fecha + deporte + duración razonable (±50%)
           const planned = workoutsQuery.data || [];
+          const matchedPlanIds = new Set();
           if (planned.length > 0) {
             for (const newAct of newRows) {
               const actDate = new Date(newAct.date).toISOString().split('T')[0];
               const actCategory = getSportCategory(newAct.type);
+              const actDuration = newAct.duration || 0; // minutos
               
               const match = planned.find(p => {
+                if (matchedPlanIds.has(p.id)) return false;
                 const planDate = new Date(p.date).toISOString().split('T')[0];
                 const planCategory = getSportCategory(p.type);
-                return planDate === actDate && planCategory === actCategory;
+                if (planDate !== actDate || planCategory !== actCategory) return false;
+                // Tolerancia de duración: si ambos tienen duración, verificar ±50%
+                const planDuration = p.duration || 0;
+                if (planDuration > 0 && actDuration > 0) {
+                  const ratio = actDuration / planDuration;
+                  return ratio >= 0.5 && ratio <= 1.5;
+                }
+                return true; // Si no hay duración en alguno, match por fecha+deporte
               });
 
               if (match) {
-                 await deletePlannedWorkout(match.id);
-                 console.log(`Auto-completado (borrado) plan planificado ${match.id} tras sincronizar actividad real de ${actCategory} el ${actDate}`);
+                matchedPlanIds.add(match.id);
+                await deletePlannedWorkout(match.id);
+                console.log(`Auto-completado plan ${match.id} → actividad real de ${actCategory} el ${actDate}`);
               }
             }
           }
