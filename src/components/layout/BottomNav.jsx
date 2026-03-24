@@ -1,8 +1,9 @@
 import React from 'react';
-import { LayoutDashboard, Calendar, List, HeartPulse } from 'lucide-react';
+import { LayoutDashboard, Calendar, List, HeartPulse, BarChart3 } from 'lucide-react';
 export const BottomNav = ({ activeTab, onTabChange }) => {
   const navItems = [
     { id: 'overview', icon: LayoutDashboard, label: 'Inicio' },
+    { id: 'stats', icon: BarChart3, label: 'Rendimiento' },
     { id: 'calendar', icon: Calendar, label: 'Calendario' },
     { id: 'health', icon: HeartPulse, label: 'Salud' },
     { id: 'history', icon: List, label: 'Lista' }

@@ -10,6 +10,12 @@ import {
 } from 'lucide-react';
 import { EvolutionChart } from './EvolutionChart';
 import { InfoTooltip } from '../common/InfoTooltip';
+import { 
+    estimateFTP, estimateCyclingVO2max, predictRaceTimes, 
+    calculateTrainingEffect, analyzePowerProfile, calculateDanielsPaces,
+    estimateThresholdPace, calculatePowerZones, calculateFTPHistory,
+    calculateFitnessScore, analyzeIntensityDistribution
+} from '../../utils/fitnessStatsEngine';
 
 const TIME_INTERVALS = [1, 5, 15, 30, 60, 180, 300, 600, 1200, 2400, 3600, 7200];
 const formatInterval = (secs) => { if (secs < 60) return `${secs}s`; if (secs < 3600) return `${secs / 60}m`; return `${secs / 3600}h`; };
@@ -27,26 +33,43 @@ export const AdvancedAnalytics = ({ activities, settings, onSelectActivity, time
     const [intensityTimeframe, setIntensityTimeframe] = useState('28d');
 
     const analytics = useMemo(() => {
+        const ftp = estimateFTP(activities, settings);
         const today = new Date();
-        const date28DaysAgo = new Date(today); date28DaysAgo.setDate(today.getDate() - 28);
-        const date45DaysAgo = new Date(today); date45DaysAgo.setDate(today.getDate() - 45);
-        const date90DaysAgo = new Date(today); date90DaysAgo.setDate(today.getDate() - 90);
+        const d45 = new Date(today); d45.setDate(today.getDate() - 45);
+        const restHr = Number(settings.fcReposo) || 60;
+        
+        // 1. VO2 Max
+        let bestRunVo2 = 0;
+        activities.forEach(act => {
+            const d = new Date(act.date);
+            if (d < d45 || act.duration < 15) return;
+            const typeLower = String(act.type || '').toLowerCase();
+            const isRun = typeLower.includes('run') || typeLower.includes('carrera');
+            const speed = act.speed_avg || (act.distance && act.duration ? act.distance / (act.duration * 60) : 0);
+            if (isRun && speed > 2.0 && act.hr_avg > restHr) {
+                const max = Number(settings.run.max) || 180;
+                const pct = (act.hr_avg - restHr) / (max - restHr);
+                if (pct > 0 && act.hr_avg >= max * 0.55) {
+                    const vo2 = ((speed * 60 * 0.2) + 3.5) / pct;
+                    if (vo2 > bestRunVo2 && vo2 < 85) bestRunVo2 = vo2;
+                }
+            }
+        });
+        const bikeVo2Result = estimateCyclingVO2max(activities, settings);
+        let bestBikeVo2 = bikeVo2Result.vo2max;
+        if (bestBikeVo2 === 0 && settings.fcReposo > 30 && settings.bike.max > 120) {
+            bestBikeVo2 = Number((15.3 * (settings.bike.max / settings.fcReposo) * 0.95).toFixed(1));
+        }
 
-        const dateMmp = new Date(today);
-        if (mmpTimeframe === '90d') dateMmp.setDate(today.getDate() - 90);
-        else if (mmpTimeframe === '1y') dateMmp.setDate(today.getDate() - 365);
-        else dateMmp.setFullYear(2000);
+        const vo2ForPred = bestRunVo2 > 0 ? bestRunVo2 : bestBikeVo2;
+        const races = predictRaceTimes(vo2ForPred);
+        const te = calculateTrainingEffect(activities, settings);
+        const profile = analyzePowerProfile(ftp);
+        const intensityDays = parseInt(intensityTimeframe) || 90;
+        const intensity = analyzeIntensityDistribution(activities, settings, intensityDays);
 
-        const dateIntensity = new Date(today);
-        if (intensityTimeframe === '28d') dateIntensity.setDate(today.getDate() - 28);
-        else if (intensityTimeframe === '90d') dateIntensity.setDate(today.getDate() - 90);
-        else if (intensityTimeframe === '1y') dateIntensity.setDate(today.getDate() - 365);
-        else dateIntensity.setFullYear(2000);
 
-        const zonesData = [0, 0, 0, 0, 0, 0, 0];
-        const sortedActivities = [...activities].sort((a, b) => new Date(a.date) - new Date(b.date));
-        const weeklyMap = new Map();
-
+        // 2. Peaks, Zones, EF and PMC
         const getPeakByTime = (data, timeData, windowSecs) => {
             if (!data || !timeData || data.length === 0) return 0;
             let maxAvg = 0; let startIdx = 0; let currentSum = 0; let currentCount = 0;
@@ -57,202 +80,90 @@ export const AdvancedAnalytics = ({ activities, settings, onSelectActivity, time
             }
             return maxAvg;
         };
-
         const initPeaks = () => { const p = {}; TIME_INTERVALS.forEach(i => { p[i] = { value: 0, actId: null, actName: '', actDate: '' }; }); return p; };
         const peaks = { all: { hr: initPeaks(), spd: initPeaks(), pwr: initPeaks() }, bike: { hr: initPeaks(), spd: initPeaks(), pwr: initPeaks() }, run: { hr: initPeaks(), spd: initPeaks(), pwr: initPeaks() } };
-        const efData = { bike: [], run: [] };
         const updatePeak = (sport, metric, window, value, act) => { if (value > peaks[sport][metric][window].value) peaks[sport][metric][window] = { value, actId: act.id, actName: act.name, actDate: act.date }; };
 
-        let bestRunVo2 = 0; let bestBikeVo2 = 0; let hasPowerMeter = false;
+        const zonesData = [0, 0, 0, 0, 0, 0, 0];
+        const efData = { bike: [], run: [] };
         const dailyTSS = new Map();
+        const dateIntensityLimit = new Date(); dateIntensityLimit.setDate(dateIntensityLimit.getDate() - intensityDays);
+        const dateMmpLimit = new Date(); dateMmpLimit.setDate(dateMmpLimit.getDate() - (mmpTimeframe === '90d' ? 90 : 365));
 
-        let totalVolume = 0; let totalActivities = 0;
-        sortedActivities.forEach(act => {
+        activities.forEach(act => {
             const actDate = new Date(act.date);
-            const actTss = act.tss || 0;
-            const dateKey = actDate.toISOString().split('T')[0];
-            dailyTSS.set(dateKey, (dailyTSS.get(dateKey) || 0) + actTss);
+            dailyTSS.set(actDate.toISOString().split('T')[0], (dailyTSS.get(actDate.toISOString().split('T')[0]) || 0) + (act.tss || 0));
             
-            if (actDate >= date90DaysAgo) {
-                totalVolume += (act.duration || 0);
-                totalActivities++;
-            }
-
-            if (actDate >= date90DaysAgo) {
-                const weekStart = getMonday(act.date);
-                if (!weeklyMap.has(weekStart)) weeklyMap.set(weekStart, { week: weekStart, tss: 0, hours: 0 });
-                const wData = weeklyMap.get(weekStart);
-                wData.tss += actTss; wData.hours += (act.duration || 0) / 60;
-            }
-
-            const typeLower = String(act.type).toLowerCase();
+            const typeLower = String(act.type || '').toLowerCase();
             const isBike = typeLower.includes('bici') || typeLower.includes('ciclismo');
             const isRun = typeLower.includes('run') || typeLower.includes('carrera');
 
-            if (actDate >= date90DaysAgo && (isBike || isRun) && act.hr_avg > 80 && act.duration >= 20) {
-                const speedMs = act.speed_avg || 0;
-                const baseDateLabel = actDate.toLocaleDateString('es-ES', { day: '2-digit', month: 'short' });
-                if (isBike && act.watts_avg > 40) {
-                    const efBike = act.watts_avg / act.hr_avg;
-                    efData.bike.push({ date: act.date, dateLabel: baseDateLabel, ef: Number(efBike.toFixed(2)), name: act.name, id: act.id, hr: Math.round(act.hr_avg), watts: Math.round(act.watts_avg) });
-                }
-                if (isRun && speedMs > 2) {
-                    const efRun = (speedMs * 60) / act.hr_avg; // Speed (m/min) per heartbeat
-                    efData.run.push({ date: act.date, dateLabel: baseDateLabel, ef: Number(efRun.toFixed(2)), name: act.name, id: act.id, hr: Math.round(act.hr_avg), pace: formatPace((16.6666667 / speedMs)) });
-                }
-            }
-
-            if (actDate >= date45DaysAgo && act.duration >= 20) {
-                // Heart Rate Reserve (HRR) Extrapolation Model
-                const restHr = Number(settings.fcReposo) || 60;
-
-                if (isRun && act.speed_avg > 2.5 && act.hr_avg > restHr) {
-                    const maxHr = Number(settings.run.max) || 180;
-                    const pctHrr = (act.hr_avg - restHr) / (maxHr - restHr);
-
-                    // Only calculate if the effort is significant enough to be linear (>70% max HR)
-                    if (pctHrr > 0 && act.hr_avg >= (maxHr * 0.70)) {
-                        // O2 Cost of running = speed(m/min) * 0.2 ml/kg/min + 3.5 ml/kg/min resting
-                        const speedMetersPerMin = (act.speed_avg * 60);
-                        const o2Cost = (speedMetersPerMin * 0.2) + 3.5;
-
-                        // Extrapolate sub-maximal o2 cost to 100% HRR
-                        const vo2 = o2Cost / pctHrr;
-                        if (vo2 > bestRunVo2 && vo2 < 85) bestRunVo2 = vo2; // Cap at 85 to prevent anomalous data
-                    }
-                }
-
-                if (isBike && act.watts_avg > 50 && act.hr_avg > restHr) {
-                    hasPowerMeter = true;
-                    const maxHr = Number(settings.bike.max) || 180;
-                    const pctHrr = (act.hr_avg - restHr) / (maxHr - restHr);
-                    const weight = Number(settings.weight) || 70;
-
-                    // Only calculate if the effort is significant enough to be linear (>70% max HR)
-                    if (pctHrr > 0 && act.hr_avg >= (maxHr * 0.70)) {
-                        // ACSM O2 Cost of cycling = (Watts * 10.8) / weight + 7 ml/kg/min resting
-                        const o2Cost = ((act.watts_avg * 10.8) / weight) + 7;
-
-                        // Extrapolate sub-maximal o2 cost to 100% HRR
-                        const vo2 = o2Cost / pctHrr;
-                        if (vo2 > bestBikeVo2 && vo2 < 85) bestBikeVo2 = vo2; // Cap at 85 to prevent anomalous data
-                    }
-                }
-            }
-
-            if (act.streams_data?.time) {
+            if (act.streams_data?.time?.data) {
                 const timeData = act.streams_data.time.data;
-                if (act.streams_data.heartrate) {
-                    const hrData = act.streams_data.heartrate.data;
-                    if (actDate >= dateIntensity) {
-                        const userZones = isBike ? settings.bike.zones : settings.run.zones;
-                        for (let i = 1; i < hrData.length; i++) {
-                            const hr = hrData[i]; const dt = timeData[i] - timeData[i - 1];
-                            const zIndex = userZones.findIndex(z => hr >= z.min && hr <= z.max);
-                            if (zIndex !== -1 && zIndex < 7) zonesData[zIndex] += dt; else if (hr > userZones[userZones.length - 1].max) zonesData[6] += dt;
+                const hrData = act.streams_data.heartrate?.data;
+                if (hrData) {
+                    if (actDate >= dateIntensityLimit) {
+                        const userZones = isRun ? settings.run.zones : settings.bike.zones;
+                        if (userZones) {
+                            for (let i = 1; i < hrData.length; i++) {
+                                const dt = timeData[i] - timeData[i - 1];
+                                if (dt > 0 && dt < 10) {
+                                    const zIndex = userZones.findIndex(z => hrData[i] >= z.min && hrData[i] <= z.max);
+                                    if (zIndex !== -1 && zIndex < 7) zonesData[zIndex] += dt;
+                                }
+                            }
                         }
                     }
-                    if (actDate >= dateMmp) {
+                    if (actDate >= dateMmpLimit) {
                         TIME_INTERVALS.forEach(w => {
-                            const peak = getPeakByTime(hrData, timeData, w);
-                            if (peak > 0) { updatePeak('all', 'hr', w, peak, act); if (isBike) updatePeak('bike', 'hr', w, peak, act); if (isRun) updatePeak('run', 'hr', w, peak, act); }
+                            const pk = getPeakByTime(hrData, timeData, w);
+                            if (pk > 0) { updatePeak('all', 'hr', w, pk, act); if (isBike) updatePeak('bike', 'hr', w, pk, act); if (isRun) updatePeak('run', 'hr', w, pk, act); }
                         });
                     }
                 }
-                if (actDate >= dateMmp && act.streams_data.velocity_smooth) {
-                    const spdData = act.streams_data.velocity_smooth.data;
-                    TIME_INTERVALS.forEach(w => {
-                        const peak = getPeakByTime(spdData, timeData, w);
-                        if (peak > 0) { updatePeak('all', 'spd', w, peak, act); if (isBike) updatePeak('bike', 'spd', w, peak, act); if (isRun) updatePeak('run', 'spd', w, peak, act); }
-                    });
+                if (actDate >= dateMmpLimit) {
+                    if (act.streams_data.velocity_smooth?.data) {
+                        TIME_INTERVALS.forEach(w => {
+                            const pk = getPeakByTime(act.streams_data.velocity_smooth.data, timeData, w);
+                            if (pk > 0) { updatePeak('all', 'spd', w, pk, act); if (isBike) updatePeak('bike', 'spd', w, pk, act); if (isRun) updatePeak('run', 'spd', w, pk, act); }
+                        });
+                    }
+                    if (act.streams_data.watts?.data) {
+                        TIME_INTERVALS.forEach(w => {
+                            const pk = getPeakByTime(act.streams_data.watts.data, timeData, w);
+                            if (pk > 0) { updatePeak('all', 'pwr', w, pk, act); if (isBike) updatePeak('bike', 'pwr', w, pk, act); if (isRun) updatePeak('run', 'pwr', w, pk, act); }
+                        });
+                    }
                 }
-                if (actDate >= dateMmp && act.streams_data.watts) {
-                    const pwrData = act.streams_data.watts.data;
-                    TIME_INTERVALS.forEach(w => {
-                        const peak = getPeakByTime(pwrData, timeData, w);
-                        if (peak > 0) { updatePeak('all', 'pwr', w, peak, act); if (isBike) updatePeak('bike', 'pwr', w, peak, act); if (isRun) updatePeak('run', 'pwr', w, peak, act); }
-                    });
+            }
+
+            if (actDate >= d45 && act.duration >= 20 && act.hr_avg > 80) {
+                const baseDateLabel = actDate.toLocaleDateString('es-ES', { day: '2-digit', month: 'short' });
+                if (isBike && act.watts_avg > 40) {
+                    efData.bike.push({ date: act.date, dateLabel: baseDateLabel, ef: Number((act.watts_avg / act.hr_avg).toFixed(2)), name: act.name, id: act.id, hr: Math.round(act.hr_avg), watts: Math.round(act.watts_avg) });
+                }
+                if (isRun && act.speed_avg > 2) {
+                    efData.run.push({ date: act.date, dateLabel: baseDateLabel, ef: Number(((act.speed_avg * 60) / act.hr_avg).toFixed(2)), name: act.name, id: act.id, hr: Math.round(act.hr_avg), pace: formatPace((16.6666667 / act.speed_avg)) });
                 }
             }
         });
 
-        let bikeVo2IsEstimated = false;
-        if (bestBikeVo2 === 0 && !hasPowerMeter && settings.fcReposo > 30 && settings.bike.max > 120) {
-            bestBikeVo2 = 15.3 * (settings.bike.max / settings.fcReposo) * 0.95;
-            bikeVo2IsEstimated = true;
-        }
-
-        let currentCTL = 0; let currentATL = 0;
-        const loadHistory = [];
         const pmcHistory = [];
-        const allDates = Array.from(dailyTSS.keys()).sort();
-        if (allDates.length > 0) {
-            const firstDate = new Date(allDates[0]);
-            const msPerDay = 24 * 60 * 60 * 1000;
-            const totalDays = Math.floor((today - firstDate) / msPerDay);
-            for (let i = totalDays; i >= 0; i--) {
-                const d = new Date(today); d.setDate(d.getDate() - i);
-                const dateStr = d.toISOString().split('T')[0];
-                const tss = dailyTSS.get(dateStr) || 0;
-                currentCTL = currentCTL + (tss - currentCTL) / 42;
-                currentATL = currentATL + (tss - currentATL) / 7;
-                if (i <= 180) {
-                    pmcHistory.push({
-                        dateLabel: d.toLocaleDateString('es-ES', { day: '2-digit', month: 'short' }),
-                        ctl: Math.round(currentCTL * 10) / 10,
-                        atl: Math.round(currentATL * 10) / 10,
-                        tsb: Math.round((currentCTL - currentATL) * 10) / 10,
-                        tss: Math.round(tss),
-                        date: dateStr
-                    });
+        let finalCTL = 0, finalATL = 0;
+        const sortedDates = Array.from(dailyTSS.keys()).sort();
+        if (sortedDates.length > 0) {
+            let runningCTL = 0, runningATL = 0;
+            const firstDate = new Date(sortedDates[0]);
+            for (let d = new Date(firstDate); d <= today; d.setDate(d.getDate() + 1)) {
+                const k = d.toISOString().split('T')[0];
+                const tss = dailyTSS.get(k) || 0;
+                runningCTL += (tss - runningCTL) / 42;
+                runningATL += (tss - runningATL) / 7;
+                if (d >= new Date(today.getTime() - 120 * 24 * 3600 * 1000)) {
+                    pmcHistory.push({ dateLabel: d.toLocaleDateString('es-ES', { day: '2-digit', month: 'short' }), ctl: Math.round(runningCTL), atl: Math.round(runningATL), tsb: Math.round(runningCTL - runningATL), tss: Math.round(tss) });
                 }
-                if (i < 7) loadHistory.push(tss);
             }
-        }
-        const tsb = currentCTL - currentATL;
-        const freshness = currentCTL > 0 ? (tsb / currentCTL) * 100 : 0;
-
-        // Calcular Ramp Rate (tendencia a 7 días) y Carga de hace 28d
-        let pastCTL = 0; let ctl28d = 0;
-        if (pmcHistory.length >= 8) pastCTL = pmcHistory[pmcHistory.length - 8].ctl;
-        if (pmcHistory.length >= 28) ctl28d = pmcHistory[pmcHistory.length - 28].ctl;
-        
-        const rampRate = currentCTL - (pastCTL || currentCTL);
-        const loadTrend = ctl28d > 0 ? ((currentCTL - ctl28d) / ctl28d) * 100 : 0;
-
-        const sum7 = loadHistory.reduce((a, b) => a + b, 0);
-        const mean7 = sum7 / 7;
-        const variance = loadHistory.reduce((acc, val) => acc + Math.pow(val - mean7, 2), 0) / 7;
-        const stdDev = Math.sqrt(variance);
-        const monotony = stdDev > 0 ? (mean7 / stdDev) : (mean7 > 0 ? 4 : 0);
-        const strain = sum7 * monotony;
-
-        const weeklyChart = Array.from(weeklyMap.values()).map(w => ({ dateLabel: new Date(w.week).toLocaleDateString('es-ES', { day: '2-digit', month: 'short' }), tss: Math.round(w.tss), hours: Number(w.hours.toFixed(1)) }));
-        const zonesChart = zonesData.map((secs, i) => ({ name: ZONE_LABELS[i], hours: Number((secs / 3600).toFixed(1)), fill: ZONE_COLORS[i] }));
-        const totalFocus = zonesData.reduce((a, b) => a + b, 0);
-        const focusChart = totalFocus > 0 ? [
-            { name: 'Aeróbico', value: Math.round(((zonesData[0] + zonesData[1]) / totalFocus) * 100), color: '#3b82f6' },
-            { name: 'Tempo/Umbral', value: Math.round(((zonesData[2] + zonesData[3]) / totalFocus) * 100), color: '#eab308' },
-            { name: 'Anaeróbico', value: Math.round(((zonesData[4] + zonesData[5] + zonesData[6]) / totalFocus) * 100), color: '#ef4444' }
-        ] : [];
-
-        let trainingProfile = { title: "Sin Datos", desc: "No hay datos de zonas suficientes para determinar un perfil.", color: "text-slate-500", raw: 'none' };
-        if (totalFocus > 0) {
-            const zAerobic = (zonesData[0] + zonesData[1]) / totalFocus;
-            const zTempo = (zonesData[2] + zonesData[3]) / totalFocus;
-            const zAnaerobic = (zonesData[4] + zonesData[5] + zonesData[6]) / totalFocus;
-
-            if (zAerobic >= 0.75 && zAnaerobic >= zTempo) {
-                trainingProfile = { title: "Polarizado", desc: "Mucha base aeróbica y picos de alta intensidad, evitando zonas grises. Muy efectivo.", color: "text-emerald-500", raw: 'polarizado' };
-            } else if (zAerobic >= 0.65 && zTempo > zAnaerobic) {
-                trainingProfile = { title: "Piramidal", desc: "Base enorme, algo de umbral y poco anaeróbico. Gran progresión constante de forma.", color: "text-blue-500", raw: 'piramidal' };
-            } else if (zTempo >= 0.35) {
-                trainingProfile = { title: "Enfocado en Umbral", desc: "Excesivo tiempo en zonas de fatiga alta y media. Riesgo de estancamiento (mucho 'Sweet Spot').", color: "text-amber-500", raw: 'umbral' };
-            } else if (zAerobic < 0.55 && zAnaerobic >= 0.20) {
-                trainingProfile = { title: "Alta Intensidad (HIIT)", desc: "Entrenamiento de corta duración y altísimo impacto. Insostenible a medio plazo.", color: "text-rose-500", raw: 'hiit' };
-            } else {
-                trainingProfile = { title: "Mixto / Base", desc: "Distribución aeróbica general sin un pico polarizado muy claro hacia los extremos.", color: "text-indigo-500", raw: 'mixto' };
-            }
+            finalCTL = runningCTL; finalATL = runningATL;
         }
 
         const curves = { all: { spd: [], hr: [], pwr: [] }, bike: { spd: [], hr: [], pwr: [] }, run: { spd: [], hr: [], pwr: [] } };
@@ -270,22 +181,40 @@ export const AdvancedAnalytics = ({ activities, settings, onSelectActivity, time
             }).filter(d => d.value > 0);
         });
 
+        const tFocus = zonesData.reduce((a, b) => a + b, 0);
+        const fitnessScore = calculateFitnessScore(vo2ForPred, ftp.wPerKg, finalCTL);
         return {
-            zonesChart, focusChart, weeklyChart, curves, efData, dailyTSS, pmcHistory,
-            trainingProfile,
-            vo2Max: { run: Number(bestRunVo2.toFixed(1)), bike: Number(bestBikeVo2.toFixed(1)), bikeEstimated: bikeVo2IsEstimated },
-            model: { ctl: currentCTL, atl: currentATL, tsb, rampRate, monotony, strain, load7d: sum7, freshness, loadTrend, totalActivities, totalVolume },
-            peaksRecord: peaks // Pass raw peaks for table display
+            vo2Max: { run: Number(bestRunVo2.toFixed(1)), bike: bestBikeVo2 },
+            fitnessScore, te, intensity, races, profile, curves, efData, pmcHistory, peaksRecord: peaks,
+            zonesChart: zonesData.map((secs, i) => ({ name: ZONE_LABELS[i], hours: Number((secs / 3600).toFixed(1)), fill: ZONE_COLORS[i] })),
+            focusChart: [
+                { name: 'Aeróbico', value: tFocus > 0 ? Math.round(((zonesData[0] + zonesData[1]) / tFocus) * 100) : 0, color: '#3b82f6' },
+                { name: 'Tempo/Umbral', value: tFocus > 0 ? Math.round(((zonesData[2] + zonesData[3]) / tFocus) * 100) : 0, color: '#eab308' },
+                { name: 'Anaeróbico', value: tFocus > 0 ? Math.round(((zonesData[4] + zonesData[5] + zonesData[6]) / tFocus) * 100) : 0, color: '#ef4444' }
+            ],
+            model: { 
+                ctl: finalCTL, atl: finalATL, tsb: finalCTL - finalATL, 
+                freshness: finalCTL > 0 ? ((finalCTL - finalATL) / finalCTL) * 100 : 0, 
+                rampRate: te?.ctlTrend || 0,
+                loadTrend: te?.ctlTrend || 0,
+                monotony: te?.monotony || 1,
+                load7d: 0, 
+                totalActivities: activities.length, 
+                totalVolume: activities.reduce((s, a) => s + (a.duration || 0), 0) 
+            }
         };
     }, [activities, settings, mmpTimeframe, intensityTimeframe]);
 
-    if (!activities || activities.length === 0) return null;
-
     const currentCurve = useMemo(() => {
-        if (curveType === 'power') return analytics.curves[curveSport].pwr;
-        if (curveType === 'speed') return analytics.curves[curveSport].spd;
-        return analytics.curves[curveSport].hr;
+        if (!analytics?.curves || !curveSport) return [];
+        const sportCurves = analytics.curves[curveSport];
+        if (!sportCurves) return [];
+        if (curveType === 'power') return sportCurves.pwr || [];
+        if (curveType === 'speed') return sportCurves.spd || [];
+        return sportCurves.hr || [];
     }, [analytics.curves, curveSport, curveType]);
+
+    if (!activities || activities.length === 0) return null;
 
     const isPace = curveSport === 'run' && curveType === 'speed';
     const curveColor = curveType === 'hr' ? '#ef4444' : (curveType === 'power' ? '#fbbf24' : (isPace ? '#ea580c' : '#2563eb'));
@@ -349,13 +278,15 @@ export const AdvancedAnalytics = ({ activities, settings, onSelectActivity, time
     };
 
     const getTrainingStatus = () => {
-        const { ctl, tsb, rampRate } = analytics.model;
-        if (ctl < 15) return { phase: 'Construyendo Base', color: 'text-slate-500', bg: 'bg-slate-50 border-slate-200 dark:bg-zinc-800/50 dark:border-zinc-700', icon: Brain, desc: 'Tienes poco historial acumulado (Fitness CTL). Sigue entrenando para asentar el modelo base de 42 días.' };
-        if (tsb < -25) return { phase: 'Sobrecarga / Riesgo', color: 'text-red-500', bg: 'bg-red-50 dark:bg-red-900/10 border-red-200 dark:border-red-900/30', icon: AlertTriangle, desc: 'Tu Fatiga (7d) supera con creces tu Forma Base (42d). Riesgo alto de lesión. Necesitas descanso urgente.' };
-        if (tsb >= -25 && tsb <= -10 && rampRate > 0.5) return { phase: 'Productivo', color: 'text-emerald-500', bg: 'bg-emerald-50 dark:bg-emerald-900/10 border-emerald-200 dark:border-emerald-900/30', icon: TrendingUp, desc: 'Punto dulce de estrés. Estás asimilando carga perfectamente (TSB entre -10 y -25) y ganando estado de forma.' };
-        if (tsb > -10 && tsb <= 5) return { phase: 'Mantenimiento', color: 'text-blue-500', bg: 'bg-blue-50 dark:bg-blue-900/10 border-blue-200 dark:border-blue-900/30', icon: Activity, desc: 'Balance Neutro (TSB cercano a 0). Mantienes tu nivel sin estresar en exceso el sistema. Ideal para asimilar.' };
-        if (tsb > 5 && rampRate < -1) return { phase: 'Pérdida de Forma', color: 'text-orange-500', bg: 'bg-orange-50 dark:bg-orange-900/10 border-orange-200 dark:border-orange-900/30', icon: TrendingDown, desc: 'Estás estrenando menos de lo habitual. Tu Fatiga ha desaparecido pero tu Forma Base está cayendo.' };
-        return { phase: 'Pico / Recuperación', color: 'text-purple-500', bg: 'bg-purple-50 dark:bg-purple-900/10 border-purple-200 dark:border-purple-900/30', icon: Battery, desc: 'Estás muy fresco positivamente (TSB Alto). Has limpiado la fatiga y estás en tu nivel óptimo para competir.' };
+        const { ctl, tsb } = analytics.model;
+        const rampRate = analytics.te.ctlTrend || 0;
+
+        if (ctl < 15) return { phase: 'Construyendo Base Inicial', color: 'text-slate-500', bg: 'bg-slate-50 border-slate-200 dark:bg-zinc-800/50 dark:border-zinc-700', icon: Brain, desc: 'Fase de crecimiento inicial. Tu carga es baja pero constante. Sigue así para asentar el modelo.' };
+        if (tsb < -25) return { phase: 'Sobrecarga de Alto Riesgo', color: 'text-red-500', bg: 'bg-red-50 dark:bg-red-900/10 border-red-200 dark:border-red-900/30', icon: AlertTriangle, desc: 'Fatiga extrema. Tu cuerpo está al límite de lo que puede asimilar. Riesgo inminente de lesión o sobreentrenamiento.' };
+        if (tsb >= -25 && tsb <= -10 && rampRate > 0) return { phase: 'Productivo / Supercompensación', color: 'text-emerald-500', bg: 'bg-emerald-50 dark:bg-emerald-900/10 border-emerald-200 dark:border-emerald-900/30', icon: TrendingUp, desc: 'Punto dulce de entrenamiento. Estás asimilando la carga perfectamente y mejorando tu rendimiento real.' };
+        if (tsb > -10 && tsb <= 10) return { phase: 'Mantenimiento / Asimilación', color: 'text-blue-500', bg: 'bg-blue-50 dark:bg-blue-900/10 border-blue-200 dark:border-blue-900/30', icon: Activity, desc: 'Balance óptimo para asimilar entrenos pasados sin quemarse. Ideal para semanas de carga media.' };
+        if (tsb > 10 && rampRate < 0) return { phase: 'Desentrenamiento / Pérdida', color: 'text-orange-500', bg: 'bg-orange-50 dark:bg-orange-900/10 border-orange-200 dark:border-orange-900/30', icon: TrendingDown, desc: 'Falta de estímulo. Estás perdiendo adaptaciones fisiológicas por falta de carga de entrenamiento.' };
+        return { phase: 'Pico de Forma / Competición', color: 'text-purple-500', bg: 'bg-purple-50 dark:bg-purple-900/10 border-purple-200 dark:border-purple-900/30', icon: Battery, desc: 'Estado de frescura máxima. La fatiga ha desaparecido y tu sistema está listo para rendir al 100%.' };
     };
 
     const getVo2Assessment = (vo2Value) => {
@@ -429,9 +360,10 @@ export const AdvancedAnalytics = ({ activities, settings, onSelectActivity, time
                         { label: 'Forma (TSB)', value: Math.round(analytics.model.tsb), icon: Zap, color: analytics.model.tsb < -25 ? 'text-red-500' : (analytics.model.tsb > 0 ? 'text-emerald-500' : 'text-blue-500'), sub: `Frescura: ${Math.round(analytics.model.freshness)}%`, tip: "Balance entre Fitness y Fatiga. Óptimo para competir: +5 a +25. Óptimo para entrenar: -10 a -30." },
                         { label: 'Rampa Semanal', value: analytics.model.rampRate.toFixed(1), icon: analytics.model.rampRate >= 0 ? ArrowUpRight : ArrowDownRight, color: analytics.model.rampRate > 6 ? 'text-red-500' : (analytics.model.rampRate > 0 ? 'text-emerald-500' : 'text-slate-400'), sub: `${analytics.model.rampRate > 0 ? 'Subiendo' : 'Bajando'}`, tip: "Cuánto sube tu CTL cada semana. Ideal: 2-5 pts. >8 indica riesgo alto de sobreentrenamiento." },
                         { label: 'Monotonía', value: analytics.model.monotony.toFixed(2), icon: Brain, color: analytics.model.monotony > 2 ? 'text-orange-500' : 'text-slate-400', sub: 'Variedad de carga', tip: "Variedad de la carga diaria. >1.5 significa falta de variedad y mayor riesgo de lesión o estancamiento." },
-                        { label: 'Carga Sem.', value: Math.round(analytics.model.strain), icon: ActivityPulse, color: analytics.model.strain > 2000 ? 'text-red-500' : 'text-slate-400', sub: 'Estrés acumulado', tip: "Estrés total de la semana (TSS x Monotonía). Refleja el impacto sistémico real en tu cuerpo." },
-                        { label: 'Volumen 3M', value: `${Math.round(analytics.model.totalVolume / 60)}h`, icon: CalendarDays, color: 'text-slate-500', sub: `${analytics.model.totalActivities} actividades`, tip: "Horas totales y actividades acumuladas en los últimos 3 meses. Clave para entender tu consistencia." },
-                        { label: 'VO2 Max', value: currentVo2Value || '--', icon: TrendingUp, color: vo2Info.color, sub: vo2Info.label, tip: "Estimación de tu capacidad aeróbica máxima (ml/kg/min). Sube con la intensidad y eficiencia." }
+                        { label: 'Carga Sem.', value: Math.round(analytics.te.weeklyTssAvg), icon: ActivityPulse, color: 'text-slate-400', sub: 'Solo Correr/Bici', tip: "Carga media de TSS semanal filtrada por actividades de carrera y ciclismo." },
+                        { label: 'Sesiones/Sem.', value: Math.round(analytics.te.weeklySessionsAvg), icon: CalendarDays, color: 'text-slate-500', sub: 'Número entero', tip: "Media de sesiones por semana redondeada al entero más cercano." },
+                        { label: 'VO2 Max', value: currentVo2Value || '--', icon: TrendingUp, color: vo2Info.color, sub: vo2Info.label, tip: "Estimación de tu capacidad aeróbica máxima (ml/kg/min). Sube con la intensidad y eficiencia." },
+                         { label: 'Fitness Score', value: analytics.fitnessScore.score, icon: Trophy, color: 'text-amber-500', sub: analytics.fitnessScore.label, tip: "Puntuación global de 0-100 basada en VO2max, W/Kg y consistencia de carga." }
                     ].map((kpi, i) => (
                         <div key={i} className="bg-white dark:bg-zinc-900/40 p-3 rounded-xl border border-slate-200 dark:border-zinc-800/50 hover:border-slate-300 dark:hover:border-zinc-700 transition-colors shadow-sm">
                             <div className="flex items-center justify-between mb-1">
@@ -538,9 +470,11 @@ export const AdvancedAnalytics = ({ activities, settings, onSelectActivity, time
                                 <p className="text-[7px] font-bold text-slate-400 uppercase">W/Kg</p>
                                 <p className="text-sm font-black text-slate-800 dark:text-zinc-100">{(settings.bike.ftp / (settings.weight || 70)).toFixed(2)}</p>
                             </div>
-                            <div className="bg-slate-50 dark:bg-zinc-800/60 p-2 rounded-lg">
-                                <p className="text-[7px] font-bold text-slate-400 uppercase">Peso</p>
-                                <p className="text-sm font-black text-slate-800 dark:text-zinc-100">{settings.weight} <span className="text-[8px] font-bold">Kg</span></p>
+                            <div className="bg-slate-50 dark:bg-zinc-800/60 p-2 rounded-lg col-span-2">
+                                <p className="text-[7px] font-bold text-purple-400 uppercase">Perfil / Fenotipo</p>
+                                <p className="text-[10px] font-bold text-slate-800 dark:text-zinc-100 leading-tight">
+                                    {analytics.profile?.sprint > 7 ? 'Velocista Explosivo' : analytics.profile?.anaerobic > 180 ? 'Perfil Puncheur / Potencia' : 'Fondista Rodador de Resistencia'}
+                                </p>
                             </div>
                         </div>
                     </div>
@@ -603,7 +537,7 @@ export const AdvancedAnalytics = ({ activities, settings, onSelectActivity, time
                         <div className="flex justify-between items-center mb-4">
                             <span className="text-[9px] font-bold uppercase tracking-widest text-slate-400">Distribución de Foco</span>
                             <div className="flex bg-slate-100 dark:bg-zinc-800 p-0.5 rounded-full">
-                                {['28d', '90d'].map(t => (
+                                {['7d', '30d', '90d'].map(t => (
                                     <button key={t} onClick={() => setIntensityTimeframe(t)} className={`px-2 py-0.5 text-[7px] font-bold uppercase rounded-full transition-all ${intensityTimeframe === t ? 'bg-white dark:bg-zinc-700 text-slate-800 dark:text-zinc-100 shadow-sm' : 'text-slate-500'}`}>{t.toUpperCase()}</button>
                                 ))}
                             </div>

@@ -1,5 +1,5 @@
 import React, { useRef } from 'react';
-import { Upload, Trash2, UserCircle, Plus, RefreshCw, Activity, Settings, Moon, Sun, LogOut, LayoutDashboard, Calendar, List, HeartPulse } from 'lucide-react';
+import { Upload, Trash2, UserCircle, Plus, RefreshCw, Activity, Settings, Moon, Sun, LogOut, LayoutDashboard, Calendar, List, HeartPulse, BarChart3 } from 'lucide-react';
 import StravaConnect from '../common/StravaConnect';
 import { useTheme } from '../../hooks/useTheme';
 import { supabase } from '../../supabase';
@@ -18,6 +18,7 @@ export const Navbar = ({
 
   const tabs = [
     { id: 'overview', label: 'Dashboard', icon: LayoutDashboard },
+    { id: 'stats', label: 'Rendimiento', icon: BarChart3 },
     { id: 'calendar', label: 'Calendario', icon: Calendar },
     { id: 'history', label: 'Actividades', icon: List },
     { id: 'health', label: 'Salud', icon: HeartPulse },
