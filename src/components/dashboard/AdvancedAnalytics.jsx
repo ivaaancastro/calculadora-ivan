@@ -3,19 +3,19 @@ import {
     PieChart, Pie, Cell, BarChart, Bar, AreaChart, Area, XAxis, YAxis, Tooltip as RechartsTooltip, ResponsiveContainer, CartesianGrid,
     LineChart, Line, Legend, ComposedChart, ScatterChart, Scatter, ReferenceLine, ReferenceArea
 } from 'recharts';
-import { 
-    Activity, Heart, CalendarDays, BarChart2, Target, MousePointer2, TrendingUp, Trophy, AlertTriangle, 
+import {
+    Activity, Heart, CalendarDays, BarChart2, Target, MousePointer2, TrendingUp, Trophy, AlertTriangle,
     Battery, Brain, Moon, Info, Activity as ActivityPulse, Loader2, Sparkles, Coffee, AlertOctagon,
-    ArrowUpRight, ArrowDownRight, Zap, TrendingDown
+    ArrowUpRight, ArrowDownRight, Zap, TrendingDown, Wifi
 } from 'lucide-react';
+import { 
+    estimateFTP, estimateCyclingVO2max, estimateRunningVO2max, predictRaceTimes, 
+    calculateTrainingEffect, analyzePowerProfile, calculateDanielsPaces 
+} from '../../utils/fitnessStatsEngine';
+import { SPORT_LOAD_CONFIG, getSportCategory } from '../../utils/tssEngine';
 import { EvolutionChart } from './EvolutionChart';
 import { InfoTooltip } from '../common/InfoTooltip';
-import { 
-    estimateFTP, estimateCyclingVO2max, predictRaceTimes, 
-    calculateTrainingEffect, analyzePowerProfile, calculateDanielsPaces,
-    estimateThresholdPace, calculatePowerZones, calculateFTPHistory,
-    calculateFitnessScore, analyzeIntensityDistribution
-} from '../../utils/fitnessStatsEngine';
+import { supabase } from '../../supabase';
 
 const TIME_INTERVALS = [1, 5, 15, 30, 60, 180, 300, 600, 1200, 2400, 3600, 7200];
 const formatInterval = (secs) => { if (secs < 60) return `${secs}s`; if (secs < 3600) return `${secs / 60}m`; return `${secs / 3600}h`; };
@@ -24,52 +24,69 @@ const getMonday = (d) => { const date = new Date(d); const day = date.getDay(); 
 const ZONE_COLORS = ['#94a3b8', '#3b82f6', '#22c55e', '#eab308', '#f97316', '#ef4444', '#a855f7'];
 const ZONE_LABELS = ['Z1 Recuperación', 'Z2 Aeróbico', 'Z3 Tempo', 'Z4 SubUmbral', 'Z5 SupraUmbral', 'Z6 VO2Max', 'Z7 Anaeróbico'];
 
-export const AdvancedAnalytics = ({ activities, settings, onSelectActivity, timeRange, setTimeRange, chartData }) => {
+// ─────────────────────────────────────────────────────────────────────────────
+// Helper: load the latest wellness row from Supabase (written by useIntervalsSync)
+// ─────────────────────────────────────────────────────────────────────────────
+async function fetchLatestWellnessRow() {
+    try {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!session) return null;
+        const { data } = await supabase
+            .from('wellness_data')
+            .select('vo2max, ctl, atl, resting_hr, weight')
+            .eq('user_id', session.user.id)
+            .not('vo2max', 'is', null)
+            .order('date', { ascending: false })
+            .limit(1)
+            .maybeSingle();
+        return data || null;
+    } catch { return null; }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Component
+// currentMetrics — comes from useActivities (single source of truth for CTL/ATL)
+//   { ctl, atl, tcb (=TSB), rampRate, acwr, monotony, strain, avgTss7d, pastCtl }
+// chartData — daily series from useActivities, already filtered by timeRange
+// ─────────────────────────────────────────────────────────────────────────────
+export const AdvancedAnalytics = ({ activities, settings, onSelectActivity, timeRange, setTimeRange, chartData, currentMetrics }) => {
     const [curveType, setCurveType] = useState('power');
     const [curveSport, setCurveSport] = useState('bike');
     const [scatterSport, setScatterSport] = useState('run');
     const [vo2Sport, setVo2Sport] = useState('run');
     const [mmpTimeframe, setMmpTimeframe] = useState('90d');
     const [intensityTimeframe, setIntensityTimeframe] = useState('28d');
+    const [garminVo2max, setGarminVo2max] = useState(null);
 
-    const analytics = useMemo(() => {
-        const ftp = estimateFTP(activities, settings);
-        const today = new Date();
-        const d45 = new Date(today); d45.setDate(today.getDate() - 45);
-        const restHr = Number(settings.fcReposo) || 60;
-        
-        // 1. VO2 Max
-        let bestRunVo2 = 0;
-        activities.forEach(act => {
-            const d = new Date(act.date);
-            if (d < d45 || act.duration < 15) return;
-            const typeLower = String(act.type || '').toLowerCase();
-            const isRun = typeLower.includes('run') || typeLower.includes('carrera');
-            const speed = act.speed_avg || (act.distance && act.duration ? act.distance / (act.duration * 60) : 0);
-            if (isRun && speed > 2.0 && act.hr_avg > restHr) {
-                const max = Number(settings.run.max) || 180;
-                const pct = (act.hr_avg - restHr) / (max - restHr);
-                if (pct > 0 && act.hr_avg >= max * 0.55) {
-                    const vo2 = ((speed * 60 * 0.2) + 3.5) / pct;
-                    if (vo2 > bestRunVo2 && vo2 < 85) bestRunVo2 = vo2;
-                }
-            }
+    // Load Garmin VO2max from Supabase wellness_data (synced from Intervals.icu)
+    useEffect(() => {
+        fetchLatestWellnessRow().then(row => {
+            if (row?.vo2max) setGarminVo2max(Number(Number(row.vo2max).toFixed(1)));
         });
-        const bikeVo2Result = estimateCyclingVO2max(activities, settings);
-        let bestBikeVo2 = bikeVo2Result.vo2max;
-        if (bestBikeVo2 === 0 && settings.fcReposo > 30 && settings.bike.max > 120) {
-            bestBikeVo2 = Number((15.3 * (settings.bike.max / settings.fcReposo) * 0.95).toFixed(1));
-        }
+    }, []);
 
-        const vo2ForPred = bestRunVo2 > 0 ? bestRunVo2 : bestBikeVo2;
-        const races = predictRaceTimes(vo2ForPred);
-        const te = calculateTrainingEffect(activities, settings);
-        const profile = analyzePowerProfile(ftp);
-        const intensityDays = parseInt(intensityTimeframe) || 90;
-        const intensity = analyzeIntensityDistribution(activities, settings, intensityDays);
+    // ── ANALYTICS MEMO: MMP peaks, zones, EF, weekly volume, profile ─────────
+    // NOTE: CTL/ATL/TSB are NOT calculated here — they come from currentMetrics
+    //       (single source of truth via useActivities with Intervals.icu formula)
+    const analytics = useMemo(() => {
+        const today = new Date();
+        const date90DaysAgo = new Date(today); date90DaysAgo.setDate(today.getDate() - 90);
 
+        const dateMmp = new Date(today);
+        if (mmpTimeframe === '90d') dateMmp.setDate(today.getDate() - 90);
+        else if (mmpTimeframe === '1y') dateMmp.setDate(today.getDate() - 365);
+        else dateMmp.setFullYear(2000);
 
-        // 2. Peaks, Zones, EF and PMC
+        const dateIntensity = new Date(today);
+        if (intensityTimeframe === '28d') dateIntensity.setDate(today.getDate() - 28);
+        else if (intensityTimeframe === '90d') dateIntensity.setDate(today.getDate() - 90);
+        else if (intensityTimeframe === '1y') dateIntensity.setDate(today.getDate() - 365);
+        else dateIntensity.setFullYear(2000);
+
+        const zonesData = [0, 0, 0, 0, 0, 0, 0];
+        const sortedActivities = [...activities].sort((a, b) => new Date(a.date) - new Date(b.date));
+        const weeklyMap = new Map();
+
         const getPeakByTime = (data, timeData, windowSecs) => {
             if (!data || !timeData || data.length === 0) return 0;
             let maxAvg = 0; let startIdx = 0; let currentSum = 0; let currentCount = 0;
@@ -80,90 +97,98 @@ export const AdvancedAnalytics = ({ activities, settings, onSelectActivity, time
             }
             return maxAvg;
         };
+
         const initPeaks = () => { const p = {}; TIME_INTERVALS.forEach(i => { p[i] = { value: 0, actId: null, actName: '', actDate: '' }; }); return p; };
         const peaks = { all: { hr: initPeaks(), spd: initPeaks(), pwr: initPeaks() }, bike: { hr: initPeaks(), spd: initPeaks(), pwr: initPeaks() }, run: { hr: initPeaks(), spd: initPeaks(), pwr: initPeaks() } };
+        const efData = { bike: [], run: [] };
         const updatePeak = (sport, metric, window, value, act) => { if (value > peaks[sport][metric][window].value) peaks[sport][metric][window] = { value, actId: act.id, actName: act.name, actDate: act.date }; };
 
-        const zonesData = [0, 0, 0, 0, 0, 0, 0];
-        const efData = { bike: [], run: [] };
-        const dailyTSS = new Map();
-        const dateIntensityLimit = new Date(); dateIntensityLimit.setDate(dateIntensityLimit.getDate() - intensityDays);
-        const dateMmpLimit = new Date(); dateMmpLimit.setDate(dateMmpLimit.getDate() - (mmpTimeframe === '90d' ? 90 : 365));
-
-        activities.forEach(act => {
+        sortedActivities.forEach(act => {
             const actDate = new Date(act.date);
-            dailyTSS.set(actDate.toISOString().split('T')[0], (dailyTSS.get(actDate.toISOString().split('T')[0]) || 0) + (act.tss || 0));
-            
-            const typeLower = String(act.type || '').toLowerCase();
-            const isBike = typeLower.includes('bici') || typeLower.includes('ciclismo');
-            const isRun = typeLower.includes('run') || typeLower.includes('carrera');
+            const actTss = act.tss || 0;
 
-            if (act.streams_data?.time?.data) {
-                const timeData = act.streams_data.time.data;
-                const hrData = act.streams_data.heartrate?.data;
-                if (hrData) {
-                    if (actDate >= dateIntensityLimit) {
-                        const userZones = isRun ? settings.run.zones : settings.bike.zones;
-                        if (userZones) {
-                            for (let i = 1; i < hrData.length; i++) {
-                                const dt = timeData[i] - timeData[i - 1];
-                                if (dt > 0 && dt < 10) {
-                                    const zIndex = userZones.findIndex(z => hrData[i] >= z.min && hrData[i] <= z.max);
-                                    if (zIndex !== -1 && zIndex < 7) zonesData[zIndex] += dt;
-                                }
-                            }
-                        }
-                    }
-                    if (actDate >= dateMmpLimit) {
-                        TIME_INTERVALS.forEach(w => {
-                            const pk = getPeakByTime(hrData, timeData, w);
-                            if (pk > 0) { updatePeak('all', 'hr', w, pk, act); if (isBike) updatePeak('bike', 'hr', w, pk, act); if (isRun) updatePeak('run', 'hr', w, pk, act); }
-                        });
-                    }
-                }
-                if (actDate >= dateMmpLimit) {
-                    if (act.streams_data.velocity_smooth?.data) {
-                        TIME_INTERVALS.forEach(w => {
-                            const pk = getPeakByTime(act.streams_data.velocity_smooth.data, timeData, w);
-                            if (pk > 0) { updatePeak('all', 'spd', w, pk, act); if (isBike) updatePeak('bike', 'spd', w, pk, act); if (isRun) updatePeak('run', 'spd', w, pk, act); }
-                        });
-                    }
-                    if (act.streams_data.watts?.data) {
-                        TIME_INTERVALS.forEach(w => {
-                            const pk = getPeakByTime(act.streams_data.watts.data, timeData, w);
-                            if (pk > 0) { updatePeak('all', 'pwr', w, pk, act); if (isBike) updatePeak('bike', 'pwr', w, pk, act); if (isRun) updatePeak('run', 'pwr', w, pk, act); }
-                        });
-                    }
-                }
+            if (actDate >= date90DaysAgo) {
+                const weekStart = getMonday(act.date);
+                if (!weeklyMap.has(weekStart)) weeklyMap.set(weekStart, { week: weekStart, tss: 0, hours: 0 });
+                const wData = weeklyMap.get(weekStart);
+                wData.tss += actTss; wData.hours += (act.duration || 0) / 60;
             }
 
-            if (actDate >= d45 && act.duration >= 20 && act.hr_avg > 80) {
+            const typeLower = String(act.type).toLowerCase();
+            const isBike = typeLower.includes('bici') || typeLower.includes('ciclismo') || typeLower.includes('ride');
+            const isRun = typeLower.includes('run') || typeLower.includes('carrera');
+
+            if (actDate >= date90DaysAgo && (isBike || isRun) && act.hr_avg > 80 && act.duration >= 20) {
+                const speedMs = act.speed_avg || 0;
                 const baseDateLabel = actDate.toLocaleDateString('es-ES', { day: '2-digit', month: 'short' });
                 if (isBike && act.watts_avg > 40) {
                     efData.bike.push({ date: act.date, dateLabel: baseDateLabel, ef: Number((act.watts_avg / act.hr_avg).toFixed(2)), name: act.name, id: act.id, hr: Math.round(act.hr_avg), watts: Math.round(act.watts_avg) });
                 }
-                if (isRun && act.speed_avg > 2) {
-                    efData.run.push({ date: act.date, dateLabel: baseDateLabel, ef: Number(((act.speed_avg * 60) / act.hr_avg).toFixed(2)), name: act.name, id: act.id, hr: Math.round(act.hr_avg), pace: formatPace((16.6666667 / act.speed_avg)) });
+                if (isRun && speedMs > 2) {
+                    efData.run.push({ date: act.date, dateLabel: baseDateLabel, ef: Number(((speedMs * 60) / act.hr_avg).toFixed(2)), name: act.name, id: act.id, hr: Math.round(act.hr_avg), pace: formatPace((16.6666667 / speedMs)) });
+                }
+            }
+
+            if (act.streams_data?.time) {
+                const timeData = act.streams_data.time.data;
+                if (act.streams_data.heartrate) {
+                    const hrData = act.streams_data.heartrate.data;
+                    if (actDate >= dateIntensity) {
+                        const userZones = isBike ? settings.bike.zones : settings.run.zones;
+                        for (let i = 1; i < hrData.length; i++) {
+                            const hr = hrData[i]; const dt = timeData[i] - timeData[i - 1];
+                            const zIndex = userZones.findIndex(z => hr >= z.min && hr <= z.max);
+                            if (zIndex !== -1 && zIndex < 7) zonesData[zIndex] += dt; else if (hr > userZones[userZones.length - 1].max) zonesData[6] += dt;
+                        }
+                    }
+                    if (actDate >= dateMmp) {
+                        TIME_INTERVALS.forEach(w => {
+                            const peak = getPeakByTime(hrData, timeData, w);
+                            if (peak > 0) { updatePeak('all', 'hr', w, peak, act); if (isBike) updatePeak('bike', 'hr', w, peak, act); if (isRun) updatePeak('run', 'hr', w, peak, act); }
+                        });
+                    }
+                }
+                if (actDate >= dateMmp && act.streams_data.velocity_smooth) {
+                    const spdData = act.streams_data.velocity_smooth.data;
+                    TIME_INTERVALS.forEach(w => {
+                        const peak = getPeakByTime(spdData, timeData, w);
+                        if (peak > 0) { updatePeak('all', 'spd', w, peak, act); if (isBike) updatePeak('bike', 'spd', w, peak, act); if (isRun) updatePeak('run', 'spd', w, peak, act); }
+                    });
+                }
+                if (actDate >= dateMmp && act.streams_data.watts) {
+                    const pwrData = act.streams_data.watts.data;
+                    TIME_INTERVALS.forEach(w => {
+                        const peak = getPeakByTime(pwrData, timeData, w);
+                        if (peak > 0) { updatePeak('all', 'pwr', w, peak, act); if (isBike) updatePeak('bike', 'pwr', w, peak, act); if (isRun) updatePeak('run', 'pwr', w, peak, act); }
+                    });
                 }
             }
         });
 
-        const pmcHistory = [];
-        let finalCTL = 0, finalATL = 0;
-        const sortedDates = Array.from(dailyTSS.keys()).sort();
-        if (sortedDates.length > 0) {
-            let runningCTL = 0, runningATL = 0;
-            const firstDate = new Date(sortedDates[0]);
-            for (let d = new Date(firstDate); d <= today; d.setDate(d.getDate() + 1)) {
-                const k = d.toISOString().split('T')[0];
-                const tss = dailyTSS.get(k) || 0;
-                runningCTL += (tss - runningCTL) / 42;
-                runningATL += (tss - runningATL) / 7;
-                if (d >= new Date(today.getTime() - 120 * 24 * 3600 * 1000)) {
-                    pmcHistory.push({ dateLabel: d.toLocaleDateString('es-ES', { day: '2-digit', month: 'short' }), ctl: Math.round(runningCTL), atl: Math.round(runningATL), tsb: Math.round(runningCTL - runningATL), tss: Math.round(tss) });
-                }
-            }
-            finalCTL = runningCTL; finalATL = runningATL;
+        // VO2 Max — estimated from activity data, overridden by Garmin if available
+        const runVo2Result = estimateRunningVO2max(sortedActivities, settings);
+        const bikeVo2Result = estimateCyclingVO2max(sortedActivities, settings);
+        const bikeVo2IsEstimated = bikeVo2Result.method !== 'garmin_firstbeat' && bikeVo2Result.method !== 'none';
+
+        const weeklyChart = Array.from(weeklyMap.values()).map(w => ({ dateLabel: new Date(w.week).toLocaleDateString('es-ES', { day: '2-digit', month: 'short' }), tss: Math.round(w.tss), hours: Number(w.hours.toFixed(1)) }));
+        const zonesChart = zonesData.map((secs, i) => ({ name: ZONE_LABELS[i], hours: Number((secs / 3600).toFixed(1)), fill: ZONE_COLORS[i] }));
+        const totalFocus = zonesData.reduce((a, b) => a + b, 0);
+        const focusChart = totalFocus > 0 ? [
+            { name: 'Aeróbico', value: Math.round(((zonesData[0] + zonesData[1]) / totalFocus) * 100), color: '#3b82f6' },
+            { name: 'Tempo/Umbral', value: Math.round(((zonesData[2] + zonesData[3]) / totalFocus) * 100), color: '#eab308' },
+            { name: 'Anaeróbico', value: Math.round(((zonesData[4] + zonesData[5] + zonesData[6]) / totalFocus) * 100), color: '#ef4444' }
+        ] : [];
+
+        let trainingProfile = { title: "Sin Datos", desc: "No hay datos de zonas suficientes para determinar un perfil.", color: "text-slate-500", raw: 'none' };
+        if (totalFocus > 0) {
+            const zAerobic = (zonesData[0] + zonesData[1]) / totalFocus;
+            const zTempo = (zonesData[2] + zonesData[3]) / totalFocus;
+            const zAnaerobic = (zonesData[4] + zonesData[5] + zonesData[6]) / totalFocus;
+            if (zAerobic >= 0.75 && zAnaerobic >= zTempo) trainingProfile = { title: "Polarizado", desc: "Mucha base aeróbica y picos de alta intensidad, evitando zonas grises. Muy efectivo.", color: "text-emerald-500", raw: 'polarizado' };
+            else if (zAerobic >= 0.65 && zTempo > zAnaerobic) trainingProfile = { title: "Piramidal", desc: "Base enorme, algo de umbral y poco anaeróbico. Gran progresión constante de forma.", color: "text-blue-500", raw: 'piramidal' };
+            else if (zTempo >= 0.35) trainingProfile = { title: "Enfocado en Umbral", desc: "Excesivo tiempo en zonas de fatiga alta y media. Riesgo de estancamiento (mucho 'Sweet Spot').", color: "text-amber-500", raw: 'umbral' };
+            else if (zAerobic < 0.55 && zAnaerobic >= 0.20) trainingProfile = { title: "Alta Intensidad (HIIT)", desc: "Entrenamiento de corta duración y altísimo impacto. Insostenible a medio plazo.", color: "text-rose-500", raw: 'hiit' };
+            else trainingProfile = { title: "Mixto / Base", desc: "Distribución aeróbica general sin un pico polarizado muy claro hacia los extremos.", color: "text-indigo-500", raw: 'mixto' };
         }
 
         const curves = { all: { spd: [], hr: [], pwr: [] }, bike: { spd: [], hr: [], pwr: [] }, run: { spd: [], hr: [], pwr: [] } };
@@ -181,44 +206,69 @@ export const AdvancedAnalytics = ({ activities, settings, onSelectActivity, time
             }).filter(d => d.value > 0);
         });
 
-        const tFocus = zonesData.reduce((a, b) => a + b, 0);
-        const fitnessScore = calculateFitnessScore(vo2ForPred, ftp.wPerKg, finalCTL);
+        // 30d volume
+        const date30d = new Date(today); date30d.setDate(today.getDate() - 30);
+        let totalVolume = 0; let totalActivities30d = 0;
+        sortedActivities.forEach(a => {
+            if (new Date(a.date) >= date30d) { totalVolume += (a.duration || 0); totalActivities30d++; }
+        });
+
         return {
-            vo2Max: { run: Number(bestRunVo2.toFixed(1)), bike: bestBikeVo2 },
-            fitnessScore, te, intensity, races, profile, curves, efData, pmcHistory, peaksRecord: peaks,
-            zonesChart: zonesData.map((secs, i) => ({ name: ZONE_LABELS[i], hours: Number((secs / 3600).toFixed(1)), fill: ZONE_COLORS[i] })),
-            focusChart: [
-                { name: 'Aeróbico', value: tFocus > 0 ? Math.round(((zonesData[0] + zonesData[1]) / tFocus) * 100) : 0, color: '#3b82f6' },
-                { name: 'Tempo/Umbral', value: tFocus > 0 ? Math.round(((zonesData[2] + zonesData[3]) / tFocus) * 100) : 0, color: '#eab308' },
-                { name: 'Anaeróbico', value: tFocus > 0 ? Math.round(((zonesData[4] + zonesData[5] + zonesData[6]) / tFocus) * 100) : 0, color: '#ef4444' }
-            ],
-            model: { 
-                ctl: finalCTL, atl: finalATL, tsb: finalCTL - finalATL, 
-                freshness: finalCTL > 0 ? ((finalCTL - finalATL) / finalCTL) * 100 : 0, 
-                rampRate: te?.ctlTrend || 0,
-                loadTrend: te?.ctlTrend || 0,
-                monotony: te?.monotony || 1,
-                load7d: 0, 
-                totalActivities: activities.length, 
-                totalVolume: activities.reduce((s, a) => s + (a.duration || 0), 0) 
-            }
+            zonesChart, focusChart, weeklyChart, curves, efData,
+            trainingProfile,
+            vo2Max: {
+                run: runVo2Result,
+                bike: bikeVo2Result,
+                bikeEstimated: bikeVo2IsEstimated,
+                // garmin is set from state (loaded async) — see below
+            },
+            peaksRecord: peaks,
+            totalVolume,
+            totalActivities30d,
         };
     }, [activities, settings, mmpTimeframe, intensityTimeframe]);
 
-    const currentCurve = useMemo(() => {
-        if (!analytics?.curves || !curveSport) return [];
-        const sportCurves = analytics.curves[curveSport];
-        if (!sportCurves) return [];
-        if (curveType === 'power') return sportCurves.pwr || [];
-        if (curveType === 'speed') return sportCurves.spd || [];
-        return sportCurves.hr || [];
-    }, [analytics.curves, curveSport, curveType]);
+    // ── MODEL: read directly from currentMetrics (useActivities = single source of truth) ──
+    // This guarantees that every place showing CTL/ATL/TSB shows the exact same value
+    const model = useMemo(() => {
+        if (!currentMetrics) return { ctl: 0, atl: 0, tsb: 0, acwr: 0, rampRate: 0, monotony: 0, strain: 0, loadTrend: 0, totalActivities: 0, totalVolume: 0 };
+        const { ctl, atl, tcb: tsb, rampRate, acwr, monotony, strain, pastCtl } = currentMetrics;
+        const loadTrend = pastCtl > 0 ? ((ctl - pastCtl) / pastCtl) * 100 : 0;
+        return {
+            ctl: ctl || 0,
+            atl: atl || 0,
+            tsb: tsb || 0,
+            acwr: acwr || 0,
+            rampRate: rampRate || 0,
+            monotony: monotony || 0,
+            strain: strain || 0,
+            loadTrend,
+            totalActivities: analytics.totalActivities30d || 0,
+            totalVolume: analytics.totalVolume || 0,
+        };
+    }, [currentMetrics, analytics]);
 
-    if (!activities || activities.length === 0) return null;
+    // Primary VO2max: Garmin (measured) > estimated from activities
+    const globalMaxVo2 = garminVo2max
+        ? garminVo2max
+        : Math.max(analytics.vo2Max.run.vo2max || 0, analytics.vo2Max.bike.vo2max || 0);
+    const vo2IsGarmin = !!garminVo2max;
+
+    const currentCurve = useMemo(() => {
+        if (!analytics?.curves) return [];
+        if (curveType === 'power') return analytics.curves[curveSport]?.pwr || [];
+        if (curveType === 'speed') return analytics.curves[curveSport]?.spd || [];
+        return analytics.curves[curveSport]?.hr || [];
+    }, [analytics, curveSport, curveType]);
 
     const isPace = curveSport === 'run' && curveType === 'speed';
     const curveColor = curveType === 'hr' ? '#ef4444' : (curveType === 'power' ? '#fbbf24' : (isPace ? '#ea580c' : '#2563eb'));
     const curveUnit = curveType === 'power' ? 'w' : (isPace ? '/km' : (curveType === 'speed' ? 'km/h' : 'ppm'));
+
+    const currentVo2Obj = vo2Sport === 'run' ? analytics.vo2Max.run : analytics.vo2Max.bike;
+    const currentVo2Value = currentVo2Obj.vo2max || 0;
+
+    if (!activities || activities.length === 0) return null;
 
     const tooltipStyle = { backgroundColor: '#18181b', border: '1px solid #3f3f46', borderRadius: '4px', color: '#f4f4f5', fontSize: '11px', fontWeight: '500', padding: '8px 10px', zIndex: 1000, pointerEvents: 'none' };
 
@@ -278,15 +328,13 @@ export const AdvancedAnalytics = ({ activities, settings, onSelectActivity, time
     };
 
     const getTrainingStatus = () => {
-        const { ctl, tsb } = analytics.model;
-        const rampRate = analytics.te.ctlTrend || 0;
-
-        if (ctl < 15) return { phase: 'Construyendo Base Inicial', color: 'text-slate-500', bg: 'bg-slate-50 border-slate-200 dark:bg-zinc-800/50 dark:border-zinc-700', icon: Brain, desc: 'Fase de crecimiento inicial. Tu carga es baja pero constante. Sigue así para asentar el modelo.' };
-        if (tsb < -25) return { phase: 'Sobrecarga de Alto Riesgo', color: 'text-red-500', bg: 'bg-red-50 dark:bg-red-900/10 border-red-200 dark:border-red-900/30', icon: AlertTriangle, desc: 'Fatiga extrema. Tu cuerpo está al límite de lo que puede asimilar. Riesgo inminente de lesión o sobreentrenamiento.' };
-        if (tsb >= -25 && tsb <= -10 && rampRate > 0) return { phase: 'Productivo / Supercompensación', color: 'text-emerald-500', bg: 'bg-emerald-50 dark:bg-emerald-900/10 border-emerald-200 dark:border-emerald-900/30', icon: TrendingUp, desc: 'Punto dulce de entrenamiento. Estás asimilando la carga perfectamente y mejorando tu rendimiento real.' };
-        if (tsb > -10 && tsb <= 10) return { phase: 'Mantenimiento / Asimilación', color: 'text-blue-500', bg: 'bg-blue-50 dark:bg-blue-900/10 border-blue-200 dark:border-blue-900/30', icon: Activity, desc: 'Balance óptimo para asimilar entrenos pasados sin quemarse. Ideal para semanas de carga media.' };
-        if (tsb > 10 && rampRate < 0) return { phase: 'Desentrenamiento / Pérdida', color: 'text-orange-500', bg: 'bg-orange-50 dark:bg-orange-900/10 border-orange-200 dark:border-orange-900/30', icon: TrendingDown, desc: 'Falta de estímulo. Estás perdiendo adaptaciones fisiológicas por falta de carga de entrenamiento.' };
-        return { phase: 'Pico de Forma / Competición', color: 'text-purple-500', bg: 'bg-purple-50 dark:bg-purple-900/10 border-purple-200 dark:border-purple-900/30', icon: Battery, desc: 'Estado de frescura máxima. La fatiga ha desaparecido y tu sistema está listo para rendir al 100%.' };
+        const { ctl, tsb, rampRate } = model;
+        if (ctl < 15) return { phase: 'Construyendo Base', color: 'text-slate-500', bg: 'bg-slate-50 border-slate-200 dark:bg-zinc-800/50 dark:border-zinc-700', icon: Brain, desc: 'Tienes poco historial acumulado (Fitness CTL). Sigue entrenando para asentar el modelo base de 42 días.' };
+        if (tsb < -25) return { phase: 'Sobrecarga / Riesgo', color: 'text-red-500', bg: 'bg-red-50 dark:bg-red-900/10 border-red-200 dark:border-red-900/30', icon: AlertTriangle, desc: 'Tu Fatiga (7d) supera con creces tu Forma Base (42d). Riesgo alto de lesión. Necesitas descanso urgente.' };
+        if (tsb >= -25 && tsb <= -10 && rampRate > 0.5) return { phase: 'Productivo', color: 'text-emerald-500', bg: 'bg-emerald-50 dark:bg-emerald-900/10 border-emerald-200 dark:border-emerald-900/30', icon: TrendingUp, desc: 'Punto dulce de estrés. Estás asimilando carga perfectamente (TSB entre -10 y -25) y ganando estado de forma.' };
+        if (tsb > -10 && tsb <= 5) return { phase: 'Mantenimiento', color: 'text-blue-500', bg: 'bg-blue-50 dark:bg-blue-900/10 border-blue-200 dark:border-blue-900/30', icon: Activity, desc: 'Balance Neutro (TSB cercano a 0). Mantienes tu nivel sin estresar en exceso el sistema. Ideal para asimilar.' };
+        if (tsb > 5 && rampRate < -1) return { phase: 'Pérdida de Forma', color: 'text-orange-500', bg: 'bg-orange-50 dark:bg-orange-900/10 border-orange-200 dark:border-orange-900/30', icon: TrendingDown, desc: 'Estás entrenando menos de lo habitual. Tu Fatiga ha desaparecido pero tu Forma Base está cayendo.' };
+        return { phase: 'Pico / Recuperación', color: 'text-purple-500', bg: 'bg-purple-50 dark:bg-purple-900/10 border-purple-200 dark:border-purple-900/30', icon: Battery, desc: 'Estás muy fresco positivamente (TSB Alto). Has limpiado la fatiga y estás en tu nivel óptimo para competir.' };
     };
 
     const getVo2Assessment = (vo2Value) => {
@@ -299,7 +347,6 @@ export const AdvancedAnalytics = ({ activities, settings, onSelectActivity, time
         else if (v < 60) posPercent = 60 + ((v - 50) / 10) * 20;
         else posPercent = 80 + Math.min(((v - 60) / 10) * 20, 20);
         posPercent = Math.max(2, Math.min(posPercent, 98));
-
         if (v < 35) return { label: 'Pobre', color: 'text-red-500', width: `${posPercent}%` };
         if (v < 42) return { label: 'Regular', color: 'text-orange-500', width: `${posPercent}%` };
         if (v < 50) return { label: 'Bueno', color: 'text-emerald-500', width: `${posPercent}%` };
@@ -308,7 +355,6 @@ export const AdvancedAnalytics = ({ activities, settings, onSelectActivity, time
     };
 
     const status = getTrainingStatus();
-    const currentVo2Value = vo2Sport === 'run' ? analytics.vo2Max.run : analytics.vo2Max.bike;
     const vo2Info = getVo2Assessment(currentVo2Value);
 
     const SectionHeader = ({ title }) => (
@@ -316,7 +362,6 @@ export const AdvancedAnalytics = ({ activities, settings, onSelectActivity, time
             <h3 className="text-sm font-black text-slate-800 dark:text-zinc-200 uppercase tracking-widest">{title}</h3>
         </div>
     );
-    const Subtitle = ({ text }) => <span className="text-[9px] font-bold text-slate-400 dark:text-zinc-500 uppercase tracking-widest ml-2 bg-slate-100 dark:bg-zinc-800 px-2 py-0.5 rounded">{text}</span>;
 
     return (
         <div className="space-y-12 pb-12">
@@ -328,42 +373,47 @@ export const AdvancedAnalytics = ({ activities, settings, onSelectActivity, time
                             Carga y Rendimiento
                         </h2>
                         <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400 dark:text-zinc-500">
-                            Evolución de fitness, fatiga y forma a largo plazo
+                            Evolución de fitness, fatiga y forma · Fórmula Intervals.icu
                         </p>
                     </div>
 
-                    <div className="flex bg-slate-200/50 dark:bg-zinc-800/50 backdrop-blur-sm p-1 rounded-xl border border-slate-200 dark:border-zinc-800">
-                        {[
-                            { id: "7d", label: "7D" },
-                            { id: "30d", label: "30D" },
-                            { id: "90d", label: "3M" },
-                            { id: "all", label: "Todo" },
-                        ].map((t) => (
-                            <button
-                                key={t.id}
-                                onClick={() => setTimeRange(t.id)}
-                                className={`px-4 py-1.5 text-[10px] font-bold uppercase transition-all rounded-lg ${timeRange === t.id
-                                    ? "bg-white dark:bg-zinc-700 text-blue-600 dark:text-blue-400 shadow-sm"
-                                    : "text-slate-500 dark:text-zinc-400 hover:text-slate-700 dark:hover:text-zinc-200"
-                                    }`}
-                            >
-                                {t.label}
-                            </button>
-                        ))}
+                    <div className="flex items-center gap-3">
+                        {/* Intervals.icu badge */}
+                        <span className="text-[9px] font-bold text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-900/20 border border-indigo-200 dark:border-indigo-800 px-2 py-0.5 rounded-full flex items-center gap-1">
+                            <Wifi size={8} /> exp(-1/42) · exp(-1/7)
+                        </span>
+                        <div className="flex bg-slate-200/50 dark:bg-zinc-800/50 backdrop-blur-sm p-1 rounded-xl border border-slate-200 dark:border-zinc-800">
+                            {[
+                                { id: "7d", label: "7D" },
+                                { id: "30d", label: "30D" },
+                                { id: "90d", label: "3M" },
+                                { id: "all", label: "Todo" },
+                            ].map((t) => (
+                                <button
+                                    key={t.id}
+                                    onClick={() => setTimeRange(t.id)}
+                                    className={`px-4 py-1.5 text-[10px] font-bold uppercase transition-all rounded-lg ${timeRange === t.id
+                                        ? "bg-white dark:bg-zinc-700 text-blue-600 dark:text-blue-400 shadow-sm"
+                                        : "text-slate-500 dark:text-zinc-400 hover:text-slate-700 dark:hover:text-zinc-200"
+                                        }`}
+                                >
+                                    {t.label}
+                                </button>
+                            ))}
+                        </div>
                     </div>
                 </div>
 
                 <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-4 gap-3">
                     {[
-                        { label: 'Fitness (CTL)', value: Math.round(analytics.model.ctl), icon: Activity, color: 'text-blue-500', sub: `${analytics.model.loadTrend >= 0 ? '+' : ''}${analytics.model.loadTrend.toFixed(1)}% vs 28d`, subColor: analytics.model.loadTrend >= 0 ? 'text-emerald-500' : 'text-red-500', tip: "Nivel de condición física basado en los últimos 42 días. A mayor CTL, mayor capacidad de asimilar carga." },
-                        { label: 'Fatiga (ATL)', value: Math.round(analytics.model.atl), icon: Battery, color: 'text-purple-500', sub: 'Carga últ. 7 días', tip: "Cansancio acumulado en los últimos 7 días. Sube rápido tras entrenos duros y baja con descanso." },
-                        { label: 'Forma (TSB)', value: Math.round(analytics.model.tsb), icon: Zap, color: analytics.model.tsb < -25 ? 'text-red-500' : (analytics.model.tsb > 0 ? 'text-emerald-500' : 'text-blue-500'), sub: `Frescura: ${Math.round(analytics.model.freshness)}%`, tip: "Balance entre Fitness y Fatiga. Óptimo para competir: +5 a +25. Óptimo para entrenar: -10 a -30." },
-                        { label: 'Rampa Semanal', value: analytics.model.rampRate.toFixed(1), icon: analytics.model.rampRate >= 0 ? ArrowUpRight : ArrowDownRight, color: analytics.model.rampRate > 6 ? 'text-red-500' : (analytics.model.rampRate > 0 ? 'text-emerald-500' : 'text-slate-400'), sub: `${analytics.model.rampRate > 0 ? 'Subiendo' : 'Bajando'}`, tip: "Cuánto sube tu CTL cada semana. Ideal: 2-5 pts. >8 indica riesgo alto de sobreentrenamiento." },
-                        { label: 'Monotonía', value: analytics.model.monotony.toFixed(2), icon: Brain, color: analytics.model.monotony > 2 ? 'text-orange-500' : 'text-slate-400', sub: 'Variedad de carga', tip: "Variedad de la carga diaria. >1.5 significa falta de variedad y mayor riesgo de lesión o estancamiento." },
-                        { label: 'Carga Sem.', value: Math.round(analytics.te.weeklyTssAvg), icon: ActivityPulse, color: 'text-slate-400', sub: 'Solo Correr/Bici', tip: "Carga media de TSS semanal filtrada por actividades de carrera y ciclismo." },
-                        { label: 'Sesiones/Sem.', value: Math.round(analytics.te.weeklySessionsAvg), icon: CalendarDays, color: 'text-slate-500', sub: 'Número entero', tip: "Media de sesiones por semana redondeada al entero más cercano." },
-                        { label: 'VO2 Max', value: currentVo2Value || '--', icon: TrendingUp, color: vo2Info.color, sub: vo2Info.label, tip: "Estimación de tu capacidad aeróbica máxima (ml/kg/min). Sube con la intensidad y eficiencia." },
-                         { label: 'Fitness Score', value: analytics.fitnessScore.score, icon: Trophy, color: 'text-amber-500', sub: analytics.fitnessScore.label, tip: "Puntuación global de 0-100 basada en VO2max, W/Kg y consistencia de carga." }
+                        { label: 'Fitness (CTL)', value: Math.round(model.ctl), icon: Activity, color: 'text-blue-500', sub: `${model.loadTrend >= 0 ? '+' : ''}${model.loadTrend.toFixed(1)}% vs 28d`, subColor: model.loadTrend >= 0 ? 'text-emerald-500' : 'text-red-500', tip: "Nivel de condición física basado en los últimos 42 días. Fórmula exacta Intervals.icu: CTL = CTL × exp(-1/42) + TSS × (1-exp(-1/42))." },
+                        { label: 'Fatiga (ATL)', value: Math.round(model.atl), icon: Battery, color: 'text-purple-500', sub: 'Carga últ. 7 días', tip: "Cansancio acumulado. Fórmula: ATL = ATL × exp(-1/7) + TSS × (1-exp(-1/7))." },
+                        { label: 'Forma (TSB)', value: (model.tsb >= 0 ? '+' : '') + Math.round(model.tsb), icon: Zap, color: model.tsb < -25 ? 'text-red-500' : (model.tsb > 0 ? 'text-emerald-500' : 'text-blue-500'), sub: 'CTL[ayer] - ATL[ayer]', tip: "Forma actual = CTL de ayer - ATL de ayer (convención Intervals.icu). Óptimo para competir: +5 a +25. Óptimo para entrenar: -10 a -30." },
+                        { label: 'Ratio Carga (ACWR)', value: model.acwr.toFixed(2), icon: Target, color: model.acwr > 1.5 ? 'text-red-500' : (model.acwr > 1.3 ? 'text-orange-500' : (model.acwr > 0.8 ? 'text-emerald-500' : 'text-slate-400')), sub: 'Aguda vs Crónica', tip: "Relación ATL/CTL. Punto dulce: 0.8 - 1.3. Sobrecarga: 1.3 - 1.5. Riesgo alto de lesión/alerta: > 1.5." },
+                        { label: 'Rampa Semanal', value: model.rampRate.toFixed(1), icon: model.rampRate >= 0 ? ArrowUpRight : ArrowDownRight, color: model.rampRate > 6 ? 'text-red-500' : (model.rampRate > 0 ? 'text-emerald-500' : 'text-slate-400'), sub: `${model.rampRate > 0 ? 'Subiendo' : 'Bajando'}`, tip: "Cuánto sube tu CTL cada semana. Ideal: 2-5 pts. >8 indica riesgo alto de sobreentrenamiento." },
+                        { label: 'Monotonía', value: model.monotony.toFixed(2), icon: Brain, color: model.monotony > 2 ? 'text-orange-500' : 'text-slate-400', sub: 'Variedad de carga', tip: "Variedad de la carga diaria. >1.5 significa falta de variedad y mayor riesgo de lesión o estancamiento." },
+                        { label: 'Volumen 30D', value: `${Math.round(model.totalVolume / 60)}h`, icon: CalendarDays, color: 'text-slate-500', sub: `${model.totalActivities} actividades`, tip: "Horas totales y actividades acumuladas en los últimos 30 días." },
+                        { label: 'VO2 Max (Top)', value: globalMaxVo2 || '--', icon: TrendingUp, color: vo2IsGarmin ? 'text-rose-500' : 'text-blue-500', sub: vo2IsGarmin ? '📡 Garmin Medido' : 'Estimado', tip: vo2IsGarmin ? "VO2max medido directamente por tu Garmin (vía Intervals.icu). Fuente más precisa." : "El mayor valor de VO2max estimado entre todos tus deportes desde los streams de actividad." }
                     ].map((kpi, i) => (
                         <div key={i} className="bg-white dark:bg-zinc-900/40 p-3 rounded-xl border border-slate-200 dark:border-zinc-800/50 hover:border-slate-300 dark:hover:border-zinc-700 transition-colors shadow-sm">
                             <div className="flex items-center justify-between mb-1">
@@ -406,11 +456,11 @@ export const AdvancedAnalytics = ({ activities, settings, onSelectActivity, time
                                 <status.icon size={16} strokeWidth={2.5} />
                             </div>
                             <div>
-                            <div className="flex items-center gap-1">
-                                <span className="text-[8px] font-bold uppercase tracking-widest text-slate-400 opacity-60">Fase Actual</span>
-                                <InfoTooltip text="Estado sistémico basado en tu balance de fatiga y fitness. Indica si estás en fase productiva, de riesgo o de recuperación." />
-                            </div>
-                            <h3 className={`text-sm font-bold uppercase tracking-tight ${status.color}`}>{status.phase}</h3>
+                                <div className="flex items-center gap-1">
+                                    <span className="text-[8px] font-bold uppercase tracking-widest text-slate-400 opacity-60">Fase Actual</span>
+                                    <InfoTooltip text="Estado sistémico basado en tu balance de fatiga y fitness. Indica si estás en fase productiva, de riesgo o de recuperación." />
+                                </div>
+                                <h3 className={`text-sm font-bold uppercase tracking-tight ${status.color}`}>{status.phase}</h3>
                             </div>
                         </div>
                         <p className="text-[10px] font-medium text-slate-600 dark:text-zinc-400 leading-tight">
@@ -421,8 +471,10 @@ export const AdvancedAnalytics = ({ activities, settings, onSelectActivity, time
                     <div className="bg-white dark:bg-zinc-900/40 p-4 rounded-2xl border border-slate-200 dark:border-zinc-800/50 lg:col-span-1 flex flex-col">
                         <div className="flex justify-between items-center mb-4">
                             <div className="flex items-center gap-1">
-                                <span className="text-[9px] font-bold uppercase tracking-widest text-slate-400">VO2 Max Estimado</span>
-                                <InfoTooltip text="Consumo máximo de oxígeno. Es una métrica de tu potencia aeróbica total. Varía según el deporte seleccionado." />
+                                <span className="text-[9px] font-bold uppercase tracking-widest text-slate-400">
+                                    {vo2IsGarmin ? 'VO2 Max · Garmin' : 'VO2 Max Estimado'}
+                                </span>
+                                <InfoTooltip text={vo2IsGarmin ? "Consumo máximo de oxígeno medido por tu Garmin vía Intervals.icu. Es el valor más preciso disponible." : "Consumo máximo de oxígeno estimado de los streams de actividad. Varía según el deporte seleccionado."} />
                             </div>
                             <div className="flex bg-slate-100 dark:bg-zinc-800 p-0.5 rounded-full">
                                 {['bike', 'run'].map(s => (
@@ -433,9 +485,12 @@ export const AdvancedAnalytics = ({ activities, settings, onSelectActivity, time
 
                         <div className="flex-1 flex flex-col justify-center">
                             <div className="flex items-baseline gap-2 justify-center">
-                                <span className="text-3xl font-semibold text-slate-800 dark:text-zinc-100 tracking-tighter">{currentVo2Value > 0 ? currentVo2Value : '--'}</span>
+                                <span className={`text-3xl font-semibold tracking-tighter ${vo2IsGarmin ? 'text-rose-500' : 'text-slate-800 dark:text-zinc-100'}`}>{currentVo2Value > 0 ? currentVo2Value : '--'}</span>
                                 <span className="text-[8px] font-bold text-slate-400 uppercase tracking-widest">ml/kg/min</span>
                             </div>
+                            {vo2IsGarmin && (
+                                <p className="text-center text-[8px] font-bold text-rose-400/70 uppercase tracking-widest mt-1">📡 Garmin Firstbeat</p>
+                            )}
                             <div className="relative w-full h-1 bg-slate-100 dark:bg-zinc-800 rounded-full overflow-hidden mt-2">
                                 <div className="absolute top-0 left-0 h-full bg-red-500/30 w-[20%]"></div>
                                 <div className="absolute top-0 left-[20%] h-full bg-orange-500/30 w-[20%]"></div>
@@ -454,8 +509,8 @@ export const AdvancedAnalytics = ({ activities, settings, onSelectActivity, time
 
                     <div className="bg-white dark:bg-zinc-900/40 p-4 rounded-2xl border border-slate-200 dark:border-zinc-800/50 lg:col-span-1 flex flex-col justify-between">
                         <div className="flex items-center gap-1 mb-2">
-                             <span className="text-[9px] font-bold uppercase tracking-widest text-slate-400">Umbrales Actuales</span>
-                             <InfoTooltip text="Tus valores de referencia (FTP en bici, Ritmo Umbral en carrera) configurados en tu perfil." />
+                            <span className="text-[9px] font-bold uppercase tracking-widest text-slate-400">Umbrales Actuales</span>
+                            <InfoTooltip text="Tus valores de referencia (FTP en bici, Ritmo Umbral en carrera) configurados en tu perfil." />
                         </div>
                         <div className="grid grid-cols-2 gap-2">
                             <div className="bg-slate-50 dark:bg-zinc-800/60 p-2 rounded-lg">
@@ -464,17 +519,15 @@ export const AdvancedAnalytics = ({ activities, settings, onSelectActivity, time
                             </div>
                             <div className="bg-slate-50 dark:bg-zinc-800/60 p-2 rounded-lg">
                                 <p className="text-[7px] font-bold text-slate-400 uppercase">TP (Carrera)</p>
-                                <p className="text-sm font-black text-slate-800 dark:text-zinc-100">{formatPace(settings.run.thresholdPace)} <span className="text-[8px] font-bold">/km</span></p>
+                                <p className="text-sm font-black text-slate-800 dark:text-zinc-100">{settings.run.thresholdPace || '--'} <span className="text-[8px] font-bold">/km</span></p>
                             </div>
                             <div className="bg-slate-50 dark:bg-zinc-800/60 p-2 rounded-lg">
                                 <p className="text-[7px] font-bold text-slate-400 uppercase">W/Kg</p>
                                 <p className="text-sm font-black text-slate-800 dark:text-zinc-100">{(settings.bike.ftp / (settings.weight || 70)).toFixed(2)}</p>
                             </div>
-                            <div className="bg-slate-50 dark:bg-zinc-800/60 p-2 rounded-lg col-span-2">
-                                <p className="text-[7px] font-bold text-purple-400 uppercase">Perfil / Fenotipo</p>
-                                <p className="text-[10px] font-bold text-slate-800 dark:text-zinc-100 leading-tight">
-                                    {analytics.profile?.sprint > 7 ? 'Velocista Explosivo' : analytics.profile?.anaerobic > 180 ? 'Perfil Puncheur / Potencia' : 'Fondista Rodador de Resistencia'}
-                                </p>
+                            <div className="bg-slate-50 dark:bg-zinc-800/60 p-2 rounded-lg">
+                                <p className="text-[7px] font-bold text-slate-400 uppercase">Peso</p>
+                                <p className="text-sm font-black text-slate-800 dark:text-zinc-100">{settings.weight} <span className="text-[8px] font-bold">Kg</span></p>
                             </div>
                         </div>
                     </div>
@@ -483,17 +536,17 @@ export const AdvancedAnalytics = ({ activities, settings, onSelectActivity, time
                 {/* FORMA (TSB) CARD */}
                 <div className="bg-white dark:bg-zinc-900/40 p-4 rounded-2xl border border-slate-200 dark:border-zinc-800/50 flex items-center justify-between">
                     <div className="flex items-center gap-3">
-                        <div className={`p-2 rounded-xl bg-slate-50 dark:bg-zinc-800 ${analytics.model.tsb < -25 ? 'text-red-500' : (analytics.model.tsb > 0 ? 'text-emerald-500' : 'text-blue-500')}`}>
+                        <div className={`p-2 rounded-xl bg-slate-50 dark:bg-zinc-800 ${model.tsb < -25 ? 'text-red-500' : (model.tsb > 0 ? 'text-emerald-500' : 'text-blue-500')}`}>
                             <Activity size={18} />
                         </div>
                         <div>
                             <p className="text-[9px] font-bold uppercase text-slate-400">Balance de Carga (TSB)</p>
-                            <p className="text-xs font-medium text-slate-500 dark:text-zinc-500">Forma actual basada en el balance fatiga/fitness</p>
+                            <p className="text-xs font-medium text-slate-500 dark:text-zinc-500">CTL[ayer] − ATL[ayer] · Intervalsstyle</p>
                         </div>
                     </div>
                     <div className="text-right">
-                        <span className={`text-2xl font-semibold ${analytics.model.tsb < -25 ? 'text-red-500' : (analytics.model.tsb > 0 ? 'text-emerald-500' : 'text-blue-500')}`}>
-                            {Math.round(analytics.model.tsb)}
+                        <span className={`text-2xl font-semibold ${model.tsb < -25 ? 'text-red-500' : (model.tsb > 0 ? 'text-emerald-500' : 'text-blue-500')}`}>
+                            {model.tsb >= 0 ? '+' : ''}{Math.round(model.tsb)}
                         </span>
                         <span className="text-[9px] font-bold text-slate-400 uppercase ml-1">pts</span>
                     </div>
@@ -514,10 +567,10 @@ export const AdvancedAnalytics = ({ activities, settings, onSelectActivity, time
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                     <div className="bg-white dark:bg-zinc-900/30 p-4 rounded-2xl border border-transparent dark:border-zinc-900 flex flex-col lg:col-span-2 shadow-inner">
                         <div className="flex justify-between items-center mb-2">
-                             <div className="flex items-center gap-1">
+                            <div className="flex items-center gap-1">
                                 <span className="text-[9px] font-bold uppercase tracking-widest text-slate-400">Volumen Semanal (TSS/Horas)</span>
                                 <InfoTooltip text="Carga de entrenamiento (TSS) y horas totales acumuladas cada semana. Las barras indican el estrés (TSS) y la línea el tiempo." />
-                             </div>
+                            </div>
                         </div>
                         <div className="h-[180px]">
                             <ResponsiveContainer width="100%" height="100%">
@@ -537,15 +590,14 @@ export const AdvancedAnalytics = ({ activities, settings, onSelectActivity, time
                         <div className="flex justify-between items-center mb-4">
                             <span className="text-[9px] font-bold uppercase tracking-widest text-slate-400">Distribución de Foco</span>
                             <div className="flex bg-slate-100 dark:bg-zinc-800 p-0.5 rounded-full">
-                                {['7d', '30d', '90d'].map(t => (
+                                {['28d', '90d'].map(t => (
                                     <button key={t} onClick={() => setIntensityTimeframe(t)} className={`px-2 py-0.5 text-[7px] font-bold uppercase rounded-full transition-all ${intensityTimeframe === t ? 'bg-white dark:bg-zinc-700 text-slate-800 dark:text-zinc-100 shadow-sm' : 'text-slate-500'}`}>{t.toUpperCase()}</button>
                                 ))}
                             </div>
                         </div>
-                        
+
                         <div className="flex flex-col gap-4">
-                             {/* FOCUS BARS */}
-                             <div className="space-y-3">
+                            <div className="space-y-3">
                                 {analytics.focusChart.map((focus, i) => (
                                     <div key={i} className="space-y-1">
                                         <div className="flex items-center justify-between text-[8px] font-bold uppercase text-slate-500">
@@ -560,10 +612,9 @@ export const AdvancedAnalytics = ({ activities, settings, onSelectActivity, time
                                         </div>
                                     </div>
                                 ))}
-                             </div>
+                            </div>
 
-                             {/* TIME IN ZONES SMALL TABLE */}
-                             <div className="pt-2 border-t border-slate-100 dark:border-zinc-800">
+                            <div className="pt-2 border-t border-slate-100 dark:border-zinc-800">
                                 <span className="text-[7px] font-bold uppercase tracking-widest text-slate-400 block mb-2">Desglose por Zona</span>
                                 <div className="grid grid-cols-2 gap-x-4 gap-y-1">
                                     {analytics.zonesChart.filter(z => z.hours > 0).map((z, i) => (
@@ -576,7 +627,7 @@ export const AdvancedAnalytics = ({ activities, settings, onSelectActivity, time
                                         </div>
                                     ))}
                                 </div>
-                             </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -599,12 +650,19 @@ export const AdvancedAnalytics = ({ activities, settings, onSelectActivity, time
                             <button onClick={() => setCurveSport('bike')} className={`px-4 py-1.5 text-[9px] font-bold uppercase rounded-lg transition-all ${curveSport === 'bike' ? 'bg-white dark:bg-zinc-700 text-blue-600 dark:text-blue-400 shadow-sm' : 'text-slate-500'}`}>Ciclismo</button>
                             <button onClick={() => setCurveSport('run')} className={`px-4 py-1.5 text-[9px] font-bold uppercase rounded-lg transition-all ${curveSport === 'run' ? 'bg-white dark:bg-zinc-700 text-orange-600 dark:text-orange-400 shadow-sm' : 'text-slate-500'}`}>Carrera</button>
                         </div>
-                        <div className="flex gap-3">
-                            {['power', 'speed', 'hr'].map(t => (
-                                <button key={t} onClick={() => setCurveType(t)} className={`text-[9px] font-bold uppercase ${curveType === t ? 'text-blue-500 border-b-2 border-blue-500' : 'text-slate-400'}`}>
-                                    {t === 'power' ? 'Potencia' : (t === 'speed' ? (curveSport === 'run' ? 'Ritmo' : 'Veloc.') : 'Pulso')}
-                                </button>
-                            ))}
+                        <div className="flex items-center gap-3">
+                            <div className="flex bg-slate-100 dark:bg-zinc-800 p-0.5 rounded-xl border border-slate-200 dark:border-zinc-800/50">
+                                {['90d', '1y', 'all'].map(t => (
+                                    <button key={t} onClick={() => setMmpTimeframe(t)} className={`px-3 py-1 text-[8px] font-bold uppercase rounded-lg transition-all ${mmpTimeframe === t ? 'bg-white dark:bg-zinc-700 text-blue-600 dark:text-blue-400 shadow-sm' : 'text-slate-500'}`}>{t === 'all' ? 'Todo' : t.toUpperCase()}</button>
+                                ))}
+                            </div>
+                            <div className="flex gap-3">
+                                {['power', 'speed', 'hr'].map(t => (
+                                    <button key={t} onClick={() => setCurveType(t)} className={`text-[9px] font-bold uppercase ${curveType === t ? 'text-blue-500 border-b-2 border-blue-500' : 'text-slate-400'}`}>
+                                        {t === 'power' ? 'Potencia' : (t === 'speed' ? (curveSport === 'run' ? 'Ritmo' : 'Veloc.') : 'Pulso')}
+                                    </button>
+                                ))}
+                            </div>
                         </div>
                     </div>
 
@@ -632,14 +690,14 @@ export const AdvancedAnalytics = ({ activities, settings, onSelectActivity, time
                                         <YAxis hide domain={['dataMin - 0.1', 'dataMax + 0.1']} />
                                         <RechartsTooltip content={<CustomEfTooltip />} isAnimationActive={false} />
                                         <Area type="monotone" dataKey="ef" stroke="#8b5cf6" strokeWidth={2} fill="url(#efGrad)" activeDot={{ r: 4, fill: '#8b5cf6' }} isAnimationActive={false} />
-                                        <Scatter 
-                                            dataKey="ef" 
-                                            fill="transparent" 
-                                            cursor="pointer" 
-                                            onClick={(data) => { 
+                                        <Scatter
+                                            dataKey="ef"
+                                            fill="transparent"
+                                            cursor="pointer"
+                                            onClick={(data) => {
                                                 const act = activities.find(a => a.id === data.id);
                                                 if (act && onSelectActivity) onSelectActivity(act);
-                                            }} 
+                                            }}
                                         />
                                     </ComposedChart>
                                 </ResponsiveContainer>
@@ -660,16 +718,16 @@ export const AdvancedAnalytics = ({ activities, settings, onSelectActivity, time
                                         <YAxis hide reversed={isPace} domain={['auto', 'auto']} />
                                         <RechartsTooltip content={<CustomCurveTooltip />} isAnimationActive={false} />
                                         <Area type="stepAfter" dataKey="value" stroke={curveColor} strokeWidth={2} fill={curveColor} fillOpacity={0.03} dot={false} isAnimationActive={false} />
-                                        <Scatter 
-                                            dataKey="value" 
-                                            fill="transparent" 
-                                            cursor="pointer" 
-                                            onClick={(data) => { 
+                                        <Scatter
+                                            dataKey="value"
+                                            fill="transparent"
+                                            cursor="pointer"
+                                            onClick={(data) => {
                                                 if (data.actId && onSelectActivity) {
                                                     const act = activities.find(a => a.id === data.actId);
                                                     if (act) onSelectActivity(act);
                                                 }
-                                            }} 
+                                            }}
                                         />
                                     </ComposedChart>
                                 </ResponsiveContainer>
@@ -692,7 +750,7 @@ export const AdvancedAnalytics = ({ activities, settings, onSelectActivity, time
                                     } else {
                                         displayVal = Math.round(pk.value);
                                     }
-                                    
+
                                     return (
                                         <div key={secs} className="flex items-center justify-between p-2 rounded-lg bg-slate-50 dark:bg-zinc-800/50 border border-slate-100 dark:border-zinc-800">
                                             <span className="text-[9px] font-bold text-slate-500 uppercase">{formatInterval(secs)}</span>

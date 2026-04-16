@@ -12,8 +12,12 @@ export const usePlannedWorkoutsQuery = () => {
     const queryClient = useQueryClient();
     const { settings } = useAppStore();
 
+    // Use stable scalar values in the query key instead of the whole settings object
+    // (objects are compared by reference and would cause infinite re-fetches)
+    const settingsKey = `${settings.bike?.ftp}-${settings.run?.lthr}-${settings.run?.thresholdPace}-${settings.fcReposo}`;
+
     const query = useQuery({
-        queryKey: ["plannedWorkouts", settings], // Recalcular TSS si cambian los settings
+        queryKey: ["plannedWorkouts", settingsKey], // Recalcular TSS si cambian los settings
         queryFn: async () => {
             const { data, error } = await supabase.from("planned_workouts").select("*");
             if (error) throw error;
@@ -44,7 +48,7 @@ export const usePlannedWorkoutsQuery = () => {
             return { ...data, dateObj: new Date(data.date), tss: recalcTssFromBlocks(data, settings), isPlanned: true };
         },
         onSuccess: (newWorkout) => {
-            queryClient.setQueryData(["plannedWorkouts", settings], (old: any) => {
+            queryClient.setQueryData(["plannedWorkouts", settingsKey], (old: any) => {
                 const arr = old ? [...old, newWorkout] : [newWorkout];
                 return arr.sort((a, b) => a.dateObj.getTime() - b.dateObj.getTime());
             });
@@ -63,7 +67,7 @@ export const usePlannedWorkoutsQuery = () => {
             return { ...data, dateObj: new Date(data.date), tss: recalcTssFromBlocks(data, settings), isPlanned: true };
         },
         onSuccess: (updated) => {
-            queryClient.setQueryData(["plannedWorkouts", settings], (old: any) => {
+            queryClient.setQueryData(["plannedWorkouts", settingsKey], (old: any) => {
                 if (!old) return [updated];
                 return old.map((w: any) => w.id === updated.id ? updated : w).sort((a: any, b: any) => a.dateObj.getTime() - b.dateObj.getTime());
             });
@@ -77,7 +81,7 @@ export const usePlannedWorkoutsQuery = () => {
             return id;
         },
         onSuccess: (id) => {
-            queryClient.setQueryData(["plannedWorkouts", settings], (old: any) =>
+            queryClient.setQueryData(["plannedWorkouts", settingsKey], (old: any) =>
                 old ? old.filter((w: any) => w.id !== id) : []
             );
         }

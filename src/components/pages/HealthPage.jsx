@@ -1,6 +1,6 @@
 import React, { useMemo } from 'react';
 import { LineChart, Line, XAxis, YAxis, Tooltip as RechartsTooltip, ResponsiveContainer, CartesianGrid, ReferenceArea, ReferenceLine, ComposedChart, Bar, Cell, Area } from 'recharts';
-import { Moon, Info, Shield, ShieldAlert, ShieldCheck, AlertTriangle, Activity, Battery, Heart, Sparkles, TrendingUp, Zap, Flame, BatteryCharging, BrainCircuit, ActivitySquare } from 'lucide-react';
+import { Moon, Info, Shield, ShieldAlert, ShieldCheck, AlertTriangle, Activity, Battery, Heart, Sparkles, TrendingUp, Zap, Flame, BatteryCharging, BrainCircuit, ActivitySquare, Scale, Footprints, Wind, Target, TrendingDown, Minus } from 'lucide-react';
 import { useWellnessInfo } from '../../hooks/useWellnessInfo';
 
 const BevelCard = ({ children, className = '' }) => (
@@ -145,16 +145,21 @@ export const HealthPage = ({ activities, settings, chartData }) => {
                         {wellnessLoading ? 'Analizando biometrías...' : readinessInfo.msg}
                     </p>
                 </div>
-                {(apiError || (wellnessMetrics?.isSimulated)) && (
-                    <div className="flex gap-2">
+            {(apiError || wellnessMetrics?.isSimulated || wellnessMetrics?.source) && (
+                    <div className="flex gap-2 flex-wrap">
                         {apiError && (
                             <span className="text-[10px] font-bold text-red-600 bg-red-50/80 dark:bg-red-900/40 px-3 py-1.5 rounded-full uppercase tracking-widest flex items-center gap-1.5 backdrop-blur-md">
                                 <AlertTriangle size={12} /> Error API
                             </span>
                         )}
-                        {wellnessMetrics?.isSimulated && (
+                        {wellnessMetrics?.source === 'simulated' && (
                             <span className="text-[10px] font-bold text-amber-600 bg-amber-50/80 dark:bg-amber-900/40 px-3 py-1.5 rounded-full uppercase tracking-widest flex items-center gap-1.5 backdrop-blur-md">
                                 <BrainCircuit size={12} /> Simulador Demo
+                            </span>
+                        )}
+                        {(wellnessMetrics?.source === 'intervals' || wellnessMetrics?.source === 'intervals_direct') && (
+                            <span className="text-[10px] font-bold text-indigo-600 bg-indigo-50/80 dark:bg-indigo-900/40 px-3 py-1.5 rounded-full uppercase tracking-widest flex items-center gap-1.5 backdrop-blur-md">
+                                <Activity size={12} /> Garmin · Intervals.icu
                             </span>
                         )}
                     </div>
@@ -175,10 +180,13 @@ export const HealthPage = ({ activities, settings, chartData }) => {
                         size={180}
                         strokeWidth={16}
                     />
-                    <div className="mt-8 text-center z-10">
+                    <div className="mt-8 text-center z-10 space-y-2">
                         <span className={`px-4 py-1.5 rounded-full text-[11px] font-black uppercase tracking-widest shadow-sm ${readinessInfo.badge}`}>
                             {readinessInfo.label}
                         </span>
+                        {wellnessMetrics?.readinessSource === 'intervals' && (
+                            <p className="text-[8px] font-bold text-indigo-400 uppercase tracking-widest">Intervals.icu · Garmin</p>
+                        )}
                     </div>
                 </BevelCard>
 
@@ -364,6 +372,95 @@ export const HealthPage = ({ activities, settings, chartData }) => {
                     </BevelCard>
                 </div>
             </div>
+
+            {/* GARMIN DATA ROW — visible when real Intervals.icu data synced */}
+            {wellnessMetrics && !wellnessMetrics.isSimulated && (
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+
+                    {/* VO2max */}
+                    <BevelCard className="p-5 flex flex-col items-center justify-center text-center group">
+                        <div className="p-2 bg-rose-50 dark:bg-rose-900/20 rounded-xl mb-3 group-hover:scale-110 transition-transform">
+                            <Activity size={20} className="text-rose-500" />
+                        </div>
+                        <span className="text-[10px] font-bold text-slate-400 dark:text-zinc-500 uppercase tracking-widest mb-1">VO₂máx</span>
+                        <div className="flex items-baseline gap-1">
+                            <span className="text-3xl font-black tracking-tighter text-rose-500">
+                                {wellnessMetrics.latestVo2max !== '--' ? Number(wellnessMetrics.latestVo2max).toFixed(1) : '--'}
+                            </span>
+                            {wellnessMetrics.latestVo2max !== '--' && <span className="text-xs font-bold text-slate-400">ml/kg/min</span>}
+                        </div>
+                        <span className="text-[8px] font-bold uppercase tracking-widest text-rose-400/60 mt-2">Garmin Measured</span>
+                    </BevelCard>
+
+                    {/* Weight */}
+                    <BevelCard className="p-5 flex flex-col items-center justify-center text-center group">
+                        <div className="p-2 bg-amber-50 dark:bg-amber-900/20 rounded-xl mb-3 group-hover:scale-110 transition-transform">
+                            <Scale size={20} className="text-amber-500" />
+                        </div>
+                        <span className="text-[10px] font-bold text-slate-400 dark:text-zinc-500 uppercase tracking-widest mb-1">Peso</span>
+                        <div className="flex items-baseline gap-1">
+                            <span className="text-3xl font-black tracking-tighter text-slate-800 dark:text-zinc-100">
+                                {wellnessMetrics.latestWeight !== '--' ? wellnessMetrics.latestWeight : '--'}
+                            </span>
+                            {wellnessMetrics.latestWeight !== '--' && <span className="text-xs font-bold text-slate-400">kg</span>}
+                        </div>
+                        {wellnessMetrics.weightTrend != null && (
+                            <span className={`text-[9px] font-bold uppercase tracking-widest mt-2 flex items-center gap-0.5 ${
+                                wellnessMetrics.weightTrend < -0.1 ? 'text-emerald-500' :
+                                wellnessMetrics.weightTrend > 0.1 ? 'text-red-500' : 'text-slate-400'
+                            }`}>
+                                {wellnessMetrics.weightTrend < -0.1 ? <TrendingDown size={10} /> :
+                                 wellnessMetrics.weightTrend > 0.1 ? <TrendingUp size={10} /> : <Minus size={10} />}
+                                {wellnessMetrics.weightTrend > 0 ? '+' : ''}{wellnessMetrics.weightTrend} kg (7d)
+                            </span>
+                        )}
+                    </BevelCard>
+
+                    {/* SpO2 */}
+                    <BevelCard className="p-5 flex flex-col items-center justify-center text-center group">
+                        <div className="p-2 bg-sky-50 dark:bg-sky-900/20 rounded-xl mb-3 group-hover:scale-110 transition-transform">
+                            <Wind size={20} className="text-sky-500" />
+                        </div>
+                        <span className="text-[10px] font-bold text-slate-400 dark:text-zinc-500 uppercase tracking-widest mb-1">SpO₂</span>
+                        <div className="flex items-baseline gap-0.5">
+                            <span className={`text-3xl font-black tracking-tighter ${
+                                wellnessMetrics.latestSpo2 === '--' ? 'text-slate-400' :
+                                wellnessMetrics.latestSpo2 >= 95 ? 'text-sky-500' : 'text-amber-500'
+                            }`}>
+                                {wellnessMetrics.latestSpo2 !== '--' ? Number(wellnessMetrics.latestSpo2).toFixed(0) : '--'}
+                            </span>
+                            {wellnessMetrics.latestSpo2 !== '--' && <span className="text-xs font-bold text-slate-400">%</span>}
+                        </div>
+                        <span className="text-[8px] font-bold text-slate-400 uppercase tracking-widest mt-2 bg-slate-100 dark:bg-zinc-800 px-2 py-0.5 rounded-full">Saturación O₂</span>
+                    </BevelCard>
+
+                    {/* Steps */}
+                    <BevelCard className="p-5 flex flex-col items-center justify-center text-center group">
+                        <div className="p-2 bg-violet-50 dark:bg-violet-900/20 rounded-xl mb-3 group-hover:scale-110 transition-transform">
+                            <Footprints size={20} className="text-violet-500" />
+                        </div>
+                        <span className="text-[10px] font-bold text-slate-400 dark:text-zinc-500 uppercase tracking-widest mb-1">Pasos</span>
+                        <div className="flex items-baseline gap-1">
+                            <span className={`text-3xl font-black tracking-tighter ${
+                                wellnessMetrics.latestSteps === '--' ? 'text-slate-400' :
+                                wellnessMetrics.latestSteps >= 10000 ? 'text-violet-500' : 'text-slate-700 dark:text-zinc-200'
+                            }`}>
+                                {wellnessMetrics.latestSteps !== '--' ? Math.round(wellnessMetrics.latestSteps / 1000).toFixed(1) + 'k' : '--'}
+                            </span>
+                        </div>
+                        {wellnessMetrics.latestSteps !== '--' && (
+                            <div className="w-full mt-2 h-1.5 bg-slate-100 dark:bg-zinc-800 rounded-full overflow-hidden">
+                                <div
+                                    className="h-full bg-violet-500 rounded-full transition-all"
+                                    style={{ width: `${Math.min(100, (wellnessMetrics.latestSteps / 10000) * 100)}%` }}
+                                />
+                            </div>
+                        )}
+                        <span className="text-[8px] font-bold text-slate-400 uppercase tracking-widest mt-1">objetivo 10k</span>
+                    </BevelCard>
+
+                </div>
+            )}
 
             {/* VFC TREND CHART (BEVEL GLOW STYLE) */}
             <BevelCard className="p-6 md:p-8 flex flex-col h-[400px]">

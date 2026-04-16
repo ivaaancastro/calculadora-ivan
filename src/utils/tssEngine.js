@@ -24,22 +24,24 @@ export const LTHR_ZONE_PCT = [
 // fitness: % contribution to CTL    fatigue: % contribution to ATL
 // countsForWeekly: whether to include in the weekly TSS summary (intervals.icu style)
 export const SPORT_LOAD_CONFIG = {
-    cardio: { fitness: 1.0, fatigue: 1.0, countsForWeekly: true },
-    strength: { fitness: 0.0, fatigue: 1.0, countsForWeekly: false },
-    yoga: { fitness: 0.0, fatigue: 0.2, countsForWeekly: false },
-    walk: { fitness: 0.0, fatigue: 0.3, countsForWeekly: false },
+    ride: { fitness: 1.0, fatigue: 1.0, countsForWeekly: true },
+    run: { fitness: 1.0, fatigue: 1.0, countsForWeekly: true },
     swim: { fitness: 1.0, fatigue: 1.0, countsForWeekly: true },
-    other: { fitness: 0.5, fatigue: 0.5, countsForWeekly: false },
+    strength: { fitness: 0.0, fatigue: 1.0, countsForWeekly: false }, // Strength doesn't build aerobic fitness (CTL) by default in some models
+    walk: { fitness: 0.0, fatigue: 0.5, countsForWeekly: false },
+    yoga: { fitness: 0.0, fatigue: 0.2, countsForWeekly: false },
+    other: { fitness: 1.0, fatigue: 1.0, countsForWeekly: true },
 };
 
 // ── Sport classification ─────────────────────────────────────────────────────
 export function getSportCategory(typeStr) {
     const t = String(typeStr).toLowerCase();
-    if (t.includes('weighttraining') || t.includes('fuerza') || t.includes('crossfit') || t.includes('workout')) return 'strength';
+    if (t.includes('weighttraining') || t.includes('fuerza') || t.includes('crossfit') || t.includes('workout') || t.includes('gym')) return 'strength';
     if (t.includes('yoga') || t.includes('stretch')) return 'yoga';
     if (t.includes('walk') || t.includes('hike') || t.includes('caminata') || t.includes('senderismo')) return 'walk';
     if (t.includes('swim') || t.includes('natación') || t.includes('natacion')) return 'swim';
-    if (t.includes('run') || t.includes('ride') || t.includes('ciclismo') || t.includes('bici') || t.includes('correr') || t.includes('carrera')) return 'cardio';
+    if (t.includes('run') || t.includes('correr') || t.includes('carrera') || t.includes('footing')) return 'run';
+    if (t.includes('ride') || t.includes('ciclismo') || t.includes('bici') || t.includes('bike')) return 'ride';
     return 'other';
 }
 
