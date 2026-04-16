@@ -277,7 +277,7 @@ export const useActivities = () => {
 
       if (totalNew > 0) {
         setUploadState(true, "Refrescando base de datos...");
-        await queryClient.invalidateQueries(["activities"]);
+        await queryClient.invalidateQueries({ queryKey: ["activities"] });
       }
 
       // FASE 2: DEEP SYNC AUTOMÁTICO (Telemetría y GPS)
@@ -444,6 +444,18 @@ export const useActivities = () => {
       activitiesMap.get(dKey).push(act);
     });
 
+    // ─── Exact Intervals.icu exponential decay constants ─────────────────────
+    // intervals.icu formula: CTL_new = CTL_prev × k_ctl + TSS × (1 - k_ctl)
+    // where k_ctl = exp(-1/42)  ≈ 0.97614  (Fitness: 42-day time constant)
+    //       k_atl = exp(-1/7)   ≈ 0.86671  (Fatigue: 7-day time constant)
+    // This is more accurate than the linear approx (1 - 1/42) used before.
+    const ta = settings.ta || 42;
+    const tf = settings.tf || 7;
+    const K_CTL = Math.exp(-1 / ta);   // ~0.97614
+    const K_ATL = Math.exp(-1 / tf);   // ~0.86671
+    const ONE_MINUS_K_CTL = 1 - K_CTL;
+    const ONE_MINUS_K_ATL = 1 - K_ATL;
+
     let ctl = 0;
     let atl = 0;
     const fullSeries = [];
@@ -479,19 +491,29 @@ export const useActivities = () => {
 
       if (time <= todayUTC) loadHistory.push(Math.round(dailyAtlContrib));
 
+      // TSB Calculation is deferred until we apply the offset modifier
+
+
+      // Apply exact exponential EWMA (Intervals.icu formula)
       if (fullSeries.length === 0 && dailyTss > 0) {
+        // Seed: first day with training — prime CTL/ATL from the day's load
         ctl = dailyCtlContrib;
         atl = dailyAtlContrib;
       } else {
-        ctl = ctl + (dailyCtlContrib - ctl) / settings.ta;
-        atl = atl + (dailyAtlContrib - atl) / settings.tf;
+        ctl = ctl * K_CTL + dailyCtlContrib * ONE_MINUS_K_CTL;
+        atl = atl * K_ATL + dailyAtlContrib * ONE_MINUS_K_ATL;
       }
+
+      const offsetCtl = Number(settings.offsetCtl) || 0;
+      const finalCtl = ctl + offsetCtl;
+      const tsb = parseFloat((finalCtl - atl).toFixed(1));
 
       fullSeries.push({
         date: dateStr,
-        ctl: parseFloat(ctl.toFixed(1)),
+        ctl: parseFloat(finalCtl.toFixed(1)),
         atl: parseFloat(atl.toFixed(1)),
-        tcb: parseFloat((ctl - atl).toFixed(1)),
+        tsb,   // yesterday CTL - yesterday ATL (consistent with intervals.icu)
+        tcb: tsb,  // alias kept for chart compatibility
         dailyTss: Math.round(dailyTss),
         dailyTssEffective: Math.round(dailyAtlContrib),
       });

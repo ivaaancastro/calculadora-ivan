@@ -157,6 +157,7 @@ const Dashboard = () => {
                     timeRange={timeRange}
                     setTimeRange={setTimeRange}
                     chartData={chartData}
+                    currentMetrics={currentMetrics}
                   />
             </div>
 

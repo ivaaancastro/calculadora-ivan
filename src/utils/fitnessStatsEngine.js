@@ -191,62 +191,308 @@ export function estimateFTP(activities, settings) {
 
 
 // ════════════════════════════════════════════════════════════════════════════════
-// 2. VO2max CICLISMO — Usando MAP (peak 5min power)
+// ════════════════════════════════════════════════════════════════════════════════
+// 2. VO2max CICLISMO — Garmin/Firstbeat Style (HR/Power Relationship)
 //
-//    Garmin/Firstbeat usa la potencia máxima aeróbica (MAP ≈ pico 5min)
-//    con una fórmula de cycling con coeficiente más alto que el ACSM ergometer:
-//    VO2max = (MAP × 12.35 / peso) + 7
-//    (El ACSM usa 10.8, pero eso es para ergómetro estático.
-//     Para ciclismo en carretera el coste metabólico es ~15% superior.)
+//    Garmin uses the oxygen cost of power vs. heart rate reserve percentage.
+//    1. VO2 (ml/kg/min) ≈ (Power * 10.8 / Mass) + 7
+//    2. %HRR (Heart Rate Reserve) ≈ %VO2max
+//    3. VO2max = VO2 / %HRR
+//
+//    We analyze submaximal steady-state segments to find the most consistent ratio.
 // ════════════════════════════════════════════════════════════════════════════════
 
 export function estimateCyclingVO2max(activities, settings) {
     const today = new Date();
     const d45 = new Date(today); d45.setDate(today.getDate() - 45);
     const weight = Number(settings?.weight) || 70;
+    const hrRest = Number(settings?.fcReposo) || 50;
+    const hrMax = Number(settings?.bike?.max || settings?.run?.max) || 190;
+    const hrRange = hrMax - hrRest;
 
-    let bestMAP = 0;
-    let bestActivity = null;
+    if (hrRange <= 0) return { vo2max: 0, method: 'error', description: 'FC Max/Reposo no configuradas' };
+
+    const candidates = [];
 
     activities.forEach(act => {
         const t = String(act.type).toLowerCase();
         const isBike = t.includes('bici') || t.includes('ciclismo') || t.includes('ride');
         if (!isBike || new Date(act.date) < d45) return;
 
-        // Preferir pico 5min de streams (MAP real)
-        if (act.streams_data?.watts?.data && act.streams_data?.time?.data) {
-            const map5 = getPeakPower(act.streams_data.watts.data, act.streams_data.time.data, 300);
-            if (map5 > bestMAP) {
-                bestMAP = map5;
-                bestActivity = { id: act.id, name: act.name, date: act.date };
+        const streams = act.streams_data;
+        if (streams?.watts?.data && streams?.heartrate?.data && streams?.time?.data) {
+            const watts = streams.watts.data;
+            const hr = streams.heartrate.data;
+            const time = streams.time.data;
+
+            // STRATEGY 1: Best efforts (Learning from Peaks) - Most reliable
+            // Garmin ignores efforts under 5 mins for VO2Max to avoid anaerobic/W' inflation.
+            [300, 480, 600, 900, 1200].forEach(duration => {
+                const peak = getPeakPowerWithHR(watts, hr, time, duration);
+                if (peak && peak.avgW > 100 && peak.avgHR > hrRest + hrRange * 0.70) {
+                    const pctHRR = (peak.avgHR - hrRest) / hrRange;
+                    const vo2Cost = (peak.avgW * 10.8) / weight + 7;
+                    const estVO2max = vo2Cost / pctHRR;
+                    if (estVO2max > 20 && estVO2max < 85) {
+                        candidates.push({ 
+                            vo2: estVO2max, 
+                            quality: pctHRR, 
+                            method: 'peak_effort',
+                            actId: act.id,
+                            actName: act.name,
+                            description: 'Basado en mejores esfuerzos aeróbicos (5-20min)'
+                        });
+                    }
+                }
+            });
+
+            // STRATEGY 2: Steady state windows (Firstbeat style)
+            // Firstbeat requires HR to be fully stabilized. 30s is too short (HR lag produces fake high VO2max).
+            // We use 180s (3 min) rolling windows to ensure true steady-state oxygen consumption.
+            const windowSize = 180;
+            const thresholdHR = hrRest + hrRange * 0.65; // At least 65% HRR to ensure aerobic system is taxed
+            
+            for (let i = 0; i < time.length - windowSize; i += windowSize / 2) {
+                let sW = 0, sH = 0, c = 0, minH = 999, maxH = 0;
+                for (let j = i; j < i + windowSize && j < time.length; j++) {
+                    sW += watts[j]; sH += hr[j];
+                    if (hr[j] < minH) minH = hr[j];
+                    if (hr[j] > maxH) maxH = hr[j];
+                    c++;
+                }
+                const avgW = sW / c; const avgH = sH / c;
+                
+                // Pure steady state requirement: HR must not drift more than 5 bpm over 3 minutes.
+                if (avgW > 120 && avgH > thresholdHR && (maxH - minH) <= 6) {
+                    const pctHRR = (avgH - hrRest) / hrRange;
+                    const estVO2max = ((avgW * 10.8) / weight + 7) / pctHRR;
+                    if (estVO2max > 20 && estVO2max < 85) {
+                        candidates.push({ 
+                            vo2: estVO2max, 
+                            quality: pctHRR * 0.9,  // High quality because it's stable
+                            method: 'steady_state',
+                            description: 'Basado en estado estable (Garmin Firstbeat)'
+                        });
+                    }
+                }
             }
-        }
-        // Fallback: si no hay streams pero hay watts_avg alto (esfuerzo corto)
-        else if (act.watts_avg > bestMAP && act.duration <= 15 && act.duration >= 3) {
-            bestMAP = act.watts_avg;
-            bestActivity = { id: act.id, name: act.name, date: act.date };
         }
     });
 
-    if (bestMAP <= 0) return { vo2max: 0, method: 'none', map: 0 };
+    // Pick the most reliable candidate (highest Quality/pctHRR)
+    if (candidates.length > 0) {
+        // We pick the top 3 and average them to avoid single-point glitches, 
+        // prioritizing the ones with highest HRR % (closer to max effort = more reliable)
+        candidates.sort((a, b) => b.quality - a.quality);
+        const top = candidates.slice(0, 5);
+        const avgVo2 = top.reduce((a, b) => a + b.vo2, 0) / top.length;
+        const best = top[0]; // For Metadata
+        
+        return {
+            vo2max: Number(avgVo2.toFixed(1)),
+            method: best.method,
+            description: best.description,
+            activity: best.actId ? { id: best.actId, name: best.actName } : null
+        };
+    }
 
-    // Road cycling formula (coeficiente 12.35 vs 10.8 del ergómetro ACSM)
-    const vo2max = (bestMAP * 12.35) / weight + 7;
-    return {
-        vo2max: Math.min(85, Number(vo2max.toFixed(1))),
-        method: 'map',
-        map: Math.round(bestMAP),
-        activity: bestActivity,
-    };
+    // Fallback 1: MAP 5m (No HR telemetry)
+    let bestMAP = 0;
+    activities.forEach(act => {
+        const t = String(act.type).toLowerCase();
+        if ((t.includes('bici') || t.includes('ciclismo') || t.includes('ride')) && new Date(act.date) >= d45) {
+            if (act.streams_data?.watts?.data && act.streams_data?.time?.data) {
+                const map5 = getPeakPower(act.streams_data.watts.data, act.streams_data.time.data, 300);
+                if (map5 > bestMAP) bestMAP = map5;
+            }
+        }
+    });
+
+    if (bestMAP > 0) {
+        return {
+            vo2max: Number(((bestMAP * 12.35) / weight + 7).toFixed(1)),
+            method: 'map_fallback',
+            description: 'Basado en potencia máxima (sin pulso)',
+            activity: null
+        };
+    }
+
+    // Fallback 2: Physiological
+    if (hrRest > 30 && hrMax > 120) {
+        return {
+            vo2max: Number((15.3 * (hrMax / hrRest) * 0.95).toFixed(1)),
+            method: 'physiological_fallback',
+            description: 'Estimado por frecuencia cardíaca (Uth-Sørensen)',
+            activity: null
+        };
+    }
+
+    return { vo2max: 0, method: 'none', description: 'Sin datos suficientes' };
+}
+
+// Helper for peak efforts with HR
+function getPeakPowerWithHR(watts, hr, time, windowSecs) {
+    let bestW = 0; let correspondingHR = 0;
+    for (let i = 0; i < time.length; i++) {
+        let sumW = 0, sumH = 0, count = 0;
+        const endTime = time[i] + windowSecs;
+        let j = i;
+        while(j < time.length && time[j] <= endTime) {
+            sumW += watts[j]; sumH += hr[j]; count++; j++;
+        }
+        if (count > windowSecs * 0.8) {
+            const avgW = sumW / count;
+            if (avgW > bestW) {
+                bestW = avgW;
+                correspondingHR = sumH / count;
+            }
+        }
+    }
+    return bestW > 0 ? { avgW: bestW, avgHR: correspondingHR } : null;
 }
 
 
 // ════════════════════════════════════════════════════════════════════════════════
-// 3. PRONÓSTICO DE CARRERA (Daniels VDOT, derating 3%)
+// 3. VO2max CARRERA — HR/Pace Extrapolation
+//
+//    Similar to cycling but using ACSM running formula:
+//    1. VO2 cost (ml/kg/min) ≈ (Speed_m_min * 0.2) + 3.5
+//    2. VO2max = VO2 / %HRR
+// ════════════════════════════════════════════════════════════════════════════════
+
+export function estimateRunningVO2max(activities, settings) {
+    const today = new Date();
+    const d45 = new Date(today); d45.setDate(today.getDate() - 45);
+    const hrRest = Number(settings?.fcReposo) || 50;
+    const hrMax = Number(settings?.run?.max || settings?.bike?.max) || 190;
+    const hrRange = hrMax - hrRest;
+
+    if (hrRange <= 0) return { vo2max: 0, method: 'error' };
+
+    const candidates = [];
+
+    activities.forEach(act => {
+        const t = String(act.type).toLowerCase();
+        const isRun = t.includes('run') || t.includes('carrera');
+        if (!isRun || new Date(act.date) < d45 || (act.duration || 0) < 10) return;
+
+        const streams = act.streams_data;
+        if (streams?.velocity_smooth?.data && streams?.heartrate?.data && streams?.time?.data) {
+            const speed = streams.velocity_smooth.data;
+            const hr = streams.heartrate.data;
+            const time = streams.time.data;
+
+            // STRATEGY 1: Best efforts (Learning from Peaks)
+            [300, 600, 900, 1200].forEach(duration => {
+                const peak = getPeakSpeedWithHR(speed, hr, time, duration);
+                if (peak && peak.avgS > 2.5 && peak.avgHR > hrRest + hrRange * 0.70) {
+                    const pctHRR = (peak.avgHR - hrRest) / hrRange;
+                    const vo2Cost = (peak.avgS * 60 * 0.2) + 3.5;
+                    const estVO2max = vo2Cost / pctHRR;
+                    if (estVO2max > 25 && estVO2max < 85) {
+                        candidates.push({ 
+                            vo2: estVO2max, 
+                            quality: pctHRR, 
+                            method: 'peak_effort',
+                            actId: act.id, actName: act.name,
+                            description: 'Basado en mejores esfuerzos de ritmo (5-20min)'
+                        });
+                    }
+                }
+            });
+
+            // STRATEGY 2: Steady state windows
+            const windowSize = 180;
+            const thresholdHR = hrRest + hrRange * 0.65;
+            
+            for (let i = 0; i < time.length - windowSize; i += windowSize / 2) {
+                let sS = 0, sH = 0, c = 0, minH = 999, maxH = 0;
+                for (let j = i; j < i + windowSize && j < time.length; j++) {
+                    sS += speed[j]; sH += hr[j];
+                    if (hr[j] < minH) minH = hr[j];
+                    if (hr[j] > maxH) maxH = hr[j];
+                    c++;
+                }
+                const avgS = sS / c; const avgH = sH / c;
+                if (avgS > 2.2 && avgH > thresholdHR && (maxH - minH) <= 6) {
+                    const pctHRR = (avgH - hrRest) / hrRange;
+                    const estVO2max = ((avgS * 60 * 0.2) + 3.5) / pctHRR;
+                    if (estVO2max > 25 && estVO2max < 85) {
+                        candidates.push({ 
+                            vo2: estVO2max, 
+                            quality: pctHRR * 0.9, 
+                            method: 'steady_state',
+                            description: 'Basado en estado estable (Garmin Firstbeat)'
+                        });
+                    }
+                }
+            }
+        } else {
+            // Fallback for activities without streams: use summary data ONLY if it's a long continuous run
+            const avgSpeed = act.speed_avg || 0;
+            const avgHR = act.hr_avg || 0;
+            if (act.duration >= 20 && avgSpeed > 2.2 && avgHR > hrRest + hrRange * 0.6) {
+                const estVO2max = ((avgSpeed * 60 * 0.2) + 3.5) / ((avgHR - hrRest) / hrRange);
+                if (estVO2max > 25 && estVO2max < 80) {
+                    candidates.push({ vo2: estVO2max, quality: 0.4, method: 'summary', description: 'Basado en resumen de actividad' });
+                }
+            }
+        }
+    });
+
+    if (candidates.length > 0) {
+        candidates.sort((a, b) => b.quality - a.quality);
+        const top = candidates.slice(0, 5);
+        const avgVo2 = top.reduce((a, b) => a + b.vo2, 0) / top.length;
+        const best = top[0];
+        return {
+            vo2max: Number(avgVo2.toFixed(1)),
+            method: best.method,
+            description: best.description,
+            activity: best.actId ? { id: best.actId, name: best.actName } : null
+        };
+    }
+
+    // FINAL FALLBACK: Uth-Sørensen
+    if (hrRest > 30 && hrMax > 120) {
+        return {
+            vo2max: Number((15.3 * (hrMax / hrRest)).toFixed(1)),
+            method: 'physiological_fallback',
+            description: 'Estimado por frecuencia cardíaca (Uth-Sørensen)',
+            activity: null
+        };
+    }
+
+    return { vo2max: 0, method: 'none', description: 'Sin datos para estimar VO2max' };
+}
+
+// Helper for peak speed with HR
+function getPeakSpeedWithHR(speed, hr, time, windowSecs) {
+    let bestS = 0; let correspondingHR = 0;
+    for (let i = 0; i < time.length; i++) {
+        let sumS = 0, sumH = 0, count = 0;
+        const endTime = time[i] + windowSecs;
+        let j = i;
+        while(j < time.length && time[j] <= endTime) {
+            sumS += speed[j]; sumH += hr[j]; count++; j++;
+        }
+        if (count > windowSecs * 0.8) {
+            const avgS = sumS / count;
+            if (avgS > bestS) {
+                bestS = avgS;
+                correspondingHR = sumH / count;
+            }
+        }
+    }
+    return bestS > 0 ? { avgS: bestS, avgHR: correspondingHR } : null;
+}
+
+
+// ════════════════════════════════════════════════════════════════════════════════
+// 4. PRONÓSTICO DE CARRERA (Daniels VDOT, derating 3%)
 // ════════════════════════════════════════════════════════════════════════════════
 
 function vo2ToSpeed(vo2) {
-    if (!vo2 || isNaN(vo2)) return 0;
     const a = 0.000104, b = 0.182258, c = -(vo2 + 4.6);
     const disc = b * b - 4 * a * c;
     if (disc < 0) return 0;
@@ -282,12 +528,15 @@ function fmtPace(d) { if (!d || d >= 20) return '>20:00'; const m = Math.floor(d
 
 export function predictRaceTimes(vo2max) {
     if (!vo2max || vo2max <= 0) return null;
-    return {
-        '5k': fmtTime(estimateRaceTime(vo2max, 5)),
-        '10k': fmtTime(estimateRaceTime(vo2max, 10)),
-        'media': fmtTime(estimateRaceTime(vo2max, 21.0975)),
-        'maraton': fmtTime(estimateRaceTime(vo2max, 42.195)),
-    };
+    return [
+        { name: '5K', distance: 5, emoji: '🏃' },
+        { name: '10K', distance: 10, emoji: '🏃‍♂️' },
+        { name: 'Media', distance: 21.0975, emoji: '🏅' },
+        { name: 'Maratón', distance: 42.195, emoji: '🏆' },
+    ].map(r => {
+        const t = estimateRaceTime(vo2max, r.distance);
+        return { ...r, time: fmtTime(t), timeMinutes: t, pace: t ? fmtPace(t / r.distance) : '--' };
+    });
 }
 
 
@@ -296,8 +545,7 @@ export function predictRaceTimes(vo2max) {
 // ════════════════════════════════════════════════════════════════════════════════
 export function calculateTrainingEffect(activities, settings) {
     if (!activities || activities.length === 0) return null;
-    const today = new Date();
-    const d7 = new Date(today); d7.setDate(today.getDate() - 7);
+    const d7 = new Date(); d7.setDate(d7.getDate() - 7);
     const recent = activities
         .filter(a => {
             const t = String(a.type).toLowerCase();
@@ -328,59 +576,10 @@ export function calculateTrainingEffect(activities, settings) {
     }
 
     const lbl = s => s >= 4 ? { label: 'Altamente Impactante', color: '#8b5cf6' } : s >= 3 ? { label: 'Alto Beneficio', color: '#3b82f6' } : s >= 2 ? { label: 'Beneficio Moderado', color: '#10b981' } : s >= 1 ? { label: 'Beneficio Ligero', color: '#f59e0b' } : { label: 'Sin impacto', color: '#94a3b8' };
-    
-    // Summary metrics (last 30 days for averages)
-    const d30 = new Date(); d30.setDate(d30.getDate() - 30);
-    const d60 = new Date(); d60.setDate(d60.getDate() - 60);
-    
-    const last30 = activities.filter(a => {
-        const d = new Date(a.date);
-        const type = String(a.type).toLowerCase();
-        return d >= d30 && (type.includes('run') || type.includes('ride') || type.includes('bici') || type.includes('ciclismo'));
-    });
-    
-    const prev30 = activities.filter(a => {
-        const d = new Date(a.date);
-        const type = String(a.type).toLowerCase();
-        return d >= d60 && d < d30 && (type.includes('run') || type.includes('ride') || type.includes('bici') || type.includes('ciclismo'));
-    });
-
-    const load30 = last30.reduce((s, a) => s + (a.tss || 0), 0) / 30;
-    const loadPrev = prev30.reduce((s, a) => s + (a.tss || 0), 0) / 30;
-    const ctlTrend = loadPrev > 0 ? ((load30 / loadPrev) - 1) * 100 : 0;
-
-    // Monotonía (Media / Desviación Estándar de los últimos 7 días)
-    const last7Days = activities.filter(a => new Date(a.date) >= d7);
-    const dailyTss = new Array(7).fill(0);
-    last7Days.forEach(a => {
-        const diff = Math.floor((today - new Date(a.date)) / (1000 * 60 * 60 * 24));
-        if (diff >= 0 && diff < 7) dailyTss[diff] += (a.tss || 0);
-    });
-    const avg7 = dailyTss.reduce((a, b) => a + b, 0) / 7;
-    const varianza = dailyTss.reduce((a, b) => a + Math.pow(b - avg7, 2), 0) / 7;
-    const stdDev = Math.sqrt(varianza);
-    const monotony = stdDev > 0 ? avg7 / stdDev : 1.0;
-
-    const sports = last30.reduce((acc, a) => {
-        const type = String(a.type).toLowerCase();
-        acc[type] = (acc[type] || 0) + 1;
-        return acc;
-    }, {});
-    const primarySport = Object.entries(sports).sort((a, b) => b[1] - a[1])[0]?.[0] || '---';
-    const weeklyAvg = Math.round((last30.length / 30) * 7);
-    const avgLoad = last30.length > 0 ? last30.reduce((s, a) => s + (a.tss || 0), 0) / 4.3 : 0;
-
     return {
         activity: { id: act.id, name: act.name, date: act.date, type: act.type },
         aerobic: { score: Number(aerobic.toFixed(1)), ...lbl(aerobic) },
         anaerobic: { score: Number(anaerobic.toFixed(1)), ...lbl(anaerobic) },
-        weeklyAvg,
-        weeklySessionsAvg: weeklyAvg,
-        avgLoad: Math.round(avgLoad),
-        weeklyTssAvg: Math.round(avgLoad),
-        ctlTrend,
-        monotony,
-        primarySport
     };
 }
 
@@ -449,8 +648,6 @@ export function estimateThresholdPace(vo2max, settings) {
     const thresholdVo2 = vo2max * 0.88;
     const speed = vo2ToSpeed(thresholdVo2); // m/min
     const paceMinPerKm = speed > 0 ? 1000 / speed : 0;
-    
-    if (isNaN(paceMinPerKm) || !isFinite(paceMinPerKm)) return null;
 
     const configuredPace = settings?.run?.thresholdPace;
     let configPaceMinPerKm = null;
@@ -572,12 +769,12 @@ export function calculateFitnessScore(vo2max, eFTPwPerKg, ctl) {
     const score = Math.round(scores.reduce((s, x) => s + x.value * (x.weight / totalWeight), 0));
 
     const getLevel = (s) => {
-        if (s >= 85) return { label: 'Elite Superior', color: '#8b5cf6' };
-        if (s >= 70) return { label: 'Muy Alto', color: '#3b82f6' };
-        if (s >= 55) return { label: 'Bueno', color: '#22c55e' };
-        if (s >= 40) return { label: 'Moderado', color: '#f59e0b' };
-        if (s >= 25) return { label: 'Bajo', color: '#f97316' };
-        return { label: 'Iniciación', color: '#94a3b8' };
+        if (s >= 85) return { label: 'Élite', color: '#8b5cf6', emoji: '🏆' };
+        if (s >= 70) return { label: 'Excelente', color: '#3b82f6', emoji: '💪' };
+        if (s >= 55) return { label: 'Bueno', color: '#22c55e', emoji: '✅' };
+        if (s >= 40) return { label: 'Medio', color: '#f59e0b', emoji: '📊' };
+        if (s >= 25) return { label: 'En desarrollo', color: '#f97316', emoji: '🔧' };
+        return { label: 'Principiante', color: '#94a3b8', emoji: '🌱' };
     };
 
     return {
@@ -597,15 +794,15 @@ export function calculateFitnessScore(vo2max, eFTPwPerKg, ctl) {
 //     Clasifica el tiempo en zonas: Z1-Z2 (easy), Z3, Z4, Z5+ (hard)
 //     Indica si el patrón es polarizado, piramidal, o threshold-heavy
 // ════════════════════════════════════════════════════════════════════════════════
-export function analyzeIntensityDistribution(activities, settings, days = 90) {
+export function analyzeIntensityDistribution(activities, settings) {
     const today = new Date();
-    const dLimit = new Date(today); dLimit.setDate(today.getDate() - days);
+    const d90 = new Date(today); d90.setDate(today.getDate() - 90);
 
     let totalTime = 0;
     let timeZ12 = 0, timeZ3 = 0, timeZ4 = 0, timeZ5 = 0;
 
     activities.forEach(act => {
-        if (new Date(act.date) < dLimit || act.duration < 10) return;
+        if (new Date(act.date) < d90 || act.duration < 10) return;
         const t = String(act.type).toLowerCase();
         const isCardio = t.includes('run') || t.includes('carrera') || t.includes('bici') || t.includes('ciclismo') || t.includes('ride');
         if (!isCardio) return;
