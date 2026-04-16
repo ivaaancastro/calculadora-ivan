@@ -299,8 +299,9 @@ const SportZonesSection = ({ sport, sportLabel, icon: Icon, color, showPace, sho
     );
 };
 
-export const ProfilePage = ({ currentSettings, onUpdate, activities, isDeepSyncing, deepSyncProgress, onDeepSync, onBack }) => {
+export const ProfilePage = ({ currentSettings, currentMetrics, onUpdate, activities, isDeepSyncing, deepSyncProgress, onDeepSync, onBack }) => {
     const [formData, setFormData] = useState(null);
+    const [targetCtl, setTargetCtl] = useState(null); // Managed separately for calibration logic
     const [activeTab, setActiveTab] = useState('run');
     const [isScanning, setIsScanning] = useState(false);
     const [newPassword, setNewPassword] = useState('');
@@ -344,6 +345,7 @@ export const ProfilePage = ({ currentSettings, onUpdate, activities, isDeepSynci
                 ...currentSettings,
                 intervalsId: currentSettings.intervalsId || '',
                 intervalsKey: currentSettings.intervalsKey || '',
+                offsetCtl: currentSettings.offsetCtl || 0,
                 run: {
                     ...currentSettings.run,
                     zonesMode: currentSettings.run?.zonesMode || 'lthr',
@@ -361,8 +363,12 @@ export const ProfilePage = ({ currentSettings, onUpdate, activities, isDeepSynci
                         calcZonesFromLTHR(currentSettings.bike?.lthr || 168, currentSettings.bike?.max || 190),
                 },
             });
+            // Initialize targetCtl from the current adjusted value
+            if (currentMetrics?.ctl != null) {
+                setTargetCtl(Math.round(currentMetrics.ctl));
+            }
         }
-    }, [currentSettings]);
+    }, [currentSettings, currentMetrics]);
 
     if (!formData) return null;
 
@@ -459,7 +465,14 @@ export const ProfilePage = ({ currentSettings, onUpdate, activities, isDeepSynci
                         <p className="text-[10px] text-slate-500 dark:text-zinc-500 font-bold uppercase tracking-widest mt-0.5">Zonas, umbrales y configuración</p>
                     </div>
                 </div>
-                <button onClick={() => onUpdate(formData)} className="flex items-center gap-1.5 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded text-[10px] font-bold uppercase tracking-widest transition-colors shadow-sm">
+                <button 
+                  onClick={() => {
+                    const raw = currentMetrics?.rawCtl || 0;
+                    const newOffset = targetCtl !== null ? (targetCtl - raw) : formData.offsetCtl;
+                    onUpdate({ ...formData, offsetCtl: newOffset });
+                  }} 
+                  className="flex items-center gap-1.5 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded text-[10px] font-bold uppercase tracking-widest transition-colors shadow-sm"
+                >
                     <Save size={14} /> Guardar
                 </button>
             </div>
@@ -487,12 +500,19 @@ export const ProfilePage = ({ currentSettings, onUpdate, activities, isDeepSynci
                                 </div>
                             </div>
                             <div className="pt-2 border-t border-slate-100 dark:border-zinc-800/80">
-                                <label className="text-[9px] font-bold text-slate-500 dark:text-zinc-400 uppercase tracking-widest block mb-1">Ajuste CTL Base (±)</label>
+                                <label className="text-[9px] font-bold text-slate-500 dark:text-zinc-400 uppercase tracking-widest block mb-1">Calibrar Fitness Actual (CTL)</label>
                                 <div className="relative">
                                     <Activity size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-blue-500" />
-                                    <input type="number" step="0.5" name="offsetCtl" value={formData.offsetCtl || ''} onChange={handleChange} placeholder="Ej: 5.0" className="w-full pl-9 pr-3 py-2 bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 rounded text-sm font-mono dark:text-zinc-200 focus:border-blue-500 outline-none placeholder:text-slate-400" />
+                                    <input 
+                                        type="number" 
+                                        step="1" 
+                                        value={targetCtl ?? ''} 
+                                        onChange={(e) => setTargetCtl(e.target.value ? parseInt(e.target.value) : null)} 
+                                        placeholder="Puntos CTL..." 
+                                        className="w-full pl-9 pr-3 py-2 bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 rounded text-sm font-mono dark:text-zinc-200 focus:border-blue-500 outline-none placeholder:text-slate-400" 
+                                    />
                                 </div>
-                                <p className="text-[8px] text-slate-400 mt-1 leading-tight">Suma o resta puntos al Fitness (CTL) global para empatarlo con Intervals.icu si te faltan actividades históricas antiguas.</p>
+                                <p className="text-[8px] text-slate-400 mt-1 leading-tight">Introduce tu Fitness actual de Garmin/Intervals.icu. El sistema ajustará todo el historial suavemente para coincidir con este valor hoy.</p>
                             </div>
                         </div>
                     </div>

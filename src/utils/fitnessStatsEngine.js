@@ -4,8 +4,10 @@
  * 1. eFTP — Ratio-table approach (FastFitness.Tips / intervals.icu style)
  * 2. VO2max ciclismo — Usando pico 5min (MAP) en vez de media de actividad
  * 3. Pronóstico de carrera (Daniels VDOT, ajustado)
- * 4. Training Effect
+ * 4. Training Effect / Balance
  * 5. Perfil de potencia
+ * 6. Estado de Entreno (Tendencias)
+ * 7. VFC (Variabilidad de Frecuencia Cardíaca)
  */
 
 // ════════════════════════════════════════════════════════════════════════════════
@@ -14,14 +16,31 @@
 
 function getPeakPower(wattsData, timeData, windowSecs) {
     if (!wattsData || !timeData || wattsData.length === 0) return 0;
-    let maxAvg = 0, startIdx = 0, currentSum = 0, currentCount = 0;
-    for (let endIdx = 0; endIdx < timeData.length; endIdx++) {
-        currentSum += wattsData[endIdx]; currentCount++;
+    
+    let maxAvg = 0;
+    let startIdx = 0;
+    let currentEnergy = 0; // Watts * seconds
+
+    // Calculate energy using trapezoidal or step-based approach
+    for (let endIdx = 1; endIdx < timeData.length; endIdx++) {
+        const dt = timeData[endIdx] - timeData[endIdx - 1];
+        // Treat gaps larger than 5s as pauses (0 watts in the gap)
+        const energyContribution = dt > 5 ? 0 : wattsData[endIdx] * dt;
+        currentEnergy += energyContribution;
+
+        // Slide window until duration is <= windowSecs
         while (timeData[endIdx] - timeData[startIdx] > windowSecs) {
-            currentSum -= wattsData[startIdx]; currentCount--; startIdx++;
+            const dtStart = timeData[startIdx + 1] - timeData[startIdx];
+            const energyToRemove = dtStart > 5 ? 0 : wattsData[startIdx + 1] * dtStart;
+            currentEnergy -= energyToRemove;
+            startIdx++;
         }
-        if (timeData[endIdx] - timeData[startIdx] >= windowSecs * 0.90) {
-            const avg = currentSum / currentCount;
+
+        // The true average is Energy / windowSecs
+        // We only consider the effort if the window duration is at least 98% of windowSecs
+        const windowDuration = timeData[endIdx] - timeData[startIdx];
+        if (windowDuration >= windowSecs * 0.98) {
+            const avg = currentEnergy / windowSecs; 
             if (avg > maxAvg) maxAvg = avg;
         }
     }
@@ -45,20 +64,20 @@ function getPeakPower(wattsData, timeData, windowSecs) {
 // Empirical power/FTP ratios from FastFitness.Tips mean curves.
 // These represent average power at duration d, divided by the athlete's FTP.
 const FTP_RATIO_TABLE = [
-    { secs: 1,    ratio: 5.60 },   // Not used for eFTP (too short / too anaerobic)
+    { secs: 1,    ratio: 5.60 },   
     { secs: 5,    ratio: 4.20 },
     { secs: 10,   ratio: 3.20 },
     { secs: 30,   ratio: 2.10 },
     { secs: 60,   ratio: 1.70 },
     { secs: 120,  ratio: 1.45 },
-    { secs: 180,  ratio: 1.35 },   // ← eFTP estimation starts here (3min)
-    { secs: 300,  ratio: 1.22 },   // 5 min — most common test duration
-    { secs: 480,  ratio: 1.15 },   // 8 min
-    { secs: 600,  ratio: 1.12 },   // 10 min
-    { secs: 900,  ratio: 1.08 },   // 15 min
-    { secs: 1200, ratio: 1.05 },   // 20 min (classic FTP test × 0.95 → ratio = 1/0.95 ≈ 1.053)
-    { secs: 1800, ratio: 1.02 },   // 30 min
-    { secs: 3600, ratio: 1.00 },   // 60 min = FTP by definition
+    { secs: 180,  ratio: 1.35 },   
+    { secs: 300,  ratio: 1.25 },   // 5 min (125%)
+    { secs: 480,  ratio: 1.18 },   // 8 min (118%)
+    { secs: 600,  ratio: 1.14 },   // 10 min
+    { secs: 900,  ratio: 1.09 },   // 15 min
+    { secs: 1200, ratio: 1.053 },  // 20 min (1 / 0.95)
+    { secs: 1800, ratio: 1.025 },  // 30 min
+    { secs: 3600, ratio: 1.00 },   // 60 min
 ];
 
 function interpolateRatio(secs) {
@@ -77,8 +96,8 @@ function interpolateRatio(secs) {
 // Durations used for building power curve
 const CURVE_DURATIONS = [1, 3, 5, 10, 15, 30, 60, 120, 180, 300, 480, 600, 900, 1200, 1800, 2400, 3600, 5400, 7200];
 
-// Durations considered for eFTP estimation (3min – 30min, intervals.icu default)
-const EFTP_MIN_SECS = 180;
+// Durations considered for eFTP estimation (5min – 30min)
+const EFTP_MIN_SECS = 300;
 const EFTP_MAX_SECS = 1800;
 
 export function estimateFTP(activities, settings) {
@@ -526,16 +545,85 @@ function fmtTime(m) {
 
 function fmtPace(d) { if (!d || d >= 20) return '>20:00'; const m = Math.floor(d), s = Math.round((d - m) * 60); return `${m}:${s.toString().padStart(2, '0')}`; }
 
-export function predictRaceTimes(vo2max) {
+function getRunningStats(activities) {
+    if (!activities || activities.length === 0) return { avgWeeklyKm: 0, maxLongRun: 0, consistency: 0 };
+    
+    const now = new Date();
+    const fourWeeksAgo = new Date(now.getTime() - (28 * 24 * 60 * 60 * 1000));
+    
+    const runs = activities.filter(a => {
+        const t = String(a.type).toLowerCase();
+        return (t.includes('run') || t.includes('carrera')) && new Date(a.date) >= fourWeeksAgo;
+    });
+
+    if (runs.length === 0) return { avgWeeklyKm: 0, maxLongRun: 0, consistency: 0 };
+
+    const totalDistance = runs.reduce((sum, a) => sum + (a.distance || 0), 0) / 1000; // to km
+    const maxLongRun = Math.max(...runs.map(a => (a.distance || 0) / 1000));
+    
+    return {
+        avgWeeklyKm: totalDistance / 4,
+        maxLongRun,
+        consistency: runs.length / 4 // runs per week
+    };
+}
+
+function getVolumePenalty(distKm, stats) {
+    const vol = stats.avgWeeklyKm;
+    const lRun = stats.maxLongRun;
+    
+    // Theoretical volume needed for each distance to reach 100% potential
+    const requiredVol = {
+        5: 20,
+        10: 35,
+        21.1: 50,
+        42.2: 70
+    };
+
+    // Calculate penalty based on mileage
+    const rv = requiredVol[distKm] || (distKm * 2);
+    let penalty = 0;
+
+    if (vol < rv) {
+        // Linear penalty that increases as distance gets longer
+        // 5K: minimal impact. Marathon: huge impact.
+        const sensitivity = distKm / 42.2;
+        penalty += (1 - (vol / rv)) * 0.25 * sensitivity;
+    }
+
+    // Extra penalty if long runs are missing (crucial for HM and Full)
+    if (distKm >= 21.1) {
+        const minLongRun = distKm * 0.7; // Ideal long run should be ~70% of race distance
+        if (lRun < minLongRun) {
+            penalty += (1 - (lRun / minLongRun)) * 0.15 * (distKm / 42.2);
+        }
+    }
+
+    return 1 + Math.max(0, penalty);
+}
+
+export function predictRaceTimes(vo2max, activities = []) {
     if (!vo2max || vo2max <= 0) return null;
+    
+    const runStats = getRunningStats(activities);
+    
     return [
         { name: '5K', distance: 5, emoji: '🏃' },
         { name: '10K', distance: 10, emoji: '🏃‍♂️' },
         { name: 'Media', distance: 21.0975, emoji: '🏅' },
         { name: 'Maratón', distance: 42.195, emoji: '🏆' },
     ].map(r => {
-        const t = estimateRaceTime(vo2max, r.distance);
-        return { ...r, time: fmtTime(t), timeMinutes: t, pace: t ? fmtPace(t / r.distance) : '--' };
+        const theoryT = estimateRaceTime(vo2max, r.distance);
+        const penalty = getVolumePenalty(r.distance, runStats);
+        const finalT = theoryT * penalty;
+        
+        return { 
+            ...r, 
+            time: fmtTime(finalT), 
+            timeMinutes: finalT, 
+            pace: finalT ? fmtPace(finalT / r.distance) : '--',
+            preparation: Math.round(Math.max(0, 100 - (penalty - 1) * 200)) // 0-100% preparation score
+        };
     });
 }
 
@@ -582,6 +670,103 @@ export function calculateTrainingEffect(activities, settings) {
         anaerobic: { score: Number(anaerobic.toFixed(1)), ...lbl(anaerobic) },
     };
 }
+
+/**
+ * 4.2 TRAINING BALANCE (CARGA POR PERIODO)
+ *     Analiza la distribución de carga en un periodo de tiempo.
+ */
+export function getTrainingBalance(activities, settings, days = 7) {
+    if (!activities || activities.length === 0) return null;
+    const start = new Date(); start.setDate(start.getDate() - days);
+    
+    const relevant = activities.filter(a => {
+        const t = String(a.type).toLowerCase();
+        return (t.includes('run') || t.includes('carrera') || t.includes('bici') || t.includes('ciclismo') || t.includes('ride'))
+            && new Date(a.date) >= start && a.duration >= 10;
+    });
+
+    if (!relevant.length) return { empty: true };
+
+    let totalLow = 0;
+    let totalHigh = 0;
+    let totalAnaerobic = 0;
+
+    relevant.forEach(act => {
+        const t = String(act.type).toLowerCase();
+        const isBike = t.includes('bici') || t.includes('ciclismo') || t.includes('ride');
+        const maxHr = Number((isBike ? settings.bike : settings.run)?.max) || 190;
+        
+        let low = 0, high = 0, anaerobic = 0;
+        if (act.streams_data?.heartrate?.data && act.streams_data?.time?.data) {
+            const hr = act.streams_data.heartrate.data, tm = act.streams_data.time.data;
+            const totalT = tm[tm.length - 1] - tm[0];
+            let tLow = 0, tMid = 0, tHigh = 0;
+            for (let i = 1; i < hr.length; i++) {
+                const dt = tm[i] - tm[i - 1]; if (dt > 10) continue;
+                const p = hr[i] / maxHr;
+                if (p < 0.7) tLow += dt; else if (p < 0.85) tMid += dt; else tHigh += dt;
+            }
+            
+            const df = Math.min(act.duration / 90, 1);
+            low = (tLow / (totalT || 1)) * 50 * df;
+            high = (tMid / (totalT || 1)) * 50 * df;
+            anaerobic = (tHigh / (totalT || 1)) * 100 * df;
+            
+        } else {
+            const p = (act.hr_avg || 0) / maxHr;
+            const df = Math.min(act.duration / 90, 1);
+            const load = (act.tss || 50) * 0.1;
+            
+            if (p < 0.7 || !p) {
+                low = load;
+            } else if (p < 0.85) {
+                high = load;
+            } else {
+                anaerobic = load;
+            }
+        }
+        
+        totalLow += low;
+        totalHigh += high;
+        totalAnaerobic += anaerobic;
+    });
+
+    const totalLoad = totalLow + totalHigh + totalAnaerobic;
+    const pLow = totalLoad > 0 ? (totalLow / totalLoad) * 100 : 0;
+    const pHigh = totalLoad > 0 ? (totalHigh / totalLoad) * 100 : 0;
+    const pAnaerobic = totalLoad > 0 ? (totalAnaerobic / totalLoad) * 100 : 0;
+
+    // Recommendations
+    let recommendation = "";
+    let status = "Equilibrado";
+    let color = "#10b981";
+
+    if (totalLoad === 0) {
+        recommendation = "No hay datos suficientes.";
+        status = "Sin Datos";
+    } else if (pAnaerobic > 30) {
+        recommendation = "Exceso de intensidad. Considera rodajes más suaves.";
+        status = "Muy Alto";
+        color = "#ef4444";
+    } else if (pLow < 50) {
+        recommendation = "Falta base aeróbica. Añade más tiempo en zonas bajas.";
+        status = "Base Baja";
+        color = "#f59e0b";
+    }
+
+    return {
+        aerobicLow: totalLow,
+        aerobicHigh: totalHigh,
+        anaerobic: totalAnaerobic,
+        totalLoad,
+        pcts: { low: pLow, high: pHigh, anaerobic: pAnaerobic },
+        recommendation,
+        status,
+        color,
+        activityCount: relevant.length
+    };
+}
+
 
 
 // ════════════════════════════════════════════════════════════════════════════════
@@ -876,3 +1061,187 @@ export function analyzeIntensityDistribution(activities, settings) {
         patternColor,
     };
 }
+
+/**
+ * 12. PERFIL DE POTENCIA COMPARATIVO (BENCHMARKS COGGAN)
+ *     Calcula W/kg del usuario en duraciones clave y los compara con 
+ *     típicos de categorías (Cat 1, World Class, etc.)
+ */
+export function getPowerProfileBenchmarks(activities, settings, eFTP) {
+    const weight = Number(settings?.weight) || 75;
+    const today = new Date();
+    const d90 = new Date(today); d90.setDate(today.getDate() - 90);
+
+    const durations = [
+        { secs: 5, label: '5s' },
+        { secs: 15, label: '15s' },
+        { secs: 30, label: '30s' },
+        { secs: 60, label: '60s' },
+        { secs: 120, label: '2m' },
+        { secs: 180, label: '3m' },
+        { secs: 300, label: '5m' },
+        { secs: 600, label: '10m' },
+        { secs: 900, label: '15m' },
+        { secs: 1200, label: '20m' },
+        { secs: 3600, label: '60m' },
+        { secs: 5400, label: '90m' },
+        { secs: 7200, label: '2h' },
+        { secs: 10800, label: '3h' },
+        { secs: 14400, label: '4h' },
+    ];
+
+    const bikeActivities = activities.filter(act => {
+        const t = String(act.type).toLowerCase();
+        return (t.includes('bici') || t.includes('ciclismo') || t.includes('ride'))
+            && new Date(act.date) >= d90
+            && act.streams_data?.watts?.data 
+            && act.streams_data?.time?.data;
+    });
+
+    const userPoints = durations.map(d => {
+        let bestPower = 0;
+        bikeActivities.forEach(act => {
+            const peak = getPeakPower(act.streams_data.watts.data, act.streams_data.time.data, d.secs);
+            if (peak > bestPower) bestPower = peak;
+        });
+
+        return {
+            label: d.label,
+            wKg: Number((bestPower / weight).toFixed(2)),
+            power: Math.round(bestPower),
+            duration: d.secs
+        };
+    });
+
+    // Reference data (Simplified Men's Coggan Chart with interpolations for long duration)
+    const references = [
+        { category: 'World Class', '5s': 24.0, '15s': 18.0, '30s': 14.5, '60s': 11.5, '2m': 9.2, '3m': 8.5, '5m': 7.6, '10m': 6.8, '15m': 6.6, '20m': 6.4, '60m': 6.0, '90m': 5.6, '2h': 5.2, '3h': 4.8, '4h': 4.5 },
+        { category: 'Cat 1 / Elite', '5s': 19.5, '15s': 14.5, '30s': 12.0, '60s': 9.5, '2m': 7.5, '3m': 6.8, '5m': 6.2, '10m': 5.5, '15m': 5.3, '20m': 5.2, '60m': 4.8, '90m': 4.5, '2h': 4.1, '3h': 3.8, '4h': 3.6 },
+        { category: 'Cat 2', '5s': 17.0, '15s': 12.5, '30s': 10.5, '60s': 8.5, '2m': 6.8, '3m': 6.1, '5m': 5.5, '10m': 4.8, '15m': 4.6, '20m': 4.5, '60m': 4.2, '90m': 3.9, '2h': 3.6, '3h': 3.4, '4h': 3.2 },
+        { category: 'Cat 3', '5s': 14.5, '15s': 11.0, '30s': 9.2, '60s': 7.4, '2m': 6.0, '3m': 5.3, '5m': 4.8, '10m': 4.2, '15m': 4.0, '20m': 3.9, '60m': 3.6, '90m': 3.3, '2h': 3.1, '3h': 2.9, '4h': 2.7 },
+        { category: 'Cat 4', '5s': 12.5, '15s': 9.5, '30s': 8.1, '60s': 6.5, '2m': 5.2, '3m': 4.7, '5m': 4.1, '10m': 3.6, '15m': 3.4, '20m': 3.3, '60m': 3.1, '90m': 2.8, '2h': 2.6, '3h': 2.4, '4h': 2.2 },
+        { category: 'Cat 5', '5s': 10.5, '15s': 8.0, '30s': 6.8, '60s': 5.5, '2m': 4.4, '3m': 4.0, '5m': 3.5, '10m': 3.1, '15m': 2.9, '20m': 2.8, '60m': 2.6, '90m': 2.3, '2h': 2.1, '3h': 1.9, '4h': 1.7 },
+        { category: 'Untrained', '5s': 8.5, '15s': 6.2, '30s': 5.0, '60s': 4.0, '2m': 3.2, '3m': 3.0, '5m': 2.8, '10m': 2.3, '15m': 2.2, '20m': 2.1, '60m': 1.9, '90m': 1.6, '2h': 1.5, '3h': 1.4, '4h': 1.3 },
+    ];
+
+    return {
+        userPoints,
+        references,
+        weight,
+        eFTP: Math.round(eFTP || 0)
+    };
+}
+
+/**
+ * 13. ESTADO DE ENTRENO (Garmin Training Status)
+ *     Analiza la tendencia de condición física (CTL) y fatiga (ATL)
+ */
+export function getTrainingStatus(activities) {
+    if (!activities || activities.length < 5) return null;
+
+    // Calculamos CTL/ATL/TSB simplificado
+    const today = new Date();
+    const d7 = new Date(today); d7.setDate(today.getDate() - 7);
+    const d28 = new Date(today); d28.setDate(today.getDate() - 28);
+
+    const load7 = activities.filter(a => new Date(a.date) >= d7).reduce((s, a) => s + (a.tss || 45), 0) / 7;
+    const load28 = activities.filter(a => new Date(a.date) >= d28).reduce((s, a) => s + (a.tss || 45), 0) / 28;
+
+    const tsb = load28 - load7; 
+    const loadTrend = load7 / (load28 || 1);
+
+    let status = "Mantenimiento";
+    let desc = "Tu carga actual es estable. Estás manteniendo tu nivel físico.";
+    let color = "#3b82f6";
+
+    if (loadTrend > 1.15 && tsb < -5) {
+        status = "Productivo";
+        desc = "Carga en aumento y forma en mejora. ¡Sigue así!";
+        color = "#10b981";
+    } else if (loadTrend > 1.45) {
+        status = "Esfuerzo excesivo";
+        desc = "La carga sube demasiado rápido. Riesgo de fatiga extrema.";
+        color = "#ef4444";
+    } else if (loadTrend < 0.75 && load7 > 5) {
+        status = "Recuperación";
+        desc = "Carga baja para permitir la supercompensación.";
+        color = "#8b5cf6";
+    } else if (loadTrend < 0.4) {
+        status = "Desentrenamiento";
+        desc = "Pérdida de condición física por baja carga.";
+        color = "#94a3b8";
+    } else if (tsb > 12 && loadTrend > 0.8) {
+        status = "Pico de forma";
+        desc = "Excelente balance entre forma y descanso. ¡Momento de competir!";
+        color = "#f59e0b";
+    }
+
+    return { status, desc, color, load7: Math.round(load7), load28: Math.round(load28), tsb: Math.round(tsb) };
+}
+
+/**
+ * 14. ESTADO DE VFC (Variabilidad de Frecuencia Cardíaca)
+ *     Simula el estado de recuperación basado en la regularidad y descanso.
+ */
+export function getHRVAnalysis(activities, wellnessData = null) {
+    if (!activities || activities.length === 0) return null;
+
+    // Prioritize real data from wellnessData if available
+    let currentRMSSD = null;
+    let source = 'estimated';
+    let baseline = 48; // Default
+
+    if (wellnessData && wellnessData.latestHrv && wellnessData.latestHrv !== '--') {
+        currentRMSSD = wellnessData.latestHrv;
+        source = 'garmin';
+        // Use the real baseline calculated by the wellness hook (30-day EWMA)
+        if (wellnessData.baselineHrv) baseline = wellnessData.baselineHrv;
+    } else {
+        // Fallback: search in activities (some syncs put it there)
+        const hrvData = activities.filter(a => a.hrv_rmssd > 0).sort((a, b) => new Date(b.date) - new Date(a.date));
+        if (hrvData.length > 0) {
+            currentRMSSD = hrvData[0].hrv_rmssd;
+            source = 'activities';
+            
+            // Calculate a simple 30-day average baseline if we have enough data
+            const last30 = hrvData.filter(a => {
+                const diff = (new Date() - new Date(a.date)) / (1000 * 60 * 60 * 24);
+                return diff <= 30;
+            });
+            if (last30.length > 0) {
+                baseline = Math.round(last30.reduce((s, a) => s + a.hrv_rmssd, 0) / last30.length);
+            }
+        }
+    }
+
+    // Still no real current data? Simulate based on TSB
+    if (currentRMSSD === null) {
+        const stats = getTrainingStatus(activities);
+        const tsb = stats?.tsb || 0;
+        currentRMSSD = Math.round(baseline + (tsb * 0.4) + (Math.sin(Date.now()/1000000)*5));
+    }
+    
+    let state = "Equilibrado";
+    let color = "#10b981";
+    let msg = "Tu recuperación es óptima. Tu cuerpo responde bien.";
+
+    if (currentRMSSD < baseline * 0.85) {
+        state = "Bajo"; color = "#f59e0b";
+        msg = "Ligero estrés acumulado. Considera un día suave.";
+    } else if (currentRMSSD < baseline * 0.7) {
+        state = "No equilibrado"; color = "#ef4444";
+        msg = "Estrés elevado. Tu sistema nervioso necesita descanso.";
+    }
+
+    return {
+        rmssd: Math.round(currentRMSSD),
+        baseline,
+        state,
+        color,
+        msg,
+        source,
+        stress: Math.round(Math.max(0, 100 - (currentRMSSD / baseline) * 100 + 40))
+    };
+}
+
+

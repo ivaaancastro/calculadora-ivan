@@ -9,6 +9,8 @@ import {
   Activity,
 } from "lucide-react";
 import { useActivities } from "../hooks/useActivities";
+import { useIntervalsSync } from "../hooks/useIntervalsSync";
+import { useEffect } from "react";
 
 // Componentes
 import { Navbar } from "./dashboard/Navbar";
@@ -59,6 +61,29 @@ const Dashboard = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [activeTab, setActiveTab] = useState("overview");
   const [activeActivity, setActiveActivity] = useState(null);
+
+  const { syncAll } = useIntervalsSync();
+
+  // --- AUTO-SYNC INTERVALS.ICU ---
+  useEffect(() => {
+    const triggerAutoSync = async () => {
+      if (settings?.intervalsId && settings?.intervalsKey) {
+        const lastSyncDate = settings.intervalsLastSynced ? new Date(settings.intervalsLastSynced).toDateString() : null;
+        const isSyncedToday = lastSyncDate === new Date().toDateString();
+
+        if (!isSyncedToday) {
+          console.log("Iniciando auto-sync diario de Intervals.icu...");
+          await syncAll(settings);
+          // Refetch profile to get new last_synced and metrics
+          fetchProfile();
+        }
+      }
+    };
+
+    if (!loading) {
+      triggerAutoSync();
+    }
+  }, [loading, settings?.intervalsId, settings?.intervalsKey, settings?.intervalsLastSynced]);
 
   const handleTabChange = (tab) => {
     setActiveTab(tab);
@@ -113,6 +138,7 @@ const Dashboard = () => {
           <ErrorBoundary>
             <ProfilePage
               currentSettings={settings}
+              currentMetrics={currentMetrics}
               onUpdate={updateProfile}
               onAnalyze={analyzeHistory}
               onBack={() => setActiveTab("overview")}

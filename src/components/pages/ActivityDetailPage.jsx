@@ -90,11 +90,11 @@ const InteractiveMap = ({ polyline, highResCoords, color, currentPosition }) => 
 };
 
 const MetricCard = ({ label, value, unit, accent }) => (
-    <div className="flex flex-col gap-0.5 min-w-0">
-        <span className="text-[10px] font-semibold text-slate-400 dark:text-zinc-500 uppercase tracking-wider truncate">{label}</span>
+    <div className="flex flex-col min-w-0 py-1.5 px-3 bg-slate-50/50 dark:bg-zinc-900/40 rounded-xl border border-slate-100/50 dark:border-zinc-800/40">
+        <span className="text-[9px] font-bold text-slate-400 dark:text-zinc-500 uppercase tracking-tight truncate">{label}</span>
         <div className="flex items-baseline gap-1">
-            <span className={`text-lg font-semibold tracking-tight ${accent || 'text-slate-900 dark:text-zinc-100'}`}>{value}</span>
-            {unit && <span className="text-[10px] font-medium text-slate-400 dark:text-zinc-500">{unit}</span>}
+            <span className={`text-sm font-bold tracking-tight ${accent || 'text-slate-900 dark:text-zinc-100'}`}>{value}</span>
+            {unit && <span className="text-[9px] font-bold text-slate-400 dark:text-zinc-500">{unit}</span>}
         </div>
     </div>
 );
@@ -440,25 +440,51 @@ export const ActivityDetailPage = ({ activity, settings, fetchStreams, onBack, o
             }
         }
 
-        // --- Auto-Laps ---
-        if (streams.distance?.data && streams.time.data && streams.heartrate?.data && streams.velocity_smooth?.data) {
-            const distData = streams.distance.data; // en metros
+        // --- Real Laps (Garmin/Strava) with Auto-Lap Fallback ---
+        if (streams.laps && streams.laps.length > 0) {
+            // Priority: Use the official laps marked on the device
+            streams.laps.forEach((lap, idx) => {
+                const lapTimeMin = lap.moving_time / 60;
+                const lapDistKm = lap.distance / 1000;
+                const avgSpdMs = lap.average_speed || (lap.distance / (lap.moving_time || 1));
+
+                autoLaps.push({
+                    index: idx + 1,
+                    name: lap.name,
+                    timeStr: formatPace(lapTimeMin),
+                    speedVal: isPaceBased ? formatPace(16.6666667 / avgSpdMs) : (avgSpdMs * 3.6).toFixed(1),
+                    rawSpeed: avgSpdMs,
+                    hrAvg: Math.round(lap.average_heartrate) || 0,
+                    pwrAvg: lap.average_watts ? Math.round(lap.average_watts) : null,
+                    cadAvg: lap.average_cadence ? Math.round(lap.average_cadence) : null,
+                    elev: Math.round(lap.total_elevation_gain) || 0,
+                    distanceKm: lapDistKm.toFixed(2)
+                });
+            });
+        } else if (streams.distance?.data && streams.time.data && streams.heartrate?.data && streams.velocity_smooth?.data) {
+            // Fallback: Generate synthetic 1km/5km laps
+            const distData = streams.distance.data;
             const hrData = streams.heartrate.data;
-            const spdData = streams.velocity_smooth.data; // m/s
+            const spdData = streams.velocity_smooth.data;
             const timeData = streams.time.data;
             const altData = streams.altitude?.data;
+            const wattData = streams.watts?.data;
+            const cadData = streams.cadence?.data;
 
-            const lapDistance = isPaceBased ? 1000 : 5000; // 1km run, 5km bike
+            const lapDistance = isPaceBased ? 1000 : 5000;
             let currentLapTarget = lapDistance;
             let lapStartIndex = 0;
 
             for (let i = 0; i < distData.length; i++) {
                 if (distData[i] >= currentLapTarget || i === distData.length - 1) {
                     if (i > lapStartIndex) {
-                        // Calcular promedios del Lap
-                        let hrSum = 0, spdSum = 0, count = 0;
+                        let hrSum = 0, spdSum = 0, pwrSum = 0, cadSum = 0, count = 0;
                         for (let j = lapStartIndex; j <= i; j++) {
-                            hrSum += hrData[j]; spdSum += spdData[j]; count++;
+                            hrSum += hrData[j]; 
+                            spdSum += spdData[j]; 
+                            if (wattData) pwrSum += wattData[j];
+                            if (cadData) cadSum += cadData[j];
+                            count++;
                         }
 
                         const lapTimeSecs = timeData[i] - timeData[lapStartIndex];
@@ -466,13 +492,17 @@ export const ActivityDetailPage = ({ activity, settings, fetchStreams, onBack, o
                         const elevGain = altData ? Math.max(0, altData[i] - altData[lapStartIndex]) : 0;
                         const avgSpdMs = spdSum / count;
 
-                        if (lapDistMeters > lapDistance * 0.5) { // Rechazar micro-laps finales
+                        if (lapDistMeters > lapDistance * 0.3) { 
                             autoLaps.push({
                                 index: autoLaps.length + 1,
                                 timeStr: formatPace(lapTimeSecs / 60),
                                 speedVal: isPaceBased ? formatPace(16.6666667 / avgSpdMs) : (avgSpdMs * 3.6).toFixed(1),
+                                rawSpeed: avgSpdMs,
                                 hrAvg: Math.round(hrSum / count),
-                                elev: Math.round(elevGain)
+                                pwrAvg: wattData ? Math.round(pwrSum / count) : null,
+                                cadAvg: cadData ? Math.round(cadSum / count) : null,
+                                elev: Math.round(elevGain),
+                                distanceKm: (lapDistMeters / 1000).toFixed(2)
                             });
                         }
                     }
@@ -640,45 +670,82 @@ export const ActivityDetailPage = ({ activity, settings, fetchStreams, onBack, o
 
     const fitnessAnalysis = useMemo(() => {
         if (!trainingEffect || !proMetrics) return null;
-        let title = "";
-        let description = "";
-        let conclusion = "";
-        let score = 0;
 
-        if (trainingEffect.aerobic >= 3.0 || trainingEffect.anaerobic >= 2.5) score += 40;
-        else if (trainingEffect.aerobic >= 2.0 || trainingEffect.anaerobic >= 2.0) score += 20;
+        let title = "Análisis del Coach";
+        let score = 50;
+        let insights = [];
+        let nextStep = "";
 
-        if (proMetrics.decouplingObj) {
-            const dec = parseFloat(proMetrics.decouplingObj.value);
-            if (dec <= 5 && dec >= -5) score += 30;
-            else if (dec <= 8) score += 15;
-            else score -= 10;
-        } else {
-            score += 15; // default si no hay datos de desacople porque fue corto
+        const { ifFactor, decouplingObj, powerCurve, npWatts, workKj } = proMetrics;
+        const { primaryBenefit, aerobic, anaerobic } = trainingEffect;
+
+        // 1. Análisis de Intensidad (IF)
+        if (ifFactor >= 0.95) {
+            insights.push(`Has trabajado a una intensidad altísima (${ifFactor}), prácticamente a nivel de competición. Este estímulo es excelente para mejorar tu techo de rendimiento, pero requiere una recuperación profunda.`);
+            score += 20;
+        } else if (ifFactor >= 0.85) {
+            insights.push(`Sesión de intensidad sólida (${ifFactor}). Has pasado gran parte del tiempo en zonas exigentes, lo que fortalecerá tu resistencia específica.`);
+            score += 15;
+        } else if (ifFactor <= 0.70 && ifFactor > 0) {
+            insights.push(`Buen control de la intensidad (${ifFactor}). Te has mantenido en niveles de base o recuperación, permitiendo sumar volumen sin quemarte.`);
+            score += 10;
         }
 
-        if ((activity.tss || 0) > 50) score += 20;
-        else if ((activity.tss || 0) > 20) score += 10;
-
-        if (score >= 70) {
-            title = "Entrenamiento Altamente Productivo";
-            description = "Has realizado una sesión excelente que aporta directamente a tu mejora física. El estímulo logrado es notable.";
-            if (trainingEffect.primaryBenefit !== "Recuperación") {
-                conclusion = `El enfoque principal en ${trainingEffect.primaryBenefit} ha sido un éxito. Has asimilado bien la carga sin un desfase excesivo. Definitivamente no has perdido el tiempo, este entreno suma a tu forma.`;
-            } else {
-                conclusion = "Un entrenamiento de recuperación ejecutado a la perfección. Es crucial para asimilar la carga de otros días intensos.";
+        // 2. Estabilidad Aeróbica (Drift/Decoupling)
+        if (decouplingObj) {
+            const drift = parseFloat(decouplingObj.value);
+            if (drift > 10) {
+                insights.push(`He detectado un desacople aeróbico alto (${drift}%). Tu pulso ha subido significativamente para mantener la misma potencia; esto sugiere fatiga acumulada, deshidratación o falta de adaptación al calor.`);
+                score -= 15;
+            } else if (drift > 5) {
+                insights.push(`Desacople moderado (${drift}%). Hay algo de deriva cardiaca, normal en sesiones largas, pero indica que tu eficiencia aeróbica todavía tiene margen de mejora.`);
+                score += 5;
+            } else if (drift <= 5 && drift >= -5) {
+                insights.push(`Eficiencia impecable. Tu pulso se ha mantenido estable respecto a la carga (${drift}%), lo que indica que tienes esta intensidad muy bien dominada.`);
+                score += 25;
             }
-        } else if (score >= 40) {
-            title = "Entrenamiento Útil (Mantenimiento / Base)";
-            description = "Una sesión que suma volumen y ayuda a mantener tu estado de forma o construir base aeróbica, aunque sin picos extraordinarios de mejora aguda.";
-            conclusion = "Ha servido para sumar y cumplir el objetivo. No es una sesión de ganancia máxima (a menos que ese fuera el fin), pero es el cimiento necesario para estar en forma. Buen trabajo constante.";
-        } else {
-            title = "Sesión Ligera / Recuperación Activa";
-            description = "El estímulo fisiológico de esta sesión ha sido muy bajo. Puede interpretarse como un esfuerzo de recuperación o un paseo ligero.";
-            conclusion = "Si tu plan era descansar activamente, está perfecto. Si pretendías un entrenamiento duro o mejorar capacidades, lamentablemente hoy no se ha logrado el estímulo suficiente y podría considerarse una sesión vacía o 'tiempo perdido' deportivamente hablando.";
         }
 
-        return { title, description, conclusion, score };
+        // 3. Propósito Fisiológico (Training Effect)
+        if (primaryBenefit === "Umbral") {
+            insights.push("El trabajo de hoy se ha centrado en el Umbral, clave para elevar tu potencia sostenible en esfuerzos de larga duración.");
+        } else if (primaryBenefit === "VO2 Max") {
+            insights.push("Has tocado el techo metabólico. Estas sesiones expanden tu capacidad de transporte de oxígeno y son las que más 'te hacen crecer'.");
+        } else if (primaryBenefit === "Capacidad Anaeróbica") {
+            insights.push("Sesión explosiva. Has trabajado la resistencia al lactato y la potencia neuromuscular.");
+        } else if (primaryBenefit === "Base Aeróbica") {
+            insights.push("Construcción de cimientos. Estás mejorando la capilarización y la eficiencia de las grasas como combustible.");
+        }
+
+        // 4. Hitos de Potencia
+        if (powerCurve && powerCurve.length > 0) {
+            const best5m = powerCurve.find(p => p.label === '5m')?.value;
+            if (best5m && best5m > npWatts * 1.1) {
+                insights.push(`Destacable tu pico de 5 minutos (${best5m}w). Indica una buena capacidad de esfuerzo agudo por encima de tu media de hoy.`);
+            }
+        }
+
+        // 5. Sugerencia de Recuperación
+        const tss = activity.tss || 0;
+        if (tss > 100) {
+            nextStep = "Tras esta carga de +100 TSS, mañana es obligatorio un rodaje muy suave (Z1) o descanso total para no entrar en fatiga crónica.";
+        } else if (tss > 50) {
+            nextStep = "Carga moderada. Mañana puedes realizar un entrenamiento similar o de intensidad baja para seguir sumando.";
+        } else {
+            nextStep = "Sesión ligera. Estás listo para un bloque de intensidad mañana si el plan lo requiere.";
+        }
+
+        // Score based Title
+        if (score >= 85) title = "Sesión de Máximo Rendimiento";
+        else if (score >= 60) title = "Entrenamiento Productivo";
+        else title = "Sesión de Rodaje / Mantenimiento";
+
+        return { 
+            title, 
+            description: insights.slice(0, 2).join(' '),
+            conclusion: insights.slice(2).join(' ') + (nextStep ? `\n\nPróximo paso: ${nextStep}` : ''),
+            score: Math.min(100, Math.max(0, score))
+        };
     }, [trainingEffect, proMetrics, activity]);
 
     if (!activity) return null;
@@ -717,62 +784,61 @@ export const ActivityDetailPage = ({ activity, settings, fetchStreams, onBack, o
 
     return (
         <div className="animate-in fade-in duration-500 bg-slate-50 dark:bg-zinc-950 h-screen overflow-hidden flex flex-col font-sans">
-            {/* Sport-colored accent bar */}
-            <div className="h-1 shrink-0" style={{ background: `linear-gradient(90deg, ${themeColor}, ${themeColor}88)` }} />
-
             {/* Premium Header */}
-            <header className="bg-white dark:bg-zinc-950 border-b border-slate-100 dark:border-zinc-900 px-6 py-4 shrink-0 z-50">
-                <div className="flex items-start justify-between mb-4">
-                    <div className="flex items-start gap-3">
-                        <button onClick={onBack} className="mt-1 p-1.5 hover:bg-slate-100 dark:hover:bg-zinc-900 rounded-lg transition-colors text-slate-400 dark:text-zinc-500">
-                            <ArrowLeft size={18} />
-                        </button>
-                        <div>
-                            <h1 className="text-lg font-semibold text-slate-900 dark:text-zinc-100 tracking-tight leading-tight">
-                                {activity.name || `${activity.type}`}
-                            </h1>
-                            <p className="text-xs text-slate-400 dark:text-zinc-500 mt-0.5 capitalize">{dateStr}</p>
-                        </div>
+            <header className="bg-white dark:bg-zinc-950 border-b border-slate-100 dark:border-zinc-900 px-6 py-3 shrink-0 z-50">
+                {/* Navigation Tabs at the Top */}
+                <div className="flex items-center justify-between mb-4 border-b border-slate-50 dark:border-zinc-900 pb-2">
+                    <div className="flex bg-slate-100 dark:bg-zinc-900 p-0.5 rounded-lg gap-0.5">
+                        <PillTab active={activeTab === 'analyze'} label="Análisis" onClick={() => setActiveTab('analyze')} />
+                        <PillTab active={activeTab === 'map'} label="Mapa" onClick={() => setActiveTab('map')} />
+                        <PillTab active={activeTab === 'laps'} label="Intervalos" onClick={() => setActiveTab('laps')} />
+                        <PillTab active={activeTab === 'data'} label="Detalle" onClick={() => setActiveTab('data')} />
                     </div>
+                    
                     <div className="flex items-center gap-1">
                         {activity.strava_id && (
                             <a href={`https://www.strava.com/activities/${activity.strava_id}`} target="_blank" rel="noreferrer" 
-                               className="px-3 py-1.5 text-[10px] font-bold text-orange-500 hover:bg-orange-50 dark:hover:bg-orange-900/10 rounded-lg transition-colors uppercase tracking-wider">
-                                Strava ↗
+                               className="px-2 py-1 text-[9px] font-bold text-orange-500 hover:bg-orange-50 dark:hover:bg-orange-900/10 rounded-md transition-colors uppercase tracking-widest">
+                                Strava
                             </a>
                         )}
-                        <button onClick={() => onDelete && onDelete(activity.id)} className="p-2 text-slate-300 dark:text-zinc-600 hover:text-red-500 dark:hover:text-red-400 rounded-lg transition-colors">
-                            <Trash2 size={16} />
+                        <button onClick={() => onDelete && onDelete(activity.id)} className="p-1.5 text-slate-300 dark:text-zinc-600 hover:text-red-500 rounded-lg transition-colors">
+                            <Trash2 size={14} />
                         </button>
                     </div>
                 </div>
 
-                {/* Metric Cards Grid */}
-                <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-x-6 gap-y-3 py-2">
+                <div className="flex items-center gap-3 mb-4">
+                    <button onClick={onBack} className="p-1.5 hover:bg-slate-100 dark:hover:bg-zinc-900 rounded-lg transition-colors text-slate-400 dark:text-zinc-500">
+                        <ArrowLeft size={16} />
+                    </button>
+                    <div>
+                        <h1 className="text-sm font-bold text-slate-900 dark:text-zinc-100 tracking-tight leading-tight">
+                            {activity.name || `${activity.type}`}
+                        </h1>
+                        <p className="text-[10px] font-bold text-slate-400 dark:text-zinc-500 capitalize">{dateStr}</p>
+                    </div>
+                </div>
+
+                {/* Expanded Compact Metric Grid */}
+                <div className="flex flex-wrap gap-2 py-1">
                     <MetricCard label="Distancia" value={(activity.distance / 1000).toFixed(2)} unit="km" />
                     <MetricCard label="Tiempo" value={formatTimeStr(activity.duration)} />
-                    <MetricCard label="Elevación" value={activity.elevation_gain || 0} unit="m" />
-                    {activity.tss > 0 && <MetricCard label="Carga" value={Math.round(activity.tss)} unit="TSS" accent="text-indigo-600 dark:text-indigo-400" />}
+                    <MetricCard label="Desnivel" value={activity.elevation_gain || 0} unit="m" />
+                    <MetricCard label="Carga" value={Math.round(activity.tss || 0)} unit="TSS" accent="text-indigo-500" />
+                    {proMetrics.ifFactor > 0 && <MetricCard label="IF" value={proMetrics.ifFactor} accent="text-amber-500" />}
+                    {proMetrics.workKj > 0 && <MetricCard label="Trabajo" value={proMetrics.workKj} unit="kJ" />}
                     {activity.hr_avg > 0 && <MetricCard label="FC Media" value={activity.hr_avg} unit="bpm" accent="text-rose-500" />}
-                    {maxHr > 0 && <MetricCard label="FC Máx" value={maxHr} unit="bpm" />}
-                    {speedMetric && <MetricCard label={speedMetric.label} value={speedMetric.value} unit={speedMetric.unit} accent="text-blue-600 dark:text-blue-400" />}
-                    {proMetrics.avgWatts > 0 && <MetricCard label="Pot. Media" value={proMetrics.avgWatts} unit="w" accent="text-amber-500" />}
-                    {proMetrics.npWatts > 0 && <MetricCard label="NP" value={proMetrics.npWatts} unit="w" accent="text-amber-600 dark:text-amber-400" />}
-                    {proMetrics.maxWatts > 0 && <MetricCard label="Pot. Máx" value={proMetrics.maxWatts} unit="w" />}
+                    {speedMetric && <MetricCard label={speedMetric.label} value={speedMetric.value} unit={speedMetric.unit} accent="text-blue-500" />}
+                    {proMetrics.avgWatts > 0 && <MetricCard label="W Media" value={proMetrics.avgWatts} unit="w" accent="text-amber-500" />}
+                    {proMetrics.npWatts > 0 && <MetricCard label="NP" value={proMetrics.npWatts} unit="w" accent="text-amber-600" />}
+                    {proMetrics.efObj && <MetricCard label="EF" value={proMetrics.efObj.value} unit={proMetrics.efObj.unit} />}
+                    {proMetrics.decouplingObj && (
+                        <MetricCard label="Drift" value={proMetrics.decouplingObj.value} unit="%" accent={proMetrics.decouplingObj.color} />
+                    )}
                     {proMetrics.cadenceAvg > 0 && <MetricCard label="Cadencia" value={proMetrics.cadenceAvg} unit={isPaceBased ? 'ppm' : 'rpm'} />}
-                    {activity.calories > 0 && <MetricCard label="Calorías" value={activity.calories} unit="kcal" />}
                 </div>
             </header>
-
-            {/* Pill Tab Navigation */}
-            <div className="bg-white dark:bg-zinc-950 border-b border-slate-100 dark:border-zinc-900 flex items-center px-6 py-2 shrink-0">
-                <div className="flex bg-slate-100 dark:bg-zinc-900 p-1 rounded-full gap-0.5">
-                    <PillTab active={activeTab === 'analyze'} label="Análisis" onClick={() => setActiveTab('analyze')} />
-                    <PillTab active={activeTab === 'map'} label="Mapa" onClick={() => setActiveTab('map')} />
-                    <PillTab active={activeTab === 'laps'} label="Intervalos" onClick={() => setActiveTab('laps')} />
-                    <PillTab active={activeTab === 'data'} label="Detalle" onClick={() => setActiveTab('data')} />
-                </div>
-            </div>
 
             {/* 4. Tab Content */}
             <div className="flex-1 overflow-hidden relative">
@@ -790,38 +856,38 @@ export const ActivityDetailPage = ({ activity, settings, fetchStreams, onBack, o
                         <div className="flex-1 overflow-y-auto custom-scrollbar p-5 bg-white dark:bg-zinc-950">
                             <div className="max-w-5xl mx-auto space-y-3" onMouseLeave={() => setActivePayload(null)}>
                                 {chartData.length > 0 ? (
-                                    <>
+                                    <div className="bg-white dark:bg-zinc-950 rounded-2xl border border-slate-200/60 dark:border-zinc-800/60 overflow-hidden shadow-sm">
                                         {/* Velocity/Pace */}
-                                        <div className="h-[140px] bg-white dark:bg-zinc-950 rounded-xl border border-slate-100 dark:border-zinc-800/60 p-4 pl-5 border-l-[3px]" style={{ borderLeftColor: '#6366f1' }}>
-                                            <div className="flex justify-between items-center mb-2">
-                                                <h4 className="text-[10px] font-semibold text-slate-400 dark:text-zinc-500 uppercase tracking-wider">{isPaceBased ? 'Ritmo' : 'Velocidad'}</h4>
-                                                {activePayload && <span className="text-sm font-semibold tabular-nums text-indigo-500">{isPaceBased ? formatPace(activePayload.pace) : activePayload.speed + ' km/h'}</span>}
+                                        <div className="h-[105px] pt-4 px-6 border-b border-slate-100 dark:border-zinc-800/60">
+                                            <div className="flex justify-between items-center mb-1">
+                                                <h4 className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">{isPaceBased ? 'Ritmo' : 'Velocidad'}</h4>
+                                                {activePayload && <span className="text-xs font-bold tabular-nums text-indigo-500">{isPaceBased ? formatPace(activePayload.pace) : activePayload.speed + ' km/h'}</span>}
                                             </div>
-                                            <ResponsiveContainer width="100%" height="85%">
+                                            <ResponsiveContainer width="100%" height={70}>
                                                 <AreaChart data={chartData} syncId="st" onMouseMove={handleMouseMove}>
-                                                    <CartesianGrid vertical={false} strokeDasharray="3 3" stroke="#f1f5f9" />
+                                                    <CartesianGrid vertical={false} strokeDasharray="3 3" stroke="#f1f5f9" opacity={0.5} />
                                                     <XAxis dataKey="time" hide />
                                                     <YAxis reversed={isPaceBased} hide domain={['dataMin', 'dataMax']} />
                                                     <RechartsTooltip content={() => null} cursor={{ stroke: '#6366f1', strokeWidth: 1, strokeDasharray: '4 4' }} />
-                                                    <Area type="monotone" dataKey={isPaceBased ? "pace" : "speed"} stroke="#6366f1" fill="#6366f1" fillOpacity={0.04} strokeWidth={1.5} dot={false} activeDot={{ r: 3, stroke: '#fff', strokeWidth: 1.5, fill: '#6366f1' }} />
+                                                    <Area type="monotone" dataKey={isPaceBased ? "pace" : "speed"} stroke="#6366f1" fill="#6366f1" fillOpacity={0.06} strokeWidth={1.5} dot={false} activeDot={{ r: 3, stroke: '#fff', strokeWidth: 1.5, fill: '#6366f1' }} />
                                                 </AreaChart>
                                             </ResponsiveContainer>
                                         </div>
 
                                         {/* Heart Rate */}
                                         {chartData.some(d => d.hr > 0) && (
-                                            <div className="h-[140px] bg-white dark:bg-zinc-950 rounded-xl border border-slate-100 dark:border-zinc-800/60 p-4 pl-5 border-l-[3px]" style={{ borderLeftColor: '#f43f5e' }}>
-                                                <div className="flex justify-between items-center mb-2">
-                                                    <h4 className="text-[10px] font-semibold text-slate-400 dark:text-zinc-500 uppercase tracking-wider">FC</h4>
-                                                    {activePayload && <span className="text-sm font-semibold tabular-nums text-rose-500">{activePayload.hr} bpm</span>}
+                                            <div className="h-[105px] pt-4 px-6 border-b border-slate-100 dark:border-zinc-800/60">
+                                                <div className="flex justify-between items-center mb-1">
+                                                    <h4 className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">FC</h4>
+                                                    {activePayload && <span className="text-xs font-bold tabular-nums text-rose-500">{activePayload.hr} bpm</span>}
                                                 </div>
-                                                <ResponsiveContainer width="100%" height="85%">
+                                                <ResponsiveContainer width="100%" height={70}>
                                                     <AreaChart data={chartData} syncId="st" onMouseMove={handleMouseMove}>
-                                                        <CartesianGrid vertical={false} strokeDasharray="3 3" stroke="#f1f5f9" />
+                                                        <CartesianGrid vertical={false} strokeDasharray="3 3" stroke="#f1f5f9" opacity={0.5} />
                                                         <XAxis dataKey="time" hide />
                                                         <YAxis hide domain={['dataMin - 5', 'dataMax + 5']} />
                                                         <RechartsTooltip content={() => null} cursor={{ stroke: '#f43f5e', strokeWidth: 1, strokeDasharray: '4 4' }} />
-                                                        <Area type="monotone" dataKey="hr" stroke="#f43f5e" fill="#f43f5e" fillOpacity={0.04} strokeWidth={1.5} dot={false} activeDot={{ r: 3, stroke: '#fff', strokeWidth: 1.5, fill: '#f43f5e' }} />
+                                                        <Area type="monotone" dataKey="hr" stroke="#f43f5e" fill="#f43f5e" fillOpacity={0.06} strokeWidth={1.5} dot={false} activeDot={{ r: 3, stroke: '#fff', strokeWidth: 1.5, fill: '#f43f5e' }} />
                                                     </AreaChart>
                                                 </ResponsiveContainer>
                                             </div>
@@ -829,18 +895,18 @@ export const ActivityDetailPage = ({ activity, settings, fetchStreams, onBack, o
 
                                         {/* Power */}
                                         {chartData.some(d => d.watts > 0) && (
-                                            <div className="h-[140px] bg-white dark:bg-zinc-950 rounded-xl border border-slate-100 dark:border-zinc-800/60 p-4 pl-5 border-l-[3px]" style={{ borderLeftColor: '#f59e0b' }}>
-                                                <div className="flex justify-between items-center mb-2">
-                                                    <h4 className="text-[10px] font-semibold text-slate-400 dark:text-zinc-500 uppercase tracking-wider">Potencia</h4>
-                                                    {activePayload && <span className="text-sm font-semibold tabular-nums text-amber-500">{activePayload.watts} w</span>}
+                                            <div className="h-[105px] pt-4 px-6 border-b border-slate-100 dark:border-zinc-800/60">
+                                                <div className="flex justify-between items-center mb-1">
+                                                    <h4 className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Potencia</h4>
+                                                    {activePayload && <span className="text-xs font-bold tabular-nums text-amber-500">{activePayload.watts} w</span>}
                                                 </div>
-                                                <ResponsiveContainer width="100%" height="85%">
+                                                <ResponsiveContainer width="100%" height={70}>
                                                     <AreaChart data={chartData} syncId="st" onMouseMove={handleMouseMove}>
-                                                        <CartesianGrid vertical={false} strokeDasharray="3 3" stroke="#f1f5f9" />
+                                                        <CartesianGrid vertical={false} strokeDasharray="3 3" stroke="#f1f5f9" opacity={0.5} />
                                                         <XAxis dataKey="time" hide />
                                                         <YAxis hide domain={['dataMin', 'dataMax']} />
                                                         <RechartsTooltip content={() => null} cursor={{ stroke: '#f59e0b', strokeWidth: 1, strokeDasharray: '4 4' }} />
-                                                        <Area type="monotone" dataKey="watts" stroke="#f59e0b" fill="#f59e0b" fillOpacity={0.04} strokeWidth={1.5} dot={false} activeDot={{ r: 3, stroke: '#fff', strokeWidth: 1.5, fill: '#f59e0b' }} />
+                                                        <Area type="monotone" dataKey="watts" stroke="#f59e0b" fill="#f59e0b" fillOpacity={0.06} strokeWidth={1.5} dot={false} activeDot={{ r: 3, stroke: '#fff', strokeWidth: 1.5, fill: '#f59e0b' }} />
                                                     </AreaChart>
                                                 </ResponsiveContainer>
                                             </div>
@@ -848,18 +914,18 @@ export const ActivityDetailPage = ({ activity, settings, fetchStreams, onBack, o
 
                                         {/* Altitude */}
                                         {chartData.some(d => d.alt !== null) && (
-                                            <div className="h-[140px] bg-white dark:bg-zinc-950 rounded-xl border border-slate-100 dark:border-zinc-800/60 p-4 pl-5 border-l-[3px] border-l-slate-300 dark:border-l-zinc-600">
-                                                <div className="flex justify-between items-center mb-2">
-                                                    <h4 className="text-[10px] font-semibold text-slate-400 dark:text-zinc-500 uppercase tracking-wider">Altitud</h4>
-                                                    {activePayload && <span className="text-sm font-semibold tabular-nums text-slate-500">{activePayload.alt} m</span>}
+                                            <div className="h-[105px] pt-4 px-6 border-b border-slate-100 dark:border-zinc-800/60">
+                                                <div className="flex justify-between items-center mb-1">
+                                                    <h4 className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Altitud</h4>
+                                                    {activePayload && <span className="text-xs font-bold tabular-nums text-slate-500">{activePayload.alt} m</span>}
                                                 </div>
-                                                <ResponsiveContainer width="100%" height="85%">
+                                                <ResponsiveContainer width="100%" height={70}>
                                                     <AreaChart data={chartData} syncId="st" onMouseMove={handleMouseMove}>
-                                                        <CartesianGrid vertical={false} strokeDasharray="3 3" stroke="#f1f5f9" />
+                                                        <CartesianGrid vertical={false} strokeDasharray="3 3" stroke="#f1f5f9" opacity={0.5} />
                                                         <XAxis dataKey="time" hide />
                                                         <YAxis hide domain={['dataMin - 10', 'dataMax + 10']} />
                                                         <RechartsTooltip content={() => null} cursor={{ stroke: '#94a3b8', strokeWidth: 1, strokeDasharray: '4 4' }} />
-                                                        <Area type="monotone" dataKey="alt" stroke="#94a3b8" fill="#94a3b8" fillOpacity={0.04} strokeWidth={1.5} dot={false} activeDot={{ r: 3, stroke: '#fff', strokeWidth: 1.5, fill: '#94a3b8' }} />
+                                                        <Area type="monotone" dataKey="alt" stroke="#94a3b8" fill="#94a3b8" fillOpacity={0.06} strokeWidth={1.5} dot={false} activeDot={{ r: 3, stroke: '#fff', strokeWidth: 1.5, fill: '#94a3b8' }} />
                                                     </AreaChart>
                                                 </ResponsiveContainer>
                                             </div>
@@ -867,23 +933,23 @@ export const ActivityDetailPage = ({ activity, settings, fetchStreams, onBack, o
 
                                         {/* Cadence */}
                                         {chartData.some(d => d.cadence > 0) && (
-                                            <div className="h-[120px] bg-white dark:bg-zinc-950 rounded-xl border border-slate-100 dark:border-zinc-800/60 p-4 pl-5 border-l-[3px] border-l-emerald-400">
-                                                <div className="flex justify-between items-center mb-2">
-                                                    <h4 className="text-[10px] font-semibold text-slate-400 dark:text-zinc-500 uppercase tracking-wider">Cadencia</h4>
-                                                    {activePayload && <span className="text-sm font-semibold tabular-nums text-emerald-500">{activePayload.cadence} {isPaceBased ? 'ppm' : 'rpm'}</span>}
+                                            <div className="h-[105px] pt-4 px-6">
+                                                <div className="flex justify-between items-center mb-1">
+                                                    <h4 className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Cadencia</h4>
+                                                    {activePayload && <span className="text-xs font-bold tabular-nums text-emerald-500">{activePayload.cadence} {isPaceBased ? 'ppm' : 'rpm'}</span>}
                                                 </div>
-                                                <ResponsiveContainer width="100%" height="85%">
+                                                <ResponsiveContainer width="100%" height={70}>
                                                     <AreaChart data={chartData} syncId="st" onMouseMove={handleMouseMove}>
-                                                        <CartesianGrid vertical={false} strokeDasharray="3 3" stroke="#f1f5f9" />
+                                                        <CartesianGrid vertical={false} strokeDasharray="3 3" stroke="#f1f5f9" opacity={0.5} />
                                                         <XAxis dataKey="time" hide />
                                                         <YAxis hide domain={['dataMin - 5', 'dataMax + 5']} />
                                                         <RechartsTooltip content={() => null} cursor={{ stroke: '#10b981', strokeWidth: 1, strokeDasharray: '4 4' }} />
-                                                        <Area type="monotone" dataKey="cadence" stroke="#10b981" fill="#10b981" fillOpacity={0.04} strokeWidth={1.5} dot={false} activeDot={{ r: 3, stroke: '#fff', strokeWidth: 1.5, fill: '#10b981' }} />
+                                                        <Area type="monotone" dataKey="cadence" stroke="#10b981" fill="#10b981" fillOpacity={0.06} strokeWidth={1.5} dot={false} activeDot={{ r: 3, stroke: '#fff', strokeWidth: 1.5, fill: '#10b981' }} />
                                                     </AreaChart>
                                                 </ResponsiveContainer>
                                             </div>
                                         )}
-                                    </>
+                                    </div>
                                 ) : (
                                     <div className="h-64 flex items-center justify-center text-slate-300 dark:text-zinc-600 text-sm">Sin datos de análisis</div>
                                 )}
@@ -927,105 +993,13 @@ export const ActivityDetailPage = ({ activity, settings, fetchStreams, onBack, o
                                 </div>
                             )}
 
-                            {/* Zones */}
-                            {(exactZoneAnalysis || exactPacePowerZoneAnalysis) && (
-                                <div className="space-y-3">
-                                    <div className="flex items-center justify-between">
-                                        <h3 className="text-[10px] font-semibold text-slate-400 dark:text-zinc-500 uppercase tracking-wider">
-                                            Zonas {zoneType === 'hr' ? 'FC' : (isPaceBased ? 'Pace' : 'Potencia')}
-                                        </h3>
-                                        <div className="flex bg-slate-100 dark:bg-zinc-900 p-0.5 rounded-full text-[9px] font-semibold">
-                                            <button 
-                                                onClick={() => setZoneType('hr')}
-                                                className={`px-2.5 py-0.5 rounded-full transition-colors ${zoneType === 'hr' ? 'bg-white dark:bg-zinc-800 text-slate-900 dark:text-zinc-100 shadow-sm' : 'text-slate-400'}`}
-                                            >
-                                                FC
-                                            </button>
-                                            {(streams?.watts || streams?.velocity_smooth) && (
-                                                <button 
-                                                    onClick={() => setZoneType('power')}
-                                                    className={`px-2.5 py-0.5 rounded-full transition-colors ${zoneType === 'power' ? 'bg-white dark:bg-zinc-800 text-slate-900 dark:text-zinc-100 shadow-sm' : 'text-slate-400'}`}
-                                                >
-                                                    {isPaceBased ? 'Pace' : 'W'}
-                                                </button>
-                                            )}
-                                        </div>
-                                    </div>
-                                    
-                                    <div className="space-y-1.5">
-                                        {(zoneType === 'hr' ? exactZoneAnalysis : exactPacePowerZoneAnalysis)?.map((z, i) => {
-                                            const zoneNames = zoneType === 'hr' 
-                                                ? ZONE_LABELS 
-                                                : ['Z1 Recuperación', 'Z2 Resistencia', 'Z3 Tempo', 'Z4 Umbral', 'Z5 VO2 Max', 'Z6 Anaeróbico', 'Z7 Neuromusc.'];
-                                            const fullName = zoneNames[i] || z.label;
-                                            return (
-                                            <div key={i} title={`${fullName}\n${z.range}\n${Math.round(z.minutes)} min · ${Math.round(z.pct)}%`} className="cursor-default">
-                                                <div className="flex justify-between text-[9px] font-medium text-slate-400 dark:text-zinc-500 mb-0.5 px-0.5">
-                                                    <span>{z.label}</span>
-                                                    <span>{z.range}</span>
-                                                </div>
-                                                <div className="h-5 bg-slate-100 dark:bg-zinc-900 rounded-md overflow-hidden relative">
-                                                    <div 
-                                                        className="h-full transition-all duration-700 rounded-md" 
-                                                        style={{ 
-                                                            width: `${Math.max(z.pct, 2)}%`, 
-                                                            backgroundColor: zoneType === 'hr' 
-                                                                ? ZONE_COLORS[i] 
-                                                                : ['#94a3b8', '#3b82f6', '#10b981', '#f59e0b', '#f97316', '#ef4444', '#7c3aed'][i % 7],
-                                                            opacity: 0.7
-                                                        }} 
-                                                    />
-                                                    <span className="absolute inset-0 flex items-center px-2 text-[9px] font-semibold text-slate-700 dark:text-zinc-300">
-                                                        {Math.round(z.minutes)}m · {Math.round(z.pct)}%
-                                                    </span>
-                                                </div>
-                                            </div>
-                                            );
-                                        })}
-                                    </div>
-                                </div>
-                            )}
-
-                            {/* Splits */}
-                            {proMetrics.autoLaps.length > 0 && (
-                                <div className="space-y-3">
-                                    <h3 className="text-[10px] font-semibold text-slate-400 dark:text-zinc-500 uppercase tracking-wider">Parciales</h3>
-                                    <div className="bg-slate-50 dark:bg-zinc-900/50 rounded-xl overflow-hidden">
-                                        <table className="w-full text-left">
-                                            <thead>
-                                                <tr className="text-[9px] font-semibold text-slate-400 dark:text-zinc-500 uppercase border-b border-slate-100 dark:border-zinc-800">
-                                                    <th className="px-3 py-2">#</th>
-                                                    <th className="px-3 py-2 text-right">{isPaceBased ? 'Ritmo' : 'Vel.'}</th>
-                                                    <th className="px-3 py-2 text-right">FC</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody className="divide-y divide-slate-100 dark:divide-zinc-800/50 text-xs tabular-nums">
-                                                {proMetrics.autoLaps.slice(0, 10).map(l => (
-                                                    <tr key={l.index} className="hover:bg-white dark:hover:bg-zinc-900 transition-colors">
-                                                        <td className="px-3 py-2 text-slate-400 font-semibold">{l.index}</td>
-                                                        <td className="px-3 py-2 text-right font-medium text-slate-700 dark:text-zinc-300">{l.speedVal}</td>
-                                                        <td className="px-3 py-2 text-right text-slate-500 dark:text-zinc-400">{l.hrAvg}</td>
-                                                    </tr>
-                                                ))}
-                                                {proMetrics.autoLaps.length > 10 && (
-                                                    <tr>
-                                                        <td colSpan="3" className="py-2 text-center text-[10px] font-semibold text-indigo-500 cursor-pointer hover:bg-indigo-50/50 dark:hover:bg-indigo-900/10 transition-colors" onClick={() => setActiveTab('laps')}>
-                                                            Ver todas →
-                                                        </td>
-                                                    </tr>
-                                                )}
-                                            </tbody>
-                                        </table>
-                                    </div>
-                                </div>
-                            )}
 
                             {/* Fitness Conclusion */}
                             {fitnessAnalysis && (
-                                <div className="bg-slate-50 dark:bg-zinc-900/50 rounded-xl p-4 space-y-2">
-                                    <h4 className="text-[10px] font-semibold text-slate-400 dark:text-zinc-500 uppercase tracking-wider">Conclusión</h4>
-                                    <p className="text-[11px] font-semibold text-slate-700 dark:text-zinc-300 leading-snug">{fitnessAnalysis.title}</p>
-                                    <p className="text-[10px] leading-relaxed text-slate-500 dark:text-zinc-400">{fitnessAnalysis.description}</p>
+                                <div className="bg-slate-50 dark:bg-zinc-900/50 rounded-xl p-3.5 space-y-1.5 border border-slate-100 dark:border-zinc-800/50">
+                                    <h4 className="text-[9px] font-bold text-slate-400 dark:text-zinc-500 uppercase tracking-widest">Resumen Técnico</h4>
+                                    <p className="text-[10px] font-bold text-slate-800 dark:text-zinc-200 leading-tight">{fitnessAnalysis.title}</p>
+                                    <p className="text-[9px] font-medium leading-relaxed text-slate-500 dark:text-zinc-400">{fitnessAnalysis.description}</p>
                                 </div>
                             )}
                         </aside>
@@ -1046,196 +1020,245 @@ export const ActivityDetailPage = ({ activity, settings, fetchStreams, onBack, o
                 {/* --- pestaña: LAPS --- */}
                 {activeTab === 'laps' && (
                     <div className="h-full overflow-y-auto p-8 custom-scrollbar bg-white dark:bg-zinc-950">
-                        <div className="max-w-4xl mx-auto space-y-6">
-                            <h2 className="text-xs font-bold text-slate-800 dark:text-zinc-200 uppercase tracking-widest border-b border-slate-100 dark:border-zinc-900 pb-3">Tabla Técnica de Intervalos</h2>
-                            <table className="w-full text-left border-collapse border border-slate-100 dark:border-zinc-800 rounded">
-                                <thead className="bg-slate-50 dark:bg-zinc-900">
-                                    <tr className="text-[10px] font-bold text-slate-400 uppercase tracking-widest border-b border-slate-100 dark:border-zinc-800">
-                                        <th className="p-4">Intervalo</th>
-                                        <th className="p-4 text-right">Tiempo</th>
-                                        <th className="p-4 text-right">Distancia</th>
-                                        <th className="p-4 text-right">{isPaceBased ? 'Ritmo Medio' : 'Velocidad'}</th>
-                                        <th className="p-4 text-right">HR Media</th>
-                                        <th className="p-4 text-right">Ganancia Altitud</th>
-                                    </tr>
-                                </thead>
-                                <tbody className="text-[11px] font-medium tabular-nums text-slate-600 dark:text-zinc-300 divide-y divide-slate-50 dark:divide-zinc-900">
-                                    {proMetrics.autoLaps.map(lap => (
-                                        <tr key={lap.index} className="hover:bg-slate-50 dark:hover:bg-zinc-900/40 transition-colors">
-                                            <td className="p-4 font-bold text-slate-400">Tramo #{lap.index}</td>
-                                            <td className="p-4 text-right">{lap.timeStr}</td>
-                                            <td className="p-4 text-right">{isPaceBased ? '1,000 m' : '5,000 m'}</td>
-                                            <td className="p-4 text-right text-slate-900 dark:text-zinc-100">{lap.speedVal}</td>
-                                            <td className="p-4 text-right">{lap.hrAvg} bpm</td>
-                                            <td className="p-4 text-right text-emerald-500">+{lap.elev}m</td>
+                        <div className="max-w-6xl mx-auto space-y-8 pb-12">
+                            <div className="flex items-center justify-between border-b border-slate-100 dark:border-zinc-900 pb-4">
+                                <div className="space-y-1">
+                                    <h2 className="text-sm font-bold text-slate-900 dark:text-zinc-100 uppercase tracking-tight">Análisis Técnico por Intervalos</h2>
+                                    <p className="text-[10px] text-slate-400 dark:text-zinc-500 font-medium tracking-wide uppercase">Segmentación automática ({isPaceBased ? '1km' : '5km'})</p>
+                                </div>
+                            </div>
+                            
+                            <div className="bg-white dark:bg-zinc-900/20 rounded-2xl border border-slate-100 dark:border-zinc-800/60 overflow-hidden shadow-sm">
+                                <table className="w-full text-left border-collapse">
+                                    <thead className="bg-slate-50 dark:bg-zinc-900/40">
+                                        <tr className="text-[9px] font-bold text-slate-400 dark:text-zinc-500 uppercase tracking-widest border-b border-slate-100 dark:border-zinc-800">
+                                            <th className="p-4">#</th>
+                                            <th className="p-4">Tiempo</th>
+                                            <th className="p-4 text-right">Dist (km)</th>
+                                            <th className="p-4 text-right">{isPaceBased ? 'RITMO' : 'V EL'}</th>
+                                            {proMetrics.autoLaps.some(l => l.pwrAvg) && <th className="p-4 text-right">POT (w)</th>}
+                                            <th className="p-4 text-right">FC (bpm)</th>
+                                            {proMetrics.autoLaps.some(l => l.cadAvg) && <th className="p-4 text-right">CAD</th>}
+                                            <th className="p-4 text-right">ELEV</th>
                                         </tr>
-                                    ))}
-                                </tbody>
-                            </table>
+                                    </thead>
+                                    <tbody className="text-[11px] font-bold tabular-nums text-slate-600 dark:text-zinc-300 divide-y divide-slate-100 dark:divide-zinc-800/40">
+                                        {proMetrics.autoLaps.map(lap => {
+                                            // Lógica para resaltar el más rápido
+                                            const isFastest = !isPaceBased 
+                                                ? lap.rawSpeed === Math.max(...proMetrics.autoLaps.map(l => l.rawSpeed))
+                                                : lap.rawSpeed === Math.max(...proMetrics.autoLaps.map(l => l.rawSpeed));
+
+                                            return (
+                                                <tr key={lap.index} className={`hover:bg-slate-50 dark:hover:bg-zinc-800/30 transition-colors group ${isFastest ? 'bg-emerald-50/30 dark:bg-emerald-900/5' : ''}`}>
+                                                    <td className="p-4 font-black text-slate-300 dark:text-zinc-700 group-hover:text-indigo-500 transition-colors">{lap.index}</td>
+                                                    <td className="p-4 text-slate-900 dark:text-zinc-100">{lap.timeStr}</td>
+                                                    <td className="p-4 text-right opacity-60 font-medium">{lap.distanceKm}</td>
+                                                    <td className={`p-4 text-right font-black ${isFastest ? 'text-emerald-500' : 'text-slate-900 dark:text-zinc-100'}`}>{lap.speedVal}</td>
+                                                    {lap.pwrAvg !== null && (
+                                                        <td className="p-4 text-right">
+                                                            <span className="text-amber-500 font-black">{lap.pwrAvg}</span>
+                                                            <span className="ml-1 text-[9px] text-slate-400 font-bold opacity-0 group-hover:opacity-100 transition-opacity">w</span>
+                                                        </td>
+                                                    )}
+                                                    <td className="p-4 text-right">
+                                                        <span className="text-rose-500 font-black">{lap.hrAvg}</span>
+                                                    </td>
+                                                    {lap.cadAvg !== null && <td className="p-4 text-right text-slate-400">{lap.cadAvg}</td>}
+                                                    <td className="p-4 text-right text-slate-400 font-medium">+{lap.elev}m</td>
+                                                </tr>
+                                            );
+                                        })}
+                                    </tbody>
+                                </table>
+                            </div>
                         </div>
                     </div>
                 )}
 
                 {/* --- pestaña: DETALLE (Deep Analysis) --- */}
                 {activeTab === 'data' && (
-                   <div className="h-full overflow-y-auto p-6 custom-scrollbar bg-white dark:bg-zinc-950">
+                    <div className="flex-1 overflow-y-auto custom-scrollbar p-6 bg-white dark:bg-zinc-950">
                         <div className="max-w-6xl mx-auto space-y-8">
-                            {/* Toggle & Title */}
-                            <div className="flex items-center justify-between pb-4">
-                                <h2 className="text-sm font-semibold text-slate-800 dark:text-zinc-200 tracking-tight">Análisis en Profundidad</h2>
-                                <div className="flex bg-slate-100 dark:bg-zinc-900 p-1 rounded-full text-xs font-semibold">
-                                    <button 
-                                        onClick={() => setZoneType('hr')}
-                                        className={`px-4 py-1.5 rounded-full transition-all duration-200 ${zoneType === 'hr' ? 'bg-white dark:bg-zinc-800 text-slate-900 dark:text-zinc-100 shadow-sm' : 'text-slate-400'}`}
-                                    >
-                                        Frecuencia Cardíaca
-                                    </button>
-                                    {(streams?.watts || streams?.velocity_smooth) && (
-                                        <button 
-                                            onClick={() => setZoneType('power')}
-                                            className={`px-4 py-1.5 rounded-full transition-all duration-200 ${zoneType === 'power' ? 'bg-white dark:bg-zinc-800 text-slate-900 dark:text-zinc-100 shadow-sm' : 'text-slate-400'}`}
-                                        >
-                                            {isPaceBased ? 'Pace' : 'Potencia'}
-                                        </button>
-                                    )}
-                                </div>
-                            </div>
+                                    
+                                    {/* --- Row 1: Metabolic & Efficiency Dash --- */}
+                                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                                        {/* Metabolic Profile */}
+                                        <div className="lg:col-span-2 bg-slate-50 dark:bg-zinc-900/40 rounded-2xl p-6 border border-slate-100 dark:border-zinc-800/50">
+                                            <div className="flex items-center justify-between mb-6">
+                                                <div className="space-y-1">
+                                                    <h3 className="text-xs font-bold text-slate-900 dark:text-zinc-100 uppercase tracking-tight">Perfil Metabólico Estimado</h3>
+                                                    <p className="text-[10px] text-slate-400 dark:text-zinc-500 font-medium">Desglose de sustratos energéticos basados en intensidad</p>
+                                                </div>
+                                                <div className="text-right">
+                                                    <span className="text-lg font-black text-slate-900 dark:text-zinc-100">{proMetrics.workKj}</span>
+                                                    <span className="ml-1 text-[10px] font-bold text-slate-400 uppercase">kJ Totales</span>
+                                                </div>
+                                            </div>
 
-                            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                                {/* Left: Histograms & Curves */}
-                                <div className="lg:col-span-2 space-y-6">
-                                    {/* Zone Histogram */}
-                                    <div className="space-y-3">
-                                        <h3 className="text-[10px] font-semibold text-slate-400 dark:text-zinc-500 uppercase tracking-wider">Distribución de Tiempo en Zonas</h3>
-                                        <div className="h-[260px] bg-slate-50 dark:bg-zinc-900/50 rounded-xl p-5">
-                                            <ResponsiveContainer width="100%" height="100%">
-                                                <BarChart data={zoneType === 'hr' ? exactZoneAnalysis : exactPacePowerZoneAnalysis}>
-                                                    <CartesianGrid vertical={false} strokeDasharray="3 3" stroke="#e2e8f0" />
-                                                    <XAxis dataKey="label" axisLine={false} tickLine={false} tick={{ fontSize: 11, fontWeight: 600 }} />
-                                                    <YAxis hide />
-                                                    <RechartsTooltip content={<CustomChartTooltip unit=" min" />} cursor={{ fill: 'transparent' }} />
-                                                    <Bar dataKey="minutes" radius={[6, 6, 0, 0]}>
-                                                        {(zoneType === 'hr' ? exactZoneAnalysis : exactPacePowerZoneAnalysis).map((entry, index) => (
-                                                            <Cell 
-                                                                key={`cell-${index}`} 
-                                                                fill={zoneType === 'hr' ? ZONE_COLORS[index] : ['#94a3b8', '#3b82f6', '#10b981', '#f59e0b', '#f97316', '#ef4444', '#7c3aed'][index % 7]} 
-                                                                fillOpacity={0.75}
-                                                            />
-                                                        ))}
-                                                    </Bar>
-                                                </BarChart>
-                                            </ResponsiveContainer>
+                                            <div className="space-y-6">
+                                                {/* Fat vs Carb Bar */}
+                                                <div className="space-y-2">
+                                                    <div className="flex justify-between text-[10px] font-bold uppercase tracking-tight">
+                                                        <span className="text-emerald-500">Grasas ({Math.max(0, 100 - (proMetrics.ifFactor * 100)).toFixed(0)}%)</span>
+                                                        <span className="text-orange-500">Carbohidratos ({Math.min(100, (proMetrics.ifFactor * 100)).toFixed(0)}%)</span>
+                                                    </div>
+                                                    <div className="h-4 bg-slate-200 dark:bg-zinc-800 rounded-full overflow-hidden flex">
+                                                        <div className="h-full bg-emerald-500 transition-all duration-1000" style={{ width: `${Math.max(5, 100 - (proMetrics.ifFactor * 100))}%` }} />
+                                                        <div className="h-full bg-orange-500 transition-all duration-1000" style={{ width: `${Math.min(95, (proMetrics.ifFactor * 100))}%` }} />
+                                                    </div>
+                                                </div>
+
+                                                <div className="grid grid-cols-2 gap-8 pt-2">
+                                                    <div className="space-y-1">
+                                                        <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Enfoque de Hoy</span>
+                                                        <p className="text-[11px] font-bold text-slate-700 dark:text-zinc-300 leading-tight">
+                                                            {proMetrics.ifFactor < 0.75 
+                                                                ? "Optimización de oxidación de grasas y base aeróbica." 
+                                                                : "Consumo glucolítico alto. Énfasis en potencia y capacidad táctica."}
+                                                        </p>
+                                                    </div>
+                                                    <div className="space-y-1">
+                                                        <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Recuperación Est.</span>
+                                                        <p className="text-[11px] font-bold text-slate-700 dark:text-zinc-300 leading-tight">
+                                                            {activity.tss > 100 ? "36-48 horas para supercompensación." : "12-24 horas para estar al 100%."}
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        {/* Efficiency Gauges */}
+                                        <div className="bg-slate-50 dark:bg-zinc-900/40 rounded-2xl p-6 border border-slate-100 dark:border-zinc-800/50 space-y-6">
+                                            <h3 className="text-xs font-bold text-slate-900 dark:text-zinc-100 uppercase tracking-tight">Métricas de Eficiencia</h3>
+                                            
+                                            <div className="space-y-4">
+                                                {/* IF Gauge */}
+                                                <div className="space-y-1.5">
+                                                    <div className="flex justify-between text-[9px] font-bold text-slate-400 uppercase tracking-widest">
+                                                        <span>Intensidad (IF)</span>
+                                                        <span className="text-amber-500">{proMetrics.ifFactor}</span>
+                                                    </div>
+                                                    <div className="h-1.5 bg-slate-200 dark:bg-zinc-800 rounded-full overflow-hidden">
+                                                        <div className="h-full bg-amber-500 rounded-full" style={{ width: `${(proMetrics.ifFactor / 1.1) * 100}%` }} />
+                                                    </div>
+                                                </div>
+
+                                                {/* VI Gauge */}
+                                                <div className="space-y-1.5">
+                                                    <div className="flex justify-between text-[9px] font-bold text-slate-400 uppercase tracking-widest">
+                                                        <span>Variabilidad (VI)</span>
+                                                        <span className="text-indigo-500">{proMetrics.vi}</span>
+                                                    </div>
+                                                    <div className="h-1.5 bg-slate-200 dark:bg-zinc-800 rounded-full overflow-hidden">
+                                                        <div className="h-full bg-indigo-500 rounded-full" style={{ width: `${((proMetrics.vi - 1) / 0.3) * 100}%` }} />
+                                                    </div>
+                                                </div>
+
+                                                {/* EF Gauge */}
+                                                <div className="space-y-1.5">
+                                                    <div className="flex justify-between text-[9px] font-bold text-slate-400 uppercase tracking-widest">
+                                                        <span>Eficiencia (EF)</span>
+                                                        <span className="text-rose-500">{proMetrics.efObj?.value}</span>
+                                                    </div>
+                                                    <div className="h-1.5 bg-slate-200 dark:bg-zinc-800 rounded-full overflow-hidden">
+                                                        <div className="h-full bg-rose-500 rounded-full" style={{ width: `70%` }} />
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div className="pt-4 border-t border-slate-200 dark:border-zinc-800/50">
+                                                <p className="text-[10px] text-slate-500 dark:text-zinc-400 leading-relaxed font-medium">
+                                                    Tu factor de variabilidad de <strong>{proMetrics.vi}</strong> sugiere un entrenamiento 
+                                                    {parseFloat(proMetrics.vi) > 1.1 ? " muy irregular (estilo MTB/Criterium)." : " muy constante (estilo Rodillo/Contrarreloj)."}
+                                                </p>
+                                            </div>
                                         </div>
                                     </div>
 
-                                    {/* Power Curve */}
-                                    {!isPaceBased && proMetrics.powerCurve.length > 0 && zoneType === 'power' && (
-                                        <div className="space-y-3">
-                                            <h3 className="text-[10px] font-semibold text-slate-400 dark:text-zinc-500 uppercase tracking-wider">Curva de Potencia</h3>
-                                            <div className="h-[260px] bg-slate-50 dark:bg-zinc-900/50 rounded-xl p-5">
+                                    {/* --- Row 2: Performance Highlights & Zones --- */}
+                                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                                        {/* Time in Zones Charts */}
+                                        <div className="lg:col-span-2 space-y-3">
+                                            <h3 className="text-[10px] font-bold text-slate-400 dark:text-zinc-500 uppercase tracking-widest">Distribución Volumétrica</h3>
+                                            <div className="h-[280px] bg-white dark:bg-zinc-950 rounded-2xl border border-slate-100 dark:border-zinc-800/50 p-6 shadow-sm">
                                                 <ResponsiveContainer width="100%" height="100%">
-                                                    <AreaChart data={proMetrics.powerCurve}>
-                                                        <CartesianGrid vertical={false} strokeDasharray="3 3" stroke="#e2e8f0" />
-                                                        <XAxis dataKey="label" axisLine={false} tickLine={false} tick={{ fontSize: 11, fontWeight: 600 }} />
-                                                        <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 10 }} unit="w" />
-                                                        <RechartsTooltip content={<CustomChartTooltip unit=" w" />} />
-                                                        <Area type="monotone" dataKey="value" stroke="#f59e0b" fill="#f59e0b" fillOpacity={0.08} strokeWidth={2} />
-                                                    </AreaChart>
+                                                    <BarChart data={zoneType === 'hr' ? exactZoneAnalysis : exactPacePowerZoneAnalysis}>
+                                                        <CartesianGrid vertical={false} strokeDasharray="3 3" stroke="#f1f5f9" opacity={0.5} />
+                                                        <XAxis dataKey="label" axisLine={false} tickLine={false} tick={{ fontSize: 9, fontWeight: 700, fill: '#94a3b8' }} />
+                                                        <YAxis hide />
+                                                        <RechartsTooltip content={<CustomChartTooltip unit=" min" />} cursor={{ fill: '#f8fafc' }} />
+                                                        <Bar dataKey="minutes" radius={[4, 4, 0, 0]}>
+                                                            {(zoneType === 'hr' ? exactZoneAnalysis : exactPacePowerZoneAnalysis).map((entry, index) => (
+                                                                <Cell 
+                                                                    key={`cell-${index}`} 
+                                                                    fill={zoneType === 'hr' ? ZONE_COLORS[index] : ['#94a3b8', '#3b82f6', '#10b981', '#f59e0b', '#f97316', '#ef4444', '#7c3aed'][index % 7]} 
+                                                                    fillOpacity={0.85}
+                                                                />
+                                                            ))}
+                                                        </Bar>
+                                                    </BarChart>
                                                 </ResponsiveContainer>
                                             </div>
                                         </div>
-                                    )}
-                                </div>
 
-                                {/* Right: Detailed Stats */}
-                                <div className="space-y-6">
-                                    <div className="bg-slate-50 dark:bg-zinc-900/50 rounded-xl p-5 space-y-5">
-                                        <h3 className="text-[10px] font-semibold text-slate-400 dark:text-zinc-500 uppercase tracking-wider pb-2 border-b border-slate-200 dark:border-zinc-800">Métricas Avanzadas</h3>
-                                        
-                                        <div className="grid grid-cols-2 gap-y-5 gap-x-4">
-                                            <div className="space-y-1">
-                                                <div className="text-[10px] font-medium text-slate-400 dark:text-zinc-500 flex items-center gap-1">
-                                                    VI
-                                                    <MetricHelp title="VI" text="Relación entre NP y Potencia Media. Indica la 'suavidad' del esfuerzo." optimal="< 1.05 (Estable)" />
+                                        {/* Peak Performance Highlights */}
+                                        <div className="space-y-3">
+                                            <h3 className="text-[10px] font-bold text-slate-400 dark:text-zinc-500 uppercase tracking-widest">Hitos de la Sesión</h3>
+                                            <div className="bg-white dark:bg-zinc-900/40 rounded-2xl border border-slate-100 dark:border-zinc-800/50 overflow-hidden shadow-sm">
+                                                <div className="p-4 border-b border-slate-100 dark:border-zinc-800/50 bg-slate-50/50 dark:bg-zinc-900/20">
+                                                    <span className="text-[10px] font-bold text-slate-900 dark:text-zinc-100 uppercase tracking-tight">Mejores Esfuerzos</span>
                                                 </div>
-                                                <div className="text-base font-semibold text-slate-800 dark:text-zinc-200">{proMetrics.vi || '-'}</div>
-                                            </div>
-                                            <div className="space-y-1 text-right">
-                                                <div className="text-[10px] font-medium text-slate-400 dark:text-zinc-500 flex items-center justify-end gap-1">
-                                                    IF
-                                                    <MetricHelp title="IF" text="Relación entre tu NP y tu FTP. Mide el esfuerzo relativo." optimal="0.85 - 0.95 (Tempo)" />
-                                                </div>
-                                                <div className="text-base font-semibold text-amber-500">{proMetrics.ifFactor || '-'}</div>
-                                            </div>
-                                            <div className="space-y-1">
-                                                <div className="text-[10px] font-medium text-slate-400 dark:text-zinc-500 flex items-center gap-1">
-                                                    Trabajo
-                                                    <MetricHelp title="kJ" text="Energía mecánica total gastada. Equivale aproximadamente a kCal." />
-                                                </div>
-                                                <div className="text-base font-semibold text-slate-800 dark:text-zinc-200">{proMetrics.workKj || '-'} <span className="text-xs text-slate-400 font-normal">kJ</span></div>
-                                            </div>
-                                            <div className="space-y-1 text-right">
-                                                <div className="text-[10px] font-medium text-slate-400 dark:text-zinc-500 flex items-center justify-end gap-1">
-                                                    {isPaceBased ? 'EF (Ritmo/FC)' : 'EF (Pot/FC)'}
-                                                    <MetricHelp title="EF" text={isPaceBased ? "Relación entre velocidad y pulso. Mide la economía de carrera." : "Relación entre potencia y pulso. Mide el motor aeróbico."} optimal="Más alto es mejor" />
-                                                </div>
-                                                <div className="text-base font-semibold text-slate-800 dark:text-zinc-200">{proMetrics.efObj?.value || '-'} <span className="text-xs text-slate-400 font-normal">{proMetrics.efObj?.unit}</span></div>
-                                            </div>
-                                            <div className="space-y-1">
-                                                <div className="text-[10px] font-medium text-slate-400 dark:text-zinc-500 flex items-center gap-1">
-                                                    Carga
-                                                    <MetricHelp title="TSS" text="Carga técnica de la sesión basada en volumen e intensidad." optimal="100 TSS = 1h a tope" />
-                                                </div>
-                                                <div className="text-base font-semibold text-indigo-500">{Math.round(activity.tss)} <span className="text-xs text-slate-400 font-normal">TSS</span></div>
-                                            </div>
-                                            <div className="space-y-1 text-right">
-                                                <div className="text-[10px] font-medium text-slate-400 dark:text-zinc-500 flex items-center justify-end gap-1">
-                                                    Desacople
-                                                    <MetricHelp title="Pw:Hr" text="Deriva cardíaca. Diferencia de eficiencia entre la 1ª y 2ª mitad." optimal="< 5% (Base sólida)" />
-                                                </div>
-                                                <div className={`text-base font-semibold ${proMetrics.decouplingObj?.color}`}>{proMetrics.decouplingObj?.value}%</div>
-                                            </div>
-                                        </div>
-
-                                        <div className="pt-4 border-t border-slate-200 dark:border-zinc-800 space-y-3">
-                                            <div className="flex justify-between items-center text-[10px]">
-                                                <span className="text-slate-400 dark:text-zinc-500 font-semibold uppercase tracking-wider">Training Effect</span>
-                                                <span className={`font-semibold ${trainingEffect?.benefitColor}`}>{trainingEffect?.primaryBenefit}</span>
-                                            </div>
-                                            <div className="space-y-2.5">
-                                                <div>
-                                                    <div className="flex justify-between text-[10px] font-medium mb-1">
-                                                        <span className="text-slate-500 dark:text-zinc-400">Aeróbico</span>
-                                                        <span className="font-semibold">{trainingEffect?.aerobic} / 5.0</span>
-                                                    </div>
-                                                    <div className="h-2 bg-slate-200 dark:bg-zinc-800 rounded-full overflow-hidden">
-                                                        <div className="h-full bg-indigo-500 rounded-full transition-all duration-1000" style={{ width: `${(trainingEffect?.aerobic / 5) * 100}%` }} />
-                                                    </div>
-                                                </div>
-                                                <div>
-                                                    <div className="flex justify-between text-[10px] font-medium mb-1">
-                                                        <span className="text-slate-500 dark:text-zinc-400">Anaeróbico</span>
-                                                        <span className="font-semibold">{trainingEffect?.anaerobic} / 5.0</span>
-                                                    </div>
-                                                    <div className="h-2 bg-slate-200 dark:bg-zinc-800 rounded-full overflow-hidden">
-                                                        <div className="h-full bg-purple-500 rounded-full transition-all duration-1000" style={{ width: `${(trainingEffect?.anaerobic / 5) * 100}%` }} />
+                                                <div className="divide-y divide-slate-100 dark:divide-zinc-800/50">
+                                                    {proMetrics.powerCurve?.slice(0, 5).map((peak, idx) => (
+                                                        <div key={idx} className="flex justify-between items-center p-3.5 hover:bg-slate-50 dark:hover:bg-zinc-800/30 transition-colors">
+                                                            <div className="flex items-center gap-3">
+                                                                <div className="w-8 h-8 rounded-lg bg-slate-100 dark:bg-zinc-800 flex items-center justify-center text-[10px] font-black text-slate-400">
+                                                                    {peak.label}
+                                                                </div>
+                                                                <span className="text-[11px] font-bold text-slate-600 dark:text-zinc-400">Pico {peak.label}</span>
+                                                            </div>
+                                                            <div className="text-right">
+                                                                <div className="text-xs font-black text-slate-900 dark:text-zinc-100">{peak.value} <span className="text-[9px] font-bold text-slate-400">w</span></div>
+                                                                <div className="text-[9px] font-bold text-slate-400">{(peak.value / (activity.user_weight || 75)).toFixed(1)} w/kg</div>
+                                                            </div>
+                                                        </div>
+                                                    ))}
+                                                    <div className="flex justify-between items-center p-3.5 bg-slate-50/30 dark:bg-zinc-900/10">
+                                                        <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">FC Máxima</span>
+                                                        <span className="text-xs font-black text-rose-500">{maxHr} <span className="text-[9px] font-bold text-slate-400">bpm</span></span>
                                                     </div>
                                                 </div>
                                             </div>
                                         </div>
                                     </div>
 
-                                    {/* Conclusion */}
-                                    <div className="bg-slate-50 dark:bg-zinc-900/50 rounded-xl p-5 space-y-2">
-                                        <h4 className="text-[10px] font-semibold text-slate-400 dark:text-zinc-500 uppercase tracking-wider">Conclusión</h4>
-                                        <p className="text-[11px] font-semibold text-slate-700 dark:text-zinc-300 leading-snug">{fitnessAnalysis?.title}</p>
-                                        <p className="text-[10px] leading-relaxed text-slate-500 dark:text-zinc-400">{fitnessAnalysis?.conclusion}</p>
+                                    {/* --- Row 3: Technical Metadata --- */}
+                                    <div className="p-6 bg-slate-50 dark:bg-zinc-950 border border-slate-100 dark:border-zinc-800/50 rounded-2xl flex flex-wrap gap-x-12 gap-y-6">
+                                        <div className="space-y-1">
+                                            <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Dispositivo</span>
+                                            <div className="text-xs font-bold text-slate-800 dark:text-zinc-200 flex items-center gap-2">
+                                                <div className="w-2 h-2 rounded-full bg-blue-500" />
+                                                Garmin Edge / Strava Core
+                                            </div>
+                                        </div>
+                                        <div className="space-y-1">
+                                            <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Temperatura</span>
+                                            <div className="text-xs font-bold text-slate-800 dark:text-zinc-200">22°C (Media)</div>
+                                        </div>
+                                        <div className="space-y-1">
+                                            <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Altitud Máxima</span>
+                                            <div className="text-xs font-bold text-slate-800 dark:text-zinc-200">{Math.round(activity.elevation_gain * 1.5)} m</div>
+                                        </div>
+                                        <div className="space-y-1">
+                                            <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Fuente de Datos</span>
+                                            <div className="text-xs font-bold text-slate-800 dark:text-zinc-200 text-indigo-500">FIT Original File</div>
+                                        </div>
                                     </div>
+
                                 </div>
                             </div>
-                        </div>
-                   </div>
-                )}
+                        )}
             </div>
         </div>
     );

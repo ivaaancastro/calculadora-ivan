@@ -11,6 +11,7 @@ const initialSettings = {
     tf: 7,
     intervalsId: "",
     intervalsKey: "",
+    offsetCtl: 0,
 };
 
 export const useAppStore = create((set) => ({

@@ -58,10 +58,10 @@ export const HistoryList = ({ activities, onDelete, onSelectActivity }) => {
     }, [activities, searchTerm, sportFilter, dateFilter]);
 
     return (
-        <div className="bg-white dark:bg-zinc-900 rounded-lg border border-slate-200 dark:border-zinc-800 shadow-sm flex flex-col h-full overflow-hidden">
+        <div className="glass-panel flex flex-col h-full overflow-hidden">
 
             {/* BARRA DE FILTROS */}
-            <div className="p-4 border-b border-slate-200 dark:border-zinc-800 bg-slate-50 dark:bg-zinc-950/50 flex flex-col sm:flex-row gap-3">
+            <div className="p-4 border-b border-slate-200/50 dark:border-zinc-800/50 bg-white/50 dark:bg-zinc-950/20 flex flex-col sm:flex-row gap-3">
 
                 {/* Buscador de Texto */}
                 <div className="relative flex-1">
@@ -71,7 +71,7 @@ export const HistoryList = ({ activities, onDelete, onSelectActivity }) => {
                         placeholder="Buscar por título..."
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
-                        className="w-full pl-9 pr-3 py-2 bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-700 rounded-md text-[11px] font-bold text-slate-800 dark:text-zinc-200 placeholder-slate-400 focus:outline-none focus:border-blue-500 transition-colors"
+                        className="w-full pl-9 pr-3 py-2 bg-white/80 dark:bg-zinc-900/80 border border-slate-200 dark:border-zinc-800 rounded-xl text-sm font-medium text-slate-900 dark:text-zinc-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all"
                     />
                 </div>
 
@@ -81,7 +81,7 @@ export const HistoryList = ({ activities, onDelete, onSelectActivity }) => {
                     <select
                         value={sportFilter}
                         onChange={(e) => setSportFilter(e.target.value)}
-                        className="w-full pl-9 pr-3 py-2 bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-700 rounded-md text-[11px] font-bold text-slate-800 dark:text-zinc-200 focus:outline-none focus:border-blue-500 appearance-none cursor-pointer transition-colors"
+                        className="w-full pl-9 pr-3 py-2 bg-white/80 dark:bg-zinc-900/80 border border-slate-200 dark:border-zinc-800 rounded-xl text-sm font-medium text-slate-800 dark:text-zinc-200 focus:outline-none focus:ring-2 focus:ring-blue-500/50 appearance-none cursor-pointer transition-all"
                     >
                         <option value="all">Todos los Deportes</option>
                         <option value="run">Carrera</option>
@@ -97,7 +97,7 @@ export const HistoryList = ({ activities, onDelete, onSelectActivity }) => {
                     <select
                         value={dateFilter}
                         onChange={(e) => setDateFilter(e.target.value)}
-                        className="w-full pl-9 pr-3 py-2 bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-700 rounded-md text-[11px] font-bold text-slate-800 dark:text-zinc-200 focus:outline-none focus:border-blue-500 appearance-none cursor-pointer transition-colors"
+                        className="w-full pl-9 pr-3 py-2 bg-white/80 dark:bg-zinc-900/80 border border-slate-200 dark:border-zinc-800 rounded-xl text-sm font-medium text-slate-800 dark:text-zinc-200 focus:outline-none focus:ring-2 focus:ring-blue-500/50 appearance-none cursor-pointer transition-all"
                     >
                         <option value="all">Todo el Historial</option>
                         <option value="7d">Últimos 7 Días</option>
@@ -109,8 +109,8 @@ export const HistoryList = ({ activities, onDelete, onSelectActivity }) => {
             </div>
 
             {/* RESUMEN DE RESULTADOS */}
-            <div className="px-4 py-2 border-b border-slate-100 dark:border-zinc-800/50 bg-white dark:bg-zinc-900 flex justify-between items-center text-[10px] uppercase font-bold tracking-widest text-slate-500 dark:text-zinc-400">
-                <span>{filteredActivities.length} Actividades encontradas</span>
+            <div className="px-4 py-2 border-b border-slate-200/50 dark:border-zinc-800/50 bg-transparent flex justify-between items-center apple-label">
+                <span>{filteredActivities.length} Actividades</span>
             </div>
 
             {/* LISTA DE ACTIVIDADES */}
@@ -128,10 +128,9 @@ export const HistoryList = ({ activities, onDelete, onSelectActivity }) => {
                                     {getSportIcon(act.type)}
                                 </div>
 
-                                {/* Info Principal */}
                                 <div className="flex-1 min-w-0 mr-4">
-                                    <h4 className="text-[11px] font-bold text-slate-800 dark:text-zinc-200 truncate mb-0.5" title={act.name}>{act.name}</h4>
-                                    <div className="flex items-center gap-2 text-[10px] text-slate-500 dark:text-zinc-500 font-medium">
+                                    <h4 className="text-[13px] font-semibold text-slate-900 dark:text-white truncate mb-0.5" title={act.name}>{act.name}</h4>
+                                    <div className="flex items-center gap-2 text-[11px] text-slate-500 dark:text-zinc-400">
                                         <span>{new Date(act.date).toLocaleDateString('es-ES', { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' })}</span>
                                         <span>•</span>
                                         <span className="capitalize">{act.type}</span>
@@ -141,20 +140,20 @@ export const HistoryList = ({ activities, onDelete, onSelectActivity }) => {
                                 {/* Métricas Clínicas */}
                                 <div className="hidden md:flex items-center gap-6 mr-6">
                                     <div className="flex flex-col items-end">
-                                        <span className="text-[9px] uppercase tracking-widest text-slate-400 font-bold mb-0.5 flex items-center gap-1"><Clock size={10} /> Tiempo</span>
-                                        <span className="text-[11px] font-mono text-slate-700 dark:text-zinc-300 font-bold">{formatDuration(act.duration)}</span>
+                                        <span className="text-[10px] text-slate-400 mb-0.5 flex items-center gap-1">Tiempo</span>
+                                        <span className="text-sm font-semibold text-slate-700 dark:text-zinc-300">{formatDuration(act.duration)}</span>
                                     </div>
                                     <div className="flex flex-col items-end w-16">
-                                        <span className="text-[9px] uppercase tracking-widest text-slate-400 font-bold mb-0.5 flex items-center gap-1"><MapPin size={10} /> Dist</span>
-                                        <span className="text-[11px] font-mono text-slate-700 dark:text-zinc-300 font-bold">{act.distance > 0 ? (act.distance / 1000).toFixed(1) + 'km' : '--'}</span>
+                                        <span className="text-[10px] text-slate-400 mb-0.5 flex items-center gap-1">Dist</span>
+                                        <span className="text-sm font-semibold text-slate-700 dark:text-zinc-300">{act.distance > 0 ? (act.distance / 1000).toFixed(1) + 'km' : '--'}</span>
                                     </div>
                                     <div className="flex flex-col items-end w-12">
-                                        <span className="text-[9px] uppercase tracking-widest text-slate-400 font-bold mb-0.5 flex items-center gap-1"><Flame size={10} /> Kcal</span>
-                                        <span className="text-[11px] font-mono text-slate-700 dark:text-zinc-300 font-bold">{act.calories || '--'}</span>
+                                        <span className="text-[10px] text-slate-400 mb-0.5 flex items-center gap-1">Kcal</span>
+                                        <span className="text-sm font-semibold text-slate-700 dark:text-zinc-300">{act.calories || '--'}</span>
                                     </div>
                                     <div className="flex flex-col items-end w-12">
-                                        <span className="text-[9px] uppercase tracking-widest text-slate-400 font-bold mb-0.5 flex items-center gap-1"><Zap size={10} /> TSS</span>
-                                        <span className={`text-[11px] font-mono font-black ${act.tss > 0 ? 'text-amber-500' : 'text-slate-400'}`}>
+                                        <span className="text-[10px] text-slate-400 mb-0.5 flex items-center gap-1">TSS</span>
+                                        <span className={`text-sm font-bold ${act.tss > 0 ? 'text-amber-500' : 'text-slate-400'}`}>
                                             {act.tss > 0 ? Math.round(act.tss) : '--'}
                                         </span>
                                     </div>
