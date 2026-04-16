@@ -64,8 +64,10 @@ export const useProfileQuery = () => {
                         zonesMode: data.bike_zones_mode ?? 'lthr',
                         ftp: num(data.bike_ftp, 200),
                     },
-                    intervalsId: data.intervalsId ?? "",
-                    intervalsKey: data.intervalsKey ?? "",
+                    intervalsId: data.intervals_athlete_id ?? "",
+                    intervalsKey: data.intervals_api_key ?? "",
+                    intervalsLastSynced: data.intervals_last_synced ?? null,
+                    offsetCtl: num(data.user_settings?.offsetCtl, 0),
                 });
             }
 
@@ -96,8 +98,12 @@ export const useProfileQuery = () => {
                 bike_zones: newSettings.bike?.zones,
                 bike_zones_mode: newSettings.bike?.zonesMode,
                 bike_ftp: newSettings.bike?.ftp,
-                intervalsId: newSettings.intervalsId,
-                intervalsKey: newSettings.intervalsKey,
+                intervals_athlete_id: newSettings.intervalsId,
+                intervals_api_key: newSettings.intervalsKey,
+                user_settings: {
+                    ...(queryClient.getQueryData(["profile"]) as any)?.user_settings,
+                    offsetCtl: parseFloat(newSettings.offsetCtl) || 0,
+                },
             };
 
             const { error } = await supabase.from("profiles").upsert(
@@ -130,8 +136,13 @@ export const useProfileQuery = () => {
                 bike_zones: newSettings.bike?.zones,
                 bike_zones_mode: newSettings.bike?.zonesMode,
                 bike_ftp: newSettings.bike?.ftp,
-                intervalsId: newSettings.intervalsId,
-                intervalsKey: newSettings.intervalsKey,
+                intervals_athlete_id: newSettings.intervalsId,
+                intervals_api_key: newSettings.intervalsKey,
+                intervals_last_synced: newSettings.intervalsLastSynced,
+                user_settings: {
+                    ...(oldData || {}).user_settings,
+                    offsetCtl: parseFloat(newSettings.offsetCtl) || 0,
+                },
             }));
             toast.success("¡Perfil fisiológico y claves guardadas con éxito!");
         },

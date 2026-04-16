@@ -123,29 +123,40 @@ export const useActivities = () => {
   const fetchActivityStreams = async (activityId, stravaId) => {
     try {
       const token = await getValidStravaToken();
-      // Añadimos latlng a la petición de Strava
-      const response = await fetch(
-        `https://www.strava.com/api/v3/activities/${stravaId}/streams?keys=time,heartrate,watts,velocity_smooth,altitude,cadence,latlng&key_by_type=true`,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        },
-      );
+      
+      // Parallel fetch for streams and real Garmin/Strava laps
+      const [streamsRes, lapsRes] = await Promise.all([
+        fetch(
+          `https://www.strava.com/api/v3/activities/${stravaId}/streams?keys=time,heartrate,watts,velocity_smooth,altitude,cadence,latlng&key_by_type=true`,
+          { headers: { Authorization: `Bearer ${token}` } }
+        ),
+        fetch(
+          `https://www.strava.com/api/v3/activities/${stravaId}/laps`,
+          { headers: { Authorization: `Bearer ${token}` } }
+        )
+      ]);
 
-      if (!response.ok) return null;
-      const streams = await response.json();
+      if (!streamsRes.ok) return null;
+      
+      const streams = await streamsRes.json();
+      const laps = lapsRes.ok ? await lapsRes.json() : [];
+
+      // Merge real device laps into the streams object for persistence
+      const enrichedStreams = { ...streams, laps };
 
       await supabase
         .from("activities")
-        .update({ streams_data: streams })
+        .update({ streams_data: enrichedStreams })
         .eq("id", activityId);
 
-      // Update react query cache directly
       queryClient.setQueryData(["activities"], (oldData) => {
         if (!oldData) return oldData;
-        return oldData.map((a) => a.id === activityId ? { ...a, streams_data: streams } : a);
+        return oldData.map((a) => a.id === activityId ? { ...a, streams_data: enrichedStreams } : a);
       });
-      return streams;
+      
+      return enrichedStreams;
     } catch (e) {
+      console.error("Error fetching telemetry/laps:", e);
       return null;
     }
   };
@@ -455,6 +466,7 @@ export const useActivities = () => {
     const K_ATL = Math.exp(-1 / tf);   // ~0.86671
     const ONE_MINUS_K_CTL = 1 - K_CTL;
     const ONE_MINUS_K_ATL = 1 - K_ATL;
+    const offsetCtl = parseFloat(settings.offsetCtl) || 0;
 
     let ctl = 0;
     let atl = 0;
@@ -504,7 +516,6 @@ export const useActivities = () => {
         atl = atl * K_ATL + dailyAtlContrib * ONE_MINUS_K_ATL;
       }
 
-      const offsetCtl = Number(settings.offsetCtl) || 0;
       const finalCtl = ctl + offsetCtl;
       const tsb = parseFloat((finalCtl - atl).toFixed(1));
 
@@ -590,6 +601,7 @@ export const useActivities = () => {
 
     const currentMetrics = {
       ctl: lastPoint.ctl,
+      rawCtl: lastPoint.ctl - offsetCtl,
       atl: lastPoint.atl,
       tcb: lastPoint.tcb,
       rampRate,

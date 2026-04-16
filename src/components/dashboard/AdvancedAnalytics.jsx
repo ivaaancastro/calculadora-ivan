@@ -16,6 +16,7 @@ import { SPORT_LOAD_CONFIG, getSportCategory } from '../../utils/tssEngine';
 import { EvolutionChart } from './EvolutionChart';
 import { InfoTooltip } from '../common/InfoTooltip';
 import { supabase } from '../../supabase';
+import { useTheme } from '../../hooks/useTheme';
 
 const TIME_INTERVALS = [1, 5, 15, 30, 60, 180, 300, 600, 1200, 2400, 3600, 7200];
 const formatInterval = (secs) => { if (secs < 60) return `${secs}s`; if (secs < 3600) return `${secs / 60}m`; return `${secs / 3600}h`; };
@@ -53,10 +54,11 @@ export const AdvancedAnalytics = ({ activities, settings, onSelectActivity, time
     const [curveType, setCurveType] = useState('power');
     const [curveSport, setCurveSport] = useState('bike');
     const [scatterSport, setScatterSport] = useState('run');
-    const [vo2Sport, setVo2Sport] = useState('run');
+    const [vo2Sport, setVo2Sport] = useState('bike');
     const [mmpTimeframe, setMmpTimeframe] = useState('90d');
     const [intensityTimeframe, setIntensityTimeframe] = useState('28d');
     const [garminVo2max, setGarminVo2max] = useState(null);
+    const { theme } = useTheme();
 
     // Load Garmin VO2max from Supabase wellness_data (synced from Intervals.icu)
     useEffect(() => {
@@ -248,10 +250,10 @@ export const AdvancedAnalytics = ({ activities, settings, onSelectActivity, time
         };
     }, [currentMetrics, analytics]);
 
-    // Primary VO2max: Garmin (measured) > estimated from activities
-    const globalMaxVo2 = garminVo2max
-        ? garminVo2max
-        : Math.max(analytics.vo2Max.run.vo2max || 0, analytics.vo2Max.bike.vo2max || 0);
+    // Primary VO2max: Priority Bike > Garmin > Run
+    const globalMaxVo2 = analytics.vo2Max.bike.vo2max 
+        ? analytics.vo2Max.bike.vo2max
+        : (garminVo2max || analytics.vo2Max.run.vo2max || 0);
     const vo2IsGarmin = !!garminVo2max;
 
     const currentCurve = useMemo(() => {
@@ -265,12 +267,14 @@ export const AdvancedAnalytics = ({ activities, settings, onSelectActivity, time
     const curveColor = curveType === 'hr' ? '#ef4444' : (curveType === 'power' ? '#fbbf24' : (isPace ? '#ea580c' : '#2563eb'));
     const curveUnit = curveType === 'power' ? 'w' : (isPace ? '/km' : (curveType === 'speed' ? 'km/h' : 'ppm'));
 
-    const currentVo2Obj = vo2Sport === 'run' ? analytics.vo2Max.run : analytics.vo2Max.bike;
+    const defaultVo2Sport = (analytics?.vo2Max?.bike?.vo2max || 0) > 0 ? 'bike' : 'run';
+    const activeVo2Sport = vo2Sport === 'auto' ? defaultVo2Sport : vo2Sport;
+    const currentVo2Obj = activeVo2Sport === 'run' ? analytics?.vo2Max?.run || {} : analytics?.vo2Max?.bike || {};
     const currentVo2Value = currentVo2Obj.vo2max || 0;
 
     if (!activities || activities.length === 0) return null;
 
-    const tooltipStyle = { backgroundColor: '#18181b', border: '1px solid #3f3f46', borderRadius: '4px', color: '#f4f4f5', fontSize: '11px', fontWeight: '500', padding: '8px 10px', zIndex: 1000, pointerEvents: 'none' };
+    const tooltipStyle = { backgroundColor: theme === 'dark' ? 'rgba(28, 28, 30, 0.85)' : 'rgba(255, 255, 255, 0.85)', backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)', border: theme === 'dark' ? '1px solid rgba(255,255,255,0.05)' : '1px solid rgba(0,0,0,0.05)', borderRadius: '16px', color: theme === 'dark' ? '#f5f5f7' : '#1d1d1f', fontSize: '11px', fontWeight: '500', padding: '12px 14px', zIndex: 1000, pointerEvents: 'none', boxShadow: '0 8px 32px rgba(0,0,0,0.12)' };
 
     const handleDirectClick = (payload) => { if (!onSelectActivity) return; if (payload?.actId || payload?.id) onSelectActivity(activities.find(a => a.id === (payload.actId || payload.id))); };
     const handleChartBackgroundClick = (data) => { if (data && data.activePayload && data.activePayload.length > 0) handleDirectClick(data.activePayload[0].payload); };
@@ -301,10 +305,10 @@ export const AdvancedAnalytics = ({ activities, settings, onSelectActivity, time
             const isRun = curveSport === 'run';
             return (
                 <div style={tooltipStyle} className="shadow-xl w-48 z-[200]">
-                    <p className="text-[9px] text-zinc-400 uppercase tracking-widest mb-1.5 border-b border-zinc-700 pb-1">Factor de Eficiencia</p>
+                    <p className="text-xs font-semibold text-slate-500 dark:text-zinc-400 mb-1.5 border-b border-slate-200/50 dark:border-zinc-700/50 pb-1">Factor de Eficiencia</p>
                     <div className="flex justify-between items-end mb-2">
-                        <span className="text-xl font-black text-violet-400 leading-none">{data.ef}</span>
-                        <span className="text-[10px] text-zinc-500 font-bold uppercase">{isRun ? 'm/bpm' : 'w/bpm'}</span>
+                        <span className="text-xl font-bold text-violet-500 leading-none">{data.ef}</span>
+                        <span className="text-[10px] text-slate-500 font-medium uppercase">{isRun ? 'm/bpm' : 'w/bpm'}</span>
                     </div>
                     <div className="grid grid-cols-2 gap-2 mb-2 bg-zinc-800 p-2 rounded">
                         <div>
@@ -316,10 +320,10 @@ export const AdvancedAnalytics = ({ activities, settings, onSelectActivity, time
                             <p className="text-xs font-bold text-rose-400">{data.hr} ppm</p>
                         </div>
                     </div>
-                    <div className="border-t border-zinc-700 pt-2 mt-1">
-                        <p className="text-[10px] text-zinc-200 truncate font-bold" title={data.name}>{data.name}</p>
-                        <p className="text-[9px] text-zinc-500">{new Date(data.date).toLocaleDateString()}</p>
-                        <div className="flex items-center gap-1 text-[8px] text-blue-400 mt-2 font-bold uppercase tracking-widest"><MousePointer2 size={8} /> Clic en el punto para abrir</div>
+                    <div className="border-t border-slate-200/50 dark:border-zinc-700/50 pt-2 mt-1">
+                        <p className="text-[11px] text-slate-700 dark:text-zinc-200 truncate font-semibold" title={data.name}>{data.name}</p>
+                        <p className="text-[10px] text-slate-500">{new Date(data.date).toLocaleDateString()}</p>
+                        <div className="flex items-center gap-1 text-[9px] text-blue-500 mt-2 font-medium"><MousePointer2 size={10} /> Clic en el punto para abrir</div>
                     </div>
                 </div>
             );
@@ -378,11 +382,7 @@ export const AdvancedAnalytics = ({ activities, settings, onSelectActivity, time
                     </div>
 
                     <div className="flex items-center gap-3">
-                        {/* Intervals.icu badge */}
-                        <span className="text-[9px] font-bold text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-900/20 border border-indigo-200 dark:border-indigo-800 px-2 py-0.5 rounded-full flex items-center gap-1">
-                            <Wifi size={8} /> exp(-1/42) · exp(-1/7)
-                        </span>
-                        <div className="flex bg-slate-200/50 dark:bg-zinc-800/50 backdrop-blur-sm p-1 rounded-xl border border-slate-200 dark:border-zinc-800">
+                        <div className="flex bg-slate-200/50 dark:bg-zinc-800/50 backdrop-blur-md p-1 rounded-lg">
                             {[
                                 { id: "7d", label: "7D" },
                                 { id: "30d", label: "30D" },
@@ -392,9 +392,9 @@ export const AdvancedAnalytics = ({ activities, settings, onSelectActivity, time
                                 <button
                                     key={t.id}
                                     onClick={() => setTimeRange(t.id)}
-                                    className={`px-4 py-1.5 text-[10px] font-bold uppercase transition-all rounded-lg ${timeRange === t.id
-                                        ? "bg-white dark:bg-zinc-700 text-blue-600 dark:text-blue-400 shadow-sm"
-                                        : "text-slate-500 dark:text-zinc-400 hover:text-slate-700 dark:hover:text-zinc-200"
+                                    className={`px-3 py-1 text-xs font-medium transition-all rounded-md ${timeRange === t.id
+                                        ? "bg-white dark:bg-[#2c2c2e] text-slate-900 dark:text-white shadow hover:shadow-md"
+                                        : "text-slate-500 dark:text-zinc-400 hover:text-slate-800 dark:hover:text-zinc-200"
                                         }`}
                                 >
                                     {t.label}
@@ -406,33 +406,34 @@ export const AdvancedAnalytics = ({ activities, settings, onSelectActivity, time
 
                 <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-4 gap-3">
                     {[
-                        { label: 'Fitness (CTL)', value: Math.round(model.ctl), icon: Activity, color: 'text-blue-500', sub: `${model.loadTrend >= 0 ? '+' : ''}${model.loadTrend.toFixed(1)}% vs 28d`, subColor: model.loadTrend >= 0 ? 'text-emerald-500' : 'text-red-500', tip: "Nivel de condición física basado en los últimos 42 días. Fórmula exacta Intervals.icu: CTL = CTL × exp(-1/42) + TSS × (1-exp(-1/42))." },
+                        { label: 'Fitness (CTL)', value: Math.round(model.ctl), icon: Activity, color: 'text-blue-500', sub: `${model.loadTrend >= 0 ? '+' : ''}${model.loadTrend.toFixed(1)}% vs 28d`, subColor: model.loadTrend >= 0 ? 'text-emerald-500' : 'text-red-500', tip: `Nivel de condición física basado en los últimos 42 días.${settings.offsetCtl !== 0 ? ` (Incluye ajuste manual de ${settings.offsetCtl > 0 ? '+' : ''}${settings.offsetCtl} pts).` : ''} Fórmula exacta Intervals.icu.` },
                         { label: 'Fatiga (ATL)', value: Math.round(model.atl), icon: Battery, color: 'text-purple-500', sub: 'Carga últ. 7 días', tip: "Cansancio acumulado. Fórmula: ATL = ATL × exp(-1/7) + TSS × (1-exp(-1/7))." },
-                        { label: 'Forma (TSB)', value: (model.tsb >= 0 ? '+' : '') + Math.round(model.tsb), icon: Zap, color: model.tsb < -25 ? 'text-red-500' : (model.tsb > 0 ? 'text-emerald-500' : 'text-blue-500'), sub: 'CTL[ayer] - ATL[ayer]', tip: "Forma actual = CTL de ayer - ATL de ayer (convención Intervals.icu). Óptimo para competir: +5 a +25. Óptimo para entrenar: -10 a -30." },
+                        { label: 'Forma (TSB)', value: (model.tsb >= 0 ? '+' : '') + Math.round(model.tsb), icon: Zap, color: model.tsb < -25 ? 'text-red-500' : (model.tsb > 0 ? 'text-emerald-500' : 'text-blue-500'), sub: 'Balance Nivel/Fatiga', tip: "Forma actual = CTL de ayer - ATL de ayer (convención Intervals.icu). Óptimo para competir: +5 a +25. Óptimo para entrenar: -10 a -30." },
                         { label: 'Ratio Carga (ACWR)', value: model.acwr.toFixed(2), icon: Target, color: model.acwr > 1.5 ? 'text-red-500' : (model.acwr > 1.3 ? 'text-orange-500' : (model.acwr > 0.8 ? 'text-emerald-500' : 'text-slate-400')), sub: 'Aguda vs Crónica', tip: "Relación ATL/CTL. Punto dulce: 0.8 - 1.3. Sobrecarga: 1.3 - 1.5. Riesgo alto de lesión/alerta: > 1.5." },
                         { label: 'Rampa Semanal', value: model.rampRate.toFixed(1), icon: model.rampRate >= 0 ? ArrowUpRight : ArrowDownRight, color: model.rampRate > 6 ? 'text-red-500' : (model.rampRate > 0 ? 'text-emerald-500' : 'text-slate-400'), sub: `${model.rampRate > 0 ? 'Subiendo' : 'Bajando'}`, tip: "Cuánto sube tu CTL cada semana. Ideal: 2-5 pts. >8 indica riesgo alto de sobreentrenamiento." },
                         { label: 'Monotonía', value: model.monotony.toFixed(2), icon: Brain, color: model.monotony > 2 ? 'text-orange-500' : 'text-slate-400', sub: 'Variedad de carga', tip: "Variedad de la carga diaria. >1.5 significa falta de variedad y mayor riesgo de lesión o estancamiento." },
                         { label: 'Volumen 30D', value: `${Math.round(model.totalVolume / 60)}h`, icon: CalendarDays, color: 'text-slate-500', sub: `${model.totalActivities} actividades`, tip: "Horas totales y actividades acumuladas en los últimos 30 días." },
-                        { label: 'VO2 Max (Top)', value: globalMaxVo2 || '--', icon: TrendingUp, color: vo2IsGarmin ? 'text-rose-500' : 'text-blue-500', sub: vo2IsGarmin ? '📡 Garmin Medido' : 'Estimado', tip: vo2IsGarmin ? "VO2max medido directamente por tu Garmin (vía Intervals.icu). Fuente más precisa." : "El mayor valor de VO2max estimado entre todos tus deportes desde los streams de actividad." }
+                        { label: 'VO2 Max (Top)', value: globalMaxVo2 || '--', icon: TrendingUp, color: vo2IsGarmin ? 'text-rose-500' : 'text-blue-500', sub: 'Mejor Nivel Detectado', tip: "El mayor valor de VO2max registrado entre tus deportes (Ciclismo/Running) o sincronizado de wellness." }
                     ].map((kpi, i) => (
-                        <div key={i} className="bg-white dark:bg-zinc-900/40 p-3 rounded-xl border border-slate-200 dark:border-zinc-800/50 hover:border-slate-300 dark:hover:border-zinc-700 transition-colors shadow-sm">
-                            <div className="flex items-center justify-between mb-1">
+                        <div key={i} className="glass-panel p-4">
+                            <div className="flex items-center justify-between mb-2">
                                 <div className="flex items-center gap-1">
-                                    <span className="text-[8px] font-bold uppercase tracking-widest text-slate-400 dark:text-zinc-500">{kpi.label}</span>
+                                    <span className="apple-label">{kpi.label}</span>
                                     <InfoTooltip text={kpi.tip} />
                                 </div>
-                                <kpi.icon size={12} className={kpi.color} />
+                                <kpi.icon size={16} className={kpi.color} strokeWidth={2} />
                             </div>
-                            <div className="flex items-baseline gap-1">
-                                <span className="text-lg font-semibold text-slate-900 dark:text-zinc-100">{kpi.value}</span>
+                            <div className="flex items-baseline gap-1 mt-1">
+                                <span className="text-2xl font-bold text-slate-900 dark:text-white">{kpi.value}</span>
                             </div>
-                            {kpi.sub && <p className={`text-[7px] font-bold uppercase mt-1 ${kpi.subColor || 'text-slate-400 dark:text-zinc-500'}`}>{kpi.sub}</p>}
+                            {kpi.sub && <p className={`text-[10px] font-medium mt-1 ${kpi.subColor || 'text-slate-500 dark:text-zinc-400'}`}>{kpi.sub}</p>}
                         </div>
                     ))}
                 </div>
 
-                <div className="bg-white dark:bg-zinc-900/30 p-4 rounded-2xl border border-transparent dark:border-zinc-900 shadow-inner">
-                    <div className="h-[280px]">
+
+                <div className="glass-panel p-5">
+                    <div className="h-[300px]">
                         <EvolutionChart data={chartData} />
                     </div>
                 </div>
@@ -449,8 +450,49 @@ export const AdvancedAnalytics = ({ activities, settings, onSelectActivity, time
                     </p>
                 </div>
 
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-                    <div className={`p-4 rounded-2xl border flex flex-col justify-center lg:col-span-1 ${status.bg} border-opacity-50 shadow-sm`}>
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
+                    {/* VO2 MAX CARD (NOW FIRST) */}
+                    <div className="glass-panel p-5 lg:col-span-1 flex flex-col">
+                        <div className="flex justify-between items-center mb-4">
+                            <div className="flex items-center gap-1">
+                                <span className="apple-label">VO2 Max</span>
+                                <InfoTooltip text="Consumo máximo de oxígeno. Refleja tu capacidad de rendimiento aeróbico global." />
+                            </div>
+                            <div className="flex bg-slate-100 dark:bg-zinc-800 p-0.5 rounded-full">
+                                {['auto', 'bike', 'run'].map(s => (
+                                    <button key={s} 
+                                        onClick={() => setVo2Sport(s)} 
+                                        className={`px-2 py-0.5 text-[7px] font-bold uppercase rounded-full transition-all ${vo2Sport === s ? 'bg-white dark:bg-zinc-700 text-slate-800 dark:text-zinc-100 shadow-sm' : 'text-slate-500'}`}
+                                    >
+                                        {s === 'auto' ? 'Auto' : (s === 'bike' ? 'Bici' : 'Run')}
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+
+                        <div className="flex-1 flex flex-col justify-center">
+                            <div className="flex items-baseline gap-2 justify-center">
+                                <span className={`text-3xl font-semibold tracking-tighter ${vo2IsGarmin ? 'text-rose-500' : 'text-slate-800 dark:text-zinc-100'}`}>{currentVo2Value > 0 ? currentVo2Value : '--'}</span>
+                                <span className="text-[8px] font-bold text-slate-400 uppercase tracking-widest">ml/kg/min</span>
+                            </div>
+                            <div className="relative w-full h-1 bg-slate-100 dark:bg-zinc-800 rounded-full overflow-hidden mt-2">
+                                <div className="absolute top-0 left-0 h-full bg-red-500/30 w-[20%]"></div>
+                                <div className="absolute top-0 left-[20%] h-full bg-orange-500/30 w-[20%]"></div>
+                                <div className="absolute top-0 left-[40%] h-full bg-emerald-500/30 w-[20%]"></div>
+                                <div className="absolute top-0 left-[60%] h-full bg-blue-500/30 w-[20%]"></div>
+                                <div className="absolute top-0 left-[80%] h-full bg-purple-500/30 w-[20%]"></div>
+                                {currentVo2Value > 0 && (
+                                    <div className="absolute top-0 h-full w-1 bg-slate-800 dark:bg-white shadow-xl z-10 transition-all duration-1000" style={{ left: vo2Info.width }}></div>
+                                )}
+                            </div>
+                            <div className="mt-1 text-center">
+                                <span className={`text-[8px] font-bold uppercase tracking-widest ${vo2Info.color}`}>{vo2Info.label}</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* CURRENT PHASE CARD */}
+                    <div className={`glass-panel p-5 flex flex-col justify-center lg:col-span-1 ${status.bg} border-opacity-50`}>
                         <div className="flex items-center gap-3 mb-3">
                             <div className={`p-1.5 rounded-lg bg-white dark:bg-zinc-900 shadow-sm ${status.color}`}>
                                 <status.icon size={16} strokeWidth={2.5} />
@@ -468,48 +510,10 @@ export const AdvancedAnalytics = ({ activities, settings, onSelectActivity, time
                         </p>
                     </div>
 
-                    <div className="bg-white dark:bg-zinc-900/40 p-4 rounded-2xl border border-slate-200 dark:border-zinc-800/50 lg:col-span-1 flex flex-col">
-                        <div className="flex justify-between items-center mb-4">
-                            <div className="flex items-center gap-1">
-                                <span className="text-[9px] font-bold uppercase tracking-widest text-slate-400">
-                                    {vo2IsGarmin ? 'VO2 Max · Garmin' : 'VO2 Max Estimado'}
-                                </span>
-                                <InfoTooltip text={vo2IsGarmin ? "Consumo máximo de oxígeno medido por tu Garmin vía Intervals.icu. Es el valor más preciso disponible." : "Consumo máximo de oxígeno estimado de los streams de actividad. Varía según el deporte seleccionado."} />
-                            </div>
-                            <div className="flex bg-slate-100 dark:bg-zinc-800 p-0.5 rounded-full">
-                                {['bike', 'run'].map(s => (
-                                    <button key={s} onClick={() => setVo2Sport(s)} className={`px-2 py-0.5 text-[7px] font-bold uppercase rounded-full transition-all ${vo2Sport === s ? 'bg-white dark:bg-zinc-700 text-slate-800 dark:text-zinc-100 shadow-sm' : 'text-slate-500'}`}>{s === 'bike' ? 'Bici' : 'Run'}</button>
-                                ))}
-                            </div>
-                        </div>
-
-                        <div className="flex-1 flex flex-col justify-center">
-                            <div className="flex items-baseline gap-2 justify-center">
-                                <span className={`text-3xl font-semibold tracking-tighter ${vo2IsGarmin ? 'text-rose-500' : 'text-slate-800 dark:text-zinc-100'}`}>{currentVo2Value > 0 ? currentVo2Value : '--'}</span>
-                                <span className="text-[8px] font-bold text-slate-400 uppercase tracking-widest">ml/kg/min</span>
-                            </div>
-                            {vo2IsGarmin && (
-                                <p className="text-center text-[8px] font-bold text-rose-400/70 uppercase tracking-widest mt-1">📡 Garmin Firstbeat</p>
-                            )}
-                            <div className="relative w-full h-1 bg-slate-100 dark:bg-zinc-800 rounded-full overflow-hidden mt-2">
-                                <div className="absolute top-0 left-0 h-full bg-red-500/30 w-[20%]"></div>
-                                <div className="absolute top-0 left-[20%] h-full bg-orange-500/30 w-[20%]"></div>
-                                <div className="absolute top-0 left-[40%] h-full bg-emerald-500/30 w-[20%]"></div>
-                                <div className="absolute top-0 left-[60%] h-full bg-blue-500/30 w-[20%]"></div>
-                                <div className="absolute top-0 left-[80%] h-full bg-purple-500/30 w-[20%]"></div>
-                                {currentVo2Value > 0 && (
-                                    <div className="absolute top-0 h-full w-1 bg-slate-800 dark:bg-white shadow-xl z-10 transition-all duration-1000" style={{ left: vo2Info.width }}></div>
-                                )}
-                            </div>
-                            <div className="mt-1 text-center">
-                                <span className={`text-[8px] font-bold uppercase tracking-widest ${vo2Info.color}`}>{vo2Info.label}</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div className="bg-white dark:bg-zinc-900/40 p-4 rounded-2xl border border-slate-200 dark:border-zinc-800/50 lg:col-span-1 flex flex-col justify-between">
-                        <div className="flex items-center gap-1 mb-2">
-                            <span className="text-[9px] font-bold uppercase tracking-widest text-slate-400">Umbrales Actuales</span>
+                    {/* THRESHOLDS CARD */}
+                    <div className="glass-panel p-5 lg:col-span-1 flex flex-col justify-between">
+                        <div className="flex items-center gap-1 mb-3">
+                            <span className="apple-label">Umbrales Actuales</span>
                             <InfoTooltip text="Tus valores de referencia (FTP en bici, Ritmo Umbral en carrera) configurados en tu perfil." />
                         </div>
                         <div className="grid grid-cols-2 gap-2">
@@ -534,21 +538,20 @@ export const AdvancedAnalytics = ({ activities, settings, onSelectActivity, time
                 </div>
 
                 {/* FORMA (TSB) CARD */}
-                <div className="bg-white dark:bg-zinc-900/40 p-4 rounded-2xl border border-slate-200 dark:border-zinc-800/50 flex items-center justify-between">
-                    <div className="flex items-center gap-3">
+                <div className="glass-panel p-5 flex items-center justify-between">
+                    <div className="flex items-center gap-4">
                         <div className={`p-2 rounded-xl bg-slate-50 dark:bg-zinc-800 ${model.tsb < -25 ? 'text-red-500' : (model.tsb > 0 ? 'text-emerald-500' : 'text-blue-500')}`}>
                             <Activity size={18} />
                         </div>
                         <div>
-                            <p className="text-[9px] font-bold uppercase text-slate-400">Balance de Carga (TSB)</p>
-                            <p className="text-xs font-medium text-slate-500 dark:text-zinc-500">CTL[ayer] − ATL[ayer] · Intervalsstyle</p>
+                            <p className="text-sm font-semibold text-slate-600 dark:text-zinc-300">Balance de Carga (TSB)</p>
+                            <p className="text-xs font-medium text-slate-500 dark:text-zinc-500">Diferencia Crónica − Aguda</p>
                         </div>
                     </div>
                     <div className="text-right">
                         <span className={`text-2xl font-semibold ${model.tsb < -25 ? 'text-red-500' : (model.tsb > 0 ? 'text-emerald-500' : 'text-blue-500')}`}>
                             {model.tsb >= 0 ? '+' : ''}{Math.round(model.tsb)}
                         </span>
-                        <span className="text-[9px] font-bold text-slate-400 uppercase ml-1">pts</span>
                     </div>
                 </div>
             </div>
@@ -565,10 +568,10 @@ export const AdvancedAnalytics = ({ activities, settings, onSelectActivity, time
                 </div>
 
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                    <div className="bg-white dark:bg-zinc-900/30 p-4 rounded-2xl border border-transparent dark:border-zinc-900 flex flex-col lg:col-span-2 shadow-inner">
-                        <div className="flex justify-between items-center mb-2">
+                    <div className="glass-panel p-5 flex flex-col lg:col-span-2">
+                        <div className="flex justify-between items-center mb-3">
                             <div className="flex items-center gap-1">
-                                <span className="text-[9px] font-bold uppercase tracking-widest text-slate-400">Volumen Semanal (TSS/Horas)</span>
+                                <span className="apple-label">Volumen Semanal (TSS/Horas)</span>
                                 <InfoTooltip text="Carga de entrenamiento (TSS) y horas totales acumuladas cada semana. Las barras indican el estrés (TSS) y la línea el tiempo." />
                             </div>
                         </div>
@@ -586,10 +589,10 @@ export const AdvancedAnalytics = ({ activities, settings, onSelectActivity, time
                         </div>
                     </div>
 
-                    <div className="bg-white dark:bg-zinc-900/40 p-4 rounded-2xl border border-slate-200 dark:border-zinc-800/50 flex flex-col lg:col-span-1 shadow-sm">
-                        <div className="flex justify-between items-center mb-4">
-                            <span className="text-[9px] font-bold uppercase tracking-widest text-slate-400">Distribución de Foco</span>
-                            <div className="flex bg-slate-100 dark:bg-zinc-800 p-0.5 rounded-full">
+                    <div className="glass-panel p-5 flex flex-col lg:col-span-1">
+                        <div className="flex justify-between items-center mb-5">
+                            <span className="apple-label">Distribución de Foco</span>
+                            <div className="flex bg-slate-200/50 dark:bg-zinc-800/50 p-0.5 rounded-lg">
                                 {['28d', '90d'].map(t => (
                                     <button key={t} onClick={() => setIntensityTimeframe(t)} className={`px-2 py-0.5 text-[7px] font-bold uppercase rounded-full transition-all ${intensityTimeframe === t ? 'bg-white dark:bg-zinc-700 text-slate-800 dark:text-zinc-100 shadow-sm' : 'text-slate-500'}`}>{t.toUpperCase()}</button>
                                 ))}
