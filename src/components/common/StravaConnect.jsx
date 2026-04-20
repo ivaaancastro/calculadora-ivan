@@ -1,5 +1,10 @@
+/**
+ * StravaConnect.jsx — Botón para iniciar el flujo OAuth2 con Strava.
+ * Redirige al endpoint de autenticación de Strava con los scopes necesarios.
+ */
 import React from 'react';
-import { Activity } from 'lucide-react'; // O el icono que prefieras
+
+import { Activity } from 'lucide-react';
 
 const StravaConnect = () => {
   const handleConnect = () => {

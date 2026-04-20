@@ -19,8 +19,9 @@ body {
   color: #1d1d1f;
 }
 
+/* Dark mode — Tailwind aplica 'dark' en el elemento <html>, no en <body> */
 @media (prefers-color-scheme: dark) {
-  body.dark {
+  .dark body {
     background-color: #000000; /* Apple pitch black */
     color: #f5f5f7;
   }
@@ -70,16 +71,22 @@ body {
   background: #94a3b8;
 }
 
+/* Scrollbar personalizado fino (se referencia con la clase custom-scrollbar) */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 4px;
+  height: 4px;
+}
+.custom-scrollbar::-webkit-scrollbar-track  { background: transparent; }
+.custom-scrollbar::-webkit-scrollbar-thumb  { background: #cbd5e1; border-radius: 4px; }
+.custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+
+/* Ocultar scrollbar por completo (chrome, safari, opera) */
 .hide-scrollbar {
   -ms-overflow-style: none;
-  /* IE and Edge */
   scrollbar-width: none;
-  /* Firefox */
 }
-
 .hide-scrollbar::-webkit-scrollbar {
   display: none;
-  /* Chrome, Safari and Opera */
 }
 
 /* Animación para el puntero del mapa */

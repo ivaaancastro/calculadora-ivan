@@ -6,7 +6,7 @@ import toast from 'react-hot-toast';
 const AddActivityModal = ({ isOpen, onClose, onSave }) => {
     const [formData, setFormData] = useState({
         date: new Date().toISOString().split('T')[0],
-        type: 'Carrera', duration: '', hr_avg: '', rpe: 5, distance: '', elevation_gain: ''
+        type: 'Carrera', duration: '', hr_avg: '', distance: '', elevation_gain: ''
     });
     const [loading, setLoading] = useState(false);
 
@@ -27,6 +27,7 @@ const AddActivityModal = ({ isOpen, onClose, onSave }) => {
             }]);
             if (error) throw error;
             onSave();
+            onClose();
             toast.success("Actividad generada exitosamente.");
             setFormData({ date: new Date().toISOString().split('T')[0], type: 'Carrera', duration: '', hr_avg: '', distance: '', elevation_gain: '' });
         } catch (err) {

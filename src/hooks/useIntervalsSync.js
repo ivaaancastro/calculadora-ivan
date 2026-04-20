@@ -1,19 +1,18 @@
 /**
- * useIntervalsSync.js
+ * useIntervalsSync.js — Sincronización desde Intervals.icu a Supabase.
  *
- * Hook that syncs data from Intervals.icu to Supabase:
- *   - Wellness: HRV, resting HR, weight, sleep, VO2max, readiness, steps, SpO2
- *   - Athlete profile: FTP, resting HR, weight
- *   - Activities TSS: icu_training_load (the official Intervals TSS)
+ * Descarga y persiste los siguientes datos:
+ *   - Wellness: HRV, FC reposo, peso, sueño, VO2max, readiness, pasos, SpO2
+ *   - Perfil del atleta: FTP, FC reposo, peso
+ *   - TSS de actividades: icu_training_load (TSS oficial de Intervals)
  *
- * Uses the intervals-proxy Edge Function to avoid CORS.
+ * La llamada a la API de Intervals se hace via proxy directo (CORS seguro en dev).
+ * En producción se debería enrutar a través de la Edge Function de Supabase.
  */
 
 import { useState, useCallback } from 'react';
 import { supabase } from '../supabase';
 import toast from 'react-hot-toast';
-
-const SUPABASE_PROJECT_URL = import.meta.env.VITE_SUPABASE_URL;
 
 /**
  * Calls Intervals.icu API directly.
