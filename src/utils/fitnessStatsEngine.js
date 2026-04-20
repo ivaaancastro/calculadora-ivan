@@ -660,43 +660,196 @@ export function predictRaceTimes(vo2max, activities = []) {
 // ════════════════════════════════════════════════════════════════════════════════
 // 4. TRAINING EFFECT
 // ════════════════════════════════════════════════════════════════════════════════
-export function calculateTrainingEffect(activities, settings) {
-    if (!activities || activities.length === 0) return null;
-    const d7 = new Date(); d7.setDate(d7.getDate() - 7);
-    const recent = activities
-        .filter(a => {
-            const t = String(a.type).toLowerCase();
-            return (t.includes('run') || t.includes('carrera') || t.includes('bici') || t.includes('ciclismo') || t.includes('ride'))
-                && new Date(a.date) >= d7 && a.duration >= 10;
-        })
-        .sort((a, b) => new Date(b.date) - new Date(a.date));
-    if (!recent.length) return null;
+/**
+ * 3. EFECTO DEL ENTRENAMIENTO (GARMIN / FIRSTBEAT STYLE)
+ *    Calcula el impacto aeróbico y anaeróbico basándose en el modelo de EPOC.
+ *
+ *    @param {object} act       - Objeto actividad (debe incluir streams para máxima precisión)
+ *    @param {object} settings  - Perfil del usuario
+ *    @returns {object|null}
+ */
+export function calculateTrainingEffect(act, settings) {
+    if (!act) return null;
 
-    const act = recent[0];
     const t = String(act.type).toLowerCase();
     const isBike = t.includes('bici') || t.includes('ciclismo') || t.includes('ride');
-    const maxHr = Number((isBike ? settings.bike : settings.run)?.max) || 190;
-
-    let aerobic = 0, anaerobic = 0;
-    if (act.streams_data?.heartrate?.data && act.streams_data?.time?.data) {
-        const hr = act.streams_data.heartrate.data, tm = act.streams_data.time.data;
-        const totalT = tm[tm.length - 1] - tm[0];
-        let tLow = 0, tMid = 0, tHigh = 0;
-        for (let i = 1; i < hr.length; i++) { const dt = tm[i] - tm[i - 1]; if (dt > 10) continue; const p = hr[i] / maxHr; if (p < 0.7) tLow += dt; else if (p < 0.85) tMid += dt; else tHigh += dt; }
-        const df = Math.min(act.duration / 90, 1), af = totalT > 0 ? (tLow + tMid) / totalT : 0;
-        aerobic = Math.min(5, df * 2.5 + af * 2.5);
-        anaerobic = Math.min(5, Math.min((totalT > 0 ? tHigh / totalT : 0) * 5, 2.5) + Math.min((act.tss || 0) / 150, 2.5));
+    const profile = isBike ? settings.bike : settings.run;
+    
+    // Parámetros fisiológicos
+    const hrMax  = Number(profile?.max) || 190;
+    const hrRest = Number(settings.fcReposo) || 50;
+    const lthr   = Number(profile?.lthr) || 165;
+    
+    // Determinación del umbral de potencia (específico por deporte)
+    let thresholdPower = 200;
+    if (isBike) {
+        thresholdPower = Number(settings.bike?.ftp) || 200;
     } else {
-        const p = (act.hr_avg || 0) / maxHr, df = Math.min(act.duration / 90, 1);
-        aerobic = Math.min(5, df * 3 + (p < 0.85 ? p * 2 : 1));
-        anaerobic = Math.min(5, p > 0.85 ? (p - 0.7) * 10 : Math.max(0, (p - 0.5) * 3));
+        // Para carrera, si no hay FTP explícito, lo estimamos desde el Ritmo Umbral (thresholdPace)
+        // Estimación aproximada: FTP_run \approx (1000 / ritmo_umbral_seg) * peso * factor
+        const paceStr = settings.run?.thresholdPace || '4:30';
+        const [m, s] = paceStr.split(':');
+        const paceSecs = (parseInt(m) || 4) * 60 + (parseInt(s) || 30);
+        const weight = Number(settings.weight) || 75;
+        thresholdPower = (1000 / paceSecs) * weight * 1.05; // Factor de eficiencia
     }
 
-    const lbl = s => s >= 4 ? { label: 'Altamente Impactante', color: '#8b5cf6' } : s >= 3 ? { label: 'Alto Beneficio', color: '#3b82f6' } : s >= 2 ? { label: 'Beneficio Moderado', color: '#10b981' } : s >= 1 ? { label: 'Beneficio Ligero', color: '#f59e0b' } : { label: 'Sin impacto', color: '#94a3b8' };
+    let aerobicScore = 0;
+    let anaerobicScore = 0;
+    let peakEpoc = 0;
+
+    // --- MODELO EPOC PARA EFECTO AERÓBICO ---
+    if (act.streams_data?.heartrate?.data && act.streams_data?.time?.data) {
+        const hrs = act.streams_data.heartrate.data;
+        const tms = act.streams_data.time.data;
+        
+        let epoc = 0;
+        const tau = 15.0; // Constante de decaimiento (minutos) — Estándar Firstbeat
+
+        for (let i = 1; i < hrs.length; i++) {
+            const dtMin = (tms[i] - tms[i - 1]) / 60;
+            if (dtMin > 0.5) continue; // Ignorar pausas largas
+
+            // Intensidad relativa (0.0 a 1.0) basada en %HRmax
+            const intensity = Math.max(0, (hrs[i] - hrRest) / (hrMax - hrRest));
+            
+            // Tasa de acumulación (fórmula recalibrada para ser menos agresiva)
+            // dEPOC/dt = Incremento(Intensidad) - EPOC/tau
+            // Reducimos el coeficiente base de 0.55 a 0.40 y el exponente para suavizar el impacto
+            const increment = 0.42 * Math.exp(4.5 * intensity);
+            
+            // Aplicar decaimiento y acumulación
+            epoc = epoc * Math.exp(-dtMin / tau) + (increment * dtMin);
+            if (epoc > peakEpoc) peakEpoc = epoc;
+        }
+
+        // Mapeo Peak EPOC -> Aerobic TE (0.0 - 5.0) RECALIBRADO
+        // Subimos los listones para que el 5.0 requiera un EPOC mucho mayor
+        // Escala: 40=1.0, 100=2.0, 200=3.0, 350=4.0, 550+=5.0
+        if (peakEpoc < 40) aerobicScore = (peakEpoc / 40);
+        else if (peakEpoc < 100) aerobicScore = 1.0 + (peakEpoc - 40) / 60;
+        else if (peakEpoc < 200) aerobicScore = 2.0 + (peakEpoc - 100) / 100;
+        else if (peakEpoc < 350) aerobicScore = 3.0 + (peakEpoc - 200) / 150;
+        else aerobicScore = 4.0 + Math.min(1.0, (peakEpoc - 350) / 200);
+
+    } else {
+        // Fallback mediante FC media si no hay streams
+        const p = (act.hr_avg || 0) / hrMax;
+        const durMin = act.duration / 60;
+        const factor = p > 0.85 ? 1.4 : p > 0.75 ? 1.0 : 0.6;
+        aerobicScore = Math.min(5, (durMin / 45) * factor * (p * 4));
+    }
+
+    // --- ANÁLISIS DE INTERVALOS PARA EFECTO ANAERÓBICO ---
+    if (act.streams_data?.heartrate?.data) {
+        const hrs = act.streams_data.heartrate.data;
+        const tms = act.streams_data.time.data;
+        const watts = act.streams_data.watts?.data;
+        const speed = act.streams_data.velocity_smooth?.data;
+
+        let anaerobicPoints = 0;
+        let lastBurstTime = -300;
+
+        for (let i = 10; i < hrs.length; i += 5) {
+            const dt = tms[i] - tms[i - 10];
+            const dHR = hrs[i] - hrs[i - 10];
+            const hrPct = hrs[i] / hrMax;
+
+            // Detectar un "burst" (rápido incremento de HR o alta intensidad sostenida)
+            const fastHrRise = dHR > 5 && hrPct > 0.82;
+            const highIntense = hrPct > 0.94;
+            
+            // Si hay potencia o velocidad, validar el burst con el umbral correcto
+            let workBurst = false;
+            if (watts) workBurst = watts[i] > thresholdPower * 1.35;
+            else if (speed) workBurst = speed[i] > 5.5; 
+
+            if ((fastHrRise || highIntense || workBurst) && (tms[i] - lastBurstTime > 30)) {
+                // Puntos según la dureza del pico
+                let points = 0.5;
+                if (hrPct > 0.96) points = 1.2;
+                else if (hrPct > 0.90) points = 0.8;
+                
+                anaerobicPoints += points;
+                lastBurstTime = tms[i];
+            }
+        }
+
+        // Mapeo Anaerobic Points -> Anaerobic TE (0.0 - 5.0)
+        // 2 puntos=1.0, 5 puntos=2.0, 9 puntos=3.0, 15 puntos=4.0
+        if (anaerobicPoints < 2) anaerobicScore = (anaerobicPoints / 2);
+        else if (anaerobicPoints < 5) anaerobicScore = 1.0 + (anaerobicPoints - 2) / 3;
+        else if (anaerobicPoints < 9) anaerobicScore = 2.0 + (anaerobicPoints - 5) / 4;
+        else if (anaerobicPoints < 15) anaerobicScore = 3.0 + (anaerobicPoints - 9) / 6;
+        else anaerobicScore = 4.0 + Math.min(1.0, (anaerobicPoints - 15) / 10);
+    }
+
+    // --- CLASIFICACIÓN DE BENEFICIO PRIMARIO (GARMIN MATRIX) ---
+    let primaryBenefit = "Recuperación";
+    let benefitDesc = "Intensidad baja. Mejora la recuperación y prepara para entrenos más duros.";
+    let label = "Mantenimiento";
+    let color = "text-slate-500"; 
+
+    const aS = Number(aerobicScore.toFixed(1));
+    const anS = Number(anaerobicScore.toFixed(1));
+
+    if (anS >= 3.0) {
+        primaryBenefit = "Capacidad Anaeróbica";
+        benefitDesc = "Mejora tu capacidad de realizar y repetir esfuerzos cortos y explosivos.";
+        color = "text-purple-600";
+    } else if (anS >= 2.0) {
+        primaryBenefit = "Sprint / Velocidad";
+        benefitDesc = "Estimula las fibras rápidas y mejora la economía de esfuerzo a alta velocidad.";
+        color = "text-purple-500";
+    } else if (aS >= 4.5) {
+        primaryBenefit = "Sobre-esfuerzo";
+        benefitDesc = "Carga extremadamente alta. Requiere descanso prolongado.";
+        color = "text-rose-700";
+    } else if (aS >= 3.5) {
+        if (aS > 4.0) {
+            primaryBenefit = "Altamente Impactante: VO2 Máx";
+            benefitDesc = "Mejora significativamente tu potencia aeróbica y velocidad de crucero.";
+            color = "text-rose-600";
+        } else {
+            primaryBenefit = "VO2 Máx";
+            benefitDesc = "Estimula la capacidad de transporte de oxígeno y el consumo máximo.";
+            color = "text-rose-500";
+        }
+    } else if (aS >= 3.0) {
+        const activityIF = parseFloat(act.intensity_factor) || (act.hr_avg / lthr);
+        if (activityIF > 0.92) {
+            primaryBenefit = "Umbral de Lactato";
+            benefitDesc = "Fortalece tu capacidad de mantener ritmos altos durante mucho tiempo.";
+            color = "text-amber-500";
+        } else if (activityIF > 0.82) {
+            primaryBenefit = "Tempo";
+            benefitDesc = "Entrenamiento de ritmo constante que mejora la eficiencia metabólica.";
+            color = "text-emerald-500";
+        } else {
+            primaryBenefit = "Base Aeróbica";
+            benefitDesc = "Desarrolla resistencia a largo plazo mediante una intensidad aeróbica pura.";
+            color = "text-blue-500";
+        }
+    } else if (aS >= 2.0) {
+        primaryBenefit = "Mantenimiento";
+        benefitDesc = "Carga adecuada para no perder el nivel de forma actual.";
+        color = "text-blue-400";
+    }
+
+    // Etiqueta general (0-5)
+    const getFinalLabel = (s) => 
+        s >= 5.0 ? "Sobre-esfuerzo" :
+        s >= 4.0 ? "Altamente Impactante" :
+        s >= 3.0 ? "Impacto Importante" :
+        s >= 2.0 ? "Mantenimiento" :
+        s >= 1.0 ? "Beneficio Ligero" : "Sin Impacto";
+
     return {
-        activity: { id: act.id, name: act.name, date: act.date, type: act.type },
-        aerobic: { score: Number(aerobic.toFixed(1)), ...lbl(aerobic) },
-        anaerobic: { score: Number(anaerobic.toFixed(1)), ...lbl(anaerobic) },
+        aerobic: { score: aS, label: getFinalLabel(aS), color },
+        anaerobic: { score: anS, label: getFinalLabel(anS), color: anS > 2 ? 'text-purple-500' : color },
+        primaryBenefit,
+        benefitDesc,
+        peakEpoc: Math.round(peakEpoc)
     };
 }
 

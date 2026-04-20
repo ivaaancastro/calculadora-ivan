@@ -229,11 +229,19 @@ export function calculateActivityTSS(act, settings) {
         let trimp = 0;
         for (let i = 1; i < hrData.length; i++) {
             const dt = (timeData[i] - timeData[i - 1]) / 60;
-            if (dt > 5) continue; // Ignorar huecos grandes (pausas de seguimiento)
+            if (dt > 5) continue;
             const d = Math.max(0, (hrData[i] - hrRest) / hrRange);
             trimp += dt * d * kY * Math.exp(kB * d);
         }
-        return { tss: Math.round((trimp / norm) * 100), method: 'hr_stream' };
+        const hrss = (trimp / norm) * 100;
+        const durationHours = (timeData[timeData.length - 1] - timeData[0]) / 3600;
+        const intensityFactor = durationHours > 0 ? Math.sqrt(hrss / (durationHours * 100)) : 0;
+
+        return { 
+            tss: Math.round(hrss), 
+            intensity_factor: intensityFactor,
+            method: 'hr_stream' 
+        };
     }
 
     // ③ hrTSS avg — sólo FC media (método de estimación constante)
@@ -241,13 +249,28 @@ export function calculateActivityTSS(act, settings) {
     if (hrAvg && hrAvg > hrRest) {
         const d = (hrAvg - hrRest) / hrRange;
         const trimp = durMin * d * kY * Math.exp(kB * d);
-        return { tss: Math.round((trimp / norm) * 100), method: 'hr_avg' };
+        const hrss = (trimp / norm) * 100;
+        const durationHours = durMin / 60;
+        const intensityFactor = durationHours > 0 ? Math.sqrt(hrss / (durationHours * 100)) : 0;
+
+        return { 
+            tss: Math.round(hrss), 
+            intensity_factor: intensityFactor,
+            method: 'hr_avg' 
+        };
     }
 
     // ④ Sin datos fisiológicos → estimación genérica por duración
     const cat = getSportCategory(act.type);
-    if (cat === 'strength') return { tss: Math.round((durMin / 60) * 40), method: 'duration' };
-    return { tss: Math.round((durMin / 60) * 25), method: 'duration' };
+    const estimatedTss = cat === 'strength' ? (durMin / 60) * 40 : (durMin / 60) * 25;
+    const durationHours = durMin / 60;
+    const intensityFactor = durationHours > 0 ? Math.sqrt(estimatedTss / (durationHours * 100)) : 0;
+
+    return { 
+        tss: Math.round(estimatedTss), 
+        intensity_factor: intensityFactor,
+        method: 'duration' 
+    };
 }
 
 // ── 2. TSS/hora por zona (para estimación de planificación) ─────────────────

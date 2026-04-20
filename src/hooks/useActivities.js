@@ -501,14 +501,10 @@ export const useActivities = () => {
             if (time <= todayUTC) loadHistory.push(Math.round(dailyAtlContrib));
 
             // Fórmula EWMA exacta de Intervals.icu
-            if (fullSeries.length === 0 && dailyTss > 0) {
-                // Seeding: primer día con entrenamiento inicializa CTL/ATL
-                ctl = dailyCtlContrib;
-                atl = dailyAtlContrib;
-            } else {
-                ctl = ctl * K_CTL + dailyCtlContrib * K_CTL_GAIN;
-                atl = atl * K_ATL + dailyAtlContrib * K_ATL_GAIN;
-            }
+            // No hacemos seeding igualando CTL/ATL al TSS porque eso anula el TSB (Forma) 
+            // el primer día. Empezamos en 0 y dejamos que el primer entreno aplique el gain.
+            ctl = ctl * K_CTL + dailyCtlContrib * K_CTL_GAIN;
+            atl = atl * K_ATL + dailyAtlContrib * K_ATL_GAIN;
 
             const finalCtl = ctl + offsetCtl;
             const tsb      = parseFloat((finalCtl - atl).toFixed(1));
@@ -518,6 +514,7 @@ export const useActivities = () => {
                 ctl:               parseFloat(finalCtl.toFixed(1)),
                 atl:               parseFloat(atl.toFixed(1)),
                 tsb,
+                tcb:               tsb, // Alias para compatibilidad con componentes antiguos
                 dailyTss:          Math.round(dailyTss),
                 dailyTssEffective: Math.round(dailyAtlContrib),
             });
@@ -587,6 +584,7 @@ export const useActivities = () => {
             rawCtl:     lastPoint.ctl - offsetCtl,
             atl:        lastPoint.atl,
             tsb:        lastPoint.tsb,
+            tcb:        lastPoint.tsb, // Alias
             rampRate,
             avgTss7d:   Math.round(avg7),
             acwr:       parseFloat(acwr.toFixed(2)),
