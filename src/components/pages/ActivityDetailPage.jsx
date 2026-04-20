@@ -3,6 +3,7 @@ import { ArrowLeft, ExternalLink, Trash2, Calendar, Activity, Layers, Loader2, H
 import { MapContainer, TileLayer, Polyline, useMap, CircleMarker } from 'react-leaflet';
 import { AreaChart, Area, BarChart, Bar, Cell, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer } from 'recharts';
 import 'leaflet/dist/leaflet.css';
+import { calculateTrainingEffect } from '../../utils/fitnessStatsEngine';
 
 const decodePolyline = (str, precision = 5) => {
     let index = 0, lat = 0, lng = 0, coordinates = [], shift = 0, result = 0, byte = null, latitude_change, longitude_change, factor = Math.pow(10, precision);
@@ -548,13 +549,24 @@ export const ActivityDetailPage = ({ activity, settings, fetchStreams, onBack, o
 
         if (streams.watts?.data?.length > 30) {
             const wData = streams.watts.data;
-            const ftp = settings.bike?.ftp || 200;
+            
+            // Determinar umbral según tipo de actividad
+            let thresholdPower = 200;
+            if (!isPaceBased) {
+                thresholdPower = settings.bike?.ftp || 200;
+            } else {
+                const paceStr = settings.run?.thresholdPace || '4:30';
+                const [m, s] = paceStr.split(':');
+                const paceSecs = (parseInt(m) || 4) * 60 + (parseInt(s) || 30);
+                const weight = Number(settings.weight) || 75;
+                thresholdPower = (1000 / paceSecs) * weight * 1.05;
+            }
             
             // Variability Index (VI)
             if (avgWatts > 0) vi = Number((npWatts / avgWatts).toFixed(2));
             
             // Intensity Factor (IF)
-            ifFactor = Number((npWatts / ftp).toFixed(2));
+            ifFactor = Number((npWatts / thresholdPower).toFixed(2));
             
             // Work (kJ)
             const durationSecs = streams.time.data[streams.time.data.length - 1];
@@ -640,101 +652,29 @@ export const ActivityDetailPage = ({ activity, settings, fetchStreams, onBack, o
         return { cadenceAvg, maxSpeedObj, decouplingObj, efObj, autoLaps, avgWatts, maxWatts, npWatts, vi, ifFactor, workKj, powerCurve, climbPro };
     }, [streams, isPaceBased]);
 
-    // 🔥 TRAINING EFFECT ALGORITHM (Estilo Garmin) 🔥
+    // 🔥 TRAINING EFFECT ALGORITHM (Powered by Garmin-style EPOC Engine) 🔥
     const trainingEffect = useMemo(() => {
-        if (!exactZoneAnalysis || !proMetrics) return null;
+        if (!activity || !settings) return null;
+        // Delegamos el cálculo al motor central para consistencia máxima
+        const result = calculateTrainingEffect({
+            ...activity,
+            streams_data: streams // Pasamos los streams actuales
+        }, settings);
 
-        const durationHours = activity.duration / 3600;
-        const ifVal = parseFloat(proMetrics.ifFactor) || 0;
-        const viVal = parseFloat(proMetrics.vi) || 1.0;
-        
-        // --- AEROBIC TRAINING EFFECT (0-5.0) ---
-        // Basado en IF y duración con escala logarítmica para representar el EPOC
-        // Un HIIT de 1h puede dar 3.0, un fondo de 4h en Z2 puede dar 4.0+
-        let aScore = 5.0 * (1 - Math.exp(-(ifVal * Math.pow(durationHours, 0.45)) / 0.55));
-        
-        // Ajuste por desacople (si hay drift, el impacto aeróbico es mayor)
-        if (proMetrics.decouplingObj && proMetrics.decouplingObj.value > 5) {
-            aScore += (proMetrics.decouplingObj.value / 100);
-        }
-        
-        const aerobicScore = Math.min(5.0, aScore).toFixed(1);
+        if (!result) return null;
 
-        // --- ANAEROBIC TRAINING EFFECT (0-5.0) ---
-        // Garmin analiza picos de FC/Ritmo. Nosotros usaremos el agotamiento de W' (el tanque rápido)
-        // Detectamos caídas significativas de W' como estímulo anaeróbico
-        const wMin = Math.min(...(proMetrics.wPrimeRemaining || [100]));
-        const wDepletion = Math.max(0, 100 - wMin);
-        
-        // Puntos por intensidad intermitente (VI) y tiempo en Z5
-        const z5m = exactZoneAnalysis[4].minutes;
-        const anaerobicIntensityPoints = (z5m * 0.2) + (viVal > 1.1 ? (viVal - 1) * 10 : 0);
-        const wPoints = (wDepletion / 20); // Agotamiento total (100) da 5 puntos base
-        
-        let anScore = 5.0 * (1 - Math.exp(-(wPoints + anaerobicIntensityPoints / 5) / 2.5));
-        if (anScore < 0.8 && z5m < 2) anScore = 0.0;
-        
-        const anaerobicScore = Math.min(5.0, anScore).toFixed(1);
-
-        // --- BENEFIT CLASSIFICATION & DESCRIPTIONS ---
-        let primaryBenefit = "Recuperación";
-        let description = "Actividad regenerativa para eliminar fatiga residual.";
-        let benefitColor = "text-slate-500 dark:text-zinc-400";
-
-        const aS = parseFloat(aerobicScore);
-        const anS = parseFloat(anaerobicScore);
-
-        if (aS < 2.0 && anS < 2.0) {
-            primaryBenefit = "Recuperación";
-            description = "Intensidad muy baja. Ideal para recuperación activa o base muy ligera.";
-        } else if (anS >= 2.5 && anS >= aS - 0.5) {
-            primaryBenefit = "Capacidad Anaeróbica";
-            description = "Entrenamiento de intervalos que mejora tu capacidad de realizar esfuerzos explosivos repetidos.";
-            benefitColor = "text-purple-600 dark:text-purple-400";
-        } else if (aS >= 3.0) {
-            // Predominio Aeróbico
-            if (ifVal >= 0.95 || z5m > 10) {
-                primaryBenefit = "VO2 Máx";
-                description = "Mejora significativa de tu consumo máximo de oxígeno y potencia aeróbica.";
-                benefitColor = "text-rose-600 dark:text-rose-500";
-            } else if (ifVal >= 0.85 || exactZoneAnalysis[3].minutes > 20) {
-                primaryBenefit = "Umbral de Lactato";
-                description = "Fortalece tu capacidad de mantener ritmos altos durante periodos prolongados.";
-                benefitColor = "text-amber-600 dark:text-amber-500";
-            } else if (ifVal >= 0.75) {
-                primaryBenefit = "Tempo";
-                description = "Ritmo moderado-alto que mejora la eficiencia metabólica y el ritmo de carrera.";
-                benefitColor = "text-emerald-600 dark:text-emerald-500";
-            } else {
-                primaryBenefit = "Base Aeróbica";
-                description = "Desarrollo de resistencia cardiovascular y optimización de la quema de grasas.";
-                benefitColor = "text-blue-600 dark:text-blue-400";
-            }
-        } else if (aS >= 2.0) {
-            primaryBenefit = "Mantenimiento";
-            description = "Estímulo suficiente para mantener tu nivel de forma actual.";
-            benefitColor = "text-indigo-600 dark:text-indigo-400";
-        }
-
-        const getLabel = (score) => {
-            if (score <= 1.0) return "Ninguno";
-            if (score < 2.0) return "Menor";
-            if (score < 3.0) return "Mantenimiento";
-            if (score < 4.0) return "Mejora";
-            if (score < 5.0) return "Mejora alta";
-            return "Sobreesfuerzo";
-        };
-
+        // Mapeo retrocompatible para la UI existente
         return {
-            aerobic: aS,
-            anaerobic: anS,
-            description,
-            aerobicLabel: getLabel(aS),
-            anaerobicLabel: getLabel(anS),
-            primaryBenefit,
-            benefitColor
+            aerobic: result.aerobic.score,
+            anaerobic: result.anaerobic.score,
+            description: result.benefitDesc,
+            aerobicLabel: result.aerobic.label,
+            anaerobicLabel: result.anaerobic.label,
+            primaryBenefit: result.primaryBenefit,
+            benefitColor: result.aerobic.color, // Color dinámico según intensidad
+            peakEpoc: result.peakEpoc
         };
-    }, [exactZoneAnalysis, proMetrics, activity]);
+    }, [streams, activity, settings]);
 
     const chartData = useMemo(() => {
         if (!streams || !streams.time) return [];
@@ -1106,7 +1046,12 @@ export const ActivityDetailPage = ({ activity, settings, fetchStreams, onBack, o
                                         <div className="flex items-center justify-between">
                                             <div className="space-y-1">
                                                 <h3 className="text-xs font-bold text-slate-900 dark:text-zinc-100 uppercase tracking-tight">Impacto del Entrenamiento</h3>
-                                                <p className="text-[10px] text-slate-400 dark:text-zinc-500 font-medium">Análisis fisiológico de la sesión</p>
+                                                <div className="flex items-center gap-2">
+                                                    <p className="text-[10px] text-slate-400 dark:text-zinc-500 font-medium">Análisis fisiológico</p>
+                                                    {trainingEffect.peakEpoc > 0 && (
+                                                        <span className="text-[9px] font-bold text-slate-300 dark:text-zinc-700 tabular-nums">Peak EPOC: {trainingEffect.peakEpoc}ml</span>
+                                                    )}
+                                                </div>
                                             </div>
                                             <span className={`px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-tight bg-slate-100 dark:bg-zinc-800 border ${trainingEffect.benefitColor.replace('text-', 'border-').replace('dark:', '')} ${trainingEffect.benefitColor}`}>
                                                 {trainingEffect.primaryBenefit}

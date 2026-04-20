@@ -23,13 +23,13 @@ const CustomTooltip = ({ active, payload, label }) => {
             const colors = {
               ctl: 'text-[#007aff]', // Apple Blue
               atl: 'text-[#ff2d55]', // Apple Red
-              tcb: 'text-[#ffcc00]', // Apple Gold
+              tsb: 'text-[#ffcc00]', // Apple Gold
               dailyTss: 'text-slate-400'
             };
             const labels = {
               ctl: 'Fitness (CTL)',
               atl: 'Fatiga (ATL)',
-              tcb: 'Forma (TSB)',
+              tsb: 'Forma (TSB)',
               dailyTss: 'Carga (TSS)'
             };
             return (
@@ -133,7 +133,7 @@ export const EvolutionChart = ({ data }) => {
             <Area 
                 yAxisId="right" 
                 type="monotone" 
-                dataKey="tcb" 
+                dataKey="tsb" 
                 stroke="#ffcc00" 
                 strokeWidth={3} 
                 fillOpacity={1} 

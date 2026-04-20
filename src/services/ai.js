@@ -45,7 +45,7 @@ Actúa como un entrenador de triatlón experto y motivador.
 
 PERFIL DEL ATLETA:
 - Fitness (CTL): ${Math.round(currentMetrics?.ctl || 0)}
-- Forma (TSB):   ${Math.round(currentMetrics?.tcb || 0)} (negativo = cansado, positivo = fresco)
+- Forma (TSB):   ${Math.round(currentMetrics?.tsb || 0)} (negativo = cansado, positivo = fresco)
 - Fatiga (ATL):  ${Math.round(currentMetrics?.atl || 0)}
 
 PRÓXIMO OBJETIVO: ${nextRace?.name ?? 'Mantener forma'}
