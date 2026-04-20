@@ -1,13 +1,23 @@
 /**
  * fitnessStatsEngine.js — Motor de Estadísticas de Rendimiento
  *
- * 1. eFTP — Ratio-table approach (FastFitness.Tips / intervals.icu style)
- * 2. VO2max ciclismo — Usando pico 5min (MAP) en vez de media de actividad
- * 3. Pronóstico de carrera (Daniels VDOT, ajustado)
- * 4. Training Effect / Balance
- * 5. Perfil de potencia
- * 6. Estado de Entreno (Tendencias)
- * 7. VFC (Variabilidad de Frecuencia Cardíaca)
+ * Funciones exportadas:
+ *  1.  estimateFTP               — eFTP mediante tabla de ratios (estilo intervals.icu)
+ *  2.  estimateCyclingVO2max     — VO2max ciclismo (pico 5min MAP + estado estable)
+ *  3.  estimateRunningVO2max     — VO2max carrera (pace/HR extrapolación)
+ *  4.  predictRaceTimes          — Pronóstico de carrera (Daniels VDOT + penalización volumen)
+ *  5.  calculateTrainingEffect   — Efecto aeróbico / anaeróbico de la última sesión
+ *  6.  getTrainingBalance         — Distribución de carga (7/14/28 días)
+ *  7.  analyzePowerProfile        — Perfil sprint/anaeróbico desde eFTP + W'
+ *  8.  calculateDanielsPaces      — Ritmos Daniels E/M/T/I/R desde VO2max
+ *  9.  estimateThresholdPace      — Ritmo umbral estimado
+ *  10. calculatePowerZones        — Zonas de potencia Coggan desde eFTP
+ *  11. calculateFTPHistory        — Evolución del eFTP en los últimos meses
+ *  12. calculateFitnessScore      — Score global 0-100 (VO2max + W/kg + CTL)
+ *  13. analyzeIntensityDistribution — Distribución de intensidad (90 días)
+ *  14. getPowerProfileBenchmarks  — Comparación W/kg vs nivel Coggan
+ *  15. getTrainingStatus          — Estado de entreno (Garmin Training Status style)
+ *  16. getHRVAnalysis             — Análisis de variabilidad cardíaca
  */
 
 // ════════════════════════════════════════════════════════════════════════════════
@@ -349,25 +359,48 @@ export function estimateCyclingVO2max(activities, settings) {
     return { vo2max: 0, method: 'none', description: 'Sin datos suficientes' };
 }
 
-// Helper for peak efforts with HR
-function getPeakPowerWithHR(watts, hr, time, windowSecs) {
-    let bestW = 0; let correspondingHR = 0;
+/**
+ * Helper genérico: encuentra la ventana de `windowSecs` segundos con mayor
+ * promedio de `primaryData`, devolviendo también el promedio de `secondaryData`
+ * en esa misma ventana.
+ *
+ * @param {number[]} primaryData    - Serie principal (vatios o velocidad)
+ * @param {number[]} secondaryData  - Serie secundaria (FC)
+ * @param {number[]} time           - Tiempos en segundos
+ * @param {number}   windowSecs     - Duración de la ventana
+ * @returns {{ avgPrimary: number, avgSecondary: number }|null}
+ */
+function getPeakWindowWithSecondary(primaryData, secondaryData, time, windowSecs) {
+    let bestPrimary = 0;
+    let bestSecondary = 0;
+
     for (let i = 0; i < time.length; i++) {
-        let sumW = 0, sumH = 0, count = 0;
+        let sumP = 0, sumS = 0, count = 0;
         const endTime = time[i] + windowSecs;
         let j = i;
-        while(j < time.length && time[j] <= endTime) {
-            sumW += watts[j]; sumH += hr[j]; count++; j++;
+        while (j < time.length && time[j] <= endTime) {
+            sumP += primaryData[j];
+            sumS += secondaryData[j];
+            count++;
+            j++;
         }
+        // Requiere al menos el 80% de la ventana cubierta para ser válida
         if (count > windowSecs * 0.8) {
-            const avgW = sumW / count;
-            if (avgW > bestW) {
-                bestW = avgW;
-                correspondingHR = sumH / count;
+            const avgP = sumP / count;
+            if (avgP > bestPrimary) {
+                bestPrimary   = avgP;
+                bestSecondary = sumS / count;
             }
         }
     }
-    return bestW > 0 ? { avgW: bestW, avgHR: correspondingHR } : null;
+    return bestPrimary > 0 ? { avgPrimary: bestPrimary, avgSecondary: bestSecondary } : null;
+}
+
+/** Alias para compatibilidad: pico de vatios con FC correspondiente. */
+function getPeakPowerWithHR(watts, hr, time, windowSecs) {
+    const result = getPeakWindowWithSecondary(watts, hr, time, windowSecs);
+    if (!result) return null;
+    return { avgW: result.avgPrimary, avgHR: result.avgSecondary };
 }
 
 
@@ -485,25 +518,11 @@ export function estimateRunningVO2max(activities, settings) {
     return { vo2max: 0, method: 'none', description: 'Sin datos para estimar VO2max' };
 }
 
-// Helper for peak speed with HR
+/** Alias para compatibilidad: pico de velocidad con FC correspondiente. */
 function getPeakSpeedWithHR(speed, hr, time, windowSecs) {
-    let bestS = 0; let correspondingHR = 0;
-    for (let i = 0; i < time.length; i++) {
-        let sumS = 0, sumH = 0, count = 0;
-        const endTime = time[i] + windowSecs;
-        let j = i;
-        while(j < time.length && time[j] <= endTime) {
-            sumS += speed[j]; sumH += hr[j]; count++; j++;
-        }
-        if (count > windowSecs * 0.8) {
-            const avgS = sumS / count;
-            if (avgS > bestS) {
-                bestS = avgS;
-                correspondingHR = sumH / count;
-            }
-        }
-    }
-    return bestS > 0 ? { avgS: bestS, avgHR: correspondingHR } : null;
+    const result = getPeakWindowWithSecondary(speed, hr, time, windowSecs);
+    if (!result) return null;
+    return { avgS: result.avgPrimary, avgHR: result.avgSecondary };
 }
 
 
@@ -537,13 +556,23 @@ function estimateRaceTime(vo2max, distKm) {
     return tG * 1.03;
 }
 
+/** Formatea minutos decimales a tiempo de carrera (H:MM:SS o MM:SS). */
 function fmtTime(m) {
     if (!m || m <= 0) return '--';
-    const h = Math.floor(m / 60), mi = Math.floor(m % 60), s = Math.round((m % 1) * 60);
-    return h > 0 ? `${h}:${mi.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}` : `${mi}:${s.toString().padStart(2, '0')}`;
+    const h  = Math.floor(m / 60);
+    const mi = Math.floor(m % 60);
+    const s  = Math.round((m % 1) * 60);
+    if (h > 0) return `${h}:${mi.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+    return `${mi}:${s.toString().padStart(2, '0')}`;
 }
 
-function fmtPace(d) { if (!d || d >= 20) return '>20:00'; const m = Math.floor(d), s = Math.round((d - m) * 60); return `${m}:${s.toString().padStart(2, '0')}`; }
+/** Formatea minutos decimales a ritmo de carrera (Min/km). */
+function fmtPace(d) {
+    if (!d || d >= 20) return '>20:00';
+    const m = Math.floor(d);
+    const s = Math.round((d - m) * 60);
+    return `${m}:${s.toString().padStart(2, '0')}`;
+}
 
 function getRunningStats(activities) {
     if (!activities || activities.length === 0) return { avgWeeklyKm: 0, maxLongRun: 0, consistency: 0 };
@@ -785,7 +814,7 @@ export function analyzePowerProfile(ftpResult) {
     else if (sprint > 5.5) strengths.push({ area: 'Sprint', desc: 'Buena potencia explosiva', level: 'good' });
     else strengths.push({ area: 'Sprint', desc: 'Sprint por debajo de la media', level: 'weak' });
 
-    if (anaerobic > 200) strengths.push({ area: 'Anaeróbico', desc: 'Gran capacidad anaeróbica (W\' alto)', level: 'elite' });
+    if (anaerobic > 200) strengths.push({ area: 'Anaeróbico', desc: "Gran capacidad anaeróbica (W' alto)", level: 'elite' });
     else if (anaerobic > 120) strengths.push({ area: 'Anaeróbico', desc: 'Buena capacidad anaeróbica', level: 'good' });
     else strengths.push({ area: 'Anaeróbico', desc: 'Capacidad anaeróbica limitada', level: 'weak' });
 

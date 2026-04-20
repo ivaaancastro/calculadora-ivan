@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
-import { supabase } from './supabase'; // Asegúrate de que esta ruta es la tuya correcta
+import { supabase } from './supabase';
 import Dashboard from './components/Dashboard';
 import { LandingPage } from './components/pages/LandingPage';
 import StravaCallback from './components/common/StravaCallback';
