@@ -117,19 +117,47 @@ const formatPace = (decimalMinutes) => {
     return `${mins}:${secs.toString().padStart(2, '0')}`;
 };
 
+const formatDuration = (totalSeconds) => {
+    if (totalSeconds === null || totalSeconds === undefined) return "--:--";
+    const hours = Math.floor(totalSeconds / 3600);
+    const minutes = Math.floor((totalSeconds % 3600) / 60);
+    const seconds = totalSeconds % 60;
+    
+    if (hours > 0) {
+        return `${hours}h ${minutes.toString().padStart(2, '0')}min`;
+    }
+    return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+};
+
+const formatMinsToHMM = (mins) => {
+    const h = Math.floor(mins / 60);
+    const m = Math.floor(mins % 60);
+    return h > 0 ? `${h}h ${m.toString().padStart(2, '0')}min` : `${m}min`;
+};
+
 const CustomChartTooltip = ({ active, payload, label, unit = '' }) => {
     if (active && payload && payload.length) {
         const data = payload[0]?.payload;
+        let displayValue = payload[0].value;
+        let displayUnit = unit;
+
+        if (unit.trim() === "min") {
+            displayValue = formatMinsToHMM(payload[0].value);
+            displayUnit = "";
+        }
+        
         return (
-            <div className="bg-zinc-900 border border-zinc-700 p-2.5 rounded shadow-xl text-[10px] font-bold text-zinc-100 min-w-[90px]">
-                <p className="mb-1 uppercase text-zinc-500 tracking-tighter text-[8px]">{label}</p>
-                {data?.range && (
-                    <p className="mb-1.5 text-[9px] text-zinc-400 font-medium">{data.range}</p>
-                )}
-                <div className="flex items-baseline gap-1">
-                    <span className="text-indigo-400 text-xs">{payload[0].value}</span>
-                    <span className="text-[9px] text-zinc-500">{unit}</span>
+            <div className="bg-zinc-900/95 border border-zinc-700/80 p-2 rounded-lg shadow-2xl text-[10px] font-bold text-zinc-100 min-w-[90px] backdrop-blur-sm">
+                <div className="flex items-center justify-between gap-3">
+                    <span className="text-zinc-500 uppercase tracking-widest text-[8px]">{label || 'Métrica'}</span>
+                    <div className="flex items-baseline gap-0.5">
+                        <span className="text-white text-xs">{displayValue}</span>
+                        <span className="text-[8px] text-zinc-500 font-medium">{displayUnit}</span>
+                    </div>
                 </div>
+                {data?.range && (
+                    <p className="mt-1 text-[8px] text-zinc-400 font-medium opacity-60 italic">{data.range}</p>
+                )}
             </div>
         );
     }
@@ -559,60 +587,133 @@ export const ActivityDetailPage = ({ activity, settings, fetchStreams, onBack, o
             ];
         }
 
-        return { cadenceAvg, maxSpeedObj, decouplingObj, efObj, autoLaps, avgWatts, maxWatts, npWatts, vi, ifFactor, workKj, powerCurve };
+        // --- ClimbPro: Automatic Climb Detection ---
+        const climbPro = [];
+        if (streams.altitude?.data && streams.distance?.data) {
+            const altData = streams.altitude.data;
+            const distData = streams.distance.data;
+            const timeData = streams.time.data;
+            
+            let inClimb = false;
+            let climbStartIdx = 0;
+            
+            for (let i = 10; i < distData.length; i += 5) {
+                const dAlt = altData[i] - altData[i - 10];
+                const dDist = distData[i] - distData[i - 10];
+                const grade = dDist > 0 ? (dAlt / dDist) * 100 : 0;
+
+                if (!inClimb && grade > 3.0) {
+                    inClimb = true;
+                    climbStartIdx = i - 10;
+                } else if (inClimb && (grade < 0.5 || i === distData.length - 1)) {
+                    const cDist = distData[i] - distData[climbStartIdx];
+                    const cGain = altData[i] - altData[climbStartIdx];
+                    const cTime = timeData[i] - timeData[climbStartIdx];
+                    
+                    if (cDist > 400 && cGain > 15) {
+                        const avgGrade = (cGain / cDist) * 100;
+                        const vam = Math.round((cGain / cTime) * 3600);
+                        
+                        // UCI Categorization
+                        const difficulty = cDist * avgGrade; // Simplified Fiets Index
+                        let category = "4";
+                        if (difficulty > 64000) category = "HC";
+                        else if (difficulty > 48000) category = "1";
+                        else if (difficulty > 32000) category = "2";
+                        else if (difficulty > 16000) category = "3";
+
+                        climbPro.push({
+                            index: climbPro.length + 1,
+                            distance: (cDist / 1000).toFixed(2),
+                            gain: Math.round(cGain),
+                            avgGrade: avgGrade.toFixed(1),
+                            vam: vam,
+                            category: category,
+                            timeStr: formatDuration(cTime)
+                        });
+                    }
+                    inClimb = false;
+                }
+            }
+        }
+
+        return { cadenceAvg, maxSpeedObj, decouplingObj, efObj, autoLaps, avgWatts, maxWatts, npWatts, vi, ifFactor, workKj, powerCurve, climbPro };
     }, [streams, isPaceBased]);
 
     // 🔥 TRAINING EFFECT ALGORITHM (Estilo Garmin) 🔥
     const trainingEffect = useMemo(() => {
-        if (!exactZoneAnalysis) return null;
+        if (!exactZoneAnalysis || !proMetrics) return null;
 
-        const z1m = exactZoneAnalysis[0].minutes;
-        const z2m = exactZoneAnalysis[1].minutes;
-        const z3m = exactZoneAnalysis[2].minutes;
-        const z4m = exactZoneAnalysis[3].minutes;
+        const durationHours = activity.duration / 3600;
+        const ifVal = parseFloat(proMetrics.ifFactor) || 0;
+        const viVal = parseFloat(proMetrics.vi) || 1.0;
+        
+        // --- AEROBIC TRAINING EFFECT (0-5.0) ---
+        // Basado en IF y duración con escala logarítmica para representar el EPOC
+        // Un HIIT de 1h puede dar 3.0, un fondo de 4h en Z2 puede dar 4.0+
+        let aScore = 5.0 * (1 - Math.exp(-(ifVal * Math.pow(durationHours, 0.45)) / 0.55));
+        
+        // Ajuste por desacople (si hay drift, el impacto aeróbico es mayor)
+        if (proMetrics.decouplingObj && proMetrics.decouplingObj.value > 5) {
+            aScore += (proMetrics.decouplingObj.value / 100);
+        }
+        
+        const aerobicScore = Math.min(5.0, aScore).toFixed(1);
+
+        // --- ANAEROBIC TRAINING EFFECT (0-5.0) ---
+        // Garmin analiza picos de FC/Ritmo. Nosotros usaremos el agotamiento de W' (el tanque rápido)
+        // Detectamos caídas significativas de W' como estímulo anaeróbico
+        const wMin = Math.min(...(proMetrics.wPrimeRemaining || [100]));
+        const wDepletion = Math.max(0, 100 - wMin);
+        
+        // Puntos por intensidad intermitente (VI) y tiempo en Z5
         const z5m = exactZoneAnalysis[4].minutes;
+        const anaerobicIntensityPoints = (z5m * 0.2) + (viVal > 1.1 ? (viVal - 1) * 10 : 0);
+        const wPoints = (wDepletion / 20); // Agotamiento total (100) da 5 puntos base
+        
+        let anScore = 5.0 * (1 - Math.exp(-(wPoints + anaerobicIntensityPoints / 5) / 2.5));
+        if (anScore < 0.8 && z5m < 2) anScore = 0.0;
+        
+        const anaerobicScore = Math.min(5.0, anScore).toFixed(1);
 
-        // Puntos base Aeróbicos (Garmin TE aproximado por tiempo)
-        // Incrementamos el peso de Z3 y Z4 para que sesiones de Umbral puntúen correctamente alto (~4.6)
-        const aPoints = (z1m * 0.02) + (z2m * 0.045) + (z3m * 0.08) + (z4m * 0.14) + (z5m * 0.16);
-        // Función exponencial (denominador ajustado a 2.5 para escalar mejor a 5.0)
-        let aScore = 5.0 * (1 - Math.exp(-aPoints / 2.5));
-        let aerobicScore = aScore.toFixed(1);
-
-        // Puntos base Anaeróbicos
-        // Un ritmo sostenido en Z4 da 0 anaeróbico en Garmin. Solo Z5 (sprints/picos) lo genera.
-        const anPoints = z5m * 0.15;
-        let anScore = 5.0 * (1 - Math.exp(-anPoints / 2.0));
-        if (anScore < 0.6) anScore = 0.0; // Si el estímulo es ínfimo, Garmin da 0 de beneficio
-        let anaerobicScore = anScore.toFixed(1);
-
+        // --- BENEFIT CLASSIFICATION & DESCRIPTIONS ---
         let primaryBenefit = "Recuperación";
+        let description = "Actividad regenerativa para eliminar fatiga residual.";
         let benefitColor = "text-slate-500 dark:text-zinc-400";
 
-        if (aScore < 2.0 && anScore < 2.0) {
+        const aS = parseFloat(aerobicScore);
+        const anS = parseFloat(anaerobicScore);
+
+        if (aS < 2.0 && anS < 2.0) {
             primaryBenefit = "Recuperación";
-            benefitColor = "text-slate-500 dark:text-zinc-400";
-        } else if (anScore >= 2.5 && anScore >= aScore - 0.5) {
+            description = "Intensidad muy baja. Ideal para recuperación activa o base muy ligera.";
+        } else if (anS >= 2.5 && anS >= aS - 0.5) {
             primaryBenefit = "Capacidad Anaeróbica";
+            description = "Entrenamiento de intervalos que mejora tu capacidad de realizar esfuerzos explosivos repetidos.";
             benefitColor = "text-purple-600 dark:text-purple-400";
-        } else {
-            // Predominio Aeróbico: Evaluamos la estructura para clasificar el beneficio aeróbico
-            if (z5m > 8 && z5m >= z4m * 0.3) {
-                primaryBenefit = "VO2 Max";
+        } else if (aS >= 3.0) {
+            // Predominio Aeróbico
+            if (ifVal >= 0.95 || z5m > 10) {
+                primaryBenefit = "VO2 Máx";
+                description = "Mejora significativa de tu consumo máximo de oxígeno y potencia aeróbica.";
                 benefitColor = "text-rose-600 dark:text-rose-500";
-            } else if (z4m > 15 && (z4m > (z2m + z3m) * 0.4 || z4m > 30)) {
-                primaryBenefit = "Umbral";
+            } else if (ifVal >= 0.85 || exactZoneAnalysis[3].minutes > 20) {
+                primaryBenefit = "Umbral de Lactato";
+                description = "Fortalece tu capacidad de mantener ritmos altos durante periodos prolongados.";
                 benefitColor = "text-amber-600 dark:text-amber-500";
-            } else if (z3m > 15 || z4m > 10 || (z2m > 30 && (z3m > 10 || z4m > 5))) {
+            } else if (ifVal >= 0.75) {
                 primaryBenefit = "Tempo";
+                description = "Ritmo moderado-alto que mejora la eficiencia metabólica y el ritmo de carrera.";
                 benefitColor = "text-emerald-600 dark:text-emerald-500";
-            } else if (z2m > 15) {
-                primaryBenefit = "Base Aeróbica";
-                benefitColor = "text-blue-600 dark:text-blue-400";
             } else {
-                primaryBenefit = "Recuperación";
-                benefitColor = "text-slate-500 dark:text-zinc-400";
+                primaryBenefit = "Base Aeróbica";
+                description = "Desarrollo de resistencia cardiovascular y optimización de la quema de grasas.";
+                benefitColor = "text-blue-600 dark:text-blue-400";
             }
+        } else if (aS >= 2.0) {
+            primaryBenefit = "Mantenimiento";
+            description = "Estímulo suficiente para mantener tu nivel de forma actual.";
+            benefitColor = "text-indigo-600 dark:text-indigo-400";
         }
 
         const getLabel = (score) => {
@@ -625,18 +726,22 @@ export const ActivityDetailPage = ({ activity, settings, fetchStreams, onBack, o
         };
 
         return {
-            aerobic: parseFloat(aerobicScore),
-            anaerobic: parseFloat(anaerobicScore),
-            aerobicLabel: getLabel(parseFloat(aerobicScore)),
-            anaerobicLabel: getLabel(parseFloat(anaerobicScore)),
+            aerobic: aS,
+            anaerobic: anS,
+            description,
+            aerobicLabel: getLabel(aS),
+            anaerobicLabel: getLabel(anS),
             primaryBenefit,
             benefitColor
         };
-    }, [exactZoneAnalysis]);
+    }, [exactZoneAnalysis, proMetrics, activity]);
 
     const chartData = useMemo(() => {
         if (!streams || !streams.time) return [];
-        const timeData = streams.time.data; const latlngStream = streams.latlng?.data;
+        const timeData = streams.time.data; 
+        const distData = streams.distance?.data;
+        const altData = streams.altitude?.data;
+        const latlngStream = streams.latlng?.data;
         const step = Math.max(1, Math.floor(timeData.length / 600));
         const data = [];
 
@@ -649,14 +754,28 @@ export const ActivityDetailPage = ({ activity, settings, fetchStreams, onBack, o
                 else { pace = 20; }
             }
 
-            // Si no hay latlng stream, intentamos interpolar de la polilínea (más complejo)
-            // Por ahora, solo si existe el stream de latlng
+            // Cálculo de Pendiente (%)
+            let slope = 0;
+            if (i > 0 && distData && altData) {
+                const prevIdx = Math.max(0, i - step);
+                const dAlt = altData[i] - altData[prevIdx];
+                const dDist = distData[i] - distData[prevIdx];
+                if (dDist > 1) { // Evitar división por cero o ruido extremo
+                    slope = (dAlt / dDist) * 100;
+                    if (slope > 30) slope = 30; // Cap at 30% to avoid GPS spikes
+                    if (slope < -30) slope = -30;
+                }
+            }
+
             data.push({
                 time: Math.floor(timeData[i] / 60),
+                rawTime: timeData[i],
+                distanceKm: distData ? (distData[i] / 1000).toFixed(2) : null,
+                grade: slope,
                 hr: streams.heartrate ? streams.heartrate.data[i] : null,
                 speed: speed,
                 pace: pace,
-                alt: streams.altitude ? Math.round(streams.altitude.data[i]) : null,
+                alt: altData ? Math.round(altData[i]) : null,
                 watts: streams.watts ? streams.watts.data[i] : null,
                 cadence: streams.cadence ? streams.cadence.data[i] : null,
                 temp: streams.temp ? streams.temp.data[i] : null,
@@ -742,6 +861,7 @@ export const ActivityDetailPage = ({ activity, settings, fetchStreams, onBack, o
 
         return { 
             title, 
+            insights, // Restauramos el array para el mapa en la UI
             description: insights.slice(0, 2).join(' '),
             conclusion: insights.slice(2).join(' ') + (nextStep ? `\n\nPróximo paso: ${nextStep}` : ''),
             score: Math.min(100, Math.max(0, score))
@@ -750,7 +870,7 @@ export const ActivityDetailPage = ({ activity, settings, fetchStreams, onBack, o
 
     if (!activity) return null;
 
-    const formatTimeStr = (mins) => { const h = Math.floor(mins / 60); const m = Math.floor(mins % 60); return h > 0 ? `${h}h ${m}m` : `${m}m`; };
+    const formatTimeStr = (mins) => formatMinsToHMM(mins);
     const dateStr = new Date(activity.date).toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'short', year: 'numeric' });
 
     const getSpeedOrPace = () => {
@@ -859,10 +979,19 @@ export const ActivityDetailPage = ({ activity, settings, fetchStreams, onBack, o
                                     <div className="bg-white dark:bg-zinc-950 rounded-2xl border border-slate-200/60 dark:border-zinc-800/60 overflow-hidden shadow-sm">
                                         {/* Velocity/Pace */}
                                         <div className="h-[105px] pt-4 px-6 border-b border-slate-100 dark:border-zinc-800/60">
-                                            <div className="flex justify-between items-center mb-1">
-                                                <h4 className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">{isPaceBased ? 'Ritmo' : 'Velocidad'}</h4>
-                                                {activePayload && <span className="text-xs font-bold tabular-nums text-indigo-500">{isPaceBased ? formatPace(activePayload.pace) : activePayload.speed + ' km/h'}</span>}
-                                            </div>
+                                                <div className="flex justify-between items-center mb-1">
+                                                    <div className="flex items-center gap-3">
+                                                        <h4 className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">{isPaceBased ? 'Ritmo' : 'Velocidad'}</h4>
+                                                        {activePayload && (
+                                                            <div className="px-1.5 py-0.5 bg-slate-100 dark:bg-zinc-800 rounded flex items-center gap-2 text-[9px] font-bold tabular-nums">
+                                                                <span className="text-slate-600 dark:text-zinc-400">{formatDuration(activePayload.rawTime)}</span>
+                                                                <span className="w-px h-2 bg-slate-300 dark:bg-zinc-700"></span>
+                                                                <span className="text-indigo-500">{activePayload.distanceKm} km</span>
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                    {activePayload && <span className="text-xs font-bold tabular-nums text-indigo-500">{isPaceBased ? formatPace(activePayload.pace) : activePayload.speed + ' km/h'}</span>}
+                                                </div>
                                             <ResponsiveContainer width="100%" height={70}>
                                                 <AreaChart data={chartData} syncId="st" onMouseMove={handleMouseMove}>
                                                     <CartesianGrid vertical={false} strokeDasharray="3 3" stroke="#f1f5f9" opacity={0.5} />
@@ -916,7 +1045,14 @@ export const ActivityDetailPage = ({ activity, settings, fetchStreams, onBack, o
                                         {chartData.some(d => d.alt !== null) && (
                                             <div className="h-[105px] pt-4 px-6 border-b border-slate-100 dark:border-zinc-800/60">
                                                 <div className="flex justify-between items-center mb-1">
-                                                    <h4 className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Altitud</h4>
+                                                    <div className="flex items-center gap-3">
+                                                        <h4 className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Altitud</h4>
+                                                        {activePayload?.grade !== undefined && (
+                                                            <span className={`text-[9px] font-black ${activePayload.grade > 3 ? 'text-rose-500' : activePayload.grade < -3 ? 'text-emerald-500' : 'text-slate-400'}`}>
+                                                                {activePayload.grade > 0 ? '+' : ''}{activePayload.grade.toFixed(1)}%
+                                                            </span>
+                                                        )}
+                                                    </div>
                                                     {activePayload && <span className="text-xs font-bold tabular-nums text-slate-500">{activePayload.alt} m</span>}
                                                 </div>
                                                 <ResponsiveContainer width="100%" height={70}>
@@ -924,8 +1060,8 @@ export const ActivityDetailPage = ({ activity, settings, fetchStreams, onBack, o
                                                         <CartesianGrid vertical={false} strokeDasharray="3 3" stroke="#f1f5f9" opacity={0.5} />
                                                         <XAxis dataKey="time" hide />
                                                         <YAxis hide domain={['dataMin - 10', 'dataMax + 10']} />
-                                                        <RechartsTooltip content={() => null} cursor={{ stroke: '#94a3b8', strokeWidth: 1, strokeDasharray: '4 4' }} />
-                                                        <Area type="monotone" dataKey="alt" stroke="#94a3b8" fill="#94a3b8" fillOpacity={0.06} strokeWidth={1.5} dot={false} activeDot={{ r: 3, stroke: '#fff', strokeWidth: 1.5, fill: '#94a3b8' }} />
+                                                        <RechartsTooltip content={() => null} cursor={{ stroke: '#64748b', strokeWidth: 1, strokeDasharray: '4 4' }} />
+                                                        <Area type="monotone" dataKey="alt" stroke="#64748b" fill="#64748b" fillOpacity={0.06} strokeWidth={1.5} dot={false} activeDot={{ r: 3, stroke: '#fff', strokeWidth: 1.5, fill: '#64748b' }} />
                                                     </AreaChart>
                                                 </ResponsiveContainer>
                                             </div>
@@ -963,43 +1099,73 @@ export const ActivityDetailPage = ({ activity, settings, fetchStreams, onBack, o
                                 <InteractiveMap polyline={activity.map_polyline} highResCoords={streams?.latlng?.data} color={themeColor} currentPosition={activePayload?.latlng} />
                             </div>
 
-                            {/* Impact Analysis */}
+                            {/* Impact Analysis & Coach Summary (Unified Premium Section) */}
                             {trainingEffect && (
-                                <div className="bg-slate-50 dark:bg-zinc-900/50 rounded-xl p-4 space-y-3">
-                                    <div className="flex items-center justify-between">
-                                        <h3 className="text-[10px] font-semibold text-slate-400 dark:text-zinc-500 uppercase tracking-wider">Impacto</h3>
-                                        <span className={`text-xs font-semibold ${trainingEffect.benefitColor}`}>{trainingEffect.primaryBenefit}</span>
-                                    </div>
-                                    <div className="grid grid-cols-2 gap-4">
-                                        <div>
-                                            <div className="flex justify-between text-[10px] mb-1.5">
-                                                <span className="text-slate-500 dark:text-zinc-400 font-medium">Aeróbico</span>
-                                                <span className="font-semibold text-slate-700 dark:text-zinc-300">{trainingEffect.aerobic.toFixed(1)}</span>
+                                <div className="space-y-4">
+                                    <div className="bg-white dark:bg-zinc-900 border border-slate-100 dark:border-zinc-800 rounded-2xl p-6 shadow-sm space-y-6">
+                                        <div className="flex items-center justify-between">
+                                            <div className="space-y-1">
+                                                <h3 className="text-xs font-bold text-slate-900 dark:text-zinc-100 uppercase tracking-tight">Impacto del Entrenamiento</h3>
+                                                <p className="text-[10px] text-slate-400 dark:text-zinc-500 font-medium">Análisis fisiológico de la sesión</p>
                                             </div>
-                                            <div className="h-2 bg-slate-200 dark:bg-zinc-800 rounded-full overflow-hidden">
-                                                <div className="h-full bg-indigo-500 rounded-full transition-all duration-1000" style={{ width: `${(trainingEffect.aerobic / 5) * 100}%` }} />
+                                            <span className={`px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-tight bg-slate-100 dark:bg-zinc-800 border ${trainingEffect.benefitColor.replace('text-', 'border-').replace('dark:', '')} ${trainingEffect.benefitColor}`}>
+                                                {trainingEffect.primaryBenefit}
+                                            </span>
+                                        </div>
+
+                                        <div className="grid grid-cols-2 gap-6">
+                                            <div className="space-y-2">
+                                                <div className="flex justify-between items-end">
+                                                    <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Aeróbico</span>
+                                                    <span className="text-sm font-black text-slate-900 dark:text-zinc-100">{trainingEffect.aerobic}</span>
+                                                </div>
+                                                <div className="h-2 bg-slate-100 dark:bg-zinc-800 rounded-full overflow-hidden">
+                                                    <div className={`h-full transition-all duration-1000 ${trainingEffect.aerobic >= 3 ? 'bg-indigo-500' : 'bg-indigo-400'}`} style={{ width: `${(trainingEffect.aerobic / 5) * 100}%` }} />
+                                                </div>
+                                                <p className="text-[8px] font-bold text-slate-400 uppercase tracking-tighter">{trainingEffect.aerobicLabel}</p>
+                                            </div>
+
+                                            <div className="space-y-2">
+                                                <div className="flex justify-between items-end">
+                                                    <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Anaeróbico</span>
+                                                    <span className="text-sm font-black text-slate-900 dark:text-zinc-100">{trainingEffect.anaerobic}</span>
+                                                </div>
+                                                <div className="h-2 bg-slate-100 dark:bg-zinc-800 rounded-full overflow-hidden">
+                                                    <div className={`h-full transition-all duration-1000 ${trainingEffect.anaerobic >= 3 ? 'bg-purple-600' : 'bg-purple-400'}`} style={{ width: `${(trainingEffect.anaerobic / 5) * 100}%` }} />
+                                                </div>
+                                                <p className="text-[8px] font-bold text-slate-400 uppercase tracking-tighter">{trainingEffect.anaerobicLabel}</p>
                                             </div>
                                         </div>
-                                        <div>
-                                            <div className="flex justify-between text-[10px] mb-1.5">
-                                                <span className="text-slate-500 dark:text-zinc-400 font-medium">Anaeróbico</span>
-                                                <span className="font-semibold text-slate-700 dark:text-zinc-300">{trainingEffect.anaerobic.toFixed(1)}</span>
-                                            </div>
-                                            <div className="h-2 bg-slate-200 dark:bg-zinc-800 rounded-full overflow-hidden">
-                                                <div className="h-full bg-purple-500 rounded-full transition-all duration-1000" style={{ width: `${(trainingEffect.anaerobic / 5) * 100}%` }} />
+
+                                        <div className="pt-5 border-t border-slate-50 dark:border-zinc-800/60">
+                                            <div className="flex gap-3">
+                                                <div className="mt-1 w-1.5 h-1.5 rounded-full bg-indigo-500 shrink-0" />
+                                                <p className="text-[10px] font-bold text-slate-700 dark:text-zinc-300 leading-relaxed italic">
+                                                    {trainingEffect.description}
+                                                </p>
                                             </div>
                                         </div>
                                     </div>
-                                </div>
-                            )}
 
-
-                            {/* Fitness Conclusion */}
-                            {fitnessAnalysis && (
-                                <div className="bg-slate-50 dark:bg-zinc-900/50 rounded-xl p-3.5 space-y-1.5 border border-slate-100 dark:border-zinc-800/50">
-                                    <h4 className="text-[9px] font-bold text-slate-400 dark:text-zinc-500 uppercase tracking-widest">Resumen Técnico</h4>
-                                    <p className="text-[10px] font-bold text-slate-800 dark:text-zinc-200 leading-tight">{fitnessAnalysis.title}</p>
-                                    <p className="text-[9px] font-medium leading-relaxed text-slate-500 dark:text-zinc-400">{fitnessAnalysis.description}</p>
+                                    {/* Detailed Insights Slider-like cards */}
+                                    {fitnessAnalysis && (
+                                        <div className="bg-slate-50/50 dark:bg-zinc-900/40 rounded-2xl p-4 border border-slate-100 dark:border-zinc-800/40">
+                                            <h4 className="text-[9px] font-bold text-slate-400 dark:text-zinc-500 uppercase tracking-widest mb-3 flex items-center gap-2">
+                                                <div className="w-1 h-3 bg-indigo-500 rounded-full" />
+                                                Coach Insights
+                                            </h4>
+                                            <div className="space-y-3">
+                                                {fitnessAnalysis.insights.slice(0, 3).map((insight, idx) => (
+                                                    <div key={idx} className="flex gap-3">
+                                                        <div className="text-[8px] font-black text-slate-300 dark:text-zinc-700 mt-0.5">0{idx + 1}</div>
+                                                        <p className="text-[10px] font-medium text-slate-500 dark:text-zinc-400 leading-snug">
+                                                            {insight}
+                                                        </p>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    )}
                                 </div>
                             )}
                         </aside>
@@ -1078,187 +1244,224 @@ export const ActivityDetailPage = ({ activity, settings, fetchStreams, onBack, o
 
                 {/* --- pestaña: DETALLE (Deep Analysis) --- */}
                 {activeTab === 'data' && (
-                    <div className="flex-1 overflow-y-auto custom-scrollbar p-6 bg-white dark:bg-zinc-950">
-                        <div className="max-w-6xl mx-auto space-y-8">
+                    <div className="h-full overflow-y-auto custom-scrollbar p-6 bg-white dark:bg-zinc-950">
+                        <div className="max-w-[1400px] mx-auto grid grid-cols-1 lg:grid-cols-12 gap-8 pb-32">
+                            
+                            {/* --- COLUMNA PRINCIPAL (ANÁLISIS TÉCNICO) --- */}
+                            <div className="lg:col-span-8 space-y-8">
+                                
+                                {/* Distribución Volumétrica (Zones - Top Priority) */}
+                                <div className="space-y-3">
+                                    <h3 className="text-[10px] font-bold text-slate-400 dark:text-zinc-500 uppercase tracking-widest">Distribución Volumétrica (Zonas)</h3>
+                                    <div className="h-[280px] bg-white dark:bg-zinc-950 rounded-2xl border border-slate-100 dark:border-zinc-800/50 p-6 shadow-sm">
+                                        <ResponsiveContainer width="100%" height="100%">
+                                            <BarChart data={zoneType === 'hr' ? exactZoneAnalysis : exactPacePowerZoneAnalysis} margin={{ bottom: 20 }}>
+                                                <CartesianGrid vertical={false} strokeDasharray="3 3" stroke="#f1f5f9" opacity={0.5} />
+                                                <XAxis dataKey="label" axisLine={false} tickLine={false} tick={{ fontSize: 9, fontWeight: 700, fill: '#94a3b8' }} />
+                                                <YAxis hide />
+                                                <RechartsTooltip content={<CustomChartTooltip unit=" min" />} cursor={{ fill: '#f8fafc' }} />
+                                                <Bar dataKey="minutes" radius={[4, 4, 0, 0]}>
+                                                    {(zoneType === 'hr' ? exactZoneAnalysis : exactPacePowerZoneAnalysis).map((entry, index) => (
+                                                        <Cell 
+                                                            key={`cell-${index}`} 
+                                                            fill={zoneType === 'hr' ? ZONE_COLORS[index] : ['#94a3b8', '#3b82f6', '#10b981', '#f59e0b', '#f97316', '#ef4444', '#7c3aed'][index % 7]} 
+                                                            fillOpacity={0.85}
+                                                        />
+                                                    ))}
+                                                </Bar>
+                                            </BarChart>
+                                        </ResponsiveContainer>
+                                    </div>
+                                </div>
+
+                                {/* ClimbPro Section */}
+                                <div className="space-y-3">
+                                    <div className="flex items-center justify-between">
+                                        <h3 className="text-[10px] font-bold text-slate-400 dark:text-zinc-500 uppercase tracking-widest">Análisis de Ascensiones (ClimbPro)</h3>
+                                        <span className="text-[9px] font-bold text-indigo-500 px-2 py-0.5 bg-indigo-50 dark:bg-indigo-900/20 rounded-full uppercase tracking-tighter">
+                                            {proMetrics.climbPro?.length || 0} Subidas
+                                        </span>
+                                    </div>
                                     
-                                    {/* --- Row 1: Metabolic & Efficiency Dash --- */}
-                                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                                        {/* Metabolic Profile */}
-                                        <div className="lg:col-span-2 bg-slate-50 dark:bg-zinc-900/40 rounded-2xl p-6 border border-slate-100 dark:border-zinc-800/50">
-                                            <div className="flex items-center justify-between mb-6">
-                                                <div className="space-y-1">
-                                                    <h3 className="text-xs font-bold text-slate-900 dark:text-zinc-100 uppercase tracking-tight">Perfil Metabólico Estimado</h3>
-                                                    <p className="text-[10px] text-slate-400 dark:text-zinc-500 font-medium">Desglose de sustratos energéticos basados en intensidad</p>
-                                                </div>
-                                                <div className="text-right">
-                                                    <span className="text-lg font-black text-slate-900 dark:text-zinc-100">{proMetrics.workKj}</span>
-                                                    <span className="ml-1 text-[10px] font-bold text-slate-400 uppercase">kJ Totales</span>
-                                                </div>
+                                    <div className="bg-white dark:bg-zinc-900/40 rounded-2xl border border-slate-100 dark:border-zinc-800/50 overflow-hidden shadow-sm max-h-[300px] overflow-y-auto custom-scrollbar">
+                                        {proMetrics.climbPro?.length > 0 ? (
+                                            <table className="w-full text-left border-collapse">
+                                                <thead className="bg-slate-50/50 dark:bg-zinc-900/30">
+                                                    <tr className="text-[8px] font-bold text-slate-400 dark:text-zinc-500 uppercase tracking-widest border-b border-slate-100 dark:border-zinc-800/50">
+                                                        <th className="p-4">CAT</th>
+                                                        <th className="p-4">Subida</th>
+                                                        <th className="p-4 text-right">DIST (km)</th>
+                                                        <th className="p-4 text-right">GANANCIA</th>
+                                                        <th className="p-4 text-right">GRADO %</th>
+                                                        <th className="p-4 text-right">VAM (m/h)</th>
+                                                        <th className="p-4 text-right">TIEMPO</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody className="text-[10px] font-bold tabular-nums text-slate-600 dark:text-zinc-300 divide-y divide-slate-100 dark:divide-zinc-800/30">
+                                                    {proMetrics.climbPro.map((climb) => (
+                                                        <tr key={climb.index} className="hover:bg-slate-50 dark:hover:bg-zinc-800/40 transition-colors group">
+                                                            <td className="p-4">
+                                                                <span className={`px-2 py-0.5 rounded-md text-[9px] font-black ${
+                                                                    climb.category === 'HC' ? 'bg-zinc-900 text-white dark:bg-zinc-100 dark:text-black shadow-lg shadow-black/10' :
+                                                                    climb.category === '1' ? 'bg-rose-500 text-white' :
+                                                                    climb.category === '2' ? 'bg-orange-500 text-white' :
+                                                                    climb.category === '3' ? 'bg-amber-500 text-white' :
+                                                                    'bg-slate-200 text-slate-600 dark:bg-zinc-800 dark:text-zinc-400'
+                                                                }`}>
+                                                                    {climb.category}
+                                                                </span>
+                                                            </td>
+                                                            <td className="p-4 group-hover:text-indigo-500 transition-colors">Ascensión {climb.index}</td>
+                                                            <td className="p-4 text-right text-slate-400">{climb.distance}</td>
+                                                            <td className="p-4 text-right">+{climb.gain}m</td>
+                                                            <td className="p-4 text-right text-rose-500">{climb.avgGrade}%</td>
+                                                            <td className="p-4 text-right font-black text-slate-900 dark:text-zinc-100">{climb.vam}</td>
+                                                            <td className="p-4 text-right text-slate-400 font-medium">{climb.timeStr}</td>
+                                                        </tr>
+                                                    ))}
+                                                </tbody>
+                                            </table>
+                                        ) : (
+                                            <div className="flex flex-col items-center justify-center p-12 text-center space-y-2 opacity-40">
+                                                <div className="w-12 h-12 rounded-full border-2 border-dashed border-slate-300 dark:border-zinc-700" />
+                                                <p className="text-[9px] font-bold uppercase tracking-widest">Sin ascensiones notables</p>
                                             </div>
+                                        )}
+                                    </div>
+                                </div>
 
-                                            <div className="space-y-6">
-                                                {/* Fat vs Carb Bar */}
-                                                <div className="space-y-2">
-                                                    <div className="flex justify-between text-[10px] font-bold uppercase tracking-tight">
-                                                        <span className="text-emerald-500">Grasas ({Math.max(0, 100 - (proMetrics.ifFactor * 100)).toFixed(0)}%)</span>
-                                                        <span className="text-orange-500">Carbohidratos ({Math.min(100, (proMetrics.ifFactor * 100)).toFixed(0)}%)</span>
-                                                    </div>
-                                                    <div className="h-4 bg-slate-200 dark:bg-zinc-800 rounded-full overflow-hidden flex">
-                                                        <div className="h-full bg-emerald-500 transition-all duration-1000" style={{ width: `${Math.max(5, 100 - (proMetrics.ifFactor * 100))}%` }} />
-                                                        <div className="h-full bg-orange-500 transition-all duration-1000" style={{ width: `${Math.min(95, (proMetrics.ifFactor * 100))}%` }} />
-                                                    </div>
-                                                </div>
+                                {/* Metabolic Profile (Bottom) */}
+                                <div className="bg-slate-50 dark:bg-zinc-900/40 rounded-2xl p-5 border border-slate-100 dark:border-zinc-800/50">
+                                    <div className="flex items-center justify-between mb-4">
+                                        <div className="space-y-1">
+                                            <h3 className="text-xs font-bold text-slate-900 dark:text-zinc-100 uppercase tracking-tight">Perfil Metabólico Estimado</h3>
+                                            <p className="text-[9px] text-slate-400 dark:text-zinc-500 font-medium">Sustratos energéticos basados en intensidad</p>
+                                        </div>
+                                        <div className="text-right">
+                                            <span className="text-base font-black text-slate-900 dark:text-zinc-100">{proMetrics.workKj}</span>
+                                            <span className="ml-1 text-[9px] font-bold text-slate-400 uppercase">kJ Totales</span>
+                                        </div>
+                                    </div>
 
-                                                <div className="grid grid-cols-2 gap-8 pt-2">
-                                                    <div className="space-y-1">
-                                                        <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Enfoque de Hoy</span>
-                                                        <p className="text-[11px] font-bold text-slate-700 dark:text-zinc-300 leading-tight">
-                                                            {proMetrics.ifFactor < 0.75 
-                                                                ? "Optimización de oxidación de grasas y base aeróbica." 
-                                                                : "Consumo glucolítico alto. Énfasis en potencia y capacidad táctica."}
-                                                        </p>
-                                                    </div>
-                                                    <div className="space-y-1">
-                                                        <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Recuperación Est.</span>
-                                                        <p className="text-[11px] font-bold text-slate-700 dark:text-zinc-300 leading-tight">
-                                                            {activity.tss > 100 ? "36-48 horas para supercompensación." : "12-24 horas para estar al 100%."}
-                                                        </p>
-                                                    </div>
-                                                </div>
+                                    <div className="space-y-4">
+                                        <div className="space-y-1.5">
+                                            <div className="flex justify-between text-[9px] font-bold uppercase tracking-tight">
+                                                <span className="text-emerald-500">Grasas ({Math.max(0, 100 - (proMetrics.ifFactor * 100)).toFixed(0)}%)</span>
+                                                <span className="text-orange-500">Carbos ({Math.min(100, (proMetrics.ifFactor * 100)).toFixed(0)}%)</span>
+                                            </div>
+                                            <div className="h-2.5 bg-slate-200 dark:bg-zinc-800 rounded-full overflow-hidden flex">
+                                                <div className="h-full bg-emerald-500 transition-all duration-1000" style={{ width: `${Math.max(5, 100 - (proMetrics.ifFactor * 100))}%` }} />
+                                                <div className="h-full bg-orange-500 transition-all duration-1000" style={{ width: `${Math.min(95, (proMetrics.ifFactor * 100))}%` }} />
                                             </div>
                                         </div>
 
-                                        {/* Efficiency Gauges */}
-                                        <div className="bg-slate-50 dark:bg-zinc-900/40 rounded-2xl p-6 border border-slate-100 dark:border-zinc-800/50 space-y-6">
-                                            <h3 className="text-xs font-bold text-slate-900 dark:text-zinc-100 uppercase tracking-tight">Métricas de Eficiencia</h3>
-                                            
-                                            <div className="space-y-4">
-                                                {/* IF Gauge */}
-                                                <div className="space-y-1.5">
-                                                    <div className="flex justify-between text-[9px] font-bold text-slate-400 uppercase tracking-widest">
-                                                        <span>Intensidad (IF)</span>
-                                                        <span className="text-amber-500">{proMetrics.ifFactor}</span>
-                                                    </div>
-                                                    <div className="h-1.5 bg-slate-200 dark:bg-zinc-800 rounded-full overflow-hidden">
-                                                        <div className="h-full bg-amber-500 rounded-full" style={{ width: `${(proMetrics.ifFactor / 1.1) * 100}%` }} />
-                                                    </div>
-                                                </div>
-
-                                                {/* VI Gauge */}
-                                                <div className="space-y-1.5">
-                                                    <div className="flex justify-between text-[9px] font-bold text-slate-400 uppercase tracking-widest">
-                                                        <span>Variabilidad (VI)</span>
-                                                        <span className="text-indigo-500">{proMetrics.vi}</span>
-                                                    </div>
-                                                    <div className="h-1.5 bg-slate-200 dark:bg-zinc-800 rounded-full overflow-hidden">
-                                                        <div className="h-full bg-indigo-500 rounded-full" style={{ width: `${((proMetrics.vi - 1) / 0.3) * 100}%` }} />
-                                                    </div>
-                                                </div>
-
-                                                {/* EF Gauge */}
-                                                <div className="space-y-1.5">
-                                                    <div className="flex justify-between text-[9px] font-bold text-slate-400 uppercase tracking-widest">
-                                                        <span>Eficiencia (EF)</span>
-                                                        <span className="text-rose-500">{proMetrics.efObj?.value}</span>
-                                                    </div>
-                                                    <div className="h-1.5 bg-slate-200 dark:bg-zinc-800 rounded-full overflow-hidden">
-                                                        <div className="h-full bg-rose-500 rounded-full" style={{ width: `70%` }} />
-                                                    </div>
-                                                </div>
+                                        <div className="grid grid-cols-2 gap-6 pt-1">
+                                            <div className="space-y-1">
+                                                <span className="text-[8px] font-bold text-slate-400 uppercase tracking-widest">Enfoque Técnico</span>
+                                                <p className="text-[10px] font-bold text-slate-700 dark:text-zinc-300 leading-tight">
+                                                    {proMetrics.ifFactor < 0.75 
+                                                        ? "Optimización de oxidación de grasas y base aeróbica." 
+                                                        : "Consumo glucolítico alto. Énfasis en potencia táctica."}
+                                                </p>
                                             </div>
-
-                                            <div className="pt-4 border-t border-slate-200 dark:border-zinc-800/50">
-                                                <p className="text-[10px] text-slate-500 dark:text-zinc-400 leading-relaxed font-medium">
-                                                    Tu factor de variabilidad de <strong>{proMetrics.vi}</strong> sugiere un entrenamiento 
-                                                    {parseFloat(proMetrics.vi) > 1.1 ? " muy irregular (estilo MTB/Criterium)." : " muy constante (estilo Rodillo/Contrarreloj)."}
+                                            <div className="space-y-1">
+                                                <span className="text-[8px] font-bold text-slate-400 uppercase tracking-widest">Recuperación Hist.</span>
+                                                <p className="text-[10px] font-bold text-slate-700 dark:text-zinc-300 leading-tight">
+                                                    {activity.tss > 100 ? "36-48 horas para supercompensación." : "12-24 horas para estar al 100%."}
                                                 </p>
                                             </div>
                                         </div>
                                     </div>
-
-                                    {/* --- Row 2: Performance Highlights & Zones --- */}
-                                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                                        {/* Time in Zones Charts */}
-                                        <div className="lg:col-span-2 space-y-3">
-                                            <h3 className="text-[10px] font-bold text-slate-400 dark:text-zinc-500 uppercase tracking-widest">Distribución Volumétrica</h3>
-                                            <div className="h-[280px] bg-white dark:bg-zinc-950 rounded-2xl border border-slate-100 dark:border-zinc-800/50 p-6 shadow-sm">
-                                                <ResponsiveContainer width="100%" height="100%">
-                                                    <BarChart data={zoneType === 'hr' ? exactZoneAnalysis : exactPacePowerZoneAnalysis}>
-                                                        <CartesianGrid vertical={false} strokeDasharray="3 3" stroke="#f1f5f9" opacity={0.5} />
-                                                        <XAxis dataKey="label" axisLine={false} tickLine={false} tick={{ fontSize: 9, fontWeight: 700, fill: '#94a3b8' }} />
-                                                        <YAxis hide />
-                                                        <RechartsTooltip content={<CustomChartTooltip unit=" min" />} cursor={{ fill: '#f8fafc' }} />
-                                                        <Bar dataKey="minutes" radius={[4, 4, 0, 0]}>
-                                                            {(zoneType === 'hr' ? exactZoneAnalysis : exactPacePowerZoneAnalysis).map((entry, index) => (
-                                                                <Cell 
-                                                                    key={`cell-${index}`} 
-                                                                    fill={zoneType === 'hr' ? ZONE_COLORS[index] : ['#94a3b8', '#3b82f6', '#10b981', '#f59e0b', '#f97316', '#ef4444', '#7c3aed'][index % 7]} 
-                                                                    fillOpacity={0.85}
-                                                                />
-                                                            ))}
-                                                        </Bar>
-                                                    </BarChart>
-                                                </ResponsiveContainer>
-                                            </div>
-                                        </div>
-
-                                        {/* Peak Performance Highlights */}
-                                        <div className="space-y-3">
-                                            <h3 className="text-[10px] font-bold text-slate-400 dark:text-zinc-500 uppercase tracking-widest">Hitos de la Sesión</h3>
-                                            <div className="bg-white dark:bg-zinc-900/40 rounded-2xl border border-slate-100 dark:border-zinc-800/50 overflow-hidden shadow-sm">
-                                                <div className="p-4 border-b border-slate-100 dark:border-zinc-800/50 bg-slate-50/50 dark:bg-zinc-900/20">
-                                                    <span className="text-[10px] font-bold text-slate-900 dark:text-zinc-100 uppercase tracking-tight">Mejores Esfuerzos</span>
-                                                </div>
-                                                <div className="divide-y divide-slate-100 dark:divide-zinc-800/50">
-                                                    {proMetrics.powerCurve?.slice(0, 5).map((peak, idx) => (
-                                                        <div key={idx} className="flex justify-between items-center p-3.5 hover:bg-slate-50 dark:hover:bg-zinc-800/30 transition-colors">
-                                                            <div className="flex items-center gap-3">
-                                                                <div className="w-8 h-8 rounded-lg bg-slate-100 dark:bg-zinc-800 flex items-center justify-center text-[10px] font-black text-slate-400">
-                                                                    {peak.label}
-                                                                </div>
-                                                                <span className="text-[11px] font-bold text-slate-600 dark:text-zinc-400">Pico {peak.label}</span>
-                                                            </div>
-                                                            <div className="text-right">
-                                                                <div className="text-xs font-black text-slate-900 dark:text-zinc-100">{peak.value} <span className="text-[9px] font-bold text-slate-400">w</span></div>
-                                                                <div className="text-[9px] font-bold text-slate-400">{(peak.value / (activity.user_weight || 75)).toFixed(1)} w/kg</div>
-                                                            </div>
-                                                        </div>
-                                                    ))}
-                                                    <div className="flex justify-between items-center p-3.5 bg-slate-50/30 dark:bg-zinc-900/10">
-                                                        <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">FC Máxima</span>
-                                                        <span className="text-xs font-black text-rose-500">{maxHr} <span className="text-[9px] font-bold text-slate-400">bpm</span></span>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    {/* --- Row 3: Technical Metadata --- */}
-                                    <div className="p-6 bg-slate-50 dark:bg-zinc-950 border border-slate-100 dark:border-zinc-800/50 rounded-2xl flex flex-wrap gap-x-12 gap-y-6">
-                                        <div className="space-y-1">
-                                            <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Dispositivo</span>
-                                            <div className="text-xs font-bold text-slate-800 dark:text-zinc-200 flex items-center gap-2">
-                                                <div className="w-2 h-2 rounded-full bg-blue-500" />
-                                                Garmin Edge / Strava Core
-                                            </div>
-                                        </div>
-                                        <div className="space-y-1">
-                                            <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Temperatura</span>
-                                            <div className="text-xs font-bold text-slate-800 dark:text-zinc-200">22°C (Media)</div>
-                                        </div>
-                                        <div className="space-y-1">
-                                            <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Altitud Máxima</span>
-                                            <div className="text-xs font-bold text-slate-800 dark:text-zinc-200">{Math.round(activity.elevation_gain * 1.5)} m</div>
-                                        </div>
-                                        <div className="space-y-1">
-                                            <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Fuente de Datos</span>
-                                            <div className="text-xs font-bold text-slate-800 dark:text-zinc-200 text-indigo-500">FIT Original File</div>
-                                        </div>
-                                    </div>
-
                                 </div>
                             </div>
-                        )}
+
+                            {/* --- BARRA LATERAL (MÉTRICAS SECUNDARIAS) --- */}
+                            <div className="lg:col-span-4 space-y-6">
+                                
+                                {/* Efficiency Gauges */}
+                                <div className="bg-slate-50 dark:bg-zinc-900/40 rounded-2xl p-6 border border-slate-100 dark:border-zinc-800/50 space-y-6">
+                                    <h3 className="text-xs font-bold text-slate-900 dark:text-zinc-100 uppercase tracking-tight">Métricas de Eficiencia</h3>
+                                    
+                                    <div className="space-y-4">
+                                        <div className="space-y-1.5">
+                                            <div className="flex justify-between text-[9px] font-bold text-slate-400 uppercase tracking-widest">
+                                                <span>Intensidad (IF)</span>
+                                                <span className="text-amber-500 font-black">{proMetrics.ifFactor}</span>
+                                            </div>
+                                            <div className="h-1.5 bg-slate-200 dark:bg-zinc-800 rounded-full overflow-hidden">
+                                                <div className="h-full bg-amber-500 rounded-full" style={{ width: `${(proMetrics.ifFactor / 1.1) * 100}%` }} />
+                                            </div>
+                                        </div>
+
+                                        <div className="space-y-1.5">
+                                            <div className="flex justify-between text-[9px] font-bold text-slate-400 uppercase tracking-widest">
+                                                <span>Variabilidad (VI)</span>
+                                                <span className="text-indigo-500 font-black">{proMetrics.vi}</span>
+                                            </div>
+                                            <div className="h-1.5 bg-slate-200 dark:bg-zinc-800 rounded-full overflow-hidden">
+                                                <div className="h-full bg-indigo-500 rounded-full" style={{ width: `${((proMetrics.vi - 1) / 0.3) * 100}%` }} />
+                                            </div>
+                                        </div>
+
+                                        <div className="space-y-1.5">
+                                            <div className="flex justify-between text-[9px] font-bold text-slate-400 uppercase tracking-widest">
+                                                <span>Eficiencia (EF)</span>
+                                                <span className="text-rose-500 font-black">{proMetrics.efObj?.value}</span>
+                                            </div>
+                                            <div className="h-1.5 bg-slate-200 dark:bg-zinc-800 rounded-full overflow-hidden">
+                                                <div className="h-full bg-rose-500 rounded-full" style={{ width: `70%` }} />
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div className="pt-2 border-t border-slate-200 dark:border-zinc-800/40">
+                                        <p className="text-[9px] text-slate-500 dark:text-zinc-400 leading-relaxed font-bold uppercase italic">
+                                            Entrenamiento {parseFloat(proMetrics.vi) > 1.1 ? "Variable (MTB/Crit)" : "Constante (TT/Ritmo)"}
+                                        </p>
+                                    </div>
+                                </div>
+
+                                {/* Session Highlights */}
+                                <div className="space-y-3">
+                                    <h3 className="text-[10px] font-bold text-slate-400 dark:text-zinc-500 uppercase tracking-widest">Hitos de la Sesión</h3>
+                                    <div className="bg-white dark:bg-zinc-900/40 rounded-2xl border border-slate-100 dark:border-zinc-800/50 overflow-hidden shadow-sm max-h-[450px] overflow-y-auto custom-scrollbar">
+                                        <div className="divide-y divide-slate-100 dark:divide-zinc-800/50">
+                                            {proMetrics.powerCurve?.map((peak, idx) => (
+                                                <div key={idx} className="flex justify-between items-center p-3.5 hover:bg-slate-50 dark:hover:bg-zinc-800/30 transition-colors">
+                                                    <div className="flex items-center gap-3">
+                                                        <div className="w-8 h-8 rounded-lg bg-slate-100 dark:bg-zinc-800 flex items-center justify-center text-[10px] font-black text-slate-400">
+                                                            {peak.label}
+                                                        </div>
+                                                        <span className="text-[10px] font-bold text-slate-600 dark:text-zinc-400 uppercase">Pico {peak.label}</span>
+                                                    </div>
+                                                    <div className="text-right">
+                                                        <div className="text-xs font-black text-slate-900 dark:text-zinc-100">{peak.value}<span className="text-[9px] ml-0.5 opacity-50">w</span></div>
+                                                    </div>
+                                                </div>
+                                            ))}
+                                            <div className="flex justify-between items-center p-3.5 bg-slate-50/30 dark:bg-zinc-900/10">
+                                                <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">FC Máxima</span>
+                                                <span className="text-xs font-black text-rose-500">{maxHr} <span className="text-[9px] font-bold text-slate-400">bpm</span></span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Recovery Status (Raised up) */}
+                                <div className="bg-emerald-500 dark:bg-emerald-600 p-4 rounded-2xl text-white shadow-lg shadow-emerald-500/10">
+                                    <div className="flex items-center gap-2 mb-2">
+                                        <div className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
+                                        <span className="text-[8px] font-bold uppercase tracking-widest opacity-80">Estado de Recuperación</span>
+                                    </div>
+                                    <div className="flex justify-between items-end">
+                                        <div className="text-xl font-black italic">~24H</div>
+                                        <div className="text-[8px] font-bold uppercase bg-white/20 px-1.5 py-0.5 rounded">Supercompensación OK</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                )}
             </div>
         </div>
     );
