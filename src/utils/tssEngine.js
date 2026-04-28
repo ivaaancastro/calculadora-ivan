@@ -1,49 +1,72 @@
 /**
- * tssEngine.js — Single source of truth for all TSS / HRSS calculations.
+ * tssEngine.js — Fuente única de verdad para todos los cálculos de TSS / HRSS.
  *
- * Uses the Banister TRIMP model, identical to intervals.icu's HRSS:
+ * Implementa el modelo TRIMP de Banister, idéntico al HRSS de Intervals.icu:
  *   TRIMP = Σ(dt_min × d × y × e^(b×d))
- *   d = (HR − HRrest) / (HRmax − HRrest)   (Heart Rate Reserve fraction)
- *   Male:   y = 0.64,  b = 1.92
- *   Female: y = 0.86,  b = 1.67
- *   HRSS = (TRIMP / TRIMP_1h@LTHR) × 100
+ *   d     = (HR − HRreposo) / (HRmax − HRreposo)  → fracción de la Reserva Cardíaca
+ *
+ * Constantes de género (Banister):
+ *   Masculino: y = 0.64, b = 1.92
+ *   Femenino:  y = 0.86, b = 1.67
+ *
+ * HRSS = (TRIMP / TRIMP_1h@LTHR) × 100
  */
 
-// ── Zone percentages (Joe Friel 7-zone, % of LTHR) ──────────────────────────
+// ── Porcentajes de zona (Joe Friel 7 zonas, % de LTHR) ──────────────────────
 export const LTHR_ZONE_PCT = [
-    { pMin: 0, pMax: 0.81 },  // Z1 Recovery
-    { pMin: 0.81, pMax: 0.89 },  // Z2 Aerobic
-    { pMin: 0.90, pMax: 0.93 },  // Z3 Tempo
-    { pMin: 0.94, pMax: 0.99 },  // Z4 SubThreshold
-    { pMin: 1.00, pMax: 1.02 },  // Z5 SuperThreshold
-    { pMin: 1.03, pMax: 1.06 },  // Z6 Aerobic Capacity
-    { pMin: 1.06, pMax: 1.15 },  // Z7 Anaerobic
+    { pMin: 0.00, pMax: 0.81 },  // Z1 — Recuperación
+    { pMin: 0.81, pMax: 0.89 },  // Z2 — Aeróbico
+    { pMin: 0.90, pMax: 0.93 },  // Z3 — Tempo
+    { pMin: 0.94, pMax: 0.99 },  // Z4 — Subumbral
+    { pMin: 1.00, pMax: 1.02 },  // Z5 — Superumbral
+    { pMin: 1.03, pMax: 1.06 },  // Z6 — Capacidad aeróbica
+    { pMin: 1.06, pMax: 1.15 },  // Z7 — Anaeróbico
 ];
 
-// ── Per-sport contribution to PMC ────────────────────────────────────────────
-// fitness: % contribution to CTL    fatigue: % contribution to ATL
-// countsForWeekly: whether to include in the weekly TSS summary (intervals.icu style)
+/**
+ * Configuración de la contribución al PMC por tipo de deporte.
+ * - fitness:           % de contribución al CTL (forma crónica)
+ * - fatigue:           % de contribución al ATL (fatiga aguda)
+ * - countsForWeekly:   si se incluye en el sumario TSS semanal (estilo intervals.icu)
+ */
 export const SPORT_LOAD_CONFIG = {
-    cardio: { fitness: 1.0, fatigue: 1.0, countsForWeekly: true },
-    strength: { fitness: 0.0, fatigue: 1.0, countsForWeekly: false },
-    yoga: { fitness: 0.0, fatigue: 0.2, countsForWeekly: false },
-    walk: { fitness: 0.0, fatigue: 0.3, countsForWeekly: false },
-    swim: { fitness: 1.0, fatigue: 1.0, countsForWeekly: true },
-    other: { fitness: 0.5, fatigue: 0.5, countsForWeekly: false },
+    ride:     { fitness: 1.0, fatigue: 1.0, countsForWeekly: true  },
+    run:      { fitness: 1.0, fatigue: 1.0, countsForWeekly: true  },
+    swim:     { fitness: 1.0, fatigue: 1.0, countsForWeekly: true  },
+    strength: { fitness: 0.0, fatigue: 1.0, countsForWeekly: false }, // No construye CTL aeróbico
+    walk:     { fitness: 0.0, fatigue: 0.5, countsForWeekly: false },
+    yoga:     { fitness: 0.0, fatigue: 0.2, countsForWeekly: false },
+    other:    { fitness: 1.0, fatigue: 1.0, countsForWeekly: true  },
 };
 
-// ── Sport classification ─────────────────────────────────────────────────────
+// ── Clasificación de deporte ──────────────────────────────────────────────────
+/**
+ * Devuelve la categoría canónica de deporte a partir de un string de tipo.
+ * Las categorías posibles son: 'ride' | 'run' | 'swim' | 'walk' | 'yoga' | 'strength' | 'other'
+ *
+ * @param {string} typeStr  - Tipo de actividad tal y como viene de Strava o la BD
+ * @returns {'ride'|'run'|'swim'|'walk'|'yoga'|'strength'|'other'}
+ */
 export function getSportCategory(typeStr) {
     const t = String(typeStr).toLowerCase();
-    if (t.includes('weighttraining') || t.includes('fuerza') || t.includes('crossfit') || t.includes('workout')) return 'strength';
+    if (t.includes('weighttraining') || t.includes('fuerza') || t.includes('crossfit') || t.includes('workout') || t.includes('gym')) return 'strength';
     if (t.includes('yoga') || t.includes('stretch')) return 'yoga';
     if (t.includes('walk') || t.includes('hike') || t.includes('caminata') || t.includes('senderismo')) return 'walk';
     if (t.includes('swim') || t.includes('natación') || t.includes('natacion')) return 'swim';
-    if (t.includes('run') || t.includes('ride') || t.includes('ciclismo') || t.includes('bici') || t.includes('correr') || t.includes('carrera')) return 'cardio';
+    if (t.includes('run') || t.includes('correr') || t.includes('carrera') || t.includes('footing')) return 'run';
+    if (t.includes('ride') || t.includes('ciclismo') || t.includes('bici') || t.includes('bike')) return 'ride';
     return 'other';
 }
 
-// ── Zone generation from LTHR ────────────────────────────────────────────────
+// ── Generación de zonas desde LTHR ────────────────────────────────────────────
+/**
+ * Genera un array de 7 zonas de FC a partir del LTHR configurado.
+ * La Z1 empieza en 0 (reposo); la Z7 acaba en HRmax.
+ *
+ * @param {number} lthr   - Frecuencia cardíaca en el umbral láctico
+ * @param {number} maxHr  - Frecuencia cardíaca máxima
+ * @returns {{ min: number, max: number }[]}
+ */
 export function calcZonesFromLTHR(lthr, maxHr) {
     return LTHR_ZONE_PCT.map((z, i) => ({
         min: i === 0 ? 0 : Math.round(lthr * z.pMin),
@@ -51,21 +74,44 @@ export function calcZonesFromLTHR(lthr, maxHr) {
     }));
 }
 
-// ── Banister gender constants ────────────────────────────────────────────────
+// ── Constantes de género Banister ─────────────────────────────────────────────
+/**
+ * @param {'male'|'female'} gender
+ * @returns {{ kY: number, kB: number }}
+ */
 function genderConstants(gender) {
     const isMale = gender !== 'female';
     return { kY: isMale ? 0.64 : 0.86, kB: isMale ? 1.92 : 1.67 };
 }
 
-// ── Resolve sport-specific settings ──────────────────────────────────────────
+// ── Resolución de ajustes por deporte ────────────────────────────────────────
+/**
+ * Devuelve el bloque de settings (bike | run | swim) correspondiente al tipo
+ * de actividad. Usa getSportCategory para no duplicar la lógica de detección.
+ *
+ * @param {string} sportType  - Tipo de actividad
+ * @param {object} settings   - Settings del usuario (store)
+ * @returns {object|null}     - Settings del deporte (bike | run | swim object)
+ */
 function resolveSportSettings(sportType, settings) {
-    const t = String(sportType).toLowerCase();
-    const isBike = t.includes('ride') || t.includes('bici') || t.includes('ciclismo');
-    const isSwim = t.includes('swim') || t.includes('natacion');
-    return isBike ? settings.bike : isSwim ? (settings.swim || settings.run) : settings.run;
+    const category = getSportCategory(sportType);
+    if (category === 'ride') return settings.bike;
+    if (category === 'swim') return settings.swim || settings.run;
+    return settings.run; // run, walk, strength, yoga, other → usa run como base
 }
 
-// ── TRIMP normalization (1h @ LTHR) ──────────────────────────────────────────
+// ── Normalización TRIMP (1h @ LTHR) ──────────────────────────────────────────
+/**
+ * Calcula el TRIMP de referencia: el resultado de entrenar 1 hora exacta al LTHR.
+ * Se usa para normalizar el TRIMP de cualquier actividad → HRSS.
+ *
+ * @param {number} lthr    - Umbral de FC láctico
+ * @param {number} hrMax   - FC máxima
+ * @param {number} hrRest  - FC de reposo
+ * @param {number} kY      - Constante de género Y
+ * @param {number} kB      - Constante de género B
+ * @returns {number}
+ */
 function trimpNorm1h(lthr, hrMax, hrRest, kY, kB) {
     const hrRange = hrMax - hrRest;
     if (hrRange <= 0) return 1;
@@ -73,77 +119,95 @@ function trimpNorm1h(lthr, hrMax, hrRest, kY, kB) {
     return 60 * d * kY * Math.exp(kB * d);
 }
 
-// ── Calculate Normalized Power (NP) intervals.icu style ───────────────────────
+// ── Cálculo de Potencia Normalizada (NP) estilo Intervals.icu ─────────────────
+/**
+ * Calcula la Potencia Normalizada (NP) y la duración activa de una actividad
+ * a partir de los streams de vatios y tiempo.
+ *
+ * Algoritmo:
+ * 1. Reconstruye stream a 1Hz, colapsando pausas largas (>10s) a 1 segundo.
+ * 2. Aplica media móvil de 30s exacta (estilo WKO / Intervals.icu).
+ * 3. Eleva cada SMA a la 4ª potencia, promedia, y saca la raíz 4.
+ *
+ * @param {number[]} watts  - Array de vatios por muestra
+ * @param {number[]} time   - Array de tiempos en segundos (correspondientes a watts)
+ * @returns {{ np: number, duration: number }}
+ */
 function calculateNPAndDuration(watts, time) {
     if (!watts || !time || watts.length < 2) return { np: 0, duration: 0 };
-    
-    // Reconstruir el stream de potencia asegurando 1Hz puro en movimiento
-    const activeWatts = [];
-    activeWatts.push(watts[0] || 0);
-    
+
+    // Reconstruir stream a 1Hz asegurando potencia continua
+    const activeWatts = [watts[0] || 0];
     for (let i = 1; i < time.length; i++) {
-        let gap = time[i] - time[i - 1];
-        
-        // Pausas largas comprobadas (>10s) se colapsan a 1 segundo para pausar el NP.
-        if (gap > 10) gap = 1;
-        
+        // Pausas largas (>10s) se colapsan a 1 segundo para suspender el NP
+        const gap = Math.min(time[i] - time[i - 1], 10);
         const w = watts[i] || 0;
-        for (let j = 0; j < gap; j++) {
-            activeWatts.push(w);
-        }
+        for (let j = 0; j < gap; j++) activeWatts.push(w);
     }
-    
+
+    // Media móvil de 30s y acumulación de la 4ª potencia
     let sumNp = 0;
     let validCount = 0;
-    let sum = 0;
-    
-    // Media móvil de 30s exacta estilo WKO / Intervals
+    let windowSum = 0;
+
     for (let i = 0; i < activeWatts.length; i++) {
-        sum += activeWatts[i];
+        windowSum += activeWatts[i];
         if (i >= 29) {
-            if (i > 29) {
-                sum -= activeWatts[i - 30];
-            }
-            const sma = sum / 30;
+            if (i > 29) windowSum -= activeWatts[i - 30];
+            const sma = windowSum / 30;
             sumNp += Math.pow(sma, 4);
             validCount++;
         }
     }
-    
+
     const np = validCount > 0 ? Math.pow(sumNp / validCount, 0.25) : 0;
     return { np, duration: activeWatts.length };
 }
 
-// ── 1. Calculate TSS for a REAL activity (from HR stream or avg HR) ──────────
+// ── 1. Calcular TSS de una actividad REAL ────────────────────────────────────
+/**
+ * Calcula el TSS (Training Stress Score) de una actividad real aplicando,
+ * en orden de prioridad:
+ *   ① Power TSS  → stream de vatios disponible (ciclismo)
+ *   ② hrTSS      → stream de FC disponible
+ *   ③ hrTSS avg  → sólo FC media disponible
+ *   ④ Estimación por duración → sin datos fisiológicos
+ *
+ * @param {object} act       - Objeto actividad de la BD
+ * @param {object} settings  - Settings del usuario (store)
+ * @returns {{ tss: number, np?: number, intensity_factor?: number, method: string }}
+ */
 export function calculateActivityTSS(act, settings) {
     const { kY, kB } = genderConstants(settings.gender);
-    const hrRest = Number(settings.fcReposo) || 50;
-    const sportSettings = resolveSportSettings(act.type, settings);
-    const hrMax = Number(sportSettings?.max) || 200;
-    const lthr = Number(sportSettings?.lthr) || 170;
-    const hrRange = hrMax - hrRest;
-    const durMin = act.duration || 0;
+    const hrRest    = Number(settings.fcReposo) || 50;
+    const sportSetts = resolveSportSettings(act.type, settings);
+    const hrMax     = Number(sportSetts?.max) || 200;
+    const lthr      = Number(sportSetts?.lthr) || 170;
+    const hrRange   = hrMax - hrRest;
+    const durMin    = act.duration || 0;
 
-    const isBike = String(act.type).toLowerCase().includes('ride') || String(act.type).toLowerCase().includes('ciclismo') || String(act.type).toLowerCase().includes('bici');
-    
-    // ① Ciclismo: Priorizar Potencia de Vatios para Power TSS
+    const isBike = getSportCategory(act.type) === 'ride';
+
+    // ① Power TSS — sólo para ciclismo
     if (isBike) {
         const ftp = Number(settings.bike?.ftp) || 200;
-        
+
+        // Con stream de vatios — método más preciso
         if (act.streams_data?.watts?.data && act.streams_data?.time?.data) {
-            const watts = act.streams_data.watts.data;
-            const time = act.streams_data.time.data;
-            const { np, duration } = calculateNPAndDuration(watts, time);
-            
+            const { np, duration } = calculateNPAndDuration(
+                act.streams_data.watts.data,
+                act.streams_data.time.data,
+            );
             if (duration > 0 && ftp > 0 && np > 0) {
                 const intensityFactor = np / ftp;
                 const tss = (duration * np * intensityFactor) / (ftp * 36);
                 return { tss: Math.round(tss), np: Math.round(np), intensity_factor: intensityFactor, method: 'power' };
             }
         }
-        
-        if (act.watts_avg && act.watts_avg > 0) {
-            const avgWatts = Number(act.watts_avg);
+
+        // Con vatios medios — método aproximado
+        if (act.watts_avg > 0) {
+            const avgWatts   = Number(act.watts_avg);
             const durationSecs = durMin * 60;
             if (durationSecs > 0 && ftp > 0) {
                 const intensityFactor = avgWatts / ftp;
@@ -153,69 +217,101 @@ export function calculateActivityTSS(act, settings) {
         }
     }
 
+    // Sin rango de FC válido o sin duración → no es posible calcular
     if (hrRange <= 0 || durMin <= 0) return { tss: 0, method: 'none' };
 
     const norm = trimpNorm1h(lthr, hrMax, hrRest, kY, kB);
 
-    // ② Stream HR data → exact hrTSS / TRIMP
+    // ② hrTSS — stream de FC (método exacto segundo a segundo)
     if (act.streams_data?.heartrate?.data && act.streams_data?.time?.data) {
-        const hrData = act.streams_data.heartrate.data;
+        const hrData   = act.streams_data.heartrate.data;
         const timeData = act.streams_data.time.data;
         let trimp = 0;
         for (let i = 1; i < hrData.length; i++) {
             const dt = (timeData[i] - timeData[i - 1]) / 60;
-            if (dt > 5) continue; // ignore huge tracking gaps equivalent to pauses
+            if (dt > 5) continue;
             const d = Math.max(0, (hrData[i] - hrRest) / hrRange);
             trimp += dt * d * kY * Math.exp(kB * d);
         }
-        return { tss: Math.round((trimp / norm) * 100), method: 'hr_stream' };
+        const hrss = (trimp / norm) * 100;
+        const durationHours = (timeData[timeData.length - 1] - timeData[0]) / 3600;
+        const intensityFactor = durationHours > 0 ? Math.sqrt(hrss / (durationHours * 100)) : 0;
+
+        return { 
+            tss: Math.round(hrss), 
+            intensity_factor: intensityFactor,
+            method: 'hr_stream' 
+        };
     }
 
-    // ③ Average HR only → hrTSS / TRIMP at constant HR
+    // ③ hrTSS avg — sólo FC media (método de estimación constante)
     const hrAvg = Number(act.hr_avg);
     if (hrAvg && hrAvg > hrRest) {
         const d = (hrAvg - hrRest) / hrRange;
         const trimp = durMin * d * kY * Math.exp(kB * d);
-        return { tss: Math.round((trimp / norm) * 100), method: 'hr_avg' };
+        const hrss = (trimp / norm) * 100;
+        const durationHours = durMin / 60;
+        const intensityFactor = durationHours > 0 ? Math.sqrt(hrss / (durationHours * 100)) : 0;
+
+        return { 
+            tss: Math.round(hrss), 
+            intensity_factor: intensityFactor,
+            method: 'hr_avg' 
+        };
     }
 
-    // ④ No HR / No Power data → rough duration estimate
+    // ④ Sin datos fisiológicos → estimación genérica por duración
     const cat = getSportCategory(act.type);
-    if (cat === 'strength') return { tss: Math.round((durMin / 60) * 40), method: 'duration' };
-    return { tss: Math.round((durMin / 60) * 25), method: 'duration' };
+    const estimatedTss = cat === 'strength' ? (durMin / 60) * 40 : (durMin / 60) * 25;
+    const durationHours = durMin / 60;
+    const intensityFactor = durationHours > 0 ? Math.sqrt(estimatedTss / (durationHours * 100)) : 0;
+
+    return { 
+        tss: Math.round(estimatedTss), 
+        intensity_factor: intensityFactor,
+        method: 'duration' 
+    };
 }
 
-// ── 2. Compute TSS/hour for each zone (for planning estimation) ──────────────
+// ── 2. TSS/hora por zona (para estimación de planificación) ─────────────────
+/**
+ * Calcula el TSS estimado por hora de entrenamiento en cada zona de FC.
+ * Se utiliza para estimar la carga de entrenamientos planificados.
+ *
+ * @param {string} sportType  - Tipo de deporte
+ * @param {object} settings   - Settings del usuario
+ * @returns {Record<string, number>}  - Mapa zona → TSS/hora (ej: { Z1: 20, Z2: 40, ... })
+ */
 export function computeZoneTssPerHour(sportType, settings) {
-    const { kY, kB } = genderConstants(settings.gender);
-    const hrRest = Number(settings.fcReposo) || 50;
-    const sportSettings = resolveSportSettings(sportType, settings);
-    const lthr = Number(sportSettings?.lthr) || 170;
-    const hrMax = Number(sportSettings?.max) || 200;
-    const hrRange = hrMax - hrRest;
+    const { kY, kB }     = genderConstants(settings.gender);
+    const hrRest         = Number(settings.fcReposo) || 50;
+    const sportSetts     = resolveSportSettings(sportType, settings);
+    const lthr           = Number(sportSetts?.lthr) || 170;
+    const hrMax          = Number(sportSetts?.max) || 200;
+    const hrRange        = hrMax - hrRest;
 
     const fallback = { Z1: 20, Z2: 40, Z3: 60, Z4: 80, Z5: 100, Z6: 120, Z7: 140, R12: 30, R23: 50 };
     if (hrRange <= 0) return fallback;
 
-    const dLthr = (lthr - hrRest) / hrRange;
+    const dLthr             = (lthr - hrRest) / hrRange;
     const trimpPerMinAtLthr = dLthr * kY * Math.exp(kB * dLthr);
 
-    const zones = sportSettings?.zones;
-    const tph = {};
-    const minExerciseHR = lthr * 0.65; // Floor: nobody exercises below ~65% LTHR
+    const zones = sportSetts?.zones;
+    const tph   = {};
+    // Suelo mínimo: nadie entrena por debajo del ~65% del LTHR
+    const minExerciseHR = lthr * 0.65;
 
     if (zones && zones.length > 0) {
         zones.forEach((z, i) => {
-            // For Z1 (starts at 0), clamp min to a realistic exercise HR
             const effectiveMin = Math.max(z.min, minExerciseHR);
-            const typicalHR = effectiveMin + (z.max - effectiveMin) * 0.6;
-            const d = Math.max(0, (typicalHR - hrRest) / hrRange);
-            const trimpPerMin = d * kY * Math.exp(kB * d);
-            tph[`Z${i + 1}`] = Math.round((trimpPerMin / trimpPerMinAtLthr) * 100);
+            const typicalHR    = effectiveMin + (z.max - effectiveMin) * 0.6;
+            const d            = Math.max(0, (typicalHR - hrRest) / hrRange);
+            const trimpPerMin  = d * kY * Math.exp(kB * d);
+            tph[`Z${i + 1}`]  = Math.round((trimpPerMin / trimpPerMinAtLthr) * 100);
         });
     }
 
-    // Fallback if zones are missing
+    // Fallback por si faltan zonas
     for (let i = 1; i <= 7; i++) {
         if (!tph[`Z${i}`]) tph[`Z${i}`] = fallback[`Z${i}`];
     }
@@ -226,54 +322,57 @@ export function computeZoneTssPerHour(sportType, settings) {
     return tph;
 }
 
-// ── 3. Estimate TSS from planned workout blocks (with sport efficiency) ────────
+// ── 3. Estimar TSS a partir de bloques de entreno planificado ──────────────
+/**
+ * Estima el TSS total de un entreno planificado a partir de sus bloques.
+ * Soporta bloques de HR por zona y bloques de vatios (Power TSS).
+ *
+ * @param {object[]} blocks     - Array de bloques del entreno planificado
+ * @param {string}   sportType  - Tipo de deporte ('Run' | 'Ride' | 'Swim')
+ * @param {object}   settings   - Settings del usuario
+ * @returns {number|null}       - TSS estimado, o null si no hay bloques
+ */
 export function estimateTssFromBlocks(blocks, sportType, settings) {
     if (!blocks || blocks.length === 0) return null;
-    const tph = computeZoneTssPerHour(sportType, settings);
-    const cat = getSportCategory(sportType);
-    const ftp = Number(settings?.bike?.ftp || settings?.ftp || 0);
 
+    const tph      = computeZoneTssPerHour(sportType, settings);
+    const category = getSportCategory(sportType);
+    const ftp      = Number(settings?.bike?.ftp || settings?.ftp || 0);
+
+    // Velocidades de referencia por zona para estimar duración a partir de distancia (min/km ó min/100m)
     const ZONE_PACE = {
-        Run: { Z1: 7.0, R12: 6.5, Z2: 6.0, R23: 5.6, Z3: 5.2, R34: 4.85, Z4: 4.5, R45: 4.15, Z5: 3.8, Z6: 3.2 },
+        Run:  { Z1: 7.0, R12: 6.5, Z2: 6.0, R23: 5.6, Z3: 5.2, R34: 4.85, Z4: 4.5, R45: 4.15, Z5: 3.8, Z6: 3.2 },
         Ride: { Z1: 3.0, R12: 2.75, Z2: 2.5, R23: 2.35, Z3: 2.2, R34: 2.1, Z4: 2.0, R45: 1.85, Z5: 1.7, Z6: 1.5 },
         Swim: { Z1: 3.0, R12: 2.75, Z2: 2.5, R23: 2.35, Z3: 2.2, R34: 2.1, Z4: 2.0, R45: 1.85, Z5: 1.7, Z6: 1.5 },
     };
     const sportPace = ZONE_PACE[sportType] || ZONE_PACE.Run;
 
-    // Efficiency Factor: Structured blocks assume you hit the target for the whole block duration
-    const efficiency = { target: 1.0, rec: 0.0 };
-
     let totalTSS = 0;
 
+    /** Convierte un bloque a minutos efectivos. */
     const getMins = (item) => {
         const dur = Number(item.duration) || 0;
-        if (item.unit === 'dist') return dur * (sportPace[item.zone] || 5);
-        return dur;
+        return item.unit === 'dist' ? dur * (sportPace[item.zone] || 5) : dur;
     };
 
+    /** Calcula el TSS de un segmento (con o sin repeticiones). */
     const calcSegment = (item, reps = 1) => {
         const mins = getMins(item) * reps;
         if (mins <= 0) return 0;
 
-        // Si es por Vatios y hay FTP
-        if (item.targetType === 'power' && item.targetValue && ftp > 0 && cat === 'cardio') {
+        // Power TSS — sólo ciclismo con FTP configurado y vatios objetivo
+        if (item.targetType === 'power' && item.targetValue && ftp > 0 && category === 'ride') {
             const tgtWatts = Number(item.targetValue);
             if (!isNaN(tgtWatts) && tgtWatts > 0) {
-                const activeMins = mins * efficiency.target;
-                const passiveMins = mins * efficiency.rec;
-                // TSS = (duración_en_segundos * NP^2) / (FTP^2 * 36)
-                const activeTSS = (activeMins * 60 * (tgtWatts * tgtWatts)) / (ftp * ftp * 36);
-                const passiveTSS = (passiveMins / 60) * (tph.Z1 ?? 20);
-                return activeTSS + passiveTSS;
+                // TSS = (segundos × NP²) / (FTP² × 36)
+                const activeTSS = (mins * 60 * tgtWatts * tgtWatts) / (ftp * ftp * 36);
+                return activeTSS;
             }
         }
 
-        // Fallback a HR predictivo
+        // hrTSS predictivo por zona
         const tssTarget = tph[item.zone] ?? tph.Z2;
-        const tssRec = tph.Z1 ?? 20;
-        const activeTSS = (mins * efficiency.target / 60) * tssTarget;
-        const passiveTSS = (mins * efficiency.rec / 60) * tssRec;
-        return activeTSS + passiveTSS;
+        return (mins / 60) * tssTarget;
     };
 
     blocks.forEach(block => {
@@ -290,7 +389,14 @@ export function estimateTssFromBlocks(blocks, sportType, settings) {
     return Math.round(totalTSS);
 }
 
-// ── 4. Effective TSS (with sport-specific fatigue weighting) ─────────────────
+// ── 4. TSS efectivo ponderado por fatiga del deporte ─────────────────────────
+/**
+ * Devuelve el TSS efectivo de una actividad aplicando el factor de fatiga
+ * específico de su deporte (de SPORT_LOAD_CONFIG).
+ *
+ * @param {object} act  - Actividad con campos tss, sportCategory y/o type
+ * @returns {number}
+ */
 export function getEffectiveTSS(act) {
     const tss = act.tss || 0;
     const cat = act.sportCategory || getSportCategory(act.type || '');
@@ -298,10 +404,19 @@ export function getEffectiveTSS(act) {
     return Math.round(tss * cfg.fatigue);
 }
 
-// ── 5. Recalculate TSS from stored plan description ──────────────────────────
+// ── 5. Recalcular TSS de un plan almacenado ───────────────────────────────────
+/**
+ * Recalcula el TSS de un workout planificado a partir de su campo `description`
+ * (que almacena los bloques en JSON). Si no hay bloques válidos, devuelve el TSS
+ * almacenado en la BD como fallback.
+ *
+ * @param {object} plan      - Workout planificado (fila de la tabla planned_workouts)
+ * @param {object} settings  - Settings del usuario
+ * @returns {number}
+ */
 export function recalcTssFromBlocks(plan, settings) {
     try {
-        const desc = typeof plan.description === 'string' ? JSON.parse(plan.description) : plan.description;
+        const desc   = typeof plan.description === 'string' ? JSON.parse(plan.description) : plan.description;
         const blocks = desc?.blocks;
         if (!blocks || blocks.length === 0) return plan.tss || 0;
         return estimateTssFromBlocks(blocks, plan.type || 'Run', settings);

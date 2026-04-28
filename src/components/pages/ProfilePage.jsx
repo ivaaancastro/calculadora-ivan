@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { Save, Activity, Heart, Zap, Database, Loader2, RefreshCw, CheckCircle2, ArrowLeft, Lock, Key, Bike, Footprints, Weight, Link2, Timer, Gauge } from 'lucide-react';
+import { Save, Activity, Heart, Zap, Database, Loader2, RefreshCw, CheckCircle2, ArrowLeft, Lock, Key, Bike, Footprints, Weight, Link2, Timer, Gauge, Cloud, Wifi } from 'lucide-react';
 import { supabase } from '../../supabase';
 import toast from 'react-hot-toast';
 import { LTHR_ZONE_PCT, calcZonesFromLTHR } from '../../utils/tssEngine';
+import { useIntervalsSync } from '../../hooks/useIntervalsSync';
 
 const getPeakByTime = (hrData, timeData, windowSeconds) => {
     if (!hrData || !timeData || hrData.length < 2) return 0;
@@ -298,12 +299,45 @@ const SportZonesSection = ({ sport, sportLabel, icon: Icon, color, showPace, sho
     );
 };
 
-export const ProfilePage = ({ currentSettings, onUpdate, activities, isDeepSyncing, deepSyncProgress, onDeepSync, onBack }) => {
+export const ProfilePage = ({ currentSettings, currentMetrics, onUpdate, activities, isDeepSyncing, deepSyncProgress, onDeepSync, onBack }) => {
     const [formData, setFormData] = useState(null);
+    const [targetCtl, setTargetCtl] = useState(null); // Managed separately for calibration logic
     const [activeTab, setActiveTab] = useState('run');
     const [isScanning, setIsScanning] = useState(false);
     const [newPassword, setNewPassword] = useState('');
     const [isUpdatingPwd, setIsUpdatingPwd] = useState(false);
+    const [syncPreview, setSyncPreview] = useState(null); // {weight, rhr, ftp} before confirming
+
+    const { syncing: isSyncingIntervals, syncProgress: intervalsSyncProgress, syncAll: syncIntervals } = useIntervalsSync();
+
+    const handleSyncIntervals = async () => {
+        if (!formData?.intervalsId || !formData?.intervalsKey) {
+            toast.error('Introduce tu Athlete ID y API Key de Intervals.icu primero');
+            return;
+        }
+        const result = await syncIntervals(formData);
+        if (!result) return;
+
+        // Show preview of profile updates
+        const { profileUpdates } = result;
+        if (profileUpdates && Object.keys(profileUpdates).length > 0) {
+            setSyncPreview(profileUpdates);
+        }
+    };
+
+    const handleApplySyncedProfile = () => {
+        if (!syncPreview) return;
+        setFormData(prev => ({
+            ...prev,
+            ...(syncPreview.weight != null ? { weight: syncPreview.weight } : {}),
+            ...(syncPreview.fc_reposo != null ? { fcReposo: syncPreview.fc_reposo } : {}),
+            bike: syncPreview.ftp != null
+                ? { ...prev.bike, ftp: syncPreview.ftp }
+                : prev.bike,
+        }));
+        setSyncPreview(null);
+        toast.success('✅ Perfil actualizado con datos de Intervals.icu');
+    };
 
     useEffect(() => {
         if (currentSettings) {
@@ -311,6 +345,7 @@ export const ProfilePage = ({ currentSettings, onUpdate, activities, isDeepSynci
                 ...currentSettings,
                 intervalsId: currentSettings.intervalsId || '',
                 intervalsKey: currentSettings.intervalsKey || '',
+                offsetCtl: currentSettings.offsetCtl || 0,
                 run: {
                     ...currentSettings.run,
                     zonesMode: currentSettings.run?.zonesMode || 'lthr',
@@ -328,8 +363,12 @@ export const ProfilePage = ({ currentSettings, onUpdate, activities, isDeepSynci
                         calcZonesFromLTHR(currentSettings.bike?.lthr || 168, currentSettings.bike?.max || 190),
                 },
             });
+            // Initialize targetCtl from the current adjusted value
+            if (currentMetrics?.ctl != null) {
+                setTargetCtl(Math.round(currentMetrics.ctl));
+            }
         }
-    }, [currentSettings]);
+    }, [currentSettings, currentMetrics]);
 
     if (!formData) return null;
 
@@ -426,7 +465,14 @@ export const ProfilePage = ({ currentSettings, onUpdate, activities, isDeepSynci
                         <p className="text-[10px] text-slate-500 dark:text-zinc-500 font-bold uppercase tracking-widest mt-0.5">Zonas, umbrales y configuración</p>
                     </div>
                 </div>
-                <button onClick={() => onUpdate(formData)} className="flex items-center gap-1.5 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded text-[10px] font-bold uppercase tracking-widest transition-colors shadow-sm">
+                <button 
+                  onClick={() => {
+                    const raw = currentMetrics?.rawCtl || 0;
+                    const newOffset = targetCtl !== null ? (targetCtl - raw) : formData.offsetCtl;
+                    onUpdate({ ...formData, offsetCtl: newOffset });
+                  }} 
+                  className="flex items-center gap-1.5 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded text-[10px] font-bold uppercase tracking-widest transition-colors shadow-sm"
+                >
                     <Save size={14} /> Guardar
                 </button>
             </div>
@@ -453,6 +499,21 @@ export const ProfilePage = ({ currentSettings, onUpdate, activities, isDeepSynci
                                     <input type="number" name="fcReposo" value={formData.fcReposo} onChange={handleChange} className="w-full pl-9 pr-3 py-2 bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 rounded text-sm font-mono dark:text-zinc-200 focus:border-blue-500 outline-none" />
                                 </div>
                             </div>
+                            <div className="pt-2 border-t border-slate-100 dark:border-zinc-800/80">
+                                <label className="text-[9px] font-bold text-slate-500 dark:text-zinc-400 uppercase tracking-widest block mb-1">Calibrar Fitness Actual (CTL)</label>
+                                <div className="relative">
+                                    <Activity size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-blue-500" />
+                                    <input 
+                                        type="number" 
+                                        step="1" 
+                                        value={targetCtl ?? ''} 
+                                        onChange={(e) => setTargetCtl(e.target.value ? parseInt(e.target.value) : null)} 
+                                        placeholder="Puntos CTL..." 
+                                        className="w-full pl-9 pr-3 py-2 bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 rounded text-sm font-mono dark:text-zinc-200 focus:border-blue-500 outline-none placeholder:text-slate-400" 
+                                    />
+                                </div>
+                                <p className="text-[8px] text-slate-400 mt-1 leading-tight">Introduce tu Fitness actual de Garmin/Intervals.icu. El sistema ajustará todo el historial suavemente para coincidir con este valor hoy.</p>
+                            </div>
                         </div>
                     </div>
 
@@ -465,7 +526,7 @@ export const ProfilePage = ({ currentSettings, onUpdate, activities, isDeepSynci
                     </div>
 
                     <div className="bg-indigo-50/50 dark:bg-indigo-900/10 border border-indigo-200 dark:border-indigo-900/30 rounded-lg p-5 shadow-sm">
-                        <PanelHeader icon={Link2} title="Intervals.icu" />
+                        <PanelHeader icon={Link2} title="Intervals.icu" subtitle="Garmin · Whoop · Oura" />
                         <div className="space-y-2">
                             <div>
                                 <label className="text-[8px] font-bold text-slate-500 uppercase tracking-widest mb-1 block">Athlete ID</label>
@@ -475,6 +536,52 @@ export const ProfilePage = ({ currentSettings, onUpdate, activities, isDeepSynci
                                 <label className="text-[8px] font-bold text-slate-500 uppercase tracking-widest mb-1 block">API Key</label>
                                 <input type="password" name="intervalsKey" value={formData.intervalsKey} onChange={handleChange} placeholder="..." className="w-full bg-white dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 rounded px-3 py-1.5 text-xs font-mono dark:text-zinc-200 focus:border-indigo-500 outline-none" />
                             </div>
+
+                            {/* Sync button */}
+                            <button
+                                onClick={handleSyncIntervals}
+                                disabled={isSyncingIntervals || !formData.intervalsId || !formData.intervalsKey}
+                                className="w-full mt-1 py-2 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded text-[9px] font-bold uppercase tracking-wider flex justify-center items-center gap-1.5 transition-colors"
+                            >
+                                {isSyncingIntervals
+                                    ? <><Loader2 size={10} className="animate-spin" />{intervalsSyncProgress || 'Sincronizando...'}</>
+                                    : <><Cloud size={10} /> Sincronizar VFC · Peso · HR</>}
+                            </button>
+
+                            {/* Sync preview: show what will be updated */}
+                            {syncPreview && (
+                                <div className="mt-2 p-3 bg-indigo-100 dark:bg-indigo-900/30 rounded-lg border border-indigo-300 dark:border-indigo-700">
+                                    <p className="text-[8px] font-bold text-indigo-700 dark:text-indigo-400 uppercase tracking-wider mb-1.5">📥 Actualizar desde Intervals.icu:</p>
+                                    <div className="space-y-1">
+                                        {syncPreview.weight != null && (
+                                            <div className="flex justify-between text-[9px]">
+                                                <span className="text-slate-500">Peso</span>
+                                                <span className="font-mono font-bold text-indigo-700 dark:text-indigo-300">{formData.weight} → {syncPreview.weight} kg</span>
+                                            </div>
+                                        )}
+                                        {syncPreview.fc_reposo != null && (
+                                            <div className="flex justify-between text-[9px]">
+                                                <span className="text-slate-500">FC Reposo</span>
+                                                <span className="font-mono font-bold text-indigo-700 dark:text-indigo-300">{formData.fcReposo} → {syncPreview.fc_reposo} bpm</span>
+                                            </div>
+                                        )}
+                                        {syncPreview.ftp != null && (
+                                            <div className="flex justify-between text-[9px]">
+                                                <span className="text-slate-500">FTP</span>
+                                                <span className="font-mono font-bold text-indigo-700 dark:text-indigo-300">{formData.bike?.ftp} → {syncPreview.ftp} W</span>
+                                            </div>
+                                        )}
+                                    </div>
+                                    <div className="flex gap-2 mt-2">
+                                        <button onClick={handleApplySyncedProfile} className="flex-1 py-1 bg-indigo-600 text-white rounded text-[8px] font-bold uppercase">Aplicar</button>
+                                        <button onClick={() => setSyncPreview(null)} className="flex-1 py-1 bg-slate-200 dark:bg-zinc-700 text-slate-600 dark:text-zinc-300 rounded text-[8px] font-bold uppercase">Ignorar</button>
+                                    </div>
+                                </div>
+                            )}
+
+                            <p className="text-[8px] text-indigo-500/70 dark:text-indigo-400/60 leading-relaxed pt-1">
+                                Sincroniza 180 días de VFC, FC reposo, peso, sueño y VO₂máx desde Garmin a través de intervals.icu.
+                            </p>
                         </div>
                     </div>
 

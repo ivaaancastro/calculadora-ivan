@@ -1,5 +1,5 @@
 import React, { useRef } from 'react';
-import { Upload, Trash2, UserCircle, Plus, RefreshCw, Activity, Settings, Moon, Sun, LogOut, LayoutDashboard, Calendar, List, HeartPulse } from 'lucide-react';
+import { Upload, Trash2, UserCircle, Plus, RefreshCw, Activity, Settings, Moon, Sun, LogOut, LayoutDashboard, Calendar, List, HeartPulse, BarChart3 } from 'lucide-react';
 import StravaConnect from '../common/StravaConnect';
 import { useTheme } from '../../hooks/useTheme';
 import { supabase } from '../../supabase';
@@ -18,39 +18,40 @@ export const Navbar = ({
 
   const tabs = [
     { id: 'overview', label: 'Dashboard', icon: LayoutDashboard },
+    { id: 'stats', label: 'Rendimiento', icon: BarChart3 },
     { id: 'calendar', label: 'Calendario', icon: Calendar },
     { id: 'history', label: 'Actividades', icon: List },
     { id: 'health', label: 'Salud', icon: HeartPulse },
   ];
 
   return (
-    <nav className="bg-white/90 dark:bg-zinc-950/90 backdrop-blur-md border-b border-slate-200 dark:border-zinc-800 px-4 sm:px-6 pt-[calc(1rem+env(safe-area-inset-top))] pb-3 sticky top-0 z-40 transition-all duration-300">
+    <nav className="glass-nav px-4 sm:px-6 pt-[calc(1rem+env(safe-area-inset-top))] pb-3 sticky top-0 z-40 transition-all duration-300">
       <div className="flex justify-between items-center max-w-[1800px] mx-auto mt-1 md:mt-0">
 
         {/* LOGO */}
         <button onClick={() => onTabChange('overview')} className="flex items-center gap-2.5 hover:opacity-80 transition-opacity">
-          <div className="bg-blue-600 text-white p-1.5 rounded shadow-sm">
+          <div className="bg-blue-600 text-white p-1.5 rounded-lg shadow-sm">
             <Activity size={18} strokeWidth={2.5} />
           </div>
           <div className="flex flex-col justify-center text-left">
-            <h1 className="text-sm font-black text-slate-800 dark:text-zinc-100 tracking-tight leading-none uppercase">FORMA<span className="text-blue-500">LAB</span></h1>
-            <p className="text-[8px] font-bold text-slate-500 dark:text-zinc-500 uppercase tracking-widest hidden lg:block mt-0.5">Performance Analytics</p>
+            <h1 className="text-base font-semibold text-slate-900 dark:text-zinc-100 tracking-tight leading-none">Forma<span className="text-blue-500">Lab</span></h1>
+            <p className="text-[10px] font-medium text-slate-500 dark:text-zinc-400 hidden lg:block mt-0.5">Performance</p>
           </div>
         </button>
 
-        {/* PAGE TABS — Desktop */}
+        {/* PAGE TABS — Desktop Segmented Control */}
         <div className="hidden md:flex items-center">
-          <div className="flex items-center gap-0.5 bg-slate-100 dark:bg-zinc-800/60 rounded-lg p-0.5">
+          <div className="flex items-center gap-1 bg-slate-200/50 dark:bg-zinc-800/50 backdrop-blur-md rounded-xl p-1 shadow-inner">
             {tabs.map(tab => {
               const Icon = tab.icon;
               const isActive = activeTab === tab.id;
               return (
                 <button key={tab.id} onClick={() => onTabChange(tab.id)}
-                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-[10px] font-bold uppercase tracking-wider transition-all ${isActive
-                    ? 'bg-white dark:bg-zinc-900 text-slate-800 dark:text-zinc-100 shadow-sm'
-                    : 'text-slate-500 dark:text-zinc-500 hover:text-slate-700 dark:hover:text-zinc-300'
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${isActive
+                    ? 'bg-white dark:bg-[#2c2c2e] text-slate-900 dark:text-white shadow hover:shadow-md'
+                    : 'text-slate-500 dark:text-zinc-400 hover:text-slate-800 dark:hover:text-zinc-200'
                     }`}>
-                  <Icon size={13} strokeWidth={isActive ? 2.5 : 2} />
+                  <Icon size={14} strokeWidth={isActive ? 2.5 : 2} />
                   <span className="hidden lg:inline">{tab.label}</span>
                 </button>
               );
@@ -66,9 +67,9 @@ export const Navbar = ({
           </button>
 
           {isStravaConnected ? (
-            <button onClick={onSync} disabled={uploading} className="bg-[#fc4c02]/10 text-[#fc4c02] hover:bg-[#fc4c02]/20 border border-[#fc4c02]/20 font-bold py-1.5 px-2.5 rounded flex items-center gap-1.5 transition-colors text-[10px] uppercase tracking-wider">
-              <RefreshCw size={13} className={uploading ? "animate-spin" : ""} />
-              <span className={uploading ? "hidden" : "hidden lg:inline"}>Sync</span>
+            <button onClick={onSync} disabled={uploading} className="bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-500 hover:bg-blue-100 dark:hover:bg-blue-500/20 font-medium py-1.5 px-3 rounded-full flex items-center gap-1.5 transition-colors text-xs">
+              <RefreshCw size={14} className={uploading ? "animate-spin" : ""} />
+              <span className={uploading ? "hidden" : "hidden lg:inline"}>Sincronizar</span>
             </button>
           ) : (
             <div className="scale-90 sm:scale-100 origin-right">
@@ -94,9 +95,9 @@ export const Navbar = ({
 
             <div className="h-5 w-px bg-slate-200 dark:bg-zinc-800 mx-0.5"></div>
 
-            <button onClick={onProfileClick} className="flex items-center gap-1 px-1.5 py-1 hover:bg-slate-100 dark:hover:bg-zinc-800 rounded transition-colors">
-              <UserCircle size={16} className="text-slate-500 dark:text-zinc-400" />
-              <span className="text-[10px] font-bold uppercase tracking-wider text-slate-600 dark:text-zinc-300 hidden lg:inline">Perfil</span>
+            <button onClick={onProfileClick} className="flex items-center gap-1.5 px-2 py-1 hover:bg-slate-100 dark:hover:bg-zinc-800/50 rounded-xl transition-colors">
+              <UserCircle size={18} className="text-slate-500 dark:text-zinc-400" />
+              <span className="text-xs font-medium text-slate-600 dark:text-zinc-300 hidden lg:inline">Perfil</span>
             </button>
 
             <button onClick={handleLogout} className="p-1.5 hover:bg-red-50 dark:hover:bg-red-900/20 rounded transition-colors text-red-400" title="Cerrar Sesión">

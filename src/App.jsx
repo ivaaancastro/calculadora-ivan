@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { supabase } from './supabase'; // Asegúrate de que esta ruta es la tuya correcta
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { supabase } from './supabase';
 import Dashboard from './components/Dashboard';
-import { LoginPage } from './components/auth/LoginPage';
+import { LandingPage } from './components/pages/LandingPage';
+import StravaCallback from './components/common/StravaCallback';
 import { Toaster } from 'react-hot-toast';
 
 function App() {
@@ -31,29 +33,40 @@ function App() {
     );
   }
 
-  // Si no hay sesión, obligamos a ver la pantalla de Login
-  if (!session) {
-    return <LoginPage />;
-  }
-
-  // Si hay sesión, inyectamos el Dashboard directamente
   return (
-    <>
-      <Dashboard key={session.user.id} />
-      <Toaster
-        position="bottom-center"
-        toastOptions={{
-          style: {
-            background: '#27272a',
-            color: '#fff',
-            fontSize: '12px',
-            fontWeight: '600',
-            fontFamily: 'system-ui, sans-serif'
-          },
-        }}
-      />
-    </>
+    <BrowserRouter>
+      <Routes>
+        {/* Strava OAuth callback — must be accessible regardless of auth state */}
+        <Route path="/strava-callback" element={<StravaCallback />} />
+
+        {/* Main app — shows Landing if not authenticated */}
+        <Route
+          path="*"
+          element={
+            <>
+              {session ? (
+                <Dashboard key={session.user.id} />
+              ) : (
+                <LandingPage />
+              )}
+              <Toaster
+                position="bottom-center"
+                toastOptions={{
+                  style: {
+                    background: '#27272a',
+                    color: '#fff',
+                    fontSize: '12px',
+                    fontWeight: '600',
+                    fontFamily: 'system-ui, sans-serif'
+                  },
+                }}
+              />
+            </>
+          }
+        />
+      </Routes>
+    </BrowserRouter>
   );
 }
 
-export default App;
+export default App;

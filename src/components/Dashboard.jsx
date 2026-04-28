@@ -1,12 +1,8 @@
 import React, { useState } from "react";
 import {
   Loader2,
-  FileText,
-  Plus,
   Database,
-  Settings,
-  RefreshCw,
-  Activity,
+  Plus,
 } from "lucide-react";
 import { useActivities } from "../hooks/useActivities";
 
@@ -20,6 +16,7 @@ import { CalendarPage } from "./pages/CalendarPage";
 import { ActivityDetailPage } from "./pages/ActivityDetailPage";
 import { ProfilePage } from "./pages/ProfilePage";
 import { HealthPage } from "./pages/HealthPage";
+import { FitnessStatsPage } from "./pages/FitnessStatsPage";
 import { ErrorBoundary } from "./common/ErrorBoundary";
 
 const Dashboard = () => {
@@ -55,8 +52,8 @@ const Dashboard = () => {
     updatePlannedWorkout,
   } = useActivities();
 
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [activeTab, setActiveTab] = useState("overview");
+  const [isModalOpen, setIsModalOpen]     = useState(false);
+  const [activeTab, setActiveTab]         = useState("overview");
   const [activeActivity, setActiveActivity] = useState(null);
 
   const handleTabChange = (tab) => {
@@ -82,7 +79,6 @@ const Dashboard = () => {
         activities={activities}
         uploading={uploading}
         handleClearDb={handleClearDb}
-        onFileUpload={processFile}
         onAddClick={() => setIsModalOpen(true)}
         onProfileClick={() => handleTabChange("profile")}
         isStravaConnected={isStravaConnected}
@@ -112,8 +108,8 @@ const Dashboard = () => {
           <ErrorBoundary>
             <ProfilePage
               currentSettings={settings}
+              currentMetrics={currentMetrics}
               onUpdate={updateProfile}
-              onAnalyze={analyzeHistory}
               onBack={() => setActiveTab("overview")}
               activities={activities}
               isDeepSyncing={isDeepSyncing}
@@ -156,7 +152,24 @@ const Dashboard = () => {
                     timeRange={timeRange}
                     setTimeRange={setTimeRange}
                     chartData={chartData}
+                    currentMetrics={currentMetrics}
                   />
+            </div>
+
+            {/* VISTA: RENDIMIENTO */}
+            <div
+              className={
+                activeTab === "stats" ? "block animate-in fade-in" : "hidden"
+              }
+            >
+              <ErrorBoundary>
+                <FitnessStatsPage
+                  activities={activities}
+                  settings={settings}
+                  chartData={chartData}
+                  onSelectActivity={(act) => setActiveActivity(act)}
+                />
+              </ErrorBoundary>
             </div>
 
             {/* VISTA: CALENDARIO */}
