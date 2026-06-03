@@ -50,7 +50,7 @@ async function fetchLatestWellnessRow() {
 //   { ctl, atl, tcb (=TSB), rampRate, acwr, monotony, strain, avgTss7d, pastCtl }
 // chartData — daily series from useActivities, already filtered by timeRange
 // ─────────────────────────────────────────────────────────────────────────────
-export const AdvancedAnalytics = ({ activities, settings, onSelectActivity, timeRange, setTimeRange, chartData, currentMetrics }) => {
+export const AdvancedAnalytics = React.memo(({ activities, settings, onSelectActivity, timeRange, setTimeRange, chartData, currentMetrics }) => {
     const [garminVo2max, setGarminVo2max] = useState(null);
     const { theme } = useTheme();
 
@@ -189,4 +189,4 @@ export const AdvancedAnalytics = ({ activities, settings, onSelectActivity, time
             </div>
         </div>
     );
-};
+});

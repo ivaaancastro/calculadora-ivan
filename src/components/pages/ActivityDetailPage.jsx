@@ -1196,6 +1196,7 @@ export const ActivityDetailPage = ({ activity, settings, fetchStreams, onBack, o
                             <div className="lg:col-span-8 space-y-8">
                                 
                                 {/* Distribución Volumétrica (Zones - Top Priority) */}
+                                {(zoneType === 'hr' ? exactZoneAnalysis : exactPacePowerZoneAnalysis) && (
                                 <div className="space-y-3">
                                     <h3 className="text-[10px] font-bold text-slate-400 dark:text-zinc-500 uppercase tracking-widest">Distribución Volumétrica (Zonas)</h3>
                                     <div className="h-[280px] bg-white dark:bg-zinc-950 rounded-2xl border border-slate-100 dark:border-zinc-800/50 p-6 shadow-sm">
@@ -1218,6 +1219,7 @@ export const ActivityDetailPage = ({ activity, settings, fetchStreams, onBack, o
                                         </ResponsiveContainer>
                                     </div>
                                 </div>
+                                )}
 
                                 {/* ClimbPro Section */}
                                 <div className="space-y-3">

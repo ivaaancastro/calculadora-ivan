@@ -7,11 +7,11 @@ export default defineConfig({
     react(),
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['vite.svg', 'apple-touch-icon.png'],
+      includeAssets: ['favicon.svg', 'apple-touch-icon.png'],
       manifest: {
-        name: 'Rendimiento Deportivo',
-        short_name: 'Rendimiento',
-        description: 'Dashboard de Rendimiento y Recuperación',
+        name: 'Forma',
+        short_name: 'Forma',
+        description: 'Dashboard de rendimiento deportivo',
         theme_color: '#0f172a',
         background_color: '#0f172a',
         display: 'standalone',
@@ -31,4 +31,18 @@ export default defineConfig({
       }
     })
   ],
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          'vendor-react': ['react', 'react-dom', 'react-router-dom'],
+          'vendor-charts': ['recharts'],
+          'vendor-map': ['leaflet', 'react-leaflet'],
+          'vendor-supabase': ['@supabase/supabase-js'],
+          'vendor-query': ['@tanstack/react-query'],
+        }
+      }
+    }
+  }
 });
+

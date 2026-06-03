@@ -10,7 +10,7 @@ const getSportIcon = (type) => {
     return <Activity size={14} className="text-slate-500 dark:text-zinc-400" />;
 };
 
-export const HistoryList = ({ activities, onDelete, onSelectActivity }) => {
+export const HistoryList = React.memo(({ activities, onDelete, onSelectActivity }) => {
     // ESTADOS DE LOS FILTROS INTERNOS
     const [searchTerm, setSearchTerm] = useState('');
     const [sportFilter, setSportFilter] = useState('all');
@@ -183,4 +183,4 @@ export const HistoryList = ({ activities, onDelete, onSelectActivity }) => {
             </div>
         </div>
     );
-};
+});
