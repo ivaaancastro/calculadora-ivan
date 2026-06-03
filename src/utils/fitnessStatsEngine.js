@@ -793,47 +793,53 @@ export function calculateTrainingEffect(act, settings) {
     const aS = Number(aerobicScore.toFixed(1));
     const anS = Number(anaerobicScore.toFixed(1));
 
-    if (anS >= 3.0) {
-        primaryBenefit = "Capacidad Anaeróbica";
-        benefitDesc = "Mejora tu capacidad de realizar y repetir esfuerzos cortos y explosivos.";
-        color = "text-purple-600";
-    } else if (anS >= 2.0) {
-        primaryBenefit = "Sprint / Velocidad";
-        benefitDesc = "Estimula las fibras rápidas y mejora la economía de esfuerzo a alta velocidad.";
-        color = "text-purple-500";
-    } else if (aS >= 4.5) {
+    if (aS >= 5.0 || anS >= 5.0) {
         primaryBenefit = "Sobre-esfuerzo";
         benefitDesc = "Carga extremadamente alta. Requiere descanso prolongado.";
         color = "text-rose-700";
-    } else if (aS >= 3.5) {
-        if (aS > 4.0) {
-            primaryBenefit = "Altamente Impactante: VO2 Máx";
-            benefitDesc = "Mejora significativamente tu potencia aeróbica y velocidad de crucero.";
-            color = "text-rose-600";
+    } else if (anS > aS || (anS >= 3.0 && aS < 3.5)) {
+        // Anaerobic dominant
+        if (anS >= 3.0) {
+            primaryBenefit = "Capacidad Anaeróbica";
+            benefitDesc = "Mejora tu capacidad de realizar y repetir esfuerzos cortos y explosivos.";
+            color = "text-purple-600";
         } else {
-            primaryBenefit = "VO2 Máx";
-            benefitDesc = "Estimula la capacidad de transporte de oxígeno y el consumo máximo.";
-            color = "text-rose-500";
+            primaryBenefit = "Sprint / Velocidad";
+            benefitDesc = "Estimula las fibras rápidas y mejora la economía de esfuerzo a alta velocidad.";
+            color = "text-purple-500";
         }
-    } else if (aS >= 3.0) {
-        const activityIF = parseFloat(act.intensity_factor) || (act.hr_avg / lthr);
-        if (activityIF > 0.92) {
-            primaryBenefit = "Umbral de Lactato";
-            benefitDesc = "Fortalece tu capacidad de mantener ritmos altos durante mucho tiempo.";
-            color = "text-amber-500";
-        } else if (activityIF > 0.82) {
-            primaryBenefit = "Tempo";
-            benefitDesc = "Entrenamiento de ritmo constante que mejora la eficiencia metabólica.";
-            color = "text-emerald-500";
-        } else {
-            primaryBenefit = "Base Aeróbica";
-            benefitDesc = "Desarrolla resistencia a largo plazo mediante una intensidad aeróbica pura.";
-            color = "text-blue-500";
+    } else {
+        // Aerobic dominant
+        if (aS >= 3.5) {
+            if (aS > 4.0) {
+                primaryBenefit = "Altamente Impactante: VO2 Máx";
+                benefitDesc = "Mejora significativamente tu potencia aeróbica y velocidad de crucero.";
+                color = "text-rose-600";
+            } else {
+                primaryBenefit = "VO2 Máx";
+                benefitDesc = "Estimula la capacidad de transporte de oxígeno y el consumo máximo.";
+                color = "text-rose-500";
+            }
+        } else if (aS >= 3.0) {
+            const activityIF = parseFloat(act.intensity_factor) || (act.hr_avg / lthr);
+            if (activityIF > 0.92) {
+                primaryBenefit = "Umbral de Lactato";
+                benefitDesc = "Fortalece tu capacidad de mantener ritmos altos durante mucho tiempo.";
+                color = "text-amber-500";
+            } else if (activityIF > 0.82) {
+                primaryBenefit = "Tempo";
+                benefitDesc = "Entrenamiento de ritmo constante que mejora la eficiencia metabólica.";
+                color = "text-emerald-500";
+            } else {
+                primaryBenefit = "Base Aeróbica";
+                benefitDesc = "Desarrolla resistencia a largo plazo mediante una intensidad aeróbica pura.";
+                color = "text-blue-500";
+            }
+        } else if (aS >= 2.0) {
+            primaryBenefit = "Mantenimiento";
+            benefitDesc = "Carga adecuada para no perder el nivel de forma actual.";
+            color = "text-blue-400";
         }
-    } else if (aS >= 2.0) {
-        primaryBenefit = "Mantenimiento";
-        benefitDesc = "Carga adecuada para no perder el nivel de forma actual.";
-        color = "text-blue-400";
     }
 
     // Etiqueta general (0-5)
@@ -874,43 +880,72 @@ export function getTrainingBalance(activities, settings, days = 7) {
     let totalAnaerobic = 0;
 
     relevant.forEach(act => {
+        const actTss = act.tss || (act.duration / 3600 * 50); // Fallback to 50 TSS/hr
         const t = String(act.type).toLowerCase();
         const isBike = t.includes('bici') || t.includes('ciclismo') || t.includes('ride');
         const maxHr = Number((isBike ? settings.bike : settings.run)?.max) || 190;
         
-        let low = 0, high = 0, anaerobic = 0;
+        let focus = 'low'; // Default focus
+
         if (act.streams_data?.heartrate?.data && act.streams_data?.time?.data) {
-            const hr = act.streams_data.heartrate.data, tm = act.streams_data.time.data;
-            const totalT = tm[tm.length - 1] - tm[0];
-            let tLow = 0, tMid = 0, tHigh = 0;
+            const hr = act.streams_data.heartrate.data;
+            const tm = act.streams_data.time.data;
+            
+            let timeLow = 0;      // < 79% (Z1, Z2)
+            let timeHigh = 0;     // 79% - 89% (Z3, Z4)
+            let timeAnaerobic = 0; // > 89% (Z5)
+            
             for (let i = 1; i < hr.length; i++) {
-                const dt = tm[i] - tm[i - 1]; if (dt > 10) continue;
+                const dt = tm[i] - tm[i - 1]; 
+                if (dt > 10) continue; // Ignore pauses
+                
                 const p = hr[i] / maxHr;
-                if (p < 0.7) tLow += dt; else if (p < 0.85) tMid += dt; else tHigh += dt;
+                if (p > 0.89) {
+                    timeAnaerobic += dt;
+                } else if (p > 0.79) {
+                    timeHigh += dt;
+                } else {
+                    timeLow += dt;
+                }
             }
             
-            const df = Math.min(act.duration / 90, 1);
-            low = (tLow / (totalT || 1)) * 50 * df;
-            high = (tMid / (totalT || 1)) * 50 * df;
-            anaerobic = (tHigh / (totalT || 1)) * 100 * df;
-            
+            const totalActivityTime = timeLow + timeHigh + timeAnaerobic;
+
+            // --- STRICT GARMIN-STYLE DISPATCH RULES ---
+            // 1. Anaerobic trigger: > 4 minutes total in Z5 OR > 8% of the workout
+            if (timeAnaerobic > 240 || (totalActivityTime > 0 && (timeAnaerobic / totalActivityTime) > 0.08)) {
+                focus = 'anaerobic';
+            } 
+            // 2. High Aerobic trigger: > 20 minutes total in Z3/Z4 OR > 25% of the workout
+            else if (timeHigh > 1200 || (totalActivityTime > 0 && (timeHigh / totalActivityTime) > 0.25)) {
+                focus = 'high';
+            }
+            // 3. Low Aerobic trigger: everything else (Base / Recovery)
+            else {
+                focus = 'low';
+            }
         } else {
+            // Fallback if no streams exist: Use Average HR and Intensity Factor
             const p = (act.hr_avg || 0) / maxHr;
-            const df = Math.min(act.duration / 90, 1);
-            const load = (act.tss || 50) * 0.1;
+            const ifac = parseFloat(act.intensity_factor) || 0;
             
-            if (p < 0.7 || !p) {
-                low = load;
-            } else if (p < 0.85) {
-                high = load;
+            if (ifac > 1.05 || p > 0.88) {
+                focus = 'anaerobic';
+            } else if (ifac > 0.85 || p > 0.79) {
+                focus = 'high';
             } else {
-                anaerobic = load;
+                focus = 'low';
             }
         }
-        
-        totalLow += low;
-        totalHigh += high;
-        totalAnaerobic += anaerobic;
+
+        // Apply 100% of the TSS to the designated bucket
+        if (focus === 'anaerobic') {
+            totalAnaerobic += actTss;
+        } else if (focus === 'high') {
+            totalHigh += actTss;
+        } else {
+            totalLow += actTss;
+        }
     });
 
     const totalLoad = totalLow + totalHigh + totalAnaerobic;
@@ -918,22 +953,84 @@ export function getTrainingBalance(activities, settings, days = 7) {
     const pHigh = totalLoad > 0 ? (totalHigh / totalLoad) * 100 : 0;
     const pAnaerobic = totalLoad > 0 ? (totalAnaerobic / totalLoad) * 100 : 0;
 
-    // Recommendations
-    let recommendation = "";
+    // Define absolute targets based on current total load (Garmin style)
+    // This allows showing all bars on the same X-axis scale
+    const targets = {
+        low: { 
+            min: Math.round(totalLoad * 0.60), 
+            max: Math.round(totalLoad * 0.80), 
+            pctMin: 60, pctMax: 80,
+            label: 'Baja Aeróbica' 
+        },
+        high: { 
+            min: Math.round(totalLoad * 0.10), 
+            max: Math.round(totalLoad * 0.25), 
+            pctMin: 10, pctMax: 25,
+            label: 'Alta Aeróbica' 
+        },
+        anaerobic: { 
+            min: Math.round(totalLoad * 0.05), 
+            max: Math.round(totalLoad * 0.15), 
+            pctMin: 5, pctMax: 15,
+            label: 'Anaeróbica' 
+        }
+    };
+
+    // Max value for the UI scale (the largest bar or target)
+    const maxVal = Math.max(totalLow, totalHigh, totalAnaerobic, targets.low.max, targets.high.max, targets.anaerobic.max, 100);
+
+    // Advanced recommendations (Garmin Load Focus Style)
+    let recommendation = "Foco de carga óptimo";
     let status = "Equilibrado";
-    let color = "#10b981";
+    let color = "#10b981"; // Emerald
+    let details = "Tu entrenamiento está bien equilibrado en todas las intensidades, lo que proporciona una base sólida y mejora el rendimiento general.";
 
     if (totalLoad === 0) {
         recommendation = "No hay datos suficientes.";
         status = "Sin Datos";
-    } else if (pAnaerobic > 30) {
-        recommendation = "Exceso de intensidad. Considera rodajes más suaves.";
-        status = "Muy Alto";
-        color = "#ef4444";
-    } else if (pLow < 50) {
-        recommendation = "Falta base aeróbica. Añade más tiempo en zonas bajas.";
-        status = "Base Baja";
-        color = "#f59e0b";
+        color = "#94a3b8"; // Slate
+        details = "Registra más actividades con pulso para analizar tu foco de carga.";
+    } else {
+        const isLowShort = totalLow < targets.low.min;
+        const isHighShort = totalHigh < targets.high.min;
+        const isAnShort = totalAnaerobic < targets.anaerobic.min;
+
+        const isLowOver = totalLow > targets.low.max;
+        const isHighOver = totalHigh > targets.high.max;
+        const isAnOver = totalAnaerobic > targets.anaerobic.max;
+
+        // Garmin prioritizes reporting shortages, usually from Anaerobic down to Low Aerobic
+        if (isAnShort && isHighShort && isLowShort) {
+            recommendation = "Carga general baja";
+            status = "Desentrenamiento";
+            color = "#f59e0b"; // Amber
+            details = "Tu carga de entrenamiento es menor que tu rango óptimo en todas las categorías. Intenta aumentar la duración o la frecuencia de tus entrenamientos.";
+        } else if (isLowShort) {
+            recommendation = "Carga aeróbica baja: insuficiente";
+            status = "Falta Base";
+            color = "#00c2e0"; // Cyan
+            details = "Prueba a incluir más actividades fáciles de baja intensidad. Estas proporcionan una base sólida para los entrenamientos más duros y mejoran la recuperación.";
+        } else if (isHighShort) {
+            recommendation = "Carga aeróbica de intensidad alta: insuficiente";
+            status = "Falta Alta Int.";
+            color = "#f97316"; // Orange
+            details = "Prueba a incluir algo más de actividad aeróbica de alta intensidad (Tempo, Umbral). Te ayudarán a mejorar gradualmente tu umbral de lactato y tu VO2 máximo.";
+        } else if (isAnShort) {
+            recommendation = "Capacidad anaeróbica: insuficiente";
+            status = "Falta Anaeróbico";
+            color = "#a855f7"; // Purple
+            details = "Añade más entrenamientos de intervalos cortos y de alta intensidad. Esto mejorará tu velocidad máxima y tu capacidad de recuperación bajo fatiga.";
+        } else if (isAnOver) {
+            recommendation = "Exceso de carga anaeróbica";
+            status = "Sobrecarga";
+            color = "#ef4444"; // Red
+            details = "Has acumulado mucha fatiga anaeróbica. Reduce los intervalos intensos y prioriza la recuperación con rodajes muy suaves para asimilar el trabajo.";
+        } else if (isHighOver) {
+            recommendation = "Exceso de carga aeróbica alta";
+            status = "No Polarizado";
+            color = "#f59e0b"; // Amber
+            details = "Estás pasando demasiado tiempo en intensidades medias y altas. Intenta polarizar más tu entrenamiento: haz lo fácil más fácil y guarda la energía para los días realmente duros.";
+        }
     }
 
     return {
@@ -941,10 +1038,13 @@ export function getTrainingBalance(activities, settings, days = 7) {
         aerobicHigh: totalHigh,
         anaerobic: totalAnaerobic,
         totalLoad,
+        maxScale: maxVal,
         pcts: { low: pLow, high: pHigh, anaerobic: pAnaerobic },
+        targets,
         recommendation,
         status,
         color,
+        details,
         activityCount: relevant.length
     };
 }

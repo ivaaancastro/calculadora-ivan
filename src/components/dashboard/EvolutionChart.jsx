@@ -10,32 +10,29 @@ const CustomTooltip = ({ active, payload, label }) => {
     const title = date.toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long' });
 
     return (
-      <div className="bg-white/80 dark:bg-zinc-900/90 backdrop-blur-md p-4 rounded-2xl border border-slate-200/50 dark:border-zinc-800/50 shadow-2xl min-w-[200px]">
-        <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 dark:text-zinc-500 mb-3 flex justify-between items-center">
+      <div className="bg-white/90 dark:bg-zinc-900/90 backdrop-blur-md p-3 rounded-xl border border-slate-200/50 dark:border-zinc-800/50 shadow-lg min-w-[160px]">
+        <p className="text-[9px] font-medium uppercase tracking-widest text-slate-400 dark:text-zinc-500 mb-2 flex justify-between items-center">
           {title}
-          {diffDays > 0 && <span className="bg-blue-500/10 text-blue-500 px-1.5 py-0.5 rounded text-[8px] ml-2">Simulación: +{diffDays}d</span>}
+          {diffDays > 0 && <span className="bg-slate-100 dark:bg-zinc-800 text-slate-500 px-1 py-0.5 rounded text-[8px] ml-2">Sim: +{diffDays}d</span>}
         </p>
-        <div className="space-y-2">
+        <div className="space-y-1">
           {payload.map((entry, index) => {
-            // No mostrar TSS en el listado principal del tooltip si es 0, para limpieza
-            if (entry.dataKey === 'dailyTss' && entry.value === 0) return null;
+            if (entry.dataKey === 'dailyTss') return null;
             
             const colors = {
-              ctl: 'text-[#007aff]', // Apple Blue
-              atl: 'text-[#ff2d55]', // Apple Red
-              tsb: 'text-[#ffcc00]', // Apple Gold
-              dailyTss: 'text-slate-400'
+              ctl: 'text-slate-700 dark:text-slate-300',
+              atl: 'text-slate-500 dark:text-slate-400',
+              tsb: 'text-slate-400 dark:text-slate-500'
             };
             const labels = {
-              ctl: 'Fitness (CTL)',
-              atl: 'Fatiga (ATL)',
-              tsb: 'Forma (TSB)',
-              dailyTss: 'Carga (TSS)'
+              ctl: 'Fitness',
+              atl: 'Fatiga',
+              tsb: 'Forma'
             };
             return (
               <div key={index} className="flex items-center justify-between gap-4">
-                <span className="text-[11px] font-bold text-slate-600 dark:text-zinc-300">{labels[entry.dataKey]}</span>
-                <span className={`text-sm font-black ${colors[entry.dataKey]}`}>{entry.value.toFixed(1)}</span>
+                <span className="text-[10px] font-medium text-slate-500 dark:text-zinc-400">{labels[entry.dataKey]}</span>
+                <span className={`text-[11px] font-semibold ${colors[entry.dataKey]}`}>{entry.value.toFixed(1)}</span>
               </div>
             );
           })}
@@ -49,10 +46,10 @@ const CustomTooltip = ({ active, payload, label }) => {
 export const EvolutionChart = ({ data }) => {
   if (!data || data.length === 0) {
     return (
-      <div className="bg-white dark:bg-zinc-900/30 rounded-2xl border border-dashed border-slate-200 dark:border-zinc-800 p-8 h-full w-full flex items-center justify-center text-center">
+      <div className="bg-transparent rounded-xl border border-dashed border-slate-200 dark:border-zinc-800 p-8 h-full w-full flex items-center justify-center text-center">
         <div>
-           <Activity size={24} className="mx-auto text-slate-300 mb-2" />
-           <p className="text-[10px] text-slate-400 dark:text-zinc-600 uppercase tracking-widest font-black">Cargando Tendencias...</p>
+           <Activity size={16} className="mx-auto text-slate-300 mb-2" />
+           <p className="text-[9px] text-slate-400 dark:text-zinc-600 uppercase tracking-widest font-medium">Sin Datos</p>
         </div>
       </div>
     );
@@ -61,84 +58,81 @@ export const EvolutionChart = ({ data }) => {
   const todayStr = new Date().toISOString().split('T')[0];
 
   return (
-    <div className="h-full w-full flex flex-col">
-      {/* Redesigned Minimalist Header (Apple Style) */}
+    <div className="h-full w-full flex flex-col font-sans">
+      {/* Minimalist Header */}
       <div className="flex justify-between items-center mb-6 px-2">
-        <div className="flex gap-4">
-          <div className="flex flex-col">
-            <span className="text-[8px] font-black uppercase tracking-widest text-slate-400">Fitness</span>
-            <span className="text-xs font-bold text-[#007aff]">CTL</span>
+        <div className="flex gap-6">
+          <div className="flex items-center gap-1.5">
+            <div className="w-1.5 h-1.5 rounded-full bg-[#3b82f6]"></div>
+            <span className="text-[9px] font-medium text-slate-500 dark:text-zinc-400 uppercase tracking-wider">Fitness</span>
           </div>
-          <div className="flex flex-col border-l border-slate-100 dark:border-zinc-800 pl-4">
-            <span className="text-[8px] font-black uppercase tracking-widest text-slate-400">Fatiga</span>
-            <span className="text-xs font-bold text-[#ff2d55]">ATL</span>
+          <div className="flex items-center gap-1.5">
+            <div className="w-1.5 h-1.5 rounded-full bg-[#f43f5e]"></div>
+            <span className="text-[9px] font-medium text-slate-500 dark:text-zinc-400 uppercase tracking-wider">Fatiga</span>
           </div>
-          <div className="flex flex-col border-l border-slate-100 dark:border-zinc-800 pl-4">
-            <span className="text-[8px] font-black uppercase tracking-widest text-slate-400">Forma</span>
-            <span className="text-xs font-bold text-[#ffcc00]">TSB</span>
+          <div className="flex items-center gap-1.5">
+            <div className="w-1.5 h-1.5 rounded-full bg-[#eab308]"></div>
+            <span className="text-[9px] font-medium text-slate-500 dark:text-zinc-400 uppercase tracking-wider">Forma</span>
           </div>
-        </div>
-        <div className="hidden sm:block">
-           <span className="text-[8px] font-black uppercase tracking-widest text-slate-300 dark:text-zinc-700">Health Pro Sync</span>
         </div>
       </div>
 
       <div className="flex-1 w-full min-h-0">
         <ResponsiveContainer width="100%" height="100%">
-          <ComposedChart data={data} margin={{ top: 0, right: 0, left: -25, bottom: 0 }}>
+          <ComposedChart data={data} margin={{ top: 10, right: 0, left: -25, bottom: 0 }}>
             <defs>
               <linearGradient id="colorCtl" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor="#007aff" stopOpacity={0.15} />
-                <stop offset="95%" stopColor="#007aff" stopOpacity={0} />
+                <stop offset="0%" stopColor="#3b82f6" stopOpacity={0.15} />
+                <stop offset="100%" stopColor="#3b82f6" stopOpacity={0} />
               </linearGradient>
               <linearGradient id="colorTcb" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor="#ffcc00" stopOpacity={0.1} />
-                <stop offset="95%" stopColor="#ffcc00" stopOpacity={0} />
+                <stop offset="0%" stopColor="#eab308" stopOpacity={0.15} />
+                <stop offset="100%" stopColor="#eab308" stopOpacity={0} />
               </linearGradient>
             </defs>
 
-            <CartesianGrid strokeDasharray="0" stroke="#a1a1aa" opacity={0.05} vertical={false} />
+            <CartesianGrid strokeDasharray="3 3" stroke="#cbd5e1" opacity={0.3} vertical={false} />
 
             <XAxis
               dataKey="date"
-              tick={{ fontSize: 9, fill: '#71717a', fontWeight: 'bold' }}
+              tick={{ fontSize: 10, fill: '#64748b', fontWeight: '500' }}
               tickFormatter={(val) => new Date(val).toLocaleDateString('es-ES', { day: 'numeric', month: 'short' })}
-              minTickGap={40}
+              minTickGap={50}
               axisLine={false}
               tickLine={false}
               padding={{ left: 10, right: 10 }}
+              dy={10}
             />
 
-            <YAxis yAxisId="left" tick={{ fontSize: 9, fill: '#71717a', fontWeight: 'bold' }} axisLine={false} tickLine={false} />
+            <YAxis yAxisId="left" tick={{ fontSize: 10, fill: '#64748b', fontWeight: '500' }} axisLine={false} tickLine={false} dx={-10} />
             <YAxis yAxisId="right" orientation="right" hide domain={['dataMin - 30', 'dataMax + 30']} />
 
             <Tooltip
               content={<CustomTooltip />}
-              cursor={{ stroke: '#007aff', strokeWidth: 1.5, strokeDasharray: '4 4' }}
+              cursor={{ stroke: '#94a3b8', strokeWidth: 1, strokeDasharray: '4 4' }}
               isAnimationActive={false}
             />
 
             <ReferenceLine
               x={todayStr}
               yAxisId="left"
-              stroke="#10b981"
-              strokeWidth={2}
-              strokeDasharray="0"
-              label={{ position: 'insideTopLeft', value: 'HOY', fill: '#10b981', fontSize: 9, fontWeight: '900', letterSpacing: '0.1em' }}
+              stroke="#94a3b8"
+              strokeWidth={1}
+              strokeDasharray="4 4"
+              label={{ position: 'insideTopLeft', value: 'HOY', fill: '#64748b', fontSize: 9, fontWeight: '600', letterSpacing: '0.05em' }}
             />
 
-            {/* Background TSS Bars - Very Subtle */}
-            <Bar yAxisId="left" dataKey="dailyTss" fill="#71717a" opacity={0.05} radius={[2, 2, 0, 0]} barSize={6} isAnimationActive={false} />
+            {/* Removed Background TSS Bars */}
             
             <Area 
                 yAxisId="right" 
                 type="monotone" 
                 dataKey="tsb" 
-                stroke="#ffcc00" 
-                strokeWidth={3} 
+                stroke="#eab308" 
+                strokeWidth={2} 
                 fillOpacity={1} 
-                fill="url(#colorTcb)" 
-                activeDot={{ r: 6, stroke: '#fff', strokeWidth: 3, fill: '#ffcc00' }} 
+                fill="url(#colorTcb)"
+                activeDot={{ r: 4, stroke: '#fff', strokeWidth: 2, fill: '#eab308' }} 
                 isAnimationActive={false} 
             />
             
@@ -146,11 +140,11 @@ export const EvolutionChart = ({ data }) => {
                 yAxisId="left" 
                 type="monotone" 
                 dataKey="ctl" 
-                stroke="#007aff" 
+                stroke="#3b82f6" 
                 strokeWidth={3} 
                 fillOpacity={1} 
-                fill="url(#colorCtl)" 
-                activeDot={{ r: 6, stroke: '#fff', strokeWidth: 3, fill: '#007aff' }} 
+                fill="url(#colorCtl)"
+                activeDot={{ r: 5, stroke: '#fff', strokeWidth: 2, fill: '#3b82f6' }} 
                 isAnimationActive={false} 
             />
             
@@ -158,10 +152,11 @@ export const EvolutionChart = ({ data }) => {
                 yAxisId="left" 
                 type="monotone" 
                 dataKey="atl" 
-                stroke="#ff2d55" 
-                strokeWidth={2} 
+                stroke="#f43f5e" 
+                strokeWidth={1.5} 
+                strokeDasharray="3 3"
                 dot={false} 
-                activeDot={{ r: 4, stroke: '#fff', strokeWidth: 2, fill: '#ff2d55' }} 
+                activeDot={{ r: 3, stroke: '#fff', strokeWidth: 1.5, fill: '#f43f5e' }} 
                 isAnimationActive={false} 
             />
           </ComposedChart>
