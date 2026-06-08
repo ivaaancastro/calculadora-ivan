@@ -1,31 +1,41 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
+
+// Estado global fuera del hook para sincronizar múltiples componentes
+let globalTheme = 'light';
+const listeners = new Set();
+
+if (typeof window !== 'undefined') {
+  globalTheme = localStorage.getItem('theme') === 'dark' || 
+    (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches) 
+    ? 'dark' : 'light';
+}
 
 export const useTheme = () => {
-  // Leemos la preferencia guardada o usamos la del sistema por defecto
-  const [theme, setTheme] = useState(() => {
-    if (typeof window !== 'undefined') {
-      if (localStorage.getItem('theme') === 'dark' || 
-         (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-        return 'dark';
-      }
-    }
-    return 'light';
-  });
+  const [theme, setThemeState] = useState(globalTheme);
 
   useEffect(() => {
+    listeners.add(setThemeState);
+    return () => listeners.delete(setThemeState);
+  }, []);
+
+  const setTheme = useCallback((newTheme) => {
+    globalTheme = typeof newTheme === 'function' ? newTheme(globalTheme) : newTheme;
+    
     const root = window.document.documentElement;
-    if (theme === 'dark') {
+    if (globalTheme === 'dark') {
       root.classList.add('dark');
       localStorage.setItem('theme', 'dark');
     } else {
       root.classList.remove('dark');
       localStorage.setItem('theme', 'light');
     }
-  }, [theme]);
+    
+    listeners.forEach(listener => listener(globalTheme));
+  }, []);
 
-  const toggleTheme = () => {
-    setTheme(prev => prev === 'dark' ? 'light' : 'dark');
-  };
+  const toggleTheme = useCallback(() => {
+    setTheme(globalTheme === 'dark' ? 'light' : 'dark');
+  }, [setTheme]);
 
-  return { theme, toggleTheme };
+  return { theme, toggleTheme, setTheme };
 };
