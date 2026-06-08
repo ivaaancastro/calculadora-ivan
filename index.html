@@ -14,6 +14,11 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="apple-mobile-web-app-title" content="Rendimiento" />
   <meta name="theme-color" content="#0f172a" />
+  <script>
+    if (localStorage.getItem('theme') === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+      document.documentElement.classList.add('dark');
+    }
+  </script>
 
   <!-- Google Fonts: Inter (preloaded for faster FCP) -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
