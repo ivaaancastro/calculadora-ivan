@@ -3,6 +3,7 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { supabase } from './supabase';
 import Dashboard from './components/Dashboard';
 import { LandingPage } from './components/pages/LandingPage';
+import { EmailConfirmedPage } from './components/pages/EmailConfirmedPage';
 import StravaCallback from './components/common/StravaCallback';
 import { Toaster } from 'react-hot-toast';
 
@@ -38,6 +39,9 @@ function App() {
       <Routes>
         {/* Strava OAuth callback — must be accessible regardless of auth state */}
         <Route path="/strava-callback" element={<StravaCallback />} />
+
+        {/* Email confirmation success page */}
+        <Route path="/email-confirmado" element={<EmailConfirmedPage />} />
 
         {/* Main app — shows Landing if not authenticated */}
         <Route
