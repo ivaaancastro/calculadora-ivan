@@ -33,7 +33,13 @@ export const LoginPage = () => {
         if (error) throw error;
       } else {
         // REGISTRO
-        const { error } = await supabase.auth.signUp({ email, password });
+        const { error } = await supabase.auth.signUp({ 
+          email, 
+          password,
+          options: {
+            emailRedirectTo: `${window.location.origin}/email-confirmado`
+          }
+        });
         if (error) throw error;
         setMessage("¡Registro exitoso! Revisa tu email para confirmar la cuenta o inicia sesión.");
       }
