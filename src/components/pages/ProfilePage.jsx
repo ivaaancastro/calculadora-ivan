@@ -395,7 +395,22 @@ export const ProfilePage = ({ currentSettings, currentMetrics, onUpdate, activit
         
         setIsDeletingAccount(true);
         try {
-            // Attempt to call a custom RPC to delete the user
+            // 1. Deauthorize Strava
+            const { data: profile } = await supabase.from('profiles').select('strava_access_token').single();
+            if (profile && profile.strava_access_token) {
+                try {
+                    await fetch('https://www.strava.com/oauth/deauthorize', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ access_token: profile.strava_access_token })
+                    });
+                    console.log("Strava deauthorized successfully");
+                } catch (e) {
+                    console.error("Failed to deauthorize Strava", e);
+                }
+            }
+
+            // 2. Attempt to call a custom RPC to delete the user
             const { error } = await supabase.rpc('delete_user');
             
             if (error) {
