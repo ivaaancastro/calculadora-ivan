@@ -16,7 +16,12 @@ const AddActivityModal = ({ isOpen, onClose, onSave }) => {
         e.preventDefault();
         setLoading(true);
         try {
+            const { data: { session } } = await supabase.auth.getSession();
+            const userId = session?.user?.id;
+            if (!userId) throw new Error('No hay sesión activa');
+
             const { error } = await supabase.from('activities').insert([{
+                user_id: userId,
                 date: formData.date,
                 type: formData.type,
                 duration: Number(formData.duration),

@@ -27,24 +27,35 @@ export const usePlanner = (currentMetrics) => {
 
     // ── 1. CARGAR EVENTOS ────────────────────────────────────────────────────
     const fetchEvents = useCallback(async () => {
+        const { data: { session } } = await supabase.auth.getSession();
+        const userId = session?.user?.id;
+        if (!userId) return;
+
         const { data } = await supabase
             .from('events')
             .select('*')
+            .eq('user_id', userId)
             .order('date', { ascending: true });
         if (data) setEvents(data);
     }, []);
 
     // ── 2. AÑADIR EVENTO ─────────────────────────────────────────────────────
-    /** @returns {Error|null} Error de Supabase, o null si fue exitoso. */
     const addEvent = async (eventData) => {
-        const { error } = await supabase.from('events').insert([eventData]);
+        const { data: { session } } = await supabase.auth.getSession();
+        const userId = session?.user?.id;
+        if (!userId) return new Error('No hay sesión activa');
+
+        const { error } = await supabase.from('events').insert([{ ...eventData, user_id: userId }]);
         if (!error) fetchEvents();
         return error;
     };
 
-    // ── 3. BORRAR EVENTO ─────────────────────────────────────────────────────
     const deleteEvent = async (id) => {
-        await supabase.from('events').delete().eq('id', id);
+        const { data: { session } } = await supabase.auth.getSession();
+        const userId = session?.user?.id;
+        if (!userId) return;
+
+        await supabase.from('events').delete().eq('id', id).eq('user_id', userId);
         fetchEvents();
     };
 

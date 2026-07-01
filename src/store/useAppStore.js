@@ -18,6 +18,9 @@ import { calcZonesFromLTHR } from '../utils/tssEngine';
  * Los valores numéricos son representativos de un atleta recreacional de nivel medio.
  */
 const DEFAULT_SETTINGS = {
+    fullName:  '',
+    email:     '',
+    avatarUrl: '',
     gender:    'male',
     fcReposo:  50,     // Frecuencia cardíaca de reposo (ppm)
     weight:    70,     // Peso en kg
@@ -71,4 +74,15 @@ export const useAppStore = create((set) => ({
     // ── Estado de la conexión con Strava ─────────────────────────────────────
     isStravaConnected:  false,
     setStravaConnected: (isConnected) => set({ isStravaConnected: isConnected }),
+
+    // ── Reset Global (Logout) ────────────────────────────────────────────────
+    resetStore: () => set({
+        timeRange: '30d',
+        settings: DEFAULT_SETTINGS,
+        uploading: false,
+        uploadStatus: null,
+        isDeepSyncing: false,
+        deepSyncProgress: null,
+        isStravaConnected: false,
+    }),
 }));

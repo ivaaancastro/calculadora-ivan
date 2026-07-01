@@ -38,10 +38,13 @@ export const useActivitiesQuery = () => {
     const query = useQuery({
         queryKey: ['activities'],
         queryFn: async () => {
+            const userId = await requireUserId();
+
             // Fase 1: columnas ligeras, respuesta inmediata
             const { data: baseData, error } = await supabase
                 .from('activities')
-                .select(LIGHT_COLS);
+                .select(LIGHT_COLS)
+                .eq('user_id', userId);
 
             if (error) throw error;
 
@@ -58,6 +61,7 @@ export const useActivitiesQuery = () => {
                     const { data: streamsData } = await supabase
                         .from('activities')
                         .select('id,streams_data')
+                        .eq('user_id', userId)
                         .gte('date', cutoff.toISOString().split('T')[0])
                         .not('streams_data', 'is', null);
 

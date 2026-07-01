@@ -17,10 +17,10 @@ import { useAppStore } from "../../store/useAppStore";
 import { calcZonesFromLTHR } from "../../utils/tssEngine";
 import toast from "react-hot-toast";
 
-/** Obtiene el user_id de la sesión activa, o null si no hay sesión. */
-const getCurrentUserId = async (): Promise<string | null> => {
+/** Obtiene el user de la sesión activa, o null si no hay sesión. */
+const getCurrentUser = async () => {
     const { data: { session } } = await supabase.auth.getSession();
-    return session?.user?.id ?? null;
+    return session?.user ?? null;
 };
 
 /**
@@ -36,6 +36,9 @@ const num = (val: any, fallback: number): number => {
 // ── Tipos ─────────────────────────────────────────────────────────────────────
 
 interface AppSettings {
+    fullName: string;
+    email: string;
+    avatarUrl: string;
     gender: string;
     weight: number;
     fcReposo: number;
@@ -58,13 +61,16 @@ interface AppSettings {
  * Convierte una fila de la tabla `profiles` (columnas DB) al formato de AppSettings
  * que usa el store de Zustand.
  */
-function mapDbToSettings(data: any): AppSettings {
+function mapDbToSettings(data: any, email: string): AppSettings {
     const runLthr  = num(data.run_lthr,    178);
     const runMax   = num(data.run_fc_max,  200);
     const bikeLthr = num(data.bike_lthr,   168);
     const bikeMax  = num(data.bike_fc_max, 190);
 
     return {
+        fullName: data.full_name  ?? '',
+        email:    email ?? '',
+        avatarUrl: data.avatar_url ?? '',
         gender:   data.gender     ?? 'male',
         weight:   num(data.weight,   70),
         fcReposo: num(data.fc_rest,  50),
@@ -97,6 +103,8 @@ function mapDbToSettings(data: any): AppSettings {
 function mapSettingsToDb(s: AppSettings, userId: string) {
     return {
         user_id:               userId,
+        full_name:             s.fullName,
+        avatar_url:            s.avatarUrl,
         gender:                s.gender,
         weight:                s.weight,
         fc_rest:               s.fcReposo,
@@ -126,8 +134,10 @@ export const useProfileQuery = () => {
     const query = useQuery({
         queryKey: ['profile'],
         queryFn: async () => {
-            const userId = await getCurrentUserId();
-            if (!userId) return null;
+            const user = await getCurrentUser();
+            if (!user) return null;
+            const userId = user.id;
+            const userEmail = user.email || '';
 
             const { data, error } = await supabase
                 .from('profiles')
@@ -137,8 +147,11 @@ export const useProfileQuery = () => {
 
             // Perfil aún no creado (primer login) → insertar fila vacía
             if (error && error.code === 'PGRST116') {
-                await supabase.from('profiles').insert([{ user_id: userId }]);
-                return { user_id: userId };
+                const fullNameFromAuth = user.user_metadata?.full_name || '';
+                await supabase.from('profiles').insert([{ user_id: userId, full_name: fullNameFromAuth }]);
+                const newProfile = { user_id: userId, full_name: fullNameFromAuth };
+                updateSettings(mapDbToSettings(newProfile, userEmail));
+                return newProfile;
             }
 
             if (data) {
@@ -146,7 +159,7 @@ export const useProfileQuery = () => {
                 if (data.strava_access_token) setStravaConnected(true);
 
                 // Sincronizar el store con los datos del perfil
-                updateSettings(mapDbToSettings(data));
+                updateSettings(mapDbToSettings(data, userEmail));
             }
 
             return data;
@@ -157,8 +170,9 @@ export const useProfileQuery = () => {
     // ── Mutation: guardar perfil ──────────────────────────────────────────────
     const updateProfileMutation = useMutation({
         mutationFn: async (newSettings: AppSettings) => {
-            const userId = await getCurrentUserId();
-            if (!userId) throw new Error('No hay sesión activa');
+            const user = await getCurrentUser();
+            if (!user) throw new Error('No hay sesión activa');
+            const userId = user.id;
 
             const dbPayload = {
                 ...mapSettingsToDb(newSettings, userId),

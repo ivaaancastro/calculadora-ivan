@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Save, Activity, Heart, Zap, Database, Loader2, RefreshCw, CheckCircle2, ArrowLeft, Lock, Key, Bike, Footprints, Weight, Link2, Timer, Gauge, Cloud, Wifi } from 'lucide-react';
+import { Save, Activity, Heart, Zap, Database, Loader2, RefreshCw, CheckCircle2, ArrowLeft, Lock, Key, Bike, Footprints, Weight, Link2, Timer, Gauge, Cloud, Wifi, Trash2, AlertTriangle, User, Camera, Mail } from 'lucide-react';
 import { supabase } from '../../supabase';
 import toast from 'react-hot-toast';
 import { LTHR_ZONE_PCT, calcZonesFromLTHR } from '../../utils/tssEngine';
@@ -303,9 +303,13 @@ export const ProfilePage = ({ currentSettings, currentMetrics, onUpdate, activit
     const [formData, setFormData] = useState(null);
     const [targetCtl, setTargetCtl] = useState(null); // Managed separately for calibration logic
     const [activeTab, setActiveTab] = useState('run');
+    const [activeSection, setActiveSection] = useState('general');
+
     const [isScanning, setIsScanning] = useState(false);
     const [newPassword, setNewPassword] = useState('');
     const [isUpdatingPwd, setIsUpdatingPwd] = useState(false);
+    const [isDeletingAccount, setIsDeletingAccount] = useState(false);
+    const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
     const [syncPreview, setSyncPreview] = useState(null); // {weight, rhr, ftp} before confirming
 
     const { syncing: isSyncingIntervals, syncProgress: intervalsSyncProgress, syncAll: syncIntervals } = useIntervalsSync();
@@ -386,6 +390,64 @@ export const ProfilePage = ({ currentSettings, currentMetrics, onUpdate, activit
         else { toast.success("¡Contraseña actualizada!"); setNewPassword(''); }
     };
 
+    const handleDeleteAccount = async () => {
+        if (!window.confirm("¿Estás seguro de que quieres eliminar tu cuenta? Esta acción es irreversible y borrará todos tus datos para siempre.")) return;
+        
+        setIsDeletingAccount(true);
+        try {
+            // Attempt to call a custom RPC to delete the user
+            const { error } = await supabase.rpc('delete_user');
+            
+            if (error) {
+                console.error("Error al eliminar la cuenta:", error);
+                toast.error("Para eliminar tu cuenta por completo, contacta con soporte o añade la función delete_user a la base de datos.");
+            } else {
+                await supabase.auth.signOut();
+                toast.success("Tu cuenta ha sido eliminada.");
+                window.location.href = '/';
+            }
+        } catch (err) {
+            toast.error("Ocurrió un error al intentar eliminar la cuenta.");
+        } finally {
+            setIsDeletingAccount(false);
+        }
+    };
+
+    const handleAvatarUpload = async (event) => {
+        try {
+            if (!event.target.files || event.target.files.length === 0) return;
+            const file = event.target.files[0];
+            
+            // Validate file size (max 2MB)
+            if (file.size > 2 * 1024 * 1024) {
+                toast.error("La imagen es demasiado grande. Máximo 2MB.");
+                return;
+            }
+            
+            const fileExt = file.name.split('.').pop();
+            const fileName = `${Math.random()}.${fileExt}`;
+            const filePath = `${fileName}`;
+            
+            setIsUploadingAvatar(true);
+            
+            // Subir a storage
+            const { error: uploadError } = await supabase.storage.from('avatars').upload(filePath, file);
+            if (uploadError) throw uploadError;
+            
+            // Obtener URL pública
+            const { data } = supabase.storage.from('avatars').getPublicUrl(filePath);
+            
+            // Actualizar formData (el usuario debe guardar para que persista en BD)
+            setFormData(prev => ({ ...prev, avatarUrl: data.publicUrl }));
+            toast.success("Foto subida. ¡No olvides darle a Guardar Cambios!");
+        } catch (error) {
+            console.error("Error avatar:", error);
+            toast.error("Error al subir la foto: " + error.message);
+        } finally {
+            setIsUploadingAvatar(false);
+        }
+    };
+
     const handleAutoDetectLTHR = () => {
         setIsScanning(true);
         setTimeout(() => {
@@ -451,18 +513,29 @@ export const ProfilePage = ({ currentSettings, currentMetrics, onUpdate, activit
         });
     };
 
-    return (
-        <div className="animate-in fade-in duration-300 pb-12 max-w-6xl mx-auto">
+    const renderMenuButton = (id, label, IconComponent) => (
+        <button
+            onClick={() => setActiveSection(id)}
+            className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all text-left ${activeSection === id
+                ? 'bg-blue-600 text-white shadow-md'
+                : 'text-slate-700 dark:text-zinc-300 hover:bg-slate-100 dark:hover:bg-zinc-800/50'
+                }`}
+        >
+            <IconComponent size={18} className={activeSection === id ? 'text-white' : 'text-slate-400 dark:text-zinc-500'} />
+            <span className="text-sm font-semibold">{label}</span>
+        </button>
+    );
 
+    return (
+        <div className="animate-in fade-in duration-300 pb-12 max-w-5xl mx-auto">
             {/* HEADER */}
-            <div className="flex items-center justify-between mb-6 border-b border-slate-200 dark:border-zinc-800 pb-4">
+            <div className="flex items-center justify-between mb-8 border-b border-slate-200 dark:border-zinc-800 pb-4">
                 <div className="flex items-center gap-4">
                     <button onClick={onBack} className="flex items-center justify-center w-8 h-8 rounded-full bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 text-slate-500 hover:text-slate-900 dark:text-zinc-400 dark:hover:text-zinc-100 transition-colors shadow-sm">
                         <ArrowLeft size={16} />
                     </button>
                     <div>
-                        <h1 className="text-xl font-black text-slate-900 dark:text-zinc-100 tracking-tight uppercase">Ajustes Deportivos</h1>
-                        <p className="text-[10px] text-slate-500 dark:text-zinc-500 font-bold uppercase tracking-widest mt-0.5">Zonas, umbrales y configuración</p>
+                        <h1 className="text-2xl font-black text-slate-900 dark:text-zinc-100 tracking-tight">Ajustes</h1>
                     </div>
                 </div>
                 <button 
@@ -471,163 +544,296 @@ export const ProfilePage = ({ currentSettings, currentMetrics, onUpdate, activit
                     const newOffset = targetCtl !== null ? (targetCtl - raw) : formData.offsetCtl;
                     onUpdate({ ...formData, offsetCtl: newOffset });
                   }} 
-                  className="flex items-center gap-1.5 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded text-[10px] font-bold uppercase tracking-widest transition-colors shadow-sm"
+                  className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-xl text-xs font-bold uppercase tracking-widest transition-all shadow-md active:scale-95"
                 >
-                    <Save size={14} /> Guardar
+                    <Save size={16} /> Guardar Cambios
                 </button>
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-
-                {/* LEFT COLUMN (3/12) */}
-                <div className="lg:col-span-3 space-y-5">
-
-                    <div className="bg-white dark:bg-zinc-900 rounded-lg border border-slate-200 dark:border-zinc-800 p-5 shadow-sm">
-                        <PanelHeader icon={Activity} title="Datos Base" />
-                        <div className="space-y-3">
-                            <div>
-                                <label className="text-[9px] font-bold text-slate-500 dark:text-zinc-400 uppercase tracking-widest block mb-1">Peso (kg)</label>
-                                <div className="relative">
-                                    <Weight size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
-                                    <input type="number" name="weight" value={formData.weight} onChange={handleChange} className="w-full pl-9 pr-3 py-2 bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 rounded text-sm font-mono dark:text-zinc-200 focus:border-blue-500 outline-none" />
-                                </div>
-                            </div>
-                            <div>
-                                <label className="text-[9px] font-bold text-slate-500 dark:text-zinc-400 uppercase tracking-widest block mb-1">FC Reposo</label>
-                                <div className="relative">
-                                    <Heart size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-rose-400" />
-                                    <input type="number" name="fcReposo" value={formData.fcReposo} onChange={handleChange} className="w-full pl-9 pr-3 py-2 bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 rounded text-sm font-mono dark:text-zinc-200 focus:border-blue-500 outline-none" />
-                                </div>
-                            </div>
-                            <div className="pt-2 border-t border-slate-100 dark:border-zinc-800/80">
-                                <label className="text-[9px] font-bold text-slate-500 dark:text-zinc-400 uppercase tracking-widest block mb-1">Calibrar Fitness Actual (CTL)</label>
-                                <div className="relative">
-                                    <Activity size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-blue-500" />
-                                    <input 
-                                        type="number" 
-                                        step="1" 
-                                        value={targetCtl ?? ''} 
-                                        onChange={(e) => setTargetCtl(e.target.value ? parseInt(e.target.value) : null)} 
-                                        placeholder="Puntos CTL..." 
-                                        className="w-full pl-9 pr-3 py-2 bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 rounded text-sm font-mono dark:text-zinc-200 focus:border-blue-500 outline-none placeholder:text-slate-400" 
-                                    />
-                                </div>
-                                <p className="text-[8px] text-slate-400 mt-1 leading-tight">Introduce tu Fitness actual de Garmin/Intervals.icu. El sistema ajustará todo el historial suavemente para coincidir con este valor hoy.</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div className="bg-white dark:bg-zinc-900 rounded-lg border border-slate-200 dark:border-zinc-800 p-5 shadow-sm">
-                        <PanelHeader icon={RefreshCw} title="Auto-Detect" subtitle="Escanear actividades" />
-                        <button onClick={handleAutoDetectLTHR} disabled={isScanning || pureActs.length === 0} className="w-full py-2 bg-slate-100 dark:bg-zinc-800 hover:bg-slate-200 dark:hover:bg-zinc-700 text-slate-700 dark:text-zinc-300 rounded text-[9px] font-bold uppercase transition-colors flex justify-center items-center gap-1.5 disabled:opacity-50">
-                            {isScanning ? <><Loader2 size={10} className="animate-spin" /> Analizando...</> : 'Detectar LTHR'}
-                        </button>
-                        <p className="text-[8px] text-slate-400 mt-2 leading-relaxed">Analiza tus actividades con datos HR detallados para detectar tu umbral láctico automáticamente.</p>
-                    </div>
-
-                    <div className="bg-indigo-50/50 dark:bg-indigo-900/10 border border-indigo-200 dark:border-indigo-900/30 rounded-lg p-5 shadow-sm">
-                        <PanelHeader icon={Link2} title="Intervals.icu" subtitle="Garmin · Whoop · Oura" />
-                        <div className="space-y-2">
-                            <div>
-                                <label className="text-[8px] font-bold text-slate-500 uppercase tracking-widest mb-1 block">Athlete ID</label>
-                                <input type="text" name="intervalsId" value={formData.intervalsId} onChange={handleChange} placeholder="i12345" className="w-full bg-white dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 rounded px-3 py-1.5 text-xs font-mono dark:text-zinc-200 focus:border-indigo-500 outline-none" />
-                            </div>
-                            <div>
-                                <label className="text-[8px] font-bold text-slate-500 uppercase tracking-widest mb-1 block">API Key</label>
-                                <input type="password" name="intervalsKey" value={formData.intervalsKey} onChange={handleChange} placeholder="..." className="w-full bg-white dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 rounded px-3 py-1.5 text-xs font-mono dark:text-zinc-200 focus:border-indigo-500 outline-none" />
-                            </div>
-
-                            {/* Sync button */}
-                            <button
-                                onClick={handleSyncIntervals}
-                                disabled={isSyncingIntervals || !formData.intervalsId || !formData.intervalsKey}
-                                className="w-full mt-1 py-2 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded text-[9px] font-bold uppercase tracking-wider flex justify-center items-center gap-1.5 transition-colors"
-                            >
-                                {isSyncingIntervals
-                                    ? <><Loader2 size={10} className="animate-spin" />{intervalsSyncProgress || 'Sincronizando...'}</>
-                                    : <><Cloud size={10} /> Sincronizar VFC · Peso · HR</>}
-                            </button>
-
-                            {/* Sync preview: show what will be updated */}
-                            {syncPreview && (
-                                <div className="mt-2 p-3 bg-indigo-100 dark:bg-indigo-900/30 rounded-lg border border-indigo-300 dark:border-indigo-700">
-                                    <p className="text-[8px] font-bold text-indigo-700 dark:text-indigo-400 uppercase tracking-wider mb-1.5">📥 Actualizar desde Intervals.icu:</p>
-                                    <div className="space-y-1">
-                                        {syncPreview.weight != null && (
-                                            <div className="flex justify-between text-[9px]">
-                                                <span className="text-slate-500">Peso</span>
-                                                <span className="font-mono font-bold text-indigo-700 dark:text-indigo-300">{formData.weight} → {syncPreview.weight} kg</span>
-                                            </div>
-                                        )}
-                                        {syncPreview.fc_reposo != null && (
-                                            <div className="flex justify-between text-[9px]">
-                                                <span className="text-slate-500">FC Reposo</span>
-                                                <span className="font-mono font-bold text-indigo-700 dark:text-indigo-300">{formData.fcReposo} → {syncPreview.fc_reposo} bpm</span>
-                                            </div>
-                                        )}
-                                        {syncPreview.ftp != null && (
-                                            <div className="flex justify-between text-[9px]">
-                                                <span className="text-slate-500">FTP</span>
-                                                <span className="font-mono font-bold text-indigo-700 dark:text-indigo-300">{formData.bike?.ftp} → {syncPreview.ftp} W</span>
-                                            </div>
-                                        )}
-                                    </div>
-                                    <div className="flex gap-2 mt-2">
-                                        <button onClick={handleApplySyncedProfile} className="flex-1 py-1 bg-indigo-600 text-white rounded text-[8px] font-bold uppercase">Aplicar</button>
-                                        <button onClick={() => setSyncPreview(null)} className="flex-1 py-1 bg-slate-200 dark:bg-zinc-700 text-slate-600 dark:text-zinc-300 rounded text-[8px] font-bold uppercase">Ignorar</button>
-                                    </div>
-                                </div>
-                            )}
-
-                            <p className="text-[8px] text-indigo-500/70 dark:text-indigo-400/60 leading-relaxed pt-1">
-                                Sincroniza 180 días de VFC, FC reposo, peso, sueño y VO₂máx desde Garmin a través de intervals.icu.
-                            </p>
-                        </div>
-                    </div>
-
-                    <div className="bg-white dark:bg-zinc-900 rounded-lg border border-slate-200 dark:border-zinc-800 p-5 shadow-sm">
-                        <PanelHeader icon={Lock} title="Seguridad" />
-                        <form onSubmit={handleUpdatePassword} className="space-y-2">
-                            <input type="password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} placeholder="Nueva contraseña..." className="w-full px-3 py-2 bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 rounded text-xs font-mono dark:text-zinc-200 focus:border-blue-500 outline-none" />
-                            <button type="submit" disabled={isUpdatingPwd || !newPassword} className="w-full py-2 bg-slate-800 dark:bg-zinc-800 hover:bg-slate-700 text-white rounded text-[9px] font-bold uppercase disabled:opacity-50 flex justify-center items-center gap-2">
-                                {isUpdatingPwd ? <Loader2 size={12} className="animate-spin" /> : 'Actualizar'}
-                            </button>
-                        </form>
-                    </div>
-
-                    <div className="bg-white dark:bg-zinc-900 rounded-lg border border-slate-200 dark:border-zinc-800 p-5 shadow-sm">
-                        <PanelHeader icon={Database} title="Datos" subtitle={`${pureActs.length}/${stravaActs.length} con streams`} />
-                        <div className="w-full h-1.5 bg-slate-100 dark:bg-zinc-800 rounded-full overflow-hidden mb-3">
-                            <div className={`h-full ${syncPct === 100 ? 'bg-emerald-500' : 'bg-blue-500'}`} style={{ width: `${syncPct}%` }} />
-                        </div>
-                        <button onClick={onDeepSync} disabled={isDeepSyncing || syncPct === 100} className={`w-full py-2 rounded text-[9px] font-bold uppercase flex justify-center items-center gap-2 ${syncPct === 100 ? 'bg-emerald-50 text-emerald-600 border border-emerald-200' : 'bg-slate-100 dark:bg-zinc-800 hover:bg-slate-200 text-slate-800 dark:text-zinc-200'}`}>
-                            {isDeepSyncing ? <><Loader2 size={12} className="animate-spin" /> Sync...</> : syncPct === 100 ? <><CheckCircle2 size={12} /> 100%</> : 'Deep Sync'}
-                        </button>
-                    </div>
+            <div className="flex flex-col md:flex-row gap-8">
+                {/* SIDEBAR (Apple Settings Style) */}
+                <div className="w-full md:w-64 flex-shrink-0 space-y-1">
+                    {renderMenuButton('general', 'General', Activity)}
+                    {renderMenuButton('zones', 'Zonas y Umbrales', Heart)}
+                    {renderMenuButton('integrations', 'Integraciones', Link2)}
+                    {renderMenuButton('security', 'Seguridad y Datos', Lock)}
                 </div>
 
-                {/* RIGHT COLUMN: ZONES (9/12) */}
-                <div className="lg:col-span-9">
-                    {/* Tabs */}
-                    <div className="flex border-b border-slate-200 dark:border-zinc-800 mb-6 mt-1 flex-wrap gap-1">
-                        <button onClick={() => setActiveTab('run')}
-                            className={`px-5 py-3 font-bold text-[11px] uppercase tracking-widest border-b-2 transition-all flex items-center gap-2 ${activeTab === 'run' ? 'border-orange-500 text-orange-600 dark:text-orange-500 bg-orange-50/50 dark:bg-orange-500/10' : 'border-transparent text-slate-500 hover:text-slate-800 dark:text-zinc-400 dark:hover:text-zinc-200 hover:bg-slate-50 dark:hover:bg-zinc-800'}`}>
-                            <Footprints size={14} /> Correr
-                        </button>
-                        <button onClick={() => setActiveTab('bike')}
-                            className={`px-5 py-3 font-bold text-[11px] uppercase tracking-widest border-b-2 transition-all flex items-center gap-2 ${activeTab === 'bike' ? 'border-blue-500 text-blue-600 dark:text-blue-500 bg-blue-50/50 dark:bg-blue-500/10' : 'border-transparent text-slate-500 hover:text-slate-800 dark:text-zinc-400 dark:hover:text-zinc-200 hover:bg-slate-50 dark:hover:bg-zinc-800'}`}>
-                            <Bike size={14} /> Ciclismo
-                        </button>
-                    </div>
+                {/* CONTENT AREA */}
+                <div className="flex-1 min-w-0">
+                    {activeSection === 'general' && (
+                        <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-300">
+                            <div>
+                                <h2 className="text-lg font-bold text-slate-900 dark:text-zinc-100 mb-4">Mi Perfil</h2>
+                                <div className="bg-white dark:bg-zinc-900 rounded-2xl border border-slate-200 dark:border-zinc-800 overflow-hidden shadow-sm mb-6">
+                                    <div className="p-6 flex flex-col sm:flex-row items-center sm:items-start gap-6">
+                                        {/* Avatar */}
+                                        <div className="relative group shrink-0">
+                                            <div className="w-24 h-24 rounded-full overflow-hidden bg-slate-100 dark:bg-zinc-800 border-4 border-white dark:border-zinc-900 shadow-lg flex items-center justify-center relative">
+                                                {formData.avatarUrl ? (
+                                                    <img src={formData.avatarUrl} alt="Avatar" className="w-full h-full object-cover" />
+                                                ) : (
+                                                    <User size={40} className="text-slate-400" />
+                                                )}
+                                                {isUploadingAvatar && (
+                                                    <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
+                                                        <Loader2 size={24} className="text-white animate-spin" />
+                                                    </div>
+                                                )}
+                                            </div>
+                                            <label className="absolute inset-0 flex items-center justify-center bg-black/50 text-white rounded-full opacity-0 hover:opacity-100 cursor-pointer transition-opacity">
+                                                <Camera size={24} />
+                                                <input type="file" className="hidden" accept="image/*" onChange={handleAvatarUpload} disabled={isUploadingAvatar} />
+                                            </label>
+                                        </div>
+                                        {/* Inputs */}
+                                        <div className="flex-1 w-full space-y-4">
+                                            <div>
+                                                <label className="text-xs font-bold text-slate-500 uppercase tracking-widest">Nombre Completo</label>
+                                                <input type="text" name="fullName" value={formData.fullName || ''} onChange={handleChange} placeholder="Tu nombre..." className="w-full mt-1.5 bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-700 rounded-xl px-4 py-3 text-sm font-medium dark:text-zinc-200 focus:border-blue-500 outline-none transition-all" />
+                                            </div>
+                                            <div>
+                                                <label className="text-xs font-bold text-slate-500 uppercase tracking-widest">Correo Electrónico</label>
+                                                <div className="relative mt-1.5">
+                                                    <Mail size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
+                                                    <input type="email" name="email" value={formData.email || ''} disabled className="w-full pl-10 pr-4 py-3 bg-slate-100 dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-xl text-sm font-medium text-slate-500 dark:text-zinc-500 cursor-not-allowed outline-none" />
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
 
-                    <div className="space-y-6">
-                        {activeTab === 'run' && (
-                            <SportZonesSection sport="run" sportLabel="Correr" icon={Footprints} color="orange" showPace showPower={false} data={formData.run} onChange={handleChange} onZoneChange={handleZoneChange} onZonesMode={handleZonesMode} />
-                        )}
-                        {activeTab === 'bike' && (
-                            <SportZonesSection sport="bike" sportLabel="Ciclismo" icon={Bike} color="blue" showPace={false} showPower data={formData.bike} onChange={handleChange} onZoneChange={handleZoneChange} onZonesMode={handleZonesMode} />
-                        )}
-                    </div>
+                                <h2 className="text-lg font-bold text-slate-900 dark:text-zinc-100 mb-4 mt-8">Ajustes Fisiológicos</h2>
+                                <div className="bg-white dark:bg-zinc-900 rounded-2xl border border-slate-200 dark:border-zinc-800 overflow-hidden shadow-sm">
+                                    <div className="p-4 border-b border-slate-100 dark:border-zinc-800/80 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                                        <div className="flex items-center gap-3">
+                                            <div className="bg-slate-100 dark:bg-zinc-800 p-2.5 rounded-xl text-slate-500"><Weight size={20}/></div>
+                                            <div>
+                                                <p className="text-sm font-bold text-slate-800 dark:text-zinc-200">Peso Corporal</p>
+                                                <p className="text-xs text-slate-500 dark:text-zinc-500">Para cálculos de potencia relativa (W/kg)</p>
+                                            </div>
+                                        </div>
+                                        <div className="flex items-center gap-2">
+                                            <input type="number" name="weight" value={formData.weight} onChange={handleChange} className="w-20 px-3 py-2 bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-700 rounded-lg text-sm font-mono text-right outline-none focus:border-blue-500 transition-all" />
+                                            <span className="text-sm text-slate-500 font-medium">kg</span>
+                                        </div>
+                                    </div>
+
+                                    <div className="p-4 border-b border-slate-100 dark:border-zinc-800/80 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                                        <div className="flex items-center gap-3">
+                                            <div className="bg-rose-50 dark:bg-rose-900/20 p-2.5 rounded-xl text-rose-500"><Heart size={20}/></div>
+                                            <div>
+                                                <p className="text-sm font-bold text-slate-800 dark:text-zinc-200">FC Reposo</p>
+                                                <p className="text-xs text-slate-500 dark:text-zinc-500">Mínima frecuencia cardíaca registrada</p>
+                                            </div>
+                                        </div>
+                                        <div className="flex items-center gap-2">
+                                            <input type="number" name="fcReposo" value={formData.fcReposo} onChange={handleChange} className="w-20 px-3 py-2 bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-700 rounded-lg text-sm font-mono text-right outline-none focus:border-blue-500 transition-all" />
+                                            <span className="text-sm text-slate-500 font-medium">bpm</span>
+                                        </div>
+                                    </div>
+
+                                    <div className="p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                                        <div className="flex items-center gap-3">
+                                            <div className="bg-blue-50 dark:bg-blue-900/20 p-2.5 rounded-xl text-blue-500"><Activity size={20}/></div>
+                                            <div>
+                                                <p className="text-sm font-bold text-slate-800 dark:text-zinc-200">Calibrar Fitness (CTL)</p>
+                                                <p className="text-xs text-slate-500 dark:text-zinc-500">Introduce tu Fitness actual para calibrar todo el historial</p>
+                                            </div>
+                                        </div>
+                                        <div className="flex items-center gap-2">
+                                            <input 
+                                                type="number" step="1" value={targetCtl ?? ''} onChange={(e) => setTargetCtl(e.target.value ? parseInt(e.target.value) : null)} placeholder="Auto"
+                                                className="w-24 px-3 py-2 bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-700 rounded-lg text-sm font-mono text-right outline-none focus:border-blue-500 transition-all" 
+                                            />
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {activeSection === 'zones' && (
+                        <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-300">
+                            <div>
+                                <h2 className="text-lg font-bold text-slate-900 dark:text-zinc-100 mb-4">Zonas y Umbrales</h2>
+                                
+                                <div className="bg-white dark:bg-zinc-900 rounded-2xl border border-slate-200 dark:border-zinc-800 p-4 shadow-sm mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                                    <div className="flex items-center gap-3">
+                                        <div className="bg-orange-50 dark:bg-orange-900/20 p-2.5 rounded-xl text-orange-500"><RefreshCw size={20}/></div>
+                                        <div>
+                                            <p className="text-sm font-bold text-slate-800 dark:text-zinc-200">Auto-Detect LTHR</p>
+                                            <p className="text-xs text-slate-500 dark:text-zinc-500">Calcula tu umbral basado en el historial de actividades</p>
+                                        </div>
+                                    </div>
+                                    <button onClick={handleAutoDetectLTHR} disabled={isScanning || pureActs.length === 0} className="px-5 py-2.5 bg-slate-100 dark:bg-zinc-800 hover:bg-slate-200 dark:hover:bg-zinc-700 text-slate-800 dark:text-zinc-200 rounded-xl text-sm font-bold transition-colors disabled:opacity-50 flex items-center justify-center gap-2">
+                                        {isScanning ? <><Loader2 size={16} className="animate-spin" /> Analizando...</> : 'Escanear Historial'}
+                                    </button>
+                                </div>
+
+                                <div className="bg-slate-100/80 dark:bg-zinc-900/80 p-1.5 rounded-xl flex mb-6">
+                                    <button onClick={() => setActiveTab('run')} className={`flex-1 py-2 text-sm font-bold rounded-lg transition-all flex items-center justify-center gap-2 ${activeTab === 'run' ? 'bg-white dark:bg-zinc-800 text-orange-600 shadow-sm' : 'text-slate-500 hover:text-slate-700 dark:text-zinc-400'}`}>
+                                        <Footprints size={16} /> Correr
+                                    </button>
+                                    <button onClick={() => setActiveTab('bike')} className={`flex-1 py-2 text-sm font-bold rounded-lg transition-all flex items-center justify-center gap-2 ${activeTab === 'bike' ? 'bg-white dark:bg-zinc-800 text-blue-600 shadow-sm' : 'text-slate-500 hover:text-slate-700 dark:text-zinc-400'}`}>
+                                        <Bike size={16} /> Ciclismo
+                                    </button>
+                                </div>
+
+                                {activeTab === 'run' && <SportZonesSection sport="run" sportLabel="Zonas de Carrera" icon={Footprints} color="orange" showPace showPower={false} data={formData.run} onChange={handleChange} onZoneChange={handleZoneChange} onZonesMode={handleZonesMode} />}
+                                {activeTab === 'bike' && <SportZonesSection sport="bike" sportLabel="Zonas de Ciclismo" icon={Bike} color="blue" showPace={false} showPower data={formData.bike} onChange={handleChange} onZoneChange={handleZoneChange} onZonesMode={handleZonesMode} />}
+                            </div>
+                        </div>
+                    )}
+
+                    {activeSection === 'integrations' && (
+                        <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-300">
+                            <div>
+                                <h2 className="text-lg font-bold text-slate-900 dark:text-zinc-100 mb-4">Integraciones</h2>
+                                
+                                <div className="bg-white dark:bg-zinc-900 rounded-2xl border border-slate-200 dark:border-zinc-800 overflow-hidden shadow-sm">
+                                    <div className="p-5 border-b border-slate-100 dark:border-zinc-800/80">
+                                        <div className="flex items-center gap-3 mb-6">
+                                            <div className="bg-indigo-50 dark:bg-indigo-900/20 p-3 rounded-xl text-indigo-600 dark:text-indigo-400"><Link2 size={24}/></div>
+                                            <div>
+                                                <h3 className="text-base font-bold text-slate-900 dark:text-zinc-100">Intervals.icu</h3>
+                                                <p className="text-sm text-slate-500 dark:text-zinc-500">Sincroniza métricas fisiológicas (Garmin, Oura, Whoop)</p>
+                                            </div>
+                                        </div>
+                                        
+                                        <div className="space-y-5">
+                                            <div>
+                                                <label className="text-xs font-bold text-slate-700 dark:text-zinc-300 block mb-2 uppercase tracking-wider">Athlete ID</label>
+                                                <input type="text" name="intervalsId" value={formData.intervalsId} onChange={handleChange} placeholder="i12345" className="w-full bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-700 rounded-xl px-4 py-3 text-sm font-mono dark:text-zinc-200 focus:border-indigo-500 outline-none transition-all" />
+                                            </div>
+                                            <div>
+                                                <label className="text-xs font-bold text-slate-700 dark:text-zinc-300 block mb-2 uppercase tracking-wider">API Key</label>
+                                                <input type="password" name="intervalsKey" value={formData.intervalsKey} onChange={handleChange} placeholder="••••••••" className="w-full bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-700 rounded-xl px-4 py-3 text-sm font-mono dark:text-zinc-200 focus:border-indigo-500 outline-none transition-all" />
+                                            </div>
+                                            
+                                            <button
+                                                onClick={handleSyncIntervals}
+                                                disabled={isSyncingIntervals || !formData.intervalsId || !formData.intervalsKey}
+                                                className="w-full mt-2 py-3.5 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white rounded-xl text-sm font-bold flex justify-center items-center gap-2 transition-colors shadow-md"
+                                            >
+                                                {isSyncingIntervals
+                                                    ? <><Loader2 size={16} className="animate-spin" />{intervalsSyncProgress || 'Sincronizando...'}</>
+                                                    : <><Cloud size={16} /> Sincronizar Ahora</>}
+                                            </button>
+                                        </div>
+
+                                        {syncPreview && (
+                                            <div className="mt-6 p-5 bg-indigo-50 dark:bg-indigo-900/20 rounded-xl border border-indigo-200 dark:border-indigo-800">
+                                                <p className="text-sm font-bold text-indigo-700 dark:text-indigo-400 mb-4">Nuevos datos disponibles desde Intervals:</p>
+                                                <div className="space-y-3 mb-5">
+                                                    {syncPreview.weight != null && (
+                                                        <div className="flex justify-between text-sm">
+                                                            <span className="text-slate-600 dark:text-zinc-400">Peso</span>
+                                                            <span className="font-mono font-bold text-indigo-700 dark:text-indigo-300">{formData.weight} → {syncPreview.weight} kg</span>
+                                                        </div>
+                                                    )}
+                                                    {syncPreview.fc_reposo != null && (
+                                                        <div className="flex justify-between text-sm">
+                                                            <span className="text-slate-600 dark:text-zinc-400">FC Reposo</span>
+                                                            <span className="font-mono font-bold text-indigo-700 dark:text-indigo-300">{formData.fcReposo} → {syncPreview.fc_reposo} bpm</span>
+                                                        </div>
+                                                    )}
+                                                    {syncPreview.ftp != null && (
+                                                        <div className="flex justify-between text-sm">
+                                                            <span className="text-slate-600 dark:text-zinc-400">FTP</span>
+                                                            <span className="font-mono font-bold text-indigo-700 dark:text-indigo-300">{formData.bike?.ftp} → {syncPreview.ftp} W</span>
+                                                        </div>
+                                                    )}
+                                                </div>
+                                                <div className="flex gap-3">
+                                                    <button onClick={handleApplySyncedProfile} className="flex-1 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-bold uppercase tracking-wider transition-colors">Aplicar Cambios</button>
+                                                    <button onClick={() => setSyncPreview(null)} className="flex-1 py-2.5 bg-white dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 text-slate-700 dark:text-zinc-300 rounded-lg text-xs font-bold uppercase tracking-wider hover:bg-slate-50 dark:hover:bg-zinc-700 transition-colors">Ignorar</button>
+                                                </div>
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {activeSection === 'security' && (
+                        <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-300">
+                            <div>
+                                <h2 className="text-lg font-bold text-slate-900 dark:text-zinc-100 mb-4">Seguridad y Datos</h2>
+                                
+                                <div className="bg-white dark:bg-zinc-900 rounded-2xl border border-slate-200 dark:border-zinc-800 overflow-hidden shadow-sm mb-6">
+                                    <div className="p-5 border-b border-slate-100 dark:border-zinc-800/80">
+                                        <div className="flex items-center gap-3 mb-5">
+                                            <div className="bg-slate-100 dark:bg-zinc-800 p-3 rounded-xl text-slate-600 dark:text-zinc-400"><Key size={24}/></div>
+                                            <div>
+                                                <h3 className="text-base font-bold text-slate-900 dark:text-zinc-100">Contraseña de Acceso</h3>
+                                                <p className="text-sm text-slate-500 dark:text-zinc-500">Actualiza tu contraseña para entrar en FormaLab</p>
+                                            </div>
+                                        </div>
+                                        <form onSubmit={handleUpdatePassword} className="flex flex-col sm:flex-row gap-3">
+                                            <input type="password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} placeholder="Nueva contraseña..." className="flex-1 px-4 py-3 bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-700 rounded-xl text-sm font-mono dark:text-zinc-200 focus:border-blue-500 outline-none transition-all" />
+                                            <button type="submit" disabled={isUpdatingPwd || !newPassword} className="px-8 py-3 bg-slate-800 dark:bg-zinc-100 hover:bg-slate-700 dark:hover:bg-white text-white dark:text-zinc-900 rounded-xl text-sm font-bold transition-all disabled:opacity-50 flex items-center justify-center gap-2 shadow-sm">
+                                                {isUpdatingPwd ? <Loader2 size={16} className="animate-spin" /> : 'Actualizar'}
+                                            </button>
+                                        </form>
+                                    </div>
+                                </div>
+
+                                <div className="bg-white dark:bg-zinc-900 rounded-2xl border border-slate-200 dark:border-zinc-800 overflow-hidden shadow-sm">
+                                    <div className="p-6">
+                                        <div className="flex items-center gap-3 mb-5">
+                                            <div className="bg-blue-50 dark:bg-blue-900/20 p-3 rounded-xl text-blue-600"><Database size={24}/></div>
+                                            <div>
+                                                <h3 className="text-base font-bold text-slate-900 dark:text-zinc-100">Descarga de Streams (Deep Sync)</h3>
+                                                <p className="text-sm text-slate-500 dark:text-zinc-500">{pureActs.length} de {stravaActs.length} actividades con datos en crudo</p>
+                                            </div>
+                                        </div>
+                                        
+                                        <div className="w-full h-2.5 bg-slate-100 dark:bg-zinc-800 rounded-full overflow-hidden mb-5">
+                                            <div className={`h-full transition-all duration-500 ${syncPct === 100 ? 'bg-emerald-500' : 'bg-blue-500'}`} style={{ width: `${syncPct}%` }} />
+                                        </div>
+                                        
+                                        <button onClick={onDeepSync} disabled={isDeepSyncing || syncPct === 100} className={`w-full py-3.5 rounded-xl text-sm font-bold flex justify-center items-center gap-2 transition-all shadow-sm ${syncPct === 100 ? 'bg-emerald-50 dark:bg-emerald-900/10 text-emerald-600 border border-emerald-200 dark:border-emerald-800/50' : 'bg-blue-50 dark:bg-blue-900/10 text-blue-700 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-900/20'}`}>
+                                            {isDeepSyncing ? <><Loader2 size={16} className="animate-spin" /> Descargando...</> : syncPct === 100 ? <><CheckCircle2 size={16} /> Base de datos sincronizada</> : 'Iniciar Descarga Completa'}
+                                        </button>
+                                        <p className="text-xs text-slate-500 mt-4 text-center">
+                                            Esta acción descargará en segundo plano todos los vatios, pulso y coordenadas GPS de tus actividades históricas de Strava para permitir cálculos de TSS más precisos.
+                                        </p>
+                                    </div>
+                                </div>
+                                
+                                {/* Danger Zone */}
+                                <div className="bg-white dark:bg-zinc-900 rounded-2xl border border-red-200 dark:border-red-900/30 overflow-hidden shadow-sm mt-6">
+                                    <div className="p-6">
+                                        <div className="flex items-center gap-3 mb-5">
+                                            <div className="bg-red-50 dark:bg-red-900/20 p-3 rounded-xl text-red-600"><AlertTriangle size={24}/></div>
+                                            <div>
+                                                <h3 className="text-base font-bold text-red-600 dark:text-red-400">Zona de Peligro</h3>
+                                                <p className="text-sm text-slate-500 dark:text-zinc-500">Acciones destructivas para tu cuenta</p>
+                                            </div>
+                                        </div>
+                                        
+                                        <div className="flex flex-col sm:flex-row gap-4 items-center justify-between p-4 bg-red-50/50 dark:bg-red-900/10 rounded-xl border border-red-100 dark:border-red-900/20">
+                                            <div>
+                                                <p className="text-sm font-bold text-slate-800 dark:text-zinc-200">Eliminar cuenta definitivamente</p>
+                                                <p className="text-xs text-slate-500 dark:text-zinc-500 mt-1">
+                                                    Se borrarán todas tus actividades, zonas, umbrales y planes de entrenamiento. No se puede deshacer.
+                                                </p>
+                                            </div>
+                                            <button 
+                                                onClick={handleDeleteAccount}
+                                                disabled={isDeletingAccount}
+                                                className="flex-shrink-0 px-5 py-2.5 bg-red-600 hover:bg-red-700 text-white rounded-xl text-sm font-bold transition-all disabled:opacity-50 flex items-center justify-center gap-2 shadow-sm"
+                                            >
+                                                {isDeletingAccount ? <Loader2 size={16} className="animate-spin" /> : <><Trash2 size={16} /> Eliminar Cuenta</>}
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    )}
                 </div>
             </div>
         </div>
