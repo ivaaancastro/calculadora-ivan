@@ -52,49 +52,49 @@ const RingGauge = ({ value, max = 100, colorClass, gradientId, size = 160, strok
     );
 };
 
+const tooltipStyle = {
+    backgroundColor: 'rgba(24, 24, 27, 0.95)',
+    backdropFilter: 'blur(12px)',
+    border: '1px solid rgba(255, 255, 255, 0.1)',
+    borderRadius: '16px',
+    color: '#f4f4f5',
+    fontSize: '12px',
+    fontWeight: '600',
+    padding: '12px 16px',
+    zIndex: 1000,
+    boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.3)'
+};
+
+const CustomHrvTooltip = ({ active, payload }) => {
+    if (active && payload && payload.length) {
+        const data = payload[0].payload;
+        return (
+            <div style={tooltipStyle} className="min-w-[200px]">
+                <p className="text-zinc-400 text-[10px] uppercase font-black tracking-widest mb-3 border-b border-zinc-700/50 pb-2">{data.dateLabel}</p>
+                {data.hrv != null ? (
+                    <div className="space-y-3">
+                        <div className="flex items-center justify-between">
+                            <span className="flex items-center gap-2 text-[11px] font-bold text-indigo-300 uppercase tracking-wider">
+                                <div className="w-2 h-2 rounded-full bg-indigo-500 shadow-[0_0_8px_rgba(99,102,241,0.8)]"></div> Media 7d
+                            </span>
+                            <span className="text-sm font-black text-white">{data.hrv7dAvg} <span className="text-[10px] text-zinc-500">ms</span></span>
+                        </div>
+                        <div className="flex items-center justify-between">
+                            <span className="flex items-center gap-2 text-[11px] font-bold text-emerald-300 uppercase tracking-wider">
+                                <div className="w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.8)]"></div> VFC Diaria
+                            </span>
+                            <span className="text-sm font-black text-white">{data.hrv} <span className="text-[10px] text-zinc-500">ms</span></span>
+                        </div>
+                    </div>
+                ) : <p className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest text-center py-2">Sin datos de VFC</p>}
+            </div>
+        );
+    }
+    return null;
+};
+
 export const HealthPage = ({ activities, settings, chartData }) => {
     const { wellnessMetrics, loading: wellnessLoading, error: apiError } = useWellnessInfo(activities, settings, chartData);
-
-    const tooltipStyle = {
-        backgroundColor: 'rgba(24, 24, 27, 0.85)',
-        backdropFilter: 'blur(12px)',
-        border: '1px solid rgba(255, 255, 255, 0.1)',
-        borderRadius: '16px',
-        color: '#f4f4f5',
-        fontSize: '12px',
-        fontWeight: '600',
-        padding: '12px 16px',
-        zIndex: 1000,
-        boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.3)'
-    };
-
-    const CustomHrvTooltip = ({ active, payload }) => {
-        if (active && payload && payload.length) {
-            const data = payload[0].payload;
-            return (
-                <div style={tooltipStyle} className="min-w-[200px]">
-                    <p className="text-zinc-400 text-[10px] uppercase font-black tracking-widest mb-3 border-b border-zinc-700/50 pb-2">{data.dateLabel}</p>
-                    {data.hrv != null ? (
-                        <div className="space-y-3">
-                            <div className="flex items-center justify-between">
-                                <span className="flex items-center gap-2 text-[11px] font-bold text-indigo-300 uppercase tracking-wider">
-                                    <div className="w-2 h-2 rounded-full bg-indigo-500 shadow-[0_0_8px_rgba(99,102,241,0.8)]"></div> Media 7d
-                                </span>
-                                <span className="text-sm font-black text-white">{data.hrv7dAvg} <span className="text-[10px] text-zinc-500">ms</span></span>
-                            </div>
-                            <div className="flex items-center justify-between">
-                                <span className="flex items-center gap-2 text-[11px] font-bold text-emerald-300 uppercase tracking-wider">
-                                    <div className="w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.8)]"></div> VFC Diaria
-                                </span>
-                                <span className="text-sm font-black text-white">{data.hrv} <span className="text-[10px] text-zinc-500">ms</span></span>
-                            </div>
-                        </div>
-                    ) : <p className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest text-center py-2">Sin datos de VFC</p>}
-                </div>
-            );
-        }
-        return null;
-    };
 
     const readinessInfo = useMemo(() => {
         if (!wellnessMetrics || wellnessMetrics.todayReadiness === '--') return { color: 'text-slate-400', label: 'Desconocida', msg: 'Sincroniza datos para ver tu recuperación', badge: 'bg-slate-100 dark:bg-zinc-800' };

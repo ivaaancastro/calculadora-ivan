@@ -1,44 +1,82 @@
 import React from 'react';
-import { AlertTriangle, RefreshCcw } from 'lucide-react';
+import { AlertTriangle, RefreshCw } from 'lucide-react';
 
 export class ErrorBoundary extends React.Component {
-    constructor(props) {
-        super(props);
-        this.state = { hasError: false, error: null };
+  constructor(props) {
+    super(props);
+    this.state = { hasError: false, error: null, errorInfo: null };
+  }
+
+  static getDerivedStateFromError(error) {
+    // Actualiza el estado para que el siguiente render muestre la UI de repuesto
+    return { hasError: true, error };
+  }
+
+  componentDidCatch(error, errorInfo) {
+    // También puedes registrar el error en un servicio de reporte de errores
+    console.error("Error capturado por ErrorBoundary:", error, errorInfo);
+    this.setState({ errorInfo });
+  }
+
+  handleReload = () => {
+    window.location.reload();
+  };
+
+  handleClearCache = () => {
+    localStorage.clear();
+    sessionStorage.clear();
+    window.location.href = '/';
+  };
+
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-zinc-950 p-4">
+          <div className="bg-white dark:bg-zinc-900 rounded-2xl shadow-xl p-8 max-w-lg w-full border border-slate-200 dark:border-zinc-800 text-center">
+            <div className="flex justify-center mb-6">
+              <div className="w-16 h-16 bg-red-100 dark:bg-red-500/10 rounded-full flex items-center justify-center">
+                <AlertTriangle className="text-red-600 dark:text-red-500" size={32} />
+              </div>
+            </div>
+            
+            <h1 className="text-2xl font-black tracking-tight text-slate-800 dark:text-white mb-2">
+              Vaya, algo se ha roto
+            </h1>
+            <p className="text-sm font-medium text-slate-500 dark:text-zinc-400 mb-8">
+              La aplicación ha encontrado un error crítico en la interfaz. No te preocupes, tus datos están a salvo.
+            </p>
+
+            {import.meta.env.DEV && this.state.error && (
+              <div className="text-left bg-slate-100 dark:bg-zinc-950 p-4 rounded-lg overflow-auto mb-8 border border-slate-200 dark:border-zinc-800">
+                <p className="text-xs font-mono text-red-600 dark:text-red-400 font-bold mb-2">
+                  {this.state.error.toString()}
+                </p>
+                <p className="text-[10px] font-mono text-slate-500 dark:text-zinc-500 whitespace-pre-wrap">
+                  {this.state.errorInfo?.componentStack}
+                </p>
+              </div>
+            )}
+
+            <div className="flex flex-col gap-3">
+              <button 
+                onClick={this.handleReload}
+                className="w-full flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-xl font-bold text-sm uppercase tracking-widest transition-colors"
+              >
+                <RefreshCw size={16} />
+                Reiniciar Aplicación
+              </button>
+              <button 
+                onClick={this.handleClearCache}
+                className="w-full text-slate-500 dark:text-zinc-400 hover:text-slate-700 dark:hover:text-zinc-200 py-3 font-bold text-xs uppercase tracking-widest transition-colors"
+              >
+                Borrar caché y salir
+              </button>
+            </div>
+          </div>
+        </div>
+      );
     }
 
-    static getDerivedStateFromError(error) {
-        return { hasError: true, error };
-    }
-
-    componentDidCatch(error, errorInfo) {
-        console.error("ErrorBoundary atrapó un error:\n", error, "\n", errorInfo);
-    }
-
-    render() {
-        if (this.state.hasError) {
-            if (this.props.fallback) {
-                return this.props.fallback;
-            }
-            return (
-                <div className="flex flex-col items-center justify-center p-6 bg-rose-50 dark:bg-rose-950/10 border border-rose-200 dark:border-rose-900/30 rounded-xl w-full h-full min-h-[150px]">
-                    <AlertTriangle className="text-rose-500 mb-2" size={24} />
-                    <h3 className="text-xs font-bold text-rose-700 dark:text-rose-400 uppercase tracking-widest text-center">
-                        Error al visualizar
-                    </h3>
-                    <p className="text-[10px] text-rose-600/70 dark:text-rose-400/70 text-center mt-1 max-w-[200px] truncate">
-                        {this.state.error?.message || "Ocurrió un error inesperado al renderizar."}
-                    </p>
-                    <button
-                        onClick={() => this.setState({ hasError: false, error: null })}
-                        className="mt-3 flex items-center gap-1.5 px-3 py-1.5 bg-rose-100 dark:bg-rose-900/30 hover:bg-rose-200 dark:hover:bg-rose-900/50 text-rose-700 dark:text-rose-300 rounded text-[9px] font-bold uppercase transition-colors"
-                    >
-                        <RefreshCcw size={10} /> Reintentar
-                    </button>
-                </div>
-            );
-        }
-
-        return this.props.children;
-    }
+    return this.props.children;
+  }
 }
