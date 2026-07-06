@@ -121,7 +121,13 @@ const AuthModal = ({ open, onClose }) => {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;
       } else {
-        const { error } = await supabase.auth.signUp({ email, password });
+        const { error } = await supabase.auth.signUp({ 
+          email, 
+          password,
+          options: {
+            emailRedirectTo: `${window.location.origin}/email-confirmado`
+          }
+        });
         if (error) throw error;
         setMessage('¡Registro exitoso! Revisa tu email para confirmar la cuenta.');
       }

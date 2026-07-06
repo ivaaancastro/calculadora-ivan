@@ -16,13 +16,26 @@ const AddActivityModal = ({ isOpen, onClose, onSave }) => {
         e.preventDefault();
         setLoading(true);
         try {
+            const duration = Number(formData.duration);
+            const distance = Number(formData.distance) || 0;
+            const hrAvg = Number(formData.hr_avg) || 0;
+            const elevationGain = Number(formData.elevation_gain) || 0;
+
+            if (duration <= 0) throw new Error('La duración debe ser mayor que 0');
+            if (distance < 0 || hrAvg < 0 || elevationGain < 0) throw new Error('No se permiten valores negativos');
+
+            const { data: { session } } = await supabase.auth.getSession();
+            const userId = session?.user?.id;
+            if (!userId) throw new Error('No hay sesión activa');
+
             const { error } = await supabase.from('activities').insert([{
+                user_id: userId,
                 date: formData.date,
                 type: formData.type,
-                duration: Number(formData.duration),
-                hr_avg: Number(formData.hr_avg) || 0,
-                distance: Number(formData.distance) || 0, // Metros
-                elevation_gain: Number(formData.elevation_gain) || 0,
+                duration: duration,
+                hr_avg: hrAvg,
+                distance: distance, // Metros
+                elevation_gain: elevationGain,
                 calories: 0 // Simplificado
             }]);
             if (error) throw error;
@@ -71,13 +84,13 @@ const AddActivityModal = ({ isOpen, onClose, onSave }) => {
                     <div className="grid grid-cols-2 gap-4">
                         <div className="space-y-1">
                             <label className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase">Duración (min)</label>
-                            <input type="number" required placeholder="0" value={formData.duration} onChange={e => setFormData({ ...formData, duration: e.target.value })}
+                            <input type="number" min="0.1" step="any" required placeholder="0" value={formData.duration} onChange={e => setFormData({ ...formData, duration: e.target.value })}
                                 className="w-full bg-slate-50 dark:bg-slate-800 border-none rounded-xl p-3 text-sm font-bold text-slate-700 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none"
                             />
                         </div>
                         <div className="space-y-1">
                             <label className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase">Pulso Medio</label>
-                            <input type="number" placeholder="Opcional" value={formData.hr_avg} onChange={e => setFormData({ ...formData, hr_avg: e.target.value })}
+                            <input type="number" min="0" placeholder="Opcional" value={formData.hr_avg} onChange={e => setFormData({ ...formData, hr_avg: e.target.value })}
                                 className="w-full bg-slate-50 dark:bg-slate-800 border-none rounded-xl p-3 text-sm font-bold text-slate-700 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none"
                             />
                         </div>
@@ -86,13 +99,13 @@ const AddActivityModal = ({ isOpen, onClose, onSave }) => {
                     <div className="grid grid-cols-2 gap-4">
                         <div className="space-y-1">
                             <label className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase">Distancia (m)</label>
-                            <input type="number" placeholder="Ej: 5000" value={formData.distance} onChange={e => setFormData({ ...formData, distance: e.target.value })}
+                            <input type="number" min="0" placeholder="Ej: 5000" value={formData.distance} onChange={e => setFormData({ ...formData, distance: e.target.value })}
                                 className="w-full bg-slate-50 dark:bg-slate-800 border-none rounded-xl p-3 text-sm font-bold text-slate-700 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none"
                             />
                         </div>
                         <div className="space-y-1">
                             <label className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase">Desnivel (m)</label>
-                            <input type="number" placeholder="Ej: 100" value={formData.elevation_gain} onChange={e => setFormData({ ...formData, elevation_gain: e.target.value })}
+                            <input type="number" min="0" placeholder="Ej: 100" value={formData.elevation_gain} onChange={e => setFormData({ ...formData, elevation_gain: e.target.value })}
                                 className="w-full bg-slate-50 dark:bg-slate-800 border-none rounded-xl p-3 text-sm font-bold text-slate-700 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none"
                             />
                         </div>

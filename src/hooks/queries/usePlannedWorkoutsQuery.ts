@@ -73,7 +73,14 @@ export const usePlannedWorkoutsQuery = () => {
     const query = useQuery({
         queryKey: ['plannedWorkouts', settingsKey],
         queryFn: async () => {
-            const { data, error } = await supabase.from('planned_workouts').select('*');
+            const userId = await getCurrentUserId();
+            if (!userId) return [];
+            
+            const { data, error } = await supabase
+                .from('planned_workouts')
+                .select('*')
+                .eq('user_id', userId);
+                
             if (error) throw error;
             return sortByDate((data || []).map(row => enrichWorkout(row, settings)));
         },

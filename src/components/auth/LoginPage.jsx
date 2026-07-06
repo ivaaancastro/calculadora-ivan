@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
 import { supabase } from '../../supabase'; 
-import { Activity, Loader2, Mail, Lock, ArrowLeft } from 'lucide-react';
+import { Activity, Loader2, Mail, Lock, ArrowLeft, User } from 'lucide-react';
 
 export const LoginPage = () => {
   const [loading, setLoading] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [fullName, setFullName] = useState('');
   
   // Estados para controlar qué vista mostrar
   const [isLogin, setIsLogin] = useState(true);
@@ -33,7 +34,14 @@ export const LoginPage = () => {
         if (error) throw error;
       } else {
         // REGISTRO
-        const { error } = await supabase.auth.signUp({ email, password });
+        const { error } = await supabase.auth.signUp({ 
+          email, 
+          password,
+          options: {
+            data: { full_name: fullName },
+            emailRedirectTo: `${window.location.origin}/email-confirmado`
+          }
+        });
         if (error) throw error;
         setMessage("¡Registro exitoso! Revisa tu email para confirmar la cuenta o inicia sesión.");
       }
@@ -91,6 +99,20 @@ export const LoginPage = () => {
                 />
               </div>
             </div>
+
+            {!isLogin && !isForgotPassword && (
+              <div>
+                <label className="text-[10px] font-bold text-slate-500 dark:text-zinc-400 uppercase tracking-widest block mb-1">Nombre Completo</label>
+                <div className="relative">
+                  <User size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 dark:text-zinc-500" />
+                  <input 
+                    type="text" value={fullName} onChange={(e) => setFullName(e.target.value)} required
+                    className="w-full pl-10 pr-4 py-2.5 bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 rounded font-mono text-sm text-slate-800 dark:text-zinc-200 focus:border-blue-500 outline-none transition-colors"
+                    placeholder="Tu nombre..."
+                  />
+                </div>
+              </div>
+            )}
 
             {!isForgotPassword && (
               <div>
