@@ -83,8 +83,8 @@ const AddActivityModal = ({ isOpen, onClose, onSave }) => {
 
                     <div className="grid grid-cols-2 gap-4">
                         <div className="space-y-1">
-                            <label className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase">Duración (min)</label>
-                            <input type="number" min="0.1" step="any" required placeholder="0" value={formData.duration} onChange={e => setFormData({ ...formData, duration: e.target.value })}
+                            <label htmlFor="duration-input" className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase">Duración (min)</label>
+                            <input id="duration-input" type="number" min="0.1" step="any" required placeholder="0" value={formData.duration} onChange={e => setFormData({ ...formData, duration: e.target.value })}
                                 className="w-full bg-slate-50 dark:bg-slate-800 border-none rounded-xl p-3 text-sm font-bold text-slate-700 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none"
                             />
                         </div>
