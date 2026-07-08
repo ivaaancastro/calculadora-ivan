@@ -751,7 +751,7 @@ export function calculateTrainingEffect(act, settings) {
         let lastBurstTime = -300;
 
         for (let i = 10; i < hrs.length; i += 5) {
-            const dt = tms[i] - tms[i - 10];
+            const _dt = tms[i] - tms[i - 10];
             const dHR = hrs[i] - hrs[i - 10];
             const hrPct = hrs[i] / hrMax;
 
@@ -787,7 +787,7 @@ export function calculateTrainingEffect(act, settings) {
     // --- CLASIFICACIÓN DE BENEFICIO PRIMARIO (GARMIN MATRIX) ---
     let primaryBenefit = "Recuperación";
     let benefitDesc = "Intensidad baja. Mejora la recuperación y prepara para entrenos más duros.";
-    let label = "Mantenimiento";
+    let _label = "Mantenimiento";
     let color = "text-slate-500"; 
 
     const aS = Number(aerobicScore.toFixed(1));
@@ -995,9 +995,9 @@ export function getTrainingBalance(activities, settings, days = 7) {
         const isHighShort = totalHigh < targets.high.min;
         const isAnShort = totalAnaerobic < targets.anaerobic.min;
 
-        const isLowOver = totalLow > targets.low.max;
-        const isHighOver = totalHigh > targets.high.max;
-        const isAnOver = totalAnaerobic > targets.anaerobic.max;
+        const _isLowOver = totalLow > targets.low.max;
+        const _isHighOver = totalHigh > targets.high.max;
+        const _isAnOver = totalAnaerobic > targets.anaerobic.max;
 
         // Garmin prioritizes reporting shortages, usually from Anaerobic down to Low Aerobic
         if (isAnShort && isHighShort && isLowShort) {

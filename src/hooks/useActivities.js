@@ -11,7 +11,7 @@
  *
  * El hook expone un único objeto con todo lo que necesita el Dashboard.
  */
-import { useState, useEffect, useMemo, useCallback } from "react";
+import { useEffect, useMemo, useCallback } from "react";
 import { supabase } from "../supabase";
 import {
     calculateActivityTSS,
@@ -48,8 +48,8 @@ export const useActivities = () => {
     const { query: workoutsQuery, addWorkoutMutation, updateWorkoutMutation, deleteWorkoutMutation } = usePlannedWorkoutsQuery();
     const { syncAll }                                              = useIntervalsSync();
 
-    const activities      = activitiesQuery.data || [];
-    const plannedWorkouts = workoutsQuery.data   || [];
+    const activities      = useMemo(() => activitiesQuery.data || [], [activitiesQuery.data]);
+    const plannedWorkouts = useMemo(() => workoutsQuery.data   || [], [workoutsQuery.data]);
     const loading         = profileQuery.isLoading || activitiesQuery.isLoading || workoutsQuery.isLoading;
 
     // ── Auto-sync diario de Intervals.icu ────────────────────────────────────
