@@ -5,7 +5,7 @@ import { useTheme } from '../../hooks/useTheme';
 import { supabase } from '../../supabase';
 
 export const Navbar = ({
-  activities, uploading, handleClearDb, onFileUpload,
+   uploading, handleClearDb, onFileUpload,
   onAddClick, onProfileClick, isStravaConnected, onSync,
   activeTab, onTabChange
 }) => {

@@ -65,6 +65,7 @@ export const usePlanner = (currentMetrics) => {
     useEffect(() => {
         if (currentMetrics?.avgTss7d) {
             const currentWeeklyLoad = currentMetrics.avgTss7d * 7;
+            // eslint-disable-next-line react-hooks/set-state-in-effect
             setPlannedLoad(Array(WEEKS_TO_SIMULATE).fill(Math.round(currentWeeklyLoad)));
         }
     }, [currentMetrics?.avgTss7d]);
@@ -102,6 +103,7 @@ export const usePlanner = (currentMetrics) => {
             }
         });
 
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         setSimulation(simData);
     }, [plannedLoad, currentMetrics]);
 

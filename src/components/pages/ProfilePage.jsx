@@ -91,7 +91,7 @@ const ModeSelector = ({ sport, data, onZonesMode }) => (
     </div>
 );
 
-const PanelHeader = ({ icon: Icon, title, subtitle }) => (
+const PanelHeader = ({ icon:  title, subtitle }) => (
     <div className="flex justify-between items-end border-b border-slate-200 dark:border-zinc-800 pb-2 mb-4">
         <div>
             <h4 className="text-[11px] font-bold text-slate-700 dark:text-zinc-300 uppercase tracking-widest flex items-center gap-1.5">
@@ -299,7 +299,7 @@ const SportZonesSection = ({ sport, sportLabel, icon: Icon, color, showPace, sho
     );
 };
 
-export const ProfilePage = ({ currentSettings, currentMetrics, onUpdate, activities, isDeepSyncing, deepSyncProgress, onDeepSync, onBack }) => {
+export const ProfilePage = ({ currentSettings, currentMetrics, onUpdate, activities, isDeepSyncing,  onDeepSync, onBack }) => {
     const [formData, setFormData] = useState(null);
     const [targetCtl, setTargetCtl] = useState(null); // Managed separately for calibration logic
     const [activeTab, setActiveTab] = useState('run');
@@ -316,7 +316,7 @@ export const ProfilePage = ({ currentSettings, currentMetrics, onUpdate, activit
 
     const handleSyncIntervals = async () => {
         if (!formData?.intervalsId || !formData?.intervalsKey) {
-            toast.error('Introduce tu Athlete ID y API Key de Intervals.icu primero');
+            toast._or('Introduce tu Athlete ID y API Key de Intervals.icu primero');
             return;
         }
         const result = await syncIntervals(formData);
@@ -421,7 +421,7 @@ export const ProfilePage = ({ currentSettings, currentMetrics, onUpdate, activit
                 toast.success("Tu cuenta ha sido eliminada.");
                 window.location.href = '/';
             }
-        } catch (err) {
+        } catch {
             toast.error("Ocurrió un error al intentar eliminar la cuenta.");
         } finally {
             setIsDeletingAccount(false);

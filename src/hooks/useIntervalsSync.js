@@ -114,7 +114,7 @@ export function useIntervalsSync() {
    * FTP (icu_ftp from sport settings), resting HR, weight.
    * Updates the profiles table in Supabase.
    */
-  const syncAthleteProfile = useCallback(async ({ athleteId, apiKey, userId }) => {
+  const syncAthleteProfile = useCallback(async ({ athleteId, apiKey }) => {
     setSyncProgress('Obteniendo perfil de atleta desde Intervals.icu...');
 
     const athleteData = await callIntervalsProxy({

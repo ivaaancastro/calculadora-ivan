@@ -9,7 +9,7 @@ const BevelCard = ({ children, className = '' }) => (
     </div>
 );
 
-const RingGauge = ({ value, max = 100, colorClass, gradientId, size = 160, strokeWidth = 14, icon: Icon, title, subtitle }) => {
+const RingGauge = ({ value, max = 100, colorClass, gradientId, size = 160, strokeWidth = 14, icon:  title,  }) => {
     const pct = value !== '--' ? Math.max(0, Math.min(100, (value / max) * 100)) : 0;
     const r = (size - strokeWidth) / 2;
     const c = size / 2;
