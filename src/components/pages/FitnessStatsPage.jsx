@@ -12,7 +12,7 @@ import {
 } from 'lucide-react';
 import {
     estimateFTP, estimateCyclingVO2max, estimateRunningVO2max, 
-    calculateTrainingEffect, analyzePowerProfile, getPowerProfileBenchmarks,
+    analyzePowerProfile, getPowerProfileBenchmarks,
     getTrainingBalance, getTrainingStatus, getHRVAnalysis, predictRaceTimes
 } from '../../utils/fitnessStatsEngine';
 import { InfoTooltip } from '../common/InfoTooltip';
@@ -63,8 +63,6 @@ export const FitnessStatsPage = ({ activities, settings, onSelectActivity }) => 
             ftp, profile, powerProfile, balance, trainingStatus, hrv, racePredictions
         };
     }, [activities, settings, balanceDays, wellnessMetrics]);
-
-    if (!activities || activities.length === 0) return null;
 
     const currentVo2Obj = vo2Sport === 'run' ? stats.vo2.run : stats.vo2.bike;
     const currentVo2 = currentVo2Obj.vo2max;
@@ -210,9 +208,9 @@ export const FitnessStatsPage = ({ activities, settings, onSelectActivity }) => 
     const curveColor = curveType === 'hr' ? '#ef4444' : (curveType === 'power' ? '#fbbf24' : (isPace ? '#ea580c' : '#2563eb'));
     const curveUnit = curveType === 'power' ? 'w' : (isPace ? '/km' : (curveType === 'speed' ? 'km/h' : 'ppm'));
 
-    const handleDirectClick = (payload) => { if (!onSelectActivity) return; if (payload?.actId || payload?.id) onSelectActivity(activities.find(a => a.id === (payload.actId || payload.id))); };
+    // const handleDirectClick = (payload) => { if (!onSelectActivity) return; if (payload?.actId || payload?.id) onSelectActivity(activities.find(a => a.id === (payload.actId || payload.id))); };
     
-    const CustomCurveTooltip = ({ active, payload, label }) => {
+    const renderCustomCurveTooltip = ({ active, payload, label }) => {
         if (active && payload && payload.length) {
             const data = payload[0].payload;
             return (
@@ -232,7 +230,7 @@ export const FitnessStatsPage = ({ activities, settings, onSelectActivity }) => 
         return null;
     };
 
-    const CustomEfTooltip = ({ active, payload }) => {
+    const renderCustomEfTooltip = ({ active, payload }) => {
         if (active && payload && payload.length) {
             const data = payload[0].payload;
             const isRun = curveSport === 'run';
@@ -322,6 +320,7 @@ export const FitnessStatsPage = ({ activities, settings, onSelectActivity }) => 
 
     const configFTP = Number(settings?.bike?.ftp) || 0;
     const ftpDiff = stats.ftp.eFTP && configFTP ? stats.ftp.eFTP - configFTP : null;
+    if (!activities || activities.length === 0) return null;
 
     return (
         <div className="animate-in fade-in duration-500 pb-16 w-full max-w-[1100px] mx-auto px-4 sm:px-8">
@@ -948,7 +947,7 @@ export const FitnessStatsPage = ({ activities, settings, onSelectActivity }) => 
                                         <CartesianGrid strokeDasharray="2 2" stroke="#3f3f46" opacity={0.1} vertical={false} />
                                         <XAxis dataKey="dateLabel" hide />
                                         <YAxis hide domain={['dataMin - 0.1', 'dataMax + 0.1']} />
-                                        <RechartsTooltip content={<CustomEfTooltip />} isAnimationActive={false} />
+                                        <RechartsTooltip content={renderCustomEfTooltip} isAnimationActive={false} />
                                         <Area type="monotone" dataKey="ef" stroke="#8b5cf6" strokeWidth={3} fill="url(#efGrad)" activeDot={{ r: 5, fill: '#8b5cf6', strokeWidth: 2, stroke: '#fff' }} isAnimationActive={false} />
                                         <Scatter dataKey="ef" fill="transparent" cursor="pointer" onClick={(data) => { const act = activities.find(a => a.id === data.id); if (act && onSelectActivity) onSelectActivity(act); }} />
                                     </ComposedChart>
@@ -968,7 +967,7 @@ export const FitnessStatsPage = ({ activities, settings, onSelectActivity }) => 
                                         <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" opacity={0.3} vertical={false} />
                                         <XAxis dataKey="name" tick={{ fontSize: 9, fontWeight: 700, fill: '#94a3b8' }} axisLine={false} tickLine={false} />
                                         <YAxis hide reversed={isPace} domain={['auto', 'auto']} />
-                                        <RechartsTooltip content={<CustomCurveTooltip />} isAnimationActive={false} />
+                                        <RechartsTooltip content={renderCustomCurveTooltip} isAnimationActive={false} />
                                         <Area type="stepAfter" dataKey="value" stroke={curveColor} strokeWidth={3} fill={curveColor} fillOpacity={0.05} dot={false} isAnimationActive={false} />
                                         <Scatter dataKey="value" fill="transparent" cursor="pointer" onClick={(data) => { if (data.actId && onSelectActivity) { const act = activities.find(a => a.id === data.actId); if (act) onSelectActivity(act); } }} />
                                     </ComposedChart>

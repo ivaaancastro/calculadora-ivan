@@ -11,12 +11,13 @@
  *
  * El hook expone un único objeto con todo lo que necesita el Dashboard.
  */
-import { useState, useEffect, useMemo, useCallback } from "react";
+import { useEffect, useMemo, useCallback } from "react";
 import { supabase } from "../supabase";
 import {
+    calculateActivityTSS,
     SPORT_LOAD_CONFIG,
     getSportCategory,
-    calculateActivityTSS,
+    calculatePMC,
 } from "../utils/tssEngine";
 import { useAppStore } from "../store/useAppStore";
 import { useQueryClient } from "@tanstack/react-query";
@@ -47,8 +48,8 @@ export const useActivities = () => {
     const { query: workoutsQuery, addWorkoutMutation, updateWorkoutMutation, deleteWorkoutMutation } = usePlannedWorkoutsQuery();
     const { syncAll }                                              = useIntervalsSync();
 
-    const activities      = activitiesQuery.data || [];
-    const plannedWorkouts = workoutsQuery.data   || [];
+    const activities      = useMemo(() => activitiesQuery.data || [], [activitiesQuery.data]);
+    const plannedWorkouts = useMemo(() => workoutsQuery.data   || [], [workoutsQuery.data]);
     const loading         = profileQuery.isLoading || activitiesQuery.isLoading || workoutsQuery.isLoading;
 
     // ── Auto-sync diario de Intervals.icu ────────────────────────────────────
@@ -292,7 +293,6 @@ export const useActivities = () => {
                     const { error: insertError } = await supabase.from('activities').insert(newRows);
                     if (insertError) throw new Error(`Error BD: ${insertError.message}`);
                     totalNew += newRows.length;
-                    page++;
 
                     // ── Auto-completado de planes ── ─────────────────────────
                     // Si hay un workout planificado el mismo día y mismo deporte
@@ -323,9 +323,12 @@ export const useActivities = () => {
                             await deletePlannedWorkout(match.id);
                         }
                     }
-                } else {
+                }
+                
+                if (stravaActivities.length < 200) {
                     hasMore = false;
                 }
+                page++;
             }
 
             if (totalNew > 0) {
@@ -453,99 +456,14 @@ export const useActivities = () => {
             };
         });
 
-        // ── Indexar actividades por día ────────────────────────────────────
-        const activitiesMap = new Map();
-        processedActivities.forEach((act) => {
-            const dKey = new Date(act.date).toISOString().split('T')[0];
-            if (!activitiesMap.has(dKey)) activitiesMap.set(dKey, []);
-            activitiesMap.get(dKey).push(act);
-        });
 
-        // ── Constantes del modelo EWMA ─────────────────────────────────────
-        const ta           = settings.ta || 42;
-        const tf           = settings.tf || 7;
-        const K_CTL        = Math.exp(-1 / ta);   // Factor de decaimiento CTL
-        const K_ATL        = Math.exp(-1 / tf);   // Factor de decaimiento ATL
-        const K_CTL_GAIN   = 1 - K_CTL;
-        const K_ATL_GAIN   = 1 - K_ATL;
-        const offsetCtl    = parseFloat(settings.offsetCtl) || 0;
-
-        // ── Iterar día a día ───────────────────────────────────────────────
-        const oneDay     = 24 * 60 * 60 * 1000;
-        const startDate  = new Date(processedActivities[0].date);
-        const today      = new Date();
-        const startUTC   = Date.UTC(startDate.getUTCFullYear(), startDate.getUTCMonth(), startDate.getUTCDate());
-        const todayUTC   = Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), today.getUTCDate());
-        const endUTC     = todayUTC + 7 * oneDay; // Proyectar 1 semana hacia adelante
-
-        let ctl          = 0;
-        let atl          = 0;
-        const fullSeries = [];
-        const loadHistory = []; // Carga diaria efectiva (ATL contrib) para calcular ACWR
-
-        for (let time = startUTC; time <= endUTC; time += oneDay) {
-            const dateStr = new Date(time).toISOString().split('T')[0];
-            const daysActs = activitiesMap.get(dateStr) || [];
-
-            let dailyTss         = 0;
-            let dailyCtlContrib  = 0;
-            let dailyAtlContrib  = 0;
-
-            daysActs.forEach((act) => {
-                const cfg = SPORT_LOAD_CONFIG[act.sportCategory] || SPORT_LOAD_CONFIG.other;
-                dailyTss        += act.tss;
-                dailyCtlContrib += act.tss * cfg.fitness;
-                dailyAtlContrib += act.tss * cfg.fatigue;
-            });
-
-            if (time <= todayUTC) loadHistory.push(Math.round(dailyAtlContrib));
-
-            // Fórmula EWMA exacta de Intervals.icu
-            // No hacemos seeding igualando CTL/ATL al TSS porque eso anula el TSB (Forma) 
-            // el primer día. Empezamos en 0 y dejamos que el primer entreno aplique el gain.
-            ctl = ctl * K_CTL + dailyCtlContrib * K_CTL_GAIN;
-            atl = atl * K_ATL + dailyAtlContrib * K_ATL_GAIN;
-
-            const finalCtl = ctl + offsetCtl;
-            const tsb      = parseFloat((finalCtl - atl).toFixed(1));
-
-            fullSeries.push({
-                date:              dateStr,
-                ctl:               parseFloat(finalCtl.toFixed(1)),
-                atl:               parseFloat(atl.toFixed(1)),
-                tsb,
-                tcb:               tsb, // Alias para compatibilidad con componentes antiguos
-                dailyTss:          Math.round(dailyTss),
-                dailyTssEffective: Math.round(dailyAtlContrib),
-            });
-        }
-
-        // ── Métricas actuales ──────────────────────────────────────────────
-        const todayStr    = new Date(todayUTC).toISOString().split('T')[0];
-        const todayIdx    = fullSeries.findIndex(d => d.date === todayStr);
-        const currentIdx  = todayIdx !== -1 ? todayIdx : fullSeries.length - 8;
-
-        const lastPoint      = fullSeries[currentIdx]       || { ctl: 0, atl: 0, tsb: 0 };
-        const prevWeekPoint  = fullSeries[currentIdx - 7]   || { ctl: 0 };
-        const pastMonthPoint = fullSeries[currentIdx - 30]  || fullSeries[0] || { ctl: 0 };
-
-        const rampRate     = parseFloat((lastPoint.ctl - prevWeekPoint.ctl).toFixed(1));
-        const last7Loads   = loadHistory.slice(-7);
-        const last28Loads  = loadHistory.slice(-28);
-        const sum7         = last7Loads.reduce((a, b) => a + b, 0);
-        const avg7         = sum7 / (last7Loads.length || 1);
-        const avg28        = last28Loads.reduce((a, b) => a + b, 0) / (last28Loads.length || 1);
-        const acwr         = avg28 > 0 ? avg7 / avg28 : 0;
-
-        // Monotonía y Strain (Foster, 1998)
-        const variance  = last7Loads.reduce((t, n) => t + Math.pow(n - avg7, 2), 0) / (last7Loads.length || 1);
-        const stdDev    = Math.sqrt(variance);
-        const monotony  = stdDev > 0 ? avg7 / stdDev : (avg7 > 0 ? 4 : 0);
-        const strain    = sum7 * monotony;
+        // ── 3. Calcular PMC (Performance Management Chart) ───────────────────
+        const { fullSeries, metrics, loadHistory } = calculatePMC(processedActivities, settings);
 
         // ── Filtrado por timeRange ─────────────────────────────────────────
         const cutoff = new Date();
         const days   = TIME_RANGE_DAYS[timeRange];
+        const today  = new Date();
         if (days) cutoff.setDate(today.getDate() - days);
         else      cutoff.setTime(processedActivities[0] ? new Date(processedActivities[0].date).getTime() : 0);
 
@@ -579,18 +497,26 @@ export const useActivities = () => {
             tssEffective: sumTSSEffective,
         };
 
+        // Monotonía y Strain (Foster, 1998)
+        const avg7 = metrics ? metrics.avgTss7d : 0;
+        const last7Loads = loadHistory ? loadHistory.slice(-7) : [];
+        const variance  = last7Loads.reduce((t, n) => t + Math.pow(n - avg7, 2), 0) / (last7Loads.length || 1);
+        const stdDev    = Math.sqrt(variance);
+        const monotony  = stdDev > 0 ? avg7 / stdDev : (avg7 > 0 ? 4 : 0);
+        const strain    = (avg7 * (last7Loads.length || 7)) * monotony;
+
         const currentMetrics = {
-            ctl:        lastPoint.ctl,
-            rawCtl:     lastPoint.ctl - offsetCtl,
-            atl:        lastPoint.atl,
-            tsb:        lastPoint.tsb,
-            tcb:        lastPoint.tsb, // Alias
-            rampRate,
-            avgTss7d:   Math.round(avg7),
-            acwr:       parseFloat(acwr.toFixed(2)),
+            ctl:        metrics?.ctl || 0,
+            rawCtl:     metrics?.rawCtl || 0,
+            atl:        metrics?.atl || 0,
+            tsb:        metrics?.tsb || 0,
+            tcb:        metrics?.tsb || 0, // Alias
+            rampRate:   metrics?.rampRate || 0,
+            avgTss7d:   metrics?.avgTss7d || 0,
+            acwr:       metrics?.acwr || 0,
             monotony:   parseFloat(monotony.toFixed(2)),
             strain:     Math.round(strain),
-            pastCtl:    parseFloat(pastMonthPoint.ctl.toFixed(1)),
+            pastCtl:    metrics?.pastCtl || 0,
         };
 
         return {

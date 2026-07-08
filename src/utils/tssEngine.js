@@ -424,3 +424,130 @@ export function recalcTssFromBlocks(plan, settings) {
         return plan.tss || 0;
     }
 }
+
+/**
+ * Calcula el Performance Management Chart (PMC) utilizando Exponentially Weighted Moving Average (EWMA).
+ * Proyecta los datos día a día desde la primera actividad hasta 7 días en el futuro.
+ * 
+ * @param {Array} activities - Arreglo de actividades con { date, tss, type }
+ * @param {Object} settings - Configuración del usuario { ta, tf, offsetCtl }
+ * @returns {Object} - { fullSeries, metrics }
+ */
+export function calculatePMC(activities, settings = {}) {
+    if (!activities || activities.length === 0) {
+        return { fullSeries: [], metrics: null, loadHistory: [] };
+    }
+
+    // 1. Indexar actividades por día
+    const activitiesMap = new Map();
+    activities.forEach((act) => {
+        const dKey = new Date(act.date).toISOString().split('T')[0];
+        if (!activitiesMap.has(dKey)) activitiesMap.set(dKey, []);
+        
+        const sportCategory = act.sportCategory || getSportCategory(act.type);
+        activitiesMap.get(dKey).push({ ...act, sportCategory });
+    });
+
+    // 2. Constantes del modelo EWMA
+    const ta = settings.ta || 42;
+    const tf = settings.tf || 7;
+    const K_CTL = Math.exp(-1 / ta);
+    const K_ATL = Math.exp(-1 / tf);
+    const K_CTL_GAIN = 1 - K_CTL;
+    const K_ATL_GAIN = 1 - K_ATL;
+    const offsetCtl = parseFloat(settings.offsetCtl) || 0;
+
+    // 3. Rango de tiempo
+    const oneDay = 24 * 60 * 60 * 1000;
+    const sortedActivities = [...activities].sort((a, b) => new Date(a.date) - new Date(b.date));
+    const startDate = new Date(sortedActivities[0].date);
+    const today = new Date();
+    
+    const startUTC = Date.UTC(startDate.getUTCFullYear(), startDate.getUTCMonth(), startDate.getUTCDate());
+    const todayUTC = Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), today.getUTCDate());
+    const endUTC = todayUTC + 7 * oneDay;
+
+    let ctl = 0;
+    let atl = 0;
+    const fullSeries = [];
+    const loadHistory = [];
+
+    // 4. Calcular día a día
+    for (let time = startUTC; time <= endUTC; time += oneDay) {
+        const dateStr = new Date(time).toISOString().split('T')[0];
+        const daysActs = activitiesMap.get(dateStr) || [];
+
+        let dailyTss = 0;
+        let dailyCtlContrib = 0;
+        let dailyAtlContrib = 0;
+
+        daysActs.forEach((act) => {
+            const cfg = SPORT_LOAD_CONFIG[act.sportCategory] || SPORT_LOAD_CONFIG.other;
+            const tss = act.tss || 0;
+            dailyTss += tss;
+            dailyCtlContrib += tss * cfg.fitness;
+            dailyAtlContrib += tss * cfg.fatigue;
+        });
+
+        if (time <= todayUTC) {
+            loadHistory.push(Math.round(dailyAtlContrib));
+        }
+
+        ctl = ctl * K_CTL + dailyCtlContrib * K_CTL_GAIN;
+        atl = atl * K_ATL + dailyAtlContrib * K_ATL_GAIN;
+
+        const finalCtl = ctl + offsetCtl;
+        const tsb = parseFloat((finalCtl - atl).toFixed(1));
+
+        fullSeries.push({
+            date: dateStr,
+            ctl: parseFloat(finalCtl.toFixed(1)),
+            atl: parseFloat(atl.toFixed(1)),
+            tsb: tsb,
+            tcb: tsb,
+            dailyTss: Math.round(dailyTss),
+            dailyTssEffective: Math.round(dailyAtlContrib),
+        });
+    }
+
+    // 5. Métricas actuales
+    const todayStr = new Date(todayUTC).toISOString().split('T')[0];
+    const todayIdx = fullSeries.findIndex(d => d.date === todayStr);
+    const currentIdx = todayIdx !== -1 ? todayIdx : fullSeries.length - 8;
+
+    const lastPoint = fullSeries[currentIdx] || { ctl: 0, atl: 0, tsb: 0 };
+    const prevWeekPoint = fullSeries[currentIdx - 7] || { ctl: 0 };
+    const pastMonthPoint = fullSeries[currentIdx - 30] || fullSeries[0] || { ctl: 0 };
+
+    const rampRate = parseFloat((lastPoint.ctl - prevWeekPoint.ctl).toFixed(1));
+    const last7Loads = loadHistory.slice(-7);
+    const last28Loads = loadHistory.slice(-28);
+    
+    const sum7 = last7Loads.reduce((a, b) => a + b, 0);
+    const avg7 = sum7 / 7;
+    const avg28 = last28Loads.reduce((a, b) => a + b, 0) / (last28Loads.length || 1);
+    
+    const acwr = avg28 > 0 ? parseFloat((avg7 / avg28).toFixed(2)) : 0;
+    let injuryRisk = 'Bajo';
+    if (acwr > 1.5) injuryRisk = 'Peligro';
+    else if (acwr >= 1.3) injuryRisk = 'Alerta';
+    else if (acwr < 0.8 && loadHistory.length > 28) injuryRisk = 'Desentreno';
+
+    const metrics = {
+        ctl: lastPoint.ctl,
+        rawCtl: lastPoint.ctl - offsetCtl,
+        atl: lastPoint.atl,
+        tsb: lastPoint.tsb,
+        rampRate,
+        avgTss7d: Math.round(avg7),
+        acwr,
+        injuryRisk,
+        pastCtl: parseFloat(pastMonthPoint.ctl.toFixed(1)),
+        isFitnessGrowing: lastPoint.ctl > pastMonthPoint.ctl,
+        growthPercentage: pastMonthPoint.ctl > 0 
+            ? Math.round(((lastPoint.ctl - pastMonthPoint.ctl) / pastMonthPoint.ctl) * 100)
+            : 0
+    };
+
+    return { fullSeries, metrics, loadHistory };
+}

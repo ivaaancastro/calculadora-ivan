@@ -1,4 +1,5 @@
-import React, { useState, useMemo, useEffect } from 'react';
+/* eslint-disable no-unused-vars, no-empty, react-hooks/exhaustive-deps */
+import React, { useState, useMemo, useEffect, useRef, useCallback } from 'react';
 import {
     ChevronLeft, ChevronRight, Calendar as CalIcon,
     Clock, Zap, MapPin, Footprints, Bike, Dumbbell, Activity, Target,

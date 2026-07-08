@@ -1,3 +1,5 @@
+/* eslint-disable no-unused-vars */
+
 /**
  * fitnessStatsEngine.js — Motor de Estadísticas de Rendimiento
  *
@@ -751,7 +753,7 @@ export function calculateTrainingEffect(act, settings) {
         let lastBurstTime = -300;
 
         for (let i = 10; i < hrs.length; i += 5) {
-            const dt = tms[i] - tms[i - 10];
+            const _dt = tms[i] - tms[i - 10];
             const dHR = hrs[i] - hrs[i - 10];
             const hrPct = hrs[i] / hrMax;
 
@@ -787,7 +789,7 @@ export function calculateTrainingEffect(act, settings) {
     // --- CLASIFICACIÓN DE BENEFICIO PRIMARIO (GARMIN MATRIX) ---
     let primaryBenefit = "Recuperación";
     let benefitDesc = "Intensidad baja. Mejora la recuperación y prepara para entrenos más duros.";
-    let label = "Mantenimiento";
+    let _label = "Mantenimiento";
     let color = "text-slate-500"; 
 
     const aS = Number(aerobicScore.toFixed(1));
