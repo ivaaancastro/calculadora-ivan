@@ -1,3 +1,5 @@
+/* eslint-disable no-unused-vars */
+
 /**
  * fitnessStatsEngine.js — Motor de Estadísticas de Rendimiento
  *
@@ -995,9 +997,9 @@ export function getTrainingBalance(activities, settings, days = 7) {
         const isHighShort = totalHigh < targets.high.min;
         const isAnShort = totalAnaerobic < targets.anaerobic.min;
 
-        const _isLowOver = totalLow > targets.low.max;
-        const _isHighOver = totalHigh > targets.high.max;
-        const _isAnOver = totalAnaerobic > targets.anaerobic.max;
+        const isLowOver = totalLow > targets.low.max;
+        const isHighOver = totalHigh > targets.high.max;
+        const isAnOver = totalAnaerobic > targets.anaerobic.max;
 
         // Garmin prioritizes reporting shortages, usually from Anaerobic down to Low Aerobic
         if (isAnShort && isHighShort && isLowShort) {

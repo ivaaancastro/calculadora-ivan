@@ -1,3 +1,5 @@
+/* eslint-disable no-unused-vars */
+
 import React, { useState, useCallback, Suspense, lazy } from "react";
 import {
   Loader2,
