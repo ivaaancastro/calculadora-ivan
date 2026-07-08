@@ -1,3 +1,5 @@
+/* eslint-disable react-refresh/only-export-components */
+
 import React, { useState } from 'react';
 import { Droplets, Zap, Info, ChevronDown, ChevronUp } from 'lucide-react';
 

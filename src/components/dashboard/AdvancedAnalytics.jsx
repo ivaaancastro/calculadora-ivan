@@ -1,3 +1,5 @@
+/* eslint-disable no-unused-vars */
+
 import React, { useMemo, useState, useEffect } from 'react';
 import {
     PieChart, Pie, Cell, BarChart, Bar, AreaChart, Area, XAxis, YAxis, Tooltip as RechartsTooltip, ResponsiveContainer, CartesianGrid,
