@@ -49,6 +49,8 @@ export default defineConfig({
     environment: 'jsdom',
     setupFiles: './vitest.setup.js',
     include: ['src/**/*.test.{js,jsx}'],
+    pool: 'forks',
+    isolate: false,
     coverage: {
       provider: 'v8',
       reporter: ['text', 'html'],

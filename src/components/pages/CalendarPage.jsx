@@ -1754,7 +1754,7 @@ export const CalendarPage = ({ activities, plannedWorkouts = [], addPlannedWorko
                                                 <p className="text-slate-400 dark:text-zinc-500 text-xs mt-1">Inserta filas usando los botones superiores.</p>
                                             </div>
                                         )}
-                                        {newPlan.blocks.map((block, idx) => {
+                                        {newPlan.blocks?.map((block, idx) => {
                                             const isStr = newPlan.type === 'WeightTraining';
                                             const canUsePower = newPlan.type === 'Ride';
                                             const ftp = settings?.bike?.ftp || 200;
@@ -1784,7 +1784,7 @@ export const CalendarPage = ({ activities, plannedWorkouts = [], addPlannedWorko
                                                         { v: 'R34', l: `Rampa Z3→Z4 ${Math.round(ftp * 0.83)}-${Math.round(ftp * 1.05)}w` },
                                                     ]
                                                     : [
-                                                        ...sportZones.map((z, i) => ({
+                                                        ...(sportZones || []).map((z, i) => ({
                                                             v: `Z${i + 1}`,
                                                             l: `Z${i + 1} ${zoneLabels[i] || ''} ${z.min}-${z.max}bpm`,
                                                         })),
@@ -1851,7 +1851,7 @@ export const CalendarPage = ({ activities, plannedWorkouts = [], addPlannedWorko
                                                         </div>
                                                         <div className="p-3 bg-white dark:bg-zinc-950">
                                                             <div className="space-y-3">
-                                                                {block.steps.map((step, sIdx) => (
+                                                                {(block.steps || []).map((step, sIdx) => (
                                                                      <div key={step.id} className="flex flex-wrap items-center gap-2 relative">
                                                                         <select value={step.type} onChange={e => updateStep(block.id, step.id, 'type', e.target.value)}
                                                                             className={`w-20 shrink-0 bg-transparent ${step.type === 'active' ? 'text-slate-800 dark:text-zinc-200 font-semibold' : 'text-slate-400 dark:text-zinc-500'} text-[11px] outline-none cursor-pointer`}>
@@ -2249,7 +2249,7 @@ const WorkoutViewerModal = ({ workout, onClose, onDelete, onEdit }) => {
                                 </div>
                             ) : (
                                 <div className="space-y-2">
-                                    {blocks.map((block, idx) => {
+                                    {blocks?.map((block, idx) => {
                                         const bl = blockLabel(block.type);
                                         if (block.type === 'repeat') {
                                             // Interval total time

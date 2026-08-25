@@ -808,7 +808,7 @@ export const FitnessStatsPage = ({ activities, settings, onSelectActivity }) => 
                             {/* Qualitative Strengths */}
                             {stats.profile && (
                                 <div className="mt-8 grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                    {stats.profile.strengths.map((s, i) => (
+                                    {stats.profile?.strengths?.map((s, i) => (
                                         <div key={i} className="flex items-center justify-between p-4 rounded-2xl bg-slate-50/50 dark:bg-zinc-800/30 border border-slate-100 dark:border-zinc-800/50 group">
                                             <div>
                                                 <p className="text-[10px] font-bold text-slate-800 dark:text-zinc-200 uppercase tracking-tight mb-0.5">{s.area}</p>

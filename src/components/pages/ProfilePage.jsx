@@ -166,7 +166,7 @@ const SportZonesSection = ({ sport, sportLabel, icon: Icon, color, showPace, sho
                                 </tr>
                             </thead>
                             <tbody>
-                                {data.zones.map((zone, i) => {
+                                {(data?.zones || []).map((zone, i) => {
                                     const pcts = data.zonesMode === 'lthr' ? lthrPcts[i] : data.zonesMode === 'fcmax' ? fcmaxPcts[i] : null;
                                     return (
                                         <tr key={i} className="border-t border-slate-100 dark:border-zinc-800/50">
@@ -217,7 +217,7 @@ const SportZonesSection = ({ sport, sportLabel, icon: Icon, color, showPace, sho
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {(data.paceZones || calcPaceZones(data.thresholdPace)).map((zone, i) => (
+                                    {(data?.paceZones || calcPaceZones(data?.thresholdPace) || []).map((zone, i) => (
                                         <tr key={i} className="border-t border-slate-100 dark:border-zinc-800/50">
                                             <td className="px-3 py-1.5">
                                                 <div className="w-3 h-3 rounded-sm" style={{ backgroundColor: ZONE_COLORS[i] }} />
