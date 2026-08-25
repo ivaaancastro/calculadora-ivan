@@ -208,7 +208,7 @@ export const ActivityDetailPage = ({ activity, settings, fetchStreams, onBack, o
                 activity.streams_data.cadence;
 
             if (activity.streams_data && hasEssentialStreams) {
-                // setStreams(activity.streams_data);
+                setStreams(activity.streams_data);
                 // eslint-disable-next-line react-hooks/set-state-in-effect
                 setLoadingStreams(false);
             } else if (activity.strava_id && fetchStreams) {
