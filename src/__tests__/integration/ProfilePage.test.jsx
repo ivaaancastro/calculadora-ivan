@@ -1,3 +1,5 @@
+/** @vitest-environment jsdom */
+
 /* global global */
 
 import React from 'react';
