@@ -1,15 +1,17 @@
 import React, { useRef } from 'react';
 import { Upload, Trash2, UserCircle, Plus, RefreshCw, Activity, Settings, Moon, Sun, LogOut, LayoutDashboard, Calendar, List, HeartPulse, BarChart3 } from 'lucide-react';
 import StravaConnect from '../common/StravaConnect';
+import { Link, useLocation } from 'react-router-dom';
 import { useTheme } from '../../hooks/useTheme';
 import { supabase } from '../../supabase';
 
 export const Navbar = ({
    uploading, handleClearDb, onFileUpload,
-  onAddClick, onProfileClick, isStravaConnected, onSync,
-  activeTab, onTabChange
+  onAddClick, isStravaConnected, onSync
 }) => {
   const fileInputRef = useRef(null);
+  const location = useLocation();
+  const currentPath = location.pathname;
   const { theme, toggleTheme } = useTheme();
 
   const handleLogout = async () => {
@@ -17,11 +19,11 @@ export const Navbar = ({
   };
 
   const tabs = [
-    { id: 'overview', label: 'Dashboard', icon: LayoutDashboard },
-    { id: 'stats', label: 'Rendimiento', icon: BarChart3 },
-    { id: 'calendar', label: 'Calendario', icon: Calendar },
-    { id: 'history', label: 'Actividades', icon: List },
-    { id: 'health', label: 'Salud', icon: HeartPulse },
+    { path: '/', label: 'Dashboard', icon: LayoutDashboard },
+    { path: '/stats', label: 'Rendimiento', icon: BarChart3 },
+    { path: '/calendar', label: 'Calendario', icon: Calendar },
+    { path: '/history', label: 'Actividades', icon: List },
+    { path: '/health', label: 'Salud', icon: HeartPulse },
   ];
 
   return (
@@ -29,7 +31,7 @@ export const Navbar = ({
       <div className="flex justify-between items-center max-w-[1800px] mx-auto mt-1 md:mt-0">
 
         {/* LOGO */}
-        <button onClick={() => onTabChange('overview')} className="flex items-center gap-2.5 hover:opacity-80 transition-opacity">
+        <Link to="/" className="flex items-center gap-2.5 hover:opacity-80 transition-opacity">
           <div className="bg-blue-600 text-white p-1.5 rounded-lg shadow-sm">
             <Activity size={18} strokeWidth={2.5} />
           </div>
@@ -37,23 +39,23 @@ export const Navbar = ({
             <h1 className="text-base font-semibold text-slate-900 dark:text-zinc-100 tracking-tight leading-none">Forma<span className="text-blue-500">Lab</span></h1>
             <p className="text-[10px] font-medium text-slate-500 dark:text-zinc-400 hidden lg:block mt-0.5">Performance</p>
           </div>
-        </button>
+        </Link>
 
         {/* PAGE TABS — Desktop Segmented Control */}
         <div className="hidden md:flex items-center">
           <div className="flex items-center gap-1 bg-slate-200/50 dark:bg-zinc-800/50 backdrop-blur-md rounded-xl p-1 shadow-inner">
             {tabs.map(tab => {
               const Icon = tab.icon;
-              const isActive = activeTab === tab.id;
+              const isActive = currentPath === tab.path || (tab.path === '/' && currentPath === '');
               return (
-                <button key={tab.id} onClick={() => onTabChange(tab.id)}
+                <Link key={tab.path} to={tab.path}
                   className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${isActive
                     ? 'bg-white dark:bg-[#2c2c2e] text-slate-900 dark:text-white shadow hover:shadow-md'
                     : 'text-slate-500 dark:text-zinc-400 hover:text-slate-800 dark:hover:text-zinc-200'
                     }`}>
                   <Icon size={14} strokeWidth={isActive ? 2.5 : 2} />
                   <span className="hidden lg:inline">{tab.label}</span>
-                </button>
+                </Link>
               );
             })}
           </div>
@@ -95,10 +97,10 @@ export const Navbar = ({
 
             <div className="h-5 w-px bg-slate-200 dark:bg-zinc-800 mx-0.5"></div>
 
-            <button onClick={onProfileClick} className="flex items-center gap-1.5 px-2 py-1 hover:bg-slate-100 dark:hover:bg-zinc-800/50 rounded-xl transition-colors">
+            <Link to="/profile" className="flex items-center gap-1.5 px-2 py-1 hover:bg-slate-100 dark:hover:bg-zinc-800/50 rounded-xl transition-colors">
               <UserCircle size={18} className="text-slate-500 dark:text-zinc-400" />
               <span className="text-xs font-medium text-slate-600 dark:text-zinc-300 hidden lg:inline">Perfil</span>
-            </button>
+            </Link>
 
             <button onClick={handleLogout} className="p-1.5 hover:bg-red-50 dark:hover:bg-red-900/20 rounded transition-colors text-red-400" title="Cerrar Sesión">
               <LogOut size={15} />
@@ -106,9 +108,9 @@ export const Navbar = ({
           </div>
 
           {/* Mobile-only buttons */}
-          <button onClick={onProfileClick} className="md:hidden p-1.5 text-slate-400 hover:text-slate-700 dark:text-zinc-400 dark:hover:text-zinc-100">
+          <Link to="/profile" className="md:hidden p-1.5 text-slate-400 hover:text-slate-700 dark:text-zinc-400 dark:hover:text-zinc-100">
             <Settings size={18} />
-          </button>
+          </Link>
 
           <button onClick={handleLogout} className="md:hidden p-1.5 text-red-400 hover:text-red-500">
             <LogOut size={18} />

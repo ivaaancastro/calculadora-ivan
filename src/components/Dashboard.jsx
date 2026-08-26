@@ -1,6 +1,5 @@
-/* eslint-disable no-unused-vars */
-
 import React, { useState, useCallback, Suspense, lazy } from "react";
+import { Routes, Route, useNavigate, useParams, Navigate, useLocation } from "react-router-dom";
 import {
   Loader2,
   Database,
@@ -29,6 +28,34 @@ const LazyFallback = () => (
     <Loader2 className="animate-spin text-blue-500" size={24} />
   </div>
 );
+
+// Wrapper para inyectar la actividad basada en el ID de la URL
+const ActivityRouteWrapper = ({ activities, settings, fetchActivityStreams, deleteActivity }) => {
+  const { id } = useParams();
+  const navigate = useNavigate();
+  const activity = activities.find(a => String(a.id) === id);
+
+  if (!activity) {
+    return <Navigate to="/history" replace />;
+  }
+
+  return (
+    <ErrorBoundary>
+      <Suspense fallback={<LazyFallback />}>
+        <ActivityDetailPage
+          activity={activity}
+          settings={settings}
+          fetchStreams={fetchActivityStreams}
+          onBack={() => navigate(-1)}
+          onDelete={(id) => {
+            deleteActivity(id);
+            navigate("/history", { replace: true });
+          }}
+        />
+      </Suspense>
+    </ErrorBoundary>
+  );
+};
 
 const Dashboard = () => {
   const {
@@ -63,22 +90,14 @@ const Dashboard = () => {
     updatePlannedWorkout,
   } = useActivities();
 
-  const [isModalOpen, setIsModalOpen]     = useState(false);
-  const [activeTab, setActiveTab]         = useState("overview");
-  const [activeActivity, setActiveActivity] = useState(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const location = useLocation();
+  const navigate = useNavigate();
 
-  // Callbacks estables para evitar re-renders en cascada
-  const handleTabChange = useCallback((tab) => {
-    setActiveTab(tab);
-    setActiveActivity(null);
-    window.scrollTo({ top: 0, behavior: "smooth" });
-  }, []);
-
-  const handleSelectActivity = useCallback((act) => setActiveActivity(act), []);
-  const handleBackFromActivity = useCallback(() => setActiveActivity(null), []);
+  const handleSelectActivity = useCallback((act) => navigate(`/activity/${act.id}`), [navigate]);
   const handleOpenModal = useCallback(() => setIsModalOpen(true), []);
   const handleCloseModal = useCallback(() => setIsModalOpen(false), []);
-  const handleBackFromProfile = useCallback(() => setActiveTab("overview"), []);
+  const handleBackFromProfile = useCallback(() => navigate("/"), [navigate]);
 
   if (loading && !uploading) {
     return (
@@ -91,148 +110,7 @@ const Dashboard = () => {
     );
   }
 
-  // Renderizar la pestaña activa (mount/unmount condicional en vez de hidden CSS)
-  const renderActiveView = () => {
-    if (activeActivity) {
-      return (
-        <ErrorBoundary>
-          <Suspense fallback={<LazyFallback />}>
-            <ActivityDetailPage
-              activity={activeActivity}
-              settings={settings}
-              fetchStreams={fetchActivityStreams}
-              onBack={handleBackFromActivity}
-              onDelete={deleteActivity}
-            />
-          </Suspense>
-        </ErrorBoundary>
-      );
-    }
-
-    if (activeTab === "profile") {
-      return (
-        <ErrorBoundary>
-          <Suspense fallback={<LazyFallback />}>
-            <ProfilePage
-              currentSettings={settings}
-              currentMetrics={currentMetrics}
-              onUpdate={updateProfile}
-              onBack={handleBackFromProfile}
-              activities={activities}
-              isDeepSyncing={isDeepSyncing}
-              deepSyncProgress={deepSyncProgress}
-              onDeepSync={handleDeepSync}
-            />
-          </Suspense>
-        </ErrorBoundary>
-      );
-    }
-
-    if (activities.length === 0) {
-      return (
-        <div className="text-center py-20 px-4">
-          <div className="bg-white dark:bg-zinc-900 rounded-lg border border-slate-200 dark:border-zinc-800 p-8 max-w-md mx-auto">
-            <Database
-              size={32}
-              className="mx-auto text-slate-400 dark:text-zinc-600 mb-4"
-            />
-            <h2 className="text-sm font-bold uppercase tracking-widest text-slate-800 dark:text-zinc-100 mb-2">
-              Base de datos vacía
-            </h2>
-            <p className="text-[10px] text-slate-500 dark:text-zinc-500 uppercase tracking-wider mb-6">
-              Conecta Strava para iniciar el análisis.
-            </p>
-          </div>
-        </div>
-      );
-    }
-
-    switch (activeTab) {
-      case "overview":
-        return (
-          <div className="space-y-4 animate-in fade-in duration-300">
-            <AdvancedAnalytics
-              activities={activities}
-              settings={settings}
-              onSelectActivity={handleSelectActivity}
-              timeRange={timeRange}
-              setTimeRange={setTimeRange}
-              chartData={chartData}
-              currentMetrics={currentMetrics}
-            />
-          </div>
-        );
-
-      case "stats":
-        return (
-          <ErrorBoundary>
-            <Suspense fallback={<LazyFallback />}>
-              <FitnessStatsPage
-                activities={activities}
-                settings={settings}
-                chartData={chartData}
-                onSelectActivity={handleSelectActivity}
-              />
-            </Suspense>
-          </ErrorBoundary>
-        );
-
-      case "calendar":
-        return (
-          <ErrorBoundary>
-            <Suspense fallback={<LazyFallback />}>
-              <CalendarPage
-                activities={activities}
-                plannedWorkouts={plannedWorkouts}
-                addPlannedWorkout={addPlannedWorkout}
-                deletePlannedWorkout={deletePlannedWorkout}
-                updatePlannedWorkout={updatePlannedWorkout}
-                currentMetrics={currentMetrics}
-                settings={settings}
-                chartData={chartData}
-                onDelete={deleteActivity}
-                onSelectActivity={handleSelectActivity}
-              />
-            </Suspense>
-          </ErrorBoundary>
-        );
-
-      case "history":
-        return (
-          <>
-            <div className="flex justify-end mb-4">
-              <button
-                onClick={handleOpenModal}
-                className="py-1.5 px-3 bg-white dark:bg-zinc-900 text-slate-800 dark:text-zinc-200 border border-slate-200 dark:border-zinc-700 rounded text-[10px] font-bold uppercase flex items-center gap-1.5 hover:bg-slate-50 dark:hover:bg-zinc-800 transition-colors"
-              >
-                <Plus size={14} /> Añadir Manual
-              </button>
-            </div>
-            <div className="h-[calc(100vh-250px)]">
-              <ErrorBoundary>
-                <HistoryList
-                  activities={activities}
-                  onDelete={deleteActivity}
-                  onSelectActivity={handleSelectActivity}
-                />
-              </ErrorBoundary>
-            </div>
-          </>
-        );
-
-      case "health":
-        return (
-          <ErrorBoundary>
-            <Suspense fallback={<LazyFallback />}>
-              <HealthPage activities={activities} settings={settings} chartData={chartData} />
-            </Suspense>
-          </ErrorBoundary>
-        );
-
-      default:
-        return null;
-    }
-  };
+  const isActivityPage = location.pathname.startsWith("/activity/");
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-zinc-950 text-slate-800 dark:text-zinc-200 font-sans pb-24 md:pb-12 transition-colors duration-300 selection:bg-blue-500/30 overflow-hidden">
@@ -241,11 +119,8 @@ const Dashboard = () => {
         uploading={uploading}
         handleClearDb={handleClearDb}
         onAddClick={handleOpenModal}
-        onProfileClick={() => handleTabChange("profile")}
         isStravaConnected={isStravaConnected}
         onSync={handleStravaSync}
-        activeTab={activeTab}
-        onTabChange={handleTabChange}
       />
 
       {uploadStatus && (
@@ -254,12 +129,131 @@ const Dashboard = () => {
         </div>
       )}
 
-      <main className={`w-full max-w-[1800px] mx-auto ${activeActivity ? 'px-4' : 'px-4 sm:px-6 py-4 sm:py-6 space-y-4'}`}>
-        {renderActiveView()}
+      <main className={`w-full max-w-[1800px] mx-auto ${isActivityPage ? 'px-4' : 'px-4 sm:px-6 py-4 sm:py-6 space-y-4'}`}>
+        {activities.length === 0 ? (
+          <div className="text-center py-20 px-4">
+            <div className="bg-white dark:bg-zinc-900 rounded-lg border border-slate-200 dark:border-zinc-800 p-8 max-w-md mx-auto">
+              <Database
+                size={32}
+                className="mx-auto text-slate-400 dark:text-zinc-600 mb-4"
+              />
+              <h2 className="text-sm font-bold uppercase tracking-widest text-slate-800 dark:text-zinc-100 mb-2">
+                Base de datos vacía
+              </h2>
+              <p className="text-[10px] text-slate-500 dark:text-zinc-500 uppercase tracking-wider mb-6">
+                Conecta Strava para iniciar el análisis.
+              </p>
+            </div>
+          </div>
+        ) : (
+          <Routes>
+            <Route path="/" element={
+              <div className="space-y-4 animate-in fade-in duration-300">
+                <AdvancedAnalytics
+                  activities={activities}
+                  settings={settings}
+                  onSelectActivity={handleSelectActivity}
+                  timeRange={timeRange}
+                  setTimeRange={setTimeRange}
+                  chartData={chartData}
+                  currentMetrics={currentMetrics}
+                />
+              </div>
+            } />
+            
+            <Route path="/stats" element={
+              <ErrorBoundary>
+                <Suspense fallback={<LazyFallback />}>
+                  <FitnessStatsPage
+                    activities={activities}
+                    settings={settings}
+                    chartData={chartData}
+                    onSelectActivity={handleSelectActivity}
+                  />
+                </Suspense>
+              </ErrorBoundary>
+            } />
+            
+            <Route path="/calendar" element={
+              <ErrorBoundary>
+                <Suspense fallback={<LazyFallback />}>
+                  <CalendarPage
+                    activities={activities}
+                    plannedWorkouts={plannedWorkouts}
+                    addPlannedWorkout={addPlannedWorkout}
+                    deletePlannedWorkout={deletePlannedWorkout}
+                    updatePlannedWorkout={updatePlannedWorkout}
+                    currentMetrics={currentMetrics}
+                    settings={settings}
+                    chartData={chartData}
+                    onDelete={deleteActivity}
+                    onSelectActivity={handleSelectActivity}
+                  />
+                </Suspense>
+              </ErrorBoundary>
+            } />
+            
+            <Route path="/history" element={
+              <>
+                <div className="flex justify-end mb-4">
+                  <button
+                    onClick={handleOpenModal}
+                    className="py-1.5 px-3 bg-white dark:bg-zinc-900 text-slate-800 dark:text-zinc-200 border border-slate-200 dark:border-zinc-700 rounded text-[10px] font-bold uppercase flex items-center gap-1.5 hover:bg-slate-50 dark:hover:bg-zinc-800 transition-colors"
+                  >
+                    <Plus size={14} /> Añadir Manual
+                  </button>
+                </div>
+                <div className="h-[calc(100vh-250px)]">
+                  <ErrorBoundary>
+                    <HistoryList
+                      activities={activities}
+                      onDelete={deleteActivity}
+                      onSelectActivity={handleSelectActivity}
+                    />
+                  </ErrorBoundary>
+                </div>
+              </>
+            } />
+            
+            <Route path="/health" element={
+              <ErrorBoundary>
+                <Suspense fallback={<LazyFallback />}>
+                  <HealthPage activities={activities} settings={settings} chartData={chartData} />
+                </Suspense>
+              </ErrorBoundary>
+            } />
+            
+            <Route path="/profile" element={
+              <ErrorBoundary>
+                <Suspense fallback={<LazyFallback />}>
+                  <ProfilePage
+                    currentSettings={settings}
+                    currentMetrics={currentMetrics}
+                    onUpdate={updateProfile}
+                    onBack={handleBackFromProfile}
+                    activities={activities}
+                    isDeepSyncing={isDeepSyncing}
+                    deepSyncProgress={deepSyncProgress}
+                    onDeepSync={handleDeepSync}
+                  />
+                </Suspense>
+              </ErrorBoundary>
+            } />
+            
+            <Route path="/activity/:id" element={
+              <ActivityRouteWrapper 
+                activities={activities}
+                settings={settings}
+                fetchActivityStreams={fetchActivityStreams}
+                deleteActivity={deleteActivity}
+              />
+            } />
+          </Routes>
+        )}
       </main>
 
       {/* BOTTOM NAV PARA MÓVIL */}
-      <BottomNav activeTab={activeTab} onTabChange={handleTabChange} />
+      <BottomNav />
 
       {/* MODAL PARA AÑADIR MANUALMENTE */}
       <AddActivityModal
@@ -272,4 +266,3 @@ const Dashboard = () => {
 };
 
 export default Dashboard;
-
