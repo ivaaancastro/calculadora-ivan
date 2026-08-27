@@ -1,4 +1,6 @@
-import React, { useState, useCallback, Suspense, lazy } from "react";
+const fs = require('fs');
+
+const content = `import React, { useState, useCallback, Suspense, lazy } from "react";
 import { Routes, Route, useNavigate, useParams, Navigate, useLocation } from "react-router-dom";
 import {
   Loader2,
@@ -33,7 +35,7 @@ const LazyFallback = () => (
 const ActivityRouteWrapper = ({ activities, settings, fetchActivityStreams, deleteActivity }) => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const activity = activities.find(a => String(a.id) === id);
+  const activity = activities.find(a => a.id === id);
 
   if (!activity) {
     return <Navigate to="/history" replace />;
@@ -67,9 +69,15 @@ const Dashboard = () => {
     settings,
     setTimeRange,
     handleClearDb,
+    processFile,
     fetchActivities,
+    fetchProfile,
+    analyzeHistory,
+    filteredData,
     currentMetrics,
     chartData,
+    distribution,
+    summary,
     isStravaConnected,
     handleStravaSync,
     deleteActivity,
@@ -88,7 +96,7 @@ const Dashboard = () => {
   const location = useLocation();
   const navigate = useNavigate();
 
-  const handleSelectActivity = useCallback((act) => navigate(`/activity/${act.id}`), [navigate]);
+  const handleSelectActivity = useCallback((act) => navigate(\`/activity/\${act.id}\`), [navigate]);
   const handleOpenModal = useCallback(() => setIsModalOpen(true), []);
   const handleCloseModal = useCallback(() => setIsModalOpen(false), []);
   const handleBackFromProfile = useCallback(() => navigate("/"), [navigate]);
@@ -123,7 +131,7 @@ const Dashboard = () => {
         </div>
       )}
 
-      <main className={`w-full max-w-[1800px] mx-auto ${isActivityPage ? 'px-4' : 'px-4 sm:px-6 py-4 sm:py-6 space-y-4'}`}>
+      <main className={\`w-full max-w-[1800px] mx-auto \${isActivityPage ? 'px-4' : 'px-4 sm:px-6 py-4 sm:py-6 space-y-4'}\`}>
         {activities.length === 0 ? (
           <div className="text-center py-20 px-4">
             <div className="bg-white dark:bg-zinc-900 rounded-lg border border-slate-200 dark:border-zinc-800 p-8 max-w-md mx-auto">
@@ -260,3 +268,7 @@ const Dashboard = () => {
 };
 
 export default Dashboard;
+`;
+
+fs.writeFileSync('src/components/Dashboard.jsx', content);
+console.log("Dashboard rewritten correctly.");
