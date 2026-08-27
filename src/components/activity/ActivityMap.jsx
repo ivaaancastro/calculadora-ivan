@@ -3,7 +3,7 @@ import { MapContainer, TileLayer, Polyline, useMap, CircleMarker } from 'react-l
 import { MapPin } from 'lucide-react';
 import 'leaflet/dist/leaflet.css';
 
-export const decodePolyline = (str, precision = 5) => {
+const decodePolyline = (str, precision = 5) => {
     let index = 0, lat = 0, lng = 0, coordinates = [], shift = 0, result = 0, byte = null, latitude_change, longitude_change, factor = Math.pow(10, precision);
     while (index < str.length) {
         byte = null; shift = 0; result = 0;

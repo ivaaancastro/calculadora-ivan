@@ -1,4 +1,4 @@
-import React, { useMemo, useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { ArrowLeft, ExternalLink, Trash2, Calendar, Activity, Layers, Loader2, Heart, Clock, MapPin, Zap, Target, Info } from 'lucide-react';
 import { AreaChart, Area, BarChart, Bar, Cell, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer } from 'recharts';
 import { InteractiveMap } from '../activity/ActivityMap';
@@ -24,11 +24,10 @@ export const ActivityDetailPage = ({ activity, settings, fetchStreams, onBack, o
                 activity.streams_data.cadence;
 
             if (activity.streams_data && hasEssentialStreams) {
-                setStreams(activity.streams_data);
                 // eslint-disable-next-line react-hooks/set-state-in-effect
+                setStreams(activity.streams_data);
                 setLoadingStreams(false);
             } else if (activity.strava_id && fetchStreams) {
-                // eslint-disable-next-line react-hooks/set-state-in-effect
                 setLoadingStreams(true);
                 fetchStreams(activity.id, activity.strava_id).then(data => {
                     setStreams(data);

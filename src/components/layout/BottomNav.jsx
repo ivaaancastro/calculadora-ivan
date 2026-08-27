@@ -18,9 +18,9 @@ export const BottomNav = () => {
         {navItems.map((item) => {
           const isActive = currentPath === item.path || (item.path === '/' && currentPath === '');
           return (
-            <button
-              key={item.id}
-              onClick={() => onTabChange(item.id)}
+            <Link
+              key={item.path}
+              to={item.path}
               className={`flex flex-col items-center justify-center w-full h-full space-y-1 transition-colors ${isActive
                   ? 'text-blue-600 dark:text-blue-500'
                   : 'text-slate-500 hover:text-slate-800 dark:text-zinc-500 dark:hover:text-zinc-300'
@@ -30,7 +30,7 @@ export const BottomNav = () => {
               <span className={`text-[10px] font-medium ${isActive ? 'font-semibold' : ''}`}>
                 {item.label}
               </span>
-            </button>
+            </Link>
           );
         })}
       </div>
