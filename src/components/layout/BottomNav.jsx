@@ -13,15 +13,15 @@ export const BottomNav = () => {
   ];
 
   return (
-    <div className="md:hidden fixed bottom-0 left-0 w-full glass-nav border-t border-b-0 pb-safe z-50 px-2">
-      <div className="flex justify-between items-center h-16 max-w-md mx-auto">
+    <div className="md:hidden fixed bottom-0 left-0 w-full glass-nav border-t border-b-0 pb-safe px-safe z-50">
+      <div className="flex justify-between items-center h-16 max-w-md mx-auto px-2">
         {navItems.map((item) => {
           const isActive = currentPath === item.path || (item.path === '/' && currentPath === '');
           return (
             <Link
               key={item.path}
               to={item.path}
-              className={`flex flex-col items-center justify-center w-full h-full space-y-1 transition-colors ${isActive
+              className={`flex flex-col items-center justify-center w-full h-full space-y-1 transition-all active:scale-90 select-none touch-manipulation ${isActive
                   ? 'text-blue-600 dark:text-blue-500'
                   : 'text-slate-500 hover:text-slate-800 dark:text-zinc-500 dark:hover:text-zinc-300'
                 }`}

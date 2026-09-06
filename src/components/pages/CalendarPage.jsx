@@ -1185,23 +1185,23 @@ export const CalendarPage = ({ activities, plannedWorkouts = [], addPlannedWorko
             <div className="flex flex-col bg-white dark:bg-zinc-950 rounded-3xl border border-slate-100 dark:border-zinc-800/50 overflow-hidden mb-6 shadow-sm">
 
                 {/* HEADER */}
-                <div className="flex items-center justify-between px-5 py-4 bg-transparent border-b border-slate-100 dark:border-zinc-800/30">
-                    <div className="flex items-center gap-3">
-                        <h2 className="text-2xl font-semibold text-slate-800 dark:text-zinc-100 capitalize tracking-tight flex items-center">
+                <div className="flex items-center justify-between px-3 sm:px-5 py-3 sm:py-4 bg-transparent border-b border-slate-100 dark:border-zinc-800/30">
+                    <div className="flex items-center gap-2 sm:gap-3">
+                        <h2 className="text-base sm:text-2xl font-semibold text-slate-800 dark:text-zinc-100 capitalize tracking-tight flex items-center">
                             {new Date(year, month).toLocaleDateString('es-ES', { month: 'long', year: 'numeric' })}
                         </h2>
-                        <button onClick={goToday} className="text-[11px] font-medium text-slate-500 dark:text-zinc-400 hover:text-red-500 dark:hover:text-red-400 transition-colors ml-2 bg-slate-50 dark:bg-zinc-900 px-3 py-1.5 rounded-full">Hoy</button>
+                        <button onClick={goToday} className="text-[11px] font-medium text-slate-500 dark:text-zinc-400 hover:text-red-500 dark:hover:text-red-400 active:scale-95 transition-all ml-1 sm:ml-2 bg-slate-50 dark:bg-zinc-900 px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full">Hoy</button>
                     </div>
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-1.5 sm:gap-2">
                         {/* PMC CHART TOGGLE */}
                         <button onClick={() => setShowPmcChart(p => !p)} className={`hidden sm:flex items-center gap-1.5 px-3 py-1.5 border rounded-lg text-[9px] font-black uppercase tracking-widest transition-colors shadow-sm ${showPmcChart ? 'bg-violet-50 dark:bg-violet-900/20 text-violet-600 dark:text-violet-400 border-violet-200 dark:border-violet-800/50' : 'bg-white dark:bg-zinc-900 text-slate-500 dark:text-zinc-400 border-slate-200 dark:border-zinc-700 hover:border-slate-400'}`}>
                             <Activity size={12} /> Forma
                         </button>
 
-                        <div className="flex items-center border border-slate-200 dark:border-zinc-700 rounded overflow-hidden ml-2">
-                            <button onClick={prevMonth} className="p-1.5 sm:p-2 bg-transparent hover:bg-slate-100 dark:hover:bg-zinc-800 text-slate-500 dark:text-zinc-400 transition-colors"><ChevronLeft size={18} /></button>
+                        <div className="flex items-center border border-slate-200 dark:border-zinc-700 rounded-lg overflow-hidden ml-1 sm:ml-2">
+                            <button onClick={prevMonth} className="p-2 bg-transparent hover:bg-slate-100 dark:hover:bg-zinc-800 active:scale-95 text-slate-500 dark:text-zinc-400 transition-all" title="Mes anterior"><ChevronLeft size={18} /></button>
                             <div className="w-px h-5 bg-slate-200 dark:bg-zinc-700"></div>
-                            <button onClick={nextMonth} className="p-1.5 sm:p-2 bg-transparent hover:bg-slate-100 dark:hover:bg-zinc-800 text-slate-500 dark:text-zinc-400 transition-colors"><ChevronRight size={18} /></button>
+                            <button onClick={nextMonth} className="p-2 bg-transparent hover:bg-slate-100 dark:hover:bg-zinc-800 active:scale-95 text-slate-500 dark:text-zinc-400 transition-all" title="Mes siguiente"><ChevronRight size={18} /></button>
                         </div>
                     </div>
                 </div>
@@ -1410,20 +1410,23 @@ export const CalendarPage = ({ activities, plannedWorkouts = [], addPlannedWorko
                                                     onDragOver={(e) => handleDragOver(e, dateKey)}
                                                     onDragLeave={handleDragLeave}
                                                     onDrop={(e) => handleDrop(e, day.date)}
-                                                    className={`relative p-2 lg:p-2.5 border-r border-slate-100/50 dark:border-zinc-800/30 flex flex-col h-[180px] lg:h-[220px] overflow-y-auto custom-scrollbar transition-colors group/daycell
+                                                    className={`relative p-2 lg:p-2.5 border-r border-slate-100/50 dark:border-zinc-800/30 flex flex-col min-h-[72px] lg:h-[220px] overflow-y-auto custom-scrollbar transition-colors group/daycell
                                                         ${isToday ? 'bg-blue-50/10 dark:bg-blue-900/5' : 'bg-transparent'}
                                                         ${dragOverDate === dateKey ? 'bg-blue-50 dark:bg-blue-900/20 ring-2 ring-blue-400 ring-inset rounded-lg z-10' : ''}
                                                         ${!day.isCurrentMonth ? 'opacity-40' : 'opacity-100'}
                                                     `}>
                                                     {/* Day number + add button */}
                                                     <div className="flex justify-between items-start mb-2 shrink-0">
-                                                        <div className="flex items-center justify-center w-7 h-7 -ml-1 -mt-1">
+                                                        <div className="flex items-center gap-1.5 -ml-1 -mt-1">
                                                             <span className={`text-[13px] font-semibold leading-none flex items-center justify-center
                                                                 ${isToday ? 'text-white bg-red-500 w-7 h-7 rounded-full shadow-sm' : !day.isCurrentMonth ? 'text-slate-300 dark:text-zinc-600' : 'text-slate-800 dark:text-zinc-200'}`}>
                                                                 {day.date.getDate()}
                                                             </span>
+                                                            <span className="lg:hidden text-[11px] font-medium text-slate-400 dark:text-zinc-500 uppercase tracking-wide">
+                                                                {WEEKDAYS[dIdx]}
+                                                            </span>
                                                         </div>
-                                                        <button onClick={(e) => handleOpenPlanModal(e, day.date)} className="opacity-0 group-hover/daycell:opacity-100 text-slate-400 hover:text-red-500 p-0.5 rounded-full transition-all">
+                                                        <button onClick={(e) => handleOpenPlanModal(e, day.date)} className="opacity-70 lg:opacity-0 group-hover/daycell:opacity-100 text-slate-400 hover:text-red-500 p-1 min-w-[28px] min-h-[28px] flex items-center justify-center rounded-full active:scale-95 transition-all" title="Planificar sesión">
                                                             <Plus size={14} />
                                                         </button>
                                                     </div>

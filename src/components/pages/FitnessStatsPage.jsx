@@ -11,7 +11,17 @@ import { PowerProfileCard } from '../fitness/PowerProfileCard';
 import { EstimatedFtpCard } from '../fitness/EstimatedFtpCard';
 import { MmpAndEfCard } from '../fitness/MmpAndEfCard';
 
-export const FitnessStatsPage = ({ activities, settings, onSelectActivity }) => {
+export const FitnessStatsPage = ({
+    activities,
+    settings,
+    onSelectActivity,
+    loadHistoricalStreams,
+    isLoadingHistoricalStreams,
+    hasLoadedHistoricalStreams,
+    handleDeepSync,
+    isDeepSyncing,
+    deepSyncProgress
+}) => {
     const {
         vo2Sport, setVo2Sport,
         powerUnit, setPowerUnit,
@@ -22,6 +32,10 @@ export const FitnessStatsPage = ({ activities, settings, onSelectActivity }) => 
         curveSport, setCurveSport,
         mmpTimeframe, setMmpTimeframe,
         intensityTimeframe, setIntensityTimeframe,
+        powerProfileTimeframe, setPowerProfileTimeframe,
+        peaksViewMode, setPeaksViewMode,
+
+        telemetryStats,
 
         stats,
         currentVo2,
@@ -35,7 +49,11 @@ export const FitnessStatsPage = ({ activities, settings, onSelectActivity }) => 
         ppChartData,
         configFTP,
         ftpDiff
-    } = useFitnessAnalytics(activities, settings);
+    } = useFitnessAnalytics(activities, settings, {
+        loadHistoricalStreams,
+        isLoadingHistoricalStreams,
+        hasLoadedHistoricalStreams
+    });
 
     if (!activities || activities.length === 0) return null;
 
@@ -90,6 +108,8 @@ export const FitnessStatsPage = ({ activities, settings, onSelectActivity }) => 
                 setShowPowerConfig={setShowPowerConfig}
                 powerUnit={powerUnit}
                 setPowerUnit={setPowerUnit}
+                powerProfileTimeframe={powerProfileTimeframe}
+                setPowerProfileTimeframe={setPowerProfileTimeframe}
                 selectedDurs={selectedDurs}
                 toggleDur={toggleDur}
                 ppChartData={ppChartData}
@@ -120,6 +140,13 @@ export const FitnessStatsPage = ({ activities, settings, onSelectActivity }) => 
                 curveUnit={curveUnit}
                 isPace={isPace}
                 analytics={analytics}
+                peaksViewMode={peaksViewMode}
+                setPeaksViewMode={setPeaksViewMode}
+                telemetryStats={telemetryStats}
+                isLoadingHistoricalStreams={isLoadingHistoricalStreams}
+                handleDeepSync={handleDeepSync}
+                isDeepSyncing={isDeepSyncing}
+                deepSyncProgress={deepSyncProgress}
             />
         </div>
     );

@@ -64,12 +64,12 @@ export const Navbar = ({
         {/* ACTIONS */}
         <div className="flex items-center gap-1.5 sm:gap-2">
 
-          <button onClick={toggleTheme} className="p-1.5 text-slate-400 hover:text-slate-600 dark:text-zinc-400 dark:hover:text-zinc-100 transition-colors">
-            {theme === 'dark' ? <Sun size={17} /> : <Moon size={17} />}
+          <button onClick={toggleTheme} className="w-10 h-10 sm:w-8 sm:h-8 flex items-center justify-center rounded-xl text-slate-400 hover:text-slate-600 dark:text-zinc-400 dark:hover:text-zinc-100 hover:bg-slate-100 dark:hover:bg-zinc-800/60 active:scale-95 transition-all" title="Cambiar tema">
+            {theme === 'dark' ? <Sun size={18} /> : <Moon size={18} />}
           </button>
 
           {isStravaConnected ? (
-            <button onClick={onSync} disabled={uploading} className="bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-500 hover:bg-blue-100 dark:hover:bg-blue-500/20 font-medium py-1.5 px-3 rounded-full flex items-center gap-1.5 transition-colors text-xs">
+            <button onClick={onSync} disabled={uploading} className="bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-500 hover:bg-blue-100 dark:hover:bg-blue-500/20 active:scale-95 font-medium py-2 px-3 sm:py-1.5 rounded-full flex items-center gap-1.5 transition-all text-xs">
               <RefreshCw size={14} className={uploading ? "animate-spin" : ""} />
               <span className={uploading ? "hidden" : "hidden lg:inline"}>Sincronizar</span>
             </button>
@@ -107,13 +107,13 @@ export const Navbar = ({
             </button>
           </div>
 
-          {/* Mobile-only buttons */}
-          <Link to="/profile" className="md:hidden p-1.5 text-slate-400 hover:text-slate-700 dark:text-zinc-400 dark:hover:text-zinc-100">
-            <Settings size={18} />
+          {/* Mobile-only buttons with comfortable 40px touch targets */}
+          <Link to="/profile" className="md:hidden w-10 h-10 flex items-center justify-center rounded-xl text-slate-400 hover:text-slate-700 dark:text-zinc-400 dark:hover:text-zinc-100 hover:bg-slate-100 dark:hover:bg-zinc-800/60 active:scale-95 transition-all" title="Ajustes / Perfil">
+            <Settings size={20} />
           </Link>
 
-          <button onClick={handleLogout} className="md:hidden p-1.5 text-red-400 hover:text-red-500">
-            <LogOut size={18} />
+          <button onClick={handleLogout} className="md:hidden w-10 h-10 flex items-center justify-center rounded-xl text-red-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 active:scale-95 transition-all" title="Cerrar sesión">
+            <LogOut size={19} />
           </button>
         </div>
       </div>
