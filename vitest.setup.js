@@ -25,4 +25,26 @@ if (typeof window !== 'undefined') {
       dispatchEvent: vi.fn(),
     })),
   });
+
+  // Mock element dimensions for @tanstack/react-virtual and layout components in JSDOM
+  if (typeof HTMLElement !== 'undefined') {
+    Object.defineProperties(HTMLElement.prototype, {
+      offsetHeight: {
+        configurable: true,
+        get() { return parseFloat(this.style?.height) || 800; }
+      },
+      offsetWidth: {
+        configurable: true,
+        get() { return parseFloat(this.style?.width) || 800; }
+      },
+      clientHeight: {
+        configurable: true,
+        get() { return parseFloat(this.style?.height) || 800; }
+      },
+      clientWidth: {
+        configurable: true,
+        get() { return parseFloat(this.style?.width) || 800; }
+      }
+    });
+  }
 }
