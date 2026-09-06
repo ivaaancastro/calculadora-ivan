@@ -6,8 +6,8 @@ import { formatDuration } from '../../utils/formatDuration';
 const getSportIcon = (type) => {
     const t = String(type).toLowerCase();
     if (t.includes('run') || t.includes('carrera')) return <Footprints size={14} className="text-orange-500" />;
-    if (t.includes('bike') || t.includes('bici') || t.includes('ciclismo')) return <Bike size={14} className="text-blue-500" />;
-    if (t.includes('gym') || t.includes('fuerza')) return <Dumbbell size={14} className="text-purple-500" />;
+    if (t.includes('bike') || t.includes('bici') || t.includes('ciclismo') || t.includes('ride')) return <Bike size={14} className="text-blue-500" />;
+    if (t.includes('gym') || t.includes('fuerza') || t.includes('weight') || t.includes('workout')) return <Dumbbell size={14} className="text-purple-500" />;
     return <Activity size={14} className="text-slate-500 dark:text-zinc-400" />;
 };
 
@@ -38,9 +38,9 @@ export const HistoryList = React.memo(({ activities, onDelete, onSelectActivity 
             filtered = filtered.filter(act => {
                 const t = String(act.type).toLowerCase();
                 if (sportFilter === 'run') return t.includes('run') || t.includes('carrera');
-                if (sportFilter === 'bike') return t.includes('bike') || t.includes('bici') || t.includes('ciclismo');
-                if (sportFilter === 'swim') return t.includes('swim') || t.includes('nadar');
-                if (sportFilter === 'gym') return t.includes('gym') || t.includes('fuerza');
+                if (sportFilter === 'bike') return t.includes('bike') || t.includes('bici') || t.includes('ciclismo') || t.includes('ride');
+                if (sportFilter === 'swim') return t.includes('swim') || t.includes('nadar') || t.includes('natación') || t.includes('natacion');
+                if (sportFilter === 'gym') return t.includes('gym') || t.includes('fuerza') || t.includes('weight') || t.includes('workout');
                 return true;
             });
         }
@@ -65,7 +65,15 @@ export const HistoryList = React.memo(({ activities, onDelete, onSelectActivity 
         getScrollElement: () => parentRef.current,
         estimateSize: () => 64,
         overscan: 6,
+        initialRect: { width: 800, height: 800 },
     });
+
+    const virtualItems = rowVirtualizer.getVirtualItems();
+    // En entornos sin motor de layout (JSDOM en tests o SSR donde el contenedor mide 0px),
+    // fallback a renderizar filteredActivities para que testing-library y accesibilidad encuentren los elementos
+    const itemsToRender = virtualItems.length > 0
+        ? virtualItems.map(v => ({ index: v.index, start: v.start, isVirtual: true, act: filteredActivities[v.index] }))
+        : filteredActivities.map((act, index) => ({ index, start: index * 64, isVirtual: false, act }));
 
     return (
         <div className="glass-panel flex flex-col h-full overflow-hidden">
@@ -128,16 +136,16 @@ export const HistoryList = React.memo(({ activities, onDelete, onSelectActivity 
                 {filteredActivities.length > 0 ? (
                     <div
                         className="w-full relative"
-                        style={{ height: `${rowVirtualizer.getTotalSize()}px` }}
+                        style={{ height: `${Math.max(rowVirtualizer.getTotalSize(), itemsToRender.length * 64)}px` }}
                     >
-                        {rowVirtualizer.getVirtualItems().map((virtualRow) => {
-                            const act = filteredActivities[virtualRow.index];
+                        {itemsToRender.map((virtualRow) => {
+                            const act = virtualRow.act;
                             if (!act) return null;
                             return (
                                 <div
                                     key={act.id}
                                     data-index={virtualRow.index}
-                                    ref={rowVirtualizer.measureElement}
+                                    ref={virtualRow.isVirtual ? rowVirtualizer.measureElement : undefined}
                                     onClick={() => onSelectActivity && onSelectActivity(act)}
                                     style={{
                                         position: 'absolute',
