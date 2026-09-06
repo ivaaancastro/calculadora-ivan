@@ -13,6 +13,8 @@ export const PowerProfileCard = ({
     setShowPowerConfig,
     powerUnit,
     setPowerUnit,
+    powerProfileTimeframe = '90d',
+    setPowerProfileTimeframe,
     selectedDurs,
     toggleDur,
     ppChartData,
@@ -37,7 +39,7 @@ export const PowerProfileCard = ({
 
                 {showPowerConfig && (
                     <div className="mb-10 p-6 bg-slate-50/50 dark:bg-zinc-800/30 rounded-2xl border border-slate-100 dark:border-zinc-800/50 animate-in slide-in-from-top-2 duration-300">
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                             <div>
                                 <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-6">Unidad de Medida</p>
                                 <div className="flex bg-slate-100/80 dark:bg-zinc-800/80 p-1 rounded-xl w-fit">
@@ -48,6 +50,24 @@ export const PowerProfileCard = ({
                                             className={`px-4 py-1.5 rounded-lg text-[9px] font-bold uppercase tracking-widest transition-all ${powerUnit === unit ? 'bg-white dark:bg-zinc-700 text-slate-900 dark:text-zinc-100 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
                                         >
                                             {unit === 'wkg' ? 'W/kg' : 'Vatios'}
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+                            <div>
+                                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-6">Periodo Analizado</p>
+                                <div className="flex bg-slate-100/80 dark:bg-zinc-800/80 p-1 rounded-xl w-fit">
+                                    {[
+                                        { id: '90d', label: '90 Días' },
+                                        { id: '1y', label: '1 Año' },
+                                        { id: 'all', label: 'Histórico' }
+                                    ].map(item => (
+                                        <button
+                                            key={item.id}
+                                            onClick={() => setPowerProfileTimeframe && setPowerProfileTimeframe(item.id)}
+                                            className={`px-3 py-1.5 rounded-lg text-[9px] font-bold uppercase tracking-widest transition-all ${powerProfileTimeframe === item.id ? 'bg-white dark:bg-zinc-700 text-slate-900 dark:text-zinc-100 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
+                                        >
+                                            {item.label}
                                         </button>
                                     ))}
                                 </div>

@@ -146,14 +146,14 @@ export const HistoryList = React.memo(({ activities, onDelete, onSelectActivity 
                                         width: '100%',
                                         transform: `translateY(${virtualRow.start}px)`,
                                     }}
-                                    className="group flex items-center p-3 hover:bg-slate-50 dark:hover:bg-zinc-800/50 border-b border-slate-100 dark:border-zinc-800/50 box-border transition-colors cursor-pointer"
+                                    className="group flex items-center p-3 hover:bg-slate-50 dark:hover:bg-zinc-800/50 active:bg-slate-100 dark:active:bg-zinc-800/80 active:scale-[0.995] border-b border-slate-100 dark:border-zinc-800/50 box-border transition-all cursor-pointer"
                                 >
                                     {/* Icono */}
-                                    <div className="w-10 h-10 rounded-full bg-slate-100 dark:bg-zinc-800 flex items-center justify-center shrink-0 mr-4 group-hover:scale-110 transition-transform">
+                                    <div className="w-10 h-10 rounded-full bg-slate-100 dark:bg-zinc-800 flex items-center justify-center shrink-0 mr-3 sm:mr-4 group-hover:scale-110 transition-transform">
                                         {getSportIcon(act.type)}
                                     </div>
 
-                                    <div className="flex-1 min-w-0 mr-4">
+                                    <div className="flex-1 min-w-0 mr-2 sm:mr-4">
                                         <h4 className="text-[13px] font-semibold text-slate-900 dark:text-white truncate mb-0.5" title={act.name}>{act.name}</h4>
                                         <div className="flex items-center gap-2 text-[11px] text-slate-500 dark:text-zinc-400">
                                             <span>{new Date(act.date).toLocaleDateString('es-ES', { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' })}</span>
@@ -162,7 +162,19 @@ export const HistoryList = React.memo(({ activities, onDelete, onSelectActivity 
                                         </div>
                                     </div>
 
-                                    {/* Métricas Clínicas */}
+                                    {/* Compact Mobile Metrics (< md) */}
+                                    <div className="flex md:hidden flex-col items-end shrink-0 mr-1 text-right">
+                                        <span className="text-xs font-semibold text-slate-800 dark:text-zinc-200">
+                                            {formatDuration(act.duration)}
+                                        </span>
+                                        <span className="text-[10px] text-slate-500 dark:text-zinc-400 font-medium">
+                                            {act.distance > 0 
+                                                ? `${(act.distance / 1000).toFixed(1)} km` 
+                                                : (act.tss > 0 ? `${Math.round(act.tss)} TSS` : '')}
+                                        </span>
+                                    </div>
+
+                                    {/* Métricas Clínicas (>= md) */}
                                     <div className="hidden md:flex items-center gap-6 mr-6">
                                         <div className="flex flex-col items-end">
                                             <span className="text-[10px] text-slate-400 mb-0.5 flex items-center gap-1">Tiempo</span>
@@ -185,10 +197,10 @@ export const HistoryList = React.memo(({ activities, onDelete, onSelectActivity 
                                     </div>
 
                                     {/* Botón Borrar (con stopPropagation para no abrir la actividad) */}
-                                    <div className="shrink-0 flex items-center gap-3">
+                                    <div className="shrink-0 flex items-center gap-1 sm:gap-3">
                                         <button
                                             onClick={(e) => { e.stopPropagation(); onDelete && onDelete(act.id); }}
-                                            className="p-2 text-slate-300 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded transition-colors"
+                                            className="w-8 h-8 flex items-center justify-center text-slate-300 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 active:scale-95 rounded-lg transition-all"
                                             title="Eliminar actividad"
                                         >
                                             <Trash2 size={14} />

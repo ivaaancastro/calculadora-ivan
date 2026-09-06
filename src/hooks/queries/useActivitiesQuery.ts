@@ -10,6 +10,7 @@
  *  - deleteActivityMutation  — Borra una actividad por ID
  *  - clearDbMutation         — Borra todas las actividades del usuario
  */
+import { useState, useCallback } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "../../supabase";
 
@@ -33,6 +34,8 @@ const requireUserId = async (): Promise<string> => {
 
 export const useActivitiesQuery = () => {
     const queryClient = useQueryClient();
+    const [isLoadingHistoricalStreams, setIsLoadingHistoricalStreams] = useState(false);
+    const [hasLoadedHistoricalStreams, setHasLoadedHistoricalStreams] = useState(false);
 
     // ── Query: actividades (dos fases) ────────────────────────────────────────
     const query = useQuery({
@@ -86,6 +89,47 @@ export const useActivitiesQuery = () => {
         staleTime: 1000 * 60 * 30,
     });
 
+    /**
+     * Carga bajo demanda la telemetría histórica (anterior a 95 días) de todas las actividades
+     * almacenadas en Supabase que ya posean streams_data.
+     */
+    const loadHistoricalStreams = useCallback(async () => {
+        if (isLoadingHistoricalStreams || hasLoadedHistoricalStreams) return;
+        setIsLoadingHistoricalStreams(true);
+        try {
+            const userId = await requireUserId();
+            const cutoff = new Date();
+            cutoff.setDate(cutoff.getDate() - STREAMS_LOOKBACK_DAYS);
+
+            const { data: streamsData, error } = await supabase
+                .from('activities')
+                .select('id,streams_data')
+                .eq('user_id', userId)
+                .lt('date', cutoff.toISOString().split('T')[0])
+                .not('streams_data', 'is', null);
+
+            if (error) throw error;
+
+            if (streamsData && streamsData.length > 0) {
+                const streamMap = new Map(streamsData.map((s: any) => [s.id, s.streams_data]));
+
+                queryClient.setQueryData(['activities'], (oldData: any) => {
+                    if (!oldData) return oldData;
+                    return oldData.map((a: any) =>
+                        streamMap.has(a.id) ? { ...a, streams_data: streamMap.get(a.id) } : a
+                    );
+                });
+            }
+            setHasLoadedHistoricalStreams(true);
+            return streamsData?.length || 0;
+        } catch (e) {
+            console.warn('Carga de telemetría histórica fallida:', e);
+            return 0;
+        } finally {
+            setIsLoadingHistoricalStreams(false);
+        }
+    }, [isLoadingHistoricalStreams, hasLoadedHistoricalStreams, queryClient]);
+
     // ── Mutation: borrar una actividad ────────────────────────────────────────
     const deleteActivityMutation = useMutation({
         mutationFn: async (id: string | number) => {
@@ -120,5 +164,12 @@ export const useActivitiesQuery = () => {
         },
     });
 
-    return { query, deleteActivityMutation, clearDbMutation };
+    return {
+        query,
+        deleteActivityMutation,
+        clearDbMutation,
+        loadHistoricalStreams,
+        isLoadingHistoricalStreams,
+        hasLoadedHistoricalStreams
+    };
 };

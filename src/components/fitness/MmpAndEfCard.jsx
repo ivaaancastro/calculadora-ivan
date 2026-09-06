@@ -3,7 +3,7 @@ import {
     ComposedChart, Area, Scatter, XAxis, YAxis, CartesianGrid,
     Tooltip as RechartsTooltip, ResponsiveContainer
 } from 'recharts';
-import { MousePointer2 } from 'lucide-react';
+import { MousePointer2, RefreshCw } from 'lucide-react';
 import { InfoTooltip } from '../common/InfoTooltip';
 import { tooltipStyle } from './fitnessConstants';
 import { formatInterval, formatPace } from '../../hooks/useFitnessAnalytics';
@@ -21,7 +21,14 @@ export const MmpAndEfCard = ({
     curveColor,
     curveUnit,
     isPace,
-    analytics
+    analytics,
+    peaksViewMode = 'period',
+    setPeaksViewMode,
+    telemetryStats,
+    isLoadingHistoricalStreams,
+    handleDeepSync,
+    isDeepSyncing,
+    deepSyncProgress
 }) => {
     const renderCustomCurveTooltip = ({ active, payload, label }) => {
         if (active && payload && payload.length) {
@@ -85,10 +92,39 @@ export const MmpAndEfCard = ({
         <section className="mb-8">
             <div className="bg-white dark:bg-zinc-900/50 rounded-2xl border border-slate-200/50 dark:border-zinc-800/50 p-6 sm:p-8 shadow-sm">
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-10">
-                    <div className="flex items-center gap-2">
-                        <h3 className="text-[10px] font-bold text-slate-400 dark:text-zinc-500 uppercase tracking-[0.1em]">Potencial y Récords</h3>
-                        <InfoTooltip text="Análisis de eficiencia aeróbica y curvas de potencia máxima" />
+                    <div className="flex flex-wrap items-center gap-3">
+                        <div className="flex items-center gap-2">
+                            <h3 className="text-[10px] font-bold text-slate-400 dark:text-zinc-500 uppercase tracking-[0.1em]">Potencial y Récords</h3>
+                            <InfoTooltip text="Análisis de eficiencia aeróbica y curvas de potencia/ritmo/FC máxima segundo a segundo" />
+                        </div>
+
+                        {telemetryStats && telemetryStats.total > 0 && (
+                            <div className="flex items-center gap-2 px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-zinc-800/80 text-[9px] font-medium text-slate-600 dark:text-zinc-300 border border-slate-200/60 dark:border-zinc-700/60">
+                                <span className={`w-1.5 h-1.5 rounded-full ${telemetryStats.percentage >= 85 ? 'bg-emerald-500' : (telemetryStats.percentage >= 40 ? 'bg-amber-500' : 'bg-rose-500')}`} />
+                                <span>Telemetría: {telemetryStats.withStreams}/{telemetryStats.total} ({telemetryStats.percentage}%)</span>
+                                <InfoTooltip text="Las curvas MMP requieren telemetría detallada. Las sincronizaciones rápidas de Strava solo traen resúmenes hasta procesar el Deep Sync." />
+                            </div>
+                        )}
+
+                        {isLoadingHistoricalStreams && (
+                            <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-blue-500/10 text-blue-500 text-[8px] font-bold uppercase tracking-wider animate-pulse">
+                                <RefreshCw size={10} className="animate-spin" />
+                                Cargando telemetría histórica...
+                            </div>
+                        )}
+
+                        {telemetryStats && telemetryStats.withStreams < telemetryStats.total && handleDeepSync && (
+                            <button
+                                onClick={handleDeepSync}
+                                disabled={isDeepSyncing}
+                                className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-blue-50 hover:bg-blue-100 dark:bg-blue-950/40 dark:hover:bg-blue-900/40 text-blue-600 dark:text-blue-400 text-[9px] font-bold uppercase tracking-wider transition-all disabled:opacity-50"
+                            >
+                                <RefreshCw size={10} className={isDeepSyncing ? 'animate-spin' : ''} />
+                                {isDeepSyncing ? `Descargando (${deepSyncProgress?.current || 0}/${deepSyncProgress?.total || 0})...` : 'Completar telemetría'}
+                            </button>
+                        )}
                     </div>
+
                     <div className="flex flex-wrap items-center gap-3">
                         <div className="flex bg-slate-100/80 dark:bg-zinc-800/80 p-1 rounded-xl">
                             <button onClick={() => setCurveSport('bike')} className={`px-4 py-1.5 text-[9px] font-bold uppercase rounded-lg transition-all ${curveSport === 'bike' ? 'bg-white dark:bg-zinc-700 text-blue-600 dark:text-blue-400 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}>Ciclismo</button>
@@ -179,9 +215,27 @@ export const MmpAndEfCard = ({
 
                     {/* MMP PEAKS TABLE */}
                     <div className="flex flex-col lg:col-span-1">
-                        <div className="flex items-center gap-2 mb-6">
-                            <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Récords Históricos</span>
-                            <InfoTooltip text="Tus mejores valores absolutos para las duraciones clave. Se actualizan automáticamente con cada actividad." />
+                        <div className="flex items-center justify-between gap-2 mb-6">
+                            <div className="flex items-center gap-2">
+                                <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400">
+                                    {peaksViewMode === 'alltime' ? 'Récords Absolutos' : `Récords (${mmpTimeframe === 'all' ? 'Todo' : mmpTimeframe.toUpperCase()})`}
+                                </span>
+                                <InfoTooltip text={peaksViewMode === 'alltime' ? "Tus mejores marcas de todos los tiempos en actividades con telemetría registrada." : "Tus mejores marcas dentro del periodo seleccionado arriba (90d / 1y / Todo)."} />
+                            </div>
+                            <div className="flex bg-slate-100 dark:bg-zinc-800 p-0.5 rounded-lg text-[8px] font-bold uppercase">
+                                <button
+                                    onClick={() => setPeaksViewMode && setPeaksViewMode('period')}
+                                    className={`px-2 py-1 rounded transition-all ${peaksViewMode === 'period' ? 'bg-white dark:bg-zinc-700 text-slate-900 dark:text-zinc-100 shadow-xs' : 'text-slate-500 hover:text-slate-700'}`}
+                                >
+                                    Periodo
+                                </button>
+                                <button
+                                    onClick={() => setPeaksViewMode && setPeaksViewMode('alltime')}
+                                    className={`px-2 py-1 rounded transition-all ${peaksViewMode === 'alltime' ? 'bg-white dark:bg-zinc-700 text-slate-900 dark:text-zinc-100 shadow-xs' : 'text-slate-500 hover:text-slate-700'}`}
+                                >
+                                    Histórico
+                                </button>
+                            </div>
                         </div>
                         <div className="space-y-3">
                             {[1, 60, 300, 1200].map(secs => {

@@ -112,15 +112,22 @@ const CURVE_DURATIONS = [1, 3, 5, 10, 15, 30, 60, 120, 180, 300, 480, 600, 900, 
 const EFTP_MIN_SECS = 300;
 const EFTP_MAX_SECS = 1800;
 
-export function estimateFTP(activities, settings) {
+export function estimateFTP(activities, settings, options = {}) {
+    const days = options?.days !== undefined ? options.days : 90;
     const today = new Date();
-    const d90 = new Date(today); d90.setDate(today.getDate() - 90);
+    let cutoffDate = null;
+    if (days !== null && days > 0) {
+        cutoffDate = new Date(today);
+        cutoffDate.setDate(today.getDate() - days);
+    }
     const weight = Number(settings?.weight) || 70;
 
     const bikeActivities = activities.filter(act => {
         const t = String(act.type).toLowerCase();
-        return (t.includes('bici') || t.includes('ciclismo') || t.includes('ride'))
-            && new Date(act.date) >= d90
+        const matchesSport = (t.includes('bici') || t.includes('ciclismo') || t.includes('ride'));
+        const matchesDate = cutoffDate ? new Date(act.date) >= cutoffDate : true;
+        return matchesSport
+            && matchesDate
             && act.streams_data?.watts?.data
             && act.streams_data?.time?.data;
     });
@@ -1351,10 +1358,15 @@ export function analyzeIntensityDistribution(activities, settings) {
  *     Calcula W/kg del usuario en duraciones clave y los compara con 
  *     típicos de categorías (Cat 1, World Class, etc.)
  */
-export function getPowerProfileBenchmarks(activities, settings, eFTP) {
+export function getPowerProfileBenchmarks(activities, settings, eFTP, options = {}) {
     const weight = Number(settings?.weight) || 75;
+    const days = options?.days !== undefined ? options.days : 90;
     const today = new Date();
-    const d90 = new Date(today); d90.setDate(today.getDate() - 90);
+    let cutoffDate = null;
+    if (days !== null && days > 0) {
+        cutoffDate = new Date(today);
+        cutoffDate.setDate(today.getDate() - days);
+    }
 
     const durations = [
         { secs: 5, label: '5s' },
@@ -1376,8 +1388,10 @@ export function getPowerProfileBenchmarks(activities, settings, eFTP) {
 
     const bikeActivities = activities.filter(act => {
         const t = String(act.type).toLowerCase();
-        return (t.includes('bici') || t.includes('ciclismo') || t.includes('ride'))
-            && new Date(act.date) >= d90
+        const matchesSport = (t.includes('bici') || t.includes('ciclismo') || t.includes('ride'));
+        const matchesDate = cutoffDate ? new Date(act.date) >= cutoffDate : true;
+        return matchesSport
+            && matchesDate
             && act.streams_data?.watts?.data 
             && act.streams_data?.time?.data;
     });
