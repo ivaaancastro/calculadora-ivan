@@ -51,67 +51,70 @@ const AddActivityModal = ({ isOpen, onClose, onSave }) => {
     };
 
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-900/50 backdrop-blur-sm">
-            <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-2xl w-full max-w-md border border-slate-100 dark:border-slate-800 transform transition-all max-h-[90dvh] flex flex-col overflow-hidden">
+        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-slate-900/60 backdrop-blur-sm overscroll-contain animate-in fade-in duration-200">
+            <div className="bg-white dark:bg-zinc-900 rounded-t-3xl sm:rounded-2xl shadow-2xl w-full max-w-md border-t sm:border border-slate-200/80 dark:border-zinc-800 transform transition-all max-h-[92dvh] flex flex-col overflow-hidden pb-safe">
 
-                <div className="flex justify-between items-center p-4 sm:p-5 border-b border-slate-100 dark:border-slate-800 shrink-0">
-                    <h3 className="text-lg font-bold text-slate-800 dark:text-white flex items-center gap-2">
+                {/* iOS drag handle */}
+                <div className="w-12 h-1.5 bg-slate-300 dark:bg-zinc-700 rounded-full mx-auto mt-2.5 sm:hidden shrink-0" />
+
+                <div className="flex justify-between items-center px-5 py-3 sm:p-5 border-b border-slate-100 dark:border-zinc-800 shrink-0">
+                    <h3 className="text-base sm:text-lg font-bold text-slate-800 dark:text-white flex items-center gap-2">
                         <Activity className="text-blue-500" size={20} /> Añadir Manual
                     </h3>
-                    <button onClick={onClose} className="w-9 h-9 flex items-center justify-center rounded-xl text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 active:scale-95 transition-all" title="Cerrar">
+                    <button onClick={onClose} className="w-9 h-9 flex items-center justify-center rounded-xl text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-zinc-800 active:scale-95 transition-all touch-manipulation" title="Cerrar">
                         <X size={20} />
                     </button>
                 </div>
 
-                <form onSubmit={handleSubmit} className="p-4 sm:p-5 space-y-4 overflow-y-auto custom-scrollbar flex-1">
-                    <div className="grid grid-cols-2 gap-4">
+                <form onSubmit={handleSubmit} className="p-4 sm:p-5 space-y-4 overflow-y-auto custom-scrollbar touch-scroll flex-1">
+                    <div className="grid grid-cols-2 gap-3 sm:gap-4">
                         <div className="space-y-1">
-                            <label className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase">Fecha</label>
+                            <label className="text-[11px] font-bold text-slate-500 dark:text-zinc-400 uppercase tracking-wider">Fecha</label>
                             <input type="date" required value={formData.date} onChange={e => setFormData({ ...formData, date: e.target.value })}
-                                className="w-full bg-slate-50 dark:bg-slate-800 border-none rounded-xl p-3 text-sm font-bold text-slate-700 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none"
+                                className="w-full bg-slate-50 dark:bg-zinc-800/80 border border-slate-200/60 dark:border-zinc-700/60 rounded-xl p-3 text-sm font-semibold text-slate-700 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none"
                             />
                         </div>
                         <div className="space-y-1">
-                            <label className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase">Deporte</label>
+                            <label className="text-[11px] font-bold text-slate-500 dark:text-zinc-400 uppercase tracking-wider">Deporte</label>
                             <select value={formData.type} onChange={e => setFormData({ ...formData, type: e.target.value })}
-                                className="w-full bg-slate-50 dark:bg-slate-800 border-none rounded-xl p-3 text-sm font-bold text-slate-700 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none"
+                                className="w-full bg-slate-50 dark:bg-zinc-800/80 border border-slate-200/60 dark:border-zinc-700/60 rounded-xl p-3 text-sm font-semibold text-slate-700 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none"
                             >
                                 <option>Carrera</option><option>Ciclismo</option><option>Fuerza</option><option>Caminata</option><option>Natación</option>
                             </select>
                         </div>
                     </div>
 
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="grid grid-cols-2 gap-3 sm:gap-4">
                         <div className="space-y-1">
-                            <label htmlFor="duration-input" className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase">Duración (min)</label>
-                            <input id="duration-input" type="number" min="0.1" step="any" required placeholder="0" value={formData.duration} onChange={e => setFormData({ ...formData, duration: e.target.value })}
-                                className="w-full bg-slate-50 dark:bg-slate-800 border-none rounded-xl p-3 text-sm font-bold text-slate-700 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none"
+                            <label htmlFor="duration-input" className="text-[11px] font-bold text-slate-500 dark:text-zinc-400 uppercase tracking-wider">Duración (min)</label>
+                            <input id="duration-input" type="number" inputMode="decimal" min="0.1" step="any" required placeholder="0" value={formData.duration} onChange={e => setFormData({ ...formData, duration: e.target.value })}
+                                className="w-full bg-slate-50 dark:bg-zinc-800/80 border border-slate-200/60 dark:border-zinc-700/60 rounded-xl p-3 text-sm font-semibold text-slate-700 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none font-mono"
                             />
                         </div>
                         <div className="space-y-1">
-                            <label className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase">Pulso Medio</label>
-                            <input type="number" min="0" placeholder="Opcional" value={formData.hr_avg} onChange={e => setFormData({ ...formData, hr_avg: e.target.value })}
-                                className="w-full bg-slate-50 dark:bg-slate-800 border-none rounded-xl p-3 text-sm font-bold text-slate-700 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none"
-                            />
-                        </div>
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-4">
-                        <div className="space-y-1">
-                            <label className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase">Distancia (m)</label>
-                            <input type="number" min="0" placeholder="Ej: 5000" value={formData.distance} onChange={e => setFormData({ ...formData, distance: e.target.value })}
-                                className="w-full bg-slate-50 dark:bg-slate-800 border-none rounded-xl p-3 text-sm font-bold text-slate-700 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none"
-                            />
-                        </div>
-                        <div className="space-y-1">
-                            <label className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase">Desnivel (m)</label>
-                            <input type="number" min="0" placeholder="Ej: 100" value={formData.elevation_gain} onChange={e => setFormData({ ...formData, elevation_gain: e.target.value })}
-                                className="w-full bg-slate-50 dark:bg-slate-800 border-none rounded-xl p-3 text-sm font-bold text-slate-700 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none"
+                            <label className="text-[11px] font-bold text-slate-500 dark:text-zinc-400 uppercase tracking-wider">Pulso Medio</label>
+                            <input type="number" inputMode="numeric" min="0" placeholder="Opcional" value={formData.hr_avg} onChange={e => setFormData({ ...formData, hr_avg: e.target.value })}
+                                className="w-full bg-slate-50 dark:bg-zinc-800/80 border border-slate-200/60 dark:border-zinc-700/60 rounded-xl p-3 text-sm font-semibold text-slate-700 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none font-mono"
                             />
                         </div>
                     </div>
 
-                    <button type="submit" disabled={loading} className="w-full bg-slate-900 dark:bg-blue-600 text-white font-bold py-3 rounded-xl hover:opacity-90 transition flex items-center justify-center gap-2 mt-4">
+                    <div className="grid grid-cols-2 gap-3 sm:gap-4">
+                        <div className="space-y-1">
+                            <label className="text-[11px] font-bold text-slate-500 dark:text-zinc-400 uppercase tracking-wider">Distancia (m)</label>
+                            <input type="number" inputMode="decimal" min="0" placeholder="Ej: 5000" value={formData.distance} onChange={e => setFormData({ ...formData, distance: e.target.value })}
+                                className="w-full bg-slate-50 dark:bg-zinc-800/80 border border-slate-200/60 dark:border-zinc-700/60 rounded-xl p-3 text-sm font-semibold text-slate-700 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none font-mono"
+                            />
+                        </div>
+                        <div className="space-y-1">
+                            <label className="text-[11px] font-bold text-slate-500 dark:text-zinc-400 uppercase tracking-wider">Desnivel (m)</label>
+                            <input type="number" inputMode="decimal" min="0" placeholder="Ej: 100" value={formData.elevation_gain} onChange={e => setFormData({ ...formData, elevation_gain: e.target.value })}
+                                className="w-full bg-slate-50 dark:bg-zinc-800/80 border border-slate-200/60 dark:border-zinc-700/60 rounded-xl p-3 text-sm font-semibold text-slate-700 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none font-mono"
+                            />
+                        </div>
+                    </div>
+
+                    <button type="submit" disabled={loading} className="w-full min-h-[46px] bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-xl active:scale-98 transition-all flex items-center justify-center gap-2 mt-4 shadow-md touch-manipulation select-none">
                         {loading ? 'Guardando...' : <><Save size={18} /> Guardar Actividad</>}
                     </button>
                 </form>

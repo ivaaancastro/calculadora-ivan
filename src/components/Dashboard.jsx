@@ -126,7 +126,7 @@ const Dashboard = () => {
         </div>
       )}
 
-      <main className={`w-full max-w-[1800px] mx-auto ${isActivityPage ? 'px-4' : 'px-4 sm:px-6 py-4 sm:py-6 space-y-4'}`}>
+      <main className={`w-full max-w-[1800px] mx-auto ${isActivityPage ? 'px-2 sm:px-4 py-0 sm:py-2' : 'px-3 sm:px-6 py-3 sm:py-6 space-y-4'}`}>
         {activities.length === 0 ? (
           <div className="text-center py-20 px-4">
             <div className="bg-white dark:bg-zinc-900 rounded-lg border border-slate-200 dark:border-zinc-800 p-8 max-w-md mx-auto">
