@@ -133,8 +133,8 @@ export const AdvancedAnalytics = React.memo(({ activities, settings,  timeRange,
                         </p>
                     </div>
 
-                    <div className="flex items-center gap-3">
-                        <div className="flex bg-slate-200/50 dark:bg-zinc-800/50 backdrop-blur-md p-1 rounded-lg">
+                    <div className="flex items-center gap-2 sm:gap-3 w-full sm:w-auto justify-end">
+                        <div className="flex bg-slate-200/50 dark:bg-zinc-800/50 backdrop-blur-md p-1 rounded-xl shadow-inner w-full sm:w-auto justify-between sm:justify-start">
                             {[
                                 { id: "7d", label: "7D" },
                                 { id: "30d", label: "30D" },
@@ -144,8 +144,8 @@ export const AdvancedAnalytics = React.memo(({ activities, settings,  timeRange,
                                 <button
                                     key={t.id}
                                     onClick={() => setTimeRange(t.id)}
-                                    className={`px-3 py-1 text-xs font-medium transition-all rounded-md ${timeRange === t.id
-                                        ? "bg-white dark:bg-[#2c2c2e] text-slate-900 dark:text-white shadow hover:shadow-md"
+                                    className={`flex-1 sm:flex-initial px-3.5 py-1.5 min-h-[32px] text-xs font-semibold transition-all rounded-lg select-none touch-manipulation active:scale-95 ${timeRange === t.id
+                                        ? "bg-white dark:bg-[#2c2c2e] text-slate-900 dark:text-white shadow hover:shadow-md font-bold"
                                         : "text-slate-500 dark:text-zinc-400 hover:text-slate-800 dark:hover:text-zinc-200"
                                         }`}
                                 >
@@ -156,7 +156,7 @@ export const AdvancedAnalytics = React.memo(({ activities, settings,  timeRange,
                     </div>
                 </div>
 
-                <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-4 gap-3">
+                <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-4 gap-2 sm:gap-3">
                     {[
                         { label: 'Fitness (CTL)', value: Math.round(model.ctl), icon: Activity, color: 'text-slate-700 dark:text-zinc-300', sub: `${model.loadTrend >= 0 ? '+' : ''}${model.loadTrend.toFixed(1)}% vs 28d`, tip: "Nivel de condición física basado en los últimos 42 días." },
                         { label: 'Fatiga (ATL)', value: Math.round(model.atl), icon: Battery, color: 'text-slate-700 dark:text-zinc-300', sub: 'Carga últ. 7 días', tip: "Cansancio acumulado." },
@@ -167,24 +167,24 @@ export const AdvancedAnalytics = React.memo(({ activities, settings,  timeRange,
                         { label: 'Volumen 30D', value: `${Math.round(model.totalVolume / 60)}h`, icon: CalendarDays, color: 'text-slate-500 dark:text-zinc-400', sub: `${model.totalActivities} actos`, tip: "Horas totales." },
                         { label: 'VO2 Max (Top)', value: globalMaxVo2 || '--', icon: TrendingUp, color: 'text-slate-500 dark:text-zinc-400', sub: vo2IsGarmin ? 'Garmin Sync' : 'Estimado', tip: "Mejor valor de VO2max." }
                     ].map((kpi, i) => (
-                        <div key={i} className="bg-transparent border border-slate-200 dark:border-zinc-800 rounded-xl p-3 flex flex-col justify-between group transition-colors hover:border-slate-300 dark:hover:border-zinc-700">
-                            <div className="flex items-center justify-between mb-2 opacity-80 group-hover:opacity-100 transition-opacity">
-                                <div className="flex items-center gap-1.5">
-                                    <kpi.icon size={12} className={kpi.color} strokeWidth={2} />
-                                    <span className="text-[9px] font-semibold text-slate-500 dark:text-zinc-400 uppercase tracking-widest">{kpi.label}</span>
+                        <div key={i} className="bg-transparent border border-slate-200/80 dark:border-zinc-800 rounded-xl p-2.5 sm:p-3 flex flex-col justify-between group transition-colors hover:border-slate-300 dark:hover:border-zinc-700">
+                            <div className="flex items-center justify-between mb-1.5 opacity-80 group-hover:opacity-100 transition-opacity">
+                                <div className="flex items-center gap-1 sm:gap-1.5 min-w-0">
+                                    <kpi.icon size={12} className={`${kpi.color} shrink-0`} strokeWidth={2} />
+                                    <span className="text-[9px] font-semibold text-slate-500 dark:text-zinc-400 uppercase tracking-widest truncate">{kpi.label}</span>
                                 </div>
                             </div>
-                            <div className="flex items-baseline gap-1.5">
-                                <span className="text-xl font-medium tracking-tight text-slate-800 dark:text-zinc-200">{kpi.value}</span>
-                                {kpi.sub && <span className="text-[9px] font-medium text-slate-400 dark:text-zinc-500">{kpi.sub}</span>}
+                            <div className="flex items-baseline gap-1 sm:gap-1.5 flex-wrap">
+                                <span className="text-lg sm:text-xl font-medium tracking-tight text-slate-800 dark:text-zinc-200 font-mono">{kpi.value}</span>
+                                {kpi.sub && <span className="text-[8px] sm:text-[9px] font-medium text-slate-400 dark:text-zinc-500 truncate">{kpi.sub}</span>}
                             </div>
                         </div>
                     ))}
                 </div>
 
 
-                <div className="bg-[#f8fafc] dark:bg-[#18181b] border border-slate-200 dark:border-zinc-800 rounded-xl p-3 sm:p-5 shadow-inner">
-                    <div className="h-[300px]">
+                <div className="bg-[#f8fafc] dark:bg-[#18181b] border border-slate-200/80 dark:border-zinc-800 rounded-2xl p-2 sm:p-5 shadow-inner">
+                    <div className="h-[260px] sm:h-[320px]">
                         <EvolutionChart data={chartData} />
                     </div>
                 </div>

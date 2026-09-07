@@ -90,9 +90,9 @@ export const MmpAndEfCard = ({
 
     return (
         <section className="mb-8">
-            <div className="bg-white dark:bg-zinc-900/50 rounded-2xl border border-slate-200/50 dark:border-zinc-800/50 p-6 sm:p-8 shadow-sm">
-                <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-10">
-                    <div className="flex flex-wrap items-center gap-3">
+            <div className="bg-white dark:bg-zinc-900/50 rounded-2xl border border-slate-200/50 dark:border-zinc-800/50 p-3.5 sm:p-6 lg:p-8 shadow-sm">
+                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 sm:gap-6 mb-6 sm:mb-10">
+                    <div className="flex flex-wrap items-center gap-2 sm:gap-3">
                         <div className="flex items-center gap-2">
                             <h3 className="text-[10px] font-bold text-slate-400 dark:text-zinc-500 uppercase tracking-[0.1em]">Potencial y Récords</h3>
                             <InfoTooltip text="Análisis de eficiencia aeróbica y curvas de potencia/ritmo/FC máxima segundo a segundo" />

@@ -86,7 +86,7 @@ export const ActivityDetailPage = ({ activity, settings, fetchStreams, onBack, o
     };
 
     return (
-        <div className="animate-in fade-in duration-500 bg-slate-50 dark:bg-zinc-950 h-screen h-[100dvh] overflow-hidden flex flex-col font-sans">
+        <div className="animate-in fade-in duration-500 bg-slate-50 dark:bg-zinc-950 min-h-[calc(100dvh-4rem)] lg:h-[calc(100vh-70px)] flex flex-col font-sans pb-safe">
             {/* Premium Header */}
             <header className="bg-white dark:bg-zinc-950 border-b border-slate-100 dark:border-zinc-900 px-3 py-2.5 sm:px-6 sm:py-3 shrink-0 z-50">
                 {/* Navigation Tabs at the Top */}
@@ -112,7 +112,7 @@ export const ActivityDetailPage = ({ activity, settings, fetchStreams, onBack, o
                 </div>
 
                 <div className="flex items-center gap-3 mb-4">
-                    <button onClick={onBack} className="w-9 h-9 sm:w-8 sm:h-8 flex items-center justify-center hover:bg-slate-100 dark:hover:bg-zinc-900 active:scale-95 rounded-xl transition-all text-slate-500 dark:text-zinc-400" title="Volver">
+                    <button onClick={onBack} className="w-10 h-10 sm:w-8 sm:h-8 flex items-center justify-center hover:bg-slate-100 dark:hover:bg-zinc-900 active:scale-95 rounded-xl transition-all text-slate-500 dark:text-zinc-400 shrink-0" title="Volver">
                         <ArrowLeft size={16} />
                     </button>
                     <div>
@@ -154,14 +154,14 @@ export const ActivityDetailPage = ({ activity, settings, fetchStreams, onBack, o
 
                 {/* --- pestaña: ANÁLISIS --- */}
                 {activeTab === 'analyze' && (
-                    <div className="h-full flex flex-col lg:flex-row overflow-hidden">
+                    <div className="flex-1 flex flex-col lg:flex-row overflow-y-auto lg:overflow-hidden custom-scrollbar touch-scroll min-h-0">
                         {/* Charts Panel */}
-                        <div className="flex-1 overflow-y-auto custom-scrollbar p-3 sm:p-5 bg-white dark:bg-zinc-950 min-w-0">
+                        <div className="flex-1 lg:overflow-y-auto custom-scrollbar p-2.5 sm:p-5 bg-white dark:bg-zinc-950 min-w-0">
                             <div className="max-w-5xl mx-auto space-y-3" onMouseLeave={() => setActivePayload(null)}>
                                 {chartData.length > 0 ? (
                                     <div className="bg-white dark:bg-zinc-950 rounded-2xl border border-slate-200/60 dark:border-zinc-800/60 overflow-hidden shadow-sm">
                                         {/* Velocity/Pace */}
-                                        <div className="h-[105px] pt-4 px-6 border-b border-slate-100 dark:border-zinc-800/60">
+                                        <div className="h-[105px] pt-4 px-3.5 sm:px-6 border-b border-slate-100 dark:border-zinc-800/60">
                                                 <div className="flex justify-between items-center mb-1">
                                                     <div className="flex items-center gap-3">
                                                         <h4 className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">{isPaceBased ? 'Ritmo' : 'Velocidad'}</h4>
@@ -188,7 +188,7 @@ export const ActivityDetailPage = ({ activity, settings, fetchStreams, onBack, o
 
                                         {/* Heart Rate */}
                                         {chartData.some(d => d.hr > 0) && (
-                                            <div className="h-[105px] pt-4 px-6 border-b border-slate-100 dark:border-zinc-800/60">
+                                            <div className="h-[105px] pt-4 px-3.5 sm:px-6 border-b border-slate-100 dark:border-zinc-800/60">
                                                 <div className="flex justify-between items-center mb-1">
                                                     <h4 className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">FC</h4>
                                                     {activePayload && <span className="text-xs font-bold tabular-nums text-rose-500">{activePayload.hr} bpm</span>}
@@ -207,7 +207,7 @@ export const ActivityDetailPage = ({ activity, settings, fetchStreams, onBack, o
 
                                         {/* Power */}
                                         {chartData.some(d => d.watts > 0) && (
-                                            <div className="h-[105px] pt-4 px-6 border-b border-slate-100 dark:border-zinc-800/60">
+                                            <div className="h-[105px] pt-4 px-3.5 sm:px-6 border-b border-slate-100 dark:border-zinc-800/60">
                                                 <div className="flex justify-between items-center mb-1">
                                                     <h4 className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Potencia</h4>
                                                     {activePayload && <span className="text-xs font-bold tabular-nums text-amber-500">{activePayload.watts} w</span>}
@@ -226,7 +226,7 @@ export const ActivityDetailPage = ({ activity, settings, fetchStreams, onBack, o
 
                                         {/* Altitude */}
                                         {chartData.some(d => d.alt !== null) && (
-                                            <div className="h-[105px] pt-4 px-6 border-b border-slate-100 dark:border-zinc-800/60">
+                                            <div className="h-[105px] pt-4 px-3.5 sm:px-6 border-b border-slate-100 dark:border-zinc-800/60">
                                                 <div className="flex justify-between items-center mb-1">
                                                     <div className="flex items-center gap-3">
                                                         <h4 className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Altitud</h4>
@@ -252,7 +252,7 @@ export const ActivityDetailPage = ({ activity, settings, fetchStreams, onBack, o
 
                                         {/* Cadence */}
                                         {chartData.some(d => d.cadence > 0) && (
-                                            <div className="h-[105px] pt-4 px-6">
+                                            <div className="h-[105px] pt-4 px-3.5 sm:px-6">
                                                 <div className="flex justify-between items-center mb-1">
                                                     <h4 className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Cadencia</h4>
                                                     {activePayload && <span className="text-xs font-bold tabular-nums text-emerald-500">{activePayload.cadence} {isPaceBased ? 'ppm' : 'rpm'}</span>}
