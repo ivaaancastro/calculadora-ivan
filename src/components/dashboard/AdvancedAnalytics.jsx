@@ -183,7 +183,7 @@ export const AdvancedAnalytics = React.memo(({ activities, settings,  timeRange,
                 </div>
 
 
-                <div className="bg-[#f8fafc] dark:bg-[#18181b] border border-slate-200 dark:border-zinc-800 rounded-xl p-5 shadow-inner">
+                <div className="bg-[#f8fafc] dark:bg-[#18181b] border border-slate-200 dark:border-zinc-800 rounded-xl p-3 sm:p-5 shadow-inner">
                     <div className="h-[300px]">
                         <EvolutionChart data={chartData} />
                     </div>

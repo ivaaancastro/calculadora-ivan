@@ -1,16 +1,18 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useRef } from 'react';
 import { Search, Calendar, Activity, Clock, MapPin, Zap, Trash2, ChevronRight, Bike, Footprints, Dumbbell, Flame } from 'lucide-react';
+import { useVirtualizer } from '@tanstack/react-virtual';
 import { formatDuration } from '../../utils/formatDuration';
 
 const getSportIcon = (type) => {
     const t = String(type).toLowerCase();
     if (t.includes('run') || t.includes('carrera')) return <Footprints size={14} className="text-orange-500" />;
-    if (t.includes('bike') || t.includes('bici') || t.includes('ciclismo')) return <Bike size={14} className="text-blue-500" />;
-    if (t.includes('gym') || t.includes('fuerza')) return <Dumbbell size={14} className="text-purple-500" />;
+    if (t.includes('bike') || t.includes('bici') || t.includes('ciclismo') || t.includes('ride')) return <Bike size={14} className="text-blue-500" />;
+    if (t.includes('gym') || t.includes('fuerza') || t.includes('weight') || t.includes('workout')) return <Dumbbell size={14} className="text-purple-500" />;
     return <Activity size={14} className="text-slate-500 dark:text-zinc-400" />;
 };
 
 export const HistoryList = React.memo(({ activities, onDelete, onSelectActivity }) => {
+    const parentRef = useRef(null);
     // ESTADOS DE LOS FILTROS INTERNOS
     const [searchTerm, setSearchTerm] = useState('');
     const [sportFilter, setSportFilter] = useState('all');
@@ -36,9 +38,9 @@ export const HistoryList = React.memo(({ activities, onDelete, onSelectActivity 
             filtered = filtered.filter(act => {
                 const t = String(act.type).toLowerCase();
                 if (sportFilter === 'run') return t.includes('run') || t.includes('carrera');
-                if (sportFilter === 'bike') return t.includes('bike') || t.includes('bici') || t.includes('ciclismo');
-                if (sportFilter === 'swim') return t.includes('swim') || t.includes('nadar');
-                if (sportFilter === 'gym') return t.includes('gym') || t.includes('fuerza');
+                if (sportFilter === 'bike') return t.includes('bike') || t.includes('bici') || t.includes('ciclismo') || t.includes('ride');
+                if (sportFilter === 'swim') return t.includes('swim') || t.includes('nadar') || t.includes('natación') || t.includes('natacion');
+                if (sportFilter === 'gym') return t.includes('gym') || t.includes('fuerza') || t.includes('weight') || t.includes('workout');
                 return true;
             });
         }
@@ -56,6 +58,22 @@ export const HistoryList = React.memo(({ activities, onDelete, onSelectActivity 
 
         return filtered;
     }, [activities, searchTerm, sportFilter, dateFilter]);
+
+    // eslint-disable-next-line react-hooks/incompatible-library
+    const rowVirtualizer = useVirtualizer({
+        count: filteredActivities.length,
+        getScrollElement: () => parentRef.current,
+        estimateSize: () => 64,
+        overscan: 6,
+        initialRect: { width: 800, height: 800 },
+    });
+
+    const virtualItems = rowVirtualizer.getVirtualItems();
+    // En entornos sin motor de layout (JSDOM en tests o SSR donde el contenedor mide 0px),
+    // fallback a renderizar filteredActivities para que testing-library y accesibilidad encuentren los elementos
+    const itemsToRender = virtualItems.length > 0
+        ? virtualItems.map(v => ({ index: v.index, start: v.start, isVirtual: true, act: filteredActivities[v.index] }))
+        : filteredActivities.map((act, index) => ({ index, start: index * 64, isVirtual: false, act }));
 
     return (
         <div className="glass-panel flex flex-col h-full overflow-hidden">
@@ -113,65 +131,93 @@ export const HistoryList = React.memo(({ activities, onDelete, onSelectActivity 
                 <span>{filteredActivities.length} Actividades</span>
             </div>
 
-            {/* LISTA DE ACTIVIDADES */}
-            <div className="flex-1 overflow-y-auto custom-scrollbar">
+            {/* LISTA DE ACTIVIDADES VIRTUALIZADA */}
+            <div ref={parentRef} className="flex-1 overflow-y-auto custom-scrollbar">
                 {filteredActivities.length > 0 ? (
-                    <div className="divide-y divide-slate-100 dark:divide-zinc-800/50">
-                        {filteredActivities.map((act) => (
-                            <div
-                                key={act.id}
-                                onClick={() => onSelectActivity && onSelectActivity(act)}
-                                className="group flex items-center p-3 hover:bg-slate-50 dark:hover:bg-zinc-800/50 transition-colors cursor-pointer"
-                            >
-                                {/* Icono */}
-                                <div className="w-10 h-10 rounded-full bg-slate-100 dark:bg-zinc-800 flex items-center justify-center shrink-0 mr-4 group-hover:scale-110 transition-transform">
-                                    {getSportIcon(act.type)}
-                                </div>
+                    <div
+                        className="w-full relative"
+                        style={{ height: `${Math.max(rowVirtualizer.getTotalSize(), itemsToRender.length * 64)}px` }}
+                    >
+                        {itemsToRender.map((virtualRow) => {
+                            const act = virtualRow.act;
+                            if (!act) return null;
+                            return (
+                                <div
+                                    key={act.id}
+                                    data-index={virtualRow.index}
+                                    ref={virtualRow.isVirtual ? rowVirtualizer.measureElement : undefined}
+                                    onClick={() => onSelectActivity && onSelectActivity(act)}
+                                    style={{
+                                        position: 'absolute',
+                                        top: 0,
+                                        left: 0,
+                                        width: '100%',
+                                        transform: `translateY(${virtualRow.start}px)`,
+                                    }}
+                                    className="group flex items-center p-3 hover:bg-slate-50 dark:hover:bg-zinc-800/50 active:bg-slate-100 dark:active:bg-zinc-800/80 active:scale-[0.995] border-b border-slate-100 dark:border-zinc-800/50 box-border transition-all cursor-pointer"
+                                >
+                                    {/* Icono */}
+                                    <div className="w-10 h-10 rounded-full bg-slate-100 dark:bg-zinc-800 flex items-center justify-center shrink-0 mr-3 sm:mr-4 group-hover:scale-110 transition-transform">
+                                        {getSportIcon(act.type)}
+                                    </div>
 
-                                <div className="flex-1 min-w-0 mr-4">
-                                    <h4 className="text-[13px] font-semibold text-slate-900 dark:text-white truncate mb-0.5" title={act.name}>{act.name}</h4>
-                                    <div className="flex items-center gap-2 text-[11px] text-slate-500 dark:text-zinc-400">
-                                        <span>{new Date(act.date).toLocaleDateString('es-ES', { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' })}</span>
-                                        <span>•</span>
-                                        <span className="capitalize">{act.type}</span>
+                                    <div className="flex-1 min-w-0 mr-2 sm:mr-4">
+                                        <h4 className="text-[13px] font-semibold text-slate-900 dark:text-white truncate mb-0.5" title={act.name}>{act.name}</h4>
+                                        <div className="flex items-center gap-2 text-[11px] text-slate-500 dark:text-zinc-400">
+                                            <span>{new Date(act.date).toLocaleDateString('es-ES', { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' })}</span>
+                                            <span>•</span>
+                                            <span className="capitalize">{act.type}</span>
+                                        </div>
                                     </div>
-                                </div>
 
-                                {/* Métricas Clínicas */}
-                                <div className="hidden md:flex items-center gap-6 mr-6">
-                                    <div className="flex flex-col items-end">
-                                        <span className="text-[10px] text-slate-400 mb-0.5 flex items-center gap-1">Tiempo</span>
-                                        <span className="text-sm font-semibold text-slate-700 dark:text-zinc-300">{formatDuration(act.duration)}</span>
-                                    </div>
-                                    <div className="flex flex-col items-end w-16">
-                                        <span className="text-[10px] text-slate-400 mb-0.5 flex items-center gap-1">Dist</span>
-                                        <span className="text-sm font-semibold text-slate-700 dark:text-zinc-300">{act.distance > 0 ? (act.distance / 1000).toFixed(1) + 'km' : '--'}</span>
-                                    </div>
-                                    <div className="flex flex-col items-end w-12">
-                                        <span className="text-[10px] text-slate-400 mb-0.5 flex items-center gap-1">Kcal</span>
-                                        <span className="text-sm font-semibold text-slate-700 dark:text-zinc-300">{act.calories || '--'}</span>
-                                    </div>
-                                    <div className="flex flex-col items-end w-12">
-                                        <span className="text-[10px] text-slate-400 mb-0.5 flex items-center gap-1">TSS</span>
-                                        <span className={`text-sm font-bold ${act.tss > 0 ? 'text-amber-500' : 'text-slate-400'}`}>
-                                            {act.tss > 0 ? Math.round(act.tss) : '--'}
+                                    {/* Compact Mobile Metrics (< md) */}
+                                    <div className="flex md:hidden flex-col items-end shrink-0 mr-1 text-right">
+                                        <span className="text-xs font-semibold text-slate-800 dark:text-zinc-200">
+                                            {formatDuration(act.duration)}
+                                        </span>
+                                        <span className="text-[10px] text-slate-500 dark:text-zinc-400 font-medium">
+                                            {act.distance > 0 
+                                                ? `${(act.distance / 1000).toFixed(1)} km` 
+                                                : (act.tss > 0 ? `${Math.round(act.tss)} TSS` : '')}
                                         </span>
                                     </div>
-                                </div>
 
-                                {/* Botón Borrar (con stopPropagation para no abrir la actividad) */}
-                                <div className="shrink-0 flex items-center gap-3">
-                                    <button
-                                        onClick={(e) => { e.stopPropagation(); onDelete && onDelete(act.id); }}
-                                        className="p-2 text-slate-300 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded transition-colors"
-                                        title="Eliminar actividad"
-                                    >
-                                        <Trash2 size={14} />
-                                    </button>
-                                    <ChevronRight size={16} className="text-slate-300 dark:text-zinc-600 group-hover:text-blue-500 transition-colors" />
+                                    {/* Métricas Clínicas (>= md) */}
+                                    <div className="hidden md:flex items-center gap-6 mr-6">
+                                        <div className="flex flex-col items-end">
+                                            <span className="text-[10px] text-slate-400 mb-0.5 flex items-center gap-1">Tiempo</span>
+                                            <span className="text-sm font-semibold text-slate-700 dark:text-zinc-300">{formatDuration(act.duration)}</span>
+                                        </div>
+                                        <div className="flex flex-col items-end w-16">
+                                            <span className="text-[10px] text-slate-400 mb-0.5 flex items-center gap-1">Dist</span>
+                                            <span className="text-sm font-semibold text-slate-700 dark:text-zinc-300">{act.distance > 0 ? (act.distance / 1000).toFixed(1) + 'km' : '--'}</span>
+                                        </div>
+                                        <div className="flex flex-col items-end w-12">
+                                            <span className="text-[10px] text-slate-400 mb-0.5 flex items-center gap-1">Kcal</span>
+                                            <span className="text-sm font-semibold text-slate-700 dark:text-zinc-300">{act.calories || '--'}</span>
+                                        </div>
+                                        <div className="flex flex-col items-end w-12">
+                                            <span className="text-[10px] text-slate-400 mb-0.5 flex items-center gap-1">TSS</span>
+                                            <span className={`text-sm font-bold ${act.tss > 0 ? 'text-amber-500' : 'text-slate-400'}`}>
+                                                {act.tss > 0 ? Math.round(act.tss) : '--'}
+                                            </span>
+                                        </div>
+                                    </div>
+
+                                    {/* Botón Borrar (con stopPropagation para no abrir la actividad) */}
+                                    <div className="shrink-0 flex items-center gap-1 sm:gap-3">
+                                        <button
+                                            onClick={(e) => { e.stopPropagation(); onDelete && onDelete(act.id); }}
+                                            className="w-8 h-8 flex items-center justify-center text-slate-300 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 active:scale-95 rounded-lg transition-all"
+                                            title="Eliminar actividad"
+                                        >
+                                            <Trash2 size={14} />
+                                        </button>
+                                        <ChevronRight size={16} className="text-slate-300 dark:text-zinc-600 group-hover:text-blue-500 transition-colors" />
+                                    </div>
                                 </div>
-                            </div>
-                        ))}
+                            );
+                        })}
                     </div>
                 ) : (
                     <div className="flex flex-col items-center justify-center h-full text-center p-8">

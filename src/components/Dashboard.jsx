@@ -77,6 +77,9 @@ const Dashboard = () => {
     isDeepSyncing,
     deepSyncProgress,
     handleDeepSync,
+    loadHistoricalStreams,
+    isLoadingHistoricalStreams,
+    hasLoadedHistoricalStreams,
     updateProfile,
     plannedWorkouts,
     addPlannedWorkout,
@@ -107,7 +110,7 @@ const Dashboard = () => {
   const isActivityPage = location.pathname.startsWith("/activity/");
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-zinc-950 text-slate-800 dark:text-zinc-200 font-sans pb-24 md:pb-12 transition-colors duration-300 selection:bg-blue-500/30 overflow-hidden">
+    <div className="min-h-screen bg-slate-50 dark:bg-zinc-950 text-slate-800 dark:text-zinc-200 font-sans pb-safe-nav md:pb-12 transition-colors duration-300 selection:bg-blue-500/30 overflow-x-hidden">
       <Navbar
         activities={activities}
         uploading={uploading}
@@ -163,6 +166,12 @@ const Dashboard = () => {
                     settings={settings}
                     chartData={chartData}
                     onSelectActivity={handleSelectActivity}
+                    loadHistoricalStreams={loadHistoricalStreams}
+                    isLoadingHistoricalStreams={isLoadingHistoricalStreams}
+                    hasLoadedHistoricalStreams={hasLoadedHistoricalStreams}
+                    handleDeepSync={handleDeepSync}
+                    isDeepSyncing={isDeepSyncing}
+                    deepSyncProgress={deepSyncProgress}
                   />
                 </Suspense>
               </ErrorBoundary>

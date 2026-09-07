@@ -44,7 +44,14 @@ export const useActivities = () => {
 
     // ── Data queries ────────────────────────────────────────────────────────
     const { query: profileQuery, updateProfileMutation }          = useProfileQuery();
-    const { query: activitiesQuery, deleteActivityMutation, clearDbMutation } = useActivitiesQuery();
+    const {
+        query: activitiesQuery,
+        deleteActivityMutation,
+        clearDbMutation,
+        loadHistoricalStreams,
+        isLoadingHistoricalStreams,
+        hasLoadedHistoricalStreams
+    } = useActivitiesQuery();
     const { query: workoutsQuery, addWorkoutMutation, updateWorkoutMutation, deleteWorkoutMutation } = usePlannedWorkoutsQuery();
     const { syncAll }                                              = useIntervalsSync();
 
@@ -172,6 +179,24 @@ export const useActivities = () => {
      */
     const fetchActivityStreams = useCallback(async (activityId, stravaId) => {
         try {
+            // 1. Comprobar si ya existe en Supabase (útil si la actividad es previa a los 95 días del inicio rápido)
+            const { data: dbAct } = await supabase
+                .from('activities')
+                .select('streams_data')
+                .eq('id', activityId)
+                .single();
+
+            if (dbAct?.streams_data) {
+                queryClient.setQueryData(['activities'], (oldData) => {
+                    if (!oldData) return oldData;
+                    return oldData.map((a) =>
+                        a.id === activityId ? { ...a, streams_data: dbAct.streams_data } : a
+                    );
+                });
+                return dbAct.streams_data;
+            }
+
+            if (!stravaId) return null;
             const token = await getValidStravaToken();
 
             const [streamsRes, lapsRes] = await Promise.all([
@@ -184,6 +209,11 @@ export const useActivities = () => {
                     { headers: { Authorization: `Bearer ${token}` } }
                 ),
             ]);
+
+            if (streamsRes.status === 429) {
+                toast.error('Límite de peticiones de Strava alcanzado (100 peticiones / 15 min). Inténtalo más tarde.');
+                return { error: 'rate_limit' };
+            }
 
             if (!streamsRes.ok) return null;
 
@@ -403,12 +433,21 @@ export const useActivities = () => {
         setDeepSyncState(true, { current: 1, total: toSync.length });
 
         try {
+            let hitRateLimit = false;
             for (let i = 0; i < toSync.length; i++) {
                 setDeepSyncState(true, { current: i + 1, total: toSync.length });
-                await fetchActivityStreams(toSync[i].id, toSync[i].strava_id);
+                const res = await fetchActivityStreams(toSync[i].id, toSync[i].strava_id);
+                if (res?.error === 'rate_limit') {
+                    hitRateLimit = true;
+                    break;
+                }
                 await new Promise(r => setTimeout(r, 100));
             }
-            toast.success('¡Sincronización profunda completada! Telemetría y mapas 100% exactos.');
+            if (hitRateLimit) {
+                toast.info('Sincronización pausada por límite de peticiones de Strava (100 req/15 min). Puedes continuar más tarde.');
+            } else {
+                toast.success('¡Sincronización profunda completada! Telemetría y mapas 100% exactos.');
+            }
         } catch (err) {
             console.error('Error en deep sync:', err);
             toast.error('La sincronización se detuvo por un error de conexión.');
@@ -563,6 +602,9 @@ export const useActivities = () => {
         deleteActivity,
         handleClearDb,
         fetchActivities,
+        loadHistoricalStreams,
+        isLoadingHistoricalStreams,
+        hasLoadedHistoricalStreams,
 
         // Acciones de planificación
         addPlannedWorkout,
