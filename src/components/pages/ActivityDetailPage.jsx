@@ -90,33 +90,33 @@ export const ActivityDetailPage = ({ activity, settings, fetchStreams, onBack, o
             {/* Premium Header */}
             <header className="bg-white dark:bg-zinc-950 border-b border-slate-100 dark:border-zinc-900 px-3 py-2.5 sm:px-6 sm:py-3 shrink-0 z-50">
                 {/* Navigation Tabs at the Top */}
-                <div className="flex items-center justify-between mb-4 border-b border-slate-50 dark:border-zinc-900 pb-2">
-                    <div className="flex bg-slate-100 dark:bg-zinc-900 p-0.5 rounded-lg gap-0.5">
+                <div className="flex items-center justify-between gap-2 mb-2.5 sm:mb-4 border-b border-slate-100 dark:border-zinc-900 pb-2">
+                    <div className="flex bg-slate-100 dark:bg-zinc-900 p-0.5 rounded-lg gap-0.5 overflow-x-auto hide-scrollbar min-w-0">
                         <PillTab active={activeTab === 'analyze'} label="Análisis" onClick={() => setActiveTab('analyze')} />
                         <PillTab active={activeTab === 'map'} label="Mapa" onClick={() => setActiveTab('map')} />
                         <PillTab active={activeTab === 'laps'} label="Intervalos" onClick={() => setActiveTab('laps')} />
                         <PillTab active={activeTab === 'data'} label="Detalle" onClick={() => setActiveTab('data')} />
                     </div>
                     
-                    <div className="flex items-center gap-1">
+                    <div className="flex items-center gap-1 shrink-0">
                         {activity.strava_id && (
                             <a href={`https://www.strava.com/activities/${activity.strava_id}`} target="_blank" rel="noreferrer" 
-                               className="px-2 py-1 text-[9px] font-bold text-orange-500 hover:bg-orange-50 dark:hover:bg-orange-900/10 rounded-md transition-colors uppercase tracking-widest">
+                               className="px-2 py-1 text-[9px] font-bold text-orange-500 hover:bg-orange-50 dark:hover:bg-orange-900/10 rounded-md transition-colors uppercase tracking-widest shrink-0">
                                 Strava
                             </a>
                         )}
-                        <button onClick={() => onDelete && onDelete(activity.id)} className="p-1.5 text-slate-300 dark:text-zinc-600 hover:text-red-500 rounded-lg transition-colors">
-                            <Trash2 size={14} />
+                        <button onClick={() => onDelete && onDelete(activity.id)} className="p-1.5 text-slate-400 dark:text-zinc-600 hover:text-red-500 rounded-lg transition-colors shrink-0" title="Eliminar actividad">
+                            <Trash2 size={15} />
                         </button>
                     </div>
                 </div>
 
-                <div className="flex items-center gap-3 mb-4">
-                    <button onClick={onBack} className="w-10 h-10 sm:w-8 sm:h-8 flex items-center justify-center hover:bg-slate-100 dark:hover:bg-zinc-900 active:scale-95 rounded-xl transition-all text-slate-500 dark:text-zinc-400 shrink-0" title="Volver">
+                <div className="flex items-center gap-2.5 sm:gap-3 mb-2.5 sm:mb-4">
+                    <button onClick={onBack} className="w-9 h-9 sm:w-8 sm:h-8 flex items-center justify-center hover:bg-slate-100 dark:hover:bg-zinc-900 active:scale-95 rounded-xl transition-all text-slate-500 dark:text-zinc-400 shrink-0" title="Volver">
                         <ArrowLeft size={16} />
                     </button>
-                    <div>
-                        <h1 className="text-sm font-bold text-slate-900 dark:text-zinc-100 tracking-tight leading-tight">
+                    <div className="min-w-0">
+                        <h1 className="text-sm font-bold text-slate-900 dark:text-zinc-100 tracking-tight leading-tight truncate">
                             {activity.name || `${activity.type}`}
                         </h1>
                         <p className="text-[10px] font-bold text-slate-400 dark:text-zinc-500 capitalize">{dateStr}</p>
@@ -124,7 +124,7 @@ export const ActivityDetailPage = ({ activity, settings, fetchStreams, onBack, o
                 </div>
 
                 {/* Expanded Compact Metric Grid */}
-                <div className="flex gap-2 py-1 overflow-x-auto hide-scrollbar sm:flex-wrap">
+                <div className="flex items-center gap-2 py-1 overflow-x-auto hide-scrollbar touch-scroll overscroll-contain sm:flex-wrap -mx-3 px-3 sm:mx-0 sm:px-0">
                     <MetricCard label="Distancia" value={(activity.distance / 1000).toFixed(2)} unit="km" />
                     <MetricCard label="Tiempo" value={formatTimeStr(activity.duration)} />
                     <MetricCard label="Desnivel" value={activity.elevation_gain || 0} unit="m" />
@@ -154,7 +154,7 @@ export const ActivityDetailPage = ({ activity, settings, fetchStreams, onBack, o
 
                 {/* --- pestaña: ANÁLISIS --- */}
                 {activeTab === 'analyze' && (
-                    <div className="flex-1 flex flex-col lg:flex-row overflow-y-auto lg:overflow-hidden custom-scrollbar touch-scroll min-h-0">
+                    <div className="flex-1 flex flex-col lg:flex-row overflow-y-auto lg:overflow-hidden custom-scrollbar touch-scroll min-h-0 pb-24 lg:pb-0">
                         {/* Charts Panel */}
                         <div className="flex-1 lg:overflow-y-auto custom-scrollbar p-2.5 sm:p-5 bg-white dark:bg-zinc-950 min-w-0">
                             <div className="max-w-5xl mx-auto space-y-3" onMouseLeave={() => setActivePayload(null)}>
@@ -656,4 +656,4 @@ export const ActivityDetailPage = ({ activity, settings, fetchStreams, onBack, o
         </div>
     );
 };
-
+

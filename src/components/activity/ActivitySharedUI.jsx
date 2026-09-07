@@ -2,12 +2,12 @@ import React from 'react';
 import { Info } from 'lucide-react';
 import { formatMinsToHMM } from '../../utils/formatters';
 
-export const MetricCard = ({ label, value, unit, accent }) => (
-    <div className="flex flex-col min-w-0 py-1.5 px-3 bg-slate-50/50 dark:bg-zinc-900/40 rounded-xl border border-slate-100/50 dark:border-zinc-800/40">
-        <span className="text-[9px] font-bold text-slate-400 dark:text-zinc-500 uppercase tracking-tight truncate">{label}</span>
-        <div className="flex items-baseline gap-1">
-            <span className={`text-sm font-bold tracking-tight ${accent || 'text-slate-900 dark:text-zinc-100'}`}>{value}</span>
-            {unit && <span className="text-[9px] font-bold text-slate-400 dark:text-zinc-500">{unit}</span>}
+export const MetricCard = ({ label, value, unit, accent, className = '' }) => (
+    <div className={`flex flex-col shrink-0 py-1.5 px-3 bg-slate-50 dark:bg-zinc-900/60 rounded-xl border border-slate-200/70 dark:border-zinc-800/60 shadow-xs select-none transition-colors ${className}`}>
+        <span className="text-[9px] font-bold text-slate-400 dark:text-zinc-500 uppercase tracking-wider whitespace-nowrap">{label}</span>
+        <div className="flex items-baseline gap-1 whitespace-nowrap mt-0.5">
+            <span className={`text-sm font-bold tracking-tight tabular-nums ${accent || 'text-slate-900 dark:text-zinc-100'}`}>{value}</span>
+            {unit && <span className="text-[9px] font-semibold text-slate-400 dark:text-zinc-500">{unit}</span>}
         </div>
     </div>
 );
@@ -15,7 +15,7 @@ export const MetricCard = ({ label, value, unit, accent }) => (
 export const PillTab = ({ active, label, onClick }) => (
     <button 
         onClick={onClick}
-        className={`px-5 py-1.5 text-xs font-semibold rounded-full transition-all duration-200 ${active 
+        className={`px-3 sm:px-5 py-1.5 text-xs font-semibold rounded-md sm:rounded-full whitespace-nowrap shrink-0 transition-all duration-200 ${active 
             ? 'bg-white dark:bg-zinc-800 text-slate-900 dark:text-zinc-100 shadow-sm' 
             : 'text-slate-400 dark:text-zinc-500 hover:text-slate-700 dark:hover:text-zinc-300'}`}
     >
