@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState, useRef, useMemo } from 'react';
 import { ArrowLeft, ExternalLink, Trash2, Calendar, Activity, Layers, Loader2, Heart, Clock, MapPin, Zap, Target, Info } from 'lucide-react';
 import { AreaChart, Area, BarChart, Bar, Cell, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer } from 'recharts';
 import { InteractiveMap } from '../activity/ActivityMap';
@@ -51,6 +51,45 @@ export const ActivityDetailPage = ({ activity, settings, fetchStreams, onBack, o
         fitnessAnalysis
     } = useActivityMetrics(activity, streams, settings);
 
+    const peaks = useMemo(() => {
+        if (!chartData || chartData.length === 0) return null;
+        let maxSpeedPt = null;
+        let bestPacePt = null;
+        let maxHrPt = null;
+        let maxWattsPt = null;
+        let maxAltPt = null;
+
+        chartData.forEach(pt => {
+            if (pt.speed !== null && (!maxSpeedPt || pt.speed > maxSpeedPt.speed)) maxSpeedPt = pt;
+            if (pt.pace !== null && pt.pace > 0 && (!bestPacePt || pt.pace < bestPacePt.pace)) bestPacePt = pt;
+            if (pt.hr !== null && (!maxHrPt || pt.hr > maxHrPt.hr)) maxHrPt = pt;
+            if (pt.watts !== null && (!maxWattsPt || pt.watts > maxWattsPt.watts)) maxWattsPt = pt;
+            if (pt.alt !== null && (!maxAltPt || pt.alt > maxAltPt.alt)) maxAltPt = pt;
+        });
+
+        return { maxSpeedPt, bestPacePt, maxHrPt, maxWattsPt, maxAltPt };
+    }, [chartData]);
+
+    const activePeakType = useMemo(() => {
+        if (!activePayload || !peaks) return null;
+        if (peaks.maxHrPt && activePayload.hr && activePayload.hr >= peaks.maxHrPt.hr - 2) {
+            return { label: 'Pico FC', value: `${peaks.maxHrPt.hr} bpm`, color: 'text-rose-600 bg-rose-500/10 border-rose-500/30 dark:text-rose-400' };
+        }
+        if (peaks.maxWattsPt && activePayload.watts && activePayload.watts >= peaks.maxWattsPt.watts - 15) {
+            return { label: 'Pico Potencia', value: `${peaks.maxWattsPt.watts} W`, color: 'text-amber-600 bg-amber-500/10 border-amber-500/30 dark:text-amber-400' };
+        }
+        if (isPaceBased && peaks.bestPacePt && activePayload.pace && activePayload.pace <= peaks.bestPacePt.pace + 0.1) {
+            return { label: 'Ritmo Máx', value: formatPace(peaks.bestPacePt.pace), color: 'text-indigo-600 bg-indigo-500/10 border-indigo-500/30 dark:text-indigo-400' };
+        }
+        if (!isPaceBased && peaks.maxSpeedPt && activePayload.speed && activePayload.speed >= peaks.maxSpeedPt.speed - 1) {
+            return { label: 'Velocidad Máx', value: `${peaks.maxSpeedPt.speed} km/h`, color: 'text-blue-600 bg-blue-500/10 border-blue-500/30 dark:text-blue-400' };
+        }
+        if (peaks.maxAltPt && activePayload.alt && activePayload.alt >= peaks.maxAltPt.alt - 3) {
+            return { label: 'Cima', value: `${peaks.maxAltPt.alt} m`, color: 'text-slate-700 bg-slate-200 border-slate-300 dark:text-zinc-200 dark:bg-zinc-800 dark:border-zinc-700' };
+        }
+        return null;
+    }, [activePayload, peaks, isPaceBased]);
+
     if (!activity) return null;
 
     const formatTimeStr = (mins) => formatMinsToHMM(mins);
@@ -76,55 +115,107 @@ export const ActivityDetailPage = ({ activity, settings, fetchStreams, onBack, o
 
     const ZONE_LABELS = ['Z1 Recuperación', 'Z2 Base', 'Z3 Tempo', 'Z4 Umbral', 'Z5 VO2Max'];
     const ZONE_COLORS = ['#94a3b8', '#3b82f6', '#10b981', '#eab308', '#ef4444'];
-    // const tooltipStyle = { backgroundColor: '#18181b', border: '1px solid #27272a', borderRadius: '4px', color: '#f4f4f5', fontSize: '11px', fontWeight: '500', padding: '8px 12px' };
 
     const handleMouseMove = (state) => {
         if (state && typeof state.activeTooltipIndex !== 'undefined' && state.activeTooltipIndex !== null) {
             const dataPoint = chartData[state.activeTooltipIndex];
             if (dataPoint) setActivePayload(dataPoint);
+        } else if (state && state.activePayload && state.activePayload.length > 0) {
+            const dataPoint = state.activePayload[0].payload;
+            if (dataPoint) setActivePayload(dataPoint);
         }
     };
 
     return (
-        <div className="animate-in fade-in duration-500 bg-slate-50 dark:bg-zinc-950 min-h-[calc(100dvh-4rem)] lg:h-[calc(100vh-70px)] flex flex-col font-sans pb-safe">
+        <div className={`animate-in fade-in duration-500 bg-slate-50 dark:bg-zinc-950 ${activeTab === 'analyze' ? 'min-h-[calc(100dvh-4rem)]' : 'h-[calc(100dvh-4rem)]'} lg:h-[calc(100vh-70px)] flex flex-col font-sans pb-safe`}>
             {/* Premium Header */}
-            <header className="bg-white dark:bg-zinc-950 border-b border-slate-100 dark:border-zinc-900 px-3 py-2.5 sm:px-6 sm:py-3 shrink-0 z-50">
-                {/* Navigation Tabs at the Top */}
-                <div className="flex items-center justify-between gap-2 mb-2.5 sm:mb-4 border-b border-slate-100 dark:border-zinc-900 pb-2">
-                    <div className="flex bg-slate-100 dark:bg-zinc-900 p-0.5 rounded-lg gap-0.5 overflow-x-auto hide-scrollbar min-w-0">
+            <header className="glass-nav px-3.5 py-2 sm:px-6 sm:py-3 shrink-0 z-50">
+                {/* --- DESKTOP HEADER (lg:flex) --- */}
+                <div className="hidden lg:flex items-center justify-between gap-2 mb-2.5 sm:mb-3 border-b border-black/[0.04] dark:border-white/[0.06] pb-2">
+                    <div className="flex bg-slate-200/60 dark:bg-zinc-800/80 p-0.5 rounded-full gap-0.5 overflow-x-auto hide-scrollbar min-w-0">
                         <PillTab active={activeTab === 'analyze'} label="Análisis" onClick={() => setActiveTab('analyze')} />
                         <PillTab active={activeTab === 'map'} label="Mapa" onClick={() => setActiveTab('map')} />
                         <PillTab active={activeTab === 'laps'} label="Intervalos" onClick={() => setActiveTab('laps')} />
                         <PillTab active={activeTab === 'data'} label="Detalle" onClick={() => setActiveTab('data')} />
                     </div>
                     
-                    <div className="flex items-center gap-1 shrink-0">
+                    <div className="flex items-center gap-1.5 shrink-0">
                         {activity.strava_id && (
                             <a href={`https://www.strava.com/activities/${activity.strava_id}`} target="_blank" rel="noreferrer" 
-                               className="px-2 py-1 text-[9px] font-bold text-orange-500 hover:bg-orange-50 dark:hover:bg-orange-900/10 rounded-md transition-colors uppercase tracking-widest shrink-0">
+                               className="px-2.5 py-1 text-[10px] font-bold text-orange-500 hover:bg-orange-500/10 active:scale-95 rounded-full transition-all uppercase tracking-wider shrink-0">
                                 Strava
                             </a>
                         )}
-                        <button onClick={() => onDelete && onDelete(activity.id)} className="p-1.5 text-slate-400 dark:text-zinc-600 hover:text-red-500 rounded-lg transition-colors shrink-0" title="Eliminar actividad">
-                            <Trash2 size={15} />
+                        <button onClick={() => onDelete && onDelete(activity.id)} className="w-8 h-8 flex items-center justify-center text-slate-400 dark:text-zinc-500 hover:text-red-500 hover:bg-red-500/10 rounded-full active:scale-90 transition-all shrink-0" title="Eliminar actividad">
+                            <Trash2 size={14} />
                         </button>
                     </div>
                 </div>
 
-                <div className="flex items-center gap-2.5 sm:gap-3 mb-2.5 sm:mb-4">
-                    <button onClick={onBack} className="w-9 h-9 sm:w-8 sm:h-8 flex items-center justify-center hover:bg-slate-100 dark:hover:bg-zinc-900 active:scale-95 rounded-xl transition-all text-slate-500 dark:text-zinc-400 shrink-0" title="Volver">
+                <div className="hidden lg:flex items-center gap-2.5 sm:gap-3 mb-2 sm:mb-3">
+                    <button onClick={onBack} className="w-8 h-8 flex items-center justify-center bg-slate-100/80 dark:bg-zinc-800/80 hover:bg-slate-200/70 dark:hover:bg-zinc-700 active:scale-90 rounded-full transition-all text-slate-600 dark:text-zinc-300 shrink-0" title="Volver">
                         <ArrowLeft size={16} />
                     </button>
                     <div className="min-w-0">
-                        <h1 className="text-sm font-bold text-slate-900 dark:text-zinc-100 tracking-tight leading-tight truncate">
+                        <h1 className="text-sm font-bold text-slate-900 dark:text-white tracking-tight leading-tight truncate">
                             {activity.name || `${activity.type}`}
                         </h1>
-                        <p className="text-[10px] font-bold text-slate-400 dark:text-zinc-500 capitalize">{dateStr}</p>
+                        <p className="text-[10px] font-semibold text-slate-400 dark:text-zinc-500 capitalize">{dateStr}</p>
                     </div>
                 </div>
 
-                {/* Expanded Compact Metric Grid */}
-                <div className="flex items-center gap-2 py-1 overflow-x-auto hide-scrollbar touch-scroll overscroll-contain sm:flex-wrap -mx-3 px-3 sm:mx-0 sm:px-0">
+                {/* --- MOBILE HEADER (lg:hidden) --- */}
+                {/* Fila 1: Flecha atrás + Título + Acciones Strava y Borrar */}
+                <div className="lg:hidden flex items-center justify-between gap-2 mb-2.5">
+                    <div className="flex items-center gap-2 min-w-0">
+                        <button onClick={onBack} className="w-8 h-8 flex items-center justify-center bg-slate-100/80 dark:bg-zinc-800/80 hover:bg-slate-200/70 dark:hover:bg-zinc-700 active:scale-90 rounded-full transition-all text-slate-600 dark:text-zinc-300 shrink-0" title="Volver">
+                            <ArrowLeft size={16} />
+                        </button>
+                        <div className="min-w-0">
+                            <h1 className="text-sm font-bold text-slate-900 dark:text-white tracking-tight leading-tight truncate">
+                                {activity.name || `${activity.type}`}
+                            </h1>
+                            <p className="text-[10px] font-semibold text-slate-400 dark:text-zinc-500 capitalize truncate">{dateStr}</p>
+                        </div>
+                    </div>
+
+                    <div className="flex items-center gap-1.5 shrink-0">
+                        {activity.strava_id && (
+                            <a href={`https://www.strava.com/activities/${activity.strava_id}`} target="_blank" rel="noreferrer" 
+                               className="px-2.5 py-1 text-[10px] font-bold text-orange-500 hover:bg-orange-500/10 active:scale-95 rounded-full transition-all uppercase tracking-wider shrink-0">
+                                Strava
+                            </a>
+                        )}
+                        <button onClick={() => onDelete && onDelete(activity.id)} className="w-8 h-8 flex items-center justify-center text-slate-400 dark:text-zinc-500 hover:text-red-500 hover:bg-red-500/10 rounded-full active:scale-90 transition-all shrink-0" title="Eliminar actividad">
+                            <Trash2 size={14} />
+                        </button>
+                    </div>
+                </div>
+
+                {/* Fila 2: Selector Segmentado iOS nativo a ancho completo (4 columnas iguales, cómodo y sin cortes) */}
+                <div className="lg:hidden grid grid-cols-4 w-full bg-slate-200/70 dark:bg-zinc-800/80 p-1 rounded-xl gap-1 shadow-2xs">
+                    {[
+                        { id: 'analyze', label: 'Análisis' },
+                        { id: 'map', label: 'Mapa' },
+                        { id: 'laps', label: 'Intervalos' },
+                        { id: 'data', label: 'Detalle' },
+                    ].map(tab => (
+                        <button
+                            key={tab.id}
+                            onClick={() => setActiveTab(tab.id)}
+                            className={`py-1.5 text-xs font-semibold rounded-lg text-center transition-all select-none touch-manipulation active:scale-[0.98] ${
+                                activeTab === tab.id
+                                    ? 'bg-white dark:bg-[#2c2c2e] text-slate-900 dark:text-white shadow-xs font-bold'
+                                    : 'text-slate-500 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-white'
+                            }`}
+                        >
+                            {tab.label}
+                        </button>
+                    ))}
+                </div>
+
+                {/* Expanded Compact Metric Grid - Desktop Solo (en móvil se muestra en cuadrícula bajo el Mapa) */}
+                <div className="hidden lg:flex items-center gap-2 py-1 overflow-x-auto hide-scrollbar touch-scroll overscroll-contain sm:flex-wrap -mx-3 px-3 sm:mx-0 sm:px-0 mt-2">
                     <MetricCard label="Distancia" value={(activity.distance / 1000).toFixed(2)} unit="km" />
                     <MetricCard label="Tiempo" value={formatTimeStr(activity.duration)} />
                     <MetricCard label="Desnivel" value={activity.elevation_gain || 0} unit="m" />
@@ -144,7 +235,7 @@ export const ActivityDetailPage = ({ activity, settings, fetchStreams, onBack, o
             </header>
 
             {/* 4. Tab Content */}
-            <div className="flex-1 overflow-hidden relative">
+            <div className="flex-1 min-h-0 overflow-hidden relative flex flex-col w-full">
                 {loadingStreams ? (
                     <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-white/80 dark:bg-zinc-950/80 z-20">
                         <Loader2 size={24} className="animate-spin text-indigo-500" />
@@ -157,11 +248,222 @@ export const ActivityDetailPage = ({ activity, settings, fetchStreams, onBack, o
                     <div className="flex-1 flex flex-col lg:flex-row overflow-y-auto lg:overflow-hidden custom-scrollbar touch-scroll min-h-0 pb-24 lg:pb-0">
                         {/* Charts Panel */}
                         <div className="flex-1 lg:overflow-y-auto custom-scrollbar p-2.5 sm:p-5 bg-white dark:bg-zinc-950 min-w-0">
-                            <div className="max-w-5xl mx-auto space-y-3" onMouseLeave={() => setActivePayload(null)}>
-                                {chartData.length > 0 ? (
-                                    <div className="bg-white dark:bg-zinc-950 rounded-2xl border border-slate-200/60 dark:border-zinc-800/60 overflow-hidden shadow-sm">
-                                        {/* Velocity/Pace */}
-                                        <div className="h-[105px] pt-4 px-3.5 sm:px-6 border-b border-slate-100 dark:border-zinc-800/60">
+                                <div className="max-w-5xl mx-auto space-y-3">
+                                    {/* HERO MAP (MÓVIL SOLO - ESTILO STRAVA) */}
+                                    <div className="lg:hidden space-y-2.5">
+                                        {(activity.map_polyline || streams?.latlng?.data) && (
+                                            <div className="h-48 sm:h-64 rounded-2xl overflow-hidden shadow-sm border border-slate-200/80 dark:border-zinc-800/80">
+                                                <InteractiveMap 
+                                                    polyline={activity.map_polyline} 
+                                                    highResCoords={streams?.latlng?.data} 
+                                                    color={themeColor} 
+                                                    currentPosition={activePayload?.latlng} 
+                                                />
+                                            </div>
+                                        )}
+
+                                        {/* Resumen de Métricas en varias Columnas y Filas (Estilo Apple / Strava) */}
+                                        <div className="grid grid-cols-3 gap-2 py-0.5">
+                                            <MetricCard label="Distancia" value={(activity.distance / 1000).toFixed(2)} unit="km" />
+                                            <MetricCard label="Tiempo" value={formatTimeStr(activity.duration)} />
+                                            <MetricCard label="Desnivel" value={activity.elevation_gain || 0} unit="m" />
+                                            {speedMetric && <MetricCard label={speedMetric.label} value={speedMetric.value} unit={speedMetric.unit} accent="text-blue-500" />}
+                                            {activity.hr_avg > 0 && <MetricCard label="FC Media" value={activity.hr_avg} unit="bpm" accent="text-rose-500" />}
+                                            <MetricCard label="Carga" value={Math.round(activity.tss || 0)} unit="TSS" accent="text-indigo-500" />
+                                            {proMetrics.avgWatts > 0 && <MetricCard label="W Media" value={proMetrics.avgWatts} unit="w" accent="text-amber-500" />}
+                                            {proMetrics.ifFactor > 0 && <MetricCard label="IF" value={proMetrics.ifFactor} accent="text-amber-500" />}
+                                            {proMetrics.cadenceAvg > 0 && <MetricCard label="Cadencia" value={proMetrics.cadenceAvg} unit={isPaceBased ? 'ppm' : 'rpm'} />}
+                                            {proMetrics.workKj > 0 && <MetricCard label="Trabajo" value={proMetrics.workKj} unit="kJ" />}
+                                            {proMetrics.npWatts > 0 && <MetricCard label="NP" value={proMetrics.npWatts} unit="w" accent="text-amber-600" />}
+                                            {proMetrics.efObj && <MetricCard label="EF" value={proMetrics.efObj.value} unit={proMetrics.efObj.unit} />}
+                                            {proMetrics.decouplingObj && (
+                                                <MetricCard label="Drift" value={proMetrics.decouplingObj.value} unit="%" accent={proMetrics.decouplingObj.color} />
+                                            )}
+                                        </div>
+                                    </div>
+
+                                    {/* PEAK SHORTCUT BUTTONS & LIVE TELEMETRY HUD */}
+                                    {chartData.length > 0 && (
+                                        <div className="space-y-2.5">
+                                            {/* Accesos rápidos a los Picos del entrenamiento */}
+                                            {peaks && (
+                                                <div className="flex items-center gap-1.5 overflow-x-auto hide-scrollbar py-0.5">
+                                                    <span className="text-[9px] font-bold text-slate-400 dark:text-zinc-500 uppercase tracking-widest shrink-0 mr-1">
+                                                        Picos:
+                                                    </span>
+                                                    {peaks.maxHrPt && (
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => setActivePayload(peaks.maxHrPt)}
+                                                            className={`px-2.5 py-1 rounded-full text-[10px] font-bold shrink-0 border transition-all active:scale-95 flex items-center gap-1.5 ${
+                                                                activePayload?.rawTime === peaks.maxHrPt.rawTime
+                                                                    ? 'bg-rose-500 text-white border-rose-600 shadow-xs'
+                                                                    : 'bg-white dark:bg-zinc-900 text-rose-600 dark:text-rose-400 border-rose-200 dark:border-rose-900/50 hover:bg-rose-50 dark:hover:bg-rose-950/30'
+                                                            }`}
+                                                        >
+                                                            <span>Pico FC</span>
+                                                            <span className="font-mono tabular-nums">{peaks.maxHrPt.hr} bpm</span>
+                                                        </button>
+                                                    )}
+                                                    {peaks.maxWattsPt && (
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => setActivePayload(peaks.maxWattsPt)}
+                                                            className={`px-2.5 py-1 rounded-full text-[10px] font-bold shrink-0 border transition-all active:scale-95 flex items-center gap-1.5 ${
+                                                                activePayload?.rawTime === peaks.maxWattsPt.rawTime
+                                                                    ? 'bg-amber-500 text-white border-amber-600 shadow-xs'
+                                                                    : 'bg-white dark:bg-zinc-900 text-amber-600 dark:text-amber-400 border-amber-200 dark:border-amber-900/50 hover:bg-amber-50 dark:hover:bg-amber-950/30'
+                                                            }`}
+                                                        >
+                                                            <span>Pico W</span>
+                                                            <span className="font-mono tabular-nums">{peaks.maxWattsPt.watts} W</span>
+                                                        </button>
+                                                    )}
+                                                    {(!isPaceBased ? peaks.maxSpeedPt : peaks.bestPacePt) && (
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => setActivePayload(isPaceBased ? peaks.bestPacePt : peaks.maxSpeedPt)}
+                                                            className={`px-2.5 py-1 rounded-full text-[10px] font-bold shrink-0 border transition-all active:scale-95 flex items-center gap-1.5 ${
+                                                                activePayload?.rawTime === (isPaceBased ? peaks.bestPacePt?.rawTime : peaks.maxSpeedPt?.rawTime)
+                                                                    ? 'bg-blue-500 text-white border-blue-600 shadow-xs'
+                                                                    : 'bg-white dark:bg-zinc-900 text-blue-600 dark:text-blue-400 border-blue-200 dark:border-blue-900/50 hover:bg-blue-50 dark:hover:bg-blue-950/30'
+                                                            }`}
+                                                        >
+                                                            <span>{isPaceBased ? 'Mejor Ritmo' : 'Max Vel'}</span>
+                                                            <span className="font-mono tabular-nums">
+                                                                {isPaceBased ? formatPace(peaks.bestPacePt.pace) : `${peaks.maxSpeedPt.speed} km/h`}
+                                                            </span>
+                                                        </button>
+                                                    )}
+                                                    {peaks.maxAltPt && (
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => setActivePayload(peaks.maxAltPt)}
+                                                            className={`px-2.5 py-1 rounded-full text-[10px] font-bold shrink-0 border transition-all active:scale-95 flex items-center gap-1.5 ${
+                                                                activePayload?.rawTime === peaks.maxAltPt.rawTime
+                                                                    ? 'bg-slate-700 dark:bg-zinc-200 text-white dark:text-zinc-900 border-slate-800 shadow-xs'
+                                                                    : 'bg-white dark:bg-zinc-900 text-slate-600 dark:text-zinc-300 border-slate-200 dark:border-zinc-800 hover:bg-slate-50 dark:hover:bg-zinc-800'
+                                                            }`}
+                                                        >
+                                                            <span>Cima</span>
+                                                            <span className="font-mono tabular-nums">{peaks.maxAltPt.alt} m</span>
+                                                        </button>
+                                                    )}
+                                                </div>
+                                            )}
+
+                                            {/* HUD de Telemetría Dinámico */}
+                                            <div className="bg-white/95 dark:bg-zinc-900/95 backdrop-blur-md border border-slate-200/80 dark:border-zinc-800 rounded-2xl p-2.5 sm:p-3 shadow-sm transition-all">
+                                                {activePayload ? (
+                                                    <div className="space-y-2">
+                                                        <div className="flex items-center justify-between border-b border-slate-100 dark:border-zinc-800/80 pb-1.5">
+                                                            <div className="flex items-center gap-2 flex-wrap">
+                                                                <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-slate-100 dark:bg-zinc-800 font-mono text-[11px] font-bold tabular-nums text-slate-700 dark:text-zinc-300">
+                                                                    <span>⏱️ {formatDuration(activePayload.rawTime)}</span>
+                                                                    <span className="text-slate-300 dark:text-zinc-700">|</span>
+                                                                    <span>📍 {activePayload.distanceKm} km</span>
+                                                                </div>
+                                                                {activePeakType && (
+                                                                    <span className={`px-2 py-0.5 rounded-md text-[10px] font-black uppercase tracking-tight border animate-pulse ${activePeakType.color}`}>
+                                                                        {activePeakType.label}: {activePeakType.value}
+                                                                    </span>
+                                                                )}
+                                                            </div>
+                                                            <button
+                                                                type="button"
+                                                                onClick={() => setActivePayload(null)}
+                                                                className="text-[10px] font-bold text-slate-400 dark:text-zinc-500 hover:text-slate-600 dark:hover:text-zinc-300 px-1.5 py-0.5 rounded hover:bg-slate-100 dark:hover:bg-zinc-800 transition-colors"
+                                                            >
+                                                                Resetear
+                                                            </button>
+                                                        </div>
+
+                                                        <div className="grid grid-cols-3 sm:grid-cols-5 gap-1.5 text-center">
+                                                            {/* Ritmo / Velocidad */}
+                                                            <div className="bg-slate-50 dark:bg-zinc-800/50 rounded-xl p-1.5 border border-slate-100 dark:border-zinc-800/60">
+                                                                <span className="text-[8px] font-bold uppercase tracking-wider text-slate-400 dark:text-zinc-500 block">
+                                                                    {isPaceBased ? 'Ritmo' : 'Velocidad'}
+                                                                </span>
+                                                                <span className="text-xs sm:text-sm font-black font-mono tabular-nums text-indigo-500">
+                                                                    {isPaceBased ? formatPace(activePayload.pace) : `${activePayload.speed} km/h`}
+                                                                </span>
+                                                            </div>
+
+                                                            {/* FC */}
+                                                            {activePayload.hr !== null && (
+                                                                <div className="bg-slate-50 dark:bg-zinc-800/50 rounded-xl p-1.5 border border-slate-100 dark:border-zinc-800/60">
+                                                                    <span className="text-[8px] font-bold uppercase tracking-wider text-slate-400 dark:text-zinc-500 block">
+                                                                        FC
+                                                                    </span>
+                                                                    <span className="text-xs sm:text-sm font-black font-mono tabular-nums text-rose-500">
+                                                                        {activePayload.hr} <span className="text-[9px] font-normal">bpm</span>
+                                                                    </span>
+                                                                </div>
+                                                            )}
+
+                                                            {/* Potencia */}
+                                                            {activePayload.watts !== null && (
+                                                                <div className="bg-slate-50 dark:bg-zinc-800/50 rounded-xl p-1.5 border border-slate-100 dark:border-zinc-800/60">
+                                                                    <span className="text-[8px] font-bold uppercase tracking-wider text-slate-400 dark:text-zinc-500 block">
+                                                                        Potencia
+                                                                    </span>
+                                                                    <span className="text-xs sm:text-sm font-black font-mono tabular-nums text-amber-500">
+                                                                        {activePayload.watts} <span className="text-[9px] font-normal">W</span>
+                                                                    </span>
+                                                                </div>
+                                                            )}
+
+                                                            {/* Altitud y Pendiente */}
+                                                            {activePayload.alt !== null && (
+                                                                <div className="bg-slate-50 dark:bg-zinc-800/50 rounded-xl p-1.5 border border-slate-100 dark:border-zinc-800/60">
+                                                                    <span className="text-[8px] font-bold uppercase tracking-wider text-slate-400 dark:text-zinc-500 block">
+                                                                        Altitud
+                                                                    </span>
+                                                                    <div className="flex items-center justify-center gap-1 text-xs sm:text-sm font-black font-mono tabular-nums text-slate-700 dark:text-zinc-300">
+                                                                        <span>{activePayload.alt}m</span>
+                                                                        {activePayload.grade !== undefined && (
+                                                                            <span className={`text-[9px] font-bold ${activePayload.grade > 3 ? 'text-rose-500' : activePayload.grade < -3 ? 'text-emerald-500' : 'text-slate-400'}`}>
+                                                                                {activePayload.grade > 0 ? '+' : ''}{activePayload.grade.toFixed(0)}%
+                                                                            </span>
+                                                                        )}
+                                                                    </div>
+                                                                </div>
+                                                            )}
+
+                                                            {/* Cadencia */}
+                                                            {activePayload.cadence !== null && (
+                                                                <div className="bg-slate-50 dark:bg-zinc-800/50 rounded-xl p-1.5 border border-slate-100 dark:border-zinc-800/60">
+                                                                    <span className="text-[8px] font-bold uppercase tracking-wider text-slate-400 dark:text-zinc-500 block">
+                                                                        Cadencia
+                                                                    </span>
+                                                                    <span className="text-xs sm:text-sm font-black font-mono tabular-nums text-emerald-500">
+                                                                        {activePayload.cadence} <span className="text-[9px] font-normal">{isPaceBased ? 'ppm' : 'rpm'}</span>
+                                                                    </span>
+                                                                </div>
+                                                            )}
+                                                        </div>
+                                                    </div>
+                                                ) : (
+                                                    <div className="flex items-center justify-between text-slate-400 dark:text-zinc-500 py-0.5 px-1">
+                                                        <div className="flex items-center gap-2">
+                                                            <span className="inline-block w-2 h-2 rounded-full bg-indigo-500 animate-ping" />
+                                                            <span className="text-[11px] font-medium">
+                                                                Desliza el dedo por los gráficos para explorar cada punto y pico
+                                                            </span>
+                                                        </div>
+                                                        <span className="text-[10px] font-semibold text-indigo-500 uppercase tracking-wider hidden sm:inline">
+                                                            Telemetría
+                                                        </span>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    {chartData.length > 0 ? (
+                                        <div className="ios-card overflow-hidden">
+                                            {/* Velocity/Pace */}
+                                            <div className="h-[120px] pt-3.5 px-3.5 sm:px-6 border-b border-slate-100 dark:border-zinc-800/60">
                                                 <div className="flex justify-between items-center mb-1">
                                                     <div className="flex items-center gap-3">
                                                         <h4 className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">{isPaceBased ? 'Ritmo' : 'Velocidad'}</h4>
@@ -175,201 +477,249 @@ export const ActivityDetailPage = ({ activity, settings, fetchStreams, onBack, o
                                                     </div>
                                                     {activePayload && <span className="text-xs font-bold tabular-nums text-indigo-500">{isPaceBased ? formatPace(activePayload.pace) : activePayload.speed + ' km/h'}</span>}
                                                 </div>
-                                            <ResponsiveContainer width="100%" height={70}>
-                                                <AreaChart data={chartData} syncId="st" onMouseMove={handleMouseMove}>
-                                                    <CartesianGrid vertical={false} strokeDasharray="3 3" stroke="#f1f5f9" opacity={0.5} />
-                                                    <XAxis dataKey="time" hide />
-                                                    <YAxis reversed={isPaceBased} hide domain={['dataMin', 'dataMax']} />
-                                                    <RechartsTooltip content={() => null} cursor={{ stroke: '#6366f1', strokeWidth: 1, strokeDasharray: '4 4' }} />
-                                                    <Area type="monotone" dataKey={isPaceBased ? "pace" : "speed"} stroke="#6366f1" fill="#6366f1" fillOpacity={0.06} strokeWidth={1.5} dot={false} activeDot={{ r: 3, stroke: '#fff', strokeWidth: 1.5, fill: '#6366f1' }} />
-                                                </AreaChart>
-                                            </ResponsiveContainer>
-                                        </div>
-
-                                        {/* Heart Rate */}
-                                        {chartData.some(d => d.hr > 0) && (
-                                            <div className="h-[105px] pt-4 px-3.5 sm:px-6 border-b border-slate-100 dark:border-zinc-800/60">
-                                                <div className="flex justify-between items-center mb-1">
-                                                    <h4 className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">FC</h4>
-                                                    {activePayload && <span className="text-xs font-bold tabular-nums text-rose-500">{activePayload.hr} bpm</span>}
-                                                </div>
-                                                <ResponsiveContainer width="100%" height={70}>
-                                                    <AreaChart data={chartData} syncId="st" onMouseMove={handleMouseMove}>
+                                                <ResponsiveContainer width="100%" height={80}>
+                                                    <AreaChart 
+                                                        data={chartData} 
+                                                        syncId="st" 
+                                                        onMouseMove={handleMouseMove}
+                                                        onTouchMove={handleMouseMove}
+                                                        onTouchStart={handleMouseMove}
+                                                        onClick={handleMouseMove}
+                                                        style={{ touchAction: 'pan-y' }}
+                                                    >
                                                         <CartesianGrid vertical={false} strokeDasharray="3 3" stroke="#f1f5f9" opacity={0.5} />
                                                         <XAxis dataKey="time" hide />
-                                                        <YAxis hide domain={['dataMin - 5', 'dataMax + 5']} />
-                                                        <RechartsTooltip content={() => null} cursor={{ stroke: '#f43f5e', strokeWidth: 1, strokeDasharray: '4 4' }} />
-                                                        <Area type="monotone" dataKey="hr" stroke="#f43f5e" fill="#f43f5e" fillOpacity={0.06} strokeWidth={1.5} dot={false} activeDot={{ r: 3, stroke: '#fff', strokeWidth: 1.5, fill: '#f43f5e' }} />
+                                                        <YAxis reversed={isPaceBased} hide domain={['dataMin', 'dataMax']} />
+                                                        <RechartsTooltip isAnimationActive={false} content={() => null} cursor={{ stroke: '#6366f1', strokeWidth: 1.5, strokeDasharray: '3 3' }} />
+                                                        <Area type="monotone" dataKey={isPaceBased ? "pace" : "speed"} stroke="#6366f1" fill="#6366f1" fillOpacity={0.06} strokeWidth={1.5} dot={false} activeDot={{ r: 3, stroke: '#fff', strokeWidth: 1.5, fill: '#6366f1' }} />
                                                     </AreaChart>
                                                 </ResponsiveContainer>
                                             </div>
-                                        )}
 
-                                        {/* Power */}
-                                        {chartData.some(d => d.watts > 0) && (
-                                            <div className="h-[105px] pt-4 px-3.5 sm:px-6 border-b border-slate-100 dark:border-zinc-800/60">
-                                                <div className="flex justify-between items-center mb-1">
-                                                    <h4 className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Potencia</h4>
-                                                    {activePayload && <span className="text-xs font-bold tabular-nums text-amber-500">{activePayload.watts} w</span>}
-                                                </div>
-                                                <ResponsiveContainer width="100%" height={70}>
-                                                    <AreaChart data={chartData} syncId="st" onMouseMove={handleMouseMove}>
-                                                        <CartesianGrid vertical={false} strokeDasharray="3 3" stroke="#f1f5f9" opacity={0.5} />
-                                                        <XAxis dataKey="time" hide />
-                                                        <YAxis hide domain={['dataMin', 'dataMax']} />
-                                                        <RechartsTooltip content={() => null} cursor={{ stroke: '#f59e0b', strokeWidth: 1, strokeDasharray: '4 4' }} />
-                                                        <Area type="monotone" dataKey="watts" stroke="#f59e0b" fill="#f59e0b" fillOpacity={0.06} strokeWidth={1.5} dot={false} activeDot={{ r: 3, stroke: '#fff', strokeWidth: 1.5, fill: '#f59e0b' }} />
-                                                    </AreaChart>
-                                                </ResponsiveContainer>
-                                            </div>
-                                        )}
-
-                                        {/* Altitude */}
-                                        {chartData.some(d => d.alt !== null) && (
-                                            <div className="h-[105px] pt-4 px-3.5 sm:px-6 border-b border-slate-100 dark:border-zinc-800/60">
-                                                <div className="flex justify-between items-center mb-1">
-                                                    <div className="flex items-center gap-3">
-                                                        <h4 className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Altitud</h4>
-                                                        {activePayload?.grade !== undefined && (
-                                                            <span className={`text-[9px] font-black ${activePayload.grade > 3 ? 'text-rose-500' : activePayload.grade < -3 ? 'text-emerald-500' : 'text-slate-400'}`}>
-                                                                {activePayload.grade > 0 ? '+' : ''}{activePayload.grade.toFixed(1)}%
-                                                            </span>
-                                                        )}
+                                            {/* Heart Rate */}
+                                            {chartData.some(d => d.hr > 0) && (
+                                                <div className="h-[120px] pt-3.5 px-3.5 sm:px-6 border-b border-slate-100 dark:border-zinc-800/60">
+                                                    <div className="flex justify-between items-center mb-1">
+                                                        <h4 className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">FC</h4>
+                                                        {activePayload && <span className="text-xs font-bold tabular-nums text-rose-500">{activePayload.hr} bpm</span>}
                                                     </div>
-                                                    {activePayload && <span className="text-xs font-bold tabular-nums text-slate-500">{activePayload.alt} m</span>}
+                                                    <ResponsiveContainer width="100%" height={80}>
+                                                        <AreaChart 
+                                                            data={chartData} 
+                                                            syncId="st" 
+                                                            onMouseMove={handleMouseMove}
+                                                            onTouchMove={handleMouseMove}
+                                                            onTouchStart={handleMouseMove}
+                                                            onClick={handleMouseMove}
+                                                            style={{ touchAction: 'pan-y' }}
+                                                        >
+                                                            <CartesianGrid vertical={false} strokeDasharray="3 3" stroke="#f1f5f9" opacity={0.5} />
+                                                            <XAxis dataKey="time" hide />
+                                                            <YAxis hide domain={['dataMin - 5', 'dataMax + 5']} />
+                                                            <RechartsTooltip isAnimationActive={false} content={() => null} cursor={{ stroke: '#f43f5e', strokeWidth: 1.5, strokeDasharray: '3 3' }} />
+                                                            <Area type="monotone" dataKey="hr" stroke="#f43f5e" fill="#f43f5e" fillOpacity={0.06} strokeWidth={1.5} dot={false} activeDot={{ r: 3, stroke: '#fff', strokeWidth: 1.5, fill: '#f43f5e' }} />
+                                                        </AreaChart>
+                                                    </ResponsiveContainer>
                                                 </div>
-                                                <ResponsiveContainer width="100%" height={70}>
-                                                    <AreaChart data={chartData} syncId="st" onMouseMove={handleMouseMove}>
-                                                        <CartesianGrid vertical={false} strokeDasharray="3 3" stroke="#f1f5f9" opacity={0.5} />
-                                                        <XAxis dataKey="time" hide />
-                                                        <YAxis hide domain={['dataMin - 10', 'dataMax + 10']} />
-                                                        <RechartsTooltip content={() => null} cursor={{ stroke: '#64748b', strokeWidth: 1, strokeDasharray: '4 4' }} />
-                                                        <Area type="monotone" dataKey="alt" stroke="#64748b" fill="#64748b" fillOpacity={0.06} strokeWidth={1.5} dot={false} activeDot={{ r: 3, stroke: '#fff', strokeWidth: 1.5, fill: '#64748b' }} />
-                                                    </AreaChart>
-                                                </ResponsiveContainer>
-                                            </div>
-                                        )}
+                                            )}
 
-                                        {/* Cadence */}
-                                        {chartData.some(d => d.cadence > 0) && (
-                                            <div className="h-[105px] pt-4 px-3.5 sm:px-6">
-                                                <div className="flex justify-between items-center mb-1">
-                                                    <h4 className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Cadencia</h4>
-                                                    {activePayload && <span className="text-xs font-bold tabular-nums text-emerald-500">{activePayload.cadence} {isPaceBased ? 'ppm' : 'rpm'}</span>}
-                                                </div>
-                                                <ResponsiveContainer width="100%" height={70}>
-                                                    <AreaChart data={chartData} syncId="st" onMouseMove={handleMouseMove}>
-                                                        <CartesianGrid vertical={false} strokeDasharray="3 3" stroke="#f1f5f9" opacity={0.5} />
-                                                        <XAxis dataKey="time" hide />
-                                                        <YAxis hide domain={['dataMin - 5', 'dataMax + 5']} />
-                                                        <RechartsTooltip content={() => null} cursor={{ stroke: '#10b981', strokeWidth: 1, strokeDasharray: '4 4' }} />
-                                                        <Area type="monotone" dataKey="cadence" stroke="#10b981" fill="#10b981" fillOpacity={0.06} strokeWidth={1.5} dot={false} activeDot={{ r: 3, stroke: '#fff', strokeWidth: 1.5, fill: '#10b981' }} />
-                                                    </AreaChart>
-                                                </ResponsiveContainer>
-                                            </div>
-                                        )}
-                                    </div>
-                                ) : (
-                                    <div className="h-64 flex items-center justify-center text-slate-300 dark:text-zinc-600 text-sm">Sin datos de análisis</div>
-                                )}
-                            </div>
-                        </div>
-
-                        {/* Sidebar */}
-                        <aside className="w-full lg:w-[380px] border-t lg:border-t-0 lg:border-l border-slate-100 dark:border-zinc-900 bg-white dark:bg-zinc-950 overflow-y-auto custom-scrollbar p-4 sm:p-5 space-y-6 shrink-0">
-                            {/* Map */}
-                            <div className="h-56 rounded-xl border border-slate-100 dark:border-zinc-800 overflow-hidden shadow-sm">
-                                <InteractiveMap polyline={activity.map_polyline} highResCoords={streams?.latlng?.data} color={themeColor} currentPosition={activePayload?.latlng} />
-                            </div>
-
-                            {/* Impact Analysis & Coach Summary (Unified Premium Section) */}
-                            {trainingEffect && (
-                                <div className="space-y-4">
-                                    <div className="bg-white dark:bg-zinc-900 border border-slate-100 dark:border-zinc-800 rounded-2xl p-6 shadow-sm space-y-6">
-                                        <div className="flex items-center justify-between">
-                                            <div className="space-y-1">
-                                                <h3 className="text-xs font-bold text-slate-900 dark:text-zinc-100 uppercase tracking-tight">Impacto del Entrenamiento</h3>
-                                                <div className="flex items-center gap-2">
-                                                    <p className="text-[10px] text-slate-400 dark:text-zinc-500 font-medium">Análisis fisiológico</p>
-                                                    {trainingEffect.peakEpoc > 0 && (
-                                                        <span className="text-[9px] font-bold text-slate-300 dark:text-zinc-700 tabular-nums">Peak EPOC: {trainingEffect.peakEpoc}ml</span>
-                                                    )}
-                                                </div>
-                                            </div>
-                                            <span className={`px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-tight bg-slate-100 dark:bg-zinc-800 border ${trainingEffect.benefitColor.replace('text-', 'border-').replace('dark:', '')} ${trainingEffect.benefitColor}`}>
-                                                {trainingEffect.primaryBenefit}
-                                            </span>
-                                        </div>
-
-                                        <div className="grid grid-cols-2 gap-6">
-                                            <div className="space-y-2">
-                                                <div className="flex justify-between items-end">
-                                                    <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Aeróbico</span>
-                                                    <span className="text-sm font-black text-slate-900 dark:text-zinc-100">{trainingEffect.aerobic}</span>
-                                                </div>
-                                                <div className="h-2 bg-slate-100 dark:bg-zinc-800 rounded-full overflow-hidden">
-                                                    <div className={`h-full transition-all duration-1000 ${trainingEffect.aerobic >= 3 ? 'bg-indigo-500' : 'bg-indigo-400'}`} style={{ width: `${(trainingEffect.aerobic / 5) * 100}%` }} />
-                                                </div>
-                                                <p className="text-[8px] font-bold text-slate-400 uppercase tracking-tighter">{trainingEffect.aerobicLabel}</p>
-                                            </div>
-
-                                            <div className="space-y-2">
-                                                <div className="flex justify-between items-end">
-                                                    <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Anaeróbico</span>
-                                                    <span className="text-sm font-black text-slate-900 dark:text-zinc-100">{trainingEffect.anaerobic}</span>
-                                                </div>
-                                                <div className="h-2 bg-slate-100 dark:bg-zinc-800 rounded-full overflow-hidden">
-                                                    <div className={`h-full transition-all duration-1000 ${trainingEffect.anaerobic >= 3 ? 'bg-purple-600' : 'bg-purple-400'}`} style={{ width: `${(trainingEffect.anaerobic / 5) * 100}%` }} />
-                                                </div>
-                                                <p className="text-[8px] font-bold text-slate-400 uppercase tracking-tighter">{trainingEffect.anaerobicLabel}</p>
-                                            </div>
-                                        </div>
-
-                                        <div className="pt-5 border-t border-slate-50 dark:border-zinc-800/60">
-                                            <div className="flex gap-3">
-                                                <div className="mt-1 w-1.5 h-1.5 rounded-full bg-indigo-500 shrink-0" />
-                                                <p className="text-[10px] font-bold text-slate-700 dark:text-zinc-300 leading-relaxed italic">
-                                                    {trainingEffect.description}
-                                                </p>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    {/* Detailed Insights Slider-like cards */}
-                                    {fitnessAnalysis && (
-                                        <div className="bg-slate-50/50 dark:bg-zinc-900/40 rounded-2xl p-4 border border-slate-100 dark:border-zinc-800/40">
-                                            <h4 className="text-[9px] font-bold text-slate-400 dark:text-zinc-500 uppercase tracking-widest mb-3 flex items-center gap-2">
-                                                <div className="w-1 h-3 bg-indigo-500 rounded-full" />
-                                                Coach Insights
-                                            </h4>
-                                            <div className="space-y-3">
-                                                {fitnessAnalysis.insights.slice(0, 3).map((insight, idx) => (
-                                                    <div key={idx} className="flex gap-3">
-                                                        <div className="text-[8px] font-black text-slate-300 dark:text-zinc-700 mt-0.5">0{idx + 1}</div>
-                                                        <p className="text-[10px] font-medium text-slate-500 dark:text-zinc-400 leading-snug">
-                                                            {insight}
-                                                        </p>
+                                            {/* Power */}
+                                            {chartData.some(d => d.watts > 0) && (
+                                                <div className="h-[120px] pt-3.5 px-3.5 sm:px-6 border-b border-slate-100 dark:border-zinc-800/60">
+                                                    <div className="flex justify-between items-center mb-1">
+                                                        <h4 className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Potencia</h4>
+                                                        {activePayload && <span className="text-xs font-bold tabular-nums text-amber-500">{activePayload.watts} w</span>}
                                                     </div>
-                                                ))}
-                                            </div>
+                                                    <ResponsiveContainer width="100%" height={80}>
+                                                        <AreaChart 
+                                                            data={chartData} 
+                                                            syncId="st" 
+                                                            onMouseMove={handleMouseMove}
+                                                            onTouchMove={handleMouseMove}
+                                                            onTouchStart={handleMouseMove}
+                                                            onClick={handleMouseMove}
+                                                            style={{ touchAction: 'pan-y' }}
+                                                        >
+                                                            <CartesianGrid vertical={false} strokeDasharray="3 3" stroke="#f1f5f9" opacity={0.5} />
+                                                            <XAxis dataKey="time" hide />
+                                                            <YAxis hide domain={['dataMin', 'dataMax']} />
+                                                            <RechartsTooltip isAnimationActive={false} content={() => null} cursor={{ stroke: '#f59e0b', strokeWidth: 1.5, strokeDasharray: '3 3' }} />
+                                                            <Area type="monotone" dataKey="watts" stroke="#f59e0b" fill="#f59e0b" fillOpacity={0.06} strokeWidth={1.5} dot={false} activeDot={{ r: 3, stroke: '#fff', strokeWidth: 1.5, fill: '#f59e0b' }} />
+                                                        </AreaChart>
+                                                    </ResponsiveContainer>
+                                                </div>
+                                            )}
+
+                                            {/* Altitude */}
+                                            {chartData.some(d => d.alt !== null) && (
+                                                <div className="h-[120px] pt-3.5 px-3.5 sm:px-6 border-b border-slate-100 dark:border-zinc-800/60">
+                                                    <div className="flex justify-between items-center mb-1">
+                                                        <div className="flex items-center gap-3">
+                                                            <h4 className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Altitud</h4>
+                                                            {activePayload?.grade !== undefined && (
+                                                                <span className={`text-[9px] font-black ${activePayload.grade > 3 ? 'text-rose-500' : activePayload.grade < -3 ? 'text-emerald-500' : 'text-slate-400'}`}>
+                                                                    {activePayload.grade > 0 ? '+' : ''}{activePayload.grade.toFixed(1)}%
+                                                                </span>
+                                                            )}
+                                                        </div>
+                                                        {activePayload && <span className="text-xs font-bold tabular-nums text-slate-500">{activePayload.alt} m</span>}
+                                                    </div>
+                                                    <ResponsiveContainer width="100%" height={80}>
+                                                        <AreaChart 
+                                                            data={chartData} 
+                                                            syncId="st" 
+                                                            onMouseMove={handleMouseMove}
+                                                            onTouchMove={handleMouseMove}
+                                                            onTouchStart={handleMouseMove}
+                                                            onClick={handleMouseMove}
+                                                            style={{ touchAction: 'pan-y' }}
+                                                        >
+                                                            <CartesianGrid vertical={false} strokeDasharray="3 3" stroke="#f1f5f9" opacity={0.5} />
+                                                            <XAxis dataKey="time" hide />
+                                                            <YAxis hide domain={['dataMin - 10', 'dataMax + 10']} />
+                                                            <RechartsTooltip isAnimationActive={false} content={() => null} cursor={{ stroke: '#64748b', strokeWidth: 1.5, strokeDasharray: '3 3' }} />
+                                                            <Area type="monotone" dataKey="alt" stroke="#64748b" fill="#64748b" fillOpacity={0.06} strokeWidth={1.5} dot={false} activeDot={{ r: 3, stroke: '#fff', strokeWidth: 1.5, fill: '#64748b' }} />
+                                                        </AreaChart>
+                                                    </ResponsiveContainer>
+                                                </div>
+                                            )}
+
+                                            {/* Cadence */}
+                                            {chartData.some(d => d.cadence > 0) && (
+                                                <div className="h-[120px] pt-3.5 px-3.5 sm:px-6">
+                                                    <div className="flex justify-between items-center mb-1">
+                                                        <h4 className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Cadencia</h4>
+                                                        {activePayload && <span className="text-xs font-bold tabular-nums text-emerald-500">{activePayload.cadence} {isPaceBased ? 'ppm' : 'rpm'}</span>}
+                                                    </div>
+                                                    <ResponsiveContainer width="100%" height={80}>
+                                                        <AreaChart 
+                                                            data={chartData} 
+                                                            syncId="st" 
+                                                            onMouseMove={handleMouseMove}
+                                                            onTouchMove={handleMouseMove}
+                                                            onTouchStart={handleMouseMove}
+                                                            onClick={handleMouseMove}
+                                                            style={{ touchAction: 'pan-y' }}
+                                                        >
+                                                            <CartesianGrid vertical={false} strokeDasharray="3 3" stroke="#f1f5f9" opacity={0.5} />
+                                                            <XAxis dataKey="time" hide />
+                                                            <YAxis hide domain={['dataMin - 5', 'dataMax + 5']} />
+                                                            <RechartsTooltip isAnimationActive={false} content={() => null} cursor={{ stroke: '#10b981', strokeWidth: 1.5, strokeDasharray: '3 3' }} />
+                                                            <Area type="monotone" dataKey="cadence" stroke="#10b981" fill="#10b981" fillOpacity={0.06} strokeWidth={1.5} dot={false} activeDot={{ r: 3, stroke: '#fff', strokeWidth: 1.5, fill: '#10b981' }} />
+                                                        </AreaChart>
+                                                    </ResponsiveContainer>
+                                                </div>
+                                            )}
                                         </div>
+                                    ) : (
+                                        <div className="h-64 flex items-center justify-center text-slate-300 dark:text-zinc-600 text-sm">Sin datos de análisis</div>
                                     )}
                                 </div>
-                            )}
-                        </aside>
-                    </div>
-                )}
+                            </div>
 
-                {/* --- pestaña: MAPA --- */}
-                {activeTab === 'map' && (
-                    <div className="h-full w-full relative">
-                        <InteractiveMap polyline={activity.map_polyline} highResCoords={streams?.latlng?.data} color="#6366f1" />
-                        <div className="absolute top-4 left-4 z-[400] bg-white/90 dark:bg-zinc-900/90 backdrop-blur p-4 rounded border border-slate-100 dark:border-zinc-800 shadow-lg space-y-2 pointer-events-none max-w-[200px]">
-                            <h3 className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Ruta Detallada</h3>
-                            <div className="text-[9px] text-slate-500 leading-tight">Vista técnica a pantalla completa del track GPS.</div>
+                            {/* Sidebar */}
+                            <aside className="w-full lg:w-[380px] border-t lg:border-t-0 lg:border-l border-slate-100 dark:border-zinc-900 bg-white dark:bg-zinc-950 overflow-y-auto custom-scrollbar p-4 sm:p-5 space-y-6 shrink-0">
+                                {/* Map - Desktop Solo (en móvil se muestra arriba estilo Strava) */}
+                                <div className="hidden lg:block h-56 rounded-xl border border-slate-100 dark:border-zinc-800 overflow-hidden shadow-sm">
+                                    <InteractiveMap polyline={activity.map_polyline} highResCoords={streams?.latlng?.data} color={themeColor} currentPosition={activePayload?.latlng} />
+                                </div>
+
+                                {/* Impact Analysis & Coach Summary (Unified Premium Section) */}
+                                {trainingEffect && (
+                                    <div className="space-y-4">
+                                        <div className="bg-white dark:bg-zinc-900 border border-slate-100 dark:border-zinc-800 rounded-2xl p-6 shadow-sm space-y-6">
+                                            <div className="flex items-center justify-between">
+                                                <div className="space-y-1">
+                                                    <h3 className="text-xs font-bold text-slate-900 dark:text-zinc-100 uppercase tracking-tight">Impacto del Entrenamiento</h3>
+                                                    <div className="flex items-center gap-2">
+                                                        <p className="text-[10px] text-slate-400 dark:text-zinc-500 font-medium">Análisis fisiológico</p>
+                                                        {trainingEffect.peakEpoc > 0 && (
+                                                            <span className="text-[9px] font-bold text-slate-300 dark:text-zinc-700 tabular-nums">Peak EPOC: {trainingEffect.peakEpoc}ml</span>
+                                                        )}
+                                                    </div>
+                                                </div>
+                                                <span className={`px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-tight bg-slate-100 dark:bg-zinc-800 border ${trainingEffect.benefitColor.replace('text-', 'border-').replace('dark:', '')} ${trainingEffect.benefitColor}`}>
+                                                    {trainingEffect.primaryBenefit}
+                                                </span>
+                                            </div>
+
+                                            <div className="grid grid-cols-2 gap-6">
+                                                <div className="space-y-2">
+                                                    <div className="flex justify-between items-end">
+                                                        <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Aeróbico</span>
+                                                        <span className="text-sm font-black text-slate-900 dark:text-zinc-100">{trainingEffect.aerobic}</span>
+                                                    </div>
+                                                    <div className="h-2 bg-slate-100 dark:bg-zinc-800 rounded-full overflow-hidden">
+                                                        <div className={`h-full transition-all duration-1000 ${trainingEffect.aerobic >= 3 ? 'bg-indigo-500' : 'bg-indigo-400'}`} style={{ width: `${(trainingEffect.aerobic / 5) * 100}%` }} />
+                                                    </div>
+                                                    <p className="text-[8px] font-bold text-slate-400 uppercase tracking-tighter">{trainingEffect.aerobicLabel}</p>
+                                                </div>
+
+                                                <div className="space-y-2">
+                                                    <div className="flex justify-between items-end">
+                                                        <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Anaeróbico</span>
+                                                        <span className="text-sm font-black text-slate-900 dark:text-zinc-100">{trainingEffect.anaerobic}</span>
+                                                    </div>
+                                                    <div className="h-2 bg-slate-100 dark:bg-zinc-800 rounded-full overflow-hidden">
+                                                        <div className={`h-full transition-all duration-1000 ${trainingEffect.anaerobic >= 3 ? 'bg-purple-600' : 'bg-purple-400'}`} style={{ width: `${(trainingEffect.anaerobic / 5) * 100}%` }} />
+                                                    </div>
+                                                    <p className="text-[8px] font-bold text-slate-400 uppercase tracking-tighter">{trainingEffect.anaerobicLabel}</p>
+                                                </div>
+                                            </div>
+
+                                            <div className="pt-5 border-t border-slate-50 dark:border-zinc-800/60">
+                                                <div className="flex gap-3">
+                                                    <div className="mt-1 w-1.5 h-1.5 rounded-full bg-indigo-500 shrink-0" />
+                                                    <p className="text-[10px] font-bold text-slate-700 dark:text-zinc-300 leading-relaxed italic">
+                                                        {trainingEffect.description}
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        {/* Detailed Insights Slider-like cards */}
+                                        {fitnessAnalysis && (
+                                            <div className="bg-slate-50/50 dark:bg-zinc-900/40 rounded-2xl p-4 border border-slate-100 dark:border-zinc-800/40">
+                                                <h4 className="text-[9px] font-bold text-slate-400 dark:text-zinc-500 uppercase tracking-widest mb-3 flex items-center gap-2">
+                                                    <div className="w-1 h-3 bg-indigo-500 rounded-full" />
+                                                    Coach Insights
+                                                </h4>
+                                                <div className="space-y-3">
+                                                    {fitnessAnalysis.insights.slice(0, 3).map((insight, idx) => (
+                                                        <div key={idx} className="flex gap-3">
+                                                            <div className="text-[8px] font-black text-slate-300 dark:text-zinc-700 mt-0.5">0{idx + 1}</div>
+                                                            <p className="text-[10px] font-medium text-slate-500 dark:text-zinc-400 leading-snug">
+                                                                {insight}
+                                                            </p>
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                        )}
+                                    </div>
+                                )}
+                            </aside>
                         </div>
-                    </div>
-                )}
+                    )}
+
+                    {/* --- pestaña: MAPA --- */}
+                    {activeTab === 'map' && (
+                        <div className="flex-1 min-h-[480px] h-[calc(100dvh-130px)] lg:h-full w-full relative">
+                            <InteractiveMap 
+                                polyline={activity.map_polyline} 
+                                highResCoords={streams?.latlng?.data} 
+                                color={themeColor || "#6366f1"} 
+                                currentPosition={activePayload?.latlng} 
+                            />
+                            <div className="absolute top-4 left-4 z-[400] bg-white/90 dark:bg-zinc-900/90 backdrop-blur p-3 rounded-xl border border-slate-100 dark:border-zinc-800 shadow-md space-y-1 pointer-events-none max-w-[220px]">
+                                <h3 className="text-[10px] font-bold uppercase tracking-widest text-slate-400 dark:text-zinc-500">Ruta Detallada</h3>
+                                <div className="text-[10px] text-slate-600 dark:text-zinc-400 leading-tight">
+                                    {activity.distance ? `${(activity.distance / 1000).toFixed(2)} km` : ''} 
+                                    {activity.elevation_gain ? ` • +${activity.elevation_gain}m` : ''}
+                                </div>
+                            </div>
+                        </div>
+                    )}
 
                 {/* --- pestaña: LAPS --- */}
                 {activeTab === 'laps' && (
