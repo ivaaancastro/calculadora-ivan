@@ -165,10 +165,11 @@ const PmcFloatingChart = ({ pmcByDate, onClose, initPos }) => {
     };
 
     const hoverEntry = hover != null ? visibleWithRamp[hover.idx] : null;
+    const isMobileScreen = typeof window !== 'undefined' && window.innerWidth < 640;
 
     return (
-        <div className="fixed z-[100] bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-700 rounded-xl shadow-2xl overflow-visible select-none"
-            style={{ left: pos.x, top: pos.y, width: Math.min(480, window.innerWidth - 32) }}>
+        <div className={isMobileScreen ? "fixed z-[100] inset-x-0 bottom-0 bg-white dark:bg-zinc-900 border-t border-slate-200 dark:border-zinc-700 rounded-t-3xl shadow-2xl overflow-y-auto max-h-[90vh] pb-safe select-none" : "fixed z-[100] bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-700 rounded-xl shadow-2xl overflow-visible select-none"}
+            style={isMobileScreen ? {} : { left: pos.x, top: pos.y, width: Math.min(480, window.innerWidth - 32) }}>
             {/* Title / drag bar */}
             <div className="flex items-center justify-between px-3 py-2 bg-slate-50 dark:bg-zinc-950 border-b border-slate-100 dark:border-zinc-800 rounded-t-xl cursor-grab active:cursor-grabbing"
                 onPointerDown={handleDragDown} onPointerMove={handleDragMove} onPointerUp={handleDragUp}>
@@ -1199,9 +1200,9 @@ export const CalendarPage = ({ activities, plannedWorkouts = [], addPlannedWorko
                         </button>
 
                         <div className="flex items-center border border-slate-200 dark:border-zinc-700 rounded-lg overflow-hidden ml-1 sm:ml-2">
-                            <button onClick={prevMonth} className="p-2 bg-transparent hover:bg-slate-100 dark:hover:bg-zinc-800 active:scale-95 text-slate-500 dark:text-zinc-400 transition-all" title="Mes anterior"><ChevronLeft size={18} /></button>
+                            <button onClick={prevMonth} className="w-10 h-10 flex items-center justify-center bg-transparent hover:bg-slate-100 dark:hover:bg-zinc-800 active:scale-95 text-slate-500 dark:text-zinc-400 transition-all touch-manipulation" title="Mes anterior"><ChevronLeft size={18} /></button>
                             <div className="w-px h-5 bg-slate-200 dark:bg-zinc-700"></div>
-                            <button onClick={nextMonth} className="p-2 bg-transparent hover:bg-slate-100 dark:hover:bg-zinc-800 active:scale-95 text-slate-500 dark:text-zinc-400 transition-all" title="Mes siguiente"><ChevronRight size={18} /></button>
+                            <button onClick={nextMonth} className="w-10 h-10 flex items-center justify-center bg-transparent hover:bg-slate-100 dark:hover:bg-zinc-800 active:scale-95 text-slate-500 dark:text-zinc-400 transition-all touch-manipulation" title="Mes siguiente"><ChevronRight size={18} /></button>
                         </div>
                     </div>
                 </div>
@@ -1426,7 +1427,7 @@ export const CalendarPage = ({ activities, plannedWorkouts = [], addPlannedWorko
                                                                 {WEEKDAYS[dIdx]}
                                                             </span>
                                                         </div>
-                                                        <button onClick={(e) => handleOpenPlanModal(e, day.date)} className="opacity-70 lg:opacity-0 group-hover/daycell:opacity-100 text-slate-400 hover:text-red-500 p-1 min-w-[28px] min-h-[28px] flex items-center justify-center rounded-full active:scale-95 transition-all" title="Planificar sesión">
+                                                        <button onClick={(e) => handleOpenPlanModal(e, day.date)} className="opacity-90 lg:opacity-0 group-hover/daycell:opacity-100 text-slate-400 hover:text-red-500 w-8 h-8 sm:w-7 sm:h-7 flex items-center justify-center rounded-full active:scale-90 transition-all touch-manipulation" title="Planificar sesión">
                                                             <Plus size={14} />
                                                         </button>
                                                     </div>

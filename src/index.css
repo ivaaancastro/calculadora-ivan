@@ -127,11 +127,19 @@ body {
 }
 
 .pb-safe-nav {
-  padding-bottom: calc(5.5rem + env(safe-area-inset-bottom, 0px));
+  padding-bottom: calc(5rem + env(safe-area-inset-bottom, 0px));
+}
+
+.mb-safe-nav {
+  margin-bottom: calc(4.5rem + env(safe-area-inset-bottom, 0px));
 }
 
 .pt-safe {
   padding-top: env(safe-area-inset-top, 0px);
+}
+
+.pt-safe-top {
+  padding-top: calc(0.75rem + env(safe-area-inset-top, 0px));
 }
 
 .pl-safe {
@@ -147,6 +155,23 @@ body {
   padding-right: env(safe-area-inset-right, 0px);
 }
 
+/* Prevenir llamada al menú de guardar imagen/seleccionar en toques largos */
+.touch-callout-none {
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+/* Evitar rebote extraño de pantalla completa en scroll de modales */
+.overscroll-contain {
+  overscroll-behavior: contain;
+}
+
+/* Scroll táctil nativo fluido iOS */
+.touch-scroll {
+  -webkit-overflow-scrolling: touch;
+}
+
 /* Ocultar flechas de inputs numéricos */
 .no-spinner::-webkit-outer-spin-button,
 .no-spinner::-webkit-inner-spin-button {
@@ -155,5 +180,5 @@ body {
 }
 
 .no-spinner {
-  --moz-appearance: textfield;
+  -moz-appearance: textfield;
 }

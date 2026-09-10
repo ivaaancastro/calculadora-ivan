@@ -118,15 +118,15 @@ const SportZonesSection = ({ sport, sportLabel, icon: Icon, color, showPace, sho
             <div className="p-5 space-y-5">
 
                 {/* Threshold values row */}
-                <div className={`grid ${showPace ? 'grid-cols-3' : showPower ? 'grid-cols-3' : 'grid-cols-2'} gap-4`}>
+                <div className={`grid ${showPace ? 'grid-cols-2 sm:grid-cols-3' : showPower ? 'grid-cols-2 sm:grid-cols-3' : 'grid-cols-2'} gap-3 sm:gap-4`}>
                     <div>
                         <label className="text-[9px] font-bold text-slate-500 dark:text-zinc-400 uppercase tracking-widest block mb-1">FC umbral</label>
-                        <input type="number" value={data.lthr} onChange={(e) => onChange(e, sport, 'lthr')}
+                        <input type="number" inputMode="numeric" value={data.lthr} onChange={(e) => onChange(e, sport, 'lthr')}
                             className={`w-full bg-white dark:bg-${color}-900/10 border border-slate-300 dark:border-${color}-500/30 rounded px-3 py-1.5 text-sm font-mono text-${color}-700 dark:text-${color}-400 focus:border-${color}-500 shadow-sm outline-none transition-colors`} />
                     </div>
                     <div>
                         <label className="text-[9px] font-bold text-slate-500 dark:text-zinc-400 uppercase tracking-widest block mb-1">FC máx.</label>
-                        <input type="number" value={data.max} onChange={(e) => onChange(e, sport, 'max')}
+                        <input type="number" inputMode="numeric" value={data.max} onChange={(e) => onChange(e, sport, 'max')}
                             className="w-full bg-white dark:bg-zinc-950 border border-slate-300 dark:border-zinc-700 rounded px-3 py-1.5 text-sm font-mono dark:text-zinc-200 focus:border-blue-500 shadow-sm outline-none transition-colors" />
                     </div>
                     {showPace && (
@@ -140,7 +140,7 @@ const SportZonesSection = ({ sport, sportLabel, icon: Icon, color, showPace, sho
                     {showPower && (
                         <div>
                             <label className="text-[9px] font-bold text-emerald-600 dark:text-emerald-500 uppercase tracking-widest block mb-1 flex items-center gap-1"><Gauge size={10} /> FTP</label>
-                            <input type="number" value={data.ftp} onChange={(e) => onChange(e, sport, 'ftp')}
+                            <input type="number" inputMode="numeric" value={data.ftp} onChange={(e) => onChange(e, sport, 'ftp')}
                                 className="w-full bg-white dark:bg-emerald-900/10 border border-slate-300 dark:border-emerald-500/30 rounded px-3 py-1.5 text-sm font-mono text-emerald-700 dark:text-emerald-400 focus:border-emerald-500 shadow-sm outline-none transition-colors" />
                             <span className="text-[8px] text-slate-400 mt-0.5 block">vatios</span>
                         </div>
@@ -531,13 +531,13 @@ export const ProfilePage = ({ currentSettings, currentMetrics, onUpdate, activit
     const renderMenuButton = (id, label, IconComponent) => (
         <button
             onClick={() => setActiveSection(id)}
-            className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all text-left ${activeSection === id
-                ? 'bg-blue-600 text-white shadow-md'
-                : 'text-slate-700 dark:text-zinc-300 hover:bg-slate-100 dark:hover:bg-zinc-800/50'
+            className={`flex items-center gap-2.5 px-3.5 sm:px-4 py-2.5 sm:py-3 rounded-xl transition-all text-left whitespace-nowrap select-none touch-manipulation active:scale-95 ${activeSection === id
+                ? 'bg-blue-600 text-white shadow-md font-bold'
+                : 'text-slate-700 dark:text-zinc-300 hover:bg-slate-100 dark:hover:bg-zinc-800/50 font-medium'
                 }`}
         >
             <IconComponent size={18} className={activeSection === id ? 'text-white' : 'text-slate-400 dark:text-zinc-500'} />
-            <span className="text-sm font-semibold">{label}</span>
+            <span className="text-xs sm:text-sm">{label}</span>
         </button>
     );
 
@@ -567,7 +567,7 @@ export const ProfilePage = ({ currentSettings, currentMetrics, onUpdate, activit
 
             <div className="flex flex-col md:flex-row gap-8">
                 {/* SIDEBAR (Apple Settings Style) */}
-                <div className="w-full md:w-64 flex-shrink-0 space-y-1">
+                <div className="w-full md:w-64 flex-shrink-0 flex md:flex-col gap-1.5 overflow-x-auto hide-scrollbar pb-1 md:pb-0 md:space-y-1">
                     {renderMenuButton('general', 'General', Activity)}
                     {renderMenuButton('zones', 'Zonas y Umbrales', Heart)}
                     {renderMenuButton('integrations', 'Integraciones', Link2)}
@@ -629,7 +629,7 @@ export const ProfilePage = ({ currentSettings, currentMetrics, onUpdate, activit
                                             </div>
                                         </div>
                                         <div className="flex items-center gap-2">
-                                            <input type="number" name="weight" value={formData.weight} onChange={handleChange} className="w-20 px-3 py-2 bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-700 rounded-lg text-sm font-mono text-right outline-none focus:border-blue-500 transition-all" />
+                                            <input type="number" inputMode="decimal" name="weight" value={formData.weight} onChange={handleChange} className="w-20 px-3 py-2 bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-700 rounded-lg text-sm font-mono text-right outline-none focus:border-blue-500 transition-all" />
                                             <span className="text-sm text-slate-500 font-medium">kg</span>
                                         </div>
                                     </div>
@@ -643,7 +643,7 @@ export const ProfilePage = ({ currentSettings, currentMetrics, onUpdate, activit
                                             </div>
                                         </div>
                                         <div className="flex items-center gap-2">
-                                            <input type="number" name="fcReposo" value={formData.fcReposo} onChange={handleChange} className="w-20 px-3 py-2 bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-700 rounded-lg text-sm font-mono text-right outline-none focus:border-blue-500 transition-all" />
+                                            <input type="number" inputMode="numeric" name="fcReposo" value={formData.fcReposo} onChange={handleChange} className="w-20 px-3 py-2 bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-700 rounded-lg text-sm font-mono text-right outline-none focus:border-blue-500 transition-all" />
                                             <span className="text-sm text-slate-500 font-medium">bpm</span>
                                         </div>
                                     </div>
@@ -658,7 +658,7 @@ export const ProfilePage = ({ currentSettings, currentMetrics, onUpdate, activit
                                         </div>
                                         <div className="flex items-center gap-2">
                                             <input 
-                                                type="number" step="1" value={targetCtl ?? ''} onChange={(e) => setTargetCtl(e.target.value ? parseInt(e.target.value) : null)} placeholder="Auto"
+                                                type="number" inputMode="numeric" step="1" value={targetCtl ?? ''} onChange={(e) => setTargetCtl(e.target.value ? parseInt(e.target.value) : null)} placeholder="Auto"
                                                 className="w-24 px-3 py-2 bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-700 rounded-lg text-sm font-mono text-right outline-none focus:border-blue-500 transition-all" 
                                             />
                                         </div>
