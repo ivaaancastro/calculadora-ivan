@@ -20,12 +20,51 @@ const decodePolyline = (str, precision = 5) => {
 
 export const MapBounds = ({ bounds }) => {
     const map = useMap();
-    useEffect(() => { if (bounds && bounds.length > 0) map.fitBounds(bounds, { padding: [30, 30] }); }, [map, bounds]);
+    useEffect(() => { 
+        if (bounds && bounds.length > 0) {
+            map.invalidateSize();
+            map.fitBounds(bounds, { padding: [30, 30] }); 
+            const t = setTimeout(() => {
+                map.invalidateSize();
+                map.fitBounds(bounds, { padding: [30, 30] });
+            }, 150);
+            const t2 = setTimeout(() => {
+                map.invalidateSize();
+            }, 400);
+            return () => {
+                clearTimeout(t);
+                clearTimeout(t2);
+            };
+        }
+    }, [map, bounds]);
+    return null;
+};
+
+const MapResizer = () => {
+    const map = useMap();
+    useEffect(() => {
+        const update = () => {
+            if (map) {
+                map.invalidateSize();
+            }
+        };
+        update();
+        const t1 = setTimeout(update, 100);
+        const t2 = setTimeout(update, 350);
+        const t3 = setTimeout(update, 800);
+        window.addEventListener('resize', update);
+        return () => {
+            clearTimeout(t1);
+            clearTimeout(t2);
+            clearTimeout(t3);
+            window.removeEventListener('resize', update);
+        };
+    }, [map]);
     return null;
 };
 
 export const InteractiveMap = ({ polyline, highResCoords, color, currentPosition }) => {
-    const [mapType, setMapType] = useState('dark');
+    const [mapType, setMapType] = useState('light');
 
     const coords = useMemo(() => {
         if (highResCoords && highResCoords.length > 0) return highResCoords;
@@ -34,9 +73,10 @@ export const InteractiveMap = ({ polyline, highResCoords, color, currentPosition
     }, [polyline, highResCoords]);
 
     if (!coords || coords.length === 0) return (
-        <div className="w-full h-full flex flex-col items-center justify-center bg-slate-50 dark:bg-zinc-900 rounded-lg border border-slate-200 dark:border-zinc-800">
-            <MapPin size={24} className="text-slate-400 dark:text-zinc-600 mb-2" />
-            <span className="text-slate-500 dark:text-zinc-500 font-bold text-xs uppercase tracking-widest">Sin datos GPS</span>
+        <div className="w-full h-full min-h-[350px] flex flex-col items-center justify-center bg-slate-50 dark:bg-zinc-900 rounded-2xl border border-slate-200 dark:border-zinc-800 p-8 text-center">
+            <MapPin size={32} className="text-slate-400 dark:text-zinc-600 mb-2" />
+            <span className="text-slate-700 dark:text-zinc-300 font-bold text-sm">Sin datos GPS</span>
+            <p className="text-slate-400 dark:text-zinc-500 text-xs mt-1 max-w-xs">Esta actividad no contiene coordenadas de ruta o track GPS.</p>
         </div>
     );
 
@@ -81,6 +121,7 @@ export const InteractiveMap = ({ polyline, highResCoords, color, currentPosition
                     </>
                 )}
                 <MapBounds bounds={coords} />
+                <MapResizer />
             </MapContainer>
         </div>
     );

@@ -3,11 +3,11 @@ import { Info } from 'lucide-react';
 import { formatMinsToHMM } from '../../utils/formatters';
 
 export const MetricCard = ({ label, value, unit, accent, className = '' }) => (
-    <div className={`flex flex-col shrink-0 py-1.5 px-3 bg-slate-50 dark:bg-zinc-900/60 rounded-xl border border-slate-200/70 dark:border-zinc-800/60 shadow-xs select-none transition-colors ${className}`}>
-        <span className="text-[9px] font-bold text-slate-400 dark:text-zinc-500 uppercase tracking-wider whitespace-nowrap">{label}</span>
-        <div className="flex items-baseline gap-1 whitespace-nowrap mt-0.5">
-            <span className={`text-sm font-bold tracking-tight tabular-nums ${accent || 'text-slate-900 dark:text-zinc-100'}`}>{value}</span>
-            {unit && <span className="text-[9px] font-semibold text-slate-400 dark:text-zinc-500">{unit}</span>}
+    <div className={`flex flex-col py-2 px-2.5 sm:px-3 bg-white dark:bg-[#1c1c1e] rounded-xl sm:rounded-2xl border border-black/[0.04] dark:border-white/[0.07] shadow-xs select-none transition-all justify-between ${className}`}>
+        <span className="text-[9px] font-semibold text-slate-400 dark:text-zinc-500 uppercase tracking-wider truncate">{label}</span>
+        <div className="flex items-baseline gap-1 truncate mt-0.5">
+            <span className={`text-sm sm:text-base font-bold tracking-tight tabular-nums truncate ${accent || 'text-slate-900 dark:text-white'}`}>{value}</span>
+            {unit && <span className="text-[9px] font-medium text-slate-400 dark:text-zinc-500 shrink-0">{unit}</span>}
         </div>
     </div>
 );
@@ -15,9 +15,9 @@ export const MetricCard = ({ label, value, unit, accent, className = '' }) => (
 export const PillTab = ({ active, label, onClick }) => (
     <button 
         onClick={onClick}
-        className={`px-3 sm:px-5 py-1.5 text-xs font-semibold rounded-md sm:rounded-full whitespace-nowrap shrink-0 transition-all duration-200 ${active 
-            ? 'bg-white dark:bg-zinc-800 text-slate-900 dark:text-zinc-100 shadow-sm' 
-            : 'text-slate-400 dark:text-zinc-500 hover:text-slate-700 dark:hover:text-zinc-300'}`}
+        className={`px-3 sm:px-4 py-1 text-xs font-semibold rounded-full whitespace-nowrap shrink-0 transition-all duration-200 select-none active:scale-95 ${active 
+            ? 'bg-white dark:bg-[#2c2c2e] text-slate-900 dark:text-white shadow-xs font-bold' 
+            : 'text-slate-500 dark:text-zinc-400 hover:text-slate-800 dark:hover:text-zinc-200'}`}
     >
         {label}
     </button>

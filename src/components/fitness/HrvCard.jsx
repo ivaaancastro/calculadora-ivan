@@ -16,7 +16,7 @@ export const HrvCard = ({ hrv }) => {
                     {hrv.source === 'garmin' && (
                         <div className="flex items-center gap-1.5 px-3 py-1 bg-blue-50 dark:bg-blue-900/20 rounded-full border border-blue-100 dark:border-blue-800/50">
                             <ShieldCheck size={10} className="text-blue-500" />
-                            <span className="text-[9px] font-bold text-blue-600 dark:text-blue-400 uppercase tracking-tighter">Sincronizado con Garmin</span>
+                            <span className="text-[9px] font-bold text-blue-600 dark:text-blue-400 uppercase tracking-tighter">Biometría Sincronizada</span>
                         </div>
                     )}
                 </div>
