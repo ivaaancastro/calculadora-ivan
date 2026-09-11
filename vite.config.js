@@ -9,14 +9,15 @@ export default defineConfig({
     ...(process.env.VITEST ? [] : [
       VitePWA({
         registerType: 'autoUpdate',
-        includeAssets: ['favicon.svg', 'apple-touch-icon.png'],
+        includeAssets: ['favicon.svg', 'favicon-32x32.png', 'favicon-64x64.png', 'apple-touch-icon.png', 'apple-touch-icon-precomposed.png'],
         manifest: {
-          name: 'Forma',
+          name: 'Forma - Rendimiento Deportivo',
           short_name: 'Forma',
-          description: 'Dashboard de rendimiento deportivo',
-          theme_color: '#0f172a',
-          background_color: '#0f172a',
+          description: 'Dashboard de rendimiento deportivo y salud',
+          theme_color: '#06080f',
+          background_color: '#06080f',
           display: 'standalone',
+          orientation: 'portrait',
           icons: [
             {
               src: 'pwa-192x192.png',
@@ -27,7 +28,13 @@ export default defineConfig({
               src: 'pwa-512x512.png',
               sizes: '512x512',
               type: 'image/png',
-              purpose: 'any maskable'
+              purpose: 'any'
+            },
+            {
+              src: 'pwa-512x512.png',
+              sizes: '512x512',
+              type: 'image/png',
+              purpose: 'maskable'
             }
           ]
         }
