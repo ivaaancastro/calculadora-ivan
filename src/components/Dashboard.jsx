@@ -253,6 +253,7 @@ const Dashboard = () => {
                     isDeepSyncing={isDeepSyncing}
                     deepSyncProgress={deepSyncProgress}
                     onDeepSync={handleDeepSync}
+                    section={new URLSearchParams(location.search).get('section') || 'general'}
                   />
                 </Suspense>
               </ErrorBoundary>
