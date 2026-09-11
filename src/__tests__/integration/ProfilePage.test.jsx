@@ -7,6 +7,7 @@ import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { ProfilePage } from '../../../src/components/pages/ProfilePage';
+import { MemoryRouter } from 'react-router-dom';
 import { supabase } from '../../../src/supabase';
 
 vi.mock('../../../src/supabase', () => ({
@@ -77,7 +78,11 @@ describe('ProfilePage - Integración', () => {
 
     it('debería revocar el acceso a Strava y llamar a delete_user al eliminar cuenta', async () => {
         const user = userEvent.setup();
-        const { container } = render(<ProfilePage currentSettings={{ fcReposo: 50, ftp: 200, lthr: 170, max: 190 }} activities={[]} />);
+        const { container } = render(
+            <MemoryRouter>
+                <ProfilePage currentSettings={{ fcReposo: 50, ftp: 200, lthr: 170, max: 190 }} activities={[]} />
+            </MemoryRouter>
+        );
         console.log("RENDERED HTML:", container.innerHTML);
 
         // Ir a la pestaña de Seguridad y Datos

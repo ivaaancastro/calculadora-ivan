@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { useSearchParams } from 'react-router-dom';
 import { Save, Activity, Heart, Zap, Database, Loader2, RefreshCw, CheckCircle2, ArrowLeft, Lock, Key, Bike, Footprints, Weight, Link2, Timer, Gauge, Cloud, Wifi, Trash2, AlertTriangle, User, Camera, Mail } from 'lucide-react';
 import { supabase } from '../../supabase';
 import toast from 'react-hot-toast';
@@ -294,25 +293,56 @@ const SECTION_NAMES = {
     security: 'Seguridad y Datos'
 };
 
-export const ProfilePage = ({ currentSettings, currentMetrics, onUpdate, activities, isDeepSyncing,  onDeepSync, onBack }) => {
-    const [searchParams, setSearchParams] = useSearchParams();
-    const sectionParam = searchParams.get('section');
+export const ProfilePage = ({ 
+    currentSettings, 
+    currentMetrics, 
+    onUpdate, 
+    activities, 
+    isDeepSyncing,  
+    onDeepSync, 
+    onBack,
+    section: propSection
+}) => {
+    const getInitialSection = () => {
+        if (propSection && ['general', 'zones', 'integrations', 'security'].includes(propSection)) {
+            return propSection;
+        }
+        if (typeof window !== 'undefined' && window.location) {
+            try {
+                const params = new URLSearchParams(window.location.search);
+                const sec = params.get('section');
+                if (sec && ['general', 'zones', 'integrations', 'security'].includes(sec)) {
+                    return sec;
+                }
+            } catch {
+                // Ignore URL parsing errors in non-browser test runners
+            }
+        }
+        return 'general';
+    };
+
     const [formData, setFormData] = useState(null);
     const [targetCtl, setTargetCtl] = useState(null); // Managed separately for calibration logic
     const [activeTab, setActiveTab] = useState('run');
-    const [activeSection, setActiveSection] = useState(
-        (sectionParam && ['general', 'zones', 'integrations', 'security'].includes(sectionParam)) ? sectionParam : 'general'
-    );
+    const [activeSection, setActiveSection] = useState(getInitialSection);
 
     useEffect(() => {
-        if (sectionParam && ['general', 'zones', 'integrations', 'security'].includes(sectionParam)) {
-            setActiveSection(sectionParam);
+        if (propSection && ['general', 'zones', 'integrations', 'security'].includes(propSection)) {
+            setActiveSection(propSection);
         }
-    }, [sectionParam]);
+    }, [propSection]);
 
     const handleSectionChange = (sectionId) => {
         setActiveSection(sectionId);
-        setSearchParams({ section: sectionId });
+        if (typeof window !== 'undefined' && window.location && window.history) {
+            try {
+                const url = new URL(window.location.href);
+                url.searchParams.set('section', sectionId);
+                window.history.replaceState({}, '', url.toString());
+            } catch {
+                // Ignore history update errors in non-browser envs
+            }
+        }
     };
 
     const [isScanning, setIsScanning] = useState(false);
@@ -946,7 +976,7 @@ export const ProfilePage = ({ currentSettings, currentMetrics, onUpdate, activit
                                             <AlertTriangle size={15} strokeWidth={2.3} />
                                         </div>
                                         <div>
-                                            <h3 className="text-xs sm:text-sm font-bold text-red-600 dark:text-red-400">Eliminar Cuenta</h3>
+                                            <h3 className="text-xs sm:text-sm font-bold text-red-600 dark:text-red-400">Eliminar cuenta definitivamente</h3>
                                             <p className="text-[10px] text-slate-400 dark:text-zinc-500">Se eliminarán todas tus actividades y métricas</p>
                                         </div>
                                     </div>
@@ -955,7 +985,7 @@ export const ProfilePage = ({ currentSettings, currentMetrics, onUpdate, activit
                                         disabled={isDeletingAccount}
                                         className="w-full py-2 bg-red-600 hover:bg-red-700 text-white rounded-xl text-xs font-semibold transition-all disabled:opacity-50 flex items-center justify-center gap-1.5 shadow-xs active:scale-95"
                                     >
-                                        {isDeletingAccount ? <Loader2 size={13} className="animate-spin" /> : <><Trash2 size={13} /> Eliminar Definitivamente</>}
+                                        {isDeletingAccount ? <Loader2 size={13} className="animate-spin" /> : <><Trash2 size={13} /> Eliminar Cuenta</>}
                                     </button>
                                 </div>
                             </div>
