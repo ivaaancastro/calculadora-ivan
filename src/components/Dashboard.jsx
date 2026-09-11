@@ -1,4 +1,4 @@
-import React, { useState, useCallback, Suspense, lazy } from "react";
+import React, { useState, useCallback, useMemo, Suspense, lazy } from "react";
 import { Routes, Route, useNavigate, useParams, Navigate, useLocation } from "react-router-dom";
 import {
   Loader2,
@@ -6,10 +6,12 @@ import {
   Plus,
 } from "lucide-react";
 import { useActivities } from "../hooks/useActivities";
+import { useSwipeNavigation } from "../hooks/useSwipeNavigation";
 
 // Componentes siempre cargados (shell de la app)
 import { Navbar } from "./dashboard/Navbar";
 import { BottomNav } from "./layout/BottomNav";
+import { MobileSwipePager } from "./layout/MobileSwipePager";
 import { AdvancedAnalytics } from "./dashboard/AdvancedAnalytics";
 import { HistoryList } from "./dashboard/HistoryList";
 import AddActivityModal from "./modals/AddActivityModal";
@@ -32,7 +34,6 @@ const LazyFallback = () => (
 // Wrapper para inyectar la actividad basada en el ID de la URL
 const ActivityRouteWrapper = ({ activities, settings, fetchActivityStreams, deleteActivity }) => {
   const { id } = useParams();
-  const navigate = useNavigate();
   const activity = activities.find(a => String(a.id) === id);
 
   if (!activity) {
@@ -45,12 +46,8 @@ const ActivityRouteWrapper = ({ activities, settings, fetchActivityStreams, dele
         <ActivityDetailPage
           activity={activity}
           settings={settings}
-          fetchStreams={fetchActivityStreams}
-          onBack={() => navigate(-1)}
-          onDelete={(id) => {
-            deleteActivity(id);
-            navigate("/history", { replace: true });
-          }}
+          fetchActivityStreams={fetchActivityStreams}
+          deleteActivity={deleteActivity}
         />
       </Suspense>
     </ErrorBoundary>
@@ -63,17 +60,17 @@ const Dashboard = () => {
     loading,
     uploading,
     uploadStatus,
-    timeRange,
-    settings,
-    setTimeRange,
     handleClearDb,
-    fetchActivities,
-    currentMetrics,
-    chartData,
+    settings,
+    timeRange,
+    setTimeRange,
     isStravaConnected,
     handleStravaSync,
+    fetchActivities,
     deleteActivity,
     fetchActivityStreams,
+    chartData,
+    currentMetrics,
     isDeepSyncing,
     deepSyncProgress,
     handleDeepSync,
@@ -91,10 +88,26 @@ const Dashboard = () => {
   const location = useLocation();
   const navigate = useNavigate();
 
+  // Gestos táctiles laterales para retroceder desde el borde en subpáginas
+  useSwipeNavigation();
+
   const handleSelectActivity = useCallback((act) => navigate(`/activity/${act.id}`), [navigate]);
   const handleOpenModal = useCallback(() => setIsModalOpen(true), []);
   const handleCloseModal = useCallback(() => setIsModalOpen(false), []);
   const handleBackFromProfile = useCallback(() => navigate("/"), [navigate]);
+
+  const TAB_PATHS = useMemo(() => ['/', '/stats', '/calendar', '/health', '/history'], []);
+  const isSubPage = location.pathname.startsWith("/activity/") || location.pathname === "/profile";
+  const currentTabIndex = TAB_PATHS.indexOf(location.pathname);
+  const activeTabIndex = currentTabIndex === -1 ? 0 : currentTabIndex;
+
+  const handleMobileTabChange = useCallback((newIndex, customPath) => {
+    const targetPath = customPath || TAB_PATHS[newIndex] || '/';
+    if (location.pathname !== targetPath) {
+      navigate(targetPath);
+      window.scrollTo({ top: 0, behavior: 'instant' });
+    }
+  }, [TAB_PATHS, location.pathname, navigate]);
 
   if (loading && !uploading) {
     return (
@@ -109,10 +122,94 @@ const Dashboard = () => {
 
   const isActivityPage = location.pathname.startsWith("/activity/");
 
+  // Renderizado de las 5 vistas principales
+  const renderAdvancedAnalytics = (
+    <div className="space-y-4 animate-in fade-in duration-200">
+      <AdvancedAnalytics
+        activities={activities}
+        settings={settings}
+        onSelectActivity={handleSelectActivity}
+        timeRange={timeRange}
+        setTimeRange={setTimeRange}
+        chartData={chartData}
+        currentMetrics={currentMetrics}
+      />
+    </div>
+  );
+
+  const renderFitnessStats = (
+    <ErrorBoundary>
+      <Suspense fallback={<LazyFallback />}>
+        <FitnessStatsPage
+          activities={activities}
+          settings={settings}
+          chartData={chartData}
+          onSelectActivity={handleSelectActivity}
+          loadHistoricalStreams={loadHistoricalStreams}
+          isLoadingHistoricalStreams={isLoadingHistoricalStreams}
+          hasLoadedHistoricalStreams={hasLoadedHistoricalStreams}
+          handleDeepSync={handleDeepSync}
+          isDeepSyncing={isDeepSyncing}
+          deepSyncProgress={deepSyncProgress}
+        />
+      </Suspense>
+    </ErrorBoundary>
+  );
+
+  const renderCalendar = (
+    <ErrorBoundary>
+      <Suspense fallback={<LazyFallback />}>
+        <CalendarPage
+          activities={activities}
+          plannedWorkouts={plannedWorkouts}
+          addPlannedWorkout={addPlannedWorkout}
+          deletePlannedWorkout={deletePlannedWorkout}
+          updatePlannedWorkout={updatePlannedWorkout}
+          currentMetrics={currentMetrics}
+          settings={settings}
+          chartData={chartData}
+          onDelete={deleteActivity}
+          onSelectActivity={handleSelectActivity}
+        />
+      </Suspense>
+    </ErrorBoundary>
+  );
+
+  const renderHealth = (
+    <ErrorBoundary>
+      <Suspense fallback={<LazyFallback />}>
+        <HealthPage activities={activities} settings={settings} chartData={chartData} />
+      </Suspense>
+    </ErrorBoundary>
+  );
+
+  const renderHistory = (
+    <>
+      <div className="flex justify-end mb-3">
+        <button
+          onClick={handleOpenModal}
+          className="py-1.5 px-3 bg-white dark:bg-zinc-900 text-slate-800 dark:text-zinc-200 border border-slate-200 dark:border-zinc-700 rounded-full text-[10px] font-bold uppercase flex items-center gap-1.5 hover:bg-slate-50 dark:hover:bg-zinc-800 transition-colors shadow-2xs active:scale-95"
+        >
+          <Plus size={14} /> Añadir Manual
+        </button>
+      </div>
+      <div className="h-[calc(100dvh-170px)] sm:h-[calc(100vh-250px)]">
+        <ErrorBoundary>
+          <HistoryList
+            activities={activities}
+            onDelete={deleteActivity}
+            onSelectActivity={handleSelectActivity}
+          />
+        </ErrorBoundary>
+      </div>
+    </>
+  );
+
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-zinc-950 text-slate-800 dark:text-zinc-200 font-sans pb-safe-nav md:pb-12 transition-colors duration-300 selection:bg-blue-500/30 overflow-x-hidden">
+    <div className="min-h-screen bg-slate-50 dark:bg-zinc-950 text-slate-800 dark:text-zinc-200 font-sans md:pb-12 transition-colors duration-300 selection:bg-blue-500/30 overflow-x-hidden">
       <Navbar
         activities={activities}
+        settings={settings}
         uploading={uploading}
         handleClearDb={handleClearDb}
         onAddClick={handleOpenModal}
@@ -126,7 +223,7 @@ const Dashboard = () => {
         </div>
       )}
 
-      <main className={`w-full max-w-[1800px] mx-auto ${isActivityPage ? 'px-2 sm:px-4 py-0 sm:py-2' : 'px-3 sm:px-6 py-3 sm:py-6 space-y-4'}`}>
+      <main className={`w-full max-w-[1800px] mx-auto ${isActivityPage ? 'px-2 sm:px-4 py-0 sm:py-2' : 'px-0 sm:px-6 py-2 sm:py-6'}`}>
         {activities.length === 0 ? (
           <div className="text-center py-20 px-4">
             <div className="bg-white dark:bg-zinc-900 rounded-lg border border-slate-200 dark:border-zinc-800 p-8 max-w-md mx-auto">
@@ -142,90 +239,8 @@ const Dashboard = () => {
               </p>
             </div>
           </div>
-        ) : (
+        ) : isSubPage ? (
           <Routes>
-            <Route path="/" element={
-              <div className="space-y-4 animate-in fade-in duration-300">
-                <AdvancedAnalytics
-                  activities={activities}
-                  settings={settings}
-                  onSelectActivity={handleSelectActivity}
-                  timeRange={timeRange}
-                  setTimeRange={setTimeRange}
-                  chartData={chartData}
-                  currentMetrics={currentMetrics}
-                />
-              </div>
-            } />
-            
-            <Route path="/stats" element={
-              <ErrorBoundary>
-                <Suspense fallback={<LazyFallback />}>
-                  <FitnessStatsPage
-                    activities={activities}
-                    settings={settings}
-                    chartData={chartData}
-                    onSelectActivity={handleSelectActivity}
-                    loadHistoricalStreams={loadHistoricalStreams}
-                    isLoadingHistoricalStreams={isLoadingHistoricalStreams}
-                    hasLoadedHistoricalStreams={hasLoadedHistoricalStreams}
-                    handleDeepSync={handleDeepSync}
-                    isDeepSyncing={isDeepSyncing}
-                    deepSyncProgress={deepSyncProgress}
-                  />
-                </Suspense>
-              </ErrorBoundary>
-            } />
-            
-            <Route path="/calendar" element={
-              <ErrorBoundary>
-                <Suspense fallback={<LazyFallback />}>
-                  <CalendarPage
-                    activities={activities}
-                    plannedWorkouts={plannedWorkouts}
-                    addPlannedWorkout={addPlannedWorkout}
-                    deletePlannedWorkout={deletePlannedWorkout}
-                    updatePlannedWorkout={updatePlannedWorkout}
-                    currentMetrics={currentMetrics}
-                    settings={settings}
-                    chartData={chartData}
-                    onDelete={deleteActivity}
-                    onSelectActivity={handleSelectActivity}
-                  />
-                </Suspense>
-              </ErrorBoundary>
-            } />
-            
-            <Route path="/history" element={
-              <>
-                <div className="flex justify-end mb-4">
-                  <button
-                    onClick={handleOpenModal}
-                    className="py-1.5 px-3 bg-white dark:bg-zinc-900 text-slate-800 dark:text-zinc-200 border border-slate-200 dark:border-zinc-700 rounded text-[10px] font-bold uppercase flex items-center gap-1.5 hover:bg-slate-50 dark:hover:bg-zinc-800 transition-colors"
-                  >
-                    <Plus size={14} /> Añadir Manual
-                  </button>
-                </div>
-                <div className="h-[calc(100vh-250px)]">
-                  <ErrorBoundary>
-                    <HistoryList
-                      activities={activities}
-                      onDelete={deleteActivity}
-                      onSelectActivity={handleSelectActivity}
-                    />
-                  </ErrorBoundary>
-                </div>
-              </>
-            } />
-            
-            <Route path="/health" element={
-              <ErrorBoundary>
-                <Suspense fallback={<LazyFallback />}>
-                  <HealthPage activities={activities} settings={settings} chartData={chartData} />
-                </Suspense>
-              </ErrorBoundary>
-            } />
-            
             <Route path="/profile" element={
               <ErrorBoundary>
                 <Suspense fallback={<LazyFallback />}>
@@ -238,11 +253,11 @@ const Dashboard = () => {
                     isDeepSyncing={isDeepSyncing}
                     deepSyncProgress={deepSyncProgress}
                     onDeepSync={handleDeepSync}
+                    section={new URLSearchParams(location.search).get('section') || 'general'}
                   />
                 </Suspense>
               </ErrorBoundary>
             } />
-            
             <Route path="/activity/:id" element={
               <ActivityRouteWrapper 
                 activities={activities}
@@ -252,11 +267,38 @@ const Dashboard = () => {
               />
             } />
           </Routes>
+        ) : (
+          <>
+            {/* VISTA MÓVIL: DESLIZAMIENTO TÁCTIL EN TIEMPO REAL 1:1 ACOMPAÑANDO AL DEDO */}
+            <div className="block md:hidden">
+              <MobileSwipePager activeIndex={activeTabIndex} onChangeTab={handleMobileTabChange}>
+                {renderAdvancedAnalytics}
+                {renderFitnessStats}
+                {renderCalendar}
+                {renderHealth}
+                {renderHistory}
+              </MobileSwipePager>
+            </div>
+
+            {/* VISTA ESCRITORIO: NAVEGACIÓN ESTÁNDAR POR RUTAS */}
+            <div className="hidden md:block">
+              <Routes>
+                <Route path="/" element={renderAdvancedAnalytics} />
+                <Route path="/stats" element={renderFitnessStats} />
+                <Route path="/calendar" element={renderCalendar} />
+                <Route path="/health" element={renderHealth} />
+                <Route path="/history" element={renderHistory} />
+              </Routes>
+            </div>
+          </>
         )}
       </main>
 
-      {/* BOTTOM NAV PARA MÓVIL */}
-      <BottomNav />
+      {/* BOTTOM NAV PARA MÓVIL FLOTANTE LIQUID GLASS */}
+      <BottomNav
+        activeIndex={isSubPage ? undefined : activeTabIndex}
+        onTabChange={handleMobileTabChange}
+      />
 
       {/* MODAL PARA AÑADIR MANUALMENTE */}
       <AddActivityModal

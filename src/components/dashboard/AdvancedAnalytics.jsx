@@ -119,73 +119,178 @@ export const AdvancedAnalytics = React.memo(({ activities, settings,  timeRange,
 
     if (!activities || activities.length === 0) return null;
 
-    return (
-        <div className="space-y-12 pb-12">
-            {/* ZONA 1: CARGA Y RENDIMIENTO (PMC) */}
-            <div className="space-y-6">
-                <div className="flex flex-col md:flex-row md:items-end justify-between items-start gap-4">
-                    <div>
-                        <h2 className="text-xl font-semibold text-slate-900 dark:text-zinc-100 tracking-tight">
-                            Carga y Rendimiento
-                        </h2>
-                        <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400 dark:text-zinc-500">
-                            Evolución de fitness, fatiga y forma · Fórmula Intervals.icu
-                        </p>
-                    </div>
+    const fitnessStatus = (() => {
+        const tsb = model.tsb;
+        if (tsb > 25) return { label: 'Transición', desc: 'Pérdida de forma por descanso', badge: 'text-slate-600 dark:text-zinc-400 bg-slate-100 dark:bg-zinc-800/80 border-slate-200/60 dark:border-zinc-700/60' };
+        if (tsb >= 5) return { label: 'Pico de Forma', desc: 'Fresco y listo para competir al máximo', badge: 'text-[#30D158] bg-[#30D158]/10 border-[#30D158]/25 dark:bg-[#30D158]/15' };
+        if (tsb >= -10) return { label: 'Zona Productiva', desc: 'Balance óptimo entre carga y adaptación', badge: 'text-[#0A84FF] bg-[#0A84FF]/10 border-[#0A84FF]/25 dark:bg-[#0A84FF]/15' };
+        if (tsb >= -30) return { label: 'Sobrecarga', desc: 'Fatiga alta, programa recuperación', badge: 'text-[#FF9F0A] bg-[#FF9F0A]/10 border-[#FF9F0A]/25 dark:bg-[#FF9F0A]/15' };
+        return { label: 'Fatiga Crítica', desc: 'Riesgo de sobreentrenamiento', badge: 'text-[#FA114F] bg-[#FA114F]/10 border-[#FA114F]/25 dark:bg-[#FA114F]/15' };
+    })();
 
-                    <div className="flex items-center gap-2 sm:gap-3 w-full sm:w-auto justify-end">
-                        <div className="flex bg-slate-200/50 dark:bg-zinc-800/50 backdrop-blur-md p-1 rounded-xl shadow-inner w-full sm:w-auto justify-between sm:justify-start">
-                            {[
-                                { id: "7d", label: "7D" },
-                                { id: "30d", label: "30D" },
-                                { id: "90d", label: "3M" },
-                                { id: "all", label: "Todo" },
-                            ].map((t) => (
-                                <button
-                                    key={t.id}
-                                    onClick={() => setTimeRange(t.id)}
-                                    className={`flex-1 sm:flex-initial px-3.5 py-1.5 min-h-[32px] text-xs font-semibold transition-all rounded-lg select-none touch-manipulation active:scale-95 ${timeRange === t.id
-                                        ? "bg-white dark:bg-[#2c2c2e] text-slate-900 dark:text-white shadow hover:shadow-md font-bold"
-                                        : "text-slate-500 dark:text-zinc-400 hover:text-slate-800 dark:hover:text-zinc-200"
-                                        }`}
-                                >
-                                    {t.label}
-                                </button>
-                            ))}
+    return (
+        <div className="space-y-6 sm:space-y-8 pb-8">
+            {/* HERO: ESTADO DE FORMA ESTILO APPLE FITNESS */}
+            <div className="ios-card p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-blue-500/20 to-indigo-500/20 text-blue-600 dark:text-blue-400 flex items-center justify-center shrink-0 shadow-2xs">
+                        <ActivityPulse size={20} strokeWidth={2.3} />
+                    </div>
+                    <div>
+                        <div className="flex items-center gap-2">
+                            <h2 className="text-base sm:text-lg font-bold text-slate-900 dark:text-white tracking-tight">
+                                Estado de Forma
+                            </h2>
+                            <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${fitnessStatus.badge} uppercase tracking-wider`}>
+                                {fitnessStatus.label}
+                            </span>
                         </div>
+                        <p className="text-xs text-slate-500 dark:text-zinc-400 mt-0.5">
+                            {fitnessStatus.desc}
+                        </p>
                     </div>
                 </div>
 
-                <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-4 gap-2 sm:gap-3">
+                {/* Apple Segmented Control para Rango de Tiempo - En Desktop permanece en la cabecera */}
+                <div className="hidden md:flex items-center self-end sm:self-center w-auto">
+                    <div className="flex bg-slate-200/60 dark:bg-zinc-800/70 p-1 rounded-full backdrop-blur-md w-auto justify-start shadow-xs">
+                        {[
+                            { id: "7d", label: "7D" },
+                            { id: "30d", label: "30D" },
+                            { id: "90d", label: "3M" },
+                            { id: "all", label: "Todo" },
+                        ].map((t) => (
+                            <button
+                                key={t.id}
+                                onClick={() => setTimeRange(t.id)}
+                                className={`px-3.5 py-1 min-h-[30px] text-xs font-semibold transition-all rounded-full select-none touch-manipulation active:scale-95 ${timeRange === t.id
+                                    ? "bg-white dark:bg-[#2c2c2e] text-slate-900 dark:text-white shadow-xs font-bold"
+                                    : "text-slate-500 dark:text-zinc-400 hover:text-slate-800 dark:hover:text-zinc-200"
+                                    }`}
+                            >
+                                {t.label}
+                            </button>
+                        ))}
+                    </div>
+                </div>
+            </div>
+
+            {/* SECCIÓN 1: MÉTRICAS CLAVE (APPLE HEALTH CARDS) */}
+            <div>
+                <p className="ios-header">Fisiología y Carga</p>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-2.5 sm:gap-3">
+                    {/* Fitness (CTL) */}
+                    <div className="ios-card ios-touch p-3.5 sm:p-4 flex flex-col justify-between">
+                        <div className="flex items-center justify-between mb-2">
+                            <span className="text-[11px] font-semibold text-slate-500 dark:text-zinc-400">Fitness (CTL)</span>
+                            <div className="w-7 h-7 rounded-xl bg-blue-500/10 text-blue-600 dark:text-blue-400 flex items-center justify-center">
+                                <Activity size={15} strokeWidth={2.3} />
+                            </div>
+                        </div>
+                        <div>
+                            <div className="text-2xl sm:text-3xl font-bold tracking-tight text-slate-900 dark:text-white tabular-nums">
+                                {Math.round(model.ctl)}
+                            </div>
+                            <span className="text-[10px] font-medium text-slate-400 dark:text-zinc-500">
+                                {model.loadTrend >= 0 ? '+' : ''}{model.loadTrend.toFixed(1)}% vs 28d
+                            </span>
+                        </div>
+                    </div>
+
+                    {/* Fatiga (ATL) */}
+                    <div className="ios-card ios-touch p-3.5 sm:p-4 flex flex-col justify-between">
+                        <div className="flex items-center justify-between mb-2">
+                            <span className="text-[11px] font-semibold text-slate-500 dark:text-zinc-400">Fatiga (ATL)</span>
+                            <div className="w-7 h-7 rounded-xl bg-[#FA114F]/10 text-[#FA114F] flex items-center justify-center">
+                                <Battery size={15} strokeWidth={2.3} />
+                            </div>
+                        </div>
+                        <div>
+                            <div className="text-2xl sm:text-3xl font-bold tracking-tight text-slate-900 dark:text-white tabular-nums">
+                                {Math.round(model.atl)}
+                            </div>
+                            <span className="text-[10px] font-medium text-slate-400 dark:text-zinc-500">
+                                Carga últ. 7 días
+                            </span>
+                        </div>
+                    </div>
+
+                    {/* Forma (TSB) */}
+                    <div className="ios-card ios-touch p-3.5 sm:p-4 flex flex-col justify-between">
+                        <div className="flex items-center justify-between mb-2">
+                            <span className="text-[11px] font-semibold text-slate-500 dark:text-zinc-400">Forma (TSB)</span>
+                            <div className="w-7 h-7 rounded-xl bg-[#30D158]/10 text-[#30D158] flex items-center justify-center">
+                                <Zap size={15} strokeWidth={2.3} />
+                            </div>
+                        </div>
+                        <div>
+                            <div className="text-2xl sm:text-3xl font-bold tracking-tight text-slate-900 dark:text-white tabular-nums">
+                                {(model.tsb > 0 ? '+' : '') + Math.round(model.tsb)}
+                            </div>
+                            <span className="text-[10px] font-medium text-slate-400 dark:text-zinc-500">
+                                Balance CTL / ATL
+                            </span>
+                        </div>
+                    </div>
+
+                    {/* Ratio Carga (ACWR) */}
+                    <div className="ios-card ios-touch p-3.5 sm:p-4 flex flex-col justify-between">
+                        <div className="flex items-center justify-between mb-2">
+                            <span className="text-[11px] font-semibold text-slate-500 dark:text-zinc-400">Ratio Carga</span>
+                            <div className="w-7 h-7 rounded-xl bg-[#FF9F0A]/10 text-[#FF9F0A] flex items-center justify-center">
+                                <Target size={15} strokeWidth={2.3} />
+                            </div>
+                        </div>
+                        <div>
+                            <div className="text-2xl sm:text-3xl font-bold tracking-tight text-slate-900 dark:text-white tabular-nums">
+                                {model.acwr.toFixed(2)}
+                            </div>
+                            <span className="text-[10px] font-medium text-slate-400 dark:text-zinc-500">
+                                Aguda vs Crónica
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {/* SECCIÓN 2: MÉTRICAS SECUNDARIAS */}
+            <div>
+                <p className="ios-header">Tendencia y Capacidad</p>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-2.5 sm:gap-3">
                     {[
-                        { label: 'Fitness (CTL)', value: Math.round(model.ctl), icon: Activity, color: 'text-slate-700 dark:text-zinc-300', sub: `${model.loadTrend >= 0 ? '+' : ''}${model.loadTrend.toFixed(1)}% vs 28d`, tip: "Nivel de condición física basado en los últimos 42 días." },
-                        { label: 'Fatiga (ATL)', value: Math.round(model.atl), icon: Battery, color: 'text-slate-700 dark:text-zinc-300', sub: 'Carga últ. 7 días', tip: "Cansancio acumulado." },
-                        { label: 'Forma (TSB)', value: (model.tsb > 0 ? '+' : '') + Math.round(model.tsb), icon: Zap, color: 'text-slate-700 dark:text-zinc-300', sub: 'Balance Nivel/Fatiga', tip: "Forma actual." },
-                        { label: 'Ratio Carga (ACWR)', value: model.acwr.toFixed(2), icon: Target, color: 'text-slate-700 dark:text-zinc-300', sub: 'Aguda vs Crónica', tip: "Relación ATL/CTL." },
-                        { label: 'Rampa Semanal', value: `${model.rampRate > 0 ? '+' : ''}${model.rampRate.toFixed(1)}`, icon: model.rampRate >= 0 ? ArrowUpRight : ArrowDownRight, color: 'text-slate-500 dark:text-zinc-400', sub: 'pts/sem', tip: "Cuánto sube tu CTL." },
-                        { label: 'Monotonía', value: model.monotony.toFixed(2), icon: Brain, color: 'text-slate-500 dark:text-zinc-400', sub: 'Índice', tip: "Variedad de la carga." },
-                        { label: 'Volumen 30D', value: `${Math.round(model.totalVolume / 60)}h`, icon: CalendarDays, color: 'text-slate-500 dark:text-zinc-400', sub: `${model.totalActivities} actos`, tip: "Horas totales." },
-                        { label: 'VO2 Max (Top)', value: globalMaxVo2 || '--', icon: TrendingUp, color: 'text-slate-500 dark:text-zinc-400', sub: vo2IsGarmin ? 'Garmin Sync' : 'Estimado', tip: "Mejor valor de VO2max." }
+                        { label: 'Rampa Semanal', value: `${model.rampRate > 0 ? '+' : ''}${model.rampRate.toFixed(1)}`, icon: model.rampRate >= 0 ? ArrowUpRight : ArrowDownRight, color: 'text-indigo-500', bg: 'bg-indigo-500/10', sub: 'pts/sem' },
+                        { label: 'Monotonía', value: model.monotony.toFixed(2), icon: Brain, color: 'text-purple-500', bg: 'bg-purple-500/10', sub: 'Índice carga' },
+                        { label: 'Volumen 30D', value: `${Math.round(model.totalVolume / 60)}h`, icon: CalendarDays, color: 'text-cyan-500', bg: 'bg-cyan-500/10', sub: `${model.totalActivities} sesiones` },
+                        { label: 'VO2 Max', value: globalMaxVo2 || '--', icon: TrendingUp, color: 'text-emerald-500', bg: 'bg-emerald-500/10', sub: vo2IsGarmin ? 'Sincronizado' : 'Estimado' }
                     ].map((kpi, i) => (
-                        <div key={i} className="bg-transparent border border-slate-200/80 dark:border-zinc-800 rounded-xl p-2.5 sm:p-3 flex flex-col justify-between group transition-colors hover:border-slate-300 dark:hover:border-zinc-700">
-                            <div className="flex items-center justify-between mb-1.5 opacity-80 group-hover:opacity-100 transition-opacity">
-                                <div className="flex items-center gap-1 sm:gap-1.5 min-w-0">
-                                    <kpi.icon size={12} className={`${kpi.color} shrink-0`} strokeWidth={2} />
-                                    <span className="text-[9px] font-semibold text-slate-500 dark:text-zinc-400 uppercase tracking-widest truncate">{kpi.label}</span>
+                        <div key={i} className="ios-card ios-touch p-3 sm:p-3.5 flex flex-col justify-between">
+                            <div className="flex items-center justify-between mb-1.5">
+                                <span className="text-[10px] font-semibold text-slate-500 dark:text-zinc-400">{kpi.label}</span>
+                                <div className={`w-6 h-6 rounded-lg ${kpi.bg} ${kpi.color} flex items-center justify-center shrink-0`}>
+                                    <kpi.icon size={13} strokeWidth={2.2} />
                                 </div>
                             </div>
-                            <div className="flex items-baseline gap-1 sm:gap-1.5 flex-wrap">
-                                <span className="text-lg sm:text-xl font-medium tracking-tight text-slate-800 dark:text-zinc-200 font-mono">{kpi.value}</span>
-                                {kpi.sub && <span className="text-[8px] sm:text-[9px] font-medium text-slate-400 dark:text-zinc-500 truncate">{kpi.sub}</span>}
+                            <div>
+                                <span className="text-lg sm:text-xl font-bold tracking-tight text-slate-900 dark:text-white tabular-nums">
+                                    {kpi.value}
+                                </span>
+                                {kpi.sub && (
+                                    <p className="text-[9px] font-medium text-slate-400 dark:text-zinc-500 truncate">
+                                        {kpi.sub}
+                                    </p>
+                                )}
                             </div>
                         </div>
                     ))}
                 </div>
+            </div>
 
-
-                <div className="bg-[#f8fafc] dark:bg-[#18181b] border border-slate-200/80 dark:border-zinc-800 rounded-2xl p-2 sm:p-5 shadow-inner">
-                    <div className="h-[260px] sm:h-[320px]">
-                        <EvolutionChart data={chartData} />
+            {/* SECCIÓN 3: GRÁFICA DE EVOLUCIÓN (PMC) */}
+            <div>
+                <p className="ios-header">Evolución de Rendimiento</p>
+                <div className="ios-card p-3 sm:p-5">
+                    <div className="h-[290px] sm:h-[330px]">
+                        <EvolutionChart data={chartData} timeRange={timeRange} setTimeRange={setTimeRange} />
                     </div>
                 </div>
             </div>
