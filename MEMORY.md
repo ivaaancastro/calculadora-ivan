@@ -30,7 +30,7 @@
 ## 3. Especificaciones (docs/specs/)
 | ID | Spec | Estado | Última actualización | Implementada en |
 |----|------|--------|----------------------|-----------------|
-| spec-001 | Servicio de IA con Gemini — respuestas estructuradas | pendiente | 2026-11-05 | — |
+| spec-001 | Servicio de IA con Gemini — respuestas estructuradas | implementada | 2026-11-05 | feat/ai-structured-responses |
 | spec-audit-01 | Seguridad: remover secretos de `.env`, validar env vars al arranque | implementada | 2026-11-05 | fix/security-env-secrets |
 | spec-audit-02 | Cobertura: tests unitarios para utils (tssEngine, parser, formatters, fitnessStatsEngine) | implementada | 2026-11-05 | feat/tests-utils-coverage |
 | spec-audit-03 | Cobertura: tests para `src/services/ai.js` y `src/store/useAppStore.js` | implementada | 2026-11-05 | feat/tests-ai-store-coverage |
@@ -70,7 +70,7 @@
 
 ### Fase 4 — Estabilidad y tipo
 - [x] spec-audit-06: Migración progresiva a TypeScript (utils, store, servicios) (rama `feat/typescript-progreso`)
-- [ ] spec-001: Servicio de IA con Gemini — respuestas estructuradas (pendiente desde v0.1.0)
+- [x] spec-001: Servicio de IA con Gemini — respuestas estructuradas (rama `feat/ai-structured-responses`)
 - [x] spec-audit-07: Consolidar migraciones SQL, unificar `wellness_data`, añadir `schema_migrations` (rama `feat/sql-migrations-versioning`)
 - [ ] spec-audit-08: Hardening Edge Function `intervals-proxy` (rate limiting, validación entrada, timeout)
 
