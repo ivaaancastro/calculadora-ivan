@@ -1,0 +1,13 @@
+{
+  "$schema": "https://opencode.tools/mcp-schema.json",
+  "servers": {
+    "context7": {
+      "description": "Documentación actualizada de librerías del stack (React, Vite, Supabase, Gemini, Playwright, Vitest, etc.). Obligatorio para todos los agentes.",
+      "required": true
+    },
+    "opencode": {
+      "description": "Gestión de worktrees, sesiones, ramas y recursos de OpenCode. Obligatorio para el flujo de agentes y creación de ramas controladas.",
+      "required": true
+    }
+  }
+}
