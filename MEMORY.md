@@ -9,12 +9,12 @@
 - **Sin spec aprobada = sin código de producción.**
 - **Rama base:** todas las ramas de funcionalidad salen de `develop`.
 - **Nunca commitear a `main`:** `main` es producción, desplegado en Vercel.
-- **Merge solo vía PR** a `develop`, aprobado por `review-agent`.
+- **Merge solo vía PR** a `develop`.
 - **Convención de commits:** Conventional Commits (`feat`, `fix`, `docs`, `test`, `chore`, etc.).
 
 ## 1. Estado del proyecto
 - **Nombre:** Forma — Dashboard de rendimiento deportivo y salud
-- **Rama actual:** `feature/sdd-agentes-workflow` (rama de implementación del sistema SDD con agentes)
+- **Rama actual:** `develop`
 - **Rama base:** `develop`
 - **Rama de producción:** `main` (desplegada en Vercel)
 - **Versión:** 0.1.0
@@ -35,11 +35,11 @@
 > Cuando un agente implemente una spec, debe añadir una fila aquí y marcarla como `implementada`.
 
 ## 4. Decisiones tomadas
-- Sistema SDD con 6 agentes: spec-agent, code-agent, db-agent, test-agent, review-agent, doc-agent.
+- Sistema SDD basado en specs en `docs/specs/` y flujo obligatorio definido en `AGENTS.md`.
 - Las specs viven en `docs/specs/` como archivos `.md` o `.json`.
 - `MEMORY.md` es la fuente de verdad del contexto compartido.
-- `AGENTS.md` define roles, flujos, reglas de ramas/commits y estándares.
-- `skills/` contiene las capacidades reutilizables por agente (system prompts + criterios de aceptación).
+- `AGENTS.md` define flujos, reglas de ramas/commits y estándares.
+- `skills/` contiene las capacidades reutilizables (prompts y plantillas).
 - `docs/` aloja arquitectura, specs, guías y API.
 - CI ejecuta en `develop` y en PRs (no solo en `main`).
 - `main` es la rama de producción desplegada en Vercel; no se commitea directamente.
