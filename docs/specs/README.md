@@ -9,6 +9,7 @@ de aceptación.
 | ID | Título | Estado | Última actualización |
 |----|--------|--------|----------------------|
 | spec-001 | Servicio de IA con Gemini — respuestas estructuradas | pendiente | 2026-11-05 |
+| spec-audit-01 | Seguridad: remover secretos de `.env`, agregar a `.gitignore`, crear `.env.example`, validar env vars al arranque | implementada | 2026-11-05 |
 
 ## Cómo agregar una spec nueva
 
