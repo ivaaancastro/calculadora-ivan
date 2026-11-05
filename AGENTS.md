@@ -50,14 +50,34 @@ git push -u origin feature/<nombre-corto>
 Cada agente debe seguir este orden estricto:
 
 ```
-1. Especificar   → escribir/actualizar spec en docs/specs/
-2. Planificar    → leer spec + MEMORY.md, generar plan de tareas
-3. Implementar   → escribir/modificar código siguiendo la spec
-4. Verificar     → correr tests, lint, build, type-check
-5. Registrar     → actualizar CHANGELOG.md, MEMORY.md; marcar spec como implementada
+1. Especificar   → escribir spec en docs/branches/<rama>/spec.md
+2. Planificar    → escribir plan en docs/branches/<rama>/plan.md (leer spec + MEMORY.md)
+3. Presentar     → mostrar spec.md y plan.md al usuario para su aprobación
+4. Tareas        → tras aprobación, crear docs/branches/<rama>/tasks.md con checkboxes
+5. Implementar   → escribir/modificar código siguiendo la spec (solo tras aprobación del usuario y tasks.md creado)
+6. Verificar     → correr tests, lint, build, type-check
+7. Registrar     → actualizar CHANGELOG.md, MEMORY.md; marcar spec como implementada
 ```
 
-**Prohibido:** saltarse el paso 1 (Especificar). Sin spec aprobada, no hay código de producción.
+**Prohibido:** saltarse el paso 3 (Presentar para aprobación). Sin spec y plan presentados y aprobados por el usuario, no se crea tasks.md ni hay código de producción.
+
+### Estructura de documentación por rama
+
+Cada rama de funcionalidad tiene su propia carpeta en `docs/branches/<nombre-rama>/` con:
+
+| Archivo | Propósito | Cuándo se crea |
+|---------|-----------|----------------|
+| `spec.md` | Especificación completa siguiendo la plantilla de `docs/sdd/plantilla-especificacion.md` | Paso 1 (Especificar) |
+| `plan.md` | Plan de tareas derivado de la spec + MEMORY.md | Paso 2 (Planificar) |
+| `tasks.md` | Lista de tareas con checkboxes (`- [ ]` / `- [x]`) para ir marcando el progreso | Paso 4, solo tras aprobación del usuario |
+
+Ejemplo:
+```
+docs/branches/fix/security-env-secrets/
+├── spec.md
+├── plan.md
+└── tasks.md   (solo tras aprobación)
+```
 
 ---
 
