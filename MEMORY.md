@@ -76,7 +76,7 @@
 - [x] spec-audit-08: Hardening Edge Function `intervals-proxy` (rate limiting, validación entrada, timeout) (rama `feat/edge-function-intervals-proxy-hardening`)
 
 ### Pendientes anteriores (mantener)
-- [ ] Migrar lógica de `scratch/*.cjs` a specs documentadas o eliminar.
+- [x] Migrar lógica de `scratch/*.cjs` a specs documentadas o eliminar (rama `feat/scratch-cleanup`).
 - [x] Spec de pruebas E2E críticas (auth, dashboard, Strava sync, exportación de datos) (rama `feat/e2e-critical-flows`)
 
 ## 6. Contexto compartido entre agentes
