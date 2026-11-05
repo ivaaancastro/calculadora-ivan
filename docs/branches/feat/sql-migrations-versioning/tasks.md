@@ -13,7 +13,7 @@
 | 9 | Registrar (MEMORY.md, CHANGELOG.md, docs/specs/README.md, spec.md) | [x] |
 | 10 | Commit `feat(database): ...` y push | [x] |
 | 11 | Abrir PR hacia `develop` | [x] |
-| 12 | Merge a `develop` | [ ] Esperando autorización del usuario |
+| 12 | Merge a `develop` | [x] |
 
 ---
 Versión: 0.1.0 — 2026-11-05
