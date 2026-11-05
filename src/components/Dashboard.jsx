@@ -1,59 +1,46 @@
-import React, { useState, useCallback, useMemo, Suspense, lazy } from "react";
-import { Routes, Route, useNavigate, useParams, Navigate, useLocation } from "react-router-dom";
-import {
-  Loader2,
-  Database,
-  Plus,
-} from "lucide-react";
-import { useActivities } from "../hooks/useActivities";
-import { useSwipeNavigation } from "../hooks/useSwipeNavigation";
+import React, { useState, useCallback, useMemo } from 'react';
+import { Routes, Route, useNavigate, useLocation, Navigate } from 'react-router-dom';
+import { useActivities } from '../hooks/useActivities';
+import { useSwipeNavigation } from '../hooks/useSwipeNavigation';
 
 // Componentes siempre cargados (shell de la app)
-import { Navbar } from "./dashboard/Navbar";
-import { BottomNav } from "./layout/BottomNav";
-import { MobileSwipePager } from "./layout/MobileSwipePager";
-import { AdvancedAnalytics } from "./dashboard/AdvancedAnalytics";
-import { HistoryList } from "./dashboard/HistoryList";
-import AddActivityModal from "./modals/AddActivityModal";
-import { ErrorBoundary } from "./common/ErrorBoundary";
+import { Navbar } from './dashboard/Navbar';
+import { BottomNav } from './layout/BottomNav';
+import { MobileSwipePager } from './layout/MobileSwipePager';
+
+// Subcomponentes extraídos (SRP)
+import { UploadStatusBanner } from './dashboard/UploadStatusBanner';
+import { EmptyState } from './dashboard/EmptyState';
+import { MobileTabsView } from './dashboard/MobileTabsView';
+import { DesktopRoutesView } from './dashboard/DesktopRoutesView';
+import { ActivitySubRoutes } from './dashboard/ActivitySubRoutes';
+import AddActivityModal from './modals/AddActivityModal';
+import { ErrorBoundary } from './common/ErrorBoundary';
 
 // Páginas cargadas bajo demanda (code splitting)
-const CalendarPage = lazy(() => import("./pages/CalendarPage").then(m => ({ default: m.CalendarPage })));
-const ActivityDetailPage = lazy(() => import("./pages/ActivityDetailPage").then(m => ({ default: m.ActivityDetailPage })));
-const ProfilePage = lazy(() => import("./pages/ProfilePage").then(m => ({ default: m.ProfilePage })));
-const HealthPage = lazy(() => import("./pages/HealthPage").then(m => ({ default: m.HealthPage })));
-const FitnessStatsPage = lazy(() => import("./pages/FitnessStatsPage").then(m => ({ default: m.FitnessStatsPage })));
-
-// Fallback minimalista para Suspense
-const LazyFallback = () => (
-  <div className="flex items-center justify-center py-32">
-    <Loader2 className="animate-spin text-blue-500" size={24} />
-  </div>
+const CalendarPage = React.lazy(() =>
+  import('./pages/CalendarPage').then((m) => ({ default: m.CalendarPage }))
+);
+const ActivityDetailPage = React.lazy(() =>
+  import('./pages/ActivityDetailPage').then((m) => ({ default: m.ActivityDetailPage }))
+);
+const ProfilePage = React.lazy(() =>
+  import('./pages/ProfilePage').then((m) => ({ default: m.ProfilePage }))
+);
+const HealthPage = React.lazy(() =>
+  import('./pages/HealthPage').then((m) => ({ default: m.HealthPage }))
+);
+const FitnessStatsPage = React.lazy(() =>
+  import('./pages/FitnessStatsPage').then((m) => ({ default: m.FitnessStatsPage }))
 );
 
-// Wrapper para inyectar la actividad basada en el ID de la URL
-const ActivityRouteWrapper = ({ activities, settings, fetchActivityStreams, deleteActivity }) => {
-  const { id } = useParams();
-  const activity = activities.find(a => String(a.id) === id);
-
-  if (!activity) {
-    return <Navigate to="/history" replace />;
-  }
-
-  return (
-    <ErrorBoundary>
-      <Suspense fallback={<LazyFallback />}>
-        <ActivityDetailPage
-          activity={activity}
-          settings={settings}
-          fetchActivityStreams={fetchActivityStreams}
-          deleteActivity={deleteActivity}
-        />
-      </Suspense>
-    </ErrorBoundary>
-  );
-};
-
+/**
+ * Dashboard — Shell de orquestación.
+ *
+ * Coordina el estado global (useActivities), la navegación y los subcomponentes
+ * extraídos (SRP): Navbar, UploadStatusBanner, MobileTabsView, DesktopRoutesView,
+ * ActivitySubRoutes, BottomNav y AddActivityModal.
+ */
 const Dashboard = () => {
   const {
     activities,
@@ -91,28 +78,33 @@ const Dashboard = () => {
   // Gestos táctiles laterales para retroceder desde el borde en subpáginas
   useSwipeNavigation();
 
-  const handleSelectActivity = useCallback((act) => navigate(`/activity/${act.id}`), [navigate]);
+  const handleSelectActivity = useCallback((act) => navigate(`/activity/${act.id}`), [
+    navigate,
+  ]);
   const handleOpenModal = useCallback(() => setIsModalOpen(true), []);
   const handleCloseModal = useCallback(() => setIsModalOpen(false), []);
-  const handleBackFromProfile = useCallback(() => navigate("/"), [navigate]);
+  const handleBackFromProfile = useCallback(() => navigate('/'), [navigate]);
 
   const TAB_PATHS = useMemo(() => ['/', '/stats', '/calendar', '/health', '/history'], []);
-  const isSubPage = location.pathname.startsWith("/activity/") || location.pathname === "/profile";
+  const isSubPage = location.pathname.startsWith('/activity/') || location.pathname === '/profile';
   const currentTabIndex = TAB_PATHS.indexOf(location.pathname);
   const activeTabIndex = currentTabIndex === -1 ? 0 : currentTabIndex;
 
-  const handleMobileTabChange = useCallback((newIndex, customPath) => {
-    const targetPath = customPath || TAB_PATHS[newIndex] || '/';
-    if (location.pathname !== targetPath) {
-      navigate(targetPath);
-      window.scrollTo({ top: 0, behavior: 'instant' });
-    }
-  }, [TAB_PATHS, location.pathname, navigate]);
+  const handleMobileTabChange = useCallback(
+    (newIndex, customPath) => {
+      const targetPath = customPath || TAB_PATHS[newIndex] || '/';
+      if (location.pathname !== targetPath) {
+        navigate(targetPath);
+        window.scrollTo({ top: 0, behavior: 'instant' });
+      }
+    },
+    [TAB_PATHS, location.pathname, navigate],
+  );
 
   if (loading && !uploading) {
     return (
       <div className="h-screen flex flex-col items-center justify-center bg-slate-50 dark:bg-zinc-950 gap-4 transition-colors">
-        <Loader2 className="animate-spin text-blue-500" size={32} />
+        <span className="animate-spin text-blue-500">Cargando...</span>
         <p className="text-[10px] text-slate-500 dark:text-zinc-400 font-bold uppercase tracking-widest animate-pulse">
           Cargando métricas...
         </p>
@@ -120,7 +112,7 @@ const Dashboard = () => {
     );
   }
 
-  const isActivityPage = location.pathname.startsWith("/activity/");
+  const isActivityPage = location.pathname.startsWith('/activity/');
 
   // Renderizado de las 5 vistas principales
   const renderAdvancedAnalytics = (
@@ -139,47 +131,41 @@ const Dashboard = () => {
 
   const renderFitnessStats = (
     <ErrorBoundary>
-      <Suspense fallback={<LazyFallback />}>
-        <FitnessStatsPage
-          activities={activities}
-          settings={settings}
-          chartData={chartData}
-          onSelectActivity={handleSelectActivity}
-          loadHistoricalStreams={loadHistoricalStreams}
-          isLoadingHistoricalStreams={isLoadingHistoricalStreams}
-          hasLoadedHistoricalStreams={hasLoadedHistoricalStreams}
-          handleDeepSync={handleDeepSync}
-          isDeepSyncing={isDeepSyncing}
-          deepSyncProgress={deepSyncProgress}
-        />
-      </Suspense>
+      <FitnessStatsPage
+        activities={activities}
+        settings={settings}
+        chartData={chartData}
+        onSelectActivity={handleSelectActivity}
+        loadHistoricalStreams={loadHistoricalStreams}
+        isLoadingHistoricalStreams={isLoadingHistoricalStreams}
+        hasLoadedHistoricalStreams={hasLoadedHistoricalStreams}
+        handleDeepSync={handleDeepSync}
+        isDeepSyncing={isDeepSyncing}
+        deepSyncProgress={deepSyncProgress}
+      />
     </ErrorBoundary>
   );
 
   const renderCalendar = (
     <ErrorBoundary>
-      <Suspense fallback={<LazyFallback />}>
-        <CalendarPage
-          activities={activities}
-          plannedWorkouts={plannedWorkouts}
-          addPlannedWorkout={addPlannedWorkout}
-          deletePlannedWorkout={deletePlannedWorkout}
-          updatePlannedWorkout={updatePlannedWorkout}
-          currentMetrics={currentMetrics}
-          settings={settings}
-          chartData={chartData}
-          onDelete={deleteActivity}
-          onSelectActivity={handleSelectActivity}
-        />
-      </Suspense>
+      <CalendarPage
+        activities={activities}
+        plannedWorkouts={plannedWorkouts}
+        addPlannedWorkout={addPlannedWorkout}
+        deletePlannedWorkout={deletePlannedWorkout}
+        updatePlannedWorkout={updatePlannedWorkout}
+        currentMetrics={currentMetrics}
+        settings={settings}
+        chartData={chartData}
+        onDelete={deleteActivity}
+        onSelectActivity={handleSelectActivity}
+      />
     </ErrorBoundary>
   );
 
   const renderHealth = (
     <ErrorBoundary>
-      <Suspense fallback={<LazyFallback />}>
-        <HealthPage activities={activities} settings={settings} chartData={chartData} />
-      </Suspense>
+      <HealthPage activities={activities} settings={settings} chartData={chartData} />
     </ErrorBoundary>
   );
 
@@ -190,7 +176,7 @@ const Dashboard = () => {
           onClick={handleOpenModal}
           className="py-1.5 px-3 bg-white dark:bg-zinc-900 text-slate-800 dark:text-zinc-200 border border-slate-200 dark:border-zinc-700 rounded-full text-[10px] font-bold uppercase flex items-center gap-1.5 hover:bg-slate-50 dark:hover:bg-zinc-800 transition-colors shadow-2xs active:scale-95"
         >
-          <Plus size={14} /> Añadir Manual
+          <span className="text-[14px]">+</span> Añadir Manual
         </button>
       </div>
       <div className="h-[calc(100dvh-170px)] sm:h-[calc(100vh-250px)]">
@@ -217,90 +203,52 @@ const Dashboard = () => {
         onSync={handleStravaSync}
       />
 
-      {uploadStatus && (
-        <div className="bg-blue-600 dark:bg-blue-700 text-white text-center py-1.5 text-[10px] font-bold uppercase tracking-widest animate-in slide-in-from-top sticky top-[52px] z-30 shadow-sm">
-          {uploadStatus}
-        </div>
-      )}
+      <UploadStatusBanner uploadStatus={uploadStatus} />
 
       <main className={`w-full max-w-[1800px] mx-auto ${isActivityPage ? 'px-2 sm:px-4 py-0 sm:py-2' : 'px-0 sm:px-6 py-2 sm:py-6'}`}>
         {activities.length === 0 ? (
-          <div className="text-center py-20 px-4">
-            <div className="bg-white dark:bg-zinc-900 rounded-lg border border-slate-200 dark:border-zinc-800 p-8 max-w-md mx-auto">
-              <Database
-                size={32}
-                className="mx-auto text-slate-400 dark:text-zinc-600 mb-4"
-              />
-              <h2 className="text-sm font-bold uppercase tracking-widest text-slate-800 dark:text-zinc-100 mb-2">
-                Base de datos vacía
-              </h2>
-              <p className="text-[10px] text-slate-500 dark:text-zinc-500 uppercase tracking-wider mb-6">
-                Conecta Strava para iniciar el análisis.
-              </p>
-            </div>
-          </div>
+          <EmptyState />
         ) : isSubPage ? (
-          <Routes>
-            <Route path="/profile" element={
-              <ErrorBoundary>
-                <Suspense fallback={<LazyFallback />}>
-                  <ProfilePage
-                    currentSettings={settings}
-                    currentMetrics={currentMetrics}
-                    onUpdate={updateProfile}
-                    onBack={handleBackFromProfile}
-                    activities={activities}
-                    isDeepSyncing={isDeepSyncing}
-                    deepSyncProgress={deepSyncProgress}
-                    onDeepSync={handleDeepSync}
-                    section={new URLSearchParams(location.search).get('section') || 'general'}
-                  />
-                </Suspense>
-              </ErrorBoundary>
-            } />
-            <Route path="/activity/:id" element={
-              <ActivityRouteWrapper 
-                activities={activities}
-                settings={settings}
-                fetchActivityStreams={fetchActivityStreams}
-                deleteActivity={deleteActivity}
-              />
-            } />
-          </Routes>
+          <ActivitySubRoutes
+            activities={activities}
+            settings={settings}
+            fetchActivityStreams={fetchActivityStreams}
+            deleteActivity={deleteActivity}
+            currentMetrics={currentMetrics}
+            updateProfile={updateProfile}
+            isDeepSyncing={isDeepSyncing}
+            deepSyncProgress={deepSyncProgress}
+            handleDeepSync={handleDeepSync}
+            handleBackFromProfile={handleBackFromProfile}
+            location={location}
+          />
         ) : (
           <>
-            {/* VISTA MÓVIL: DESLIZAMIENTO TÁCTIL EN TIEMPO REAL 1:1 ACOMPAÑANDO AL DEDO */}
-            <div className="block md:hidden">
-              <MobileSwipePager activeIndex={activeTabIndex} onChangeTab={handleMobileTabChange}>
-                {renderAdvancedAnalytics}
-                {renderFitnessStats}
-                {renderCalendar}
-                {renderHealth}
-                {renderHistory}
-              </MobileSwipePager>
-            </div>
-
-            {/* VISTA ESCRITORIO: NAVEGACIÓN ESTÁNDAR POR RUTAS */}
-            <div className="hidden md:block">
-              <Routes>
-                <Route path="/" element={renderAdvancedAnalytics} />
-                <Route path="/stats" element={renderFitnessStats} />
-                <Route path="/calendar" element={renderCalendar} />
-                <Route path="/health" element={renderHealth} />
-                <Route path="/history" element={renderHistory} />
-              </Routes>
-            </div>
+            <MobileTabsView
+              activeIndex={activeTabIndex}
+              onChangeTab={handleMobileTabChange}
+              renderAdvancedAnalytics={renderAdvancedAnalytics}
+              renderFitnessStats={renderFitnessStats}
+              renderCalendar={renderCalendar}
+              renderHealth={renderHealth}
+              renderHistory={renderHistory}
+            />
+            <DesktopRoutesView
+              renderAdvancedAnalytics={renderAdvancedAnalytics}
+              renderFitnessStats={renderFitnessStats}
+              renderCalendar={renderCalendar}
+              renderHealth={renderHealth}
+              renderHistory={renderHistory}
+            />
           </>
         )}
       </main>
 
-      {/* BOTTOM NAV PARA MÓVIL FLOTANTE LIQUID GLASS */}
       <BottomNav
         activeIndex={isSubPage ? undefined : activeTabIndex}
         onTabChange={handleMobileTabChange}
       />
 
-      {/* MODAL PARA AÑADIR MANUALMENTE */}
       <AddActivityModal
         isOpen={isModalOpen}
         onClose={handleCloseModal}

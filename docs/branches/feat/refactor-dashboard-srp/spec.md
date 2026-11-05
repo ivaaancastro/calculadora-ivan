@@ -5,7 +5,7 @@
 - **Título:** Refactorizar `Dashboard.jsx` (313 líneas) en componentes más pequeños (SRP)
 - **Autor:** agente de implementación (Forma / calculadora-ivan)
 - **Fecha:** 2026-11-05
-- **Estado:** pendiente
+- **Estado:** implementada
 
 ## 2. Objetivo
 Extraer de `Dashboard.jsx` (313 líneas) los subcomponentes que cumplen una responsabilidad única cada uno: manejo de estado de carga, renderizado de las 5 vistas principales (AdvancedAnalytics, FitnessStats, Calendar, Health, History), gestión del modal, navegación móvil, y la ruta de detalle de actividad. Mejorar legibilidad, mantenibilidad y testabilidad cumpliendo SRP.
