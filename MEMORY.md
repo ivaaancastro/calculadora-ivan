@@ -14,11 +14,11 @@
 
 ## 1. Estado del proyecto
 - **Nombre:** Forma — Dashboard de rendimiento deportivo y salud
-- **Rama actual:** `develop`
+- **Rama actual:** `analysis/project-audit` (creada desde `develop`)
 - **Rama base:** `develop`
 - **Rama de producción:** `main` (desplegada en Vercel)
 - **Versión:** 0.1.0
-- **Estado:** Sistema SDD con agentes implementado y verificado
+- **Estado:** Sistema SDD con agentes implementado y verificado. Análisis de auditoría completado (ver `AUDIT_REPORT.md` en rama `analysis/project-audit`).
 
 ## 2. Stack tecnológico
 - Frontend: React 19, Vite 7, Tailwind CSS, React Router DOM 7, Zustand, TanStack React Query
@@ -31,6 +31,14 @@
 | ID | Spec | Estado | Última actualización | Implementada en |
 |----|------|--------|----------------------|-----------------|
 | spec-001 | Servicio de IA con Gemini — respuestas estructuradas | pendiente | 2026-11-05 | — |
+| spec-audit-01 | Seguridad: remover secretos de `.env`, validar env vars al arranque | pendiente | 2026-11-05 | — |
+| spec-audit-02 | Cobertura: tests unitarios para utils (tssEngine, parser, formatters, fitnessStatsEngine) | pendiente | 2026-11-05 | — |
+| spec-audit-03 | Cobertura: tests para `src/services/ai.js` y `src/store/useAppStore.js` | pendiente | 2026-11-05 | — |
+| spec-audit-04 | Refactor: `Dashboard.jsx` en componentes más pequeños (SRP) | pendiente | 2026-11-05 | — |
+| spec-audit-05 | Refactor: hooks grandes (`useActivities.js`, `useWellnessInfo.js`) | pendiente | 2026-11-05 | — |
+| spec-audit-06 | TypeScript progresivo: tipado de utils, store y servicios | pendiente | 2026-11-05 | — |
+| spec-audit-07 | Consolidar migraciones SQL y añadir versionado (`schema_migrations`) | pendiente | 2026-11-05 | — |
+| spec-audit-08 | Hardening Edge Function `intervals-proxy` (rate limiting, validación, timeout) | pendiente | 2026-11-05 | — |
 
 > Cuando un agente implemente una spec, debe añadir una fila aquí y marcarla como `implementada`.
 
@@ -46,11 +54,28 @@
 - Skills instaladas en el proyecto: `git-release` (en `.opencode/skills/git-release/`).
 - MCPs obligatorios (en `.opencode/mcp.json`): `context7`, `opencode`, `supabase`.
 
-## 5. Roadmap (próximas specs pendientes)
-- [ ] Migrar lógica de `scratch/*.cjs` a specs documentadas.
-- [ ] Agregar TypeScript tipado progresivo (ya está como devDep).
-- [ ] Implementar spec-001: servicio de IA con respuestas estructuradas.
-- [ ] Spec de pruebas E2E críticas (auth, dashboard).
+## 5. Roadmap (próximas specs pendientes — por prioridad)
+
+### Fase 1 — Seguridad (bloqueante, empezar inmediatamente)
+- [ ] spec-audit-01: Seguridad — remover secretos de `.env`, agregar a `.gitignore`, crear `.env.example`, validar env vars al arranque (rama `fix/security-env-secrets`)
+
+### Fase 2 — Cobertura de pruebas (utils, IA, store)
+- [ ] spec-audit-02: Tests unitarios para `tssEngine.js`, `parser.js`, `formatters.js`, `fitnessStatsEngine.js`
+- [ ] spec-audit-03: Tests para `src/services/ai.js` (mockear Gemini) y `src/store/useAppStore.js` (Zustand)
+
+### Fase 3 — Refactorización core (SRP)
+- [ ] spec-audit-04: Refactorizar `Dashboard.jsx` (313 líneas) en componentes más pequeños
+- [ ] spec-audit-05: Refactorizar hooks grandes (`useActivities.js` → hooks enfocados; `useWellnessInfo.js` → data + analytics)
+
+### Fase 4 — Estabilidad y tipo
+- [ ] spec-audit-06: Migración progresiva a TypeScript (utils, store, servicios)
+- [ ] spec-001: Servicio de IA con Gemini — respuestas estructuradas (pendiente desde v0.1.0)
+- [ ] spec-audit-07: Consolidar migraciones SQL, unificar `wellness_data`, añadir `schema_migrations`
+- [ ] spec-audit-08: Hardening Edge Function `intervals-proxy` (rate limiting, validación entrada, timeout)
+
+### Pendientes anteriores (mantener)
+- [ ] Migrar lógica de `scratch/*.cjs` a specs documentadas o eliminar.
+- [ ] Spec de pruebas E2E críticas (auth, dashboard, Strava sync, exportación de datos).
 
 ## 6. Contexto compartido entre agentes
 - El punto de entrada de la app es `src/App.jsx` (router + sesión Supabase).
@@ -62,6 +87,7 @@
 - Los E2E viven en `e2e/`.
 - Las migraciones SQL viven en `migrations/`.
 - Los scripts sueltos (revisar/eliminar) viven en `scratch/`.
+- **Informe de auditoría:** `AUDIT_REPORT.md` (rama `analysis/project-audit`) — contiene puntos débiles (P-01 a P-30), deuda técnica, hallazgos de tests/coverage y roadmap priorizado (R-01 a R-17).
 
 ---
 Última actualización: 2026-11-05
