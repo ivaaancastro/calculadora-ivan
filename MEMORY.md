@@ -37,7 +37,7 @@
 | spec-audit-04 | Refactor: `Dashboard.jsx` en componentes más pequeños (SRP) | implementada | 2026-11-05 | feat/refactor-dashboard-srp |
 | spec-fix-01 | Corregir imports faltantes en `Dashboard.jsx` tras refactor SRP | implementada | 2026-11-05 | fix/investigar-app-rota |
 | spec-audit-05 | Refactor: hooks grandes (`useActivities.js`, `useWellnessInfo.js`) | implementada | 2026-11-05 | feat/refactor-hooks-srp |
-| spec-audit-06 | TypeScript progresivo: tipado de utils, store y servicios | pendiente | 2026-11-05 | — |
+| spec-audit-06 | TypeScript progresivo: tipado de utils, store y servicios | implementada | 2026-11-05 | feat/typescript-progreso |
 | spec-audit-07 | Consolidar migraciones SQL y añadir versionado (`schema_migrations`) | pendiente | 2026-11-05 | — |
 | spec-audit-08 | Hardening Edge Function `intervals-proxy` (rate limiting, validación, timeout) | pendiente | 2026-11-05 | — |
 
@@ -69,7 +69,7 @@
 - [x] spec-audit-05: Refactorizar hooks grandes (`useActivities.js` → hooks enfocados; `useWellnessInfo.js` → data + analytics) (rama `feat/refactor-hooks-srp`)
 
 ### Fase 4 — Estabilidad y tipo
-- [ ] spec-audit-06: Migración progresiva a TypeScript (utils, store, servicios)
+- [x] spec-audit-06: Migración progresiva a TypeScript (utils, store, servicios) (rama `feat/typescript-progreso`)
 - [ ] spec-001: Servicio de IA con Gemini — respuestas estructuradas (pendiente desde v0.1.0)
 - [ ] spec-audit-07: Consolidar migraciones SQL, unificar `wellness_data`, añadir `schema_migrations`
 - [ ] spec-audit-08: Hardening Edge Function `intervals-proxy` (rate limiting, validación entrada, timeout)
