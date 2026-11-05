@@ -27,6 +27,9 @@ y este proyecto adhiere a [Semantic Versioning](https://semver.org/lang/es/).
 ### IA
 - `feat(ai):` añadir modo de respuestas estructuradas a `askGemini` (parámetro opcional `structured`, schema JSON, tipo `GeminiStructuredResponse`, pruebas unitarias y docs) (`spec-001`).
 
+### Edge Function
+- `feat(edge-function):` endurecer `intervals-proxy`: rate limiting por usuario (Deno KV, 60 req/min), lista blanca de endpoints (`wellness`, `athlete`, `activities`), timeout de 10s en `fetch`, CORS restringido, manejo seguro de respuestas no JSON y errores sin exponer internos (`spec-audit-08`).
+
 ## [0.1.0] — 2026-11-05
 
 ### Implementado
