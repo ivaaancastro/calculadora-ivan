@@ -126,15 +126,13 @@ chore(deps): actualizar vite a v7
 
 ### Skills de OpenCode (activar en el cliente)
 
-| Skill | Por qué es obligatoria |
-|-------|------------------------|
-| `vercel-react-best-practices` | React 19 + Vite: rendimiento, componentes, data fetching, optimización de bundle. |
-| `web-design-guidelines` | Revisar UI/UX y accesibilidad. App móvil-first (BottomNav, swipe navigation, gestos, liquid glass). |
-| `apple-design` | Interfaces móviles con gestos táctiles, swipe navigation, materiales translúcidos, feedback físico. |
-| `vercel-composition-patterns` | Componentes reutilizables (compound components, context). Evita proliferación de booleanos en props. |
-| `writing-guidelines` | Revisar docs/prose: README, CHANGELOG, AGENTS.md, specs, MEMORY.md. |
-| `vercel-cli-with-tokens` | Desplegar a Vercel usando tokens (no login interactivo). `main` es producción en Vercel. |
-| `vercel-optimize` | Optimizar costos y rendimiento en Vercel (Function Invocations, Build Minutes, Core Web Vitals, Bot Management). |
+Las skills de este proyecto viven en `.opencode/skills/`. Actualmente instalada:
+
+| Skill | Ruta | Propósito |
+|-------|------|-----------|
+| `git-release` | `.opencode/skills/git-release/` | Gestiona el ciclo de releases y etiquetado de versiones. |
+
+Otras skills pueden instalarse desde el cliente OpenCode según necesidad, evitando los IDs descontinuados.
 
 ### MCPs (configurar en `.opencode/mcp.json`)
 
