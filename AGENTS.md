@@ -139,18 +139,26 @@ chore(deps): actualizar vite a v7
 
 ## 7. Skills y MCPs obligatorias
 
-| Skill | Uso |
-|-------|-----|
-| `vercel-react-best-practices` | React 19 + Vite: rendimiento, componentes, data fetching. |
-| `web-design-guidelines` | UI/UX y accesibilidad. |
-| `apple-design` | Gestos táctiles, swipe navigation, materiales translúcidos. |
-| `vercel-composition-patterns` | Componentes reutilizables, compound components, context. |
-| `writing-guidelines` | Revisar docs/prose: README, CHANGELOG, specs. |
+### Skills de OpenCode (activar en el cliente)
 
-| MCP | Uso |
-|-----|-----|
-| `context7` | Documentación actualizada de librerías del stack (React, Vite, Supabase, Gemini, etc.). |
-| `opencode` | Worktrees, sesiones, gestión de ramas y recursos de OpenCode. |
+| Skill | Por qué es obligatoria | Agentes que la usan |
+|-------|------------------------|---------------------|
+| `vercel-react-best-practices` | React 19 + Vite: rendimiento, componentes, data fetching, optimización de bundle. Esencial para escribir código frontend correcto. | `code-agent`, `review-agent` |
+| `web-design-guidelines` | Revisar UI/UX y accesibilidad. La app es móvil-first (BottomNav, swipe navigation, gestos, liquid glass). | `code-agent`, `doc-agent` |
+| `apple-design` | Interfaces móviles con gestos táctiles, swipe navigation, materiales translúcidos, feedback físico. La app tiene `MobileSwipePager`, `BottomNav`, gestos de borde. | `code-agent` |
+| `vercel-composition-patterns` | Arquitectura de componentes reutilizables (compound components, render props, context providers). Evita proliferación de booleanos en props. | `code-agent` |
+| `writing-guidelines` | Revisar docs/prose: README, CHANGELOG, AGENTS, specs, MEMORY. Esencial para mantener la documentación consistente. | `doc-agent` |
+| `vercel-cli-with-tokens` | Desplegar a Vercel usando tokens (no login interactivo). `main` es la rama de producción desplegada en Vercel. | `doc-agent`, `review-agent` |
+| `vercel-optimize` | Optimizar costos y rendimiento en Vercel (Function Invocations, Build Minutes, Core Web Vitals, Bot Management). | `review-agent` |
+
+### MCPs (configurar en `.opencode/mcp.json`)
+
+| MCP | Por qué es obligatorio | Uso |
+|-----|------------------------|-----|
+| `context7` | Documentación actualizada de librerías del stack: React, Vite, Tailwind CSS, Supabase, Google Gemini, Playwright, Vitest, React Router, Zustand, TanStack Query, Recharts, Leaflet. Todos los agentes la necesitan para escribir código correcto y actualizado. | Todos los agentes (consultar APIs, versiones, patrones) |
+| `opencode` | Gestión de worktrees, sesiones, recursos MCP y herramientas de OpenCode. Útil para el flujo de agentes y para crear ramas/worktrees de forma controlada. | Flujo de agentes, creación de ramas, gestión de sesión |
+
+El archivo `.opencode/mcp.json` declara ambos MCPs como requeridos.
 
 ---
 

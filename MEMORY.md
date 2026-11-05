@@ -37,12 +37,14 @@
 ## 4. Decisiones tomadas
 - Sistema SDD con 6 agentes: spec-agent, code-agent, db-agent, test-agent, review-agent, doc-agent.
 - Las specs viven en `docs/specs/` como archivos `.md` o `.json`.
-- `MEMORY` es la fuente de verdad del contexto compartido.
+- `MEMORY.md` es la fuente de verdad del contexto compartido.
 - `AGENTS.md` define roles, flujos, reglas de ramas/commits y estándares.
-- `skills/` contiene las capacidades reutilizables por agente.
+- `skills/` contiene las capacidades reutilizables por agente (system prompts + criterios de aceptación).
 - `docs/` aloja arquitectura, specs, guías y API.
 - CI ejecuta en `develop` y en PRs (no solo en `main`).
 - `main` es la rama de producción desplegada en Vercel; no se commitea directamente.
+- Skills obligatorias: `vercel-react-best-practices`, `web-design-guidelines`, `apple-design`, `vercel-composition-patterns`, `writing-guidelines`, `vercel-cli-with-tokens`, `vercel-optimize`.
+- MCPs obligatorios (en `.opencode/mcp.json`): `context7`, `opencode`.
 
 ## 5. Roadmap (próximas specs pendientes)
 - [ ] Migrar lógica de `scratch/*.cjs` a specs documentadas.
