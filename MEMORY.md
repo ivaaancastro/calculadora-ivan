@@ -44,7 +44,7 @@
 - CI ejecuta en `develop` y en PRs (no solo en `main`).
 - `main` es la rama de producción desplegada en Vercel; no se commitea directamente.
 - Skills obligatorias: `vercel-react-best-practices`, `web-design-guidelines`, `apple-design`, `vercel-composition-patterns`, `writing-guidelines`, `vercel-cli-with-tokens`, `vercel-optimize`.
-- MCPs obligatorios (en `.opencode/mcp.json`): `context7`, `opencode`.
+- MCPs obligatorios (en `.opencode/mcp.json`): `context7`, `opencode`, `supabase`.
 
 ## 5. Roadmap (próximas specs pendientes)
 - [ ] Migrar lógica de `scratch/*.cjs` a specs documentadas.
