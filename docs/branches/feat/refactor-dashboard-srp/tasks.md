@@ -12,7 +12,7 @@
 | 8 | Reducir `Dashboard.jsx` a shell de orquestación | [x] |
 | 9 | Verificar (lint, build, test:unit, test:coverage) | [x] |
 | 10 | Registrar (MEMORY.md, CHANGELOG.md, commit, PR) | [x] |
-| 11 | Merge a `develop` | [ ] Esperando autorización del usuario |
+| 11 | Merge a `develop` | [x] Completado (PR #41 merged) |
 
 ---
 Versión: 0.1.0 — 2026-11-05
