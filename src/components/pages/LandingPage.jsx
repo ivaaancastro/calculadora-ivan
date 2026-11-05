@@ -335,11 +335,7 @@ export const LandingPage = () => {
           {/* Headline */}
           <FadeIn delay={100}>
             <h1 className="text-5xl sm:text-6xl lg:text-7xl font-black text-slate-900 dark:text-white tracking-tight leading-[1.1] mb-6">
-              Tu laboratorio de{' '}
-              <span className="bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
-                rendimiento
-              </span>
-              {' '}deportivo
+              Tu laboratorio de rendimiento deportivo
             </h1>
           </FadeIn>
 
