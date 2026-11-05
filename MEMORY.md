@@ -31,7 +31,7 @@
 | ID | Spec | Estado | Última actualización | Implementada en |
 |----|------|--------|----------------------|-----------------|
 | spec-001 | Servicio de IA con Gemini — respuestas estructuradas | pendiente | 2026-11-05 | — |
-| spec-audit-01 | Seguridad: remover secretos de `.env`, validar env vars al arranque | pendiente | 2026-11-05 | — |
+| spec-audit-01 | Seguridad: remover secretos de `.env`, validar env vars al arranque | implementada | 2026-11-05 | fix/security-env-secrets |
 | spec-audit-02 | Cobertura: tests unitarios para utils (tssEngine, parser, formatters, fitnessStatsEngine) | pendiente | 2026-11-05 | — |
 | spec-audit-03 | Cobertura: tests para `src/services/ai.js` y `src/store/useAppStore.js` | pendiente | 2026-11-05 | — |
 | spec-audit-04 | Refactor: `Dashboard.jsx` en componentes más pequeños (SRP) | pendiente | 2026-11-05 | — |
@@ -57,7 +57,7 @@
 ## 5. Roadmap (próximas specs pendientes — por prioridad)
 
 ### Fase 1 — Seguridad (bloqueante, empezar inmediatamente)
-- [ ] spec-audit-01: Seguridad — remover secretos de `.env`, agregar a `.gitignore`, crear `.env.example`, validar env vars al arranque (rama `fix/security-env-secrets`)
+- [x] spec-audit-01: Seguridad — remover secretos de `.env`, agregar a `.gitignore`, crear `.env.example`, validar env vars al arranque (rama `fix/security-env-secrets`)
 
 ### Fase 2 — Cobertura de pruebas (utils, IA, store)
 - [ ] spec-audit-02: Tests unitarios para `tssEngine.js`, `parser.js`, `formatters.js`, `fitnessStatsEngine.js`
