@@ -14,18 +14,14 @@ import { EmptyState } from './dashboard/EmptyState';
 import { MobileTabsView } from './dashboard/MobileTabsView';
 import { DesktopRoutesView } from './dashboard/DesktopRoutesView';
 import { ActivitySubRoutes } from './dashboard/ActivitySubRoutes';
+import { AdvancedAnalytics } from './dashboard/AdvancedAnalytics';
+import { HistoryList } from './dashboard/HistoryList';
 import AddActivityModal from './modals/AddActivityModal';
 import { ErrorBoundary } from './common/ErrorBoundary';
 
 // Páginas cargadas bajo demanda (code splitting)
 const CalendarPage = React.lazy(() =>
   import('./pages/CalendarPage').then((m) => ({ default: m.CalendarPage }))
-);
-const ActivityDetailPage = React.lazy(() =>
-  import('./pages/ActivityDetailPage').then((m) => ({ default: m.ActivityDetailPage }))
-);
-const ProfilePage = React.lazy(() =>
-  import('./pages/ProfilePage').then((m) => ({ default: m.ProfilePage }))
 );
 const HealthPage = React.lazy(() =>
   import('./pages/HealthPage').then((m) => ({ default: m.HealthPage }))
