@@ -20,7 +20,7 @@ Ningún agente escribe código de producción sin una spec aprobada y sin haber 
 | **Rama base** | Todas las ramas de funcionalidad salen de `develop`. |
 | **Nunca commitear a `main`** | `main` es la rama de producción, desplegada en Vercel. No se hace push directo ni commits directos a `main`. |
 | **Rama de trabajo** | Crear rama desde `develop`: `git checkout -b feature/<nombre> develop` |
-| **Merge** | Las ramas se merguean a `develop` vía Pull Request, aprobado por `review-agent`. |
+| **Merge** | Las ramas se merguean a `develop` vía Pull Request. |
 | **Despliegue** | `main` se despliega automáticamente en Vercel. `develop` es la rama de integración. |
 | **CI** | Se ejecuta en push a `main`/`develop` y en PRs (ver `.github/workflows/ci.yml`). |
 
@@ -115,11 +115,10 @@ chore(deps): actualizar vite a v7
 ## 5. Reglas de colaboración (obligatorio)
 
 1. **Un agente no implementa sin spec aprobada.**
-2. **Cada agente actualiza `MEMORY` al finalizar su tarea.**
-3. **`review-agent` debe aprobar antes de cualquier merge a `develop`.**
-4. **`doc-agent` actualiza `CHANGELOG` con cada cambio aprobado.**
-5. **Las skills en `skills/` son la fuente de prompts y plantillas de cada agente.**
-6. **Nunca commitear a `main`; las ramas salen de `develop`.**
+2. **Cada agente actualiza `MEMORY.md` al finalizar su tarea.**
+3. **`doc-agent` actualiza `CHANGELOG.md` con cada cambio aprobado.**
+4. **Las skills en `skills/` son la fuente de prompts y plantillas de cada agente.**
+5. **Nunca commitear a `main`; las ramas salen de `develop`.**
 
 ---
 
@@ -128,7 +127,7 @@ chore(deps): actualizar vite a v7
 | Archivo / Carpeta | Propósito |
 |-------------------|-----------|
 | `AGENTS.md` | Este archivo: flujo obligatorio, reglas, convenciones. |
-| `MEMORY` | Estado persistente y contexto compartido entre agentes. |
+| `MEMORY.md` | Estado persistente y contexto compartido entre agentes. |
 | `docs/specs/` | Especificaciones que impulsan el desarrollo (una por archivo). |
 | `docs/sdd/plantilla-especificacion.md` | Plantilla obligatoria para nuevas specs. |
 | `skills/<agente>/system-prompt.md` | System prompt y criterios de aceptación por agente. |
@@ -168,7 +167,7 @@ El archivo `.opencode/mcp.json` declara todos los MCPs como requeridos.
 Al iniciar cualquier nueva sesión, el agente debe:
 
 1. [ ] Leer `AGENTS.md` (este archivo).
-2. [ ] Leer `MEMORY` para conocer el estado actual del proyecto.
+2. [ ] Leer `MEMORY.md` para conocer el estado actual del proyecto.
 3. [ ] Verificar que está en una rama de funcionalidad (no en `main` ni `develop` directamente).
 4. [ ] Si va a implementar, leer la spec asociada en `docs/specs/`.
 5. [ ] Seguir el flujo SDD: Especificar → Planificar → Implementar → Verificar → Registrar.
