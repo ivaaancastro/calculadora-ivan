@@ -64,7 +64,7 @@
 - [x] spec-audit-03: Tests para `src/services/ai.js` (mockear Gemini) y `src/store/useAppStore.js` (Zustand)
 
 ### Fase 3 — Refactorización core (SRP)
-- [ ] spec-audit-04: Refactorizar `Dashboard.jsx` (313 líneas) en componentes más pequeños
+- [x] spec-audit-04: Refactorizar `Dashboard.jsx` (313 líneas) en componentes más pequeños (rama `feat/refactor-dashboard-srp`)
 - [ ] spec-audit-05: Refactorizar hooks grandes (`useActivities.js` → hooks enfocados; `useWellnessInfo.js` → data + analytics)
 
 ### Fase 4 — Estabilidad y tipo
