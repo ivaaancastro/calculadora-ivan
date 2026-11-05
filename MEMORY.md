@@ -43,7 +43,7 @@
 - `docs/` aloja arquitectura, specs, guías y API.
 - CI ejecuta en `develop` y en PRs (no solo en `main`).
 - `main` es la rama de producción desplegada en Vercel; no se commitea directamente.
-- Skills obligatorias: `vercel-react-best-practices`, `web-design-guidelines`, `apple-design`, `vercel-composition-patterns`, `writing-guidelines`, `vercel-cli-with-tokens`, `vercel-optimize`.
+- Skills instaladas en el proyecto: `git-release` (en `.opencode/skills/git-release/`).
 - MCPs obligatorios (en `.opencode/mcp.json`): `context7`, `opencode`, `supabase`.
 
 ## 5. Roadmap (próximas specs pendientes)

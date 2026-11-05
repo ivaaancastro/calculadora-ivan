@@ -1,0 +1,3 @@
+# scripts/
+# Aquí se colocan scripts de utilidad para la skill git-release.
+# Ejemplos: bump-version.sh, generate-changelog.sh, create-release-branch.sh
