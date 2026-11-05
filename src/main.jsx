@@ -28,8 +28,13 @@ if (missingEnvVars.length > 0) {
     )}.\n` +
     `Copia .env.example a .env, rellena los valores reales y reinicia la aplicación.\n` +
     `No subas nunca el archivo .env a control de versiones (está en .gitignore).`;
-  // Fallo temprano: se detiene la ejecución antes de renderizar la app.
-  throw new Error(message);
+  // Fallo temprano solo en producción. En desarrollo/test (incluido E2E) se
+  // advierte por consola sin bloquear el arranque, para permitir que las
+  // pruebas ejecuten la app sin requerir secretos reales en el entorno CI.
+  if (import.meta.env.PROD) {
+    throw new Error(message);
+  }
+  console.error(message);
 }
 
 // ---------------------------------------------------------------------------
