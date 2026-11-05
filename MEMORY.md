@@ -39,7 +39,7 @@
 | spec-audit-05 | Refactor: hooks grandes (`useActivities.js`, `useWellnessInfo.js`) | implementada | 2026-11-05 | feat/refactor-hooks-srp |
 | spec-audit-06 | TypeScript progresivo: tipado de utils, store y servicios | implementada | 2026-11-05 | feat/typescript-progreso |
 | spec-audit-07 | Consolidar migraciones SQL y añadir versionado (`schema_migrations`) | implementada | 2026-11-05 | feat/sql-migrations-versioning |
-| spec-audit-08 | Hardening Edge Function `intervals-proxy` (rate limiting, validación, timeout) | pendiente | 2026-11-05 | — |
+| spec-audit-08 | Hardening Edge Function `intervals-proxy` (rate limiting, validación, timeout) | implementada | 2026-11-05 | feat/edge-function-intervals-proxy-hardening |
 
 > Cuando un agente implemente una spec, debe añadir una fila aquí y marcarla como `implementada`.
 
@@ -72,7 +72,7 @@
 - [x] spec-audit-06: Migración progresiva a TypeScript (utils, store, servicios) (rama `feat/typescript-progreso`)
 - [x] spec-001: Servicio de IA con Gemini — respuestas estructuradas (rama `feat/ai-structured-responses`)
 - [x] spec-audit-07: Consolidar migraciones SQL, unificar `wellness_data`, añadir `schema_migrations` (rama `feat/sql-migrations-versioning`)
-- [ ] spec-audit-08: Hardening Edge Function `intervals-proxy` (rate limiting, validación entrada, timeout)
+- [x] spec-audit-08: Hardening Edge Function `intervals-proxy` (rate limiting, validación entrada, timeout) (rama `feat/edge-function-intervals-proxy-hardening`)
 
 ### Pendientes anteriores (mantener)
 - [ ] Migrar lógica de `scratch/*.cjs` a specs documentadas o eliminar.
