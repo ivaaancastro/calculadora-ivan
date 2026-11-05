@@ -17,7 +17,7 @@
 | 13 | Verificar (`npm run test:e2e` pasa local y en CI) | [x] |
 | 14 | Registrar (MEMORY.md, CHANGELOG.md, docs/specs/README.md, spec.md) | [x] |
 | 15 | Commit `feat(e2e): ...` y push | [x] |
-| 16 | Abrir PR hacia `develop` | [ ] |
+| 16 | Abrir PR hacia `develop` | [x] (PR #48) |
 | 17 | Merge a `develop` | [ ] Esperando autorización del usuario |
 
 ---
