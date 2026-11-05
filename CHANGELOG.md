@@ -13,6 +13,7 @@ y este proyecto adhiere a [Semantic Versioning](https://semver.org/lang/es/).
 ### Pruebas
 - `test(utils):` añadir tests unitarios para `tssEngine.js`, `parser.js`, `formatDuration.js` y `fitnessStatsEngine.js` en `src/__tests__/unit/` (`spec-audit-02`). Cobertura de `src/utils/` del 0% al ~40%.
 - `test(services,store):` añadir tests unitarios para `src/services/ai.js` (mock de Gemini) y `src/store/useAppStore.js` (Zustand) en `src/__tests__/unit/` (`spec-audit-03`).
+- `test(e2e):` añadir pruebas E2E críticas con Playwright (`e2e/auth.spec.js`, `e2e/dashboard.spec.js`, `e2e/activities.spec.js`, `e2e/strava.spec.js`, `e2e/export.spec.js`, `e2e/account.spec.js`) que cubren login/logout, dashboard autenticado con métricas PMC, flujo de actividades, sincronización Strava mockeada y exportación CSV. Todas las APIs externas se mockean con `page.route()` para ser deterministas y no depender de credenciales reales ni red externa (`spec-e2e-01`).
 
 ### Refactor
 - `refactor(dashboard):` extraer `Dashboard.jsx` (313 líneas) en subcomponentes SRP (`EmptyState`, `UploadStatusBanner`, `MobileTabsView`, `DesktopRoutesView`, `ActivitySubRoutes`, `ActivityRouteWrapper`) dejando un shell de orquestación (`spec-audit-04`).

@@ -40,6 +40,7 @@
 | spec-audit-06 | TypeScript progresivo: tipado de utils, store y servicios | implementada | 2026-11-05 | feat/typescript-progreso |
 | spec-audit-07 | Consolidar migraciones SQL y añadir versionado (`schema_migrations`) | implementada | 2026-11-05 | feat/sql-migrations-versioning |
 | spec-audit-08 | Hardening Edge Function `intervals-proxy` (rate limiting, validación, timeout) | implementada | 2026-11-05 | feat/edge-function-intervals-proxy-hardening |
+| spec-e2e-01 | Pruebas E2E críticas (auth, dashboard, Strava sync, exportación de datos) | implementada | 2026-11-05 | feat/e2e-critical-flows |
 
 > Cuando un agente implemente una spec, debe añadir una fila aquí y marcarla como `implementada`.
 
@@ -76,7 +77,7 @@
 
 ### Pendientes anteriores (mantener)
 - [ ] Migrar lógica de `scratch/*.cjs` a specs documentadas o eliminar.
-- [ ] Spec de pruebas E2E críticas (auth, dashboard, Strava sync, exportación de datos).
+- [x] Spec de pruebas E2E críticas (auth, dashboard, Strava sync, exportación de datos) (rama `feat/e2e-critical-flows`)
 
 ## 6. Contexto compartido entre agentes
 - El punto de entrada de la app es `src/App.jsx` (router + sesión Supabase).

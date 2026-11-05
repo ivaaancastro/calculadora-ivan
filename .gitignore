@@ -13,6 +13,10 @@ dist-ssr
 coverage/
 *.local
 
+# Playwright artifacts
+playwright-report/
+test-results/
+
 # Environment files (no versionar secretos)
 .env
 .env.*
