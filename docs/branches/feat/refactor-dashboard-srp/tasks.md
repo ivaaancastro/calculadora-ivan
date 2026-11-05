@@ -11,7 +11,8 @@
 | 7 | Extraer `ActivityRouteWrapper.jsx` | [x] |
 | 8 | Reducir `Dashboard.jsx` a shell de orquestación | [x] |
 | 9 | Verificar (lint, build, test:unit, test:coverage) | [x] |
-| 10 | Registrar (MEMORY.md, CHANGELOG.md, commit, PR) | [ ] |
+| 10 | Registrar (MEMORY.md, CHANGELOG.md, commit, PR) | [x] |
+| 11 | Merge a `develop` | [ ] Esperando autorización del usuario |
 
 ---
 Versión: 0.1.0 — 2026-11-05

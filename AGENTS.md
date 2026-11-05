@@ -116,6 +116,7 @@ chore(deps): actualizar vite a v7
 - Commits sin mensaje descriptivo.
 - Commits directos a `main` o `develop` (siempre vía PR).
 - Mensajes en español sin el prefijo de tipo en inglés.
+- **Mergear un PR sin autorización explícita del usuario.** El agente abre el PR, pero nunca lo mergea hasta que el usuario lo apruebe.
 
 ---
 
@@ -125,6 +126,7 @@ chore(deps): actualizar vite a v7
 2. **Cada agente actualiza `MEMORY.md` al finalizar su tarea.**
 3. **Las skills en `skills/` son la fuente de prompts y plantillas.**
 4. **Nunca commitear a `main`; las ramas salen de `develop`.**
+5. **Un agente nunca mergea un PR sin autorización explícita del usuario.**
 
 ---
 
