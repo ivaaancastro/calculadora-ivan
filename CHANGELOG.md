@@ -21,6 +21,9 @@ y este proyecto adhiere a [Semantic Versioning](https://semver.org/lang/es/).
 - `feat(typescript):` migrar progresivamente a TypeScript: `tssEngine.ts`, `parser.ts`, `formatDuration.ts`, `fitnessStatsEngine.ts`, `useAppStore.ts`, `ai.ts` con tipos estáticos estáticos, `tsconfig.json` creado con `allowJs` para transición progresiva (`spec-audit-06`).
 - `test(services,store):` añadir tests unitarios para `src/services/ai.js` (mock de Gemini) y `src/store/useAppStore.js` (Zustand) en `src/__tests__/unit/` (`spec-audit-03`).
 
+### Base de datos
+- `feat(database):` consolidar 8 migraciones SQL con versionado ordenado (`000_` a `008_`), crear tabla `schema_migrations` para rastrear migraciones aplicadas, consolidar definición de `wellness_data` (UUID) y añadir `migrations/README.md` (`spec-audit-07`).
+
 ## [0.1.0] — 2026-11-05
 
 ### Implementado

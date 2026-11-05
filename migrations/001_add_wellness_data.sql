@@ -1,9 +1,12 @@
 -- ─────────────────────────────────────────────────────────────────────────────
--- Migration: Create wellness_data table for Intervals.icu / Garmin sync
--- Run this ONCE in Supabase SQL Editor → New Query → Run
+-- Migration: 001_add_wellness_data
+-- Description: Crea la tabla wellness_data (definición consolidada, UUID) para
+--              sincronización de Intervals.icu / Garmin, activa RLS, crea
+--              política de acceso y añade columnas de Intervals.icu a profiles.
+--              Depende de: ninguna (auth.users preexistente).
 -- ─────────────────────────────────────────────────────────────────────────────
 
--- 1. wellness_data table
+-- 1. wellness_data table (definición consolidada: UUID, no BIGINT IDENTITY)
 CREATE TABLE IF NOT EXISTS wellness_data (
   id              UUID        DEFAULT gen_random_uuid() PRIMARY KEY,
   user_id         UUID        REFERENCES auth.users(id) ON DELETE CASCADE NOT NULL,

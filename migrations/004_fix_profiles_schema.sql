@@ -1,9 +1,10 @@
 -- ─────────────────────────────────────────────────────────────────────────────
--- FIX: Aligned Profiles Schema & Flexible Settings
+-- Migration: 004_fix_profiles_schema
+-- Description: Alinea el esquema de profiles para sincronización con
+--              Intervals.icu y añade una columna JSONB genérica user_settings
+--              para preferencias futuras.
+--              Depende de: ninguna (profiles preexistente).
 -- ─────────────────────────────────────────────────────────────────────────────
--- This migration ensures the profiles table has the correct column names for 
--- Intervals.icu sync and a generic 'user_settings' JSONB for future tweaks.
--- Run this in your Supabase SQL Editor.
 
 -- 1. Ensure core calibration and sync columns exist with aligned names
 ALTER TABLE public.profiles 

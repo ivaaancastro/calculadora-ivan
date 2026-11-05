@@ -1,3 +1,11 @@
+-- ─────────────────────────────────────────────────────────────────────────────
+-- Migration: 008_delete_user_rpc
+-- Description: Crea la función delete_user() que permite a un usuario eliminar
+--              su propia cuenta y todos sus datos asociados.
+--              ⚠️ Función con SECURITY DEFINER: borra de auth.users (potente).
+--              Depende de: 001_add_wellness_data, 002_enable_rls (tablas referenciadas).
+-- ─────────────────────────────────────────────────────────────────────────────
+
 -- Función para permitir a un usuario eliminar su propia cuenta y todos sus datos
 -- Debe ejecutarse en el SQL Editor de Supabase
 
