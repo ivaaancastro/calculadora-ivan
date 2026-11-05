@@ -1,13 +1,15 @@
 <!doctype html>
-<html lang="es">
+<html lang="es" data-type="software" data-radius="soft" data-buttons="solid" data-motion>
 
 <head>
   <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <meta name="page-type" content="software" />
+  <meta name="site-kind" content="software" />
   <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
   <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
   <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
   <link rel="apple-touch-icon-precomposed" href="/apple-touch-icon-precomposed.png" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
   <meta name="description"
     content="Dashboard de rendimiento deportivo: métricas de entrenamiento, PMC, zonas de potencia, calendario y salud." />
 
@@ -15,21 +17,22 @@
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="apple-mobile-web-app-title" content="Forma" />
-  <meta name="theme-color" content="#06080f" />
+  <meta name="theme-color" content="#0b0c0e" />
+
   <script>
     if (localStorage.getItem('theme') === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
       document.documentElement.classList.add('dark');
     }
   </script>
 
-  <!-- Google Fonts: Inter (preloaded for faster FCP) -->
+  <!-- Google Fonts: Manrope (display) + JetBrains Mono (text/mono) — dealt by start.mjs -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="preload"
-    href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" as="style"
+    href="https://fonts.googleapis.com/css2?family=Manrope:wght@400..700&family=JetBrains+Mono:wght@400..500&display=swap" as="style"
     onload="this.onload=null;this.rel='stylesheet'">
   <noscript>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap"
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400..700&family=JetBrains+Mono:wght@400..500&display=swap"
       rel="stylesheet">
   </noscript>
 

@@ -1,100 +1,12 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState } from 'react';
 import { supabase } from '../../supabase';
-import {
-  Activity, Loader2, Mail, Lock, ArrowLeft, ArrowRight,
-  BarChart3, Map, Calendar, Zap, Heart, Timer,
-  ChevronDown, X, TrendingUp, Target, Gauge
-} from 'lucide-react';
+import { ArrowRight, Mail, Lock, Activity, ChevronDown } from 'lucide-react';
+import { Button } from '../ui/Button';
+import { Card } from '../ui/Card';
+import { SectionHeader } from '../ui/SectionHeader';
+import { Link } from 'react-router-dom';
 
-/* ─── Particle Canvas ─── */
-const ParticleCanvas = () => {
-  const canvasRef = useRef(null);
-
-  useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    const ctx = canvas.getContext('2d');
-    let animId;
-    let particles = [];
-
-    const resize = () => {
-      canvas.width = window.innerWidth;
-      canvas.height = window.innerHeight;
-    };
-    resize();
-    window.addEventListener('resize', resize);
-
-    // Create particles
-    for (let i = 0; i < 80; i++) {
-      particles.push({
-        x: Math.random() * canvas.width,
-        y: Math.random() * canvas.height,
-        r: Math.random() * 2.5 + 0.5,
-        dx: (Math.random() - 0.5) * 0.4,
-        dy: (Math.random() - 0.5) * 0.4,
-        opacity: Math.random() * 0.5 + 0.1,
-      });
-    }
-
-    const draw = () => {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      particles.forEach((p) => {
-        ctx.beginPath();
-        ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
-        ctx.fillStyle = `rgba(96, 130, 255, ${p.opacity})`;
-        ctx.fill();
-        p.x += p.dx;
-        p.y += p.dy;
-        if (p.x < 0 || p.x > canvas.width) p.dx *= -1;
-        if (p.y < 0 || p.y > canvas.height) p.dy *= -1;
-      });
-      animId = requestAnimationFrame(draw);
-    };
-    draw();
-
-    return () => {
-      cancelAnimationFrame(animId);
-      window.removeEventListener('resize', resize);
-    };
-  }, []);
-
-  return (
-    <canvas
-      ref={canvasRef}
-      className="absolute inset-0 pointer-events-none"
-      style={{ zIndex: 0 }}
-    />
-  );
-};
-
-/* ─── Fade-in on scroll ─── */
-const FadeIn = ({ children, className = '', delay = 0 }) => {
-  const ref = useRef(null);
-  const [visible, setVisible] = useState(false);
-
-  useEffect(() => {
-    const el = ref.current;
-    if (!el) return;
-    const obs = new IntersectionObserver(
-      ([entry]) => { if (entry.isIntersecting) setVisible(true); },
-      { threshold: 0.15 }
-    );
-    obs.observe(el);
-    return () => obs.disconnect();
-  }, []);
-
-  return (
-    <div
-      ref={ref}
-      className={`transition-all duration-700 ease-out ${visible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'} ${className}`}
-      style={{ transitionDelay: `${delay}ms` }}
-    >
-      {children}
-    </div>
-  );
-};
-
-/* ─── Auth Modal ─── */
+/* ─── Auth Modal (mantenido, sin cambios de lógica) ─── */
 const AuthModal = ({ open, onClose }) => {
   const [loading, setLoading] = useState(false);
   const [email, setEmail] = useState('');
@@ -121,8 +33,8 @@ const AuthModal = ({ open, onClose }) => {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;
       } else {
-        const { error } = await supabase.auth.signUp({ 
-          email, 
+        const { error } = await supabase.auth.signUp({
+          email,
           password,
           options: {
             emailRedirectTo: `${window.location.origin}/email-confirmado`
@@ -142,54 +54,40 @@ const AuthModal = ({ open, onClose }) => {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4" onClick={onClose}>
-      {/* Backdrop */}
       <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" />
-
-      {/* Modal */}
       <div
-        className="relative w-full max-w-md bg-white/95 dark:bg-zinc-900/95 backdrop-blur-2xl rounded-2xl border border-slate-200/60 dark:border-zinc-800/60 shadow-2xl p-8 animate-[modalIn_0.3s_ease-out]"
+        className="relative w-full max-w-md bg-white dark:bg-zinc-900 backdrop-blur-2xl border border-slate-200/60 dark:border-zinc-800/60 rounded-[20px] p-6"
         onClick={(e) => e.stopPropagation()}
       >
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 p-2 text-slate-400 hover:text-slate-600 dark:hover:text-zinc-200 transition-colors rounded-full hover:bg-slate-100 dark:hover:bg-zinc-800"
+          className="absolute top-4 right-4 p-2 text-slate-400 hover:text-slate-600 dark:hover:text-zinc-200 rounded-sm hover:bg-slate-100 dark:hover:bg-zinc-800"
         >
-          <X size={18} />
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
+          </svg>
         </button>
 
-        {isForgotPassword && (
-          <button
-            onClick={() => { setIsForgotPassword(false); reset(); }}
-            className="absolute top-4 left-4 p-2 text-slate-400 hover:text-slate-700 dark:hover:text-zinc-200 transition-colors"
-          >
-            <ArrowLeft size={16} />
-          </button>
-        )}
-
-        {/* Logo */}
-        <div className="flex flex-col items-center gap-2 mb-6">
-          <div className="bg-blue-600 text-white p-2.5 rounded-xl shadow-lg shadow-blue-600/20">
-            <Activity size={24} strokeWidth={2.5} />
+        <div className="flex flex-col items-center gap-2 mb-4">
+          <div className="bg-[#1f2de6] text-white p-2 rounded-[12px]">
+            <Activity size={22} strokeWidth={2} />
           </div>
-          <h2 className="text-lg font-black text-slate-900 dark:text-zinc-100 tracking-tight uppercase">
+          <h2 className="text-lg font-bold text-slate-900 dark:text-zinc-100 tracking-tight uppercase">
             {isForgotPassword ? 'Recuperar Clave' : isLogin ? 'Bienvenido de Vuelta' : 'Crear Cuenta'}
           </h2>
-          <p className="text-xs text-slate-500 dark:text-zinc-400 font-medium">
-            {isForgotPassword ? 'Te enviaremos un enlace a tu correo' : isLogin ? 'Accede a tu laboratorio' : 'Empieza a analizar tu rendimiento'}
-          </p>
         </div>
 
-        {error && <div className="mb-4 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-900/50 rounded-xl text-red-600 dark:text-red-400 text-[11px] font-semibold text-center">{error}</div>}
-        {message && <div className="mb-4 p-3 bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-900/50 rounded-xl text-emerald-600 dark:text-emerald-400 text-[11px] font-semibold text-center">{message}</div>}
+        {error && <div className="mb-3 p-3 bg-red-100 dark:bg-red-900/20 border border-red-200 dark:border-red-800/50 rounded-[12px] text-red-700 dark:text-red-300 text-[11px] font-medium text-center">{error}</div>}
+        {message && <div className="mb-3 p-3 bg-emerald-100 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-800/50 rounded-[12px] text-emerald-700 dark:text-emerald-300 text-[11px] font-medium text-center">{message}</div>}
 
-        <form onSubmit={handleAuth} className="space-y-4">
+        <form onSubmit={handleAuth} className="space-y-3">
           <div>
-            <label className="text-[10px] font-semibold text-slate-500 dark:text-zinc-400 uppercase tracking-wider block mb-1.5">Email</label>
+            <label className="text-[11px] font-medium text-slate-500 dark:text-zinc-400 uppercase tracking-wider block mb-1">Email</label>
             <div className="relative">
-              <Mail size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 dark:text-zinc-500" />
+              <Mail size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 dark:text-zinc-500" />
               <input
                 type="email" value={email} onChange={(e) => setEmail(e.target.value)} required
-                className="w-full pl-10 pr-4 py-3 bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 rounded-xl text-sm text-slate-800 dark:text-zinc-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/10 outline-none transition-all"
+                className="w-full pl-9 pr-3 py-3 bg-white dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 rounded-[12px] text-sm text-slate-800 dark:text-zinc-200 focus:border-[#1f2de6] focus:ring-2 focus:ring-[#1f2de6]/20 outline-none transition-colors"
                 placeholder="atleta@ejemplo.com"
               />
             </div>
@@ -197,12 +95,12 @@ const AuthModal = ({ open, onClose }) => {
 
           {!isForgotPassword && (
             <div>
-              <label className="text-[10px] font-semibold text-slate-500 dark:text-zinc-400 uppercase tracking-wider block mb-1.5">Contraseña</label>
+              <label className="text-[11px] font-medium text-slate-500 dark:text-zinc-400 uppercase tracking-wider block mb-1">Contraseña</label>
               <div className="relative">
-                <Lock size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 dark:text-zinc-500" />
+                <Lock size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 dark:text-zinc-500" />
                 <input
                   type="password" value={password} onChange={(e) => setPassword(e.target.value)} required
-                  className="w-full pl-10 pr-4 py-3 bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 rounded-xl text-sm text-slate-800 dark:text-zinc-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/10 outline-none transition-all"
+                  className="w-full pl-9 pr-3 py-3 bg-white dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 rounded-[12px] text-sm text-slate-800 dark:text-zinc-200 focus:border-[#1f2de6] focus:ring-2 focus:ring-[#1f2de6]/20 outline-none transition-colors"
                   placeholder="••••••••"
                 />
               </div>
@@ -211,29 +109,26 @@ const AuthModal = ({ open, onClose }) => {
 
           <button
             type="submit" disabled={loading}
-            className="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold text-sm flex items-center justify-center gap-2 transition-all disabled:opacity-50 mt-2 shadow-lg shadow-blue-600/20 hover:shadow-blue-600/30 active:scale-[0.98]"
+            className="btn btn--primary w-full"
           >
-            {loading ? <Loader2 size={16} className="animate-spin" /> : (
-              <>
-                {isForgotPassword ? 'Enviar Enlace' : isLogin ? 'Entrar al Laboratorio' : 'Crear Cuenta'}
-                {!loading && <ArrowRight size={16} />}
-              </>
+            {loading ? <svg className="animate-spin w-4 h-4 mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> : (
+              isForgotPassword ? 'Enviar Enlace' : isLogin ? 'Entrar' : 'Crear Cuenta'
             )}
           </button>
         </form>
 
         {!isForgotPassword && (
-          <div className="mt-6 text-center border-t border-slate-100 dark:border-zinc-800 pt-4 flex flex-col gap-2.5">
+          <div className="mt-5 text-center border-t border-slate-100 dark:border-zinc-800 pt-4 flex flex-col gap-2">
             <button
               onClick={() => { setIsLogin(!isLogin); reset(); }}
-              className="text-[11px] font-semibold text-slate-500 dark:text-zinc-400 hover:text-slate-800 dark:hover:text-zinc-200 transition-colors"
+              className="text-[11px] font-medium text-slate-500 dark:text-zinc-400 hover:text-slate-800 dark:hover:text-zinc-100"
             >
-              {isLogin ? '¿No tienes cuenta? Regístrate gratis' : '¿Ya tienes cuenta? Inicia Sesión'}
+              {isLogin ? '¿No tienes cuenta? Regístrate' : '¿Ya tienes cuenta? Inicia Sesión'}
             </button>
             {isLogin && (
               <button
                 onClick={() => { setIsForgotPassword(true); reset(); }}
-                className="text-[10px] font-medium text-slate-400 dark:text-zinc-500 hover:text-blue-500 dark:hover:text-blue-400 transition-colors"
+                className="text-[10px] font-medium text-slate-400 dark:text-zinc-500 hover:text-[#1f2de6] dark:hover:text-blue-400"
               >
                 ¿Has olvidado tu contraseña?
               </button>
@@ -245,257 +140,163 @@ const AuthModal = ({ open, onClose }) => {
   );
 };
 
-/* ─── Feature Card ─── */
-const FeatureCard = ({ icon: Icon, title, description, color, span = '' }) => (
-  <div className={`group relative bg-white/70 dark:bg-zinc-900/50 backdrop-blur-xl border border-slate-200/50 dark:border-zinc-800/50 rounded-2xl p-6 hover:shadow-xl hover:shadow-slate-200/50 dark:hover:shadow-zinc-900/50 transition-all duration-300 hover:-translate-y-1 overflow-hidden ${span}`}>
-    <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-bl from-blue-500/5 to-transparent rounded-bl-full opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-    <div className={`w-10 h-10 rounded-xl flex items-center justify-center mb-4 ${color} transition-transform group-hover:scale-110`}>
-      <Icon size={20} className="text-white" />
-    </div>
-    <h3 className="text-base font-bold text-slate-800 dark:text-zinc-100 mb-2">{title}</h3>
-    <p className="text-sm text-slate-500 dark:text-zinc-400 leading-relaxed">{description}</p>
-  </div>
-);
-
-/* ─── Stat Counter ─── */
-const StatItem = ({ icon: Icon, value, label }) => (
-  <div className="flex flex-col items-center text-center gap-2">
-    <Icon size={24} className="text-blue-500" />
-    <span className="text-3xl font-black text-slate-800 dark:text-zinc-100 tracking-tight">{value}</span>
-    <span className="text-xs font-semibold text-slate-500 dark:text-zinc-400 uppercase tracking-wider">{label}</span>
-  </div>
-);
-
-/* ═══════════════════════════════════════════════
-   LANDING PAGE
-   ═══════════════════════════════════════════════ */
+/* ════════════════════════════════════════════════════
+   LANDING PAGE — diseño-taste-frontend
+   ════════════════════════════════════════════════════ */
 export const LandingPage = () => {
   const [authOpen, setAuthOpen] = useState(false);
 
-  const scrollToFeatures = useCallback(() => {
-    document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' });
-  }, []);
-
   return (
-    <div className="min-h-screen bg-white dark:bg-zinc-950 text-slate-800 dark:text-zinc-200 overflow-x-hidden selection:bg-blue-500/30">
+    <div className="min-h-screen bg-white dark:#0b0c0e text-slate-800 dark:text-zinc-200 overflow-x-hidden selection:bg-[#1f2de6]/30">
 
-      {/* ─── NAVBAR ─── */}
-      <nav className="fixed top-0 left-0 right-0 z-40 bg-white/80 dark:bg-zinc-950/80 backdrop-blur-xl border-b border-slate-100/80 dark:border-zinc-900/80">
-        <div className="max-w-6xl mx-auto flex items-center justify-between h-16 px-6">
-          <div className="flex items-center gap-2.5">
-            <div className="bg-blue-600 text-white p-1.5 rounded-lg">
-              <Activity size={18} strokeWidth={2.5} />
+      {/* ─── NAVBAR (fija, opaca, 1px hairline, sin blur/transparencia) ─── */}
+      <nav className="fixed top-0 left-0 right-0 z-[10] border-b border-slate-200 dark:border-zinc-800/60 bg-white/90 dark:bg-[#0b0c0e]/90">
+        <div className="wrap flex items-center justify-between h-[72px] px-6">
+          <a href="#" className="flex items-center gap-2 link">
+            <div className="bg-[#1f2de6] text-white p-1.5 rounded-[8px]">
+              <Activity size={16} strokeWidth={2} />
             </div>
-            <span className="text-base font-black uppercase tracking-tight text-slate-900 dark:text-zinc-100">
-              Forma<span className="text-blue-500">Lab</span>
-            </span>
-          </div>
-
-          <div className="hidden md:flex items-center gap-8">
-            <button onClick={scrollToFeatures} className="text-sm font-medium text-slate-500 hover:text-slate-800 dark:text-zinc-400 dark:hover:text-zinc-100 transition-colors">
-              Funciones
-            </button>
-            <a href="#stats" className="text-sm font-medium text-slate-500 hover:text-slate-800 dark:text-zinc-400 dark:hover:text-zinc-100 transition-colors">
-              Rendimiento
-            </a>
-          </div>
-
-          <div className="flex items-center gap-3">
-            <button
-              onClick={() => setAuthOpen(true)}
-              className="text-sm font-semibold text-slate-600 dark:text-zinc-300 hover:text-slate-900 dark:hover:text-zinc-100 transition-colors"
-            >
-              Iniciar Sesión
-            </button>
-            <button
-              onClick={() => setAuthOpen(true)}
-              className="bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold px-5 py-2 rounded-full transition-all shadow-lg shadow-blue-600/20 hover:shadow-blue-600/30 active:scale-95"
-            >
-              Empezar Gratis
-            </button>
-          </div>
+            <span className="font-bold text-slate-900 dark:text-zinc-100 tracking-tight">Forma<span className="text-[#1f2de6]">Lab</span></span>
+          </a>
+          <button
+            onClick={() => setAuthOpen(true)}
+            className="btn btn--primary"
+          >
+            Empezar prueba gratis
+          </button>
         </div>
       </nav>
 
-      {/* ─── HERO SECTION ─── */}
-      <section className="relative min-h-screen flex flex-col items-center justify-center px-6 pt-16">
-        <ParticleCanvas />
+      <main>
+        {/* ─── HERO — solo en la primera pantalla ─── */}
+        <section className="section hero" id="hero" style={{ '--h': 1 }}>
+          <div className="wrap">
+            <a href="#top" className="skip-link">Saltar al contenido</a>
 
-        <div className="relative z-10 text-center max-w-4xl mx-auto">
-          {/* Badge */}
-          <FadeIn>
-            <div className="inline-flex items-center gap-2 bg-blue-50 dark:bg-blue-950/30 border border-blue-200/50 dark:border-blue-800/50 rounded-full px-4 py-1.5 mb-8">
-              <div className="w-2 h-2 rounded-full bg-blue-500 animate-pulse" />
-              <span className="text-xs font-semibold text-blue-600 dark:text-blue-400">
-                Performance Analytics Platform
-              </span>
+            <div className="hero-grid grid grid-cols-12 gap-8 items-start">
+              {/* Texto: span 7 */}
+              <div className="col-span-12 lg:col-span-7 measure">
+                <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-slate-900 dark:text-zinc-100 tracking-tight leading-[1.12] mb-6">
+                  Dashboard de rendimiento para ciclistas y corredores
+                </h1>
+                <p className="text-lg text-slate-500 dark:text-zinc-400 leading-relaxed mb-8 max-w-none">
+                  Analiza tus actividades, métricas de entrenamiento (CTL, ATL, TSB), zonas de
+                  potencia y salud en un solo lugar. Conecta Strava y ve tu evolución.
+                </p>
+                {/* Dato duro: número real de la app */}
+                <div className="flex items-center gap-3 mb-8 text-sm text-slate-500 dark:text-zinc-400 font-medium">
+                  <span className="w-1 h-1 rounded-full bg-[#1f2de6] animate-pulse" />
+                  <span>Más de 10.000 actividades analizadas</span>
+                </div>
+                <div className="flex flex-col sm:flex-row gap-3">
+                  <Button variant="primary" onClick={() => setAuthOpen(true)} full>
+                    Empezar prueba gratis <ArrowRight className="ml-2 w-4 h-4" />
+                  </Button>
+                  <Button variant="secondary" asChild>
+                    <Link to="/login">Iniciar sesión</Link>
+                  </Button>
+                </div>
+              </div>
+
+              {/* App-frame: UI propio de la app, grande, a la derecha */}
+              <div className="col-span-12 lg:col-span-5 mt-10 lg:mt-0">
+                <div className="card border-slate-200 dark:border-zinc-800/60 shadow-lg dark:shadow-none overflow-hidden">
+                  {/* Header de la app (live HTML) */}
+                  <div className="bg-[#e2e5ea] dark:bg-[#17181a] px-6 py-4 border-b border-slate-200 dark:border-zinc-800/60 flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="bg-[#1f2de6] text-white p-1 rounded-[8px]"><Activity size={14} strokeWidth={2} /></div>
+                      <div className="text-sm font-bold text-slate-900 dark:text-zinc-100">FormaLab</div>
+                    </div>
+                    <div className="text-xs text-slate-400 dark:text-zinc-500">Dashboard • Hoy</div>
+                  </div>
+                  {/* Métricas principales (live HTML del producto) */}
+                  <div className="p-6 grid grid-cols-2 gap-4">
+                    <div className="bg-white dark:bg-zinc-900 rounded-[12px] border border-slate-200 dark:border-zinc-800 p-4">
+                      <div className="text-xs text-slate-400 dark:text-zinc-500 uppercase tracking-wider mb-1">CTL</div>
+                      <div className="text-2xl font-bold text-slate-900 dark:text-zinc-100">42</div>
+                      <div className="text-xs text-emerald-600 dark:text-emerald-400 mt-1">▲ 3.2 esta semana</div>
+                    </div>
+                    <div className="bg-white dark:bg-zinc-900 rounded-[12px] border border-slate-200 dark:border-zinc-800 p-4">
+                      <div className="text-xs text-slate-400 dark:text-zinc-500 uppercase tracking-wider mb-1">TSB</div>
+                      <div className="text-2xl font-bold text-slate-900 dark:text-zinc-100">+8</div>
+                      <div className="text-xs text-emerald-600 dark:text-emerald-400 mt-1">Listo para competir</div>
+                    </div>
+                  </div>
+                  {/* Gráfico simulado (live HTML del producto) */}
+                  <div className="h-32 bg-white dark:bg-zinc-900 rounded-[12px] border border-slate-200 dark:border-zinc-800 mt-4 p-4">
+                    <svg className="w-full h-full" viewBox="0 0 400 140" preserveAspectRatio="none">
+                      <path d="M20,100 Q80,60 140,90 T260,60 T380,100" stroke="#1f2de6" strokeWidth="2" fill="none" />
+                      <path d="M20,100 L380,100 L380,140 L20,140 Z" fill="rgba(31,45,230,0.08)" />
+                    </svg>
+                  </div>
+                </div>
+              </div>
             </div>
-          </FadeIn>
-
-          {/* Headline */}
-          <FadeIn delay={100}>
-            <h1 className="text-5xl sm:text-6xl lg:text-7xl font-black text-slate-900 dark:text-white tracking-tight leading-[1.1] mb-6">
-              Tu laboratorio de rendimiento deportivo
-            </h1>
-          </FadeIn>
-
-          {/* Subtitle */}
-          <FadeIn delay={200}>
-            <p className="text-lg sm:text-xl text-slate-500 dark:text-zinc-400 max-w-2xl mx-auto mb-10 leading-relaxed font-medium">
-              Analiza tus actividades, monitoriza tu evolución y lleva tu entrenamiento al siguiente nivel con métricas avanzadas y análisis de datos.
-            </p>
-          </FadeIn>
-
-          {/* CTAs */}
-          <FadeIn delay={300}>
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-              <button
-                onClick={() => setAuthOpen(true)}
-                className="group bg-slate-900 dark:bg-white hover:bg-slate-800 dark:hover:bg-zinc-100 text-white dark:text-zinc-900 text-sm font-bold px-8 py-3.5 rounded-full transition-all shadow-xl shadow-slate-900/20 dark:shadow-white/10 hover:shadow-slate-900/30 active:scale-95 flex items-center gap-2"
-              >
-                Empezar Gratis
-                <ArrowRight size={16} className="group-hover:translate-x-0.5 transition-transform" />
-              </button>
-              <button
-                onClick={scrollToFeatures}
-                className="text-sm font-semibold text-slate-600 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-zinc-100 px-8 py-3.5 rounded-full border border-slate-200 dark:border-zinc-800 hover:border-slate-300 dark:hover:border-zinc-700 transition-all hover:shadow-lg active:scale-95"
-              >
-                Explorar Funciones
-              </button>
-            </div>
-          </FadeIn>
-        </div>
-
-        {/* Scroll indicator */}
-        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 animate-bounce">
-          <ChevronDown size={24} className="text-slate-300 dark:text-zinc-600" />
-        </div>
-      </section>
-
-      {/* ─── FEATURES BENTO GRID ─── */}
-      <section id="features" className="relative py-24 px-6">
-        <div className="max-w-6xl mx-auto">
-          <FadeIn>
-            <div className="text-center mb-16">
-              <span className="text-xs font-bold text-blue-500 uppercase tracking-widest mb-3 block">Funciones</span>
-              <h2 className="text-3xl sm:text-4xl font-black text-slate-900 dark:text-white tracking-tight mb-4">
-                Todo lo que necesitas para entrenar mejor
-              </h2>
-              <p className="text-base text-slate-500 dark:text-zinc-400 max-w-xl mx-auto font-medium">
-                Herramientas avanzadas de análisis diseñadas para ciclistas y corredores que buscan mejorar su rendimiento.
-              </p>
-            </div>
-          </FadeIn>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-            <FadeIn delay={0}>
-              <FeatureCard
-                icon={BarChart3}
-                title="Dashboard Avanzado"
-                description="Gráficas de evolución, distribución de carga, resúmenes semanales y métricas clave de un vistazo."
-                color="bg-blue-600"
-              />
-            </FadeIn>
-            <FadeIn delay={80}>
-              <FeatureCard
-                icon={TrendingUp}
-                title="Análisis de Actividad"
-                description="Zonas de FC y potencia, curvas de potencia, análisis de desacople aeróbico y métricas avanzadas."
-                color="bg-indigo-600"
-              />
-            </FadeIn>
-            <FadeIn delay={160}>
-              <FeatureCard
-                icon={Map}
-                title="Mapas Interactivos"
-                description="Visualiza tus rutas con datos sincronizados en mapa. Pasa el ratón por la gráfica y mira tu posición."
-                color="bg-emerald-600"
-              />
-            </FadeIn>
-            <FadeIn delay={240}>
-              <FeatureCard
-                icon={Calendar}
-                title="Calendario"
-                description="Vista mensual de tu entrenamiento con la carga diaria, actividades planificadas y ejecutadas."
-                color="bg-orange-500"
-              />
-            </FadeIn>
-            <FadeIn delay={320}>
-              <FeatureCard
-                icon={Gauge}
-                title="Métricas de Potencia"
-                description="NP, IF, VI, TSS, curvas de potencia y análisis por zonas. Compatible con medidores de potencia."
-                color="bg-amber-500"
-              />
-            </FadeIn>
-            <FadeIn delay={400}>
-              <FeatureCard
-                icon={Zap}
-                title="Sincronización Strava"
-                description="Conecta tu cuenta de Strava y sincroniza todas tus actividades automáticamente."
-                color="bg-orange-600"
-              />
-            </FadeIn>
           </div>
-        </div>
-      </section>
+        </section>
 
-      {/* ─── STATS ─── */}
-      <section id="stats" className="py-20 px-6 bg-slate-50 dark:bg-zinc-900/30">
-        <div className="max-w-4xl mx-auto">
-          <FadeIn>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
-              <StatItem icon={Activity} value="∞" label="Actividades" />
-              <StatItem icon={Timer} value="24/7" label="Análisis" />
-              <StatItem icon={Heart} value="5+" label="Zonas FC" />
-              <StatItem icon={Target} value="100%" label="Gratis" />
+        {/* ─── CARACTERÍSTICAS — una sección, una pantalla ─── */}
+        <section className="section ground-alt" id="features" style={{ '--h': 1 }}>
+          <div className="wrap">
+            <SectionHeader
+              title="Todo lo que necesitas para entrenar mejor"
+              subtitle="Herramientas de análisis diseñadas para ciclistas y corredores que miden su progreso."
+            />
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-10">
+              {[
+                {
+                  title: 'Métricas de fitness',
+                  text: 'CTL, ATL y TSB calculados automáticamente desde tus actividades sincronizadas.',
+                },
+                {
+                  title: 'Zonas de potencia y FC',
+                  text: 'Define tus umbrales y visualiza el tiempo en cada zona por deporte.',
+                },
+                {
+                  title: 'Calendario de entrenamiento',
+                  text: 'Planea tus sesiones y lleva el registro de lo ejecutado día a día.',
+                },
+                {
+                  title: 'Salud y bienestar',
+                  text: 'HRV, reposo, sueño y entrenamiento listo para interpretar tu fatiga.',
+                },
+                {
+                  title: 'Sincronización Strava',
+                  text: 'Conecta Strava y todas tus actividades se importan automáticamente.',
+                },
+                {
+                  title: 'Entrenador IA',
+                  text: 'Pregúntale a tu entrenador basado en Google Gemini sobre tu progreso.',
+                },
+              ].map((item, i) => (
+                <Card key={i} className="h-full">
+                  <CardTitle>{item.title}</CardTitle>
+                  <CardText>{item.text}</CardText>
+                </Card>
+              ))}
             </div>
-          </FadeIn>
-        </div>
-      </section>
-
-      {/* ─── FINAL CTA ─── */}
-      <section className="py-24 px-6">
-        <div className="max-w-3xl mx-auto text-center">
-          <FadeIn>
-            <h2 className="text-3xl sm:text-4xl font-black text-slate-900 dark:text-white tracking-tight mb-4">
-              ¿Listo para analizar tu rendimiento?
-            </h2>
-            <p className="text-base text-slate-500 dark:text-zinc-400 max-w-lg mx-auto mb-8 font-medium">
-              Crea tu cuenta gratuita y empieza a entrenar con datos. Conecta Strava y visualiza tu progreso.
-            </p>
-            <button
-              onClick={() => setAuthOpen(true)}
-              className="group bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold px-10 py-4 rounded-full transition-all shadow-xl shadow-blue-600/25 hover:shadow-blue-600/40 active:scale-95 inline-flex items-center gap-2"
-            >
-              Crear Cuenta Gratis
-              <ArrowRight size={16} className="group-hover:translate-x-0.5 transition-transform" />
-            </button>
-          </FadeIn>
-        </div>
-      </section>
-
-      {/* ─── FOOTER ─── */}
-      <footer className="border-t border-slate-100 dark:border-zinc-900 py-8 px-6">
-        <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4 text-[11px] text-slate-400 dark:text-zinc-600 font-medium">
-          <div className="flex items-center gap-2">
-            <Activity size={14} className="text-blue-500" />
-            <span className="font-bold uppercase tracking-wider text-slate-600 dark:text-zinc-400">FormaLab</span>
           </div>
-          <span>© {new Date().getFullYear()} FormaLab · Performance Analytics</span>
-        </div>
-      </footer>
+        </section>
 
-      {/* ─── AUTH MODAL ─── */}
+        {/* ─── FOOTER ─── */}
+        <footer className="section ground-dark border-t border-slate-200/20" id="footer" style={{ '--h': 1 }}>
+          <div className="wrap flex flex-col lg:flex-row items-center justify-between gap-6 py-12">
+            <div className="flex items-center gap-2">
+              <div className="bg-[#1f2de6] text-white p-1 rounded-[8px]"><Activity size={14} strokeWidth={2} /></div>
+              <span className="font-bold text-zinc-100 tracking-tight">Forma<span className="text-[#1f2de6]">Lab</span></span>
+            </div>
+            <div className="text-sm text-zinc-400">
+              © {new Date().getFullYear()} FormaLab · Performance Analytics
+            </div>
+            <div className="flex gap-6 text-sm text-zinc-400">
+              <a href="#" className="link hover:text-white">Privacidad</a>
+              <a href="#" className="link hover:text-white">Términos</a>
+            </div>
+          </div>
+        </footer>
+      </main>
+
       <AuthModal open={authOpen} onClose={() => setAuthOpen(false)} />
-
-      {/* ─── MODAL ANIMATION ─── */}
-      <style>{`
-        @keyframes modalIn {
-          from { opacity: 0; transform: scale(0.95) translateY(10px); }
-          to { opacity: 1; transform: scale(1) translateY(0); }
-        }
-      `}</style>
     </div>
   );
 };

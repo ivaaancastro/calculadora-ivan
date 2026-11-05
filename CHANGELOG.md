@@ -7,6 +7,9 @@ y este proyecto adhiere a [Semantic Versioning](https://semver.org/lang/es/).
 
 ## [Unreleased]
 
+### Diseño
+- `feat(design):` rediseño integral de la webapp "Forma" con `design-taste-frontend` (tasteskill 2.5): sistema de diseño único (tokens, grounds, un par de botones, una receta de card), componentes base UI (Button, Card, Input, Badge, Avatar, EmptyState, Skeleton, Divider, SectionHeader, Toast), LandingPage y LoginPage rediseñadas con hero solo en primera pantalla y dato duro, Navbar unificada (`header.nav` fijo, opaco, 1px hairline), palette cool-grey-cobalt con accent azul, tipografía dealt Manrope + JetBrains Mono, micro-interacciones de hover/press/focus (`spec-rediseno-01`, rama `feat/webapp-redesign`).
+
 ### Seguridad
 - `fix(security):` remover `.env` del rastreo de git (`git rm --cached`), agregar `.env` y `.env.*` a `.gitignore`, crear `.env.example` sin valores secretos y validar variables de entorno críticas al arranque (`spec-audit-01`).
 

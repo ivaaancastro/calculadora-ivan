@@ -3,13 +3,6 @@
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "SF Pro", "Inter", system-ui, Avenir, Helvetica, Arial, sans-serif;
-  line-height: 1.5;
-  font-weight: 400;
-  color-scheme: light dark;
-}
-
 html, body {
   overflow-x: hidden;
   width: 100%;
@@ -20,20 +13,13 @@ html, body {
 body {
   margin: 0;
   padding: 0;
-  min-height: 100vh;
   min-height: 100dvh;
-  background-color: #f2f2f7; /* Apple iOS light grouped background */
-  color: #1d1d1f;
-  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "SF Pro", "Inter", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-  letter-spacing: -0.015em; /* Global tight tracking for Apple aesthetic */
+  background: var(--g-main);
+  color: var(--color-ink);
+  font-family: var(--font-text);
+  line-height: 1.5;
+  overflow-x: hidden;
   -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
-
-/* Dark mode — pure OLED black like Apple Fitness */
-.dark body {
-  background-color: #000000;
-  color: #f5f5f7;
 }
 
 /* Apple-style Glassmorphism and HIG utilities */
