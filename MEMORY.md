@@ -32,7 +32,7 @@
 |----|------|--------|----------------------|-----------------|
 | spec-001 | Servicio de IA con Gemini — respuestas estructuradas | pendiente | 2026-11-05 | — |
 | spec-audit-01 | Seguridad: remover secretos de `.env`, validar env vars al arranque | implementada | 2026-11-05 | fix/security-env-secrets |
-| spec-audit-02 | Cobertura: tests unitarios para utils (tssEngine, parser, formatters, fitnessStatsEngine) | pendiente | 2026-11-05 | — |
+| spec-audit-02 | Cobertura: tests unitarios para utils (tssEngine, parser, formatters, fitnessStatsEngine) | implementada | 2026-11-05 | feat/tests-utils-coverage |
 | spec-audit-03 | Cobertura: tests para `src/services/ai.js` y `src/store/useAppStore.js` | pendiente | 2026-11-05 | — |
 | spec-audit-04 | Refactor: `Dashboard.jsx` en componentes más pequeños (SRP) | pendiente | 2026-11-05 | — |
 | spec-audit-05 | Refactor: hooks grandes (`useActivities.js`, `useWellnessInfo.js`) | pendiente | 2026-11-05 | — |
@@ -60,7 +60,7 @@
 - [x] spec-audit-01: Seguridad — remover secretos de `.env`, agregar a `.gitignore`, crear `.env.example`, validar env vars al arranque (rama `fix/security-env-secrets`)
 
 ### Fase 2 — Cobertura de pruebas (utils, IA, store)
-- [ ] spec-audit-02: Tests unitarios para `tssEngine.js`, `parser.js`, `formatters.js`, `fitnessStatsEngine.js`
+- [x] spec-audit-02: Tests unitarios para `tssEngine.js`, `parser.js`, `formatters.js`, `fitnessStatsEngine.js`
 - [ ] spec-audit-03: Tests para `src/services/ai.js` (mockear Gemini) y `src/store/useAppStore.js` (Zustand)
 
 ### Fase 3 — Refactorización core (SRP)
