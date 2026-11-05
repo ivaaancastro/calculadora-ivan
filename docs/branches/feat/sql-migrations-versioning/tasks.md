@@ -11,8 +11,8 @@
 | 7 | Crear `migrations/README.md` documentando orden y propósito de cada migración | [x] |
 | 8 | Verificar (`npm run lint`, `npm run build`) | [x] |
 | 9 | Registrar (MEMORY.md, CHANGELOG.md, docs/specs/README.md, spec.md) | [x] |
-| 10 | Commit `feat(database): ...` y push | [ ] |
-| 11 | Abrir PR hacia `develop` | [ ] |
+| 10 | Commit `feat(database): ...` y push | [x] |
+| 11 | Abrir PR hacia `develop` | [x] |
 | 12 | Merge a `develop` | [ ] Esperando autorización del usuario |
 
 ---
