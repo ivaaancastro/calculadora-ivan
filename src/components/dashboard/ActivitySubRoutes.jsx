@@ -1,6 +1,7 @@
 import React, { Suspense } from 'react';
 import { Routes, Route } from 'react-router-dom';
 import { ErrorBoundary } from '../common/ErrorBoundary';
+import { ActivityRouteWrapper } from './ActivityRouteWrapper';
 
 const ProfilePage = React.lazy(() =>
   import('../pages/ProfilePage').then((m) => ({ default: m.ProfilePage }))
