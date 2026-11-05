@@ -1,8 +1,22 @@
 import { describe, it, expect } from 'vitest';
-import { calculatePMC, getSportCategory } from '../../../src/utils/tssEngine';
+import {
+  calculatePMC,
+  getSportCategory,
+  calcZonesFromLTHR,
+  calculateActivityTSS,
+  computeZoneTssPerHour,
+  estimateTssFromBlocks,
+  getEffectiveTSS,
+} from '../../../src/utils/tssEngine';
+
+const settings = {
+  gender: 'male',
+  fcReposo: 50,
+  bike: { ftp: 250, max: 190, lthr: 170 },
+  run: { max: 190, lthr: 170 },
+};
 
 describe('tssEngine - PMC Calculations', () => {
-
   it('debería retornar métricas vacías si no hay actividades', () => {
     const result = calculatePMC([]);
     expect(result.fullSeries).toEqual([]);
@@ -10,7 +24,6 @@ describe('tssEngine - PMC Calculations', () => {
   });
 
   it('debería calcular el CTL correctamente para una sola actividad de 100 TSS', () => {
-    // Simulamos que hoy es 2026-07-06 y la actividad fue ayer
     const today = new Date();
     const yesterday = new Date(today);
     yesterday.setDate(today.getDate() - 1);
@@ -20,17 +33,9 @@ describe('tssEngine - PMC Calculations', () => {
     ];
 
     const result = calculatePMC(activities, { ta: 42, tf: 7 });
-    
-    // K_CTL_GAIN para 42 días es (1 - exp(-1/42)) = ~0.0235...
-    // El CTL del día 1 será 100 * 0.0235 = ~2.35
-    
-    // El test verifica que la serie temporal no está vacía
+
     expect(result.fullSeries.length).toBeGreaterThan(0);
-    
-    // Verificamos las métricas actuales (hasta +7 días)
     expect(result.metrics).not.toBeNull();
-    // La fatiga baja rápidamente, el fitness baja lentamente.
-    // El CTL del último punto debería ser > 0 y < 100
     expect(result.metrics.ctl).toBeGreaterThan(0);
     expect(result.metrics.ctl).toBeLessThan(100);
   });
@@ -43,8 +48,103 @@ describe('tssEngine - PMC Calculations', () => {
     expect(getSportCategory('Natación')).toBe('swim');
     expect(getSportCategory('Fuerza')).toBe('strength');
     expect(getSportCategory('Yoga')).toBe('yoga');
-    expect(getSportCategory('Crossfit')).toBe('strength'); 
+    expect(getSportCategory('Crossfit')).toBe('strength');
     expect(getSportCategory('Desconocido')).toBe('other');
   });
+});
 
+describe('tssEngine - calcZonesFromLTHR', () => {
+  it('debe generar 7 zonas de FC a partir del LTHR', () => {
+    const zones = calcZonesFromLTHR(170, 190);
+    expect(zones).toHaveLength(7);
+    expect(zones[0].min).toBe(0);
+    expect(zones[6].max).toBe(190);
+  });
+
+  it('debe usar maxHr proporcionado en la última zona', () => {
+    const zones = calcZonesFromLTHR(160, 185);
+    expect(zones[6].max).toBe(185);
+  });
+});
+
+describe('tssEngine - calculateActivityTSS', () => {
+  it('debe retornar tss 0 y método none sin datos', () => {
+    const result = calculateActivityTSS({ duration: 0, type: 'Ride' }, settings);
+    expect(result.tss).toBe(0);
+    expect(result.method).toBe('none');
+  });
+
+  it('debe estimar TSS por duración para actividad sin datos fisiológicos', () => {
+    const result = calculateActivityTSS(
+      { duration: 60, type: 'Carrera', hr_avg: 0 },
+      settings
+    );
+    expect(result.tss).toBeGreaterThan(0);
+    expect(result.method).toBe('duration');
+  });
+
+  it('debe calcular TSS por potencia media para ciclismo', () => {
+    const result = calculateActivityTSS(
+      { duration: 60, type: 'Ride', watts_avg: 200 },
+      settings
+    );
+    expect(result.tss).toBeGreaterThan(0);
+    expect(result.method).toBe('power_avg');
+  });
+});
+
+describe('tssEngine - computeZoneTssPerHour', () => {
+  it('debe retornar TSS por hora para cada zona', () => {
+    const result = computeZoneTssPerHour('Ride', settings);
+    expect(result.Z1).toBeGreaterThan(0);
+    expect(result.Z7).toBeGreaterThan(result.Z1);
+    expect(result.R12).toBeDefined();
+  });
+
+  it('debe retornar fallback cuando no hay rango de FC válido', () => {
+    const badSettings = { gender: 'male', fcReposo: 50, bike: { max: 50, lthr: 50 } };
+    const result = computeZoneTssPerHour('Ride', badSettings);
+    expect(result.Z1).toBe(20);
+    expect(result.Z7).toBe(140);
+  });
+});
+
+describe('tssEngine - estimateTssFromBlocks', () => {
+  it('debe retornar null para array de bloques vacío', () => {
+    expect(estimateTssFromBlocks([], 'Ride', settings)).toBeNull();
+    expect(estimateTssFromBlocks(null, 'Ride', settings)).toBeNull();
+  });
+
+  it('debe estimar TSS de bloques simples de ciclismo', () => {
+    const blocks = [
+      { type: 'steady', zone: 'Z2', duration: 30, unit: 'min' },
+      { type: 'steady', zone: 'Z4', duration: 20, unit: 'min' },
+    ];
+    const result = estimateTssFromBlocks(blocks, 'Ride', settings);
+    expect(result).toBeGreaterThan(0);
+  });
+
+  it('debe manejar bloques con repeticiones', () => {
+    const blocks = [
+      { type: 'repeat', repeats: 2, steps: [
+        { type: 'steady', zone: 'Z3', duration: 5, unit: 'min' },
+      ] },
+    ];
+    const result = estimateTssFromBlocks(blocks, 'Run', settings);
+    expect(result).toBeGreaterThan(0);
+  });
+});
+
+describe('tssEngine - getEffectiveTSS', () => {
+  it('debe aplicar factor de fatiga del deporte', () => {
+    const ride = { tss: 100, type: 'Ride' };
+    const walk = { tss: 100, type: 'Walk' };
+    expect(getEffectiveTSS(ride)).toBe(100);
+    expect(getEffectiveTSS(walk)).toBe(50);
+  });
+
+  it('debe usar sportCategory si está disponible', () => {
+    const act = { tss: 100, sportCategory: 'strength' };
+    expect(getEffectiveTSS(act)).toBe(100);
+  });
 });
