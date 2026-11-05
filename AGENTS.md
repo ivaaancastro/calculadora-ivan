@@ -157,8 +157,9 @@ chore(deps): actualizar vite a v7
 |-----|------------------------|-----|
 | `context7` | Documentación actualizada de librerías del stack: React, Vite, Tailwind CSS, Supabase, Google Gemini, Playwright, Vitest, React Router, Zustand, TanStack Query, Recharts, Leaflet. Todos los agentes la necesitan para escribir código correcto y actualizado. | Todos los agentes (consultar APIs, versiones, patrones) |
 | `opencode` | Gestión de worktrees, sesiones, recursos MCP y herramientas de OpenCode. Útil para el flujo de agentes y para crear ramas/worktrees de forma controlada. | Flujo de agentes, creación de ramas, gestión de sesión |
+| `supabase` | MCP de Supabase (`https://github.com/supabase-community/opencode-supabase.git`). Permite a los agentes interactuar con Supabase (Auth, DB, RLS, Edge Functions) directamente desde OpenCode. Obligatorio para `db-agent` y para cualquier operación sobre la base de datos o Edge Functions. | `db-agent`, `code-agent` (cuando toca Supabase), `review-agent` (verificación de cambios en BD) |
 
-El archivo `.opencode/mcp.json` declara ambos MCPs como requeridos.
+El archivo `.opencode/mcp.json` declara todos los MCPs como requeridos.
 
 ---
 
