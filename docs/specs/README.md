@@ -8,7 +8,7 @@ de aceptación.
 
 | ID | Título | Estado | Última actualización |
 |----|--------|--------|----------------------|
-| spec-001 | Servicio de IA con Gemini — respuestas estructuradas | pendiente | 2026-11-05 |
+| spec-001 | Servicio de IA con Gemini — respuestas estructuradas | implementada | 2026-11-05 |
 | spec-audit-01 | Seguridad: remover secretos de `.env`, agregar a `.gitignore`, crear `.env.example`, validar env vars al arranque | implementada | 2026-11-05 |
 | spec-audit-02 | Cobertura: tests unitarios para utils (tssEngine, parser, formatters, fitnessStatsEngine) | implementada | 2026-11-05 |
 | spec-audit-03 | Cobertura: tests para `src/services/ai.js` y `src/store/useAppStore.js` | implementada | 2026-11-05 |

@@ -24,6 +24,9 @@ y este proyecto adhiere a [Semantic Versioning](https://semver.org/lang/es/).
 ### Base de datos
 - `feat(database):` consolidar 8 migraciones SQL con versionado ordenado (`000_` a `008_`), crear tabla `schema_migrations` para rastrear migraciones aplicadas, consolidar definición de `wellness_data` (UUID) y añadir `migrations/README.md` (`spec-audit-07`).
 
+### IA
+- `feat(ai):` añadir modo de respuestas estructuradas a `askGemini` (parámetro opcional `structured`, schema JSON, tipo `GeminiStructuredResponse`, pruebas unitarias y docs) (`spec-001`).
+
 ## [0.1.0] — 2026-11-05
 
 ### Implementado
