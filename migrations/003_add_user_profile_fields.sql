@@ -1,3 +1,11 @@
+-- ─────────────────────────────────────────────────────────────────────────────
+-- Migration: 003_add_user_profile_fields
+-- Description: Añade columnas de identidad (full_name, avatar_url) a la tabla
+--              profiles y crea el bucket de storage 'avatars' con sus políticas
+--              de acceso.
+--              Depende de: ninguna (profiles preexistente).
+-- ─────────────────────────────────────────────────────────────────────────────
+
 -- 1. Añadir columnas de identidad a la tabla profiles
 ALTER TABLE public.profiles 
   ADD COLUMN IF NOT EXISTS full_name TEXT,

@@ -13,6 +13,7 @@ de aceptación.
 | spec-audit-02 | Cobertura: tests unitarios para utils (tssEngine, parser, formatters, fitnessStatsEngine) | implementada | 2026-11-05 |
 | spec-audit-03 | Cobertura: tests para `src/services/ai.js` y `src/store/useAppStore.js` | implementada | 2026-11-05 |
 | spec-audit-04 | Refactorizar `Dashboard.jsx` (313 líneas) en componentes más pequeños | implementada | 2026-11-05 |
+| spec-audit-07 | Consolidar migraciones SQL y añadir versionado (`schema_migrations`) | implementada | 2026-11-05 |
 
 ## Cómo agregar una spec nueva
 

@@ -38,7 +38,7 @@
 | spec-fix-01 | Corregir imports faltantes en `Dashboard.jsx` tras refactor SRP | implementada | 2026-11-05 | fix/investigar-app-rota |
 | spec-audit-05 | Refactor: hooks grandes (`useActivities.js`, `useWellnessInfo.js`) | implementada | 2026-11-05 | feat/refactor-hooks-srp |
 | spec-audit-06 | TypeScript progresivo: tipado de utils, store y servicios | implementada | 2026-11-05 | feat/typescript-progreso |
-| spec-audit-07 | Consolidar migraciones SQL y añadir versionado (`schema_migrations`) | pendiente | 2026-11-05 | — |
+| spec-audit-07 | Consolidar migraciones SQL y añadir versionado (`schema_migrations`) | implementada | 2026-11-05 | feat/sql-migrations-versioning |
 | spec-audit-08 | Hardening Edge Function `intervals-proxy` (rate limiting, validación, timeout) | pendiente | 2026-11-05 | — |
 
 > Cuando un agente implemente una spec, debe añadir una fila aquí y marcarla como `implementada`.
@@ -71,7 +71,7 @@
 ### Fase 4 — Estabilidad y tipo
 - [x] spec-audit-06: Migración progresiva a TypeScript (utils, store, servicios) (rama `feat/typescript-progreso`)
 - [ ] spec-001: Servicio de IA con Gemini — respuestas estructuradas (pendiente desde v0.1.0)
-- [ ] spec-audit-07: Consolidar migraciones SQL, unificar `wellness_data`, añadir `schema_migrations`
+- [x] spec-audit-07: Consolidar migraciones SQL, unificar `wellness_data`, añadir `schema_migrations` (rama `feat/sql-migrations-versioning`)
 - [ ] spec-audit-08: Hardening Edge Function `intervals-proxy` (rate limiting, validación entrada, timeout)
 
 ### Pendientes anteriores (mantener)
