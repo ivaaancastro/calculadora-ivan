@@ -36,7 +36,7 @@
 | spec-audit-03 | Cobertura: tests para `src/services/ai.js` y `src/store/useAppStore.js` | implementada | 2026-11-05 | feat/tests-ai-store-coverage |
 | spec-audit-04 | Refactor: `Dashboard.jsx` en componentes más pequeños (SRP) | implementada | 2026-11-05 | feat/refactor-dashboard-srp |
 | spec-fix-01 | Corregir imports faltantes en `Dashboard.jsx` tras refactor SRP | implementada | 2026-11-05 | fix/investigar-app-rota |
-| spec-audit-05 | Refactor: hooks grandes (`useActivities.js`, `useWellnessInfo.js`) | pendiente | 2026-11-05 | — |
+| spec-audit-05 | Refactor: hooks grandes (`useActivities.js`, `useWellnessInfo.js`) | implementada | 2026-11-05 | feat/refactor-hooks-srp |
 | spec-audit-06 | TypeScript progresivo: tipado de utils, store y servicios | pendiente | 2026-11-05 | — |
 | spec-audit-07 | Consolidar migraciones SQL y añadir versionado (`schema_migrations`) | pendiente | 2026-11-05 | — |
 | spec-audit-08 | Hardening Edge Function `intervals-proxy` (rate limiting, validación, timeout) | pendiente | 2026-11-05 | — |
@@ -66,7 +66,7 @@
 
 ### Fase 3 — Refactorización core (SRP)
 - [x] spec-audit-04: Refactorizar `Dashboard.jsx` (313 líneas) en componentes más pequeños (rama `feat/refactor-dashboard-srp`)
-- [ ] spec-audit-05: Refactorizar hooks grandes (`useActivities.js` → hooks enfocados; `useWellnessInfo.js` → data + analytics)
+- [x] spec-audit-05: Refactorizar hooks grandes (`useActivities.js` → hooks enfocados; `useWellnessInfo.js` → data + analytics) (rama `feat/refactor-hooks-srp`)
 
 ### Fase 4 — Estabilidad y tipo
 - [ ] spec-audit-06: Migración progresiva a TypeScript (utils, store, servicios)
