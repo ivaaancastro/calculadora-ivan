@@ -74,23 +74,25 @@ export const FitnessStatsPage = ({
     };
 
     return (
-        <div className="animate-in fade-in duration-500 pb-16 w-full max-w-[1100px] mx-auto px-4 sm:px-8">
+        <div className="pb-20 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
             {/* Header */}
-            <div className="pt-8 pb-6 sm:pb-10">
-                <h2 className="text-3xl font-bold text-slate-900 dark:text-white tracking-tight">Rendimiento</h2>
-                <p className="text-sm font-medium text-slate-500 dark:text-zinc-500 mt-1.5 opacity-80">Perfil fisiológico avanzado y recuperación</p>
+            <div className="flex items-center justify-between mb-6 sm:mb-10 border-b border-slate-200 dark:border-zinc-800/40 pb-4 sm:pb-6">
+                <div>
+                    <h2 className="text-lg sm:text-2xl font-black text-slate-900 dark:text-zinc-100 tracking-tight">Rendimiento</h2>
+                    <p className="text-[12px] text-slate-500 dark:text-zinc-500 mt-1">Perfil fisiológico avanzado y recuperación</p>
+                </div>
             </div>
 
-            {/* Selector por categorías SOLO en móvil (estilo Apple sobrio, sin emojis) */}
-            <div className="md:hidden flex items-center gap-2 overflow-x-auto hide-scrollbar touch-scroll -mx-4 px-4 mb-6 pb-1">
+            {/* Selector por categorías SOLO en móvil */}
+            <div className="md:hidden flex items-center gap-2 overflow-x-auto hide-scrollbar touch-scroll mb-6 pb-1">
                 {CATEGORIES.map(cat => (
                     <button
                         key={cat.id}
                         onClick={() => setMobileCategory(cat.id)}
-                        className={`px-4 py-2 rounded-full text-xs font-semibold whitespace-nowrap transition-all select-none touch-manipulation active:scale-95 shrink-0 ${
+                        className={`px-3.5 py-1.5 rounded-full text-xs font-bold whitespace-nowrap transition-all select-none touch-manipulation active:scale-95 shrink-0 ${
                             mobileCategory === cat.id
-                                ? 'bg-slate-900 dark:bg-white text-white dark:text-zinc-900 shadow-xs font-bold'
-                                : 'bg-slate-200/70 dark:bg-zinc-800/80 text-slate-600 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-white'
+                                ? 'bg-[#1f2de6] text-white shadow-sm'
+                                : 'text-slate-500 dark:text-zinc-400 hover:text-[#1f2de6] dark:hover:text-[#4da6ff] hover:bg-slate-100 dark:hover:bg-zinc-800/40'
                         }`}
                     >
                         {cat.label}
