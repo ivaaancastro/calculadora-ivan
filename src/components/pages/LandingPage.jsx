@@ -287,7 +287,7 @@ export const LandingPage = () => {
               <Activity size={18} strokeWidth={2.5} />
             </div>
             <span className="text-base font-black uppercase tracking-tight text-slate-900 dark:text-zinc-100">
-              Forma<span className="text-blue-500">Lab</span>
+              Forma
             </span>
           </div>
 

@@ -103,7 +103,7 @@ export const Navbar = ({
             <div className="flex flex-col justify-center text-left">
               <div className="flex items-center gap-1">
                 <h1 className="text-sm sm:text-base font-bold text-slate-900 dark:text-white tracking-tight leading-none">
-                  Forma<span className="text-blue-500">Lab</span>
+                  Forma
                 </h1>
                 <ChevronDown 
                   size={13} 
