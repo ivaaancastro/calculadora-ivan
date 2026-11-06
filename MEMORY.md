@@ -56,7 +56,7 @@
 - `main` es la rama de producción desplegada en Vercel; no se commitea directamente.
 - Skills instaladas en el proyecto: `git-release` (en `.opencode/skills/git-release/`).
 - MCPs obligatorios (en `.opencode/mcp.json`): `context7`, `opencode`, `supabase`.
-- Rediseño de la webapp "Forma" con `design-taste-frontend` (tasteskill 2.5): sistema de diseño único, una sección por pantalla, componentes base UI, landing/login/navbar/Dashboard rediseñados (commit e27da2c); páginas internas Profile, Calendar, FitnessStats y ActivityDetail rediseñadas (commit 7b6ded9, rama `feat/webapp-redesign` pusheada a remoto). Falta: modales AddActivityModal, efectos tech, verificación final y PR hacia `develop` pendiente de apertura.
+- Rediseño de la webapp "Forma" con `design-taste-frontend` (tasteskill 2.5): sistema de diseño único, una sección por pantalla, componentes base UI, landing/login/navbar/Dashboard rediseñados (commit e27da2c); páginas internas Profile, Calendar, FitnessStats y ActivityDetail rediseñadas (commit 7b6ded9); modal AddActivityModal rediseñado y efecto dealt tech en hero LandingPage (commit bc76b52, rama `feat/webapp-redesign` pusheada a remoto). Falta: verificación final (build bloqueado por error preexistente en HealthPage) y PR hacia `develop` pendiente de apertura.
 
 ## 5. Roadmap (próximas specs pendientes — por prioridad)
 
