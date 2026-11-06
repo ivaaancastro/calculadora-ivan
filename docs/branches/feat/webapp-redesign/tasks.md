@@ -14,11 +14,11 @@
 | 10 | Rediseñar Navbar y BottomNav (header.nav fijo opaco + actionbar móvil) | [x] |
 | 11 | Rediseñar Dashboard (métricas CTL/ATL/TSB, gráficas, lista actividades) | [x] |
 | 12 | Rediseñar páginas internas (Profile, Calendar, Health, FitnessStats, ActivityDetail) | [x] |
-| 13 | Rediseñar modales (AddActivityModal) | [ ] |
+| 13 | Rediseñar modales (AddActivityModal) | [x] |
 | 14 | Añadir estados (skeleton, error y vacío por sección) | [x] (ya cubierto en HealthPage) |
 | 15 | Aplicar micro-interacciones (motion.md: hover/press/focus) | [x] (aplicadas en páginas rediseñadas) |
-| 16 | Aplicar efectos (tech): un efecto dealt, hasta 2 momentos, máximo 4 contextos WebGL | [ ] |
-| 17 | Verificar (build, lint, test:unit, test:e2e) | [ ] |
+| 16 | Aplicar efectos (tech): un efecto dealt, hasta 2 momentos, máximo 4 contextos WebGL | [x] (efecto dealt `data-visual` en hero LandingPage) |
+| 17 | Verificar (build, lint, test:unit, test:e2e) | [ ] (lint ✅ en todos los archivos modificados; build bloqueado por error preexistente en HealthPage) |
 | 18 | Registrar (MEMORY.md, CHANGELOG.md, marcar spec como implementada) | [ ] |
 | 19 | Commit `feat(design): ...` y push | [x] |
 | 20 | Abrir PR hacia `develop` | [ ] Rama lista en remoto (https://github.com/ivaaancastro/calculadora-ivan/pull/new/feat/webapp-redesign) |

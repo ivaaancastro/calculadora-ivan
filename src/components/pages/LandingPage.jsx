@@ -169,8 +169,14 @@ export const LandingPage = () => {
 
       <main>
         {/* ─── HERO — solo en la primera pantalla ─── */}
-        <section className="section hero" id="hero" style={{ '--h': 1 }}>
-          <div className="wrap">
+        <section className="section hero relative overflow-hidden" id="hero" style={{ '--h': 1 }}>
+          {/* Efecto dealt tech: patrón geométrico sutil en el hero (sin WebGL) */}
+          <div className="absolute inset-0 z-0 opacity-40 dark:opacity-20 pointer-events-none" data-visual>
+            <div className="w-full h-full bg-[radial-gradient(circle_at_top_right,_var(--tw-gradient-stops))] from-[#1f2de6]/10 via-transparent to-transparent" />
+            <div className="w-full h-full bg-[size:64px_64px] [mask-image:radial-gradient(circle,_#0000_75%,transparent_78%)] [mask-repeat:repeat] [mask-position:0%_0%] bg-[#1f2de6]/10" />
+          </div>
+
+          <div className="wrap relative z-10">
             <a href="#top" className="skip-link">Saltar al contenido</a>
 
             <div className="hero-grid grid grid-cols-12 gap-8 items-start">
