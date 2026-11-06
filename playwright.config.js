@@ -26,8 +26,8 @@ export default defineConfig({
 
   expect: {
     toHaveScreenshot: {
-      // Tolerancia mínima por antialiasing; un cambio real de tarjeta supera de sobra este margen.
-      maxDiffPixelRatio: 0.002,
+      // Tolerancia mínima (antialiasing): un cambio de color en un icono de tarjeta ya la supera.
+      maxDiffPixels: 100,
       animations: 'disabled',
     },
   },

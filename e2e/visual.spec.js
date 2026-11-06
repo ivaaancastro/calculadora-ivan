@@ -1,3 +1,4 @@
+/* global process */
 import { test, expect } from '@playwright/test';
 import { setupApp } from './support/mockApp.js';
 import { SCREENS, THEMES, openScreen, settleForScreenshot } from './support/ui.js';
@@ -22,8 +23,13 @@ for (const theme of THEMES) {
             content: '.min-w-full.shrink-0.overflow-y-auto{height:auto!important;overflow:visible!important}',
           });
         }
+        // Las partículas de la landing son un <canvas> animado (inestable entre capturas):
+        // se oculta solo el canvas, el resto del hero se sigue comprobando.
+        await page.addStyleTag({ content: 'canvas{visibility:hidden!important}' });
         await settleForScreenshot(page, { resize: !screen.fullPage });
-        await expect(page).toHaveScreenshot(`${screen.name}-${theme}.png`, { fullPage: !!screen.fullPage });
+        await expect(page).toHaveScreenshot(`${screen.name}-${theme}.png`, {
+          fullPage: !!screen.fullPage,
+        });
       });
     }
   });
