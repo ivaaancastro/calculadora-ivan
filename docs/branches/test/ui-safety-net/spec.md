@@ -5,7 +5,7 @@
 - **Título:** Capa 0 del rediseño: red de seguridad de UI
 - **Autor:** agente Claude Code
 - **Fecha:** 2026-11-06
-- **Estado:** pendiente de aprobación
+- **Estado:** aprobada (2026-11-06, por el usuario: "la apruebo")
 
 ## 2. Objetivo
 Conseguir que cualquier regresión visual, de layout o de funcionalidad se detecte automáticamente antes de empezar a cambiar el aspecto de la app.
