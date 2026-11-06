@@ -38,3 +38,7 @@ test-results/
 .opencode/skills/
 opencode.json
 skills-lock.json
+
+# Herramientas de agente (no versionar)
+.playwright-mcp/
+.taste-skill/
