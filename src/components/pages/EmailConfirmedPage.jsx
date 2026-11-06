@@ -25,7 +25,7 @@ export const EmailConfirmedPage = () => {
         </h1>
         
         <p className="text-sm font-medium text-slate-500 dark:text-zinc-400 mb-8 leading-relaxed">
-          Tu dirección de correo electrónico ha sido verificada correctamente. Ya tienes acceso completo a FormaLab y puedes empezar a analizar tu rendimiento.
+          Tu dirección de correo electrónico ha sido verificada correctamente. Ya tienes acceso completo a Forma y puedes empezar a analizar tu rendimiento.
         </p>
 
         <Link 

@@ -11,7 +11,9 @@
     "test:unit": "vitest run src/__tests__/unit",
     "test:integration": "vitest run src/__tests__/integration",
     "test:coverage": "vitest run --coverage",
-    "test:e2e": "playwright test"
+    "test:e2e": "playwright test",
+    "test:e2e:docker": "bash scripts/e2e-docker.sh",
+    "test:e2e:update": "bash scripts/e2e-docker.sh --update-snapshots"
   },
   "dependencies": {
     "@google/generative-ai": "^0.24.1",

@@ -32,3 +32,13 @@ test-results/
 *.njsproj
 *.sln
 *.sw?
+
+# OpenCode / skills configuration (entorno del agente, no del proyecto)
+.agents/
+.opencode/skills/
+opencode.json
+skills-lock.json
+
+# Herramientas de agente (no versionar)
+.playwright-mcp/
+.taste-skill/

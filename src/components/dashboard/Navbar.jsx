@@ -103,7 +103,7 @@ export const Navbar = ({
             <div className="flex flex-col justify-center text-left">
               <div className="flex items-center gap-1">
                 <h1 className="text-sm sm:text-base font-bold text-slate-900 dark:text-white tracking-tight leading-none">
-                  Forma<span className="text-blue-500">Lab</span>
+                  Forma
                 </h1>
                 <ChevronDown 
                   size={13} 
@@ -133,7 +133,7 @@ export const Navbar = ({
                 </div>
                 <div className="min-w-0 flex-1">
                   <p className="text-xs sm:text-sm font-bold text-slate-900 dark:text-white truncate leading-tight">
-                    {settings?.fullName || 'Atleta FormaLab'}
+                    {settings?.fullName || 'Atleta Forma'}
                   </p>
                   <p className="text-[11px] text-slate-400 dark:text-zinc-500 truncate mt-0.5">
                     {settings?.email || 'Ajustes del perfil'}

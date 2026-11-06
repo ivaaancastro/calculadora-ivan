@@ -14,7 +14,7 @@
 
 ## 1. Estado del proyecto
 - **Nombre:** Forma — Dashboard de rendimiento deportivo y salud
-- **Rama actual:** `analysis/project-audit` (creada desde `develop`)
+- **Rama actual:** `test/ui-safety-net` (Capa 0 del rediseño; PR hacia `develop`)
 - **Rama base:** `develop`
 - **Rama de producción:** `main` (desplegada en Vercel)
 - **Versión:** 0.1.0
@@ -41,6 +41,8 @@
 | spec-audit-07 | Consolidar migraciones SQL y añadir versionado (`schema_migrations`) | implementada | 2026-11-05 | feat/sql-migrations-versioning |
 | spec-audit-08 | Hardening Edge Function `intervals-proxy` (rate limiting, validación, timeout) | implementada | 2026-11-05 | feat/edge-function-intervals-proxy-hardening |
 | spec-e2e-01 | Pruebas E2E críticas (auth, dashboard, Strava sync, exportación de datos) | implementada | 2026-11-05 | feat/e2e-critical-flows |
+| spec-rediseno-02 | Rediseño de la webapp por capas (roadmap) | en curso | 2026-11-06 | `docs/branches/feat/webapp-redesign/` |
+| spec-rediseno-02-c0 | Capa 0: red de seguridad de UI | implementada (PR abierto, pendiente de revisión) | 2026-11-06 | test/ui-safety-net |
 
 > Cuando un agente implemente una spec, debe añadir una fila aquí y marcarla como `implementada`.
 
@@ -79,6 +81,22 @@
 - [x] Migrar lógica de `scratch/*.cjs` a specs documentadas o eliminar (rama `feat/scratch-cleanup`).
 - [x] Spec de pruebas E2E críticas (auth, dashboard, Strava sync, exportación de datos) (rama `feat/e2e-critical-flows`)
 
+## 5b. Rediseño (2026-11-06)
+- Producción **no se toca** por ahora (decisión del usuario): todo va por ramas hacia `develop`. Sin rollback, promoción ni merge a `main`.
+- Capas: 0 red de seguridad → 1 tokens → 2 primitivas → 3 navegación y piel v2 tras flag → 4 landing/acceso → 5 pantallas → 6 activar v2 → 7 iOS. Roadmap en `docs/branches/feat/webapp-redesign/plan.md`.
+- `feat/webapp-redesign` en el remoto conserva el primer intento descartado: **no hacer `git pull` ahí**, ni usar `archive/webapp-redesign-v1` ni `stash@{0}` como base.
+- Antes de cualquier merge a `main`: revisar que el último despliegue de producción corresponde a `cda7df1`.
+
+### Cómo trabajar con la red de seguridad (Capa 0)
+- Las capturas de referencia están en `e2e/__screenshots__/` y **solo se generan en Linux** con `npm run test:e2e:update` (Docker, imagen oficial de Playwright, `linux/amd64` como CI). Las de macOS no son comparables, por eso `visual.spec.js` se omite fuera de Linux. Para compararlas: `npm run test:e2e:docker`.
+- Revisar cada captura nueva antes de aceptarla. La tolerancia es de 100 píxeles (`maxDiffPixels`).
+- Los E2E usan su propio puerto (5273, `E2E_PORT`) y variables de Supabase fijas; no tocan un `npm run dev` en 5173.
+- Datos simulados, fecha fija (2026-06-15) y red externa bloqueada: `e2e/support/mockApp.js`. La fecha sigue avanzando (no `clock.setFixedTime`: congela las animaciones de Recharts).
+- Las capturas se hacen ajustando el viewport a la altura del documento (no `fullPage`, que reinicia las animaciones de Recharts); la landing es la excepción. En móvil se expanden los paneles internos de `MobileSwipePager`.
+- Lista de paridad y defectos conocidos (D-01, D-03 a D-06): `docs/branches/test/ui-safety-net/paridad.md`. D-01 está como `test.fail()`: cuando se corrija habrá que quitarlo.
+- Informe táctil (< 44 px) no bloquea hasta la Capa 2.
+- `VITE_GEMINI_API_KEY` es opcional (ningún componente usa `askGemini`).
+
 ## 6. Contexto compartido entre agentes
 - El punto de entrada de la app es `src/App.jsx` (router + sesión Supabase).
 - El store global es `src/store/useAppStore.js` (Zustand).
@@ -92,4 +110,4 @@
 - **Informe de auditoría:** `AUDIT_REPORT.md` (rama `analysis/project-audit`) — contiene puntos débiles (P-01 a P-30), deuda técnica, hallazgos de tests/coverage y roadmap priorizado (R-01 a R-17).
 
 ---
-Última actualización: 2026-11-05
+Última actualización: 2026-11-06
