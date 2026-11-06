@@ -133,7 +133,7 @@ export const Navbar = ({
                 </div>
                 <div className="min-w-0 flex-1">
                   <p className="text-xs sm:text-sm font-bold text-slate-900 dark:text-white truncate leading-tight">
-                    {settings?.fullName || 'Atleta FormaLab'}
+                    {settings?.fullName || 'Atleta Forma'}
                   </p>
                   <p className="text-[11px] text-slate-400 dark:text-zinc-500 truncate mt-0.5">
                     {settings?.email || 'Ajustes del perfil'}
