@@ -43,12 +43,13 @@ Solo se marca lo verificado. Rama: `test/ui-safety-net` → PR hacia `develop`.
 
 ## 9. Registro y PR
 - [x] CI: Playwright con imagen/entorno acorde a las capturas
-- [x] Dos ejecuciones seguidas estables (en Docker local, imagen oficial; falta confirmarlo en CI)
-- [ ] `npm run lint`, `test:unit`, `test:integration`, `test:e2e`, `build` en local
+- [x] Dos ejecuciones seguidas estables (Docker local, dos pasadas; CI verde en `9314ea1`)
+- [x] `npm run lint`, `test:unit`, `test:integration`, `test:e2e`, `build` en local
 - [x] `MEMORY.md` y `CHANGELOG.md`
-- [ ] PR hacia `develop` con resultados
+- [x] PR hacia `develop` con resultados (#51)
 
 ## Notas de verificación
 - Landing: el canvas de partículas se oculta con CSS en las capturas (animado e inestable); el resto del hero se comprueba.
 - Defectos de prueba: barra fija (Navbar `fixed`) y elemento de 2400 px → fallan las pruebas de layout en 390 y 1440; icono de tarjeta con otro color → falla la captura (534 px). La tolerancia inicial (0,2 %) no lo detectaba y se bajó a 100 px. Los tres retirados.
-- Pendiente: estabilidad en CI (dos ejecuciones seguidas) y resultados finales de las cinco comprobaciones en el PR.
+- CI: el primer intento falló (variables de Strava y rejilla de gráficas, 1 px); corregido en `9314ea1`, CI verde.
+- Resultados de las cinco comprobaciones copiados en el PR #51.
