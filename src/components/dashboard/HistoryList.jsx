@@ -99,7 +99,7 @@ export const HistoryList = React.memo(({ activities, onDelete, onSelectActivity 
         <div className="ios-card flex flex-col h-full overflow-hidden">
 
             {/* BARRA DE FILTROS ESTILO APPLE */}
-            <div className="p-3 sm:p-4 border-b border-black/[0.04] dark:border-white/[0.06] bg-slate-50/50 dark:bg-zinc-900/30 flex flex-col sm:flex-row gap-2.5 sm:gap-3">
+            <div className="p-3 sm:p-4 border-b border-hairline bg-slate-50/50 dark:bg-zinc-900/30 flex flex-col sm:flex-row gap-2.5 sm:gap-3">
 
                 {/* Buscador de Texto estilo iOS */}
                 <div className="relative flex-1">
@@ -147,7 +147,7 @@ export const HistoryList = React.memo(({ activities, onDelete, onSelectActivity 
             </div>
 
             {/* RESUMEN DE RESULTADOS */}
-            <div className="px-4 py-2 border-b border-black/[0.04] dark:border-white/[0.06] bg-slate-50/40 dark:bg-zinc-900/20 flex justify-between items-center text-[11px] font-semibold text-slate-400 dark:text-zinc-500 uppercase tracking-wider">
+            <div className="px-4 py-2 border-b border-hairline bg-slate-50/40 dark:bg-zinc-900/20 flex justify-between items-center text-[11px] font-semibold text-slate-400 dark:text-zinc-500 uppercase tracking-wider">
                 <span>{filteredActivities.length} Actividades</span>
             </div>
 

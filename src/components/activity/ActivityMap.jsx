@@ -73,7 +73,7 @@ export const InteractiveMap = ({ polyline, highResCoords, color, currentPosition
     }, [polyline, highResCoords]);
 
     if (!coords || coords.length === 0) return (
-        <div className="w-full h-full min-h-[350px] flex flex-col items-center justify-center bg-slate-50 dark:bg-zinc-900 rounded-2xl border border-slate-200 dark:border-zinc-800 p-8 text-center">
+        <div className="w-full h-full min-h-[350px] flex flex-col items-center justify-center bg-slate-50 dark:bg-zinc-900 rounded-2xl border border-line p-8 text-center">
             <MapPin size={32} className="text-slate-400 dark:text-zinc-600 mb-2" />
             <span className="text-slate-700 dark:text-zinc-300 font-bold text-sm">Sin datos GPS</span>
             <p className="text-slate-400 dark:text-zinc-500 text-xs mt-1 max-w-xs">Esta actividad no contiene coordenadas de ruta o track GPS.</p>
@@ -87,8 +87,8 @@ export const InteractiveMap = ({ polyline, highResCoords, color, currentPosition
     };
 
     return (
-        <div className="w-full h-full rounded-lg overflow-hidden relative border border-slate-200 dark:border-zinc-800 z-0 bg-slate-100 dark:bg-zinc-900 shadow-sm flex flex-col">
-            <div className="absolute top-3 right-3 z-[400] flex border border-slate-200 dark:border-zinc-700/80 rounded bg-white/90 dark:bg-zinc-900/90 backdrop-blur-sm shadow-sm overflow-hidden p-0.5">
+        <div className="w-full h-full rounded-lg overflow-hidden relative border border-line z-0 bg-slate-100 dark:bg-zinc-900 shadow-sm flex flex-col">
+            <div className="absolute top-3 right-3 z-[400] flex border border-line-3 rounded bg-white/90 dark:bg-zinc-900/90 backdrop-blur-sm shadow-sm overflow-hidden p-0.5">
                 {['light', 'dark', 'satellite'].map((type) => (
                     <button
                         key={type} onClick={(e) => { e.stopPropagation(); setMapType(type); }}

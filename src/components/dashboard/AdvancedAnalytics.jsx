@@ -121,7 +121,7 @@ export const AdvancedAnalytics = React.memo(({ activities, settings,  timeRange,
 
     const fitnessStatus = (() => {
         const tsb = model.tsb;
-        if (tsb > 25) return { label: 'Transición', desc: 'Pérdida de forma por descanso', badge: 'text-slate-600 dark:text-zinc-400 bg-slate-100 dark:bg-zinc-800/80 border-slate-200/60 dark:border-zinc-700/60' };
+        if (tsb > 25) return { label: 'Transición', desc: 'Pérdida de forma por descanso', badge: 'text-slate-600 dark:text-zinc-400 bg-slate-100 dark:bg-zinc-800/80 border-line-muted-2' };
         if (tsb >= 5) return { label: 'Pico de Forma', desc: 'Fresco y listo para competir al máximo', badge: 'text-[#30D158] bg-[#30D158]/10 border-[#30D158]/25 dark:bg-[#30D158]/15' };
         if (tsb >= -10) return { label: 'Zona Productiva', desc: 'Balance óptimo entre carga y adaptación', badge: 'text-[#0A84FF] bg-[#0A84FF]/10 border-[#0A84FF]/25 dark:bg-[#0A84FF]/15' };
         if (tsb >= -30) return { label: 'Sobrecarga', desc: 'Fatiga alta, programa recuperación', badge: 'text-[#FF9F0A] bg-[#FF9F0A]/10 border-[#FF9F0A]/25 dark:bg-[#FF9F0A]/15' };

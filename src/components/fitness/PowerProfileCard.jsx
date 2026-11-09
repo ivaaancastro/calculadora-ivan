@@ -23,7 +23,7 @@ export const PowerProfileCard = ({
 }) => {
     return (
         <section className="mb-8">
-            <div className="bg-white dark:bg-zinc-900/50 rounded-2xl border border-slate-200/50 dark:border-zinc-800/50 p-6 sm:p-8 shadow-sm">
+            <div className="bg-white dark:bg-zinc-900/50 rounded-2xl border border-line-muted p-6 sm:p-8 shadow-sm">
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-10">
                     <div className="flex items-center gap-2">
                         <h3 className="text-[10px] font-bold text-slate-400 dark:text-zinc-500 uppercase tracking-[0.1em]">Perfil de Potencia</h3>
@@ -31,14 +31,14 @@ export const PowerProfileCard = ({
                     </div>
                     <button
                         onClick={() => setShowPowerConfig(!showPowerConfig)}
-                        className={`flex items-center gap-2 px-4 py-1.5 rounded-xl text-[9px] font-bold uppercase tracking-widest transition-all border shadow-sm ${showPowerConfig ? 'bg-slate-100 dark:bg-zinc-800 border-slate-200 dark:border-zinc-700 text-blue-500' : 'bg-white dark:bg-zinc-900 border-slate-200 dark:border-zinc-800 text-slate-400 hover:text-slate-600'}`}
+                        className={`flex items-center gap-2 px-4 py-1.5 rounded-xl text-[9px] font-bold uppercase tracking-widest transition-all border shadow-sm ${showPowerConfig ? 'bg-slate-100 dark:bg-zinc-800 border-line-2 text-blue-500' : 'bg-white dark:bg-zinc-900 border-line text-slate-400 hover:text-slate-600'}`}
                     >
                         <Settings size={14} /> {showPowerConfig ? 'Cerrar' : 'Configurar'}
                     </button>
                 </div>
 
                 {showPowerConfig && (
-                    <div className="mb-10 p-6 bg-slate-50/50 dark:bg-zinc-800/30 rounded-2xl border border-slate-100 dark:border-zinc-800/50 animate-in slide-in-from-top-2 duration-300">
+                    <div className="mb-10 p-6 bg-slate-50/50 dark:bg-zinc-800/30 rounded-2xl border border-line-soft animate-in slide-in-from-top-2 duration-300">
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                             <div>
                                 <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-6">Unidad de Medida</p>
@@ -92,7 +92,7 @@ export const PowerProfileCard = ({
 
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
                     <div className="lg:col-span-2">
-                        <div className="h-[340px] w-full bg-slate-50/30 dark:bg-zinc-800/20 rounded-3xl p-4 border border-slate-100/50 dark:border-zinc-800/50">
+                        <div className="h-[340px] w-full bg-slate-50/30 dark:bg-zinc-800/20 rounded-3xl p-4 border border-line-faint-2">
                             <ResponsiveContainer width="100%" height="100%">
                                 <LineChart data={ppChartData} margin={{ top: 10, right: 10, left: -20, bottom: 5 }}>
                                     <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" opacity={0.3} vertical={false} />
@@ -111,7 +111,7 @@ export const PowerProfileCard = ({
                         {profile && (
                             <div className="mt-8 grid grid-cols-1 sm:grid-cols-2 gap-4">
                                 {profile?.strengths?.map((s, i) => (
-                                    <div key={i} className="flex items-center justify-between p-4 rounded-2xl bg-slate-50/50 dark:bg-zinc-800/30 border border-slate-100 dark:border-zinc-800/50 group">
+                                    <div key={i} className="flex items-center justify-between p-4 rounded-2xl bg-slate-50/50 dark:bg-zinc-800/30 border border-line-soft group">
                                         <div>
                                             <p className="text-[10px] font-bold text-slate-800 dark:text-zinc-200 uppercase tracking-tight mb-0.5">{s.area}</p>
                                             <p className="text-[9px] text-slate-400 font-bold uppercase tracking-tighter opacity-70 leading-tight">{s.desc}</p>
@@ -124,7 +124,7 @@ export const PowerProfileCard = ({
                             </div>
                         )}
                     </div>
-                    <div className="space-y-3 overflow-y-auto max-h-[480px] custom-scrollbar pr-2 pt-1 border-l border-slate-100/50 dark:border-zinc-800/50 pl-6">
+                    <div className="space-y-3 overflow-y-auto max-h-[480px] custom-scrollbar pr-2 pt-1 border-l border-line-faint-2 pl-6">
                         <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-4">Mejores Esfuerzos</p>
                         {ppChartData.map(p => (
                             <div key={p.name} className="flex items-center justify-between p-4 rounded-xl bg-slate-50/30 dark:bg-zinc-800/20 border border-slate-100/50 dark:border-zinc-800/50 hover:border-blue-500/20 transition-all cursor-default group">

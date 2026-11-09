@@ -14,7 +14,7 @@
 
 ## 1. Estado del proyecto
 - **Nombre:** Forma — Dashboard de rendimiento deportivo y salud
-- **Rama actual:** `feat/ui-tokens` (Capa 1 del rediseño, PR 1 de 6; PR hacia `develop`)
+- **Rama actual:** `feat/ui-tokens-borders` (Capa 1 del rediseño, PR 2 de 6: bordes; PR hacia `develop`)
 - **Rama base:** `develop`
 - **Rama de producción:** `main` (desplegada en Vercel)
 - **Versión:** 0.1.0
@@ -43,7 +43,7 @@
 | spec-e2e-01 | Pruebas E2E críticas (auth, dashboard, Strava sync, exportación de datos) | implementada | 2026-11-05 | feat/e2e-critical-flows |
 | spec-rediseno-02 | Rediseño de la webapp por capas (roadmap) | en curso | 2026-11-06 | `docs/branches/feat/webapp-redesign/` |
 | spec-rediseno-02-c0 | Capa 0: red de seguridad de UI | implementada (PR #51 mergeado en `develop`) | 2026-11-06 | test/ui-safety-net |
-| spec-rediseno-02-c1 | Capa 1: tokens y tema | en curso (PR 1 de 6: infraestructura) | 2026-11-09 | `docs/branches/feat/ui-tokens/` |
+| spec-rediseno-02-c1 | Capa 1: tokens y tema | en curso (PR 1 mergeado en #52; PR 2 bordes abierto) | 2026-11-09 | `docs/branches/feat/ui-tokens/` |
 
 > Cuando un agente implemente una spec, debe añadir una fila aquí y marcarla como `implementada`.
 
@@ -91,8 +91,10 @@
 ### Cómo trabajar con los tokens (Capa 1)
 - Colores: `src/styles/tokens.css` (canales RGB, `:root` y `.dark`) → `src/styles/tailwindTokens.cjs` → `tailwind.config.js`. Gráficas: `src/components/charts/chartTheme.js` + `useChartTheme()` (hex, deben coincidir con `tokens.css`; lo comprueba un test).
 - **Tokens exactos:** cada token copia un par claro/oscuro existente; no se unifican valores parecidos hasta la Capa 3. Cada token llega con la familia que lo usa (orden: bordes, texto, superficies, acentos, gráficas; una rama/PR por familia).
+- Codemods: `scripts/codemods/<familia>.mjs --inventory | --tokens | --apply`, sobre `scripts/codemods/lib.mjs`. La tabla de cada familia es `src/styles/tokens/<familia>.json`; `--tokens` regenera su bloque en `tokens.css` (no editarlo a mano).
+- **Precedencia:** en Tailwind 3 `dark:` va después de `hover:`/`focus:` en el CSS. El codemod migra por expresión de clases y propiedad todo o nada; no forzar a mano un par descartado (ver D-08).
 - `npm run lint:colors` es un trinquete por archivo (`scripts/color-baseline.json`): tras migrar, `npm run lint:colors -- --update` (solo baja). `--report` da totales.
-- Verificación de una migración: además de las capturas, volcado de estilos calculados en `develop` y en la rama (`STYLE_DUMP_DIR=<dir> npx playwright test e2e/tools/style-dump.spec.js`, con `E2E_PORT` distinto si se usa un worktree) y `node scripts/style-diff.mjs <antes> <después>`: debe dar 0 diferencias.
+- Verificación de una migración: además de las capturas, volcado de estilos calculados (incluye `:hover`/`:focus`/`:active` forzados) en `develop` y en la rama (`STYLE_DUMP_DIR=<dir> npx playwright test e2e/tools/style-dump.spec.js`, con `E2E_PORT` distinto si se usa un worktree) y `node scripts/style-diff.mjs <antes> <después>`: debe dar 0 diferencias.
 - Fuera de alcance de la Capa 1: colores en `src/hooks` y `src/utils` (74 líneas), canvas de la landing, tipografía, radios y sombras.
 
 ### Cómo trabajar con la red de seguridad (Capa 0)

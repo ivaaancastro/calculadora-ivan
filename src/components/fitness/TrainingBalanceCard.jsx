@@ -5,7 +5,7 @@ import { InfoTooltip } from '../common/InfoTooltip';
 export const TrainingBalanceCard = ({ balance, balanceDays, setBalanceDays }) => {
     return (
         <section className="mb-8">
-            <div className="bg-white dark:bg-zinc-900/50 rounded-2xl border border-slate-200/50 dark:border-zinc-800/50 p-6 sm:p-8 shadow-sm">
+            <div className="bg-white dark:bg-zinc-900/50 rounded-2xl border border-line-muted p-6 sm:p-8 shadow-sm">
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-10">
                     <div className="flex items-center gap-2">
                         <h3 className="text-[10px] font-bold text-slate-400 dark:text-zinc-500 uppercase tracking-[0.1em]">Balance de Entrenamiento</h3>
@@ -27,11 +27,11 @@ export const TrainingBalanceCard = ({ balance, balanceDays, setBalanceDays }) =>
                 {balance && !balance.empty ? (
                     <div className="space-y-12">
                         <div className="grid grid-cols-2 gap-8 px-2">
-                            <div className="p-4 rounded-2xl bg-slate-50/50 dark:bg-zinc-800/30 border border-slate-100 dark:border-zinc-800/50">
+                            <div className="p-4 rounded-2xl bg-slate-50/50 dark:bg-zinc-800/30 border border-line-soft">
                                 <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1">Carga Total</p>
                                 <p className="text-3xl font-black text-slate-900 dark:text-zinc-100">{Math.round(balance.totalLoad)} <span className="text-xs font-bold text-slate-400">Pts</span></p>
                             </div>
-                            <div className="p-4 rounded-2xl bg-slate-50/50 dark:bg-zinc-800/30 border border-slate-100 dark:border-zinc-800/50">
+                            <div className="p-4 rounded-2xl bg-slate-50/50 dark:bg-zinc-800/30 border border-line-soft">
                                 <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1">Ratio An/Ae</p>
                                 <p className="text-3xl font-black text-slate-900 dark:text-zinc-100">{(balance.anaerobic / (balance.aerobicHigh + balance.aerobicLow || 1)).toFixed(2)}</p>
                                 <p className="text-[8px] font-bold text-slate-500 uppercase mt-1 tracking-tighter">Aeróbico vs Anaeróbico</p>
@@ -94,7 +94,7 @@ export const TrainingBalanceCard = ({ balance, balanceDays, setBalanceDays }) =>
                             })}
                         </div>
 
-                        <div className="p-6 rounded-3xl bg-slate-50/50 dark:bg-zinc-800/30 border border-slate-100 dark:border-zinc-800/50 flex items-start gap-5 shadow-sm transition-all hover:shadow-md">
+                        <div className="p-6 rounded-3xl bg-slate-50/50 dark:bg-zinc-800/30 border border-line-soft flex items-start gap-5 shadow-sm transition-all hover:shadow-md">
                             <div className="p-3 rounded-2xl bg-white dark:bg-zinc-700 shadow-sm">
                                 <Brain size={24} style={{ color: balance.color }} />
                             </div>
@@ -117,7 +117,7 @@ export const TrainingBalanceCard = ({ balance, balanceDays, setBalanceDays }) =>
                         </div>
                     </div>
                 ) : (
-                    <div className="py-16 text-center text-slate-400 font-black uppercase text-[10px] tracking-widest border-2 border-dashed border-slate-100 dark:border-zinc-800 rounded-3xl">
+                    <div className="py-16 text-center text-slate-400 font-black uppercase text-[10px] tracking-widest border-2 border-dashed border-line-soft-2 rounded-3xl">
                         <Activity size={48} className="mx-auto text-slate-200 dark:text-zinc-800 mb-4 stroke-1" />
                         <p>Sin datos suficientes en el periodo</p>
                     </div>

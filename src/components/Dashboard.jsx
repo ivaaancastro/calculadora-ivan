@@ -170,7 +170,7 @@ const Dashboard = () => {
       <div className="flex justify-end mb-3">
         <button
           onClick={handleOpenModal}
-          className="py-1.5 px-3 bg-white dark:bg-zinc-900 text-slate-800 dark:text-zinc-200 border border-slate-200 dark:border-zinc-700 rounded-full text-[10px] font-bold uppercase flex items-center gap-1.5 hover:bg-slate-50 dark:hover:bg-zinc-800 transition-colors shadow-2xs active:scale-95"
+          className="py-1.5 px-3 bg-white dark:bg-zinc-900 text-slate-800 dark:text-zinc-200 border border-line-2 rounded-full text-[10px] font-bold uppercase flex items-center gap-1.5 hover:bg-slate-50 dark:hover:bg-zinc-800 transition-colors shadow-2xs active:scale-95"
         >
           <span className="text-[14px]">+</span> Añadir Manual
         </button>

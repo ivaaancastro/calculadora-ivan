@@ -22,10 +22,18 @@ Solo se marca lo verificado. Spec y plan aprobados el 2026-11-09 ("Apruebo todo"
 - Resultados: lint ✓, lint:colors ✓ (línea base: 44 archivos), unit 66/66, integración 10/10, build ✓, E2E macOS 79 ✓ (133 omitidas: capturas y volcado), E2E Docker 127 ✓ (85 omitidas: volcado manual y `fixme` D-05).
 
 ## PR 2 — Bordes (`feat/ui-tokens-borders`)
-- [ ] Inventario y tabla de equivalencias
-- [ ] Codemod con pruebas, revisión manual de clases dinámicas
-- [ ] Verificación completa, línea base bajada, cobertura ≥ 80 %
-- [ ] PR
+- [x] Inventario y tabla de equivalencias (`src/styles/tokens/borders.json`, 19 tokens: pares con ≥ 3 usos)
+- [x] Codemod con pruebas (`scripts/codemods/lib.mjs`, `borders.mjs`; 13 pruebas), revisión manual de clases dinámicas
+- [x] Verificación completa y línea base bajada
+- [ ] Cobertura ≥ 80 %: **79,5 %** (167 de 210 pares). Los 13 pares con token que no se migran son descartes deliberados por precedencia (ver notas)
+- [x] PR (#53)
+
+### Notas de verificación del PR 2
+- Codemod basado en el AST (`@babel/parser`, declarado como `devDependency`): solo sustituye pares claro/`dark:` exactos dentro del mismo literal y conserva variantes y lados (`hover:`, `border-b-`…).
+- **Regla de precedencia:** por expresión de clases (atributo JSX, plantilla, ternario) y propiedad, se migran todos los pares o ninguno. Motivo: en Tailwind 3, `dark:` se genera después de `hover:`/`focus:`, así que hoy en oscuro gana `dark:`; un token (una sola clase) perdería frente a `focus:` y cambiaría el aspecto. Descartados: 10 por otra clase de la misma propiedad en el literal y 3 por otra clase en la misma expresión.
+- El volcado de estilos ahora fuerza `:hover`, `:focus`, `:focus-visible` y `:active` (CDP) en los elementos con esas variantes. Rama frente a `develop` (`5b7fe90`): 82 volcados, 63.302 entradas, **0 diferencias**. Defecto de prueba (migrar a mano un par descartado del modal de acceso): detectado, el borde con foco en oscuro pasaba de `zinc-800` a azul. Retirado. Así se encontró D-08 (`paridad.md`).
+- `lint:colors`: `dark` 1.314 → 1.147 y `palette` 3.315 → 2.981; 167 clases con tokens.
+- Resultados: lint ✓, lint:colors ✓, unit 79/79, integración 10/10, build ✓, E2E macOS 79 ✓, E2E Docker 127 ✓ (48 capturas sin diferencias).
 
 ## PR 3 — Texto (`feat/ui-tokens-text`)
 - [ ] Inventario, tabla, codemod, revisión manual

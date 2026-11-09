@@ -37,3 +37,48 @@
   --chart-cursor: 148 163 184;
   --chart-dot-ring: 255 255 255;
 }
+
+/* @tokens:borders:start (generado por scripts/codemods/borders.mjs --tokens; no editar a mano) */
+:root {
+  --line: 226 232 240; /* slate-200 */
+  --line-2: 226 232 240; /* slate-200 */
+  --line-3: 226 232 240; --line-3-a: 1; /* slate-200 */
+  --line-4: 226 232 240; --line-4-a: 0.8; /* slate-200/80 */
+  --line-soft: 241 245 249; --line-soft-a: 1; /* slate-100 */
+  --line-soft-2: 241 245 249; /* slate-100 */
+  --line-soft-3: 241 245 249; --line-soft-3-a: 1; /* slate-100 */
+  --line-soft-4: 241 245 249; --line-soft-4-a: 1; /* slate-100 */
+  --line-soft-5: 241 245 249; --line-soft-5-a: 1; /* slate-100 */
+  --line-soft-6: 241 245 249; /* slate-100 */
+  --line-faint: 241 245 249; --line-faint-a: 0.5; /* slate-100/50 */
+  --line-faint-2: 241 245 249; --line-faint-2-a: 0.5; /* slate-100/50 */
+  --line-muted: 226 232 240; --line-muted-a: 0.5; /* slate-200/50 */
+  --line-muted-2: 226 232 240; --line-muted-2-a: 0.6; /* slate-200/60 */
+  --line-muted-3: 226 232 240; --line-muted-3-a: 0.6; /* slate-200/60 */
+  --line-strong: 203 213 225; /* slate-300 */
+  --line-strong-2: 148 163 184; /* slate-400 */
+  --hairline: 0 0 0; --hairline-a: 0.04; /* black/[0.04] */
+  --hairline-2: 0 0 0; --hairline-2-a: 0.03; /* black/[0.03] */
+}
+.dark {
+  --line: 39 39 42; /* zinc-800 */
+  --line-2: 63 63 70; /* zinc-700 */
+  --line-3: 63 63 70; --line-3-a: 0.8; /* zinc-700/80 */
+  --line-4: 39 39 42; --line-4-a: 1; /* zinc-800 */
+  --line-soft: 39 39 42; --line-soft-a: 0.5; /* zinc-800/50 */
+  --line-soft-2: 39 39 42; /* zinc-800 */
+  --line-soft-3: 39 39 42; --line-soft-3-a: 0.6; /* zinc-800/60 */
+  --line-soft-4: 39 39 42; --line-soft-4-a: 0.8; /* zinc-800/80 */
+  --line-soft-5: 39 39 42; --line-soft-5-a: 0.3; /* zinc-800/30 */
+  --line-soft-6: 24 24 27; /* zinc-900 */
+  --line-faint: 39 39 42; --line-faint-a: 0.3; /* zinc-800/30 */
+  --line-faint-2: 39 39 42; --line-faint-2-a: 0.5; /* zinc-800/50 */
+  --line-muted: 39 39 42; --line-muted-a: 0.5; /* zinc-800/50 */
+  --line-muted-2: 63 63 70; --line-muted-2-a: 0.6; /* zinc-700/60 */
+  --line-muted-3: 39 39 42; --line-muted-3-a: 0.6; /* zinc-800/60 */
+  --line-strong: 63 63 70; /* zinc-700 */
+  --line-strong-2: 82 82 91; /* zinc-600 */
+  --hairline: 255 255 255; --hairline-a: 0.06; /* white/[0.06] */
+  --hairline-2: 255 255 255; --hairline-2-a: 0.04; /* white/[0.04] */
+}
+/* @tokens:borders:end */

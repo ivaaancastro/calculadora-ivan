@@ -80,8 +80,8 @@ const PROPS = [
   'opacity',
 ];
 
-function dumpStyles(page) {
-  return page.evaluate((props) => {
+function dumpStyles(page, only = null) {
+  return page.evaluate(({ props, only }) => {
     const out = {};
     const path = (el) => {
       const parts = [];
@@ -107,6 +107,7 @@ function dumpStyles(page) {
       return `${base}>${tag}#${n}`;
     };
     for (const el of document.querySelectorAll('body *')) {
+      const selected = !only || el.matches(only);
       if (/^(SCRIPT|STYLE|LINK|META|NOSCRIPT)$/.test(el.tagName)) continue;
       if (el.tagName.toLowerCase() === 'g' && el.ownerSVGElement) continue;
       const s = getComputedStyle(el);
@@ -116,10 +117,34 @@ function dumpStyles(page) {
         const r = el.getBoundingClientRect();
         if (r.width === 0 && r.height === 0) continue;
       }
-      out[key(el)] = Object.fromEntries(props.map((p) => [p, s.getPropertyValue(p)]));
+      const k = key(el); // siempre se calcula, para que los ordinales del SVG no dependan del filtro
+      if (selected) out[k] = Object.fromEntries(props.map((p) => [p, s.getPropertyValue(p)]));
     }
     return out;
-  }, PROPS);
+  }, { props: PROPS, only });
+}
+
+/**
+ * Estilos con `:hover`, `:focus` y `:focus-visible` forzados (CDP) en los elementos con esas
+ * variantes: ahí es donde una migración puede cambiar qué clase gana (p. ej. `dark:` frente a `hover:`).
+ */
+async function dumpPseudoStates(page) {
+  const cdp = await page.context().newCDPSession(page);
+  await cdp.send('DOM.enable');
+  await cdp.send('CSS.enable');
+  const { root } = await cdp.send('DOM.getDocument', { depth: -1 });
+  const states = [['hover'], ['focus'], ['focus', 'focus-visible'], ['active']];
+  const out = {};
+  for (const forced of states) {
+    const sel = `[class*="${forced[forced.length - 1]}:"]`;
+    const { nodeIds } = await cdp.send('DOM.querySelectorAll', { nodeId: root.nodeId, selector: sel });
+    for (const nodeId of nodeIds) await cdp.send('CSS.forcePseudoState', { nodeId, forcedPseudoClasses: forced });
+    const dump = await dumpStyles(page, sel);
+    for (const [k, v] of Object.entries(dump)) out[`${k}::${forced.join('+')}`] = v;
+    for (const nodeId of nodeIds) await cdp.send('CSS.forcePseudoState', { nodeId, forcedPseudoClasses: [] });
+  }
+  await cdp.detach();
+  return out;
 }
 
 /** Espera a que terminen las transiciones y animaciones finitas (no las infinitas, p. ej. `animate-spin`). */
@@ -149,7 +174,7 @@ for (const theme of THEMES) {
         await setupApp(page, { authenticated: screen.auth, theme });
         await openScreen(page, screen);
         await settle(page);
-        save(info.project.name, `${screen.name}-${theme}`, await dumpStyles(page));
+        save(info.project.name, `${screen.name}-${theme}`, { ...(await dumpStyles(page)), ...(await dumpPseudoStates(page)) });
       });
     }
     for (const state of EXTRA_STATES) {
@@ -162,7 +187,7 @@ for (const theme of THEMES) {
         await settle(page);
         await state.act(page);
         await settle(page);
-        save(info.project.name, `${state.name}-${theme}`, await dumpStyles(page));
+        save(info.project.name, `${state.name}-${theme}`, { ...(await dumpStyles(page)), ...(await dumpPseudoStates(page)) });
       });
     }
   });

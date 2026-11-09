@@ -16,7 +16,7 @@ export const WeeklyVolumeAndFocusCard = ({
     return (
         <section className="mb-8">
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                <div className="bg-white dark:bg-zinc-900/50 rounded-2xl border border-slate-200/50 dark:border-zinc-800/50 p-6 sm:p-8 lg:col-span-2 shadow-sm">
+                <div className="bg-white dark:bg-zinc-900/50 rounded-2xl border border-line-muted p-6 sm:p-8 lg:col-span-2 shadow-sm">
                     <div className="flex justify-between items-center mb-6">
                         <div className="flex items-center gap-2">
                             <h3 className="text-[10px] font-bold text-slate-400 dark:text-zinc-500 uppercase tracking-[0.1em]">Volumen Semanal (TSS/Horas)</h3>
@@ -37,7 +37,7 @@ export const WeeklyVolumeAndFocusCard = ({
                     </div>
                 </div>
 
-                <div className="bg-white dark:bg-zinc-900/50 rounded-2xl border border-slate-200/50 dark:border-zinc-800/50 p-6 sm:p-8 lg:col-span-1 shadow-sm">
+                <div className="bg-white dark:bg-zinc-900/50 rounded-2xl border border-line-muted p-6 sm:p-8 lg:col-span-1 shadow-sm">
                     <div className="flex justify-between items-center mb-8">
                         <h3 className="text-[10px] font-bold text-slate-400 dark:text-zinc-500 uppercase tracking-[0.1em]">Distribución de Foco</h3>
                         <div className="flex bg-slate-100/80 dark:bg-zinc-800/80 p-1 rounded-xl">
@@ -71,7 +71,7 @@ export const WeeklyVolumeAndFocusCard = ({
                             ))}
                         </div>
 
-                        <div className="pt-4 border-t border-slate-100 dark:border-zinc-800">
+                        <div className="pt-4 border-t border-line-soft-2">
                             <span className="text-[8px] font-bold uppercase tracking-widest text-slate-400 block mb-3">Desglose por Zona</span>
                             <div className="grid grid-cols-2 gap-x-4 gap-y-2">
                                 {zonesChart.filter(z => z.hours > 0).map((z, i) => (

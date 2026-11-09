@@ -168,10 +168,10 @@ const PmcFloatingChart = ({ pmcByDate, onClose, initPos }) => {
     const isMobileScreen = typeof window !== 'undefined' && window.innerWidth < 640;
 
     return (
-        <div className={isMobileScreen ? "fixed z-[100] inset-x-0 bottom-0 bg-white dark:bg-zinc-900 border-t border-slate-200 dark:border-zinc-700 rounded-t-3xl shadow-2xl overflow-y-auto max-h-[90vh] pb-safe select-none" : "fixed z-[100] bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-700 rounded-xl shadow-2xl overflow-visible select-none"}
+        <div className={isMobileScreen ? "fixed z-[100] inset-x-0 bottom-0 bg-white dark:bg-zinc-900 border-t border-line-2 rounded-t-3xl shadow-2xl overflow-y-auto max-h-[90vh] pb-safe select-none" : "fixed z-[100] bg-white dark:bg-zinc-900 border border-line-2 rounded-xl shadow-2xl overflow-visible select-none"}
             style={isMobileScreen ? {} : { left: pos.x, top: pos.y, width: Math.min(480, window.innerWidth - 32) }}>
             {/* Title / drag bar */}
-            <div className="flex items-center justify-between px-3 py-2 bg-slate-50 dark:bg-zinc-950 border-b border-slate-100 dark:border-zinc-800 rounded-t-xl cursor-grab active:cursor-grabbing"
+            <div className="flex items-center justify-between px-3 py-2 bg-slate-50 dark:bg-zinc-950 border-b border-line-soft-2 rounded-t-xl cursor-grab active:cursor-grabbing"
                 onPointerDown={handleDragDown} onPointerMove={handleDragMove} onPointerUp={handleDragUp}>
                 <div className="flex items-center gap-2">
                     <Activity size={12} className="text-violet-500" />
@@ -304,7 +304,7 @@ const PmcFloatingChart = ({ pmcByDate, onClose, initPos }) => {
             {hoverEntry && (() => {
                 const tooltipLeft = hover.x > W * 0.65;
                 return (
-                    <div className="absolute top-3 pointer-events-none bg-white dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 rounded-lg shadow-lg px-3 py-2 text-[10px] z-10 min-w-[130px]"
+                    <div className="absolute top-3 pointer-events-none bg-white dark:bg-zinc-800 border border-line-2 rounded-lg shadow-lg px-3 py-2 text-[10px] z-10 min-w-[130px]"
                         style={{ [tooltipLeft ? 'right' : 'left']: tooltipLeft ? 16 : 50 }}>
                         <p className="font-bold text-slate-600 dark:text-zinc-300 mb-1.5">
                             {new Date(hoverEntry.date + 'T00:00:00').toLocaleDateString('es-ES', { weekday: 'short', day: 'numeric', month: 'short' })}
@@ -343,7 +343,7 @@ const getSportColor = (type) => {
     if (t.includes('bike') || t.includes('bici') || t.includes('ciclismo')) return 'bg-blue-100 text-blue-700 border-blue-200 dark:bg-blue-900/20 dark:text-blue-400 dark:border-blue-900/50 hover:bg-blue-200 dark:hover:bg-blue-900/40';
     if (t.includes('swim') || t.includes('nadar')) return 'bg-cyan-100 text-cyan-700 border-cyan-200 dark:bg-cyan-900/20 dark:text-cyan-400 dark:border-cyan-900/50 hover:bg-cyan-200 dark:hover:bg-cyan-900/40';
     if (t.includes('gym') || t.includes('fuerza')) return 'bg-purple-100 text-purple-700 border-purple-200 dark:bg-purple-900/20 dark:text-purple-400 dark:border-purple-900/50 hover:bg-purple-200 dark:hover:bg-purple-900/40';
-    return 'bg-slate-100 text-slate-700 border-slate-200 dark:bg-zinc-800 dark:text-zinc-400 dark:border-zinc-700 hover:bg-slate-200 dark:hover:bg-zinc-700/50';
+    return 'bg-slate-100 text-slate-700 border-line-2 dark:bg-zinc-800 dark:text-zinc-400 hover:bg-slate-200 dark:hover:bg-zinc-700/50';
 };
 
 const getSportIcon = (type, size = 12) => {
@@ -1183,10 +1183,10 @@ export const CalendarPage = ({ activities, plannedWorkouts = [], addPlannedWorko
 
     return (
         <>
-            <div className="flex flex-col bg-white dark:bg-zinc-950 rounded-3xl border border-slate-100 dark:border-zinc-800/50 overflow-hidden mb-6 shadow-sm">
+            <div className="flex flex-col bg-white dark:bg-zinc-950 rounded-3xl border border-line-soft overflow-hidden mb-6 shadow-sm">
 
                 {/* HEADER */}
-                <div className="flex items-center justify-between px-3 sm:px-5 py-3 sm:py-4 bg-transparent border-b border-slate-100 dark:border-zinc-800/30">
+                <div className="flex items-center justify-between px-3 sm:px-5 py-3 sm:py-4 bg-transparent border-b border-line-soft-5">
                     <div className="flex items-center gap-2 sm:gap-3">
                         <h2 className="text-base sm:text-2xl font-semibold text-slate-800 dark:text-zinc-100 capitalize tracking-tight flex items-center">
                             {new Date(year, month).toLocaleDateString('es-ES', { month: 'long', year: 'numeric' })}
@@ -1199,7 +1199,7 @@ export const CalendarPage = ({ activities, plannedWorkouts = [], addPlannedWorko
                             <Activity size={12} /> Forma
                         </button>
 
-                        <div className="flex items-center border border-slate-200 dark:border-zinc-700 rounded-lg overflow-hidden ml-1 sm:ml-2">
+                        <div className="flex items-center border border-line-2 rounded-lg overflow-hidden ml-1 sm:ml-2">
                             <button onClick={prevMonth} className="w-10 h-10 flex items-center justify-center bg-transparent hover:bg-slate-100 dark:hover:bg-zinc-800 active:scale-95 text-slate-500 dark:text-zinc-400 transition-all touch-manipulation" title="Mes anterior"><ChevronLeft size={18} /></button>
                             <div className="w-px h-5 bg-slate-200 dark:bg-zinc-700"></div>
                             <button onClick={nextMonth} className="w-10 h-10 flex items-center justify-center bg-transparent hover:bg-slate-100 dark:hover:bg-zinc-800 active:scale-95 text-slate-500 dark:text-zinc-400 transition-all touch-manipulation" title="Mes siguiente"><ChevronRight size={18} /></button>
@@ -1215,10 +1215,10 @@ export const CalendarPage = ({ activities, plannedWorkouts = [], addPlannedWorko
                     <div className="w-full relative">
 
                         {/* CABECERA DÍAS DE LA SEMANA */}
-                        <div className="hidden lg:grid grid-cols-[130px_repeat(7,1fr)] bg-white/80 dark:bg-zinc-950/80 backdrop-blur-md border-b border-slate-100 dark:border-zinc-800/30 sticky top-0 z-20">
-                            <div className="py-2.5 border-r border-slate-100/50 dark:border-zinc-800/30"></div>
+                        <div className="hidden lg:grid grid-cols-[130px_repeat(7,1fr)] bg-white/80 dark:bg-zinc-950/80 backdrop-blur-md border-b border-line-soft-5 sticky top-0 z-20">
+                            <div className="py-2.5 border-r border-line-faint"></div>
                             {WEEKDAYS.map((day, i) => (
-                                <div key={day} className={`py-2 text-center text-[10px] font-medium tracking-widest uppercase border-r border-slate-100/50 dark:border-zinc-800/30 last:border-r-0
+                                <div key={day} className={`py-2 text-center text-[10px] font-medium tracking-widest uppercase border-r border-line-faint last:border-r-0
                                     ${i >= 5 ? 'text-slate-400/80 dark:text-zinc-600' : 'text-slate-500 dark:text-zinc-500'}`}>{day}</div>
                             ))}
                         </div>
@@ -1300,10 +1300,10 @@ export const CalendarPage = ({ activities, plannedWorkouts = [], addPlannedWorko
                                 };
 
                                 return (
-                                    <div key={wIdx} className="grid grid-cols-1 lg:grid-cols-[130px_repeat(7,1fr)] border-b border-slate-100 dark:border-zinc-800/30 last:border-b-0">
+                                    <div key={wIdx} className="grid grid-cols-1 lg:grid-cols-[130px_repeat(7,1fr)] border-b border-line-soft-5 last:border-b-0">
 
                                         {/* ====== PANEL SEMANAL IZQUIERDO ====== */}
-                                        <div className="hidden lg:flex flex-col border-r border-slate-100/50 dark:border-zinc-800/30 bg-transparent text-[10px] relative overflow-hidden">
+                                        <div className="hidden lg:flex flex-col border-r border-line-faint bg-transparent text-[10px] relative overflow-hidden">
                                             {/* Header with week number */}
                                             <div className="px-3 py-2.5 flex items-center justify-between">
                                                 <span className="text-[11px] font-medium text-slate-400 dark:text-zinc-500 flex items-center gap-1">
@@ -1359,7 +1359,7 @@ export const CalendarPage = ({ activities, plannedWorkouts = [], addPlannedWorko
 
                                                 {/* Row 4: Total KM */}
                                                 {weekDist > 0 && (
-                                                    <div className="flex items-center justify-between pt-0.5 border-t border-slate-100/50 dark:border-zinc-800/30">
+                                                    <div className="flex items-center justify-between pt-0.5 border-t border-line-faint">
                                                         <div className="flex items-center gap-1.5">
                                                             <span className="text-[10px] text-slate-500 dark:text-zinc-400 w-9">Dist.</span>
                                                             <span className="text-[11px] font-bold text-slate-700 dark:text-zinc-300">{(weekDist / 1000).toFixed(1)} km</span>
@@ -1370,7 +1370,7 @@ export const CalendarPage = ({ activities, plannedWorkouts = [], addPlannedWorko
 
                                             {/* Target TSS */}
                                             <div
-                                                className="mt-auto px-2.5 py-1 transition-colors border-t border-slate-200/50 dark:border-zinc-800/50"
+                                                className="mt-auto px-2.5 py-1 transition-colors border-t border-line-muted"
                                             >
                                                 <div className="flex justify-between text-[9px]">
                                                     <span className="text-slate-400 dark:text-zinc-500 font-semibold">Progreso Plan</span>
@@ -1411,7 +1411,7 @@ export const CalendarPage = ({ activities, plannedWorkouts = [], addPlannedWorko
                                                     onDragOver={(e) => handleDragOver(e, dateKey)}
                                                     onDragLeave={handleDragLeave}
                                                     onDrop={(e) => handleDrop(e, day.date)}
-                                                    className={`relative p-2 lg:p-2.5 border-r border-slate-100/50 dark:border-zinc-800/30 flex flex-col min-h-[72px] lg:h-[220px] overflow-y-auto custom-scrollbar transition-colors group/daycell
+                                                    className={`relative p-2 lg:p-2.5 border-r border-line-faint flex flex-col min-h-[72px] lg:h-[220px] overflow-y-auto custom-scrollbar transition-colors group/daycell
                                                         ${isToday ? 'bg-blue-50/10 dark:bg-blue-900/5' : 'bg-transparent'}
                                                         ${dragOverDate === dateKey ? 'bg-blue-50 dark:bg-blue-900/20 ring-2 ring-blue-400 ring-inset rounded-lg z-10' : ''}
                                                         ${!day.isCurrentMonth ? 'opacity-40' : 'opacity-100'}
@@ -1495,8 +1495,8 @@ export const CalendarPage = ({ activities, plannedWorkouts = [], addPlannedWorko
                                                                 
                                                                 return {
                                                                     accent, dot,
-                                                                    planned: 'bg-white dark:bg-zinc-900 border border-slate-200/60 dark:border-zinc-800/60 ring-1 ring-slate-100 dark:ring-zinc-800/50',
-                                                                    done: 'bg-slate-50/80 dark:bg-zinc-800/80 border border-slate-200 dark:border-zinc-700'
+                                                                    planned: 'bg-white dark:bg-zinc-900 border border-line-muted-3 ring-1 ring-line-soft',
+                                                                    done: 'bg-slate-50/80 dark:bg-zinc-800/80 border border-line-2'
                                                                 };
                                                             })();
 
@@ -1638,9 +1638,9 @@ export const CalendarPage = ({ activities, plannedWorkouts = [], addPlannedWorko
             {/* MODAL PLANIFICADOR */}
             {isModalOpen && (
                 <div className="fixed inset-0 bg-black/40 dark:bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-                    <div className="bg-white dark:bg-zinc-900 rounded-2xl max-w-3xl w-full shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200 border border-slate-200/50 dark:border-zinc-800/50 flex flex-col max-h-[90vh]">
+                    <div className="bg-white dark:bg-zinc-900 rounded-2xl max-w-3xl w-full shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200 border border-line-muted flex flex-col max-h-[90vh]">
                         {/* HEADER */}
-                        <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100 dark:border-zinc-800/50 shrink-0">
+                        <div className="flex items-center justify-between px-6 py-4 border-b border-line-soft shrink-0">
                             <div>
                                 <h3 className="text-base font-semibold text-slate-900 dark:text-zinc-50 tracking-tight">
                                     {editingPlanId ? 'Editar Entrenamiento' : 'Planificar Entrenamiento'}
@@ -1691,11 +1691,11 @@ export const CalendarPage = ({ activities, plannedWorkouts = [], addPlannedWorko
                                 )}
 
                                 {/* TITLE + METRICS */}
-                                <div className="flex flex-col md:flex-row gap-3 items-start md:items-end w-full pt-1 border-t border-slate-100 dark:border-zinc-800/50">
+                                <div className="flex flex-col md:flex-row gap-3 items-start md:items-end w-full pt-1 border-t border-line-soft">
                                     <div className="flex-1 w-full">
                                         <input type="text" value={newPlan.name} onChange={e => setNewPlan({ ...newPlan, name: e.target.value })}
                                             placeholder="Nombre del entrenamiento"
-                                            className="w-full bg-transparent text-[15px] font-medium text-slate-800 dark:text-zinc-100 border-0 border-b border-slate-200 dark:border-zinc-800 px-0 py-2 outline-none focus:border-slate-400 dark:focus:border-zinc-600 transition-colors placeholder:text-slate-300 dark:placeholder:text-zinc-600"
+                                            className="w-full bg-transparent text-[15px] font-medium text-slate-800 dark:text-zinc-100 border-0 border-b border-line px-0 py-2 outline-none focus:border-line-strong-2 transition-colors placeholder:text-slate-300 dark:placeholder:text-zinc-600"
                                         />
                                     </div>
                                     <div className="flex gap-4 shrink-0 pb-1">
@@ -1734,13 +1734,13 @@ export const CalendarPage = ({ activities, plannedWorkouts = [], addPlannedWorko
 
                                     {/* AI SMART PASTE AREA */}
                                     {isPastingString && (
-                                        <div className="mb-4 p-4 rounded-xl bg-slate-50 dark:bg-zinc-950 border border-slate-100 dark:border-zinc-800/50">
+                                        <div className="mb-4 p-4 rounded-xl bg-slate-50 dark:bg-zinc-950 border border-line-soft">
                                             <label className="block text-[10px] font-semibold text-slate-500 dark:text-zinc-400 uppercase tracking-wider mb-2">Importar desde texto</label>
                                             <textarea
                                                 value={pasteText}
                                                 onChange={e => setPasteText(e.target.value)}
                                                 placeholder={`Pega el texto aquí línea a línea.\nEj:\no Calentamiento articular\no 4x8 Sentadillas Búlgaras\no 3x10 Press Banca`}
-                                                className="w-full bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-lg p-3 text-sm text-slate-700 dark:text-zinc-300 resize-y min-h-[80px] outline-none focus:border-slate-400 dark:focus:border-zinc-600 mb-3 placeholder:text-slate-300 dark:placeholder:text-zinc-600"
+                                                className="w-full bg-white dark:bg-zinc-900 border border-line rounded-lg p-3 text-sm text-slate-700 dark:text-zinc-300 resize-y min-h-[80px] outline-none focus:border-line-strong-2 mb-3 placeholder:text-slate-300 dark:placeholder:text-zinc-600"
                                             />
                                             <div className="flex justify-end gap-2">
                                                 <button onClick={() => setIsPastingString(false)} className="px-3 py-1.5 rounded-full text-[11px] font-medium text-slate-500 hover:bg-slate-100 dark:text-zinc-400 dark:hover:bg-zinc-800 transition-all">Cancelar</button>
@@ -1753,7 +1753,7 @@ export const CalendarPage = ({ activities, plannedWorkouts = [], addPlannedWorko
 
                                     <div className="space-y-2 mt-4">
                                         {newPlan.blocks.length === 0 && (
-                                            <div className="flex flex-col items-center justify-center py-8 text-center bg-slate-50 dark:bg-zinc-900 border border-dashed border-slate-300 dark:border-zinc-700 rounded-lg">
+                                            <div className="flex flex-col items-center justify-center py-8 text-center bg-slate-50 dark:bg-zinc-900 border border-dashed border-line-strong rounded-lg">
                                                 <p className="text-slate-500 dark:text-zinc-400 text-sm">Entrenamiento vacío.</p>
                                                 <p className="text-slate-400 dark:text-zinc-500 text-xs mt-1">Inserta filas usando los botones superiores.</p>
                                             </div>
@@ -1835,8 +1835,8 @@ export const CalendarPage = ({ activities, plannedWorkouts = [], addPlannedWorko
                                                         onDragOver={(e) => handleDragBlockOver(e, idx)}
                                                         onDrop={(e) => handleDropBlock(e, idx)}
                                                         onDragEnd={handleDragBlockEnd}
-                                                        className={`rounded-xl bg-white dark:bg-zinc-950 overflow-hidden cursor-move transition-all border border-slate-100 dark:border-zinc-800/50 ${draggedBlockIdx === idx ? 'opacity-50' : 'hover:border-slate-200 dark:hover:border-zinc-700'}`}>
-                                                        <div className="flex items-center gap-2 px-3 py-2 bg-slate-50/50 dark:bg-zinc-900/50 border-b border-slate-100 dark:border-zinc-800/50">
+                                                        className={`rounded-xl bg-white dark:bg-zinc-950 overflow-hidden cursor-move transition-all border border-line-soft ${draggedBlockIdx === idx ? 'opacity-50' : 'hover:border-line-2'}`}>
+                                                        <div className="flex items-center gap-2 px-3 py-2 bg-slate-50/50 dark:bg-zinc-900/50 border-b border-line-soft">
                                                             <span className="text-[11px] font-semibold text-slate-600 dark:text-zinc-400">Repetir</span>
                                                             <input type="number" value={block.repeats} min={1} onChange={e => updateBlock(block.id, 'repeats', parseInt(e.target.value) || 1)}
                                                                 className="w-9 bg-white dark:bg-zinc-800 rounded-lg text-[13px] font-mono px-1.5 py-0.5 outline-none no-spinner text-center text-slate-700 dark:text-zinc-300" />
@@ -1921,7 +1921,7 @@ export const CalendarPage = ({ activities, plannedWorkouts = [], addPlannedWorko
                                                                     </div>
                                                                 ))}
                                                                 
-                                                                <div className="flex gap-2 pt-2 border-t border-slate-100 dark:border-zinc-800/50 mt-1">
+                                                                <div className="flex gap-2 pt-2 border-t border-line-soft mt-1">
                                                                     <button onClick={() => addStepToRepeat(block.id, 'pair')} className="text-[11px] text-slate-500 hover:text-slate-800 dark:hover:text-zinc-300 font-medium transition-colors">+ Par Trabajo/Descanso</button>
                                                                     <span className="text-slate-200 dark:text-zinc-700">|</span>
                                                                     <button onClick={() => addStepToRepeat(block.id, 'active')} className="text-[10px] text-slate-400 hover:text-slate-600 font-medium transition-colors">+ Trabajo</button>
@@ -1944,7 +1944,7 @@ export const CalendarPage = ({ activities, plannedWorkouts = [], addPlannedWorko
                                                     onDragOver={(e) => handleDragBlockOver(e, idx)}
                                                     onDrop={(e) => handleDropBlock(e, idx)}
                                                     onDragEnd={handleDragBlockEnd}
-                                                    className={`py-2.5 px-3 flex flex-wrap items-center gap-2.5 bg-white dark:bg-zinc-950 rounded-xl border border-slate-100 dark:border-zinc-800/50 cursor-move transition-all ${draggedBlockIdx === idx ? 'opacity-50' : 'hover:border-slate-200 dark:hover:border-zinc-700'}`}>
+                                                    className={`py-2.5 px-3 flex flex-wrap items-center gap-2.5 bg-white dark:bg-zinc-950 rounded-xl border border-line-soft cursor-move transition-all ${draggedBlockIdx === idx ? 'opacity-50' : 'hover:border-line-2'}`}>
 
                                                     <div className="flex-1 min-w-0 flex flex-wrap items-center gap-2">
                                                         <div className={`w-1 h-5 rounded-full shrink-0`} style={{ background: zoneColors[block.zone] || '#cbd5e1' }}></div>
@@ -2015,7 +2015,7 @@ export const CalendarPage = ({ activities, plannedWorkouts = [], addPlannedWorko
 
                                                         <input type="text" value={block.details || ''} onChange={e => updateBlock(block.id, 'details', e.target.value)}
                                                             placeholder="Nota"
-                                                            className="flex-1 min-w-[80px] bg-transparent border-b border-dashed border-slate-200 dark:border-zinc-800 py-1 text-[11px] outline-none focus:border-slate-400 dark:focus:border-zinc-600 placeholder:text-slate-300 dark:placeholder:text-zinc-600" />
+                                                            className="flex-1 min-w-[80px] bg-transparent border-b border-dashed border-line py-1 text-[11px] outline-none focus:border-line-strong-2 placeholder:text-slate-300 dark:placeholder:text-zinc-600" />
                                                     </div>
 
                                                     <button onClick={() => removeBlock(block.id)} className="text-slate-300 hover:text-red-500 shrink-0 transition-colors"><X size={14} /></button>
@@ -2029,7 +2029,7 @@ export const CalendarPage = ({ activities, plannedWorkouts = [], addPlannedWorko
                         </div>
 
                         {/* FOOTER */}
-                        <div className="px-6 py-3.5 border-t border-slate-100 dark:border-zinc-800/50 flex justify-end items-center gap-2 shrink-0">
+                        <div className="px-6 py-3.5 border-t border-line-soft flex justify-end items-center gap-2 shrink-0">
                             <button onClick={() => setIsModalOpen(false)} className="px-4 py-2 rounded-full text-xs font-medium text-slate-500 dark:text-zinc-400 hover:bg-slate-100 dark:hover:bg-zinc-800 transition-all">Cancelar</button>
                             <button onClick={handleSavePlan} disabled={isSaving} className="px-5 py-2 rounded-full text-xs font-semibold text-white bg-slate-900 dark:bg-white dark:text-zinc-900 hover:bg-slate-700 dark:hover:bg-zinc-200 disabled:opacity-50 transition-all shadow-sm">
                                 {isSaving ? 'Guardando...' : editingPlanId ? 'Guardar' : 'Añadir'}
@@ -2041,7 +2041,7 @@ export const CalendarPage = ({ activities, plannedWorkouts = [], addPlannedWorko
             {/* MODAL VER ENTRENAMIENTO PLANEADO */}
             {viewingPlan && (
                 <div className="fixed inset-0 bg-slate-900/60 dark:bg-black/80 backdrop-blur-sm z-[60] flex items-center justify-center p-4 sm:p-8" onClick={() => setViewingPlan(null)} style={{ overscrollBehavior: 'contain' }}>
-                    <div className="bg-white dark:bg-zinc-900 rounded-lg w-full max-w-4xl shadow-2xl overflow-hidden border border-slate-200 dark:border-zinc-800 max-h-[90vh] flex flex-col animate-in zoom-in-95 duration-200" onClick={(e) => e.stopPropagation()}>
+                    <div className="bg-white dark:bg-zinc-900 rounded-lg w-full max-w-4xl shadow-2xl overflow-hidden border border-line max-h-[90vh] flex flex-col animate-in zoom-in-95 duration-200" onClick={(e) => e.stopPropagation()}>
                         <WorkoutViewerModal
                             workout={viewingPlan}
                             onClose={() => setViewingPlan(null)}
@@ -2209,9 +2209,9 @@ const WorkoutViewerModal = ({ workout, onClose, onDelete, onEdit }) => {
             )}
 
             {/* ── ZONE DISTRIBUTION + STRUCTURE ── */}
-            <div className="flex flex-col flex-1 overflow-hidden min-h-0 border-t border-slate-100 dark:border-zinc-800/50">
+            <div className="flex flex-col flex-1 overflow-hidden min-h-0 border-t border-line-soft">
                 <div className="flex-1 overflow-y-auto custom-scrollbar">
-                    <div className="grid grid-cols-1 md:grid-cols-[1fr_1.6fr] divide-y md:divide-y-0 md:divide-x divide-slate-100 dark:divide-zinc-800/50 min-h-full">
+                    <div className="grid grid-cols-1 md:grid-cols-[1fr_1.6fr] divide-y md:divide-y-0 md:divide-x divide-line-soft min-h-full">
 
                         {/* LEFT — Zone Distribution */}
                         <div className="p-5">
@@ -2268,7 +2268,7 @@ const WorkoutViewerModal = ({ workout, onClose, onDelete, onEdit }) => {
                                                         </div>
                                                         <span className="text-[10px] font-mono font-semibold text-slate-400">{stepTotal > 0 ? fmtDur(stepTotal) : ''}</span>
                                                     </div>
-                                                    <div className="border-t border-slate-100 dark:border-zinc-800/50">
+                                                    <div className="border-t border-line-soft">
                                                         {(block.steps || []).map((step, sIdx) => {
                                                             const isWork = step.type === 'active';
                                                             return (
@@ -2330,7 +2330,7 @@ const WorkoutViewerModal = ({ workout, onClose, onDelete, onEdit }) => {
             </div>
 
             {/* ── FOOTER ── */}
-            <div className="px-6 py-3.5 border-t border-slate-100 dark:border-zinc-800/50 flex justify-between items-center shrink-0">
+            <div className="px-6 py-3.5 border-t border-line-soft flex justify-between items-center shrink-0">
                 <button onClick={(e) => { onDelete(e); onClose(); }} className="text-[11px] font-medium text-red-400 hover:text-red-600 dark:text-red-400/60 dark:hover:text-red-400 transition-colors">
                     Eliminar
                 </button>
