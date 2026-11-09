@@ -38,7 +38,7 @@ Solo se marca lo verificado. Spec y plan aprobados el 2026-11-09 ("Apruebo todo"
 ## PR 3 — Texto (`feat/ui-tokens-text`)
 - [x] Inventario, tabla (`src/styles/tokens/text.json`, 17 tokens: pares con ≥ 3 usos), codemod (`scripts/codemods/text.mjs` sobre el CLI común `family.mjs`) y revisión manual
 - [x] Cobertura ≥ 90 %: **93,6 %** (540 de 577 pares)
-- [ ] Verificación completa: falta la pasada de capturas en Docker en local (OrbStack se cierra solo); la hace el job `e2e` del CI
+- [x] Verificación completa
 - [ ] PR
 
 ### Notas de verificación del PR 3
@@ -47,7 +47,7 @@ Solo se marca lo verificado. Spec y plan aprobados el 2026-11-09 ("Apruebo todo"
 - El volcado de estilos no cubría `group-hover:` (18 usos): ahora fuerza `:hover` en los `.group`. Rama frente a `develop` (`636dd02`): 82 volcados, 64.132 entradas, **0 diferencias**.
 - Descartes: 36 pares, casi todos por otra clase de texto de la misma propiedad en el literal (acentos como `text-blue-500`). Quedan 3 pares de borde que la regla nueva permitiría migrar; no se tocan aquí para no mezclar familias.
 - `lint:colors`: `dark` 1.147 → 607, `palette` 2.981 → 1.901; 707 clases con tokens.
-- Resultados: lint ✓, lint:colors ✓, unit 88/88, integración 10/10, build ✓, E2E macOS 79 ✓ (133 omitidas: capturas y volcado).
+- Resultados: lint ✓, lint:colors ✓, unit 88/88, integración 10/10, build ✓, E2E macOS 79 ✓ (133 omitidas: capturas y volcado), E2E Docker 127 ✓ (48 capturas sin diferencias; el ✘ de `gestures.spec.js:37` es el fallo esperado de D-01).
 
 ## PR 4 — Superficies (`feat/ui-tokens-surfaces`)
 - [ ] Inventario, tabla, codemod (incluye `index.css`), revisión manual
