@@ -7,6 +7,11 @@ y este proyecto adhiere a [Semantic Versioning](https://semver.org/lang/es/).
 
 ## [Unreleased]
 
+### Rediseño — Capa 1: tokens y tema (`spec-rediseno-02-c1`), PR 2 de 6: bordes
+- `refactor(ui-tokens):` 167 pares de borde claro/oscuro (`border`, `divide`, `ring`, `outline`) pasan a 19 tokens (`line`, `line-soft`, `line-muted`, `line-strong`, `hairline`…) con un codemod reproducible (`scripts/codemods/borders.mjs`). Sin cambios visibles.
+- `test(e2e):` el volcado de estilos fuerza `:hover`, `:focus`, `:focus-visible` y `:active`.
+- `docs(paridad):` D-08, el borde de foco de los campos de acceso no cambia en modo oscuro (preexistente).
+
 ### Rediseño — Capa 1: tokens y tema (`spec-rediseno-02-c1`), PR 1 de 6
 - `feat(ui-tokens):` `src/styles/tokens.css` (canales RGB, claro y `.dark`, valores actuales) expuesto en `tailwind.config.js` con soporte de opacidad (`src/styles/tailwindTokens.cjs`), y `chartTheme`/`useChartTheme` para Recharts en `src/components/charts/`. Sin cambios visibles: ningún componente los usa todavía.
 - `ci:` `npm run lint:colors` (`scripts/check-colors.mjs`): trinquete por archivo de colores sueltos con línea base en `scripts/color-baseline.json`.
