@@ -23,8 +23,19 @@ Solo se marca lo verificado. Spec y plan aprobados el 2026-11-09 ("Apruebo todo"
 - Resultados: lint ✓, lint:colors ✓, lint:ui ✓, unit 130/130, integración 10/10, build ✓, E2E macOS 79 ✓, E2E Docker 127 ✓ (48 capturas sin diferencias; el ✘ de `gestures.spec.js:37` es el fallo esperado de D-01), volcado `full` de la rama frente a `develop`: 104 volcados, 90.084 elementos, **0 diferencias**.
 
 ## PR 1 — Card y SectionHeader (`feat/ui-primitives-card`)
-- [ ] Inventario, primitivas, sustitución, retirada de `ios-card`, `ios-touch`, `ios-header` e `IosCard`
-- [ ] Verificación completa y PR
+- [x] Inventario, primitivas, sustitución, retirada de `ios-card`, `ios-touch`, `ios-header` e `IosCard`
+- [x] Verificación completa
+- [x] PR hacia `develop` (#61)
+
+### Notas del PR 1
+- **Cobertura:** `Card grouped` 39 (33 `ios-card` + 6 `IosCard`, 2 de ellas como receta local, abajo), de ellas 13 `pressable` y 3 `divided`; `Card panel` 11 (todas las tarjetas de Rendimiento); `SectionHeader` 13 (`as="p"` en 7). Codemod sobre el AST: cambia el elemento de apertura y el de cierre y conserva los demás atributos (`key`).
+- **Se quedan como receta local** (llevan color en `className`, que RF3 no admite; la receta de la tarjeta se escribe con sus clases de tokens): la tarjeta de Salud con degradado (`bg-gradient-to-br from-white…`) y la lista de registros diarios de Salud (`divide-line-soft-3`, un solo uso).
+- **Precedencia (corrección de la spec, 6.2):** `ios-card`, `ios-touch` e `ios-header` estaban en `@layer utilities`, que Tailwind emite después de sus utilidades (en el CSS de `develop`, `.ios-header` va detrás de `.mb-3` y `.text-danger-ink-2`, y `.ios-card` detrás de `.border-danger-edge-2`). Por eso nunca se veían, y se retiran sin `tone`: el `border-danger-edge-2` y el `text-danger-ink-2` de "Zona de peligro" (hoy gris con borde normal) y el `mb-3` de 4 títulos de Salud (hoy `mb-2`). Los tokens `danger-edge-2` y `danger-ink-2` siguen en uso en otras pantallas.
+- **Token nuevo (D2):** `--shadow-card` en `tokens.css` (claro y oscuro, por la prueba de paridad; en oscuro no se ve, por `dark:shadow-none`) y `shadow-card` en `tailwind.config.js`. Con él, el `rgba()` de la tarjeta sale de `index.css`.
+- `pressable` no suma el `transition-all` de la tarjeta: como antes, gana `transition-transform duration-150 ease-out`.
+- `lint:colors`: `rgb` 11 → 10 (`index.css`).
+- **Volcado `full`:** la rama da 464 claves nuevas `::active`, todas en las 13 fichas `pressable`: el volcado fuerza `:active` en los elementos con `active:` en `class`, y antes esa clase estaba dentro de `.ios-touch`. Repetido el volcado de `develop` forzando también `.ios-touch` (cambio solo en el worktree, sin commit): **104 volcados, 90.548 elementos, 0 diferencias**.
+- Resultados: lint ✓, lint:colors ✓, lint:ui ✓ (2 exportaciones), unit 138/138, integración 10/10, build ✓, E2E macOS 79 ✓, E2E Docker 127 ✓ (48 capturas sin diferencias; el ✘ de `gestures.spec.js:37` es D-01). En la primera ejecución de Docker falló `dashboard.spec.js:33` por tiempo (16 s); repetido 3 veces, 21/21, y la suite completa otra vez, 127 ✓. Informe táctil en macOS: 113 en `develop` y en la rama, igual por pantalla. En Docker las cifras son otras (97) por las fuentes de Linux: se compara siempre en la misma plataforma.
 
 ## PR 2 — Stat y StatTile (`feat/ui-primitives-stat`)
 - [ ] Inventario, primitivas, sustitución, retirada de `MetricCard`

@@ -40,7 +40,7 @@ Los mismos pasos en cada PR:
 7. Verificación (abajo), cobertura en `tasks.md` y PR.
 
 Notas por familia:
-- **PR 1, Card:** los `ios-card` de Ajustes con `border border-danger-edge-2` ("Zona de peligro") suman un borde a la receta: es una variante `grouped` con `tone="danger"`, o se queda fuera si el volcado muestra un cambio de precedencia. Con `@apply`, `ios-card` mete `dark:shadow-none` en la regla `.dark .ios-card`. La primitiva usa la clase `dark:shadow-none` de Tailwind, que tiene la misma especificidad (0,2,0); lo confirma el volcado `full` (`box-shadow`).
+- **PR 1, Card:** las clases `ios-*` estaban en `@layer utilities` y ganaban a las utilidades de Tailwind (ver spec 6.2, corrección): el borde y el texto de peligro de "Zona de peligro" y el `mb-3` de 4 títulos de Salud no se veían y se retiran, sin `tone`. La sombra de la tarjeta pasa a `--shadow-card` (`shadow-card`); `dark:shadow-none` se mantiene como clase. Lo confirma el volcado `full` (`box-shadow`, `margin`, `border-color`, `color`).
 - **PR 2, Stat:** `MetricCard` lleva un `border-black/[0.04] dark:border-white/[0.07]` sin token. Si D2 se aprueba, se crea su token; si no, `Stat` no puede incluirlo y `MetricCard` se queda.
 - **PR 3, Segmented:** antes de tocar nada, comprobar que los E2E y el volcado (estados `calendario-forma`, `detalle-mapa`) localizan las opciones por rol `button` y nombre: `aria-pressed` no cambia ni el rol ni el nombre.
 - **PR 4, Field:** las pruebas de integración de `AddActivityModal`, `HistoryList` y `ProfilePage` deben pasar sin tocarlas. Los campos de acceso con D-08 no entran.

@@ -2,6 +2,7 @@ import React, { useState, useMemo, useRef } from 'react';
 import { Search, Calendar, Activity, Clock, MapPin, Zap, Trash2, ChevronRight, Bike, Footprints, Dumbbell, Flame } from 'lucide-react';
 import { useVirtualizer } from '@tanstack/react-virtual';
 import { formatDuration } from '../../utils/formatDuration';
+import { Card } from '../ui';
 
 const getSportIcon = (type) => {
     const t = String(type).toLowerCase();
@@ -96,7 +97,7 @@ export const HistoryList = React.memo(({ activities, onDelete, onSelectActivity 
         : filteredActivities.map((act, index) => ({ index, start: index * 64, isVirtual: false, act }));
 
     return (
-        <div className="ios-card flex flex-col h-full overflow-hidden">
+        <Card className="flex flex-col h-full overflow-hidden">
 
             {/* BARRA DE FILTROS ESTILO APPLE */}
             <div className="p-3 sm:p-4 border-b border-hairline bg-slate-50/50 dark:bg-zinc-900/30 flex flex-col sm:flex-row gap-2.5 sm:gap-3">
@@ -247,6 +248,6 @@ export const HistoryList = React.memo(({ activities, onDelete, onSelectActivity 
                     </div>
                 )}
             </div>
-        </div>
+        </Card>
     );
 });

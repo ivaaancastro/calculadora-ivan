@@ -14,7 +14,13 @@
     "pr-safe",
     "px-safe",
     "pb-safe-nav",
-    "mb-safe-nav"
+    "mb-safe-nav",
+    "ios-card",
+    "ios-touch",
+    "ios-header"
   ],
-  "components": ["MetricHelp"]
+  "components": [
+    "MetricHelp",
+    "IosCard"
+  ]
 }

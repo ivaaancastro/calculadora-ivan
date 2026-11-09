@@ -1,10 +1,11 @@
 import React from 'react';
 import { Footprints, Bike } from 'lucide-react';
+import { Card } from '../ui';
 
 export const Vo2MaxCard = ({ vo2Sport, setVo2Sport, currentVo2, vo2Level, vo2Stats }) => {
     return (
         <section className="mb-8">
-            <div className="bg-surface-5 rounded-2xl border border-line-muted p-6 sm:p-8 shadow-sm">
+            <Card variant="panel" className="p-6 sm:p-8">
                 <div className="flex items-center justify-between mb-10">
                     <div className="flex items-center gap-2">
                         <h3 className="text-[10px] font-bold text-ink-4 uppercase tracking-[0.1em]">VO2 Máximo</h3>
@@ -70,7 +71,7 @@ export const Vo2MaxCard = ({ vo2Sport, setVo2Sport, currentVo2, vo2Level, vo2Sta
                         <p className="text-lg font-bold text-ink-soft">{vo2Stats?.bike?.vo2max > 0 ? vo2Stats.bike.vo2max : '--'}</p>
                     </div>
                 </div>
-            </div>
+            </Card>
         </section>
     );
 };

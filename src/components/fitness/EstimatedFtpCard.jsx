@@ -7,6 +7,7 @@ import { ArrowUp, ArrowDown, Minus } from 'lucide-react';
 import { InfoTooltip } from '../common/InfoTooltip';
 import { tooltipStyleFor } from './fitnessConstants';
 import { useChartTheme } from '../charts/useChartTheme';
+import { Card } from '../ui';
 
 export const EstimatedFtpCard = ({
     ftp,
@@ -17,7 +18,7 @@ export const EstimatedFtpCard = ({
     const ct = useChartTheme();
     return (
         <section className="mb-12">
-            <div className="bg-surface-5 rounded-2xl border border-line-muted p-6 sm:p-8 shadow-sm">
+            <Card variant="panel" className="p-6 sm:p-8">
                 <div className="flex items-center gap-2 mb-10">
                     <h3 className="text-[10px] font-bold text-ink-4 uppercase tracking-[0.1em]">FTP Estimado</h3>
                     <InfoTooltip text="Umbral funcional de potencia proyectado (eFTP)." />
@@ -65,7 +66,7 @@ export const EstimatedFtpCard = ({
                         )}
                     </div>
                 </div>
-            </div>
+            </Card>
         </section>
     );
 };

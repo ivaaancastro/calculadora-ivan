@@ -1,11 +1,12 @@
 import React from 'react';
 import { Activity, Brain } from 'lucide-react';
 import { InfoTooltip } from '../common/InfoTooltip';
+import { Card } from '../ui';
 
 export const TrainingBalanceCard = ({ balance, balanceDays, setBalanceDays }) => {
     return (
         <section className="mb-8">
-            <div className="bg-surface-5 rounded-2xl border border-line-muted p-6 sm:p-8 shadow-sm">
+            <Card variant="panel" className="p-6 sm:p-8">
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-10">
                     <div className="flex items-center gap-2">
                         <h3 className="text-[10px] font-bold text-ink-4 uppercase tracking-[0.1em]">Balance de Entrenamiento</h3>
@@ -122,7 +123,7 @@ export const TrainingBalanceCard = ({ balance, balanceDays, setBalanceDays }) =>
                         <p>Sin datos suficientes en el periodo</p>
                     </div>
                 )}
-            </div>
+            </Card>
         </section>
     );
 };
