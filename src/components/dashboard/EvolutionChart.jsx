@@ -11,7 +11,7 @@ const CustomTooltip = ({ active, payload, label }) => {
 
     return (
       <div className="bg-white/95 dark:bg-zinc-900/95 backdrop-blur-md p-2.5 sm:p-3 rounded-xl border border-line-muted-3 shadow-xl min-w-[140px] pointer-events-none select-none z-50">
-        <p className="text-[9px] font-medium uppercase tracking-widest text-slate-400 dark:text-zinc-500 mb-1.5 flex justify-between items-center capitalize">
+        <p className="text-[9px] font-medium uppercase tracking-widest text-ink-4 mb-1.5 flex justify-between items-center capitalize">
           {title}
           {diffDays > 0 && <span className="bg-slate-100 dark:bg-zinc-800 text-slate-500 px-1 py-0.5 rounded text-[8px] ml-2 font-mono font-normal">+{diffDays}d</span>}
         </p>
@@ -31,7 +31,7 @@ const CustomTooltip = ({ active, payload, label }) => {
             };
             return (
               <div key={index} className="flex items-center justify-between gap-3">
-                <span className="text-[10px] font-medium text-slate-500 dark:text-zinc-400">{labels[entry.dataKey]}</span>
+                <span className="text-[10px] font-medium text-ink-3">{labels[entry.dataKey]}</span>
                 <span className={`text-[11px] font-mono font-bold ${colors[entry.dataKey] || 'text-slate-700'}`}>{entry.value.toFixed(1)}</span>
               </div>
             );
@@ -51,7 +51,7 @@ export const EvolutionChart = ({ data, timeRange, setTimeRange }) => {
       <div className="bg-transparent rounded-xl border border-dashed border-line p-8 h-full w-full flex items-center justify-center text-center">
         <div>
            <Activity size={16} className="mx-auto text-slate-300 mb-2" />
-           <p className="text-[9px] text-slate-400 dark:text-zinc-600 uppercase tracking-widest font-medium">Sin Datos</p>
+           <p className="text-[9px] text-ink-4-dim uppercase tracking-widest font-medium">Sin Datos</p>
         </div>
       </div>
     );
@@ -77,8 +77,8 @@ export const EvolutionChart = ({ data, timeRange, setTimeRange }) => {
               onClick={() => setTimeRange(t.id)}
               className={`flex-1 px-3 py-1 min-h-[30px] text-xs font-semibold transition-all rounded-full select-none touch-manipulation active:scale-95 ${
                 timeRange === t.id
-                  ? "bg-white dark:bg-[#2c2c2e] text-slate-900 dark:text-white shadow-xs font-bold"
-                  : "text-slate-500 dark:text-zinc-400"
+                  ? "bg-white dark:bg-[#2c2c2e] text-ink shadow-xs font-bold"
+                  : "text-ink-3"
               }`}
             >
               {t.label}
@@ -90,7 +90,7 @@ export const EvolutionChart = ({ data, timeRange, setTimeRange }) => {
       {/* Dynamic HUD Header (Legibilidad óptima en móvil sin tapar con los dedos) */}
       <div className="flex flex-wrap items-center justify-between gap-2 p-2 sm:p-2.5 rounded-xl bg-slate-100/70 dark:bg-zinc-800/50 border border-slate-200/50 dark:border-zinc-700/40 mb-3">
         <div className="flex items-center gap-2">
-          <span className="text-[11px] font-bold text-slate-700 dark:text-zinc-300 capitalize">
+          <span className="text-[11px] font-bold text-body capitalize">
             {activePoint ? new Date(activePoint.date).toLocaleDateString('es-ES', { weekday: 'short', day: 'numeric', month: 'short' }) : 'Hoy'}
           </span>
           {hoverPoint ? (
@@ -98,7 +98,7 @@ export const EvolutionChart = ({ data, timeRange, setTimeRange }) => {
               Punto
             </span>
           ) : (
-            <span className="text-[9px] font-medium text-slate-400 dark:text-zinc-500 bg-slate-200/60 dark:bg-zinc-700/40 px-1.5 py-0.2 rounded-full">
+            <span className="text-[9px] font-medium text-ink-4 bg-slate-200/60 dark:bg-zinc-700/40 px-1.5 py-0.2 rounded-full">
               Actual
             </span>
           )}
@@ -107,21 +107,21 @@ export const EvolutionChart = ({ data, timeRange, setTimeRange }) => {
         <div className="flex items-center gap-3 sm:gap-4 shrink-0 text-xs">
           <div className="flex items-center gap-1">
             <span className="w-2 h-2 rounded-full bg-[#3b82f6]"></span>
-            <span className="text-[10px] text-slate-400 dark:text-zinc-500 font-medium">CTL</span>
+            <span className="text-[10px] text-ink-4 font-medium">CTL</span>
             <span className="font-mono font-bold text-[#3b82f6] text-xs">
               {activePoint?.ctl !== undefined ? Math.round(activePoint.ctl) : '--'}
             </span>
           </div>
           <div className="flex items-center gap-1">
             <span className="w-2 h-2 rounded-full bg-[#f43f5e]"></span>
-            <span className="text-[10px] text-slate-400 dark:text-zinc-500 font-medium">ATL</span>
+            <span className="text-[10px] text-ink-4 font-medium">ATL</span>
             <span className="font-mono font-bold text-[#f43f5e] text-xs">
               {activePoint?.atl !== undefined ? Math.round(activePoint.atl) : '--'}
             </span>
           </div>
           <div className="flex items-center gap-1">
             <span className="w-2 h-2 rounded-full bg-[#eab308]"></span>
-            <span className="text-[10px] text-slate-400 dark:text-zinc-500 font-medium">TSB</span>
+            <span className="text-[10px] text-ink-4 font-medium">TSB</span>
             <span className={`font-mono font-bold text-xs ${
               (activePoint?.tsb ?? 0) >= 0 ? 'text-[#30D158]' : 'text-[#FF9F0A]'
             }`}>
@@ -136,15 +136,15 @@ export const EvolutionChart = ({ data, timeRange, setTimeRange }) => {
         <div className="flex gap-3 sm:gap-5">
           <div className="flex items-center gap-1.5">
             <div className="w-2 h-2 rounded-full bg-[#3b82f6]"></div>
-            <span className="text-[9px] font-semibold text-slate-500 dark:text-zinc-400 uppercase tracking-wider">Fitness</span>
+            <span className="text-[9px] font-semibold text-ink-3 uppercase tracking-wider">Fitness</span>
           </div>
           <div className="flex items-center gap-1.5">
             <div className="w-2 h-2 rounded-full bg-[#f43f5e]"></div>
-            <span className="text-[9px] font-semibold text-slate-500 dark:text-zinc-400 uppercase tracking-wider">Fatiga</span>
+            <span className="text-[9px] font-semibold text-ink-3 uppercase tracking-wider">Fatiga</span>
           </div>
           <div className="flex items-center gap-1.5">
             <div className="w-2 h-2 rounded-full bg-[#eab308]"></div>
-            <span className="text-[9px] font-semibold text-slate-500 dark:text-zinc-400 uppercase tracking-wider">Forma</span>
+            <span className="text-[9px] font-semibold text-ink-3 uppercase tracking-wider">Forma</span>
           </div>
         </div>
       </div>

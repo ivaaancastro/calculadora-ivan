@@ -7,14 +7,14 @@ export const Vo2MaxCard = ({ vo2Sport, setVo2Sport, currentVo2, vo2Level, vo2Sta
             <div className="bg-white dark:bg-zinc-900/50 rounded-2xl border border-line-muted p-6 sm:p-8 shadow-sm">
                 <div className="flex items-center justify-between mb-10">
                     <div className="flex items-center gap-2">
-                        <h3 className="text-[10px] font-bold text-slate-400 dark:text-zinc-500 uppercase tracking-[0.1em]">VO2 Máximo</h3>
+                        <h3 className="text-[10px] font-bold text-ink-4 uppercase tracking-[0.1em]">VO2 Máximo</h3>
                     </div>
                     <div className="flex bg-slate-100/80 dark:bg-zinc-800/80 p-1 rounded-xl">
                         {['run', 'bike'].map(s => (
                             <button
                                 key={s}
                                 onClick={() => setVo2Sport(s)}
-                                className={`px-4 py-1.5 text-[9px] font-bold uppercase tracking-widest rounded-lg transition-all ${vo2Sport === s ? 'bg-white dark:bg-zinc-700 text-slate-900 dark:text-zinc-100 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
+                                className={`px-4 py-1.5 text-[9px] font-bold uppercase tracking-widest rounded-lg transition-all ${vo2Sport === s ? 'bg-white dark:bg-zinc-700 text-ink-soft shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
                             >
                                 {s === 'run' ? 'Carrera' : 'Bici'}
                             </button>
@@ -60,14 +60,14 @@ export const Vo2MaxCard = ({ vo2Sport, setVo2Sport, currentVo2, vo2Level, vo2Sta
                             <Footprints size={12} className="text-slate-400" />
                             <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">VO2 Carrera</span>
                         </div>
-                        <p className="text-lg font-bold text-slate-900 dark:text-zinc-100">{vo2Stats?.run?.vo2max > 0 ? vo2Stats.run.vo2max : '--'}</p>
+                        <p className="text-lg font-bold text-ink-soft">{vo2Stats?.run?.vo2max > 0 ? vo2Stats.run.vo2max : '--'}</p>
                     </div>
                     <div className="p-4 rounded-2xl bg-slate-50/50 dark:bg-zinc-800/30 border border-line-soft">
                         <div className="flex items-center gap-2 mb-1.5">
                             <Bike size={12} className="text-slate-400" />
                             <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">VO2 Bici</span>
                         </div>
-                        <p className="text-lg font-bold text-slate-900 dark:text-zinc-100">{vo2Stats?.bike?.vo2max > 0 ? vo2Stats.bike.vo2max : '--'}</p>
+                        <p className="text-lg font-bold text-ink-soft">{vo2Stats?.bike?.vo2max > 0 ? vo2Stats.bike.vo2max : '--'}</p>
                     </div>
                 </div>
             </div>

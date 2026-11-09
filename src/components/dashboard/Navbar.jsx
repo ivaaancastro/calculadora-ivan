@@ -95,14 +95,14 @@ export const Navbar = ({
                   style={{ width: '100%', height: '100%' }}
                 />
               ) : (
-                <User size={19} className="text-slate-600 dark:text-zinc-300" />
+                <User size={19} className="text-body-soft-2" />
               )}
             </div>
 
             {/* MARCA / NOMBRE Y CHEVRON */}
             <div className="flex flex-col justify-center text-left">
               <div className="flex items-center gap-1">
-                <h1 className="text-sm sm:text-base font-bold text-slate-900 dark:text-white tracking-tight leading-none">
+                <h1 className="text-sm sm:text-base font-bold text-ink tracking-tight leading-none">
                   Forma
                 </h1>
                 <ChevronDown 
@@ -110,7 +110,7 @@ export const Navbar = ({
                   className={`text-slate-400 dark:text-zinc-500 transition-transform duration-200 ${isMenuOpen ? 'rotate-180 text-blue-500' : 'group-hover:text-slate-700 dark:group-hover:text-zinc-300'}`} 
                 />
               </div>
-              <p className="text-[10px] font-medium text-slate-400 dark:text-zinc-500 truncate max-w-[110px] sm:max-w-[160px] leading-tight mt-0.5">
+              <p className="text-[10px] font-medium text-ink-4 truncate max-w-[110px] sm:max-w-[160px] leading-tight mt-0.5">
                 {settings?.fullName || 'Ajustes'}
               </p>
             </div>
@@ -132,10 +132,10 @@ export const Navbar = ({
                   )}
                 </div>
                 <div className="min-w-0 flex-1">
-                  <p className="text-xs sm:text-sm font-bold text-slate-900 dark:text-white truncate leading-tight">
+                  <p className="text-xs sm:text-sm font-bold text-ink truncate leading-tight">
                     {settings?.fullName || 'Atleta Forma'}
                   </p>
-                  <p className="text-[11px] text-slate-400 dark:text-zinc-500 truncate mt-0.5">
+                  <p className="text-[11px] text-ink-4 truncate mt-0.5">
                     {settings?.email || 'Ajustes del perfil'}
                   </p>
                 </div>
@@ -143,7 +143,7 @@ export const Navbar = ({
 
               {/* OPCIONES DE CONFIGURACIÓN */}
               <div className="p-1.5 space-y-0.5">
-                <div className="px-2.5 pt-1 pb-1 text-[10px] font-bold text-slate-400 dark:text-zinc-500 uppercase tracking-wider">
+                <div className="px-2.5 pt-1 pb-1 text-[10px] font-bold text-ink-4 uppercase tracking-wider">
                   Vistas de Configuración
                 </div>
                 {configOptions.map(opt => {
@@ -162,12 +162,12 @@ export const Navbar = ({
                           <p className="text-xs font-semibold text-slate-900 dark:text-zinc-100 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
                             {opt.label}
                           </p>
-                          <p className="text-[10px] text-slate-400 dark:text-zinc-500 truncate">
+                          <p className="text-[10px] text-ink-4 truncate">
                             {opt.desc}
                           </p>
                         </div>
                       </div>
-                      <ChevronRight size={14} className="text-slate-300 dark:text-zinc-600 group-hover:text-slate-500 dark:group-hover:text-zinc-400 shrink-0 ml-1" />
+                      <ChevronRight size={14} className="text-faint group-hover:text-ink-3 shrink-0 ml-1" />
                     </button>
                   );
                 })}
@@ -198,8 +198,8 @@ export const Navbar = ({
               return (
                 <Link key={tab.path} to={tab.path}
                   className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-semibold transition-all ${isActive
-                    ? 'bg-white dark:bg-[#2c2c2e] text-slate-900 dark:text-white shadow-xs'
-                    : 'text-slate-500 dark:text-zinc-400 hover:text-slate-800 dark:hover:text-zinc-200'
+                    ? 'bg-white dark:bg-[#2c2c2e] text-ink shadow-xs'
+                    : 'text-ink-3 hover:text-ink-2-soft'
                     }`}>
                   <Icon size={14} strokeWidth={isActive ? 2.5 : 2} />
                   <span className="hidden lg:inline">{tab.label}</span>
@@ -212,7 +212,7 @@ export const Navbar = ({
         {/* ACTIONS */}
         <div className="flex items-center gap-1.5 sm:gap-2">
 
-          <button onClick={toggleTheme} className="w-9 h-9 flex items-center justify-center rounded-full text-slate-500 hover:text-slate-800 dark:text-zinc-400 dark:hover:text-zinc-100 bg-slate-100/70 hover:bg-slate-200/60 dark:bg-zinc-900/80 dark:hover:bg-zinc-800 active:scale-90 transition-all" title="Cambiar tema">
+          <button onClick={toggleTheme} className="w-9 h-9 flex items-center justify-center rounded-full text-ink-3 hover:text-ink-2 bg-slate-100/70 hover:bg-slate-200/60 dark:bg-zinc-900/80 dark:hover:bg-zinc-800 active:scale-90 transition-all" title="Cambiar tema">
             {theme === 'dark' ? <Sun size={17} /> : <Moon size={17} />}
           </button>
 

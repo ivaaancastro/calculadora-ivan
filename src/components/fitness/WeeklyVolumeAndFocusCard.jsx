@@ -19,7 +19,7 @@ export const WeeklyVolumeAndFocusCard = ({
                 <div className="bg-white dark:bg-zinc-900/50 rounded-2xl border border-line-muted p-6 sm:p-8 lg:col-span-2 shadow-sm">
                     <div className="flex justify-between items-center mb-6">
                         <div className="flex items-center gap-2">
-                            <h3 className="text-[10px] font-bold text-slate-400 dark:text-zinc-500 uppercase tracking-[0.1em]">Volumen Semanal (TSS/Horas)</h3>
+                            <h3 className="text-[10px] font-bold text-ink-4 uppercase tracking-[0.1em]">Volumen Semanal (TSS/Horas)</h3>
                             <InfoTooltip text="Carga de entrenamiento (TSS) y horas totales acumuladas cada semana. Las barras indican el estrés (TSS) y la línea el tiempo." />
                         </div>
                     </div>
@@ -39,13 +39,13 @@ export const WeeklyVolumeAndFocusCard = ({
 
                 <div className="bg-white dark:bg-zinc-900/50 rounded-2xl border border-line-muted p-6 sm:p-8 lg:col-span-1 shadow-sm">
                     <div className="flex justify-between items-center mb-8">
-                        <h3 className="text-[10px] font-bold text-slate-400 dark:text-zinc-500 uppercase tracking-[0.1em]">Distribución de Foco</h3>
+                        <h3 className="text-[10px] font-bold text-ink-4 uppercase tracking-[0.1em]">Distribución de Foco</h3>
                         <div className="flex bg-slate-100/80 dark:bg-zinc-800/80 p-1 rounded-xl">
                             {['28d', '90d'].map(t => (
                                 <button
                                     key={t}
                                     onClick={() => setIntensityTimeframe(t)}
-                                    className={`px-3 py-1 text-[8px] font-bold uppercase rounded-lg transition-all ${intensityTimeframe === t ? 'bg-white dark:bg-zinc-700 text-slate-900 dark:text-zinc-100 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
+                                    className={`px-3 py-1 text-[8px] font-bold uppercase rounded-lg transition-all ${intensityTimeframe === t ? 'bg-white dark:bg-zinc-700 text-ink-soft shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
                                 >
                                     {t.toUpperCase()}
                                 </button>
@@ -62,7 +62,7 @@ export const WeeklyVolumeAndFocusCard = ({
                                             <span>{focus.name}</span>
                                             <InfoTooltip text={focus.name === 'AERÓBICO' ? 'Zonas 1 y 2. Base de resistencia.' : (focus.name === 'TEMPO/UMBRAL' ? 'Zonas 3 y 4. Ritmos de carrera sostenidos.' : 'Zonas 5+. Potencia explosiva y series cortas.')} />
                                         </div>
-                                        <span className="text-slate-700 dark:text-zinc-300">{focus.value}%</span>
+                                        <span className="text-body">{focus.value}%</span>
                                     </div>
                                     <div className="h-1.5 w-full bg-slate-100 dark:bg-zinc-800 rounded-full overflow-hidden">
                                         <div className="h-full rounded-full transition-all duration-500" style={{ width: `${focus.value}%`, backgroundColor: focus.color }} />
@@ -78,9 +78,9 @@ export const WeeklyVolumeAndFocusCard = ({
                                     <div key={i} className="flex justify-between items-center text-[9px] font-medium">
                                         <div className="flex items-center gap-1.5">
                                             <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: z.fill }} />
-                                            <span className="text-slate-500 dark:text-zinc-400 truncate max-w-[80px]">{z.name.split(' ')[0]}</span>
+                                            <span className="text-ink-3 truncate max-w-[80px]">{z.name.split(' ')[0]}</span>
                                         </div>
-                                        <span className="font-bold text-slate-700 dark:text-zinc-200">{z.hours}h</span>
+                                        <span className="font-bold text-body-2">{z.hours}h</span>
                                     </div>
                                 ))}
                             </div>

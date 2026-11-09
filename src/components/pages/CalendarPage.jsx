@@ -35,8 +35,8 @@ const DurationInput = ({ value, onChange, className = '' }) => {
         const clampS = Math.max(0, Math.min(59, Number(newS) || 0));
         onChange((clampH * 3600 + clampM * 60 + clampS) / 60);
     };
-    const inCls = 'w-8 shrink-0 bg-transparent text-[13px] font-mono font-medium py-1 text-center outline-none text-slate-700 dark:text-zinc-300 no-spinner';
-    const sep = <span className="text-slate-300 dark:text-zinc-600 text-[11px] font-semibold select-none">:</span>;
+    const inCls = 'w-8 shrink-0 bg-transparent text-[13px] font-mono font-medium py-1 text-center outline-none text-body no-spinner';
+    const sep = <span className="text-faint text-[11px] font-semibold select-none">:</span>;
     return (
         <div className={`inline-flex shrink-0 items-center rounded-lg bg-slate-50 dark:bg-zinc-800/50 px-1.5 py-0.5 gap-0.5 ${className}`} title="HH:MM:SS">
             <input type="number" value={h} min={0} max={23}
@@ -175,7 +175,7 @@ const PmcFloatingChart = ({ pmcByDate, onClose, initPos }) => {
                 onPointerDown={handleDragDown} onPointerMove={handleDragMove} onPointerUp={handleDragUp}>
                 <div className="flex items-center gap-2">
                     <Activity size={12} className="text-violet-500" />
-                    <span className="text-[10px] font-black text-slate-600 dark:text-zinc-300 uppercase tracking-widest">Proyección de Forma</span>
+                    <span className="text-[10px] font-black text-body-soft-2 uppercase tracking-widest">Proyección de Forma</span>
                 </div>
                 {lastReal && (
                     <div className="flex items-center gap-3 mr-2">
@@ -192,7 +192,7 @@ const PmcFloatingChart = ({ pmcByDate, onClose, initPos }) => {
             </div>
 
             {/* Legend / Toolbar */}
-            <div className="flex items-center gap-4 px-4 pt-2.5 text-[10px] font-bold text-slate-500 dark:text-zinc-400">
+            <div className="flex items-center gap-4 px-4 pt-2.5 text-[10px] font-bold text-ink-3">
                 <label className="flex items-center gap-1.5 cursor-pointer hover:text-blue-500 transition-colors">
                     <input type="checkbox" checked={viewOpts.top} onChange={e => setViewOpts(v => ({ ...v, top: e.target.checked }))} className="accent-blue-500 rounded-sm w-3 h-3" />
                     <span>Aptitud / Fatiga</span>
@@ -306,18 +306,18 @@ const PmcFloatingChart = ({ pmcByDate, onClose, initPos }) => {
                 return (
                     <div className="absolute top-3 pointer-events-none bg-white dark:bg-zinc-800 border border-line-2 rounded-lg shadow-lg px-3 py-2 text-[10px] z-10 min-w-[130px]"
                         style={{ [tooltipLeft ? 'right' : 'left']: tooltipLeft ? 16 : 50 }}>
-                        <p className="font-bold text-slate-600 dark:text-zinc-300 mb-1.5">
+                        <p className="font-bold text-body-soft-2 mb-1.5">
                             {new Date(hoverEntry.date + 'T00:00:00').toLocaleDateString('es-ES', { weekday: 'short', day: 'numeric', month: 'short' })}
                             {hoverEntry.projected && <span className="ml-1.5 text-[8px] font-normal text-violet-400 uppercase tracking-wide">proyectado</span>}
                         </p>
                         <div className="space-y-1">
                             <div className="flex justify-between gap-4">
                                 <span className="text-sky-500 font-semibold">Aptitud (CTL)</span>
-                                <span className="font-mono font-bold text-slate-700 dark:text-zinc-200">{Math.round(hoverEntry.ctl)}</span>
+                                <span className="font-mono font-bold text-body-2">{Math.round(hoverEntry.ctl)}</span>
                             </div>
                             <div className="flex justify-between gap-4">
                                 <span className="text-purple-400 font-semibold">Fatiga (ATL)</span>
-                                <span className="font-mono font-bold text-slate-700 dark:text-zinc-200">{Math.round(hoverEntry.atl)}</span>
+                                <span className="font-mono font-bold text-body-2">{Math.round(hoverEntry.atl)}</span>
                             </div>
                             <div className="flex justify-between gap-4">
                                 <span className={`font-semibold ${hoverEntry.tcb >= 0 ? 'text-emerald-500' : 'text-orange-400'}`}>Forma (TSB)</span>
@@ -327,7 +327,7 @@ const PmcFloatingChart = ({ pmcByDate, onClose, initPos }) => {
                             </div>
                             <div className="flex justify-between gap-4 pt-1 border-t border-slate-100 dark:border-zinc-700 mt-1">
                                 <span className="text-emerald-600 font-semibold">Rampa (est)</span>
-                                <span className="font-mono font-bold text-slate-700 dark:text-zinc-200">{hoverEntry.ramp.toFixed(1)}</span>
+                                <span className="font-mono font-bold text-body-2">{hoverEntry.ramp.toFixed(1)}</span>
                             </div>
                         </div>
                     </div>
@@ -1188,21 +1188,21 @@ export const CalendarPage = ({ activities, plannedWorkouts = [], addPlannedWorko
                 {/* HEADER */}
                 <div className="flex items-center justify-between px-3 sm:px-5 py-3 sm:py-4 bg-transparent border-b border-line-soft-5">
                     <div className="flex items-center gap-2 sm:gap-3">
-                        <h2 className="text-base sm:text-2xl font-semibold text-slate-800 dark:text-zinc-100 capitalize tracking-tight flex items-center">
+                        <h2 className="text-base sm:text-2xl font-semibold text-ink-2 capitalize tracking-tight flex items-center">
                             {new Date(year, month).toLocaleDateString('es-ES', { month: 'long', year: 'numeric' })}
                         </h2>
                         <button onClick={goToday} className="text-[11px] font-medium text-slate-500 dark:text-zinc-400 hover:text-red-500 dark:hover:text-red-400 active:scale-95 transition-all ml-1 sm:ml-2 bg-slate-50 dark:bg-zinc-900 px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full">Hoy</button>
                     </div>
                     <div className="flex items-center gap-1.5 sm:gap-2">
                         {/* PMC CHART TOGGLE */}
-                        <button onClick={() => setShowPmcChart(p => !p)} className={`hidden sm:flex items-center gap-1.5 px-3 py-1.5 border rounded-lg text-[9px] font-black uppercase tracking-widest transition-colors shadow-sm ${showPmcChart ? 'bg-violet-50 dark:bg-violet-900/20 text-violet-600 dark:text-violet-400 border-violet-200 dark:border-violet-800/50' : 'bg-white dark:bg-zinc-900 text-slate-500 dark:text-zinc-400 border-slate-200 dark:border-zinc-700 hover:border-slate-400'}`}>
+                        <button onClick={() => setShowPmcChart(p => !p)} className={`hidden sm:flex items-center gap-1.5 px-3 py-1.5 border rounded-lg text-[9px] font-black uppercase tracking-widest transition-colors shadow-sm ${showPmcChart ? 'bg-violet-50 dark:bg-violet-900/20 text-violet-600 dark:text-violet-400 border-violet-200 dark:border-violet-800/50' : 'bg-white dark:bg-zinc-900 text-ink-3 border-slate-200 dark:border-zinc-700 hover:border-slate-400'}`}>
                             <Activity size={12} /> Forma
                         </button>
 
                         <div className="flex items-center border border-line-2 rounded-lg overflow-hidden ml-1 sm:ml-2">
-                            <button onClick={prevMonth} className="w-10 h-10 flex items-center justify-center bg-transparent hover:bg-slate-100 dark:hover:bg-zinc-800 active:scale-95 text-slate-500 dark:text-zinc-400 transition-all touch-manipulation" title="Mes anterior"><ChevronLeft size={18} /></button>
+                            <button onClick={prevMonth} className="w-10 h-10 flex items-center justify-center bg-transparent hover:bg-slate-100 dark:hover:bg-zinc-800 active:scale-95 text-ink-3 transition-all touch-manipulation" title="Mes anterior"><ChevronLeft size={18} /></button>
                             <div className="w-px h-5 bg-slate-200 dark:bg-zinc-700"></div>
-                            <button onClick={nextMonth} className="w-10 h-10 flex items-center justify-center bg-transparent hover:bg-slate-100 dark:hover:bg-zinc-800 active:scale-95 text-slate-500 dark:text-zinc-400 transition-all touch-manipulation" title="Mes siguiente"><ChevronRight size={18} /></button>
+                            <button onClick={nextMonth} className="w-10 h-10 flex items-center justify-center bg-transparent hover:bg-slate-100 dark:hover:bg-zinc-800 active:scale-95 text-ink-3 transition-all touch-manipulation" title="Mes siguiente"><ChevronRight size={18} /></button>
                         </div>
                     </div>
                 </div>
@@ -1219,7 +1219,7 @@ export const CalendarPage = ({ activities, plannedWorkouts = [], addPlannedWorko
                             <div className="py-2.5 border-r border-line-faint"></div>
                             {WEEKDAYS.map((day, i) => (
                                 <div key={day} className={`py-2 text-center text-[10px] font-medium tracking-widest uppercase border-r border-line-faint last:border-r-0
-                                    ${i >= 5 ? 'text-slate-400/80 dark:text-zinc-600' : 'text-slate-500 dark:text-zinc-500'}`}>{day}</div>
+                                    ${i >= 5 ? 'text-slate-400/80 dark:text-zinc-600' : 'text-ink-3-flat'}`}>{day}</div>
                             ))}
                         </div>
 
@@ -1306,7 +1306,7 @@ export const CalendarPage = ({ activities, plannedWorkouts = [], addPlannedWorko
                                         <div className="hidden lg:flex flex-col border-r border-line-faint bg-transparent text-[10px] relative overflow-hidden">
                                             {/* Header with week number */}
                                             <div className="px-3 py-2.5 flex items-center justify-between">
-                                                <span className="text-[11px] font-medium text-slate-400 dark:text-zinc-500 flex items-center gap-1">
+                                                <span className="text-[11px] font-medium text-ink-4 flex items-center gap-1">
                                                     Semana {weekNum}
                                                     {isProjected && <span className="text-[8px] font-semibold text-blue-500 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/30 px-1 py-px rounded">PROY</span>}
                                                 </span>
@@ -1317,30 +1317,30 @@ export const CalendarPage = ({ activities, plannedWorkouts = [], addPlannedWorko
                                                 {/* Row 1: Aptitud & Duration */}
                                                 <div className="flex items-center justify-between">
                                                     <div className="flex items-center gap-1.5">
-                                                        <span className="text-[10px] text-slate-500 dark:text-zinc-400 w-9">Aptitud</span>
+                                                        <span className="text-[10px] text-ink-3 w-9">Aptitud</span>
                                                         <span className="text-[11px] font-bold text-blue-500">{weekPmc.ctl != null ? Math.round(weekPmc.ctl) : '-'}</span>
                                                     </div>
-                                                    <span className="text-[11px] font-bold text-slate-800 dark:text-zinc-200">{formatDuration(weekDuration)}</span>
+                                                    <span className="text-[11px] font-bold text-ink-2-soft">{formatDuration(weekDuration)}</span>
                                                 </div>
 
                                                 {/* Row 2: Fatiga & Carga */}
                                                 <div className="flex items-center justify-between">
                                                     <div className="flex items-center gap-1.5">
-                                                        <span className="text-[10px] text-slate-500 dark:text-zinc-400 w-9">Fatiga</span>
+                                                        <span className="text-[10px] text-ink-3 w-9">Fatiga</span>
                                                         <span className="text-[11px] font-bold text-purple-600 dark:text-purple-400">{weekPmc.atl != null ? Math.round(weekPmc.atl) : '-'}</span>
                                                     </div>
                                                     <div className="flex items-center gap-1">
-                                                        <span className="text-[9px] text-slate-400 dark:text-zinc-500">Carga</span>
-                                                        <span className="text-[11px] font-bold text-slate-800 dark:text-zinc-200">{Math.round(weekRealizedTSS)}</span>
+                                                        <span className="text-[9px] text-ink-4">Carga</span>
+                                                        <span className="text-[11px] font-bold text-ink-2-soft">{Math.round(weekRealizedTSS)}</span>
                                                     </div>
                                                 </div>
 
                                                 {/* Row 3: Forma & Ramp */}
                                                 <div className="flex items-center justify-between">
                                                     <div className="flex items-center gap-1.5">
-                                                        <span className="text-[10px] text-slate-500 dark:text-zinc-400 w-9">Forma</span>
+                                                        <span className="text-[10px] text-ink-3 w-9">Forma</span>
                                                         {weekPmc.tcb != null ? (
-                                                            <span className={`text-[11px] font-semibold ${weekPmc.tcb > 5 ? 'text-emerald-500' : weekPmc.tcb < -15 ? 'text-red-500' : 'text-slate-600 dark:text-zinc-300'}`}>
+                                                            <span className={`text-[11px] font-semibold ${weekPmc.tcb > 5 ? 'text-emerald-500' : weekPmc.tcb < -15 ? 'text-red-500' : 'text-body-soft-2'}`}>
                                                                 {Math.round(weekPmc.tcb)}
                                                             </span>
                                                         ) : (
@@ -1349,7 +1349,7 @@ export const CalendarPage = ({ activities, plannedWorkouts = [], addPlannedWorko
                                                     </div>
                                                     {ramp != null && (
                                                         <div className="flex items-center gap-0.5">
-                                                            <span className="text-[9px] text-slate-400 dark:text-zinc-500">Ramp</span>
+                                                            <span className="text-[9px] text-ink-4">Ramp</span>
                                                             <span className={`text-[10px] font-bold ${Number(ramp) > 0 ? 'text-emerald-500' : Number(ramp) < 0 ? 'text-red-400' : 'text-slate-500'}`}>
                                                                 {Number(ramp) > 0 ? '+' : ''}{ramp}
                                                             </span>
@@ -1361,8 +1361,8 @@ export const CalendarPage = ({ activities, plannedWorkouts = [], addPlannedWorko
                                                 {weekDist > 0 && (
                                                     <div className="flex items-center justify-between pt-0.5 border-t border-line-faint">
                                                         <div className="flex items-center gap-1.5">
-                                                            <span className="text-[10px] text-slate-500 dark:text-zinc-400 w-9">Dist.</span>
-                                                            <span className="text-[11px] font-bold text-slate-700 dark:text-zinc-300">{(weekDist / 1000).toFixed(1)} km</span>
+                                                            <span className="text-[10px] text-ink-3 w-9">Dist.</span>
+                                                            <span className="text-[11px] font-bold text-body">{(weekDist / 1000).toFixed(1)} km</span>
                                                         </div>
                                                     </div>
                                                 )}
@@ -1373,8 +1373,8 @@ export const CalendarPage = ({ activities, plannedWorkouts = [], addPlannedWorko
                                                 className="mt-auto px-2.5 py-1 transition-colors border-t border-line-muted"
                                             >
                                                 <div className="flex justify-between text-[9px]">
-                                                    <span className="text-slate-400 dark:text-zinc-500 font-semibold">Progreso Plan</span>
-                                                    <span className="font-mono font-bold text-slate-600 dark:text-zinc-300">
+                                                    <span className="text-ink-4 font-semibold">Progreso Plan</span>
+                                                    <span className="font-mono font-bold text-body-soft-2">
                                                         {Math.round(weekRealizedTSS)}/{Math.round(weekPlannedTSS)}
                                                     </span>
                                                 </div>
@@ -1420,10 +1420,10 @@ export const CalendarPage = ({ activities, plannedWorkouts = [], addPlannedWorko
                                                     <div className="flex justify-between items-start mb-2 shrink-0">
                                                         <div className="flex items-center gap-1.5 -ml-1 -mt-1">
                                                             <span className={`text-[13px] font-semibold leading-none flex items-center justify-center
-                                                                ${isToday ? 'text-white bg-red-500 w-7 h-7 rounded-full shadow-sm' : !day.isCurrentMonth ? 'text-slate-300 dark:text-zinc-600' : 'text-slate-800 dark:text-zinc-200'}`}>
+                                                                ${isToday ? 'text-white bg-red-500 w-7 h-7 rounded-full shadow-sm' : !day.isCurrentMonth ? 'text-faint' : 'text-ink-2-soft'}`}>
                                                                 {day.date.getDate()}
                                                             </span>
-                                                            <span className="lg:hidden text-[11px] font-medium text-slate-400 dark:text-zinc-500 uppercase tracking-wide">
+                                                            <span className="lg:hidden text-[11px] font-medium text-ink-4 uppercase tracking-wide">
                                                                 {WEEKDAYS[dIdx]}
                                                             </span>
                                                         </div>
@@ -1484,7 +1484,7 @@ export const CalendarPage = ({ activities, plannedWorkouts = [], addPlannedWorko
                                                             // Color mapping (Minimalist Apple style)
                                                             const sportColors = (() => {
                                                                 const t = String(act.type).toLowerCase();
-                                                                let accent = 'text-slate-500 dark:text-zinc-500';
+                                                                let accent = 'text-ink-3-flat';
                                                                 let dot = 'bg-slate-400 dark:bg-zinc-600';
                                                                 if (t.includes('run') || t.includes('carrera') || t.includes('correr')) { accent = 'text-emerald-500'; dot = 'bg-emerald-500'; }
                                                                 if (t.includes('ride') || t.includes('bici') || t.includes('ciclismo')) { accent = 'text-blue-500'; dot = 'bg-blue-500'; }
@@ -1554,15 +1554,15 @@ export const CalendarPage = ({ activities, plannedWorkouts = [], addPlannedWorko
                                                                         <>
                                                                             <div className="flex items-center gap-1.5 mb-1">
                                                                                 <span className={`shrink-0 ${sportColors.accent}`}>{getSportIcon(act.type, 13)}</span>
-                                                                                <span className="text-[11px] font-semibold tracking-tight leading-none text-slate-700 dark:text-zinc-300">{formatActDuration(act.duration || 0)}</span>
-                                                                                {act.tss > 0 && <span className="ml-auto text-[9px] font-medium text-slate-400 dark:text-zinc-500">{Math.round(act.tss)} TSS</span>}
+                                                                                <span className="text-[11px] font-semibold tracking-tight leading-none text-body">{formatActDuration(act.duration || 0)}</span>
+                                                                                {act.tss > 0 && <span className="ml-auto text-[9px] font-medium text-ink-4">{Math.round(act.tss)} TSS</span>}
                                                                             </div>
                                                                             <div className="flex flex-col gap-0.5">
-                                                                                <span className="text-[11px] font-medium leading-tight truncate text-slate-600 dark:text-zinc-400">
+                                                                                <span className="text-[11px] font-medium leading-tight truncate text-body-soft">
                                                                                     {act.name || act.type}
                                                                                 </span>
                                                                                 {extraInfo.length > 0 && (
-                                                                                    <span className="text-[9px] font-semibold text-slate-400 dark:text-zinc-500 flex gap-1.5">
+                                                                                    <span className="text-[9px] font-semibold text-ink-4 flex gap-1.5">
                                                                                         {extraInfo.map((info, idx) => (
                                                                                             <span key={idx} className="bg-slate-100 dark:bg-zinc-800 px-1 py-0.5 rounded">{info}</span>
                                                                                         ))}
@@ -1598,16 +1598,16 @@ export const CalendarPage = ({ activities, plannedWorkouts = [], addPlannedWorko
                                                                         <>
                                                                             <div className="flex items-center gap-1.5 mb-1">
                                                                                 <span className={`shrink-0 ${sportColors.accent}`}>{getSportIcon(act.type, 13)}</span>
-                                                                                <span className="text-[11px] font-semibold tracking-tight leading-none text-slate-800 dark:text-zinc-200">{formatActDuration(act.duration || 0)}</span>
-                                                                                {act.tss > 0 && <span className="ml-auto text-[9px] font-bold text-slate-500 dark:text-zinc-400">{Math.round(act.tss)} TSS</span>}
+                                                                                <span className="text-[11px] font-semibold tracking-tight leading-none text-ink-2-soft">{formatActDuration(act.duration || 0)}</span>
+                                                                                {act.tss > 0 && <span className="ml-auto text-[9px] font-bold text-ink-3">{Math.round(act.tss)} TSS</span>}
                                                                                 {isFulfilled && <span className="ml-1 text-[9px] font-bold text-emerald-500" title="Plan completado">✓</span>}
                                                                             </div>
                                                                             <div className="flex flex-col gap-0.5">
-                                                                                <span className="text-[11px] font-medium leading-tight truncate text-slate-700 dark:text-zinc-300">
+                                                                                <span className="text-[11px] font-medium leading-tight truncate text-body">
                                                                                     {act.name || act.type}
                                                                                 </span>
                                                                                 {extraInfo.length > 0 && (
-                                                                                    <span className="text-[9px] font-semibold text-slate-500 dark:text-zinc-400 flex gap-1.5">
+                                                                                    <span className="text-[9px] font-semibold text-ink-3 flex gap-1.5">
                                                                                         {extraInfo.map((info, idx) => (
                                                                                             <span key={idx} className="bg-slate-200/50 dark:bg-zinc-700/50 px-1 py-0.5 rounded">{info}</span>
                                                                                         ))}
@@ -1645,7 +1645,7 @@ export const CalendarPage = ({ activities, plannedWorkouts = [], addPlannedWorko
                                 <h3 className="text-base font-semibold text-slate-900 dark:text-zinc-50 tracking-tight">
                                     {editingPlanId ? 'Editar Entrenamiento' : 'Planificar Entrenamiento'}
                                 </h3>
-                                <p className="text-[13px] text-slate-400 dark:text-zinc-500 mt-0.5">
+                                <p className="text-[13px] text-ink-4 mt-0.5">
                                     {selectedDateForPlan?.toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long' })}
                                 </p>
                             </div>
@@ -1667,8 +1667,8 @@ export const CalendarPage = ({ activities, plannedWorkouts = [], addPlannedWorko
                                         <button key={s.key} onClick={() => setNewPlan(prev => ({ ...prev, type: s.key, blocks: [] }))}
                                             className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-all duration-200
                                                 ${newPlan.type === s.key
-                                                    ? 'bg-slate-900 text-white dark:bg-white dark:text-zinc-900 shadow-sm'
-                                                    : 'text-slate-500 dark:text-zinc-400 hover:bg-slate-100 dark:hover:bg-zinc-800'}`}>
+                                                    ? 'bg-slate-900 text-ink-inverse dark:bg-white shadow-sm'
+                                                    : 'text-ink-3 hover:bg-slate-100 dark:hover:bg-zinc-800'}`}>
                                             {s.icon}<span>{s.label}</span>
                                         </button>
                                     ))}
@@ -1682,7 +1682,7 @@ export const CalendarPage = ({ activities, plannedWorkouts = [], addPlannedWorko
                                                 className={`px-2.5 py-1 rounded-full text-[11px] font-medium transition-all duration-200
                                                     ${newPlan.name === t.name
                                                         ? 'bg-blue-500/10 text-blue-600 dark:bg-blue-500/20 dark:text-blue-400'
-                                                        : 'text-slate-400 dark:text-zinc-500 hover:text-slate-600 dark:hover:text-zinc-300 hover:bg-slate-50 dark:hover:bg-zinc-800/50'}`}
+                                                        : 'text-ink-4 hover:text-body-soft-2 hover:bg-slate-50 dark:hover:bg-zinc-800/50'}`}
                                             >
                                                 {t.name}
                                             </button>
@@ -1695,17 +1695,17 @@ export const CalendarPage = ({ activities, plannedWorkouts = [], addPlannedWorko
                                     <div className="flex-1 w-full">
                                         <input type="text" value={newPlan.name} onChange={e => setNewPlan({ ...newPlan, name: e.target.value })}
                                             placeholder="Nombre del entrenamiento"
-                                            className="w-full bg-transparent text-[15px] font-medium text-slate-800 dark:text-zinc-100 border-0 border-b border-line px-0 py-2 outline-none focus:border-line-strong-2 transition-colors placeholder:text-slate-300 dark:placeholder:text-zinc-600"
+                                            className="w-full bg-transparent text-[15px] font-medium text-ink-2 border-0 border-b border-line px-0 py-2 outline-none focus:border-line-strong-2 transition-colors placeholder:text-faint"
                                         />
                                     </div>
                                     <div className="flex gap-4 shrink-0 pb-1">
                                         <div className="text-center">
-                                            <span className="text-[10px] font-medium text-slate-400 dark:text-zinc-500 uppercase tracking-wider block mb-0.5">TSS</span>
-                                            <span className="text-lg font-semibold text-slate-800 dark:text-zinc-200 font-mono">{newPlan.tss}</span>
+                                            <span className="text-[10px] font-medium text-ink-4 uppercase tracking-wider block mb-0.5">TSS</span>
+                                            <span className="text-lg font-semibold text-ink-2-soft font-mono">{newPlan.tss}</span>
                                         </div>
                                         <div className="text-center">
-                                            <span className="text-[10px] font-medium text-slate-400 dark:text-zinc-500 uppercase tracking-wider block mb-0.5">Duración</span>
-                                            <span className="text-lg font-semibold text-slate-800 dark:text-zinc-200 font-mono">{formatDuration(newPlan.duration)}</span>
+                                            <span className="text-[10px] font-medium text-ink-4 uppercase tracking-wider block mb-0.5">Duración</span>
+                                            <span className="text-lg font-semibold text-ink-2-soft font-mono">{formatDuration(newPlan.duration)}</span>
                                         </div>
                                     </div>
                                 </div>
@@ -1714,20 +1714,20 @@ export const CalendarPage = ({ activities, plannedWorkouts = [], addPlannedWorko
                                 <div className="pt-1">
                                     <div className="flex flex-col sm:flex-row justify-between sm:items-center mb-3 gap-2">
                                         <div className="flex items-center gap-2">
-                                            <h4 className="text-[13px] font-semibold text-slate-800 dark:text-zinc-200 tracking-tight">Estructura</h4>
+                                            <h4 className="text-[13px] font-semibold text-ink-2-soft tracking-tight">Estructura</h4>
                                             <button onClick={() => setIsPastingString(!isPastingString)} className={`px-2 py-0.5 rounded-full text-[10px] font-medium transition-all duration-200 ${isPastingString ? 'bg-blue-500/10 text-blue-600' : 'text-slate-400 hover:text-slate-600 hover:bg-slate-100 dark:hover:bg-zinc-800'}`} title="Importar desde texto">
                                                 Texto
                                             </button>
                                         </div>
                                         <div className="flex gap-1.5">
                                             {newPlan.type === 'WeightTraining' ? (<>
-                                                <button onClick={() => addBlock('warmup')} className="px-2.5 py-1 text-slate-500 dark:text-zinc-400 rounded-full text-[11px] font-medium hover:bg-slate-100 dark:hover:bg-zinc-800 transition-all">+ Calentar</button>
-                                                <button onClick={() => addBlock('main')} className="px-2.5 py-1 text-slate-500 dark:text-zinc-400 rounded-full text-[11px] font-medium hover:bg-slate-100 dark:hover:bg-zinc-800 transition-all">+ Ejercicio</button>
-                                                <button onClick={() => addBlock('repeat')} className="px-2.5 py-1 bg-slate-900 dark:bg-white text-white dark:text-zinc-900 rounded-full text-[11px] font-medium hover:bg-slate-700 dark:hover:bg-zinc-200 transition-all shadow-sm">+ Circuito</button>
+                                                <button onClick={() => addBlock('warmup')} className="px-2.5 py-1 text-ink-3 rounded-full text-[11px] font-medium hover:bg-slate-100 dark:hover:bg-zinc-800 transition-all">+ Calentar</button>
+                                                <button onClick={() => addBlock('main')} className="px-2.5 py-1 text-ink-3 rounded-full text-[11px] font-medium hover:bg-slate-100 dark:hover:bg-zinc-800 transition-all">+ Ejercicio</button>
+                                                <button onClick={() => addBlock('repeat')} className="px-2.5 py-1 bg-slate-900 dark:bg-white text-ink-inverse rounded-full text-[11px] font-medium hover:bg-slate-700 dark:hover:bg-zinc-200 transition-all shadow-sm">+ Circuito</button>
                                             </>) : (<>
-                                                <button onClick={() => addBlock('warmup')} className="px-2.5 py-1 text-slate-500 dark:text-zinc-400 rounded-full text-[11px] font-medium hover:bg-slate-100 dark:hover:bg-zinc-800 transition-all">+ Calentar</button>
-                                                <button onClick={() => addBlock('main')} className="px-2.5 py-1 text-slate-500 dark:text-zinc-400 rounded-full text-[11px] font-medium hover:bg-slate-100 dark:hover:bg-zinc-800 transition-all">+ Bloque</button>
-                                                <button onClick={() => addBlock('repeat')} className="px-2.5 py-1 bg-slate-900 dark:bg-white text-white dark:text-zinc-900 rounded-full text-[11px] font-medium hover:bg-slate-700 dark:hover:bg-zinc-200 transition-all shadow-sm">+ Intervalos</button>
+                                                <button onClick={() => addBlock('warmup')} className="px-2.5 py-1 text-ink-3 rounded-full text-[11px] font-medium hover:bg-slate-100 dark:hover:bg-zinc-800 transition-all">+ Calentar</button>
+                                                <button onClick={() => addBlock('main')} className="px-2.5 py-1 text-ink-3 rounded-full text-[11px] font-medium hover:bg-slate-100 dark:hover:bg-zinc-800 transition-all">+ Bloque</button>
+                                                <button onClick={() => addBlock('repeat')} className="px-2.5 py-1 bg-slate-900 dark:bg-white text-ink-inverse rounded-full text-[11px] font-medium hover:bg-slate-700 dark:hover:bg-zinc-200 transition-all shadow-sm">+ Intervalos</button>
                                             </>)}
                                         </div>
                                     </div>
@@ -1735,16 +1735,16 @@ export const CalendarPage = ({ activities, plannedWorkouts = [], addPlannedWorko
                                     {/* AI SMART PASTE AREA */}
                                     {isPastingString && (
                                         <div className="mb-4 p-4 rounded-xl bg-slate-50 dark:bg-zinc-950 border border-line-soft">
-                                            <label className="block text-[10px] font-semibold text-slate-500 dark:text-zinc-400 uppercase tracking-wider mb-2">Importar desde texto</label>
+                                            <label className="block text-[10px] font-semibold text-ink-3 uppercase tracking-wider mb-2">Importar desde texto</label>
                                             <textarea
                                                 value={pasteText}
                                                 onChange={e => setPasteText(e.target.value)}
                                                 placeholder={`Pega el texto aquí línea a línea.\nEj:\no Calentamiento articular\no 4x8 Sentadillas Búlgaras\no 3x10 Press Banca`}
-                                                className="w-full bg-white dark:bg-zinc-900 border border-line rounded-lg p-3 text-sm text-slate-700 dark:text-zinc-300 resize-y min-h-[80px] outline-none focus:border-line-strong-2 mb-3 placeholder:text-slate-300 dark:placeholder:text-zinc-600"
+                                                className="w-full bg-white dark:bg-zinc-900 border border-line rounded-lg p-3 text-sm text-body resize-y min-h-[80px] outline-none focus:border-line-strong-2 mb-3 placeholder:text-faint"
                                             />
                                             <div className="flex justify-end gap-2">
-                                                <button onClick={() => setIsPastingString(false)} className="px-3 py-1.5 rounded-full text-[11px] font-medium text-slate-500 hover:bg-slate-100 dark:text-zinc-400 dark:hover:bg-zinc-800 transition-all">Cancelar</button>
-                                                <button onClick={handleMagicPaste} disabled={!pasteText.trim()} className="px-4 py-1.5 rounded-full text-[11px] font-semibold bg-slate-900 dark:bg-white text-white dark:text-zinc-900 hover:bg-slate-700 disabled:opacity-50 transition-all shadow-sm">
+                                                <button onClick={() => setIsPastingString(false)} className="px-3 py-1.5 rounded-full text-[11px] font-medium text-ink-3 hover:bg-slate-100 dark:hover:bg-zinc-800 transition-all">Cancelar</button>
+                                                <button onClick={handleMagicPaste} disabled={!pasteText.trim()} className="px-4 py-1.5 rounded-full text-[11px] font-semibold bg-slate-900 dark:bg-white text-ink-inverse hover:bg-slate-700 disabled:opacity-50 transition-all shadow-sm">
                                                     Analizar e Insertar
                                                 </button>
                                             </div>
@@ -1754,8 +1754,8 @@ export const CalendarPage = ({ activities, plannedWorkouts = [], addPlannedWorko
                                     <div className="space-y-2 mt-4">
                                         {newPlan.blocks.length === 0 && (
                                             <div className="flex flex-col items-center justify-center py-8 text-center bg-slate-50 dark:bg-zinc-900 border border-dashed border-line-strong rounded-lg">
-                                                <p className="text-slate-500 dark:text-zinc-400 text-sm">Entrenamiento vacío.</p>
-                                                <p className="text-slate-400 dark:text-zinc-500 text-xs mt-1">Inserta filas usando los botones superiores.</p>
+                                                <p className="text-ink-3 text-sm">Entrenamiento vacío.</p>
+                                                <p className="text-ink-4 text-xs mt-1">Inserta filas usando los botones superiores.</p>
                                             </div>
                                         )}
                                         {newPlan.blocks?.map((block, idx) => {
@@ -1837,10 +1837,10 @@ export const CalendarPage = ({ activities, plannedWorkouts = [], addPlannedWorko
                                                         onDragEnd={handleDragBlockEnd}
                                                         className={`rounded-xl bg-white dark:bg-zinc-950 overflow-hidden cursor-move transition-all border border-line-soft ${draggedBlockIdx === idx ? 'opacity-50' : 'hover:border-line-2'}`}>
                                                         <div className="flex items-center gap-2 px-3 py-2 bg-slate-50/50 dark:bg-zinc-900/50 border-b border-line-soft">
-                                                            <span className="text-[11px] font-semibold text-slate-600 dark:text-zinc-400">Repetir</span>
+                                                            <span className="text-[11px] font-semibold text-body-soft">Repetir</span>
                                                             <input type="number" value={block.repeats} min={1} onChange={e => updateBlock(block.id, 'repeats', parseInt(e.target.value) || 1)}
-                                                                className="w-9 bg-white dark:bg-zinc-800 rounded-lg text-[13px] font-mono px-1.5 py-0.5 outline-none no-spinner text-center text-slate-700 dark:text-zinc-300" />
-                                                            <span className="text-[10px] font-medium text-slate-400 dark:text-zinc-500">veces</span>
+                                                                className="w-9 bg-white dark:bg-zinc-800 rounded-lg text-[13px] font-mono px-1.5 py-0.5 outline-none no-spinner text-center text-body" />
+                                                            <span className="text-[10px] font-medium text-ink-4">veces</span>
                                                             {canUsePower && !isStr && (
                                                                 <div className="flex shrink-0 bg-slate-100 dark:bg-zinc-800/50 rounded-full p-0.5 ml-auto mr-2">
                                                                     <button onClick={() => handleZoneModeChange('hr')}
@@ -1858,7 +1858,7 @@ export const CalendarPage = ({ activities, plannedWorkouts = [], addPlannedWorko
                                                                 {(block.steps || []).map((step, sIdx) => (
                                                                      <div key={step.id} className="flex flex-wrap items-center gap-2 relative">
                                                                         <select value={step.type} onChange={e => updateStep(block.id, step.id, 'type', e.target.value)}
-                                                                            className={`w-20 shrink-0 bg-transparent ${step.type === 'active' ? 'text-slate-800 dark:text-zinc-200 font-semibold' : 'text-slate-400 dark:text-zinc-500'} text-[11px] outline-none cursor-pointer`}>
+                                                                            className={`w-20 shrink-0 bg-transparent ${step.type === 'active' ? 'text-ink-2-soft font-semibold' : 'text-ink-4'} text-[11px] outline-none cursor-pointer`}>
                                                                             <option value="active">{isStr ? 'Trabajar' : 'Activo'}</option>
                                                                             <option value="recovery">Pausa</option>
                                                                         </select>
@@ -1867,24 +1867,24 @@ export const CalendarPage = ({ activities, plannedWorkouts = [], addPlannedWorko
                                                                         <div className="flex shrink-0 bg-slate-100 dark:bg-zinc-800/50 rounded-full p-0.5">
                                                                              {!isStr && (
                                                                                  <button onClick={() => updateStep(block.id, step.id, 'unit', 'dist')}
-                                                                                    className={`px-2 py-0.5 text-[10px] font-semibold rounded-full transition-all duration-200 ${step.unit === 'dist' ? 'bg-white dark:bg-zinc-700 text-slate-800 dark:text-zinc-100 shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}
+                                                                                    className={`px-2 py-0.5 text-[10px] font-semibold rounded-full transition-all duration-200 ${step.unit === 'dist' ? 'bg-white dark:bg-zinc-700 text-ink-2 shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}
                                                                                  >KM</button>
                                                                              )}
                                                                              <button onClick={() => updateStep(block.id, step.id, 'unit', 'time')}
-                                                                                 className={`px-2 py-0.5 text-[10px] font-semibold rounded-full transition-all duration-200 ${(step.unit === 'time' || isStr) ? 'bg-white dark:bg-zinc-700 text-slate-800 dark:text-zinc-100 shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}
+                                                                                 className={`px-2 py-0.5 text-[10px] font-semibold rounded-full transition-all duration-200 ${(step.unit === 'time' || isStr) ? 'bg-white dark:bg-zinc-700 text-ink-2 shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}
                                                                              >MIN</button>
                                                                         </div>
 
                                                                         {step.unit === 'dist' && !isStr ? (
                                                                             <input type="number" value={step.duration} min={0} onChange={e => updateStep(block.id, step.id, 'duration', e.target.value)}
-                                                                                className="w-12 shrink-0 bg-slate-50 dark:bg-zinc-800/50 text-[13px] font-mono px-2 py-1 rounded-lg outline-none no-spinner text-center text-slate-700 dark:text-zinc-300" />
+                                                                                className="w-12 shrink-0 bg-slate-50 dark:bg-zinc-800/50 text-[13px] font-mono px-2 py-1 rounded-lg outline-none no-spinner text-center text-body" />
                                                                         ) : (
                                                                             <DurationInput value={step.duration} onChange={v => updateStep(block.id, step.id, 'duration', v)} />
                                                                         )}
 
                                                                         {/* Zone selector */}
                                                                         <select value={step.zone} onChange={e => handleZoneChangeWithPower(e.target.value, (k, v) => updateStep(block.id, step.id, k, v))}
-                                                                            className="shrink-0 bg-slate-50 dark:bg-zinc-800/50 text-[11px] font-medium text-slate-700 dark:text-zinc-300 px-2 py-1.5 rounded-lg outline-none cursor-pointer">
+                                                                            className="shrink-0 bg-slate-50 dark:bg-zinc-800/50 text-[11px] font-medium text-body px-2 py-1.5 rounded-lg outline-none cursor-pointer">
                                                                             {zones.map(z => <option key={z.v} value={z.v}>{z.l}</option>)}
                                                                         </select>
 
@@ -1897,7 +1897,7 @@ export const CalendarPage = ({ activities, plannedWorkouts = [], addPlannedWorko
                                                                         {!isStr && currentZoneMode !== 'power' && (
                                                                             <div className="flex items-center gap-1">
                                                                                 <select value={step.targetType || 'none'} onChange={e => { updateStep(block.id, step.id, 'targetType', e.target.value); if(e.target.value === 'none') updateStep(block.id, step.id, 'targetValue', ''); }}
-                                                                                    className="bg-transparent text-[10px] text-slate-400 dark:text-zinc-500 px-1 py-0.5 outline-none cursor-pointer">
+                                                                                    className="bg-transparent text-[10px] text-ink-4 px-1 py-0.5 outline-none cursor-pointer">
                                                                                     <option value="none">--</option>
                                                                                     <option value="power">W</option>
                                                                                     <option value="pace">/km</option>
@@ -1907,7 +1907,7 @@ export const CalendarPage = ({ activities, plannedWorkouts = [], addPlannedWorko
                                                                                         placeholder={step.targetType === 'power' ? "200" : "4:30"} 
                                                                                         value={step.targetValue || ''} 
                                                                                         onChange={e => updateStep(block.id, step.id, 'targetValue', e.target.value)}
-                                                                                        className="w-12 shrink-0 bg-slate-50 dark:bg-zinc-800/50 rounded-lg text-[11px] px-1.5 py-0.5 outline-none no-spinner text-center text-slate-700 dark:text-zinc-300" 
+                                                                                        className="w-12 shrink-0 bg-slate-50 dark:bg-zinc-800/50 rounded-lg text-[11px] px-1.5 py-0.5 outline-none no-spinner text-center text-body" 
                                                                                     />
                                                                                 )}
                                                                             </div>
@@ -1915,7 +1915,7 @@ export const CalendarPage = ({ activities, plannedWorkouts = [], addPlannedWorko
 
                                                                         <input type="text" value={step.details || ''} onChange={e => updateStep(block.id, step.id, 'details', e.target.value)}
                                                                             placeholder="Nota"
-                                                                            className="flex-1 min-w-[60px] bg-transparent border-b border-dashed border-slate-200 dark:border-zinc-800 py-1 text-[11px] outline-none focus:border-slate-400 placeholder:text-slate-300 dark:placeholder:text-zinc-600" />
+                                                                            className="flex-1 min-w-[60px] bg-transparent border-b border-dashed border-slate-200 dark:border-zinc-800 py-1 text-[11px] outline-none focus:border-slate-400 placeholder:text-faint" />
                                                                         
                                                                         <button onClick={() => removeStep(block.id, step.id)} className="text-slate-300 hover:text-red-500 ml-1 shrink-0 transition-colors"><X size={13}/></button>
                                                                     </div>
@@ -1934,7 +1934,7 @@ export const CalendarPage = ({ activities, plannedWorkouts = [], addPlannedWorko
                                             }
 
                                             // NORMAL BLOCK (Warmup/Main/Cooldown)
-                                            const bLabelStyle = block.type === 'warmup' ? 'text-orange-600' : block.type === 'cooldown' ? 'text-blue-600' : 'text-slate-700 dark:text-zinc-300';
+                                            const bLabelStyle = block.type === 'warmup' ? 'text-orange-600' : block.type === 'cooldown' ? 'text-blue-600' : 'text-body';
                                             const bLabel = block.type === 'warmup' ? 'Calentar' : block.type === 'cooldown' ? 'Soltar' : 'Trabajar';
 
                                             return (
@@ -1954,17 +1954,17 @@ export const CalendarPage = ({ activities, plannedWorkouts = [], addPlannedWorko
                                                         <div className="flex shrink-0 bg-slate-100 dark:bg-zinc-800/50 rounded-full p-0.5">
                                                             {!isStr && (
                                                                 <button onClick={() => updateBlock(block.id, 'unit', 'dist')}
-                                                                    className={`px-2 py-0.5 text-[10px] font-semibold rounded-full transition-all duration-200 ${block.unit === 'dist' ? 'bg-white dark:bg-zinc-700 text-slate-800 dark:text-zinc-100 shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}
+                                                                    className={`px-2 py-0.5 text-[10px] font-semibold rounded-full transition-all duration-200 ${block.unit === 'dist' ? 'bg-white dark:bg-zinc-700 text-ink-2 shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}
                                                                 >KM</button>
                                                             )}
                                                             <button onClick={() => updateBlock(block.id, 'unit', 'time')}
-                                                                className={`px-2 py-0.5 text-[10px] font-semibold rounded-full transition-all duration-200 ${(block.unit === 'time' || isStr) ? 'bg-white dark:bg-zinc-700 text-slate-800 dark:text-zinc-100 shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}
+                                                                className={`px-2 py-0.5 text-[10px] font-semibold rounded-full transition-all duration-200 ${(block.unit === 'time' || isStr) ? 'bg-white dark:bg-zinc-700 text-ink-2 shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}
                                                             >MIN</button>
                                                         </div>
 
                                                         {block.unit === 'dist' && !isStr ? (
                                                             <input type="number" placeholder="km" value={block.duration} min={0} onChange={e => updateBlock(block.id, 'duration', e.target.value)}
-                                                                className="w-12 shrink-0 bg-slate-50 dark:bg-zinc-800/50 text-[13px] font-mono px-2 py-1 rounded-lg outline-none no-spinner text-center text-slate-700 dark:text-zinc-300" />
+                                                                className="w-12 shrink-0 bg-slate-50 dark:bg-zinc-800/50 text-[13px] font-mono px-2 py-1 rounded-lg outline-none no-spinner text-center text-body" />
                                                         ) : (
                                                             <DurationInput value={block.duration} onChange={v => updateBlock(block.id, 'duration', v)} />
                                                         )}
@@ -1983,7 +1983,7 @@ export const CalendarPage = ({ activities, plannedWorkouts = [], addPlannedWorko
 
                                                         {/* Zone selector */}
                                                         <select value={block.zone} onChange={e => handleZoneChangeWithPower(e.target.value, (k, v) => updateBlock(block.id, k, v))}
-                                                            className="shrink-0 bg-slate-50 dark:bg-zinc-800/50 text-[11px] font-medium text-slate-700 dark:text-zinc-300 px-2 py-1.5 rounded-lg outline-none cursor-pointer">
+                                                            className="shrink-0 bg-slate-50 dark:bg-zinc-800/50 text-[11px] font-medium text-body px-2 py-1.5 rounded-lg outline-none cursor-pointer">
                                                             {zones.map(z => <option key={z.v} value={z.v}>{z.l}</option>)}
                                                         </select>
 
@@ -1997,7 +1997,7 @@ export const CalendarPage = ({ activities, plannedWorkouts = [], addPlannedWorko
                                                         {!isStr && currentZoneMode !== 'power' && (
                                                             <div className="flex items-center gap-1">
                                                                 <select value={block.targetType || 'none'} onChange={e => { updateBlock(block.id, 'targetType', e.target.value); if(e.target.value === 'none') updateBlock(block.id, 'targetValue', ''); }}
-                                                                    className="bg-transparent text-[10px] text-slate-400 dark:text-zinc-500 px-1 py-0.5 outline-none cursor-pointer">
+                                                                    className="bg-transparent text-[10px] text-ink-4 px-1 py-0.5 outline-none cursor-pointer">
                                                                     <option value="none">--</option>
                                                                     <option value="power">W</option>
                                                                     <option value="pace">/km</option>
@@ -2007,7 +2007,7 @@ export const CalendarPage = ({ activities, plannedWorkouts = [], addPlannedWorko
                                                                         placeholder={block.targetType === 'power' ? "200" : "4:30"} 
                                                                         value={block.targetValue || ''} 
                                                                         onChange={e => updateBlock(block.id, 'targetValue', e.target.value)}
-                                                                        className="w-12 shrink-0 bg-slate-50 dark:bg-zinc-800/50 rounded-lg text-[11px] px-1.5 py-0.5 outline-none no-spinner text-center text-slate-700 dark:text-zinc-300" 
+                                                                        className="w-12 shrink-0 bg-slate-50 dark:bg-zinc-800/50 rounded-lg text-[11px] px-1.5 py-0.5 outline-none no-spinner text-center text-body" 
                                                                     />
                                                                 )}
                                                             </div>
@@ -2015,7 +2015,7 @@ export const CalendarPage = ({ activities, plannedWorkouts = [], addPlannedWorko
 
                                                         <input type="text" value={block.details || ''} onChange={e => updateBlock(block.id, 'details', e.target.value)}
                                                             placeholder="Nota"
-                                                            className="flex-1 min-w-[80px] bg-transparent border-b border-dashed border-line py-1 text-[11px] outline-none focus:border-line-strong-2 placeholder:text-slate-300 dark:placeholder:text-zinc-600" />
+                                                            className="flex-1 min-w-[80px] bg-transparent border-b border-dashed border-line py-1 text-[11px] outline-none focus:border-line-strong-2 placeholder:text-faint" />
                                                     </div>
 
                                                     <button onClick={() => removeBlock(block.id)} className="text-slate-300 hover:text-red-500 shrink-0 transition-colors"><X size={14} /></button>
@@ -2030,8 +2030,8 @@ export const CalendarPage = ({ activities, plannedWorkouts = [], addPlannedWorko
 
                         {/* FOOTER */}
                         <div className="px-6 py-3.5 border-t border-line-soft flex justify-end items-center gap-2 shrink-0">
-                            <button onClick={() => setIsModalOpen(false)} className="px-4 py-2 rounded-full text-xs font-medium text-slate-500 dark:text-zinc-400 hover:bg-slate-100 dark:hover:bg-zinc-800 transition-all">Cancelar</button>
-                            <button onClick={handleSavePlan} disabled={isSaving} className="px-5 py-2 rounded-full text-xs font-semibold text-white bg-slate-900 dark:bg-white dark:text-zinc-900 hover:bg-slate-700 dark:hover:bg-zinc-200 disabled:opacity-50 transition-all shadow-sm">
+                            <button onClick={() => setIsModalOpen(false)} className="px-4 py-2 rounded-full text-xs font-medium text-ink-3 hover:bg-slate-100 dark:hover:bg-zinc-800 transition-all">Cancelar</button>
+                            <button onClick={handleSavePlan} disabled={isSaving} className="px-5 py-2 rounded-full text-xs font-semibold text-ink-inverse bg-slate-900 dark:bg-white hover:bg-slate-700 dark:hover:bg-zinc-200 disabled:opacity-50 transition-all shadow-sm">
                                 {isSaving ? 'Guardando...' : editingPlanId ? 'Guardar' : 'Añadir'}
                             </button>
                         </div>
@@ -2126,7 +2126,7 @@ const WorkoutViewerModal = ({ workout, onClose, onDelete, onEdit }) => {
     };
 
     return (
-        <div className="flex flex-col max-h-full text-slate-800 dark:text-zinc-200 relative">
+        <div className="flex flex-col max-h-full text-ink-2-soft relative">
             
             {/* ── HEADER ── */}
             <div className="relative px-6 pt-6 pb-5 shrink-0">
@@ -2144,10 +2144,10 @@ const WorkoutViewerModal = ({ workout, onClose, onDelete, onEdit }) => {
                             {workout.name || `Entrenamiento de ${sport.label}`}
                         </h3>
                         <div className="flex items-center gap-2 mt-1.5">
-                            <span className="text-[11px] font-medium text-slate-400 dark:text-zinc-500">
+                            <span className="text-[11px] font-medium text-ink-4">
                                 {workout.date ? new Date(workout.date).toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'short' }) : ''}
                             </span>
-                            <span className="text-[8px] text-slate-300 dark:text-zinc-600">•</span>
+                            <span className="text-[8px] text-faint">•</span>
                             <span className={`text-[10px] font-semibold uppercase tracking-wider ${sport.accent}`}>{sport.label}</span>
                         </div>
                     </div>
@@ -2156,24 +2156,24 @@ const WorkoutViewerModal = ({ workout, onClose, onDelete, onEdit }) => {
                 {/* ── METRICS GRID ── */}
                 <div className="grid grid-cols-4 gap-2 mt-5">
                     <div className="bg-slate-50 dark:bg-zinc-800/50 rounded-xl px-3 py-2.5 text-center">
-                        <div className="text-[9px] font-semibold text-slate-400 dark:text-zinc-500 uppercase tracking-wider mb-0.5">TSS</div>
-                        <div className="text-[18px] font-black text-slate-800 dark:text-zinc-100 leading-none font-mono">{workout.tss || '—'}</div>
+                        <div className="text-[9px] font-semibold text-ink-4 uppercase tracking-wider mb-0.5">TSS</div>
+                        <div className="text-[18px] font-black text-ink-2 leading-none font-mono">{workout.tss || '—'}</div>
                     </div>
                     <div className="bg-slate-50 dark:bg-zinc-800/50 rounded-xl px-3 py-2.5 text-center">
-                        <div className="text-[9px] font-semibold text-slate-400 dark:text-zinc-500 uppercase tracking-wider mb-0.5">Duración</div>
-                        <div className="text-[18px] font-black text-slate-800 dark:text-zinc-100 leading-none font-mono">{fmtDur(workout.duration || 0)}</div>
+                        <div className="text-[9px] font-semibold text-ink-4 uppercase tracking-wider mb-0.5">Duración</div>
+                        <div className="text-[18px] font-black text-ink-2 leading-none font-mono">{fmtDur(workout.duration || 0)}</div>
                     </div>
                     <div className="bg-slate-50 dark:bg-zinc-800/50 rounded-xl px-3 py-2.5 text-center">
-                        <div className="text-[9px] font-semibold text-slate-400 dark:text-zinc-500 uppercase tracking-wider mb-0.5">IF</div>
+                        <div className="text-[9px] font-semibold text-ink-4 uppercase tracking-wider mb-0.5">IF</div>
                         <div className={`text-[18px] font-black leading-none font-mono ${weightedIF >= 0.85 ? 'text-red-500' : weightedIF >= 0.7 ? 'text-amber-500' : 'text-emerald-500'}`}>
                             {weightedIF > 0 ? weightedIF.toFixed(2) : '—'}
                         </div>
                     </div>
                     <div className="bg-slate-50 dark:bg-zinc-800/50 rounded-xl px-3 py-2.5 text-center">
-                        <div className="text-[9px] font-semibold text-slate-400 dark:text-zinc-500 uppercase tracking-wider mb-0.5">Bloques</div>
-                        <div className="text-[18px] font-black text-slate-800 dark:text-zinc-100 leading-none font-mono">
+                        <div className="text-[9px] font-semibold text-ink-4 uppercase tracking-wider mb-0.5">Bloques</div>
+                        <div className="text-[18px] font-black text-ink-2 leading-none font-mono">
                             {totalBlocks}
-                            {intervalBlocks > 0 && <span className="text-[10px] font-semibold text-slate-400 dark:text-zinc-500 ml-0.5">({intervalBlocks}x)</span>}
+                            {intervalBlocks > 0 && <span className="text-[10px] font-semibold text-ink-4 ml-0.5">({intervalBlocks}x)</span>}
                         </div>
                     </div>
                 </div>
@@ -2202,8 +2202,8 @@ const WorkoutViewerModal = ({ workout, onClose, onDelete, onEdit }) => {
                     </div>
                     {/* Time markers */}
                     <div className="flex justify-between mt-1.5 px-0.5">
-                        <span className="text-[9px] font-mono text-slate-400 dark:text-zinc-600">0:00</span>
-                        <span className="text-[9px] font-mono text-slate-400 dark:text-zinc-600">{fmtDur(totalMin)}</span>
+                        <span className="text-[9px] font-mono text-ink-4-dim">0:00</span>
+                        <span className="text-[9px] font-mono text-ink-4-dim">{fmtDur(totalMin)}</span>
                     </div>
                 </div>
             )}
@@ -2215,7 +2215,7 @@ const WorkoutViewerModal = ({ workout, onClose, onDelete, onEdit }) => {
 
                         {/* LEFT — Zone Distribution */}
                         <div className="p-5">
-                            <h4 className="text-[10px] font-bold text-slate-400 dark:text-zinc-500 uppercase tracking-widest mb-4">Zonas</h4>
+                            <h4 className="text-[10px] font-bold text-ink-4 uppercase tracking-widest mb-4">Zonas</h4>
                             {sortedZones.length > 0 ? (
                                 <div className="space-y-2.5">
                                     {sortedZones.map(([zone, min]) => {
@@ -2225,11 +2225,11 @@ const WorkoutViewerModal = ({ workout, onClose, onDelete, onEdit }) => {
                                                 <div className="flex items-center justify-between mb-1">
                                                     <div className="flex items-center gap-2">
                                                         <div className="w-2.5 h-2.5 rounded-full ring-2 ring-white dark:ring-zinc-900" style={{ background: getZoneColor(zone) }} />
-                                                        <span className="text-[11px] font-bold text-slate-700 dark:text-zinc-300">{zone}</span>
+                                                        <span className="text-[11px] font-bold text-body">{zone}</span>
                                                     </div>
                                                     <div className="flex items-center gap-2">
-                                                        <span className="text-[10px] font-mono font-semibold text-slate-500 dark:text-zinc-400">{Math.round(min)}m</span>
-                                                        <span className="text-[9px] font-semibold text-slate-400 dark:text-zinc-500 tabular-nums w-7 text-right">{pct}%</span>
+                                                        <span className="text-[10px] font-mono font-semibold text-ink-3">{Math.round(min)}m</span>
+                                                        <span className="text-[9px] font-semibold text-ink-4 tabular-nums w-7 text-right">{pct}%</span>
                                                     </div>
                                                 </div>
                                                 <div className="h-1.5 bg-slate-100 dark:bg-zinc-800 rounded-full overflow-hidden">
@@ -2240,16 +2240,16 @@ const WorkoutViewerModal = ({ workout, onClose, onDelete, onEdit }) => {
                                     })}
                                 </div>
                             ) : (
-                                <p className="text-[11px] text-slate-400 dark:text-zinc-500 italic">Sin datos de zonas</p>
+                                <p className="text-[11px] text-ink-4 italic">Sin datos de zonas</p>
                             )}
                         </div>
 
                         {/* RIGHT — Structure */}
                         <div className="p-5">
-                            <h4 className="text-[10px] font-bold text-slate-400 dark:text-zinc-500 uppercase tracking-widest mb-4">Estructura</h4>
+                            <h4 className="text-[10px] font-bold text-ink-4 uppercase tracking-widest mb-4">Estructura</h4>
                             {blocks.length === 0 ? (
                                 <div className="flex items-center justify-center py-10">
-                                    <p className="text-[12px] text-slate-400 dark:text-zinc-500 italic">Sin estructura detallada</p>
+                                    <p className="text-[12px] text-ink-4 italic">Sin estructura detallada</p>
                                 </div>
                             ) : (
                                 <div className="space-y-2">
@@ -2263,8 +2263,8 @@ const WorkoutViewerModal = ({ workout, onClose, onDelete, onEdit }) => {
                                                     <div className="px-4 py-2.5 flex items-center justify-between">
                                                         <div className="flex items-center gap-2">
                                                             <span className="text-[11px] text-slate-400">{bl.icon}</span>
-                                                            <span className="text-[11px] font-bold text-slate-700 dark:text-zinc-300">{bl.text}</span>
-                                                            <span className="text-[10px] font-bold text-slate-500 dark:text-zinc-400 bg-slate-200/70 dark:bg-zinc-700/50 px-1.5 py-0.5 rounded-md">x{block.repeats}</span>
+                                                            <span className="text-[11px] font-bold text-body">{bl.text}</span>
+                                                            <span className="text-[10px] font-bold text-ink-3 bg-slate-200/70 dark:bg-zinc-700/50 px-1.5 py-0.5 rounded-md">x{block.repeats}</span>
                                                         </div>
                                                         <span className="text-[10px] font-mono font-semibold text-slate-400">{stepTotal > 0 ? fmtDur(stepTotal) : ''}</span>
                                                     </div>
@@ -2276,14 +2276,14 @@ const WorkoutViewerModal = ({ workout, onClose, onDelete, onEdit }) => {
                                                                     <div className="flex items-center gap-2.5">
                                                                         <div className="w-1 h-5 rounded-full" style={{ background: isWork ? (getZoneColor(step.zone)) : '#e2e8f0' }} />
                                                                         <div>
-                                                                            <span className={`text-[11px] font-semibold ${isWork ? 'text-slate-700 dark:text-zinc-200' : 'text-slate-400 dark:text-zinc-500'}`}>
+                                                                            <span className={`text-[11px] font-semibold ${isWork ? 'text-body-2' : 'text-ink-4'}`}>
                                                                                 {isWork ? 'Trabajo' : 'Descanso'}
                                                                             </span>
                                                                             {step.details && <span className="text-[9px] text-slate-400 ml-1.5">· {step.details}</span>}
                                                                         </div>
                                                                     </div>
                                                                     <div className="flex items-center gap-2.5 shrink-0">
-                                                                        <span className="text-[12px] font-bold font-mono text-slate-700 dark:text-zinc-200">
+                                                                        <span className="text-[12px] font-bold font-mono text-body-2">
                                                                             {step.duration}<span className="text-[9px] text-slate-400 ml-0.5">{step.unit === 'dist' ? 'km' : "'"}</span>
                                                                         </span>
                                                                         {step.targetType === 'power' && step.targetValue ? (
@@ -2305,12 +2305,12 @@ const WorkoutViewerModal = ({ workout, onClose, onDelete, onEdit }) => {
                                                 <div className="flex items-center gap-2.5">
                                                     <div className="w-1 h-5 rounded-full" style={{ background: getZoneColor(block.zone) }} />
                                                     <div>
-                                                        <span className="text-[11px] font-bold text-slate-700 dark:text-zinc-200">{bl.text}</span>
+                                                        <span className="text-[11px] font-bold text-body-2">{bl.text}</span>
                                                         {block.details && <span className="text-[9px] text-slate-400 ml-1.5">· {block.details}</span>}
                                                     </div>
                                                 </div>
                                                 <div className="flex items-center gap-2.5 shrink-0">
-                                                    <span className="text-[14px] font-black font-mono text-slate-700 dark:text-zinc-200">
+                                                    <span className="text-[14px] font-black font-mono text-body-2">
                                                         {block.duration}<span className="text-[10px] font-semibold text-slate-400 ml-0.5">{block.unit === 'dist' ? 'km' : "'"}</span>
                                                     </span>
                                                     {block.targetType === 'power' && block.targetValue ? (
@@ -2335,10 +2335,10 @@ const WorkoutViewerModal = ({ workout, onClose, onDelete, onEdit }) => {
                     Eliminar
                 </button>
                 <div className="flex gap-2">
-                    <button onClick={onClose} className="px-4 py-2 rounded-full text-[11px] font-medium text-slate-500 dark:text-zinc-400 hover:bg-slate-100 dark:hover:bg-zinc-800 transition-colors">
+                    <button onClick={onClose} className="px-4 py-2 rounded-full text-[11px] font-medium text-ink-3 hover:bg-slate-100 dark:hover:bg-zinc-800 transition-colors">
                         Cerrar
                     </button>
-                    <button onClick={() => { onClose(); onEdit(); }} className="px-5 py-2 rounded-full text-[11px] font-semibold bg-slate-900 dark:bg-white text-white dark:text-zinc-900 hover:bg-slate-700 dark:hover:bg-zinc-200 transition-colors shadow-sm">
+                    <button onClick={() => { onClose(); onEdit(); }} className="px-5 py-2 rounded-full text-[11px] font-semibold bg-slate-900 dark:bg-white text-ink-inverse hover:bg-slate-700 dark:hover:bg-zinc-200 transition-colors shadow-sm">
                         Editar
                     </button>
                 </div>

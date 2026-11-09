@@ -59,9 +59,9 @@ const AppleRingGauge = ({ value, max = 100, colorClass, strokeColor, gradientId,
                 <Icon size={20} className={`${colorClass} mb-1 opacity-90`} />
                 <span className={`text-3xl sm:text-4xl font-black tracking-tight tabular-nums ${colorClass}`}>
                     {valid ? (max === 10 ? numVal.toFixed(1) : Math.round(numVal)) : '--'}
-                    {unit && <span className="text-sm font-bold text-slate-400 dark:text-zinc-500 ml-0.5">{unit}</span>}
+                    {unit && <span className="text-sm font-bold text-ink-4 ml-0.5">{unit}</span>}
                 </span>
-                <span className="text-[10px] font-bold text-slate-400 dark:text-zinc-500 uppercase tracking-widest mt-0.5 text-center">
+                <span className="text-[10px] font-bold text-ink-4 uppercase tracking-widest mt-0.5 text-center">
                     {title}
                 </span>
             </div>
@@ -75,7 +75,7 @@ const HistoryChartTooltip = ({ active, payload }) => {
         const d = payload[0].payload;
         return (
             <div className="bg-slate-900/95 dark:bg-zinc-900/95 backdrop-blur-md border border-slate-700/60 dark:border-zinc-800 p-3 rounded-xl shadow-xl text-xs space-y-1.5 min-w-[150px]">
-                <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-zinc-500 border-b border-slate-800 dark:border-zinc-800 pb-1">
+                <p className="text-[10px] font-bold uppercase tracking-wider text-ink-4 border-b border-slate-800 dark:border-zinc-800 pb-1">
                     {d.dateLabelFull || d.dateLabel}
                 </p>
                 <div className="flex justify-between items-center text-emerald-400 font-bold tabular-nums">
@@ -108,7 +108,7 @@ const HistoryChartTooltip = ({ active, payload }) => {
 
 // Helper para calcular la recuperación de cualquier día
 const computeDayReadiness = (day, baselineRhr = 50) => {
-    if (!day) return { score: '--', label: 'Sin datos', color: 'text-slate-400', dot: 'bg-slate-400', badge: 'bg-slate-100 dark:bg-zinc-800 text-slate-600 dark:text-zinc-400' };
+    if (!day) return { score: '--', label: 'Sin datos', color: 'text-slate-400', dot: 'bg-slate-400', badge: 'bg-slate-100 dark:bg-zinc-800 text-body-soft' };
 
     let score = day.readiness;
     if (score == null) {
@@ -222,7 +222,7 @@ export const HealthPage = ({ activities, settings, chartData }) => {
                 color: 'text-slate-400',
                 label: 'Desconocida',
                 msg: 'Registra o sincroniza tus datos biométricos para ver tu estado.',
-                badge: 'bg-slate-100 dark:bg-zinc-800 text-slate-600 dark:text-zinc-400'
+                badge: 'bg-slate-100 dark:bg-zinc-800 text-body-soft'
             };
         }
         const r = wellnessMetrics.todayReadiness;
@@ -294,8 +294,8 @@ export const HealthPage = ({ activities, settings, chartData }) => {
                     <Activity size={24} className="text-emerald-500 animate-pulse" />
                 </div>
                 <div>
-                    <h2 className="text-lg font-bold text-slate-900 dark:text-white">Salud</h2>
-                    <p className="text-xs text-slate-400 dark:text-zinc-500 mt-1 max-w-xs mx-auto">
+                    <h2 className="text-lg font-bold text-ink">Salud</h2>
+                    <p className="text-xs text-ink-4 mt-1 max-w-xs mx-auto">
                         Sincronizando métricas fisiológicas...
                     </p>
                 </div>
@@ -310,8 +310,8 @@ export const HealthPage = ({ activities, settings, chartData }) => {
                     <Activity size={24} className="text-slate-400" />
                 </div>
                 <div className="max-w-md">
-                    <h2 className="text-lg font-bold text-slate-900 dark:text-white">Sin datos de salud</h2>
-                    <p className="text-xs text-slate-500 dark:text-zinc-400 mt-1">
+                    <h2 className="text-lg font-bold text-ink">Sin datos de salud</h2>
+                    <p className="text-xs text-ink-3 mt-1">
                         No se han encontrado registros biométricos. Sincroniza tus datos o carga actividades para ver tus métricas de salud.
                     </p>
                 </div>
@@ -327,16 +327,16 @@ export const HealthPage = ({ activities, settings, chartData }) => {
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                     <div>
                         <div className="flex items-center gap-2">
-                            <h1 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white tracking-tight">
+                            <h1 className="text-2xl sm:text-3xl font-black text-ink tracking-tight">
                                 Salud
                             </h1>
                             {wellnessMetrics && (
-                                <span className="text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-slate-200/70 dark:bg-zinc-800/80 text-slate-600 dark:text-zinc-400 uppercase tracking-wider">
+                                <span className="text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-slate-200/70 dark:bg-zinc-800/80 text-body-soft uppercase tracking-wider">
                                     {wellnessMetrics.isSimulated ? 'Modo Demo' : 'Biometría Diaria'}
                                 </span>
                             )}
                         </div>
-                        <p className="text-xs sm:text-sm font-medium text-slate-500 dark:text-zinc-400 mt-0.5 max-w-xl">
+                        <p className="text-xs sm:text-sm font-medium text-ink-3 mt-0.5 max-w-xl">
                             {wellnessLoading ? 'Sincronizando métricas fisiológicas...' : readinessInfo.msg}
                         </p>
                     </div>
@@ -348,8 +348,8 @@ export const HealthPage = ({ activities, settings, chartData }) => {
                             onClick={() => setActiveTab('today')}
                             className={`py-1.5 px-4 text-xs font-semibold rounded-lg text-center transition-all active:scale-95 ${
                                 activeTab === 'today'
-                                    ? 'bg-white dark:bg-[#2c2c2e] text-slate-900 dark:text-white shadow-xs font-bold'
-                                    : 'text-slate-500 dark:text-zinc-400 hover:text-slate-800 dark:hover:text-zinc-200'
+                                    ? 'bg-white dark:bg-[#2c2c2e] text-ink shadow-xs font-bold'
+                                    : 'text-ink-3 hover:text-ink-2-soft'
                             }`}
                         >
                             Hoy
@@ -359,8 +359,8 @@ export const HealthPage = ({ activities, settings, chartData }) => {
                             onClick={() => setActiveTab('history')}
                             className={`py-1.5 px-4 text-xs font-semibold rounded-lg text-center transition-all active:scale-95 ${
                                 activeTab === 'history'
-                                    ? 'bg-white dark:bg-[#2c2c2e] text-slate-900 dark:text-white shadow-xs font-bold'
-                                    : 'text-slate-500 dark:text-zinc-400 hover:text-slate-800 dark:hover:text-zinc-200'
+                                    ? 'bg-white dark:bg-[#2c2c2e] text-ink shadow-xs font-bold'
+                                    : 'text-ink-3 hover:text-ink-2-soft'
                             }`}
                         >
                             Historial
@@ -383,7 +383,7 @@ export const HealthPage = ({ activities, settings, chartData }) => {
                         {/* ANILLO RECUPERACIÓN */}
                         <IosCard className="flex flex-col items-center justify-between relative text-center">
                             <div className="w-full flex justify-between items-center mb-4">
-                                <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400 dark:text-zinc-500">Pilar 01</span>
+                                <span className="text-[10px] font-bold uppercase tracking-widest text-ink-4">Pilar 01</span>
                                 <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider ${readinessInfo.badge}`}>
                                     {readinessInfo.label}
                                 </span>
@@ -402,7 +402,7 @@ export const HealthPage = ({ activities, settings, chartData }) => {
                             />
 
                             <div className="mt-4 pt-3 border-t border-line-soft-4 w-full text-center">
-                                <p className="text-[11px] font-medium text-slate-500 dark:text-zinc-400">
+                                <p className="text-[11px] font-medium text-ink-3">
                                     Disponibilidad del SNC
                                 </p>
                             </div>
@@ -411,7 +411,7 @@ export const HealthPage = ({ activities, settings, chartData }) => {
                         {/* ANILLO ESFUERZO / STRAIN */}
                         <IosCard className="flex flex-col items-center justify-between relative text-center">
                             <div className="w-full flex justify-between items-center mb-4">
-                                <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400 dark:text-zinc-500">Pilar 02</span>
+                                <span className="text-[10px] font-bold uppercase tracking-widest text-ink-4">Pilar 02</span>
                                 <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-rose-50 text-rose-600 dark:bg-rose-950/40 dark:text-rose-400 border border-rose-200/50 dark:border-rose-900/40`}>
                                     {strainInfo.label}
                                 </span>
@@ -430,7 +430,7 @@ export const HealthPage = ({ activities, settings, chartData }) => {
                             />
 
                             <div className="mt-4 pt-3 border-t border-line-soft-4 w-full text-center">
-                                <p className="text-[11px] font-medium text-slate-500 dark:text-zinc-400">
+                                <p className="text-[11px] font-medium text-ink-3">
                                     Impacto y fatiga acumulada
                                 </p>
                             </div>
@@ -439,7 +439,7 @@ export const HealthPage = ({ activities, settings, chartData }) => {
                         {/* ANILLO SUEÑO */}
                         <IosCard className="flex flex-col items-center justify-between relative text-center">
                             <div className="w-full flex justify-between items-center mb-4">
-                                <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400 dark:text-zinc-500">Pilar 03</span>
+                                <span className="text-[10px] font-bold uppercase tracking-widest text-ink-4">Pilar 03</span>
                                 <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-blue-50 text-blue-600 dark:bg-blue-950/40 dark:text-blue-400 border border-blue-200/50 dark:border-blue-900/40`}>
                                     {sleepInfo.label}
                                 </span>
@@ -458,7 +458,7 @@ export const HealthPage = ({ activities, settings, chartData }) => {
                             />
 
                             <div className="mt-4 pt-3 border-t border-line-soft-4 w-full text-center">
-                                <p className="text-[11px] font-medium text-slate-500 dark:text-zinc-400">
+                                <p className="text-[11px] font-medium text-ink-3">
                                     {wellnessMetrics?.latestSleep || '--'} horas descansadas
                                 </p>
                             </div>
@@ -473,10 +473,10 @@ export const HealthPage = ({ activities, settings, chartData }) => {
                                     <BatteryCharging size={18} strokeWidth={2.5} />
                                 </div>
                                 <div>
-                                    <h3 className="text-sm font-bold text-slate-900 dark:text-white uppercase tracking-tight">
+                                    <h3 className="text-sm font-bold text-ink uppercase tracking-tight">
                                         Banco de Energía
                                     </h3>
-                                    <p className="text-[11px] text-slate-400 dark:text-zinc-500">
+                                    <p className="text-[11px] text-ink-4">
                                         Nivel metabólico restante estimado para el día
                                     </p>
                                 </div>
@@ -515,19 +515,19 @@ export const HealthPage = ({ activities, settings, chartData }) => {
                             {/* FC Reposo */}
                             <div className="ios-card ios-touch p-3.5 sm:p-4 flex flex-col justify-between">
                                 <div className="flex items-center justify-between mb-2">
-                                    <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-zinc-500">FC Reposo</span>
+                                    <span className="text-[10px] font-bold uppercase tracking-wider text-ink-4">FC Reposo</span>
                                     <div className="w-6 h-6 rounded-lg bg-rose-500/10 text-rose-500 flex items-center justify-center shrink-0">
                                         <Activity size={13} strokeWidth={2.5} />
                                     </div>
                                 </div>
                                 <div>
                                     <div className="flex items-baseline gap-1">
-                                        <span className="text-xl sm:text-2xl font-black tabular-nums tracking-tight text-slate-900 dark:text-white">
+                                        <span className="text-xl sm:text-2xl font-black tabular-nums tracking-tight text-ink">
                                             {wellnessMetrics?.latestRhr !== '--' ? Math.round(wellnessMetrics?.latestRhr) : '--'}
                                         </span>
                                         <span className="text-[10px] font-bold text-slate-400">lpm</span>
                                     </div>
-                                    <span className="text-[10px] font-medium text-slate-400 dark:text-zinc-500 mt-1 block">
+                                    <span className="text-[10px] font-medium text-ink-4 mt-1 block">
                                         Base: {wellnessMetrics?.baselineRhr !== '--' ? Math.round(wellnessMetrics?.baselineRhr) : '--'}
                                     </span>
                                 </div>
@@ -536,7 +536,7 @@ export const HealthPage = ({ activities, settings, chartData }) => {
                             {/* VFC / HRV */}
                             <div className="ios-card ios-touch p-3.5 sm:p-4 flex flex-col justify-between">
                                 <div className="flex items-center justify-between mb-2">
-                                    <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-zinc-500">VFC Anoche</span>
+                                    <span className="text-[10px] font-bold uppercase tracking-wider text-ink-4">VFC Anoche</span>
                                     <div className="w-6 h-6 rounded-lg bg-emerald-500/10 text-emerald-500 flex items-center justify-center shrink-0">
                                         <Zap size={13} strokeWidth={2.5} />
                                     </div>
@@ -550,7 +550,7 @@ export const HealthPage = ({ activities, settings, chartData }) => {
                                         </span>
                                         <span className="text-[10px] font-bold text-slate-400">ms</span>
                                     </div>
-                                    <span className="text-[10px] font-medium text-slate-400 dark:text-zinc-500 mt-1 block">
+                                    <span className="text-[10px] font-medium text-ink-4 mt-1 block">
                                         7d: {wellnessMetrics?.avgHrv7d || '--'} ms
                                     </span>
                                 </div>
@@ -559,19 +559,19 @@ export const HealthPage = ({ activities, settings, chartData }) => {
                             {/* Sueño Horas */}
                             <div className="ios-card ios-touch p-3.5 sm:p-4 flex flex-col justify-between">
                                 <div className="flex items-center justify-between mb-2">
-                                    <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-zinc-500">Sueño</span>
+                                    <span className="text-[10px] font-bold uppercase tracking-wider text-ink-4">Sueño</span>
                                     <div className="w-6 h-6 rounded-lg bg-blue-500/10 text-blue-500 flex items-center justify-center shrink-0">
                                         <Moon size={13} strokeWidth={2.5} />
                                     </div>
                                 </div>
                                 <div>
                                     <div className="flex items-baseline gap-1">
-                                        <span className="text-xl sm:text-2xl font-black tabular-nums tracking-tight text-slate-900 dark:text-white">
+                                        <span className="text-xl sm:text-2xl font-black tabular-nums tracking-tight text-ink">
                                             {wellnessMetrics?.latestSleep || '--'}
                                         </span>
                                         <span className="text-[10px] font-bold text-slate-400">h</span>
                                     </div>
-                                    <span className="text-[10px] font-medium text-slate-400 dark:text-zinc-500 mt-1 block">
+                                    <span className="text-[10px] font-medium text-ink-4 mt-1 block">
                                         Score: {wellnessMetrics?.latestSleepScore ?? '--'}%
                                     </span>
                                 </div>
@@ -580,7 +580,7 @@ export const HealthPage = ({ activities, settings, chartData }) => {
                             {/* Forma TSB */}
                             <div className="ios-card ios-touch p-3.5 sm:p-4 flex flex-col justify-between">
                                 <div className="flex items-center justify-between mb-2">
-                                    <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-zinc-500">Forma TSB</span>
+                                    <span className="text-[10px] font-bold uppercase tracking-wider text-ink-4">Forma TSB</span>
                                     <div className="w-6 h-6 rounded-lg bg-indigo-500/10 text-indigo-500 flex items-center justify-center shrink-0">
                                         <ActivitySquare size={13} strokeWidth={2.5} />
                                     </div>
@@ -596,7 +596,7 @@ export const HealthPage = ({ activities, settings, chartData }) => {
                                             {typeof wellnessMetrics?.currentTsb === 'number' ? (wellnessMetrics.currentTsb > 0 ? '+' : '') + Math.round(wellnessMetrics.currentTsb) : '--'}
                                         </span>
                                     </div>
-                                    <span className="text-[10px] font-medium text-slate-400 dark:text-zinc-500 mt-1 block">
+                                    <span className="text-[10px] font-medium text-ink-4 mt-1 block">
                                         Equilibrio fatiga
                                     </span>
                                 </div>
@@ -605,14 +605,14 @@ export const HealthPage = ({ activities, settings, chartData }) => {
                             {/* Pasos */}
                             <div className="ios-card ios-touch p-3.5 sm:p-4 flex flex-col justify-between">
                                 <div className="flex items-center justify-between mb-2">
-                                    <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-zinc-500">Pasos</span>
+                                    <span className="text-[10px] font-bold uppercase tracking-wider text-ink-4">Pasos</span>
                                     <div className="w-6 h-6 rounded-lg bg-purple-500/10 text-purple-500 flex items-center justify-center shrink-0">
                                         <Footprints size={13} strokeWidth={2.5} />
                                     </div>
                                 </div>
                                 <div>
                                     <div className="flex items-baseline gap-1">
-                                        <span className="text-xl sm:text-2xl font-black tabular-nums tracking-tight text-slate-900 dark:text-white">
+                                        <span className="text-xl sm:text-2xl font-black tabular-nums tracking-tight text-ink">
                                             {typeof wellnessMetrics?.latestSteps === 'number'
                                                 ? wellnessMetrics.latestSteps.toLocaleString('es-ES')
                                                 : (wellnessMetrics?.latestSteps && wellnessMetrics.latestSteps !== '--' ? wellnessMetrics.latestSteps : '--')}
@@ -632,7 +632,7 @@ export const HealthPage = ({ activities, settings, chartData }) => {
                             {/* SpO2 */}
                             <div className="ios-card ios-touch p-3.5 sm:p-4 flex flex-col justify-between">
                                 <div className="flex items-center justify-between mb-2">
-                                    <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-zinc-500">SpO₂ Oxígeno</span>
+                                    <span className="text-[10px] font-bold uppercase tracking-wider text-ink-4">SpO₂ Oxígeno</span>
                                     <div className="w-6 h-6 rounded-lg bg-sky-500/10 text-sky-500 flex items-center justify-center shrink-0">
                                         <Wind size={13} strokeWidth={2.5} />
                                     </div>
@@ -647,7 +647,7 @@ export const HealthPage = ({ activities, settings, chartData }) => {
                                         </span>
                                         {typeof wellnessMetrics?.latestSpo2 === 'number' && <span className="text-[10px] font-bold text-slate-400">%</span>}
                                     </div>
-                                    <span className="text-[10px] font-medium text-slate-400 dark:text-zinc-500 mt-1 block">
+                                    <span className="text-[10px] font-medium text-ink-4 mt-1 block">
                                         Saturación
                                     </span>
                                 </div>
@@ -656,19 +656,19 @@ export const HealthPage = ({ activities, settings, chartData }) => {
                             {/* VO2 Max */}
                             <div className="ios-card ios-touch p-3.5 sm:p-4 flex flex-col justify-between">
                                 <div className="flex items-center justify-between mb-2">
-                                    <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-zinc-500">VO₂ Max</span>
+                                    <span className="text-[10px] font-bold uppercase tracking-wider text-ink-4">VO₂ Max</span>
                                     <div className="w-6 h-6 rounded-lg bg-emerald-500/10 text-emerald-500 flex items-center justify-center shrink-0">
                                         <TrendingUp size={13} strokeWidth={2.5} />
                                     </div>
                                 </div>
                                 <div>
                                     <div className="flex items-baseline gap-1">
-                                        <span className="text-xl sm:text-2xl font-black tabular-nums tracking-tight text-slate-900 dark:text-white">
+                                        <span className="text-xl sm:text-2xl font-black tabular-nums tracking-tight text-ink">
                                             {typeof wellnessMetrics?.latestVo2max === 'number' ? wellnessMetrics.latestVo2max.toFixed(1) : '--'}
                                         </span>
                                         {typeof wellnessMetrics?.latestVo2max === 'number' && <span className="text-[10px] font-bold text-slate-400">ml/kg</span>}
                                     </div>
-                                    <span className="text-[10px] font-medium text-slate-400 dark:text-zinc-500 mt-1 block">
+                                    <span className="text-[10px] font-medium text-ink-4 mt-1 block">
                                         Capacidad aeróbica
                                     </span>
                                 </div>
@@ -677,14 +677,14 @@ export const HealthPage = ({ activities, settings, chartData }) => {
                             {/* Peso */}
                             <div className="ios-card ios-touch p-3.5 sm:p-4 flex flex-col justify-between">
                                 <div className="flex items-center justify-between mb-2">
-                                    <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-zinc-500">Peso</span>
+                                    <span className="text-[10px] font-bold uppercase tracking-wider text-ink-4">Peso</span>
                                     <div className="w-6 h-6 rounded-lg bg-amber-500/10 text-amber-500 flex items-center justify-center shrink-0">
                                         <Scale size={13} strokeWidth={2.5} />
                                     </div>
                                 </div>
                                 <div>
                                     <div className="flex items-baseline gap-1">
-                                        <span className="text-xl sm:text-2xl font-black tabular-nums tracking-tight text-slate-900 dark:text-white">
+                                        <span className="text-xl sm:text-2xl font-black tabular-nums tracking-tight text-ink">
                                             {wellnessMetrics?.latestWeight && wellnessMetrics.latestWeight !== '--' ? wellnessMetrics.latestWeight : '--'}
                                         </span>
                                         {wellnessMetrics?.latestWeight && wellnessMetrics.latestWeight !== '--' && <span className="text-[10px] font-bold text-slate-400">kg</span>}
@@ -699,7 +699,7 @@ export const HealthPage = ({ activities, settings, chartData }) => {
                                             {wellnessMetrics.weightTrend > 0 ? '+' : ''}{wellnessMetrics.weightTrend} kg (7d)
                                         </span>
                                     ) : (
-                                        <span className="text-[10px] font-medium text-slate-400 dark:text-zinc-500 mt-1 block">Estable</span>
+                                        <span className="text-[10px] font-medium text-ink-4 mt-1 block">Estable</span>
                                     )}
                                 </div>
                             </div>
@@ -724,10 +724,10 @@ export const HealthPage = ({ activities, settings, chartData }) => {
                                                 {isDanger ? <ShieldAlert size={16} /> : isWarning ? <AlertTriangle size={16} /> : <ShieldCheck size={16} />}
                                             </div>
                                             <div>
-                                                <h4 className="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-tight">
+                                                <h4 className="text-xs font-bold text-ink uppercase tracking-tight">
                                                     {insight.label}
                                                 </h4>
-                                                <p className="text-xs text-slate-600 dark:text-zinc-400 leading-relaxed mt-0.5">
+                                                <p className="text-xs text-body-soft leading-relaxed mt-0.5">
                                                     {insight.desc}
                                                 </p>
                                             </div>
@@ -748,7 +748,7 @@ export const HealthPage = ({ activities, settings, chartData }) => {
                     <div className="flex items-center justify-between flex-wrap gap-2">
                         <div>
                             <p className="ios-header">Registro Histórico</p>
-                            <span className="text-xs text-slate-400 dark:text-zinc-500 font-medium">
+                            <span className="text-xs text-ink-4 font-medium">
                                 Evolución diaria y biometrías día a día
                             </span>
                         </div>
@@ -765,8 +765,8 @@ export const HealthPage = ({ activities, settings, chartData }) => {
                                     onClick={() => setHistoryRange(r.days)}
                                     className={`py-1 px-3 text-xs font-bold rounded-lg transition-all active:scale-95 ${
                                         historyRange === r.days
-                                            ? 'bg-white dark:bg-[#2c2c2e] text-slate-900 dark:text-white shadow-xs'
-                                            : 'text-slate-500 dark:text-zinc-400 hover:text-slate-800 dark:hover:text-zinc-200'
+                                            ? 'bg-white dark:bg-[#2c2c2e] text-ink shadow-xs'
+                                            : 'text-ink-3 hover:text-ink-2-soft'
                                     }`}
                                 >
                                     {r.label}
@@ -788,10 +788,10 @@ export const HealthPage = ({ activities, settings, chartData }) => {
                                         className={`shrink-0 flex flex-col items-center justify-between w-14 sm:w-16 py-2.5 px-1 rounded-2xl transition-all select-none active:scale-95 ${
                                             isSelected
                                                 ? 'bg-blue-600 text-white shadow-md'
-                                                : 'bg-slate-100/80 dark:bg-zinc-800/60 hover:bg-slate-200/80 dark:hover:bg-zinc-700/60 text-slate-700 dark:text-zinc-300'
+                                                : 'bg-slate-100/80 dark:bg-zinc-800/60 hover:bg-slate-200/80 dark:hover:bg-zinc-700/60 text-body'
                                         }`}
                                     >
-                                        <span className={`text-[10px] font-bold uppercase tracking-wider ${isSelected ? 'text-blue-100' : 'text-slate-400 dark:text-zinc-500'}`}>
+                                        <span className={`text-[10px] font-bold uppercase tracking-wider ${isSelected ? 'text-blue-100' : 'text-ink-4'}`}>
                                             {d.weekday}
                                         </span>
                                         <span className="text-base sm:text-lg font-black font-mono tabular-nums my-0.5">
@@ -812,10 +812,10 @@ export const HealthPage = ({ activities, settings, chartData }) => {
                         <IosCard className="space-y-4">
                             <div className="flex items-center justify-between border-b border-line-soft-2 pb-3">
                                 <div>
-                                    <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400 dark:text-zinc-500">
+                                    <span className="text-[10px] font-bold uppercase tracking-widest text-ink-4">
                                         Detalle del Día
                                     </span>
-                                    <h3 className="text-base sm:text-lg font-bold text-slate-900 dark:text-white capitalize">
+                                    <h3 className="text-base sm:text-lg font-bold text-ink capitalize">
                                         {currentSelectedDay.dateLabelFull}
                                     </h3>
                                 </div>
@@ -827,7 +827,7 @@ export const HealthPage = ({ activities, settings, chartData }) => {
                             {/* Cuadrícula de Métricas de ese día */}
                             <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 sm:gap-3">
                                 <div className="p-3 bg-slate-50 dark:bg-zinc-800/40 rounded-xl border border-line-soft-3">
-                                    <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-zinc-500 block">
+                                    <span className="text-[10px] font-bold uppercase tracking-wider text-ink-4 block">
                                         Sueño
                                     </span>
                                     <span className="text-lg font-black font-mono tabular-nums text-blue-500">
@@ -839,7 +839,7 @@ export const HealthPage = ({ activities, settings, chartData }) => {
                                 </div>
 
                                 <div className="p-3 bg-slate-50 dark:bg-zinc-800/40 rounded-xl border border-line-soft-3">
-                                    <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-zinc-500 block">
+                                    <span className="text-[10px] font-bold uppercase tracking-wider text-ink-4 block">
                                         VFC
                                     </span>
                                     <span className="text-lg font-black font-mono tabular-nums text-emerald-500">
@@ -851,7 +851,7 @@ export const HealthPage = ({ activities, settings, chartData }) => {
                                 </div>
 
                                 <div className="p-3 bg-slate-50 dark:bg-zinc-800/40 rounded-xl border border-line-soft-3">
-                                    <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-zinc-500 block">
+                                    <span className="text-[10px] font-bold uppercase tracking-wider text-ink-4 block">
                                         FC Reposo
                                     </span>
                                     <span className="text-lg font-black font-mono tabular-nums text-rose-500">
@@ -863,7 +863,7 @@ export const HealthPage = ({ activities, settings, chartData }) => {
                                 </div>
 
                                 <div className="p-3 bg-slate-50 dark:bg-zinc-800/40 rounded-xl border border-line-soft-3">
-                                    <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-zinc-500 block">
+                                    <span className="text-[10px] font-bold uppercase tracking-wider text-ink-4 block">
                                         Estrés / Pasos
                                     </span>
                                     <span className="text-lg font-black font-mono tabular-nums text-purple-500">
@@ -881,10 +881,10 @@ export const HealthPage = ({ activities, settings, chartData }) => {
                     <IosCard className="space-y-3">
                         <div className="flex items-center justify-between">
                             <div>
-                                <h3 className="text-xs sm:text-sm font-bold text-slate-900 dark:text-white uppercase tracking-tight">
+                                <h3 className="text-xs sm:text-sm font-bold text-ink uppercase tracking-tight">
                                     Tendencia de Recuperación Diaria
                                 </h3>
-                                <p className="text-[11px] text-slate-400 dark:text-zinc-500">
+                                <p className="text-[11px] text-ink-4">
                                     Puntuación de recuperación (%) y descanso a lo largo del periodo
                                 </p>
                             </div>
@@ -932,10 +932,10 @@ export const HealthPage = ({ activities, settings, chartData }) => {
                                         <div className="flex items-center gap-3 min-w-0">
                                             <span className={`w-2.5 h-2.5 rounded-full shrink-0 ${day.recoveryInfo.dot}`} />
                                             <div className="min-w-0">
-                                                <p className="text-xs sm:text-sm font-bold text-slate-900 dark:text-white capitalize truncate">
+                                                <p className="text-xs sm:text-sm font-bold text-ink capitalize truncate">
                                                     {day.dateLabelFull}
                                                 </p>
-                                                <p className="text-[10px] text-slate-400 dark:text-zinc-500">
+                                                <p className="text-[10px] text-ink-4">
                                                     {day.recoveryInfo.label} • {day.sleep ? `${day.sleep}h sueño` : 'Sin sueño registrado'}
                                                 </p>
                                             </div>
@@ -951,7 +951,7 @@ export const HealthPage = ({ activities, settings, chartData }) => {
                                                     {day.hrv > 0 && <span>{day.hrv} ms</span>}
                                                 </div>
                                             </div>
-                                            <ChevronRight size={16} className="text-slate-300 dark:text-zinc-600" />
+                                            <ChevronRight size={16} className="text-faint" />
                                         </div>
                                     </button>
                                 );

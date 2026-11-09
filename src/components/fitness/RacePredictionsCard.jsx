@@ -9,7 +9,7 @@ export const RacePredictionsCard = ({ racePredictions }) => {
         <section className="mb-8">
             <div className="bg-white dark:bg-zinc-900/50 rounded-2xl border border-line-muted p-6 sm:p-8 shadow-sm">
                 <div className="flex items-center gap-2 mb-8">
-                    <h3 className="text-[10px] font-bold text-slate-400 dark:text-zinc-500 uppercase tracking-[0.1em]">Pronóstico de Carrera</h3>
+                    <h3 className="text-[10px] font-bold text-ink-4 uppercase tracking-[0.1em]">Pronóstico de Carrera</h3>
                     <InfoTooltip text="Predicción teórica basada en tu VO2max actual." />
                 </div>
                 <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
@@ -25,7 +25,7 @@ export const RacePredictionsCard = ({ racePredictions }) => {
                                 </div>
                                 <Trophy size={14} className={`${r.preparation > 80 ? 'text-blue-500' : 'text-slate-300'} transition-colors`} />
                             </div>
-                            <p className="text-xl font-bold text-slate-900 dark:text-zinc-100 tracking-tight">{r.time}</p>
+                            <p className="text-xl font-bold text-ink-soft tracking-tight">{r.time}</p>
                             <div className="flex items-center gap-1.5 mt-2.5 opacity-60">
                                 <Clock size={10} className="text-slate-400" />
                                 <p className="text-[10px] font-bold text-slate-500 uppercase tracking-tighter">{r.pace} <span className="text-[8px] opacity-70">m/km</span></p>

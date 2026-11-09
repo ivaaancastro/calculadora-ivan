@@ -42,7 +42,7 @@ export class ErrorBoundary extends React.Component {
             <h1 className="text-2xl font-black tracking-tight text-slate-800 dark:text-white mb-2">
               Vaya, algo se ha roto
             </h1>
-            <p className="text-sm font-medium text-slate-500 dark:text-zinc-400 mb-8">
+            <p className="text-sm font-medium text-ink-3 mb-8">
               La aplicación ha encontrado un error crítico en la interfaz. No te preocupes, tus datos están a salvo.
             </p>
 
@@ -51,7 +51,7 @@ export class ErrorBoundary extends React.Component {
                 <p className="text-xs font-mono text-red-600 dark:text-red-400 font-bold mb-2">
                   {this.state.error.toString()}
                 </p>
-                <p className="text-[10px] font-mono text-slate-500 dark:text-zinc-500 whitespace-pre-wrap">
+                <p className="text-[10px] font-mono text-ink-3-flat whitespace-pre-wrap">
                   {this.state.errorInfo?.componentStack}
                 </p>
               </div>
@@ -67,7 +67,7 @@ export class ErrorBoundary extends React.Component {
               </button>
               <button 
                 onClick={this.handleClearCache}
-                className="w-full text-slate-500 dark:text-zinc-400 hover:text-slate-700 dark:hover:text-zinc-200 py-3 font-bold text-xs uppercase tracking-widest transition-colors"
+                className="w-full text-ink-3 hover:text-body-2 py-3 font-bold text-xs uppercase tracking-widest transition-colors"
               >
                 Borrar caché y salir
               </button>

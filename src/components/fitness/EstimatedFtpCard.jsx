@@ -17,7 +17,7 @@ export const EstimatedFtpCard = ({
         <section className="mb-12">
             <div className="bg-white dark:bg-zinc-900/50 rounded-2xl border border-line-muted p-6 sm:p-8 shadow-sm">
                 <div className="flex items-center gap-2 mb-10">
-                    <h3 className="text-[10px] font-bold text-slate-400 dark:text-zinc-500 uppercase tracking-[0.1em]">FTP Estimado</h3>
+                    <h3 className="text-[10px] font-bold text-ink-4 uppercase tracking-[0.1em]">FTP Estimado</h3>
                     <InfoTooltip text="Umbral funcional de potencia proyectado (eFTP)." />
                     <span className="text-[10px] font-bold text-emerald-600 bg-emerald-50 dark:bg-emerald-950/20 px-2.5 py-0.5 rounded-lg uppercase tracking-widest border border-emerald-100 dark:border-emerald-900/30 ml-2">Modelo</span>
                 </div>
@@ -25,7 +25,7 @@ export const EstimatedFtpCard = ({
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
                     <div className="flex flex-col">
                         <div className="flex items-baseline gap-2">
-                            <span className="text-4xl font-bold tracking-tighter text-slate-900 dark:text-zinc-100 leading-none">{ftp?.eFTP || '--'}</span>
+                            <span className="text-4xl font-bold tracking-tighter text-ink-soft leading-none">{ftp?.eFTP || '--'}</span>
                             <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">Vatios</span>
                         </div>
                         {ftp?.wPerKg && (

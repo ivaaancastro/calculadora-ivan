@@ -60,7 +60,7 @@ export const MmpAndEfCard = ({
             const isRun = curveSport === 'run';
             return (
                 <div style={tooltipStyle} className="shadow-xl w-48 z-[200]">
-                    <p className="text-xs font-semibold text-slate-500 dark:text-zinc-400 mb-1.5 border-b border-slate-200/50 dark:border-zinc-700/50 pb-1">Factor de Eficiencia</p>
+                    <p className="text-xs font-semibold text-ink-3 mb-1.5 border-b border-slate-200/50 dark:border-zinc-700/50 pb-1">Factor de Eficiencia</p>
                     <div className="flex justify-between items-end mb-2">
                         <span className="text-xl font-bold text-violet-500 leading-none">{data.ef}</span>
                         <span className="text-[10px] text-slate-500 font-medium uppercase">{isRun ? 'm/bpm' : 'w/bpm'}</span>
@@ -76,7 +76,7 @@ export const MmpAndEfCard = ({
                         </div>
                     </div>
                     <div className="border-t border-slate-200/50 dark:border-zinc-700/50 pt-2 mt-1">
-                        <p className="text-[11px] text-slate-700 dark:text-zinc-200 truncate font-semibold" title={data.name}>{data.name}</p>
+                        <p className="text-[11px] text-body-2 truncate font-semibold" title={data.name}>{data.name}</p>
                         <p className="text-[10px] text-slate-500">{new Date(data.date).toLocaleDateString()}</p>
                         <div className="flex items-center gap-1 text-[9px] text-blue-500 mt-2 font-medium">
                             <MousePointer2 size={10} /> Clic en el punto para abrir
@@ -94,12 +94,12 @@ export const MmpAndEfCard = ({
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 sm:gap-6 mb-6 sm:mb-10">
                     <div className="flex flex-wrap items-center gap-2 sm:gap-3">
                         <div className="flex items-center gap-2">
-                            <h3 className="text-[10px] font-bold text-slate-400 dark:text-zinc-500 uppercase tracking-[0.1em]">Potencial y Récords</h3>
+                            <h3 className="text-[10px] font-bold text-ink-4 uppercase tracking-[0.1em]">Potencial y Récords</h3>
                             <InfoTooltip text="Análisis de eficiencia aeróbica y curvas de potencia/ritmo/FC máxima segundo a segundo" />
                         </div>
 
                         {telemetryStats && telemetryStats.total > 0 && (
-                            <div className="flex items-center gap-2 px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-zinc-800/80 text-[9px] font-medium text-slate-600 dark:text-zinc-300 border border-line-muted-2">
+                            <div className="flex items-center gap-2 px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-zinc-800/80 text-[9px] font-medium text-body-soft-2 border border-line-muted-2">
                                 <span className={`w-1.5 h-1.5 rounded-full ${telemetryStats.percentage >= 85 ? 'bg-emerald-500' : (telemetryStats.percentage >= 40 ? 'bg-amber-500' : 'bg-rose-500')}`} />
                                 <span>Telemetría: {telemetryStats.withStreams}/{telemetryStats.total} ({telemetryStats.percentage}%)</span>
                                 <InfoTooltip text="Las curvas MMP requieren telemetría detallada. Las sincronizaciones rápidas de Strava solo traen resúmenes hasta procesar el Deep Sync." />
@@ -132,7 +132,7 @@ export const MmpAndEfCard = ({
                         </div>
                         <div className="flex bg-slate-100/80 dark:bg-zinc-800/80 p-1 rounded-xl">
                             {['90d', '1y', 'all'].map(t => (
-                                <button key={t} onClick={() => setMmpTimeframe(t)} className={`px-3 py-1.5 text-[8px] font-bold uppercase rounded-lg transition-all ${mmpTimeframe === t ? 'bg-white dark:bg-zinc-700 text-slate-900 dark:text-zinc-100 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}>{t === 'all' ? 'Todo' : t.toUpperCase()}</button>
+                                <button key={t} onClick={() => setMmpTimeframe(t)} className={`px-3 py-1.5 text-[8px] font-bold uppercase rounded-lg transition-all ${mmpTimeframe === t ? 'bg-white dark:bg-zinc-700 text-ink-soft shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}>{t === 'all' ? 'Todo' : t.toUpperCase()}</button>
                             ))}
                         </div>
                         <div className="flex gap-4 ml-2">
@@ -225,13 +225,13 @@ export const MmpAndEfCard = ({
                             <div className="flex bg-slate-100 dark:bg-zinc-800 p-0.5 rounded-lg text-[8px] font-bold uppercase">
                                 <button
                                     onClick={() => setPeaksViewMode && setPeaksViewMode('period')}
-                                    className={`px-2 py-1 rounded transition-all ${peaksViewMode === 'period' ? 'bg-white dark:bg-zinc-700 text-slate-900 dark:text-zinc-100 shadow-xs' : 'text-slate-500 hover:text-slate-700'}`}
+                                    className={`px-2 py-1 rounded transition-all ${peaksViewMode === 'period' ? 'bg-white dark:bg-zinc-700 text-ink-soft shadow-xs' : 'text-slate-500 hover:text-slate-700'}`}
                                 >
                                     Periodo
                                 </button>
                                 <button
                                     onClick={() => setPeaksViewMode && setPeaksViewMode('alltime')}
-                                    className={`px-2 py-1 rounded transition-all ${peaksViewMode === 'alltime' ? 'bg-white dark:bg-zinc-700 text-slate-900 dark:text-zinc-100 shadow-xs' : 'text-slate-500 hover:text-slate-700'}`}
+                                    className={`px-2 py-1 rounded transition-all ${peaksViewMode === 'alltime' ? 'bg-white dark:bg-zinc-700 text-ink-soft shadow-xs' : 'text-slate-500 hover:text-slate-700'}`}
                                 >
                                     Histórico
                                 </button>
@@ -253,7 +253,7 @@ export const MmpAndEfCard = ({
                                     <div key={secs} className="flex items-center justify-between p-3 rounded-xl bg-slate-50/50 dark:bg-zinc-800/30 border border-slate-100 dark:border-zinc-800/50 hover:border-blue-500/30 transition-all cursor-default">
                                         <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">{formatInterval(secs)}</span>
                                         <div className="text-right">
-                                            <p className="text-sm font-black text-slate-800 dark:text-zinc-100">
+                                            <p className="text-sm font-black text-ink-2">
                                                 {pk.value > 0 ? displayVal : '--'}
                                                 <span className="text-[9px] ml-1 font-bold text-slate-400">{curveUnit}</span>
                                             </p>

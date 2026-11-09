@@ -171,10 +171,10 @@ const AuthModal = ({ open, onClose }) => {
           <div className="bg-blue-600 text-white p-2.5 rounded-xl shadow-lg shadow-blue-600/20">
             <Activity size={24} strokeWidth={2.5} />
           </div>
-          <h2 className="text-lg font-black text-slate-900 dark:text-zinc-100 tracking-tight uppercase">
+          <h2 className="text-lg font-black text-ink-soft tracking-tight uppercase">
             {isForgotPassword ? 'Recuperar Clave' : isLogin ? 'Bienvenido de Vuelta' : 'Crear Cuenta'}
           </h2>
-          <p className="text-xs text-slate-500 dark:text-zinc-400 font-medium">
+          <p className="text-xs text-ink-3 font-medium">
             {isForgotPassword ? 'Te enviaremos un enlace a tu correo' : isLogin ? 'Accede a tu laboratorio' : 'Empieza a analizar tu rendimiento'}
           </p>
         </div>
@@ -184,12 +184,12 @@ const AuthModal = ({ open, onClose }) => {
 
         <form onSubmit={handleAuth} className="space-y-4">
           <div>
-            <label htmlFor="auth-email" className="text-[10px] font-semibold text-slate-500 dark:text-zinc-400 uppercase tracking-wider block mb-1.5">Email</label>
+            <label htmlFor="auth-email" className="text-[10px] font-semibold text-ink-3 uppercase tracking-wider block mb-1.5">Email</label>
             <div className="relative">
-              <Mail size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 dark:text-zinc-500" />
+              <Mail size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-ink-4" />
               <input
                 id="auth-email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} required
-                className="w-full pl-10 pr-4 py-3 bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 rounded-xl text-sm text-slate-800 dark:text-zinc-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/10 outline-none transition-all"
+                className="w-full pl-10 pr-4 py-3 bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 rounded-xl text-sm text-ink-2-soft focus:border-blue-500 focus:ring-2 focus:ring-blue-500/10 outline-none transition-all"
                 placeholder="atleta@ejemplo.com"
               />
             </div>
@@ -197,12 +197,12 @@ const AuthModal = ({ open, onClose }) => {
 
           {!isForgotPassword && (
             <div>
-              <label htmlFor="auth-password" className="text-[10px] font-semibold text-slate-500 dark:text-zinc-400 uppercase tracking-wider block mb-1.5">Contraseña</label>
+              <label htmlFor="auth-password" className="text-[10px] font-semibold text-ink-3 uppercase tracking-wider block mb-1.5">Contraseña</label>
               <div className="relative">
-                <Lock size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 dark:text-zinc-500" />
+                <Lock size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-ink-4" />
                 <input
                   id="auth-password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} required
-                  className="w-full pl-10 pr-4 py-3 bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 rounded-xl text-sm text-slate-800 dark:text-zinc-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/10 outline-none transition-all"
+                  className="w-full pl-10 pr-4 py-3 bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 rounded-xl text-sm text-ink-2-soft focus:border-blue-500 focus:ring-2 focus:ring-blue-500/10 outline-none transition-all"
                   placeholder="••••••••"
                 />
               </div>
@@ -226,7 +226,7 @@ const AuthModal = ({ open, onClose }) => {
           <div className="mt-6 text-center border-t border-line-soft-2 pt-4 flex flex-col gap-2.5">
             <button
               onClick={() => { setIsLogin(!isLogin); reset(); }}
-              className="text-[11px] font-semibold text-slate-500 dark:text-zinc-400 hover:text-slate-800 dark:hover:text-zinc-200 transition-colors"
+              className="text-[11px] font-semibold text-ink-3 hover:text-ink-2-soft transition-colors"
             >
               {isLogin ? '¿No tienes cuenta? Regístrate gratis' : '¿Ya tienes cuenta? Inicia Sesión'}
             </button>
@@ -252,8 +252,8 @@ const FeatureCard = ({ icon: Icon, title, description, color, span = '' }) => (
     <div className={`w-10 h-10 rounded-xl flex items-center justify-center mb-4 ${color} transition-transform group-hover:scale-110`}>
       <Icon size={20} className="text-white" />
     </div>
-    <h3 className="text-base font-bold text-slate-800 dark:text-zinc-100 mb-2">{title}</h3>
-    <p className="text-sm text-slate-500 dark:text-zinc-400 leading-relaxed">{description}</p>
+    <h3 className="text-base font-bold text-ink-2 mb-2">{title}</h3>
+    <p className="text-sm text-ink-3 leading-relaxed">{description}</p>
   </div>
 );
 
@@ -261,8 +261,8 @@ const FeatureCard = ({ icon: Icon, title, description, color, span = '' }) => (
 const StatItem = ({ icon: Icon, value, label }) => (
   <div className="flex flex-col items-center text-center gap-2">
     <Icon size={24} className="text-blue-500" />
-    <span className="text-3xl font-black text-slate-800 dark:text-zinc-100 tracking-tight">{value}</span>
-    <span className="text-xs font-semibold text-slate-500 dark:text-zinc-400 uppercase tracking-wider">{label}</span>
+    <span className="text-3xl font-black text-ink-2 tracking-tight">{value}</span>
+    <span className="text-xs font-semibold text-ink-3 uppercase tracking-wider">{label}</span>
   </div>
 );
 
@@ -277,7 +277,7 @@ export const LandingPage = () => {
   }, []);
 
   return (
-    <div className="min-h-screen bg-white dark:bg-zinc-950 text-slate-800 dark:text-zinc-200 overflow-x-hidden selection:bg-blue-500/30">
+    <div className="min-h-screen bg-white dark:bg-zinc-950 text-ink-2-soft overflow-x-hidden selection:bg-blue-500/30">
 
       {/* ─── NAVBAR ─── */}
       <nav className="fixed top-0 left-0 right-0 z-40 bg-white/80 dark:bg-zinc-950/80 backdrop-blur-xl border-b border-slate-100/80 dark:border-zinc-900/80">
@@ -286,16 +286,16 @@ export const LandingPage = () => {
             <div className="bg-blue-600 text-white p-1.5 rounded-lg">
               <Activity size={18} strokeWidth={2.5} />
             </div>
-            <span className="text-base font-black uppercase tracking-tight text-slate-900 dark:text-zinc-100">
+            <span className="text-base font-black uppercase tracking-tight text-ink-soft">
               Forma
             </span>
           </div>
 
           <div className="hidden md:flex items-center gap-8">
-            <button onClick={scrollToFeatures} className="text-sm font-medium text-slate-500 hover:text-slate-800 dark:text-zinc-400 dark:hover:text-zinc-100 transition-colors">
+            <button onClick={scrollToFeatures} className="text-sm font-medium text-ink-3 hover:text-ink-2 transition-colors">
               Funciones
             </button>
-            <a href="#stats" className="text-sm font-medium text-slate-500 hover:text-slate-800 dark:text-zinc-400 dark:hover:text-zinc-100 transition-colors">
+            <a href="#stats" className="text-sm font-medium text-ink-3 hover:text-ink-2 transition-colors">
               Rendimiento
             </a>
           </div>
@@ -303,7 +303,7 @@ export const LandingPage = () => {
           <div className="flex items-center gap-3">
             <button
               onClick={() => setAuthOpen(true)}
-              className="text-sm font-semibold text-slate-600 dark:text-zinc-300 hover:text-slate-900 dark:hover:text-zinc-100 transition-colors"
+              className="text-sm font-semibold text-body-soft-2 hover:text-ink-soft transition-colors"
             >
               Iniciar Sesión
             </button>
@@ -334,14 +334,14 @@ export const LandingPage = () => {
 
           {/* Headline */}
           <FadeIn delay={100}>
-            <h1 className="text-5xl sm:text-6xl lg:text-7xl font-black text-slate-900 dark:text-white tracking-tight leading-[1.1] mb-6">
+            <h1 className="text-5xl sm:text-6xl lg:text-7xl font-black text-ink tracking-tight leading-[1.1] mb-6">
               Tu laboratorio de rendimiento deportivo
             </h1>
           </FadeIn>
 
           {/* Subtitle */}
           <FadeIn delay={200}>
-            <p className="text-lg sm:text-xl text-slate-500 dark:text-zinc-400 max-w-2xl mx-auto mb-10 leading-relaxed font-medium">
+            <p className="text-lg sm:text-xl text-ink-3 max-w-2xl mx-auto mb-10 leading-relaxed font-medium">
               Analiza tus actividades, monitoriza tu evolución y lleva tu entrenamiento al siguiente nivel con métricas avanzadas y análisis de datos.
             </p>
           </FadeIn>
@@ -351,14 +351,14 @@ export const LandingPage = () => {
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
               <button
                 onClick={() => setAuthOpen(true)}
-                className="group bg-slate-900 dark:bg-white hover:bg-slate-800 dark:hover:bg-zinc-100 text-white dark:text-zinc-900 text-sm font-bold px-8 py-3.5 rounded-full transition-all shadow-xl shadow-slate-900/20 dark:shadow-white/10 hover:shadow-slate-900/30 active:scale-95 flex items-center gap-2"
+                className="group bg-slate-900 dark:bg-white hover:bg-slate-800 dark:hover:bg-zinc-100 text-ink-inverse text-sm font-bold px-8 py-3.5 rounded-full transition-all shadow-xl shadow-slate-900/20 dark:shadow-white/10 hover:shadow-slate-900/30 active:scale-95 flex items-center gap-2"
               >
                 Empezar Gratis
                 <ArrowRight size={16} className="group-hover:translate-x-0.5 transition-transform" />
               </button>
               <button
                 onClick={scrollToFeatures}
-                className="text-sm font-semibold text-slate-600 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-zinc-100 px-8 py-3.5 rounded-full border border-line hover:border-line-strong transition-all hover:shadow-lg active:scale-95"
+                className="text-sm font-semibold text-body-soft hover:text-ink-soft px-8 py-3.5 rounded-full border border-line hover:border-line-strong transition-all hover:shadow-lg active:scale-95"
               >
                 Explorar Funciones
               </button>
@@ -368,7 +368,7 @@ export const LandingPage = () => {
 
         {/* Scroll indicator */}
         <div className="absolute bottom-8 left-1/2 -translate-x-1/2 animate-bounce">
-          <ChevronDown size={24} className="text-slate-300 dark:text-zinc-600" />
+          <ChevronDown size={24} className="text-faint" />
         </div>
       </section>
 
@@ -378,10 +378,10 @@ export const LandingPage = () => {
           <FadeIn>
             <div className="text-center mb-16">
               <span className="text-xs font-bold text-blue-500 uppercase tracking-widest mb-3 block">Funciones</span>
-              <h2 className="text-3xl sm:text-4xl font-black text-slate-900 dark:text-white tracking-tight mb-4">
+              <h2 className="text-3xl sm:text-4xl font-black text-ink tracking-tight mb-4">
                 Todo lo que necesitas para entrenar mejor
               </h2>
-              <p className="text-base text-slate-500 dark:text-zinc-400 max-w-xl mx-auto font-medium">
+              <p className="text-base text-ink-3 max-w-xl mx-auto font-medium">
                 Herramientas avanzadas de análisis diseñadas para ciclistas y corredores que buscan mejorar su rendimiento.
               </p>
             </div>
@@ -458,10 +458,10 @@ export const LandingPage = () => {
       <section className="py-24 px-6">
         <div className="max-w-3xl mx-auto text-center">
           <FadeIn>
-            <h2 className="text-3xl sm:text-4xl font-black text-slate-900 dark:text-white tracking-tight mb-4">
+            <h2 className="text-3xl sm:text-4xl font-black text-ink tracking-tight mb-4">
               ¿Listo para analizar tu rendimiento?
             </h2>
-            <p className="text-base text-slate-500 dark:text-zinc-400 max-w-lg mx-auto mb-8 font-medium">
+            <p className="text-base text-ink-3 max-w-lg mx-auto mb-8 font-medium">
               Crea tu cuenta gratuita y empieza a entrenar con datos. Conecta Strava y visualiza tu progreso.
             </p>
             <button
@@ -477,10 +477,10 @@ export const LandingPage = () => {
 
       {/* ─── FOOTER ─── */}
       <footer className="border-t border-line-soft-6 py-8 px-6">
-        <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4 text-[11px] text-slate-400 dark:text-zinc-600 font-medium">
+        <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4 text-[11px] text-ink-4-dim font-medium">
           <div className="flex items-center gap-2">
             <Activity size={14} className="text-blue-500" />
-            <span className="font-bold uppercase tracking-wider text-slate-600 dark:text-zinc-400">Forma</span>
+            <span className="font-bold uppercase tracking-wider text-body-soft">Forma</span>
           </div>
           <span>© {new Date().getFullYear()} Forma · Performance Analytics</span>
         </div>

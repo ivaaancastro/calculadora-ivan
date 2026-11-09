@@ -99,28 +99,28 @@ const StravaCallback = () => {
         {status === 'processing' && (
             <>
                 <Loader2 className="animate-spin h-12 w-12 text-blue-600 dark:text-blue-500 mx-auto mb-4" />
-                <h2 className="text-xl font-black text-slate-800 dark:text-zinc-100 uppercase tracking-tight">Procesando</h2>
+                <h2 className="text-xl font-black text-ink-2 uppercase tracking-tight">Procesando</h2>
             </>
         )}
 
         {status === 'success' && (
             <>
                 <CheckCircle className="h-12 w-12 text-emerald-500 mx-auto mb-4" />
-                <h2 className="text-xl font-black text-slate-800 dark:text-zinc-100 uppercase tracking-tight">¡Éxito!</h2>
+                <h2 className="text-xl font-black text-ink-2 uppercase tracking-tight">¡Éxito!</h2>
             </>
         )}
 
         {status === 'error' && (
             <>
                 <XCircle className="h-12 w-12 text-red-500 mx-auto mb-4" />
-                <h2 className="text-xl font-black text-slate-800 dark:text-zinc-100 uppercase tracking-tight">Error</h2>
+                <h2 className="text-xl font-black text-ink-2 uppercase tracking-tight">Error</h2>
             </>
         )}
 
-        <p className="text-[11px] font-bold text-slate-500 dark:text-zinc-400 uppercase tracking-widest mt-3">{message}</p>
+        <p className="text-[11px] font-bold text-ink-3 uppercase tracking-widest mt-3">{message}</p>
         
         {status === 'error' && (
-            <button onClick={() => navigate('/')} className="mt-6 w-full py-2.5 bg-slate-100 dark:bg-zinc-800 hover:bg-slate-200 dark:hover:bg-zinc-700 text-slate-700 dark:text-zinc-200 rounded font-bold text-[11px] uppercase tracking-widest transition-colors">
+            <button onClick={() => navigate('/')} className="mt-6 w-full py-2.5 bg-slate-100 dark:bg-zinc-800 hover:bg-slate-200 dark:hover:bg-zinc-700 text-body-2 rounded font-bold text-[11px] uppercase tracking-widest transition-colors">
                 Volver a intentar
             </button>
         )}

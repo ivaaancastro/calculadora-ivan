@@ -7,6 +7,11 @@ y este proyecto adhiere a [Semantic Versioning](https://semver.org/lang/es/).
 
 ## [Unreleased]
 
+### Rediseño — Capa 1: tokens y tema (`spec-rediseno-02-c1`), PR 3 de 6: texto
+- `refactor(ui-tokens):` 540 de 577 pares de texto neutro claro/oscuro (`text`, `placeholder:`, `group-hover:`…) pasan a 17 tokens (`ink`, `ink-2`, `ink-3`, `ink-4`, `body`, `faint`, `ink-inverse`…) con `scripts/codemods/text.mjs`. Sin cambios visibles.
+- `chore(ui-tokens):` CLI común de los codemods (`scripts/codemods/family.mjs`); la regla de precedencia distingue las ramas opuestas de un ternario y propaga el bloqueo a lo que coexiste con un literal no migrado.
+- `test(e2e):` el volcado de estilos también fuerza `:hover` en los `.group` para cubrir `group-hover:`.
+
 ### Rediseño — Capa 1: tokens y tema (`spec-rediseno-02-c1`), PR 2 de 6: bordes
 - `refactor(ui-tokens):` 167 pares de borde claro/oscuro (`border`, `divide`, `ring`, `outline`) pasan a 19 tokens (`line`, `line-soft`, `line-muted`, `line-strong`, `hairline`…) con un codemod reproducible (`scripts/codemods/borders.mjs`). Sin cambios visibles.
 - `test(e2e):` el volcado de estilos fuerza `:hover`, `:focus`, `:focus-visible` y `:active`.

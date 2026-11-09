@@ -74,9 +74,9 @@ export const InteractiveMap = ({ polyline, highResCoords, color, currentPosition
 
     if (!coords || coords.length === 0) return (
         <div className="w-full h-full min-h-[350px] flex flex-col items-center justify-center bg-slate-50 dark:bg-zinc-900 rounded-2xl border border-line p-8 text-center">
-            <MapPin size={32} className="text-slate-400 dark:text-zinc-600 mb-2" />
-            <span className="text-slate-700 dark:text-zinc-300 font-bold text-sm">Sin datos GPS</span>
-            <p className="text-slate-400 dark:text-zinc-500 text-xs mt-1 max-w-xs">Esta actividad no contiene coordenadas de ruta o track GPS.</p>
+            <MapPin size={32} className="text-ink-4-dim mb-2" />
+            <span className="text-body font-bold text-sm">Sin datos GPS</span>
+            <p className="text-ink-4 text-xs mt-1 max-w-xs">Esta actividad no contiene coordenadas de ruta o track GPS.</p>
         </div>
     );
 
@@ -92,7 +92,7 @@ export const InteractiveMap = ({ polyline, highResCoords, color, currentPosition
                 {['light', 'dark', 'satellite'].map((type) => (
                     <button
                         key={type} onClick={(e) => { e.stopPropagation(); setMapType(type); }}
-                        className={`px-2.5 py-1 text-[9px] font-bold uppercase transition-colors rounded-sm ${mapType === type ? 'bg-slate-800 text-white dark:bg-zinc-200 dark:text-zinc-900' : 'text-slate-500 dark:text-zinc-400 hover:text-slate-800 dark:hover:text-zinc-200'}`}
+                        className={`px-2.5 py-1 text-[9px] font-bold uppercase transition-colors rounded-sm ${mapType === type ? 'bg-slate-800 text-ink-inverse dark:bg-zinc-200' : 'text-ink-3 hover:text-ink-2-soft'}`}
                     >
                         {type === 'satellite' ? 'Sat' : type}
                     </button>

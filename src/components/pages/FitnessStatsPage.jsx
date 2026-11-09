@@ -77,8 +77,8 @@ export const FitnessStatsPage = ({
         <div className="animate-in fade-in duration-500 pb-16 w-full max-w-[1100px] mx-auto px-4 sm:px-8">
             {/* Header */}
             <div className="pt-8 pb-6 sm:pb-10">
-                <h2 className="text-3xl font-bold text-slate-900 dark:text-white tracking-tight">Rendimiento</h2>
-                <p className="text-sm font-medium text-slate-500 dark:text-zinc-500 mt-1.5 opacity-80">Perfil fisiológico avanzado y recuperación</p>
+                <h2 className="text-3xl font-bold text-ink tracking-tight">Rendimiento</h2>
+                <p className="text-sm font-medium text-ink-3-flat mt-1.5 opacity-80">Perfil fisiológico avanzado y recuperación</p>
             </div>
 
             {/* Selector por categorías SOLO en móvil (estilo Apple sobrio, sin emojis) */}
@@ -89,8 +89,8 @@ export const FitnessStatsPage = ({
                         onClick={() => setMobileCategory(cat.id)}
                         className={`px-4 py-2 rounded-full text-xs font-semibold whitespace-nowrap transition-all select-none touch-manipulation active:scale-95 shrink-0 ${
                             mobileCategory === cat.id
-                                ? 'bg-slate-900 dark:bg-white text-white dark:text-zinc-900 shadow-xs font-bold'
-                                : 'bg-slate-200/70 dark:bg-zinc-800/80 text-slate-600 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-white'
+                                ? 'bg-slate-900 dark:bg-white text-ink-inverse shadow-xs font-bold'
+                                : 'bg-slate-200/70 dark:bg-zinc-800/80 text-body-soft hover:text-ink'
                         }`}
                     >
                         {cat.label}

@@ -20,11 +20,11 @@ export const EmailConfirmedPage = () => {
           <CheckCircle2 size={64} strokeWidth={1.5} />
         </div>
 
-        <h1 className="text-2xl font-black text-slate-900 dark:text-zinc-100 tracking-tight mb-2 uppercase">
+        <h1 className="text-2xl font-black text-ink-soft tracking-tight mb-2 uppercase">
           ¡Cuenta Confirmada!
         </h1>
         
-        <p className="text-sm font-medium text-slate-500 dark:text-zinc-400 mb-8 leading-relaxed">
+        <p className="text-sm font-medium text-ink-3 mb-8 leading-relaxed">
           Tu dirección de correo electrónico ha sido verificada correctamente. Ya tienes acceso completo a Forma y puedes empezar a analizar tu rendimiento.
         </p>
 
