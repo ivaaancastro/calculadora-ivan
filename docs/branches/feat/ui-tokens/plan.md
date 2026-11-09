@@ -31,7 +31,8 @@ Cada rama sale de `develop` actualizado después de mergear el PR anterior.
 | 2 | `feat/ui-tokens-borders` | Bordes | 216 líneas, 32 archivos | ≥ 80 % |
 | 3 | `feat/ui-tokens-text` | Texto | 767 líneas, 37 archivos | ≥ 90 % |
 | 4 | `feat/ui-tokens-surfaces` | Superficies + `index.css` | 351 líneas, 35 archivos | ≥ 75 % |
-| 5 | `feat/ui-tokens-accents` | Acentos | 367 líneas, 30 archivos | según inventario |
+| 5a | `feat/ui-tokens-accents` | Acentos: estados y métricas | ~380 líneas de acentos en total | según inventario |
+| 5b | `feat/ui-tokens-categories` | Acentos: categorías | (resto de 5a) | según inventario |
 | 6 | `feat/ui-tokens-charts` | Gráficas | 173 líneas con hex, 21 archivos | según inventario |
 
 Pasos de cada familia:
@@ -44,7 +45,7 @@ Pasos de cada familia:
 Particularidades:
 - **Texto (PR 3):** si el diff es demasiado grande para revisarlo, se parte en `pages/` y el resto.
 - **Superficies (PR 4):** incluye las utilidades `ios-*`, `glass-*`, `liquid-glass`, el fondo de `body` y las scrollbars. Las clases siguen existiendo; la Capa 2 las sustituirá.
-- **Acentos (PR 5):** primero el mapa de significado (`action`, `positive`, `warning`, `danger`, `metric-*`, deportes, zonas) y los `legacy-*`; se añade D-07 a `paridad.md`. Los colores iOS en hex (`#007AFF`, `#30D158`…) entran aquí.
+- **Acentos (PR 5, partido en 5a y 5b el 2026-11-09 a petición del usuario):** 5a estados (`action`, `danger`, `positive`, `warning`), azules/verdes iOS y métricas (`metric-*`, `legacy-*`, D-07); 5b categorías. Lo ambiguo queda en la línea base con su motivo. Primero el mapa de significado (`action`, `positive`, `warning`, `danger`, `metric-*`, deportes, zonas) y los `legacy-*`; se añade D-07 a `paridad.md`. Los colores iOS en hex (`#007AFF`, `#30D158`…) entran aquí.
 - **Gráficas (PR 6):** los 9 archivos de Recharts pasan a `useChartTheme()`; el SVG de la PMC del Calendario y `ActivityMap` también. La rejilla de Recharts, el mapa y la vista "Forma" del Calendario no los ven las capturas: se verifican con el volcado de estilos (6.6 de la spec), revisando expresamente esas entradas en el diff y citándolas en el PR. El canvas de la landing no se toca.
 
 ## Cierre de la capa

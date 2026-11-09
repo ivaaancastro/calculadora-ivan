@@ -7,6 +7,12 @@ y este proyecto adhiere a [Semantic Versioning](https://semver.org/lang/es/).
 
 ## [Unreleased]
 
+### Rediseño — Capa 1: tokens y tema (`spec-rediseno-02-c1`), PR 5a de 6: acentos de estado y métricas
+- `refactor(ui-tokens):` 144 usos de estado pasan a 43 tokens con significado (`action`, `danger`, `positive`, `warning`, `action-ios`…) con `scripts/codemods/accents.mjs` y una lista de inclusión revisada a mano. Sin cambios visibles.
+- `refactor(ui-tokens):` CTL/ATL/TSB fuera de las gráficas usan `metric-*` y `legacy-*` (13 tokens en `metrics.json`).
+- `chore(ui-tokens):` el codemod migra clases sueltas sin pareja `dark:` (con su opacidad) y admite exclusiones.
+- `docs(paridad):` D-07, colores distintos para la misma métrica según la pantalla (preexistente).
+
 ### Rediseño — Capa 1: tokens y tema (`spec-rediseno-02-c1`), PR 4 de 6: superficies
 - `refactor(ui-tokens):` 266 de 336 pares de fondo claro/oscuro, incluidos los grises de iOS en hex, pasan a 43 tokens (`surface`, `sunken`, `fill`, `inverse`, `glass`, `canvas`…) con `scripts/codemods/surfaces.mjs`. `index.css` (`glass-*`, `ios-*`, `body`, `liquid-glass`, scrollbars) usa los tokens. Sin cambios visibles.
 - `chore(ui-tokens):` el codemod lee los `@apply` de CSS y los colores en hex.
