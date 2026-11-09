@@ -27,7 +27,7 @@ const getSportIcon = (type) => {
         );
     }
     return (
-        <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-[12px] sm:rounded-[14px] bg-slate-200/60 dark:bg-zinc-800 text-slate-600 dark:text-zinc-400 flex items-center justify-center shrink-0 shadow-2xs">
+        <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-[12px] sm:rounded-[14px] bg-slate-200/60 dark:bg-zinc-800 text-body-soft flex items-center justify-center shrink-0 shadow-2xs">
             <Activity size={17} strokeWidth={2.3} />
         </div>
     );
@@ -103,23 +103,23 @@ export const HistoryList = React.memo(({ activities, onDelete, onSelectActivity 
 
                 {/* Buscador de Texto estilo iOS */}
                 <div className="relative flex-1">
-                    <Search size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 dark:text-zinc-500" />
+                    <Search size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-ink-4" />
                     <input
                         type="text"
                         placeholder="Buscar por título..."
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
-                        className="w-full pl-10 pr-3.5 py-2 bg-slate-200/60 dark:bg-zinc-800/70 border-0 rounded-xl text-sm font-medium text-slate-900 dark:text-zinc-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/40 transition-all"
+                        className="w-full pl-10 pr-3.5 py-2 bg-slate-200/60 dark:bg-zinc-800/70 border-0 rounded-xl text-sm font-medium text-ink-soft placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/40 transition-all"
                     />
                 </div>
 
                 {/* Selector de Deporte */}
                 <div className="sm:w-44 relative">
-                    <Activity size={14} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 dark:text-zinc-500 pointer-events-none" />
+                    <Activity size={14} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-ink-4 pointer-events-none" />
                     <select
                         value={sportFilter}
                         onChange={(e) => setSportFilter(e.target.value)}
-                        className="w-full pl-9 pr-3 py-2 bg-slate-200/60 dark:bg-zinc-800/70 border-0 rounded-xl text-xs sm:text-sm font-semibold text-slate-800 dark:text-zinc-200 focus:outline-none focus:ring-2 focus:ring-blue-500/40 appearance-none cursor-pointer transition-all"
+                        className="w-full pl-9 pr-3 py-2 bg-slate-200/60 dark:bg-zinc-800/70 border-0 rounded-xl text-xs sm:text-sm font-semibold text-ink-2-soft focus:outline-none focus:ring-2 focus:ring-blue-500/40 appearance-none cursor-pointer transition-all"
                     >
                         <option value="all">Todos los Deportes</option>
                         <option value="run">Carrera</option>
@@ -131,11 +131,11 @@ export const HistoryList = React.memo(({ activities, onDelete, onSelectActivity 
 
                 {/* Selector de Fecha */}
                 <div className="sm:w-44 relative">
-                    <Calendar size={14} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 dark:text-zinc-500 pointer-events-none" />
+                    <Calendar size={14} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-ink-4 pointer-events-none" />
                     <select
                         value={dateFilter}
                         onChange={(e) => setDateFilter(e.target.value)}
-                        className="w-full pl-9 pr-3 py-2 bg-slate-200/60 dark:bg-zinc-800/70 border-0 rounded-xl text-xs sm:text-sm font-semibold text-slate-800 dark:text-zinc-200 focus:outline-none focus:ring-2 focus:ring-blue-500/40 appearance-none cursor-pointer transition-all"
+                        className="w-full pl-9 pr-3 py-2 bg-slate-200/60 dark:bg-zinc-800/70 border-0 rounded-xl text-xs sm:text-sm font-semibold text-ink-2-soft focus:outline-none focus:ring-2 focus:ring-blue-500/40 appearance-none cursor-pointer transition-all"
                     >
                         <option value="all">Todo el Historial</option>
                         <option value="7d">Últimos 7 Días</option>
@@ -147,7 +147,7 @@ export const HistoryList = React.memo(({ activities, onDelete, onSelectActivity 
             </div>
 
             {/* RESUMEN DE RESULTADOS */}
-            <div className="px-4 py-2 border-b border-hairline bg-slate-50/40 dark:bg-zinc-900/20 flex justify-between items-center text-[11px] font-semibold text-slate-400 dark:text-zinc-500 uppercase tracking-wider">
+            <div className="px-4 py-2 border-b border-hairline bg-slate-50/40 dark:bg-zinc-900/20 flex justify-between items-center text-[11px] font-semibold text-ink-4 uppercase tracking-wider">
                 <span>{filteredActivities.length} Actividades</span>
             </div>
 
@@ -182,8 +182,8 @@ export const HistoryList = React.memo(({ activities, onDelete, onSelectActivity 
                                     </div>
 
                                     <div className="flex-1 min-w-0 mr-2 sm:mr-4">
-                                        <h4 className="text-[13px] font-semibold text-slate-900 dark:text-white truncate mb-0.5" title={act.name}>{act.name}</h4>
-                                        <div className="flex items-center gap-1.5 text-[11px] text-slate-500 dark:text-zinc-400">
+                                        <h4 className="text-[13px] font-semibold text-ink truncate mb-0.5" title={act.name}>{act.name}</h4>
+                                        <div className="flex items-center gap-1.5 text-[11px] text-ink-3">
                                             <span>{new Date(act.date).toLocaleDateString('es-ES', { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' })}</span>
                                             <span>•</span>
                                             <span className="capitalize">{act.type}</span>
@@ -192,10 +192,10 @@ export const HistoryList = React.memo(({ activities, onDelete, onSelectActivity 
 
                                     {/* Compact Mobile Metrics (< md) */}
                                     <div className="flex md:hidden flex-col items-end shrink-0 mr-1 text-right">
-                                        <span className="text-xs font-bold text-slate-900 dark:text-zinc-100 tabular-nums">
+                                        <span className="text-xs font-bold text-ink-soft tabular-nums">
                                             {formatDuration(act.duration)}
                                         </span>
-                                        <span className="text-[10px] text-slate-400 dark:text-zinc-500 font-medium tabular-nums">
+                                        <span className="text-[10px] text-ink-4 font-medium tabular-nums">
                                             {act.distance > 0 
                                                 ? `${(act.distance / 1000).toFixed(1)} km` 
                                                 : (act.tss > 0 ? `${Math.round(act.tss)} TSS` : '')}
@@ -206,15 +206,15 @@ export const HistoryList = React.memo(({ activities, onDelete, onSelectActivity 
                                     <div className="hidden md:flex items-center gap-6 mr-6">
                                         <div className="flex flex-col items-end">
                                             <span className="text-[10px] font-medium text-slate-400 mb-0.5">Tiempo</span>
-                                            <span className="text-sm font-semibold text-slate-800 dark:text-zinc-200 tabular-nums">{formatDuration(act.duration)}</span>
+                                            <span className="text-sm font-semibold text-ink-2-soft tabular-nums">{formatDuration(act.duration)}</span>
                                         </div>
                                         <div className="flex flex-col items-end w-16">
                                             <span className="text-[10px] font-medium text-slate-400 mb-0.5">Dist</span>
-                                            <span className="text-sm font-semibold text-slate-800 dark:text-zinc-200 tabular-nums">{act.distance > 0 ? (act.distance / 1000).toFixed(1) + 'km' : '--'}</span>
+                                            <span className="text-sm font-semibold text-ink-2-soft tabular-nums">{act.distance > 0 ? (act.distance / 1000).toFixed(1) + 'km' : '--'}</span>
                                         </div>
                                         <div className="flex flex-col items-end w-12">
                                             <span className="text-[10px] font-medium text-slate-400 mb-0.5">Kcal</span>
-                                            <span className="text-sm font-semibold text-slate-800 dark:text-zinc-200 tabular-nums">{act.calories || '--'}</span>
+                                            <span className="text-sm font-semibold text-ink-2-soft tabular-nums">{act.calories || '--'}</span>
                                         </div>
                                         <div className="flex flex-col items-end w-12">
                                             <span className="text-[10px] font-medium text-slate-400 mb-0.5">TSS</span>
@@ -241,9 +241,9 @@ export const HistoryList = React.memo(({ activities, onDelete, onSelectActivity 
                     </div>
                 ) : (
                     <div className="flex flex-col items-center justify-center h-full text-center p-8">
-                        <Activity size={32} className="text-slate-300 dark:text-zinc-700 mb-3" />
-                        <h3 className="text-[11px] font-bold text-slate-600 dark:text-zinc-400 uppercase tracking-widest">No hay resultados</h3>
-                        <p className="text-[10px] text-slate-400 dark:text-zinc-500 mt-1">Prueba a cambiar los filtros de búsqueda.</p>
+                        <Activity size={32} className="text-faint-2 mb-3" />
+                        <h3 className="text-[11px] font-bold text-body-soft uppercase tracking-widest">No hay resultados</h3>
+                        <p className="text-[10px] text-ink-4 mt-1">Prueba a cambiar los filtros de búsqueda.</p>
                     </div>
                 )}
             </div>

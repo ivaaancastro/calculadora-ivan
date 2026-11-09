@@ -101,7 +101,7 @@ const Dashboard = () => {
     return (
       <div className="h-screen flex flex-col items-center justify-center bg-slate-50 dark:bg-zinc-950 gap-4 transition-colors">
         <span className="animate-spin text-blue-500">Cargando...</span>
-        <p className="text-[10px] text-slate-500 dark:text-zinc-400 font-bold uppercase tracking-widest animate-pulse">
+        <p className="text-[10px] text-ink-3 font-bold uppercase tracking-widest animate-pulse">
           Cargando métricas...
         </p>
       </div>
@@ -170,7 +170,7 @@ const Dashboard = () => {
       <div className="flex justify-end mb-3">
         <button
           onClick={handleOpenModal}
-          className="py-1.5 px-3 bg-white dark:bg-zinc-900 text-slate-800 dark:text-zinc-200 border border-line-2 rounded-full text-[10px] font-bold uppercase flex items-center gap-1.5 hover:bg-slate-50 dark:hover:bg-zinc-800 transition-colors shadow-2xs active:scale-95"
+          className="py-1.5 px-3 bg-white dark:bg-zinc-900 text-ink-2-soft border border-line-2 rounded-full text-[10px] font-bold uppercase flex items-center gap-1.5 hover:bg-slate-50 dark:hover:bg-zinc-800 transition-colors shadow-2xs active:scale-95"
         >
           <span className="text-[14px]">+</span> Añadir Manual
         </button>
@@ -188,7 +188,7 @@ const Dashboard = () => {
   );
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-zinc-950 text-slate-800 dark:text-zinc-200 font-sans md:pb-12 transition-colors duration-300 selection:bg-blue-500/30 overflow-x-hidden">
+    <div className="min-h-screen bg-slate-50 dark:bg-zinc-950 text-ink-2-soft font-sans md:pb-12 transition-colors duration-300 selection:bg-blue-500/30 overflow-x-hidden">
       <Navbar
         activities={activities}
         settings={settings}

@@ -26,7 +26,7 @@ export const PowerProfileCard = ({
             <div className="bg-white dark:bg-zinc-900/50 rounded-2xl border border-line-muted p-6 sm:p-8 shadow-sm">
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-10">
                     <div className="flex items-center gap-2">
-                        <h3 className="text-[10px] font-bold text-slate-400 dark:text-zinc-500 uppercase tracking-[0.1em]">Perfil de Potencia</h3>
+                        <h3 className="text-[10px] font-bold text-ink-4 uppercase tracking-[0.1em]">Perfil de Potencia</h3>
                         <InfoTooltip text="Tu potencia máxima comparada con categorías típicas (Coggan)." />
                     </div>
                     <button
@@ -47,7 +47,7 @@ export const PowerProfileCard = ({
                                         <button
                                             key={unit}
                                             onClick={() => setPowerUnit(unit)}
-                                            className={`px-4 py-1.5 rounded-lg text-[9px] font-bold uppercase tracking-widest transition-all ${powerUnit === unit ? 'bg-white dark:bg-zinc-700 text-slate-900 dark:text-zinc-100 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
+                                            className={`px-4 py-1.5 rounded-lg text-[9px] font-bold uppercase tracking-widest transition-all ${powerUnit === unit ? 'bg-white dark:bg-zinc-700 text-ink-soft shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
                                         >
                                             {unit === 'wkg' ? 'W/kg' : 'Vatios'}
                                         </button>
@@ -65,7 +65,7 @@ export const PowerProfileCard = ({
                                         <button
                                             key={item.id}
                                             onClick={() => setPowerProfileTimeframe && setPowerProfileTimeframe(item.id)}
-                                            className={`px-3 py-1.5 rounded-lg text-[9px] font-bold uppercase tracking-widest transition-all ${powerProfileTimeframe === item.id ? 'bg-white dark:bg-zinc-700 text-slate-900 dark:text-zinc-100 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
+                                            className={`px-3 py-1.5 rounded-lg text-[9px] font-bold uppercase tracking-widest transition-all ${powerProfileTimeframe === item.id ? 'bg-white dark:bg-zinc-700 text-ink-soft shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
                                         >
                                             {item.label}
                                         </button>
@@ -113,7 +113,7 @@ export const PowerProfileCard = ({
                                 {profile?.strengths?.map((s, i) => (
                                     <div key={i} className="flex items-center justify-between p-4 rounded-2xl bg-slate-50/50 dark:bg-zinc-800/30 border border-line-soft group">
                                         <div>
-                                            <p className="text-[10px] font-bold text-slate-800 dark:text-zinc-200 uppercase tracking-tight mb-0.5">{s.area}</p>
+                                            <p className="text-[10px] font-bold text-ink-2-soft uppercase tracking-tight mb-0.5">{s.area}</p>
                                             <p className="text-[9px] text-slate-400 font-bold uppercase tracking-tighter opacity-70 leading-tight">{s.desc}</p>
                                         </div>
                                         <span className={`text-[8px] font-bold uppercase px-2 py-0.5 rounded-md shadow-sm border ${s.level === 'elite' ? 'text-purple-600 bg-purple-50 border-purple-100 dark:bg-purple-900/20 dark:border-purple-800/30' : s.level === 'good' ? 'text-emerald-600 bg-emerald-50 border-emerald-100 dark:bg-emerald-900/20 dark:border-emerald-800/30' : 'text-slate-500 bg-slate-50 border-slate-200 dark:bg-zinc-800 dark:border-zinc-700'}`}>
@@ -130,7 +130,7 @@ export const PowerProfileCard = ({
                             <div key={p.name} className="flex items-center justify-between p-4 rounded-xl bg-slate-50/30 dark:bg-zinc-800/20 border border-slate-100/50 dark:border-zinc-800/50 hover:border-blue-500/20 transition-all cursor-default group">
                                 <div>
                                     <p className="text-[8px] font-bold text-slate-400 uppercase tracking-widest mb-1">{p.name}</p>
-                                    <p className="text-sm font-bold text-slate-800 dark:text-zinc-100 leading-none">
+                                    <p className="text-sm font-bold text-ink-2 leading-none">
                                         {powerUnit === 'w' ? p['Usuario'] : Math.round(p['Usuario'] * (powerProfile?.weight || 70))}
                                         <span className="text-[9px] ml-1 opacity-40 font-bold uppercase">W</span>
                                     </p>

@@ -121,7 +121,7 @@ export const AdvancedAnalytics = React.memo(({ activities, settings,  timeRange,
 
     const fitnessStatus = (() => {
         const tsb = model.tsb;
-        if (tsb > 25) return { label: 'Transición', desc: 'Pérdida de forma por descanso', badge: 'text-slate-600 dark:text-zinc-400 bg-slate-100 dark:bg-zinc-800/80 border-line-muted-2' };
+        if (tsb > 25) return { label: 'Transición', desc: 'Pérdida de forma por descanso', badge: 'text-body-soft bg-slate-100 dark:bg-zinc-800/80 border-line-muted-2' };
         if (tsb >= 5) return { label: 'Pico de Forma', desc: 'Fresco y listo para competir al máximo', badge: 'text-[#30D158] bg-[#30D158]/10 border-[#30D158]/25 dark:bg-[#30D158]/15' };
         if (tsb >= -10) return { label: 'Zona Productiva', desc: 'Balance óptimo entre carga y adaptación', badge: 'text-[#0A84FF] bg-[#0A84FF]/10 border-[#0A84FF]/25 dark:bg-[#0A84FF]/15' };
         if (tsb >= -30) return { label: 'Sobrecarga', desc: 'Fatiga alta, programa recuperación', badge: 'text-[#FF9F0A] bg-[#FF9F0A]/10 border-[#FF9F0A]/25 dark:bg-[#FF9F0A]/15' };
@@ -138,14 +138,14 @@ export const AdvancedAnalytics = React.memo(({ activities, settings,  timeRange,
                     </div>
                     <div>
                         <div className="flex items-center gap-2">
-                            <h2 className="text-base sm:text-lg font-bold text-slate-900 dark:text-white tracking-tight">
+                            <h2 className="text-base sm:text-lg font-bold text-ink tracking-tight">
                                 Estado de Forma
                             </h2>
                             <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${fitnessStatus.badge} uppercase tracking-wider`}>
                                 {fitnessStatus.label}
                             </span>
                         </div>
-                        <p className="text-xs text-slate-500 dark:text-zinc-400 mt-0.5">
+                        <p className="text-xs text-ink-3 mt-0.5">
                             {fitnessStatus.desc}
                         </p>
                     </div>
@@ -164,8 +164,8 @@ export const AdvancedAnalytics = React.memo(({ activities, settings,  timeRange,
                                 key={t.id}
                                 onClick={() => setTimeRange(t.id)}
                                 className={`px-3.5 py-1 min-h-[30px] text-xs font-semibold transition-all rounded-full select-none touch-manipulation active:scale-95 ${timeRange === t.id
-                                    ? "bg-white dark:bg-[#2c2c2e] text-slate-900 dark:text-white shadow-xs font-bold"
-                                    : "text-slate-500 dark:text-zinc-400 hover:text-slate-800 dark:hover:text-zinc-200"
+                                    ? "bg-white dark:bg-[#2c2c2e] text-ink shadow-xs font-bold"
+                                    : "text-ink-3 hover:text-ink-2-soft"
                                     }`}
                             >
                                 {t.label}
@@ -182,16 +182,16 @@ export const AdvancedAnalytics = React.memo(({ activities, settings,  timeRange,
                     {/* Fitness (CTL) */}
                     <div className="ios-card ios-touch p-3.5 sm:p-4 flex flex-col justify-between">
                         <div className="flex items-center justify-between mb-2">
-                            <span className="text-[11px] font-semibold text-slate-500 dark:text-zinc-400">Fitness (CTL)</span>
+                            <span className="text-[11px] font-semibold text-ink-3">Fitness (CTL)</span>
                             <div className="w-7 h-7 rounded-xl bg-blue-500/10 text-blue-600 dark:text-blue-400 flex items-center justify-center">
                                 <Activity size={15} strokeWidth={2.3} />
                             </div>
                         </div>
                         <div>
-                            <div className="text-2xl sm:text-3xl font-bold tracking-tight text-slate-900 dark:text-white tabular-nums">
+                            <div className="text-2xl sm:text-3xl font-bold tracking-tight text-ink tabular-nums">
                                 {Math.round(model.ctl)}
                             </div>
-                            <span className="text-[10px] font-medium text-slate-400 dark:text-zinc-500">
+                            <span className="text-[10px] font-medium text-ink-4">
                                 {model.loadTrend >= 0 ? '+' : ''}{model.loadTrend.toFixed(1)}% vs 28d
                             </span>
                         </div>
@@ -200,16 +200,16 @@ export const AdvancedAnalytics = React.memo(({ activities, settings,  timeRange,
                     {/* Fatiga (ATL) */}
                     <div className="ios-card ios-touch p-3.5 sm:p-4 flex flex-col justify-between">
                         <div className="flex items-center justify-between mb-2">
-                            <span className="text-[11px] font-semibold text-slate-500 dark:text-zinc-400">Fatiga (ATL)</span>
+                            <span className="text-[11px] font-semibold text-ink-3">Fatiga (ATL)</span>
                             <div className="w-7 h-7 rounded-xl bg-[#FA114F]/10 text-[#FA114F] flex items-center justify-center">
                                 <Battery size={15} strokeWidth={2.3} />
                             </div>
                         </div>
                         <div>
-                            <div className="text-2xl sm:text-3xl font-bold tracking-tight text-slate-900 dark:text-white tabular-nums">
+                            <div className="text-2xl sm:text-3xl font-bold tracking-tight text-ink tabular-nums">
                                 {Math.round(model.atl)}
                             </div>
-                            <span className="text-[10px] font-medium text-slate-400 dark:text-zinc-500">
+                            <span className="text-[10px] font-medium text-ink-4">
                                 Carga últ. 7 días
                             </span>
                         </div>
@@ -218,16 +218,16 @@ export const AdvancedAnalytics = React.memo(({ activities, settings,  timeRange,
                     {/* Forma (TSB) */}
                     <div className="ios-card ios-touch p-3.5 sm:p-4 flex flex-col justify-between">
                         <div className="flex items-center justify-between mb-2">
-                            <span className="text-[11px] font-semibold text-slate-500 dark:text-zinc-400">Forma (TSB)</span>
+                            <span className="text-[11px] font-semibold text-ink-3">Forma (TSB)</span>
                             <div className="w-7 h-7 rounded-xl bg-[#30D158]/10 text-[#30D158] flex items-center justify-center">
                                 <Zap size={15} strokeWidth={2.3} />
                             </div>
                         </div>
                         <div>
-                            <div className="text-2xl sm:text-3xl font-bold tracking-tight text-slate-900 dark:text-white tabular-nums">
+                            <div className="text-2xl sm:text-3xl font-bold tracking-tight text-ink tabular-nums">
                                 {(model.tsb > 0 ? '+' : '') + Math.round(model.tsb)}
                             </div>
-                            <span className="text-[10px] font-medium text-slate-400 dark:text-zinc-500">
+                            <span className="text-[10px] font-medium text-ink-4">
                                 Balance CTL / ATL
                             </span>
                         </div>
@@ -236,16 +236,16 @@ export const AdvancedAnalytics = React.memo(({ activities, settings,  timeRange,
                     {/* Ratio Carga (ACWR) */}
                     <div className="ios-card ios-touch p-3.5 sm:p-4 flex flex-col justify-between">
                         <div className="flex items-center justify-between mb-2">
-                            <span className="text-[11px] font-semibold text-slate-500 dark:text-zinc-400">Ratio Carga</span>
+                            <span className="text-[11px] font-semibold text-ink-3">Ratio Carga</span>
                             <div className="w-7 h-7 rounded-xl bg-[#FF9F0A]/10 text-[#FF9F0A] flex items-center justify-center">
                                 <Target size={15} strokeWidth={2.3} />
                             </div>
                         </div>
                         <div>
-                            <div className="text-2xl sm:text-3xl font-bold tracking-tight text-slate-900 dark:text-white tabular-nums">
+                            <div className="text-2xl sm:text-3xl font-bold tracking-tight text-ink tabular-nums">
                                 {model.acwr.toFixed(2)}
                             </div>
-                            <span className="text-[10px] font-medium text-slate-400 dark:text-zinc-500">
+                            <span className="text-[10px] font-medium text-ink-4">
                                 Aguda vs Crónica
                             </span>
                         </div>
@@ -265,17 +265,17 @@ export const AdvancedAnalytics = React.memo(({ activities, settings,  timeRange,
                     ].map((kpi, i) => (
                         <div key={i} className="ios-card ios-touch p-3 sm:p-3.5 flex flex-col justify-between">
                             <div className="flex items-center justify-between mb-1.5">
-                                <span className="text-[10px] font-semibold text-slate-500 dark:text-zinc-400">{kpi.label}</span>
+                                <span className="text-[10px] font-semibold text-ink-3">{kpi.label}</span>
                                 <div className={`w-6 h-6 rounded-lg ${kpi.bg} ${kpi.color} flex items-center justify-center shrink-0`}>
                                     <kpi.icon size={13} strokeWidth={2.2} />
                                 </div>
                             </div>
                             <div>
-                                <span className="text-lg sm:text-xl font-bold tracking-tight text-slate-900 dark:text-white tabular-nums">
+                                <span className="text-lg sm:text-xl font-bold tracking-tight text-ink tabular-nums">
                                     {kpi.value}
                                 </span>
                                 {kpi.sub && (
-                                    <p className="text-[9px] font-medium text-slate-400 dark:text-zinc-500 truncate">
+                                    <p className="text-[9px] font-medium text-ink-4 truncate">
                                         {kpi.sub}
                                     </p>
                                 )}

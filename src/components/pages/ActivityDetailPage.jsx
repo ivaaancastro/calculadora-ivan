@@ -85,7 +85,7 @@ export const ActivityDetailPage = ({ activity, settings, fetchStreams, onBack, o
             return { label: 'Velocidad Máx', value: `${peaks.maxSpeedPt.speed} km/h`, color: 'text-blue-600 bg-blue-500/10 border-blue-500/30 dark:text-blue-400' };
         }
         if (peaks.maxAltPt && activePayload.alt && activePayload.alt >= peaks.maxAltPt.alt - 3) {
-            return { label: 'Cima', value: `${peaks.maxAltPt.alt} m`, color: 'text-slate-700 bg-slate-200 border-line-strong dark:text-zinc-200 dark:bg-zinc-800' };
+            return { label: 'Cima', value: `${peaks.maxAltPt.alt} m`, color: 'text-body-2 bg-slate-200 border-line-strong dark:bg-zinc-800' };
         }
         return null;
     }, [activePayload, peaks, isPaceBased]);
@@ -153,14 +153,14 @@ export const ActivityDetailPage = ({ activity, settings, fetchStreams, onBack, o
                 </div>
 
                 <div className="hidden lg:flex items-center gap-2.5 sm:gap-3 mb-2 sm:mb-3">
-                    <button onClick={onBack} className="w-8 h-8 flex items-center justify-center bg-slate-100/80 dark:bg-zinc-800/80 hover:bg-slate-200/70 dark:hover:bg-zinc-700 active:scale-90 rounded-full transition-all text-slate-600 dark:text-zinc-300 shrink-0" title="Volver">
+                    <button onClick={onBack} className="w-8 h-8 flex items-center justify-center bg-slate-100/80 dark:bg-zinc-800/80 hover:bg-slate-200/70 dark:hover:bg-zinc-700 active:scale-90 rounded-full transition-all text-body-soft-2 shrink-0" title="Volver">
                         <ArrowLeft size={16} />
                     </button>
                     <div className="min-w-0">
-                        <h1 className="text-sm font-bold text-slate-900 dark:text-white tracking-tight leading-tight truncate">
+                        <h1 className="text-sm font-bold text-ink tracking-tight leading-tight truncate">
                             {activity.name || `${activity.type}`}
                         </h1>
-                        <p className="text-[10px] font-semibold text-slate-400 dark:text-zinc-500 capitalize">{dateStr}</p>
+                        <p className="text-[10px] font-semibold text-ink-4 capitalize">{dateStr}</p>
                     </div>
                 </div>
 
@@ -168,14 +168,14 @@ export const ActivityDetailPage = ({ activity, settings, fetchStreams, onBack, o
                 {/* Fila 1: Flecha atrás + Título + Acciones Strava y Borrar */}
                 <div className="lg:hidden flex items-center justify-between gap-2 mb-2.5">
                     <div className="flex items-center gap-2 min-w-0">
-                        <button onClick={onBack} className="w-8 h-8 flex items-center justify-center bg-slate-100/80 dark:bg-zinc-800/80 hover:bg-slate-200/70 dark:hover:bg-zinc-700 active:scale-90 rounded-full transition-all text-slate-600 dark:text-zinc-300 shrink-0" title="Volver">
+                        <button onClick={onBack} className="w-8 h-8 flex items-center justify-center bg-slate-100/80 dark:bg-zinc-800/80 hover:bg-slate-200/70 dark:hover:bg-zinc-700 active:scale-90 rounded-full transition-all text-body-soft-2 shrink-0" title="Volver">
                             <ArrowLeft size={16} />
                         </button>
                         <div className="min-w-0">
-                            <h1 className="text-sm font-bold text-slate-900 dark:text-white tracking-tight leading-tight truncate">
+                            <h1 className="text-sm font-bold text-ink tracking-tight leading-tight truncate">
                                 {activity.name || `${activity.type}`}
                             </h1>
-                            <p className="text-[10px] font-semibold text-slate-400 dark:text-zinc-500 capitalize truncate">{dateStr}</p>
+                            <p className="text-[10px] font-semibold text-ink-4 capitalize truncate">{dateStr}</p>
                         </div>
                     </div>
 
@@ -205,8 +205,8 @@ export const ActivityDetailPage = ({ activity, settings, fetchStreams, onBack, o
                             onClick={() => setActiveTab(tab.id)}
                             className={`py-1.5 text-xs font-semibold rounded-lg text-center transition-all select-none touch-manipulation active:scale-[0.98] ${
                                 activeTab === tab.id
-                                    ? 'bg-white dark:bg-[#2c2c2e] text-slate-900 dark:text-white shadow-xs font-bold'
-                                    : 'text-slate-500 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-white'
+                                    ? 'bg-white dark:bg-[#2c2c2e] text-ink shadow-xs font-bold'
+                                    : 'text-ink-3 hover:text-ink'
                             }`}
                         >
                             {tab.label}
@@ -288,7 +288,7 @@ export const ActivityDetailPage = ({ activity, settings, fetchStreams, onBack, o
                                             {/* Accesos rápidos a los Picos del entrenamiento */}
                                             {peaks && (
                                                 <div className="flex items-center gap-1.5 overflow-x-auto hide-scrollbar py-0.5">
-                                                    <span className="text-[9px] font-bold text-slate-400 dark:text-zinc-500 uppercase tracking-widest shrink-0 mr-1">
+                                                    <span className="text-[9px] font-bold text-ink-4 uppercase tracking-widest shrink-0 mr-1">
                                                         Picos:
                                                     </span>
                                                     {peaks.maxHrPt && (
@@ -341,8 +341,8 @@ export const ActivityDetailPage = ({ activity, settings, fetchStreams, onBack, o
                                                             onClick={() => setActivePayload(peaks.maxAltPt)}
                                                             className={`px-2.5 py-1 rounded-full text-[10px] font-bold shrink-0 border transition-all active:scale-95 flex items-center gap-1.5 ${
                                                                 activePayload?.rawTime === peaks.maxAltPt.rawTime
-                                                                    ? 'bg-slate-700 dark:bg-zinc-200 text-white dark:text-zinc-900 border-slate-800 shadow-xs'
-                                                                    : 'bg-white dark:bg-zinc-900 text-slate-600 dark:text-zinc-300 border-slate-200 dark:border-zinc-800 hover:bg-slate-50 dark:hover:bg-zinc-800'
+                                                                    ? 'bg-slate-700 dark:bg-zinc-200 text-ink-inverse border-slate-800 shadow-xs'
+                                                                    : 'bg-white dark:bg-zinc-900 text-body-soft-2 border-slate-200 dark:border-zinc-800 hover:bg-slate-50 dark:hover:bg-zinc-800'
                                                             }`}
                                                         >
                                                             <span>Cima</span>
@@ -358,9 +358,9 @@ export const ActivityDetailPage = ({ activity, settings, fetchStreams, onBack, o
                                                     <div className="space-y-2">
                                                         <div className="flex items-center justify-between border-b border-line-soft-4 pb-1.5">
                                                             <div className="flex items-center gap-2 flex-wrap">
-                                                                <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-slate-100 dark:bg-zinc-800 font-mono text-[11px] font-bold tabular-nums text-slate-700 dark:text-zinc-300">
+                                                                <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-slate-100 dark:bg-zinc-800 font-mono text-[11px] font-bold tabular-nums text-body">
                                                                     <span>⏱️ {formatDuration(activePayload.rawTime)}</span>
-                                                                    <span className="text-slate-300 dark:text-zinc-700">|</span>
+                                                                    <span className="text-faint-2">|</span>
                                                                     <span>📍 {activePayload.distanceKm} km</span>
                                                                 </div>
                                                                 {activePeakType && (
@@ -372,7 +372,7 @@ export const ActivityDetailPage = ({ activity, settings, fetchStreams, onBack, o
                                                             <button
                                                                 type="button"
                                                                 onClick={() => setActivePayload(null)}
-                                                                className="text-[10px] font-bold text-slate-400 dark:text-zinc-500 hover:text-slate-600 dark:hover:text-zinc-300 px-1.5 py-0.5 rounded hover:bg-slate-100 dark:hover:bg-zinc-800 transition-colors"
+                                                                className="text-[10px] font-bold text-ink-4 hover:text-body-soft-2 px-1.5 py-0.5 rounded hover:bg-slate-100 dark:hover:bg-zinc-800 transition-colors"
                                                             >
                                                                 Resetear
                                                             </button>
@@ -381,7 +381,7 @@ export const ActivityDetailPage = ({ activity, settings, fetchStreams, onBack, o
                                                         <div className="grid grid-cols-3 sm:grid-cols-5 gap-1.5 text-center">
                                                             {/* Ritmo / Velocidad */}
                                                             <div className="bg-slate-50 dark:bg-zinc-800/50 rounded-xl p-1.5 border border-line-soft-3">
-                                                                <span className="text-[8px] font-bold uppercase tracking-wider text-slate-400 dark:text-zinc-500 block">
+                                                                <span className="text-[8px] font-bold uppercase tracking-wider text-ink-4 block">
                                                                     {isPaceBased ? 'Ritmo' : 'Velocidad'}
                                                                 </span>
                                                                 <span className="text-xs sm:text-sm font-black font-mono tabular-nums text-indigo-500">
@@ -392,7 +392,7 @@ export const ActivityDetailPage = ({ activity, settings, fetchStreams, onBack, o
                                                             {/* FC */}
                                                             {activePayload.hr !== null && (
                                                                 <div className="bg-slate-50 dark:bg-zinc-800/50 rounded-xl p-1.5 border border-line-soft-3">
-                                                                    <span className="text-[8px] font-bold uppercase tracking-wider text-slate-400 dark:text-zinc-500 block">
+                                                                    <span className="text-[8px] font-bold uppercase tracking-wider text-ink-4 block">
                                                                         FC
                                                                     </span>
                                                                     <span className="text-xs sm:text-sm font-black font-mono tabular-nums text-rose-500">
@@ -404,7 +404,7 @@ export const ActivityDetailPage = ({ activity, settings, fetchStreams, onBack, o
                                                             {/* Potencia */}
                                                             {activePayload.watts !== null && (
                                                                 <div className="bg-slate-50 dark:bg-zinc-800/50 rounded-xl p-1.5 border border-line-soft-3">
-                                                                    <span className="text-[8px] font-bold uppercase tracking-wider text-slate-400 dark:text-zinc-500 block">
+                                                                    <span className="text-[8px] font-bold uppercase tracking-wider text-ink-4 block">
                                                                         Potencia
                                                                     </span>
                                                                     <span className="text-xs sm:text-sm font-black font-mono tabular-nums text-amber-500">
@@ -416,10 +416,10 @@ export const ActivityDetailPage = ({ activity, settings, fetchStreams, onBack, o
                                                             {/* Altitud y Pendiente */}
                                                             {activePayload.alt !== null && (
                                                                 <div className="bg-slate-50 dark:bg-zinc-800/50 rounded-xl p-1.5 border border-line-soft-3">
-                                                                    <span className="text-[8px] font-bold uppercase tracking-wider text-slate-400 dark:text-zinc-500 block">
+                                                                    <span className="text-[8px] font-bold uppercase tracking-wider text-ink-4 block">
                                                                         Altitud
                                                                     </span>
-                                                                    <div className="flex items-center justify-center gap-1 text-xs sm:text-sm font-black font-mono tabular-nums text-slate-700 dark:text-zinc-300">
+                                                                    <div className="flex items-center justify-center gap-1 text-xs sm:text-sm font-black font-mono tabular-nums text-body">
                                                                         <span>{activePayload.alt}m</span>
                                                                         {activePayload.grade !== undefined && (
                                                                             <span className={`text-[9px] font-bold ${activePayload.grade > 3 ? 'text-rose-500' : activePayload.grade < -3 ? 'text-emerald-500' : 'text-slate-400'}`}>
@@ -433,7 +433,7 @@ export const ActivityDetailPage = ({ activity, settings, fetchStreams, onBack, o
                                                             {/* Cadencia */}
                                                             {activePayload.cadence !== null && (
                                                                 <div className="bg-slate-50 dark:bg-zinc-800/50 rounded-xl p-1.5 border border-line-soft-3">
-                                                                    <span className="text-[8px] font-bold uppercase tracking-wider text-slate-400 dark:text-zinc-500 block">
+                                                                    <span className="text-[8px] font-bold uppercase tracking-wider text-ink-4 block">
                                                                         Cadencia
                                                                     </span>
                                                                     <span className="text-xs sm:text-sm font-black font-mono tabular-nums text-emerald-500">
@@ -444,7 +444,7 @@ export const ActivityDetailPage = ({ activity, settings, fetchStreams, onBack, o
                                                         </div>
                                                     </div>
                                                 ) : (
-                                                    <div className="flex items-center justify-between text-slate-400 dark:text-zinc-500 py-0.5 px-1">
+                                                    <div className="flex items-center justify-between text-ink-4 py-0.5 px-1">
                                                         <div className="flex items-center gap-2">
                                                             <span className="inline-block w-2 h-2 rounded-full bg-indigo-500 animate-ping" />
                                                             <span className="text-[11px] font-medium">
@@ -469,7 +469,7 @@ export const ActivityDetailPage = ({ activity, settings, fetchStreams, onBack, o
                                                         <h4 className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">{isPaceBased ? 'Ritmo' : 'Velocidad'}</h4>
                                                         {activePayload && (
                                                             <div className="px-1.5 py-0.5 bg-slate-100 dark:bg-zinc-800 rounded flex items-center gap-2 text-[9px] font-bold tabular-nums">
-                                                                <span className="text-slate-600 dark:text-zinc-400">{formatDuration(activePayload.rawTime)}</span>
+                                                                <span className="text-body-soft">{formatDuration(activePayload.rawTime)}</span>
                                                                 <span className="w-px h-2 bg-slate-300 dark:bg-zinc-700"></span>
                                                                 <span className="text-indigo-500">{activePayload.distanceKm} km</span>
                                                             </div>
@@ -612,7 +612,7 @@ export const ActivityDetailPage = ({ activity, settings, fetchStreams, onBack, o
                                             )}
                                         </div>
                                     ) : (
-                                        <div className="h-64 flex items-center justify-center text-slate-300 dark:text-zinc-600 text-sm">Sin datos de análisis</div>
+                                        <div className="h-64 flex items-center justify-center text-faint text-sm">Sin datos de análisis</div>
                                     )}
                                 </div>
                             </div>
@@ -630,11 +630,11 @@ export const ActivityDetailPage = ({ activity, settings, fetchStreams, onBack, o
                                         <div className="bg-white dark:bg-zinc-900 border border-line-soft-2 rounded-2xl p-6 shadow-sm space-y-6">
                                             <div className="flex items-center justify-between">
                                                 <div className="space-y-1">
-                                                    <h3 className="text-xs font-bold text-slate-900 dark:text-zinc-100 uppercase tracking-tight">Impacto del Entrenamiento</h3>
+                                                    <h3 className="text-xs font-bold text-ink-soft uppercase tracking-tight">Impacto del Entrenamiento</h3>
                                                     <div className="flex items-center gap-2">
-                                                        <p className="text-[10px] text-slate-400 dark:text-zinc-500 font-medium">Análisis fisiológico</p>
+                                                        <p className="text-[10px] text-ink-4 font-medium">Análisis fisiológico</p>
                                                         {trainingEffect.peakEpoc > 0 && (
-                                                            <span className="text-[9px] font-bold text-slate-300 dark:text-zinc-700 tabular-nums">Peak EPOC: {trainingEffect.peakEpoc}ml</span>
+                                                            <span className="text-[9px] font-bold text-faint-2 tabular-nums">Peak EPOC: {trainingEffect.peakEpoc}ml</span>
                                                         )}
                                                     </div>
                                                 </div>
@@ -647,7 +647,7 @@ export const ActivityDetailPage = ({ activity, settings, fetchStreams, onBack, o
                                                 <div className="space-y-2">
                                                     <div className="flex justify-between items-end">
                                                         <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Aeróbico</span>
-                                                        <span className="text-sm font-black text-slate-900 dark:text-zinc-100">{trainingEffect.aerobic}</span>
+                                                        <span className="text-sm font-black text-ink-soft">{trainingEffect.aerobic}</span>
                                                     </div>
                                                     <div className="h-2 bg-slate-100 dark:bg-zinc-800 rounded-full overflow-hidden">
                                                         <div className={`h-full transition-all duration-1000 ${trainingEffect.aerobic >= 3 ? 'bg-indigo-500' : 'bg-indigo-400'}`} style={{ width: `${(trainingEffect.aerobic / 5) * 100}%` }} />
@@ -658,7 +658,7 @@ export const ActivityDetailPage = ({ activity, settings, fetchStreams, onBack, o
                                                 <div className="space-y-2">
                                                     <div className="flex justify-between items-end">
                                                         <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Anaeróbico</span>
-                                                        <span className="text-sm font-black text-slate-900 dark:text-zinc-100">{trainingEffect.anaerobic}</span>
+                                                        <span className="text-sm font-black text-ink-soft">{trainingEffect.anaerobic}</span>
                                                     </div>
                                                     <div className="h-2 bg-slate-100 dark:bg-zinc-800 rounded-full overflow-hidden">
                                                         <div className={`h-full transition-all duration-1000 ${trainingEffect.anaerobic >= 3 ? 'bg-purple-600' : 'bg-purple-400'}`} style={{ width: `${(trainingEffect.anaerobic / 5) * 100}%` }} />
@@ -670,7 +670,7 @@ export const ActivityDetailPage = ({ activity, settings, fetchStreams, onBack, o
                                             <div className="pt-5 border-t border-slate-50 dark:border-zinc-800/60">
                                                 <div className="flex gap-3">
                                                     <div className="mt-1 w-1.5 h-1.5 rounded-full bg-indigo-500 shrink-0" />
-                                                    <p className="text-[10px] font-bold text-slate-700 dark:text-zinc-300 leading-relaxed italic">
+                                                    <p className="text-[10px] font-bold text-body leading-relaxed italic">
                                                         {trainingEffect.description}
                                                     </p>
                                                 </div>
@@ -680,15 +680,15 @@ export const ActivityDetailPage = ({ activity, settings, fetchStreams, onBack, o
                                         {/* Detailed Insights Slider-like cards */}
                                         {fitnessAnalysis && (
                                             <div className="bg-slate-50/50 dark:bg-zinc-900/40 rounded-2xl p-4 border border-slate-100 dark:border-zinc-800/40">
-                                                <h4 className="text-[9px] font-bold text-slate-400 dark:text-zinc-500 uppercase tracking-widest mb-3 flex items-center gap-2">
+                                                <h4 className="text-[9px] font-bold text-ink-4 uppercase tracking-widest mb-3 flex items-center gap-2">
                                                     <div className="w-1 h-3 bg-indigo-500 rounded-full" />
                                                     Coach Insights
                                                 </h4>
                                                 <div className="space-y-3">
                                                     {fitnessAnalysis.insights.slice(0, 3).map((insight, idx) => (
                                                         <div key={idx} className="flex gap-3">
-                                                            <div className="text-[8px] font-black text-slate-300 dark:text-zinc-700 mt-0.5">0{idx + 1}</div>
-                                                            <p className="text-[10px] font-medium text-slate-500 dark:text-zinc-400 leading-snug">
+                                                            <div className="text-[8px] font-black text-faint-2 mt-0.5">0{idx + 1}</div>
+                                                            <p className="text-[10px] font-medium text-ink-3 leading-snug">
                                                                 {insight}
                                                             </p>
                                                         </div>
@@ -712,8 +712,8 @@ export const ActivityDetailPage = ({ activity, settings, fetchStreams, onBack, o
                                 currentPosition={activePayload?.latlng} 
                             />
                             <div className="absolute top-4 left-4 z-[400] bg-white/90 dark:bg-zinc-900/90 backdrop-blur p-3 rounded-xl border border-line-soft-2 shadow-md space-y-1 pointer-events-none max-w-[220px]">
-                                <h3 className="text-[10px] font-bold uppercase tracking-widest text-slate-400 dark:text-zinc-500">Ruta Detallada</h3>
-                                <div className="text-[10px] text-slate-600 dark:text-zinc-400 leading-tight">
+                                <h3 className="text-[10px] font-bold uppercase tracking-widest text-ink-4">Ruta Detallada</h3>
+                                <div className="text-[10px] text-body-soft leading-tight">
                                     {activity.distance ? `${(activity.distance / 1000).toFixed(2)} km` : ''} 
                                     {activity.elevation_gain ? ` • +${activity.elevation_gain}m` : ''}
                                 </div>
@@ -727,15 +727,15 @@ export const ActivityDetailPage = ({ activity, settings, fetchStreams, onBack, o
                         <div className="max-w-6xl mx-auto space-y-8 pb-12">
                             <div className="flex items-center justify-between border-b border-line-soft-6 pb-4">
                                 <div className="space-y-1">
-                                    <h2 className="text-sm font-bold text-slate-900 dark:text-zinc-100 uppercase tracking-tight">Análisis Técnico por Intervalos</h2>
-                                    <p className="text-[10px] text-slate-400 dark:text-zinc-500 font-medium tracking-wide uppercase">Segmentación automática ({isPaceBased ? '1km' : '5km'})</p>
+                                    <h2 className="text-sm font-bold text-ink-soft uppercase tracking-tight">Análisis Técnico por Intervalos</h2>
+                                    <p className="text-[10px] text-ink-4 font-medium tracking-wide uppercase">Segmentación automática ({isPaceBased ? '1km' : '5km'})</p>
                                 </div>
                             </div>
                             
                             <div className="bg-white dark:bg-zinc-900/20 rounded-2xl border border-line-soft-3 overflow-x-auto custom-scrollbar shadow-sm">
                                 <table className="w-full text-left border-collapse">
                                     <thead className="bg-slate-50 dark:bg-zinc-900/40">
-                                        <tr className="text-[9px] font-bold text-slate-400 dark:text-zinc-500 uppercase tracking-widest border-b border-line-soft-2">
+                                        <tr className="text-[9px] font-bold text-ink-4 uppercase tracking-widest border-b border-line-soft-2">
                                             <th className="p-4">#</th>
                                             <th className="p-4">Tiempo</th>
                                             <th className="p-4 text-right">Dist (km)</th>
@@ -746,7 +746,7 @@ export const ActivityDetailPage = ({ activity, settings, fetchStreams, onBack, o
                                             <th className="p-4 text-right">ELEV</th>
                                         </tr>
                                     </thead>
-                                    <tbody className="text-[11px] font-bold tabular-nums text-slate-600 dark:text-zinc-300 divide-y divide-slate-100 dark:divide-zinc-800/40">
+                                    <tbody className="text-[11px] font-bold tabular-nums text-body-soft-2 divide-y divide-slate-100 dark:divide-zinc-800/40">
                                         {proMetrics.autoLaps.map(lap => {
                                             // Lógica para resaltar el más rápido
                                             const isFastest = !isPaceBased 
@@ -756,9 +756,9 @@ export const ActivityDetailPage = ({ activity, settings, fetchStreams, onBack, o
                                             return (
                                                 <tr key={lap.index} className={`hover:bg-slate-50 dark:hover:bg-zinc-800/30 transition-colors group ${isFastest ? 'bg-emerald-50/30 dark:bg-emerald-900/5' : ''}`}>
                                                     <td className="p-4 font-black text-slate-300 dark:text-zinc-700 group-hover:text-indigo-500 transition-colors">{lap.index}</td>
-                                                    <td className="p-4 text-slate-900 dark:text-zinc-100">{lap.timeStr}</td>
+                                                    <td className="p-4 text-ink-soft">{lap.timeStr}</td>
                                                     <td className="p-4 text-right opacity-60 font-medium">{lap.distanceKm}</td>
-                                                    <td className={`p-4 text-right font-black ${isFastest ? 'text-emerald-500' : 'text-slate-900 dark:text-zinc-100'}`}>{lap.speedVal}</td>
+                                                    <td className={`p-4 text-right font-black ${isFastest ? 'text-emerald-500' : 'text-ink-soft'}`}>{lap.speedVal}</td>
                                                     {lap.pwrAvg !== null && (
                                                         <td className="p-4 text-right">
                                                             <span className="text-amber-500 font-black">{lap.pwrAvg}</span>
@@ -791,7 +791,7 @@ export const ActivityDetailPage = ({ activity, settings, fetchStreams, onBack, o
                                 {/* Distribución Volumétrica (Zones - Top Priority) */}
                                 {(zoneType === 'hr' ? exactZoneAnalysis : exactPacePowerZoneAnalysis) && (
                                 <div className="space-y-3">
-                                    <h3 className="text-[10px] font-bold text-slate-400 dark:text-zinc-500 uppercase tracking-widest">Distribución Volumétrica (Zonas)</h3>
+                                    <h3 className="text-[10px] font-bold text-ink-4 uppercase tracking-widest">Distribución Volumétrica (Zonas)</h3>
                                     <div className="h-[280px] bg-white dark:bg-zinc-950 rounded-2xl border border-line-soft p-6 shadow-sm">
                                         <ResponsiveContainer width="100%" height="100%">
                                             <BarChart data={zoneType === 'hr' ? exactZoneAnalysis : exactPacePowerZoneAnalysis} margin={{ bottom: 20 }}>
@@ -817,7 +817,7 @@ export const ActivityDetailPage = ({ activity, settings, fetchStreams, onBack, o
                                 {/* ClimbPro Section */}
                                 <div className="space-y-3">
                                     <div className="flex items-center justify-between">
-                                        <h3 className="text-[10px] font-bold text-slate-400 dark:text-zinc-500 uppercase tracking-widest">Análisis de Ascensiones (ClimbPro)</h3>
+                                        <h3 className="text-[10px] font-bold text-ink-4 uppercase tracking-widest">Análisis de Ascensiones (ClimbPro)</h3>
                                         <span className="text-[9px] font-bold text-indigo-500 px-2 py-0.5 bg-indigo-50 dark:bg-indigo-900/20 rounded-full uppercase tracking-tighter">
                                             {proMetrics.climbPro?.length || 0} Subidas
                                         </span>
@@ -827,7 +827,7 @@ export const ActivityDetailPage = ({ activity, settings, fetchStreams, onBack, o
                                         {proMetrics.climbPro?.length > 0 ? (
                                             <table className="w-full text-left border-collapse">
                                                 <thead className="bg-slate-50/50 dark:bg-zinc-900/30">
-                                                    <tr className="text-[8px] font-bold text-slate-400 dark:text-zinc-500 uppercase tracking-widest border-b border-line-soft">
+                                                    <tr className="text-[8px] font-bold text-ink-4 uppercase tracking-widest border-b border-line-soft">
                                                         <th className="p-4">CAT</th>
                                                         <th className="p-4">Subida</th>
                                                         <th className="p-4 text-right">DIST (km)</th>
@@ -837,7 +837,7 @@ export const ActivityDetailPage = ({ activity, settings, fetchStreams, onBack, o
                                                         <th className="p-4 text-right">TIEMPO</th>
                                                     </tr>
                                                 </thead>
-                                                <tbody className="text-[10px] font-bold tabular-nums text-slate-600 dark:text-zinc-300 divide-y divide-line-soft-5">
+                                                <tbody className="text-[10px] font-bold tabular-nums text-body-soft-2 divide-y divide-line-soft-5">
                                                     {proMetrics.climbPro.map((climb) => (
                                                         <tr key={climb.index} className="hover:bg-slate-50 dark:hover:bg-zinc-800/40 transition-colors group">
                                                             <td className="p-4">
@@ -846,7 +846,7 @@ export const ActivityDetailPage = ({ activity, settings, fetchStreams, onBack, o
                                                                     climb.category === '1' ? 'bg-rose-500 text-white' :
                                                                     climb.category === '2' ? 'bg-orange-500 text-white' :
                                                                     climb.category === '3' ? 'bg-amber-500 text-white' :
-                                                                    'bg-slate-200 text-slate-600 dark:bg-zinc-800 dark:text-zinc-400'
+                                                                    'bg-slate-200 text-body-soft dark:bg-zinc-800'
                                                                 }`}>
                                                                     {climb.category}
                                                                 </span>
@@ -855,7 +855,7 @@ export const ActivityDetailPage = ({ activity, settings, fetchStreams, onBack, o
                                                             <td className="p-4 text-right text-slate-400">{climb.distance}</td>
                                                             <td className="p-4 text-right">+{climb.gain}m</td>
                                                             <td className="p-4 text-right text-rose-500">{climb.avgGrade}%</td>
-                                                            <td className="p-4 text-right font-black text-slate-900 dark:text-zinc-100">{climb.vam}</td>
+                                                            <td className="p-4 text-right font-black text-ink-soft">{climb.vam}</td>
                                                             <td className="p-4 text-right text-slate-400 font-medium">{climb.timeStr}</td>
                                                         </tr>
                                                     ))}
@@ -874,11 +874,11 @@ export const ActivityDetailPage = ({ activity, settings, fetchStreams, onBack, o
                                 <div className="bg-slate-50 dark:bg-zinc-900/40 rounded-2xl p-5 border border-line-soft">
                                     <div className="flex items-center justify-between mb-4">
                                         <div className="space-y-1">
-                                            <h3 className="text-xs font-bold text-slate-900 dark:text-zinc-100 uppercase tracking-tight">Perfil Metabólico Estimado</h3>
-                                            <p className="text-[9px] text-slate-400 dark:text-zinc-500 font-medium">Sustratos energéticos basados en intensidad</p>
+                                            <h3 className="text-xs font-bold text-ink-soft uppercase tracking-tight">Perfil Metabólico Estimado</h3>
+                                            <p className="text-[9px] text-ink-4 font-medium">Sustratos energéticos basados en intensidad</p>
                                         </div>
                                         <div className="text-right">
-                                            <span className="text-base font-black text-slate-900 dark:text-zinc-100">{proMetrics.workKj}</span>
+                                            <span className="text-base font-black text-ink-soft">{proMetrics.workKj}</span>
                                             <span className="ml-1 text-[9px] font-bold text-slate-400 uppercase">kJ Totales</span>
                                         </div>
                                     </div>
@@ -898,7 +898,7 @@ export const ActivityDetailPage = ({ activity, settings, fetchStreams, onBack, o
                                         <div className="grid grid-cols-2 gap-6 pt-1">
                                             <div className="space-y-1">
                                                 <span className="text-[8px] font-bold text-slate-400 uppercase tracking-widest">Enfoque Técnico</span>
-                                                <p className="text-[10px] font-bold text-slate-700 dark:text-zinc-300 leading-tight">
+                                                <p className="text-[10px] font-bold text-body leading-tight">
                                                     {proMetrics.ifFactor < 0.75 
                                                         ? "Optimización de oxidación de grasas y base aeróbica." 
                                                         : "Consumo glucolítico alto. Énfasis en potencia táctica."}
@@ -906,7 +906,7 @@ export const ActivityDetailPage = ({ activity, settings, fetchStreams, onBack, o
                                             </div>
                                             <div className="space-y-1">
                                                 <span className="text-[8px] font-bold text-slate-400 uppercase tracking-widest">Recuperación Hist.</span>
-                                                <p className="text-[10px] font-bold text-slate-700 dark:text-zinc-300 leading-tight">
+                                                <p className="text-[10px] font-bold text-body leading-tight">
                                                     {activity.tss > 100 ? "36-48 horas para supercompensación." : "12-24 horas para estar al 100%."}
                                                 </p>
                                             </div>
@@ -920,7 +920,7 @@ export const ActivityDetailPage = ({ activity, settings, fetchStreams, onBack, o
                                 
                                 {/* Efficiency Gauges */}
                                 <div className="bg-slate-50 dark:bg-zinc-900/40 rounded-2xl p-6 border border-line-soft space-y-6">
-                                    <h3 className="text-xs font-bold text-slate-900 dark:text-zinc-100 uppercase tracking-tight">Métricas de Eficiencia</h3>
+                                    <h3 className="text-xs font-bold text-ink-soft uppercase tracking-tight">Métricas de Eficiencia</h3>
                                     
                                     <div className="space-y-4">
                                         <div className="space-y-1.5">
@@ -955,7 +955,7 @@ export const ActivityDetailPage = ({ activity, settings, fetchStreams, onBack, o
                                     </div>
 
                                     <div className="pt-2 border-t border-slate-200 dark:border-zinc-800/40">
-                                        <p className="text-[9px] text-slate-500 dark:text-zinc-400 leading-relaxed font-bold uppercase italic">
+                                        <p className="text-[9px] text-ink-3 leading-relaxed font-bold uppercase italic">
                                             Entrenamiento {parseFloat(proMetrics.vi) > 1.1 ? "Variable (MTB/Crit)" : "Constante (TT/Ritmo)"}
                                         </p>
                                     </div>
@@ -963,7 +963,7 @@ export const ActivityDetailPage = ({ activity, settings, fetchStreams, onBack, o
 
                                 {/* Session Highlights */}
                                 <div className="space-y-3">
-                                    <h3 className="text-[10px] font-bold text-slate-400 dark:text-zinc-500 uppercase tracking-widest">Hitos de la Sesión</h3>
+                                    <h3 className="text-[10px] font-bold text-ink-4 uppercase tracking-widest">Hitos de la Sesión</h3>
                                     <div className="bg-white dark:bg-zinc-900/40 rounded-2xl border border-line-soft overflow-hidden shadow-sm max-h-[450px] overflow-y-auto custom-scrollbar">
                                         <div className="divide-y divide-line-soft">
                                             {proMetrics.powerCurve?.map((peak, idx) => (
@@ -972,10 +972,10 @@ export const ActivityDetailPage = ({ activity, settings, fetchStreams, onBack, o
                                                         <div className="w-8 h-8 rounded-lg bg-slate-100 dark:bg-zinc-800 flex items-center justify-center text-[10px] font-black text-slate-400">
                                                             {peak.label}
                                                         </div>
-                                                        <span className="text-[10px] font-bold text-slate-600 dark:text-zinc-400 uppercase">Pico {peak.label}</span>
+                                                        <span className="text-[10px] font-bold text-body-soft uppercase">Pico {peak.label}</span>
                                                     </div>
                                                     <div className="text-right">
-                                                        <div className="text-xs font-black text-slate-900 dark:text-zinc-100">{peak.value}<span className="text-[9px] ml-0.5 opacity-50">w</span></div>
+                                                        <div className="text-xs font-black text-ink-soft">{peak.value}<span className="text-[9px] ml-0.5 opacity-50">w</span></div>
                                                     </div>
                                                 </div>
                                             ))}

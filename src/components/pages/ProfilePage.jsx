@@ -84,7 +84,7 @@ const ModeSelector = ({ sport, data, onZonesMode }) => (
         {[{ k: 'lthr', l: '% LTHR' }, { k: 'fcmax', l: '% FCmax' }, { k: 'custom', l: 'Manual' }].map(m => (
             <button key={m.k} onClick={() => onZonesMode(sport, m.k)}
                 className={`px-2.5 py-1 rounded-full text-[10px] font-semibold transition-all select-none touch-manipulation active:scale-95 ${data.zonesMode === m.k
-                    ? 'bg-white dark:bg-[#2c2c2e] shadow-xs text-slate-900 dark:text-white'
+                    ? 'bg-white dark:bg-[#2c2c2e] shadow-xs text-ink'
                     : 'text-slate-500 dark:text-zinc-400 hover:text-slate-700'
                     }`}>{m.l}</button>
         ))}
@@ -106,35 +106,35 @@ const SportZonesSection = ({ sport, sportLabel, icon: Icon, color, showPace, sho
                         <Icon size={16} strokeWidth={2.3} />
                     </div>
                     <div>
-                        <h4 className="text-xs sm:text-sm font-bold text-slate-900 dark:text-white tracking-tight">{sportLabel}</h4>
-                        <p className="text-[10px] text-slate-400 dark:text-zinc-500">Umbrales de referencia</p>
+                        <h4 className="text-xs sm:text-sm font-bold text-ink tracking-tight">{sportLabel}</h4>
+                        <p className="text-[10px] text-ink-4">Umbrales de referencia</p>
                     </div>
                 </div>
 
                 <div className={`grid ${showPace ? 'grid-cols-2 sm:grid-cols-3' : showPower ? 'grid-cols-2 sm:grid-cols-3' : 'grid-cols-2'} gap-2 sm:gap-3`}>
                     <div className="bg-slate-50 dark:bg-zinc-800/40 rounded-xl p-2.5 border border-hairline-2">
-                        <label className="text-[10px] font-semibold text-slate-500 dark:text-zinc-400 block mb-0.5">FC Umbral</label>
+                        <label className="text-[10px] font-semibold text-ink-3 block mb-0.5">FC Umbral</label>
                         <div className="flex items-baseline gap-1">
                             <input 
                                 type="number" 
                                 inputMode="numeric" 
                                 value={data.lthr} 
                                 onChange={(e) => onChange(e, sport, 'lthr')}
-                                className="w-full bg-transparent font-mono font-bold text-sm sm:text-base text-slate-900 dark:text-white outline-none" 
+                                className="w-full bg-transparent font-mono font-bold text-sm sm:text-base text-ink outline-none" 
                             />
                             <span className="text-[10px] font-semibold text-slate-400">bpm</span>
                         </div>
                     </div>
 
                     <div className="bg-slate-50 dark:bg-zinc-800/40 rounded-xl p-2.5 border border-hairline-2">
-                        <label className="text-[10px] font-semibold text-slate-500 dark:text-zinc-400 block mb-0.5">FC Máx.</label>
+                        <label className="text-[10px] font-semibold text-ink-3 block mb-0.5">FC Máx.</label>
                         <div className="flex items-baseline gap-1">
                             <input 
                                 type="number" 
                                 inputMode="numeric" 
                                 value={data.max} 
                                 onChange={(e) => onChange(e, sport, 'max')}
-                                className="w-full bg-transparent font-mono font-bold text-sm sm:text-base text-slate-900 dark:text-white outline-none" 
+                                className="w-full bg-transparent font-mono font-bold text-sm sm:text-base text-ink outline-none" 
                             />
                             <span className="text-[10px] font-semibold text-slate-400">bpm</span>
                         </div>
@@ -142,7 +142,7 @@ const SportZonesSection = ({ sport, sportLabel, icon: Icon, color, showPace, sho
 
                     {showPace && (
                         <div className="bg-slate-50 dark:bg-zinc-800/40 rounded-xl p-2.5 border border-hairline-2 col-span-2 sm:col-span-1">
-                            <label className="text-[10px] font-semibold text-slate-500 dark:text-zinc-400 block mb-0.5">Ritmo Umbral</label>
+                            <label className="text-[10px] font-semibold text-ink-3 block mb-0.5">Ritmo Umbral</label>
                             <div className="flex items-baseline gap-1">
                                 <input 
                                     type="text" 
@@ -158,7 +158,7 @@ const SportZonesSection = ({ sport, sportLabel, icon: Icon, color, showPace, sho
 
                     {showPower && (
                         <div className="bg-slate-50 dark:bg-zinc-800/40 rounded-xl p-2.5 border border-hairline-2 col-span-2 sm:col-span-1">
-                            <label className="text-[10px] font-semibold text-slate-500 dark:text-zinc-400 block mb-0.5">FTP</label>
+                            <label className="text-[10px] font-semibold text-ink-3 block mb-0.5">FTP</label>
                             <div className="flex items-baseline gap-1">
                                 <input 
                                     type="number" 
@@ -179,7 +179,7 @@ const SportZonesSection = ({ sport, sportLabel, icon: Icon, color, showPace, sho
                 <div className="p-3.5 sm:p-4 border-b border-hairline flex items-center justify-between gap-2">
                     <div className="flex items-center gap-2">
                         <Heart size={14} className="text-rose-500" />
-                        <span className="text-xs sm:text-sm font-bold text-slate-900 dark:text-white">Zonas de Frecuencia Cardíaca</span>
+                        <span className="text-xs sm:text-sm font-bold text-ink">Zonas de Frecuencia Cardíaca</span>
                     </div>
                     <ModeSelector sport={sport} data={data} onZonesMode={onZonesMode} />
                 </div>
@@ -191,15 +191,15 @@ const SportZonesSection = ({ sport, sportLabel, icon: Icon, color, showPace, sho
                             <div key={i} className="px-3.5 py-2.5 flex items-center justify-between text-xs hover:bg-slate-50/50 dark:hover:bg-zinc-800/30 transition-colors">
                                 <div className="flex items-center gap-2.5 min-w-0">
                                     <div className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: ZONE_COLORS[i] }} />
-                                    <span className="font-bold text-slate-800 dark:text-zinc-200 shrink-0">{HR_LABELS[i]}</span>
-                                    <span className="text-slate-500 dark:text-zinc-400 truncate text-[11px]">{(pcts || lthrPcts[i]).label}</span>
+                                    <span className="font-bold text-ink-2-soft shrink-0">{HR_LABELS[i]}</span>
+                                    <span className="text-ink-3 truncate text-[11px]">{(pcts || lthrPcts[i]).label}</span>
                                 </div>
                                 <div className="flex items-center gap-3 shrink-0">
                                     {pctStr && (
-                                        <span className="text-[10px] font-mono text-slate-400 dark:text-zinc-500 hidden sm:inline">{pctStr}</span>
+                                        <span className="text-[10px] font-mono text-ink-4 hidden sm:inline">{pctStr}</span>
                                     )}
                                     {isReadOnly ? (
-                                        <span className="font-mono font-bold text-slate-700 dark:text-zinc-300 text-xs">
+                                        <span className="font-mono font-bold text-body text-xs">
                                             {zone.min} - {zone.max} <span className="text-[10px] font-normal text-slate-400">bpm</span>
                                         </span>
                                     ) : (
@@ -222,7 +222,7 @@ const SportZonesSection = ({ sport, sportLabel, icon: Icon, color, showPace, sho
                     <div className="p-3.5 sm:p-4 border-b border-hairline flex items-center justify-between">
                         <div className="flex items-center gap-2">
                             <Timer size={14} className="text-orange-500" />
-                            <span className="text-xs sm:text-sm font-bold text-slate-900 dark:text-white">Zonas de Ritmo</span>
+                            <span className="text-xs sm:text-sm font-bold text-ink">Zonas de Ritmo</span>
                         </div>
                         <span className="text-[10px] font-semibold text-slate-400">por km</span>
                     </div>
@@ -231,14 +231,14 @@ const SportZonesSection = ({ sport, sportLabel, icon: Icon, color, showPace, sho
                             <div key={i} className="px-3.5 py-2.5 flex items-center justify-between text-xs hover:bg-slate-50/50 dark:hover:bg-zinc-800/30 transition-colors">
                                 <div className="flex items-center gap-2.5 min-w-0">
                                     <div className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: ZONE_COLORS[i] }} />
-                                    <span className="font-bold text-slate-800 dark:text-zinc-200 shrink-0">{HR_LABELS[i]}</span>
-                                    <span className="text-slate-500 dark:text-zinc-400 truncate text-[11px]">{zone.label}</span>
+                                    <span className="font-bold text-ink-2-soft shrink-0">{HR_LABELS[i]}</span>
+                                    <span className="text-ink-3 truncate text-[11px]">{zone.label}</span>
                                 </div>
                                 <div className="flex items-center gap-3 shrink-0">
-                                    <span className="text-[10px] font-mono text-slate-400 dark:text-zinc-500 hidden sm:inline">
+                                    <span className="text-[10px] font-mono text-ink-4 hidden sm:inline">
                                         {zone.pctMin > 0 ? `${(zone.pctMin * 100).toFixed(0)}` : '0'}-{(zone.pctMax * 100).toFixed(0)}%
                                     </span>
-                                    <span className="font-mono font-bold text-slate-700 dark:text-zinc-300 text-xs">
+                                    <span className="font-mono font-bold text-body text-xs">
                                         {zone.min} - {zone.max}/km
                                     </span>
                                 </div>
@@ -254,7 +254,7 @@ const SportZonesSection = ({ sport, sportLabel, icon: Icon, color, showPace, sho
                     <div className="p-3.5 sm:p-4 border-b border-hairline flex items-center justify-between">
                         <div className="flex items-center gap-2">
                             <Zap size={14} className="text-amber-500" />
-                            <span className="text-xs sm:text-sm font-bold text-slate-900 dark:text-white">Zonas de Potencia ({data.ftp} W)</span>
+                            <span className="text-xs sm:text-sm font-bold text-ink">Zonas de Potencia ({data.ftp} W)</span>
                         </div>
                     </div>
                     <div className="divide-y divide-hairline-2">
@@ -265,14 +265,14 @@ const SportZonesSection = ({ sport, sportLabel, icon: Icon, color, showPace, sho
                                 <div key={i} className="px-3.5 py-2.5 flex items-center justify-between text-xs hover:bg-slate-50/50 dark:hover:bg-zinc-800/30 transition-colors">
                                     <div className="flex items-center gap-2.5 min-w-0">
                                         <div className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: ZONE_COLORS[i] }} />
-                                        <span className="font-bold text-slate-800 dark:text-zinc-200 shrink-0">Z{i + 1}</span>
-                                        <span className="text-slate-500 dark:text-zinc-400 truncate text-[11px]">{pz.label}</span>
+                                        <span className="font-bold text-ink-2-soft shrink-0">Z{i + 1}</span>
+                                        <span className="text-ink-3 truncate text-[11px]">{pz.label}</span>
                                     </div>
                                     <div className="flex items-center gap-3 shrink-0">
-                                        <span className="text-[10px] font-mono text-slate-400 dark:text-zinc-500 hidden sm:inline">
+                                        <span className="text-[10px] font-mono text-ink-4 hidden sm:inline">
                                             {Math.round(pz.pMin * 100)}-{Math.round(pz.pMax * 100)}%
                                         </span>
-                                        <span className="font-mono font-bold text-slate-700 dark:text-zinc-300 text-xs">
+                                        <span className="font-mono font-bold text-body text-xs">
                                             {minW} - {i === 6 ? maxW + '+' : maxW} <span className="text-[10px] font-normal text-slate-400">W</span>
                                         </span>
                                     </div>
@@ -573,10 +573,10 @@ export const ProfilePage = ({
             onClick={() => handleSectionChange(id)}
             className={`flex items-center gap-2.5 px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-xl transition-all text-left whitespace-nowrap select-none touch-manipulation active:scale-95 ${activeSection === id
                 ? 'bg-blue-600 text-white shadow-xs font-bold'
-                : 'text-slate-700 dark:text-zinc-300 hover:bg-slate-100 dark:hover:bg-zinc-800/50 font-medium'
+                : 'text-body hover:bg-slate-100 dark:hover:bg-zinc-800/50 font-medium'
                 }`}
         >
-            <IconComponent size={17} className={activeSection === id ? 'text-white' : 'text-slate-400 dark:text-zinc-500'} />
+            <IconComponent size={17} className={activeSection === id ? 'text-white' : 'text-ink-4'} />
             <span className="text-xs sm:text-sm">{label}</span>
         </button>
     );
@@ -594,7 +594,7 @@ export const ProfilePage = ({
                         <ArrowLeft size={18} strokeWidth={2.5} />
                         <span className="hidden sm:inline">Atrás</span>
                     </button>
-                    <h1 className="text-base sm:text-2xl font-bold text-slate-900 dark:text-zinc-100 tracking-tight ml-1">
+                    <h1 className="text-base sm:text-2xl font-bold text-ink-soft tracking-tight ml-1">
                         <span className="hidden sm:inline">Ajustes — </span>
                         <span>{SECTION_NAMES[activeSection] || 'Ajustes'}</span>
                     </h1>
@@ -653,10 +653,10 @@ export const ProfilePage = ({
                                     </label>
                                 </div>
                                 <div className="min-w-0 flex-1">
-                                    <h3 className="text-base sm:text-lg font-bold text-slate-900 dark:text-white leading-tight truncate">
+                                    <h3 className="text-base sm:text-lg font-bold text-ink leading-tight truncate">
                                         {formData.fullName || 'Atleta Forma'}
                                     </h3>
-                                    <p className="text-xs text-slate-500 dark:text-zinc-400 mt-0.5 truncate">{formData.email}</p>
+                                    <p className="text-xs text-ink-3 mt-0.5 truncate">{formData.email}</p>
                                     <span className="inline-flex items-center gap-1 mt-2 text-[10px] font-semibold text-blue-600 dark:text-blue-400 bg-blue-500/10 px-2.5 py-0.5 rounded-full border border-blue-500/15">
                                         Atleta Forma
                                     </span>
@@ -668,7 +668,7 @@ export const ProfilePage = ({
                                 <div className="ios-header">Datos Personales</div>
                                 <div className="ios-card overflow-hidden divide-y divide-hairline mb-5">
                                     <div className="p-3 sm:p-3.5 flex items-center justify-between gap-3">
-                                        <span className="text-xs sm:text-sm font-medium text-slate-600 dark:text-zinc-400">Nombre</span>
+                                        <span className="text-xs sm:text-sm font-medium text-body-soft">Nombre</span>
                                         <input
                                             type="text"
                                             name="fullName"
@@ -679,8 +679,8 @@ export const ProfilePage = ({
                                         />
                                     </div>
                                     <div className="p-3 sm:p-3.5 flex items-center justify-between gap-3">
-                                        <span className="text-xs sm:text-sm font-medium text-slate-600 dark:text-zinc-400">Correo</span>
-                                        <span className="text-xs sm:text-sm font-medium text-slate-400 dark:text-zinc-500 truncate max-w-[220px]">{formData.email}</span>
+                                        <span className="text-xs sm:text-sm font-medium text-body-soft">Correo</span>
+                                        <span className="text-xs sm:text-sm font-medium text-ink-4 truncate max-w-[220px]">{formData.email}</span>
                                     </div>
                                 </div>
                             </div>
@@ -696,8 +696,8 @@ export const ProfilePage = ({
                                                 <Weight size={15} strokeWidth={2.3} />
                                             </div>
                                             <div>
-                                                <p className="text-xs sm:text-sm font-semibold text-slate-900 dark:text-white">Peso Corporal</p>
-                                                <p className="text-[10px] text-slate-400 dark:text-zinc-500">Para cálculos de W/kg</p>
+                                                <p className="text-xs sm:text-sm font-semibold text-ink">Peso Corporal</p>
+                                                <p className="text-[10px] text-ink-4">Para cálculos de W/kg</p>
                                             </div>
                                         </div>
                                         <div className="flex items-center gap-1.5">
@@ -707,9 +707,9 @@ export const ProfilePage = ({
                                                 name="weight"
                                                 value={formData.weight}
                                                 onChange={handleChange}
-                                                className="w-16 text-right font-mono font-bold text-xs sm:text-sm text-slate-900 dark:text-white bg-slate-100 dark:bg-zinc-800/80 rounded-lg px-2 py-1 outline-none focus:ring-1 focus:ring-blue-500"
+                                                className="w-16 text-right font-mono font-bold text-xs sm:text-sm text-ink bg-slate-100 dark:bg-zinc-800/80 rounded-lg px-2 py-1 outline-none focus:ring-1 focus:ring-blue-500"
                                             />
-                                            <span className="text-xs font-semibold text-slate-400 dark:text-zinc-500">kg</span>
+                                            <span className="text-xs font-semibold text-ink-4">kg</span>
                                         </div>
                                     </div>
 
@@ -720,8 +720,8 @@ export const ProfilePage = ({
                                                 <Heart size={15} strokeWidth={2.3} />
                                             </div>
                                             <div>
-                                                <p className="text-xs sm:text-sm font-semibold text-slate-900 dark:text-white">FC Reposo</p>
-                                                <p className="text-[10px] text-slate-400 dark:text-zinc-500">Pulsaciones basales mínimas</p>
+                                                <p className="text-xs sm:text-sm font-semibold text-ink">FC Reposo</p>
+                                                <p className="text-[10px] text-ink-4">Pulsaciones basales mínimas</p>
                                             </div>
                                         </div>
                                         <div className="flex items-center gap-1.5">
@@ -731,9 +731,9 @@ export const ProfilePage = ({
                                                 name="fcReposo"
                                                 value={formData.fcReposo}
                                                 onChange={handleChange}
-                                                className="w-16 text-right font-mono font-bold text-xs sm:text-sm text-slate-900 dark:text-white bg-slate-100 dark:bg-zinc-800/80 rounded-lg px-2 py-1 outline-none focus:ring-1 focus:ring-rose-500"
+                                                className="w-16 text-right font-mono font-bold text-xs sm:text-sm text-ink bg-slate-100 dark:bg-zinc-800/80 rounded-lg px-2 py-1 outline-none focus:ring-1 focus:ring-rose-500"
                                             />
-                                            <span className="text-xs font-semibold text-slate-400 dark:text-zinc-500">bpm</span>
+                                            <span className="text-xs font-semibold text-ink-4">bpm</span>
                                         </div>
                                     </div>
 
@@ -744,8 +744,8 @@ export const ProfilePage = ({
                                                 <Activity size={15} strokeWidth={2.3} />
                                             </div>
                                             <div>
-                                                <p className="text-xs sm:text-sm font-semibold text-slate-900 dark:text-white">Calibrar Fitness (CTL)</p>
-                                                <p className="text-[10px] text-slate-400 dark:text-zinc-500">Ajuste de base histórica</p>
+                                                <p className="text-xs sm:text-sm font-semibold text-ink">Calibrar Fitness (CTL)</p>
+                                                <p className="text-[10px] text-ink-4">Ajuste de base histórica</p>
                                             </div>
                                         </div>
                                         <div className="flex items-center gap-1.5">
@@ -756,9 +756,9 @@ export const ProfilePage = ({
                                                 value={targetCtl ?? ''}
                                                 onChange={(e) => setTargetCtl(e.target.value ? parseInt(e.target.value) : null)}
                                                 placeholder="Auto"
-                                                className="w-16 text-right font-mono font-bold text-xs sm:text-sm text-slate-900 dark:text-white bg-slate-100 dark:bg-zinc-800/80 rounded-lg px-2 py-1 outline-none focus:ring-1 focus:ring-emerald-500"
+                                                className="w-16 text-right font-mono font-bold text-xs sm:text-sm text-ink bg-slate-100 dark:bg-zinc-800/80 rounded-lg px-2 py-1 outline-none focus:ring-1 focus:ring-emerald-500"
                                             />
-                                            <span className="text-xs font-semibold text-slate-400 dark:text-zinc-500">CTL</span>
+                                            <span className="text-xs font-semibold text-ink-4">CTL</span>
                                         </div>
                                     </div>
                                 </div>
@@ -775,14 +775,14 @@ export const ProfilePage = ({
                                         <RefreshCw size={15} strokeWidth={2.3} />
                                     </div>
                                     <div className="min-w-0">
-                                        <p className="text-xs sm:text-sm font-bold text-slate-900 dark:text-white truncate">Auto-Detectar LTHR</p>
-                                        <p className="text-[10px] text-slate-400 dark:text-zinc-500 truncate">Calcula tu umbral desde el historial</p>
+                                        <p className="text-xs sm:text-sm font-bold text-ink truncate">Auto-Detectar LTHR</p>
+                                        <p className="text-[10px] text-ink-4 truncate">Calcula tu umbral desde el historial</p>
                                     </div>
                                 </div>
                                 <button 
                                     onClick={handleAutoDetectLTHR} 
                                     disabled={isScanning || pureActs.length === 0} 
-                                    className="px-3.5 py-1.5 bg-slate-100 dark:bg-zinc-800 hover:bg-slate-200 dark:hover:bg-zinc-700 text-slate-800 dark:text-zinc-200 rounded-full text-xs font-semibold transition-colors disabled:opacity-50 flex items-center gap-1.5 shrink-0 active:scale-95"
+                                    className="px-3.5 py-1.5 bg-slate-100 dark:bg-zinc-800 hover:bg-slate-200 dark:hover:bg-zinc-700 text-ink-2-soft rounded-full text-xs font-semibold transition-colors disabled:opacity-50 flex items-center gap-1.5 shrink-0 active:scale-95"
                                 >
                                     {isScanning ? <><Loader2 size={13} className="animate-spin" /> Analizando...</> : 'Escanear'}
                                 </button>
@@ -793,7 +793,7 @@ export const ProfilePage = ({
                                 <button 
                                     onClick={() => setActiveTab('run')} 
                                     className={`flex-1 py-1.5 text-xs font-semibold rounded-full transition-all flex items-center justify-center gap-1.5 select-none touch-manipulation active:scale-95 ${
-                                        activeTab === 'run' ? 'bg-white dark:bg-[#2c2c2e] text-orange-600 dark:text-orange-400 shadow-xs' : 'text-slate-500 dark:text-zinc-400'
+                                        activeTab === 'run' ? 'bg-white dark:bg-[#2c2c2e] text-orange-600 dark:text-orange-400 shadow-xs' : 'text-ink-3'
                                     }`}
                                 >
                                     <Footprints size={14} strokeWidth={2.3} /> Correr
@@ -801,7 +801,7 @@ export const ProfilePage = ({
                                 <button 
                                     onClick={() => setActiveTab('bike')} 
                                     className={`flex-1 py-1.5 text-xs font-semibold rounded-full transition-all flex items-center justify-center gap-1.5 select-none touch-manipulation active:scale-95 ${
-                                        activeTab === 'bike' ? 'bg-white dark:bg-[#2c2c2e] text-blue-600 dark:text-blue-400 shadow-xs' : 'text-slate-500 dark:text-zinc-400'
+                                        activeTab === 'bike' ? 'bg-white dark:bg-[#2c2c2e] text-blue-600 dark:text-blue-400 shadow-xs' : 'text-ink-3'
                                     }`}
                                 >
                                     <Bike size={14} strokeWidth={2.3} /> Ciclismo
@@ -824,8 +824,8 @@ export const ProfilePage = ({
                                             <Link2 size={17} strokeWidth={2.3} />
                                         </div>
                                         <div>
-                                            <h3 className="text-xs sm:text-sm font-bold text-slate-900 dark:text-white">Intervals.icu</h3>
-                                            <p className="text-[10px] text-slate-400 dark:text-zinc-500">Métricas de Garmin, Oura y Whoop</p>
+                                            <h3 className="text-xs sm:text-sm font-bold text-ink">Intervals.icu</h3>
+                                            <p className="text-[10px] text-ink-4">Métricas de Garmin, Oura y Whoop</p>
                                         </div>
                                     </div>
                                     <span className={`text-[10px] font-bold px-2.5 py-0.5 rounded-full ${
@@ -839,7 +839,7 @@ export const ProfilePage = ({
 
                                 <div className="p-3.5 sm:p-4 space-y-3">
                                     <div className="flex items-center justify-between gap-3">
-                                        <span className="text-xs font-medium text-slate-600 dark:text-zinc-400 shrink-0">Athlete ID</span>
+                                        <span className="text-xs font-medium text-body-soft shrink-0">Athlete ID</span>
                                         <input 
                                             type="text" 
                                             name="intervalsId" 
@@ -850,7 +850,7 @@ export const ProfilePage = ({
                                         />
                                     </div>
                                     <div className="flex items-center justify-between gap-3">
-                                        <span className="text-xs font-medium text-slate-600 dark:text-zinc-400 shrink-0">API Key</span>
+                                        <span className="text-xs font-medium text-body-soft shrink-0">API Key</span>
                                         <input 
                                             type="password" 
                                             name="intervalsKey" 
@@ -897,7 +897,7 @@ export const ProfilePage = ({
                                         </div>
                                         <div className="flex gap-2">
                                             <button onClick={handleApplySyncedProfile} className="flex-1 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-semibold transition-colors">Aplicar</button>
-                                            <button onClick={() => setSyncPreview(null)} className="flex-1 py-1.5 bg-white dark:bg-zinc-800 border border-line-2 text-slate-700 dark:text-zinc-300 rounded-lg text-xs font-semibold hover:bg-slate-50 transition-colors">Ignorar</button>
+                                            <button onClick={() => setSyncPreview(null)} className="flex-1 py-1.5 bg-white dark:bg-zinc-800 border border-line-2 text-body rounded-lg text-xs font-semibold hover:bg-slate-50 transition-colors">Ignorar</button>
                                         </div>
                                     </div>
                                 )}
@@ -912,12 +912,12 @@ export const ProfilePage = ({
                                 <div className="ios-header">SEGURIDAD</div>
                                 <div className="ios-card p-3.5 sm:p-4 mb-5">
                                     <div className="flex items-center gap-3 mb-3">
-                                        <div className="w-7 h-7 rounded-[8px] bg-slate-500/15 text-slate-700 dark:text-zinc-300 flex items-center justify-center shrink-0">
+                                        <div className="w-7 h-7 rounded-[8px] bg-slate-500/15 text-body flex items-center justify-center shrink-0">
                                             <Key size={15} strokeWidth={2.3} />
                                         </div>
                                         <div>
-                                            <h3 className="text-xs sm:text-sm font-bold text-slate-900 dark:text-white">Contraseña de Acceso</h3>
-                                            <p className="text-[10px] text-slate-400 dark:text-zinc-500">Actualiza tu clave de acceso</p>
+                                            <h3 className="text-xs sm:text-sm font-bold text-ink">Contraseña de Acceso</h3>
+                                            <p className="text-[10px] text-ink-4">Actualiza tu clave de acceso</p>
                                         </div>
                                     </div>
                                     <form onSubmit={handleUpdatePassword} className="flex gap-2">
@@ -931,7 +931,7 @@ export const ProfilePage = ({
                                         <button 
                                             type="submit" 
                                             disabled={isUpdatingPwd || !newPassword} 
-                                            className="px-4 py-2 bg-slate-900 dark:bg-white text-white dark:text-zinc-900 rounded-xl text-xs font-semibold transition-all disabled:opacity-50 shrink-0 shadow-xs active:scale-95"
+                                            className="px-4 py-2 bg-slate-900 dark:bg-white text-ink-inverse rounded-xl text-xs font-semibold transition-all disabled:opacity-50 shrink-0 shadow-xs active:scale-95"
                                         >
                                             {isUpdatingPwd ? <Loader2 size={13} className="animate-spin" /> : 'Actualizar'}
                                         </button>
@@ -948,8 +948,8 @@ export const ProfilePage = ({
                                             <Database size={15} strokeWidth={2.3} />
                                         </div>
                                         <div>
-                                            <h3 className="text-xs sm:text-sm font-bold text-slate-900 dark:text-white">Deep Sync (Datos Crudos)</h3>
-                                            <p className="text-[10px] text-slate-400 dark:text-zinc-500">{pureActs.length} de {stravaActs.length} actividades descargadas</p>
+                                            <h3 className="text-xs sm:text-sm font-bold text-ink">Deep Sync (Datos Crudos)</h3>
+                                            <p className="text-[10px] text-ink-4">{pureActs.length} de {stravaActs.length} actividades descargadas</p>
                                         </div>
                                     </div>
                                     
@@ -977,7 +977,7 @@ export const ProfilePage = ({
                                         </div>
                                         <div>
                                             <h3 className="text-xs sm:text-sm font-bold text-red-600 dark:text-red-400">Eliminar cuenta definitivamente</h3>
-                                            <p className="text-[10px] text-slate-400 dark:text-zinc-500">Se eliminarán todas tus actividades y métricas</p>
+                                            <p className="text-[10px] text-ink-4">Se eliminarán todas tus actividades y métricas</p>
                                         </div>
                                     </div>
                                     <button 

@@ -8,7 +8,7 @@ export const TrainingBalanceCard = ({ balance, balanceDays, setBalanceDays }) =>
             <div className="bg-white dark:bg-zinc-900/50 rounded-2xl border border-line-muted p-6 sm:p-8 shadow-sm">
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-10">
                     <div className="flex items-center gap-2">
-                        <h3 className="text-[10px] font-bold text-slate-400 dark:text-zinc-500 uppercase tracking-[0.1em]">Balance de Entrenamiento</h3>
+                        <h3 className="text-[10px] font-bold text-ink-4 uppercase tracking-[0.1em]">Balance de Entrenamiento</h3>
                         <InfoTooltip text="Distribución de la carga en los últimos días según intensidad." />
                     </div>
                     <div className="flex bg-slate-100/80 dark:bg-zinc-800/80 p-1 rounded-xl">
@@ -29,11 +29,11 @@ export const TrainingBalanceCard = ({ balance, balanceDays, setBalanceDays }) =>
                         <div className="grid grid-cols-2 gap-8 px-2">
                             <div className="p-4 rounded-2xl bg-slate-50/50 dark:bg-zinc-800/30 border border-line-soft">
                                 <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1">Carga Total</p>
-                                <p className="text-3xl font-black text-slate-900 dark:text-zinc-100">{Math.round(balance.totalLoad)} <span className="text-xs font-bold text-slate-400">Pts</span></p>
+                                <p className="text-3xl font-black text-ink-soft">{Math.round(balance.totalLoad)} <span className="text-xs font-bold text-slate-400">Pts</span></p>
                             </div>
                             <div className="p-4 rounded-2xl bg-slate-50/50 dark:bg-zinc-800/30 border border-line-soft">
                                 <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1">Ratio An/Ae</p>
-                                <p className="text-3xl font-black text-slate-900 dark:text-zinc-100">{(balance.anaerobic / (balance.aerobicHigh + balance.aerobicLow || 1)).toFixed(2)}</p>
+                                <p className="text-3xl font-black text-ink-soft">{(balance.anaerobic / (balance.aerobicHigh + balance.aerobicLow || 1)).toFixed(2)}</p>
                                 <p className="text-[8px] font-bold text-slate-500 uppercase mt-1 tracking-tighter">Aeróbico vs Anaeróbico</p>
                             </div>
                         </div>
@@ -54,16 +54,16 @@ export const TrainingBalanceCard = ({ balance, balanceDays, setBalanceDays }) =>
                                     <div key={i} className="group">
                                         <div className="flex justify-between items-end mb-4 px-1">
                                             <div className="flex flex-col">
-                                                <span className="text-[10px] font-bold text-slate-500 dark:text-zinc-400 uppercase tracking-tight">{b.label}</span>
+                                                <span className="text-[10px] font-bold text-ink-3 uppercase tracking-tight">{b.label}</span>
                                                 <div className="flex items-center gap-2 mt-1">
-                                                    <span className={`text-[13px] font-black ${status === 'Alto' ? 'text-rose-500' : 'text-slate-900 dark:text-zinc-100'}`}>{Math.round(b.pct)}%</span>
+                                                    <span className={`text-[13px] font-black ${status === 'Alto' ? 'text-rose-500' : 'text-ink-soft'}`}>{Math.round(b.pct)}%</span>
                                                     <span className={`text-[8px] font-black uppercase px-1.5 py-0.5 rounded-md border ${status === 'Óptimo' ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-500' : 'bg-slate-100 dark:bg-zinc-800 border-slate-200 dark:border-zinc-700 text-slate-400'}`}>
                                                         {status}
                                                     </span>
                                                 </div>
                                             </div>
                                             <div className="text-right">
-                                                <span className="text-[10px] font-bold text-slate-700 dark:text-zinc-300">{Math.round(b.value)} <span className="text-[8px] text-slate-400">TSS</span></span>
+                                                <span className="text-[10px] font-bold text-body">{Math.round(b.value)} <span className="text-[8px] text-slate-400">TSS</span></span>
                                                 <p className="text-[8px] font-bold text-slate-400 uppercase tracking-tighter">Meta: {Math.round(b.target.min)}-{Math.round(b.target.max)}</p>
                                             </div>
                                         </div>
@@ -107,10 +107,10 @@ export const TrainingBalanceCard = ({ balance, balanceDays, setBalanceDays }) =>
                                         {balance.activityCount} Sesiones
                                     </span>
                                 </div>
-                                <p className="text-[13px] font-bold text-slate-800 dark:text-zinc-100 leading-snug mb-1">
+                                <p className="text-[13px] font-bold text-ink-2 leading-snug mb-1">
                                     {balance.recommendation}
                                 </p>
-                                <p className="text-[11px] font-medium text-slate-500 dark:text-zinc-400 leading-relaxed">
+                                <p className="text-[11px] font-medium text-ink-3 leading-relaxed">
                                     {balance.details}
                                 </p>
                             </div>

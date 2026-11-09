@@ -51,7 +51,7 @@ export const BottomNav = ({ activeIndex, onTabChange }) => {
                 className={`flex flex-col items-center justify-center h-[46px] px-3.5 rounded-full transition-all duration-200 select-none touch-manipulation touch-callout-none active:scale-95 ${
                   isActive
                     ? 'liquid-glass-active text-[#007AFF] dark:text-[#0A84FF]'
-                    : 'text-slate-400 hover:text-slate-700 dark:text-zinc-500 dark:hover:text-zinc-300'
+                    : 'text-ink-4 hover:text-body'
                 }`}
               >
                 <Icon
@@ -81,7 +81,7 @@ export const BottomNav = ({ activeIndex, onTabChange }) => {
           className={`liquid-glass w-[54px] h-[54px] rounded-full flex items-center justify-center shrink-0 shadow-2xl transition-transform active:scale-90 select-none touch-manipulation touch-callout-none ${
             isSearchActive
               ? 'liquid-glass-active text-[#007AFF] dark:text-[#0A84FF]'
-              : 'text-slate-400 hover:text-slate-700 dark:text-zinc-500 dark:hover:text-zinc-300'
+              : 'text-ink-4 hover:text-body'
           }`}
         >
           <Search

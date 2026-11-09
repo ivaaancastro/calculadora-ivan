@@ -159,22 +159,22 @@ export const calculateFueling = (workout) => {
 // ============================================================
 
 const WHY_PRE = ({ fuel }) => (
-    <div className="text-[11px] text-slate-500 dark:text-zinc-400 space-y-1.5 leading-relaxed">
+    <div className="text-[11px] text-ink-3 space-y-1.5 leading-relaxed">
         {fuel.isEasySession ? (
             <p>Al ser una sesión suave y corta, tus reservas basales de glucógeno son suficientes. Haz tu ingesta habitual sin necesidad de añadir carbohidratos extra antes de entrenar.</p>
         ) : (
             <>
                 <p>Tus músculos almacenan glucógeno como combustible principal. Antes de entrenar intenso, necesitas asegurar que esos depósitos están llenos.</p>
-                <p>Para una sesión a {fuel.dominantZone} con un IF de {fuel.estimatedIF}, el cuerpo necesitará <strong className="text-slate-700 dark:text-zinc-200">más glucosa de la habitual</strong>. La ingesta de <strong>{fuel.preCarbsVal}</strong> recomendada (1-2h antes) te da energía sin crear pesadez.</p>
+                <p>Para una sesión a {fuel.dominantZone} con un IF de {fuel.estimatedIF}, el cuerpo necesitará <strong className="text-body-2">más glucosa de la habitual</strong>. La ingesta de <strong>{fuel.preCarbsVal}</strong> recomendada (1-2h antes) te da energía sin crear pesadez.</p>
             </>
         )}
     </div>
 );
 
 const WHY_DURING = ({ fuel }) => (
-    <div className="text-[11px] text-slate-500 dark:text-zinc-400 space-y-1.5 leading-relaxed">
+    <div className="text-[11px] text-ink-3 space-y-1.5 leading-relaxed">
         <p>Ingerir carbohidratos durante el ejercicio retrasa la fatiga y mantiene el rendimiento.</p>
-        <p>Para esta combinación de duración ({Math.round(fuel.durationHours * 60)} min) e intensidad (IF {fuel.estimatedIF}), se estiman <strong className="text-slate-700 dark:text-zinc-200">{fuel.recommendedCarbRate}g de carbos por hora</strong>.</p>
+        <p>Para esta combinación de duración ({Math.round(fuel.durationHours * 60)} min) e intensidad (IF {fuel.estimatedIF}), se estiman <strong className="text-body-2">{fuel.recommendedCarbRate}g de carbos por hora</strong>.</p>
         <p>El intestino puede absorber hasta 60g/hr de glucosa sola, o hasta 90g/hr combinando fuentes (Jeukendrup, 2014).</p>
         {fuel.recommendedCarbRate >= 60 && (
             <div className="mt-2 p-2 bg-amber-50 dark:bg-amber-900/20 text-amber-800 dark:text-amber-300 rounded border border-amber-200 dark:border-amber-800/30">
@@ -185,12 +185,12 @@ const WHY_DURING = ({ fuel }) => (
 );
 
 const WHY_POST = ({ fuel }) => (
-    <div className="text-[11px] text-slate-500 dark:text-zinc-400 space-y-1.5 leading-relaxed">
+    <div className="text-[11px] text-ink-3 space-y-1.5 leading-relaxed">
         {fuel.isEasySession ? (
             <p>Sesión suave sin apenas depleción de glucógeno. No necesitas un protocolo especial de recuperación; simplemente come de forma equilibrada en tu próxima ingesta.</p>
         ) : (
             <>
-                <p>Tras el ejercicio se abre una <strong className="text-slate-700 dark:text-zinc-200">ventana de 30-60 minutos</strong> donde el músculo resintetiza glucógeno hasta 2-3 veces más rápido.</p>
+                <p>Tras el ejercicio se abre una <strong className="text-body-2">ventana de 30-60 minutos</strong> donde el músculo resintetiza glucógeno hasta 2-3 veces más rápido.</p>
                 <p>Se recomienda la ingesta de <strong>{fuel.postCarbsVal}</strong> para forzar la resíntesis de glucógeno y la reparación muscular temprana.</p>
             </>
         )}
@@ -198,11 +198,11 @@ const WHY_POST = ({ fuel }) => (
 );
 
 const WHY_HYDRA = ({ fuel }) => (
-    <div className="text-[11px] text-slate-500 dark:text-zinc-400 space-y-1.5 leading-relaxed">
+    <div className="text-[11px] text-ink-3 space-y-1.5 leading-relaxed">
         <p>La deshidratación del 2% del peso puede reducir el rendimiento aeróbico hasta un 10%.</p>
         <p>Se estiman {fuel.duringHydration}ml en base a tu intensidad ({Math.round(fuel.duringHydration / fuel.durationHours)}ml/hr).</p>
         {fuel.sodiumMg > 0 &&
-            <p><strong className="text-slate-700 dark:text-zinc-200">Electrolitos:</strong> Añadir {fuel.sodiumMg}mg de sodio repone pérdidas por sudoración y mejora la retención hídrica.</p>
+            <p><strong className="text-body-2">Electrolitos:</strong> Añadir {fuel.sodiumMg}mg de sodio repone pérdidas por sudoración y mejora la retención hídrica.</p>
         }
     </div>
 );
@@ -213,11 +213,11 @@ const Row = ({ label, value, sub, why: WhyComp, fuel }) => {
         <div className="border border-line-soft-2 rounded-lg overflow-hidden">
             <div className="flex items-start justify-between px-3 py-2.5">
                 <div>
-                    <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400 dark:text-zinc-500">{label}</p>
-                    <p className="text-base font-black font-mono text-slate-800 dark:text-zinc-100 mt-0.5">{value}</p>
-                    {sub && <p className="text-[10px] text-slate-400 dark:text-zinc-500 mt-0.5">{sub}</p>}
+                    <p className="text-[10px] font-bold uppercase tracking-widest text-ink-4">{label}</p>
+                    <p className="text-base font-black font-mono text-ink-2 mt-0.5">{value}</p>
+                    {sub && <p className="text-[10px] text-ink-4 mt-0.5">{sub}</p>}
                 </div>
-                <button onClick={() => setOpen(o => !o)} className="mt-1 p-1 rounded text-slate-300 dark:text-zinc-600 hover:text-slate-500 dark:hover:text-zinc-400 transition-colors">
+                <button onClick={() => setOpen(o => !o)} className="mt-1 p-1 rounded text-faint hover:text-ink-3 transition-colors">
                     {open ? <ChevronUp size={14} /> : <Info size={14} />}
                 </button>
             </div>
@@ -239,7 +239,7 @@ export const FuelingPanel = ({ workout }) => {
             {/* Header & Energy Cost Inline */}
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div className="flex items-center gap-3">
-                    <h4 className="text-xs font-bold text-slate-500 dark:text-zinc-400 uppercase tracking-wider flex items-center gap-1.5">
+                    <h4 className="text-xs font-bold text-ink-3 uppercase tracking-wider flex items-center gap-1.5">
                         <Zap size={14} /> Estrategia Nutricional
                     </h4>
                     {!hasBlocks && (
@@ -251,12 +251,12 @@ export const FuelingPanel = ({ workout }) => {
 
                 <div className="flex gap-3">
                     <div className="bg-white dark:bg-zinc-900 rounded-md px-3 py-1.5 border border-line flex items-center gap-2 shadow-sm">
-                        <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400 dark:text-zinc-500">Gasto Est.</span>
-                        <span className="text-sm font-black font-mono text-slate-800 dark:text-zinc-100">{fuel.estimatedKj} kcal</span>
+                        <span className="text-[10px] font-bold uppercase tracking-widest text-ink-4">Gasto Est.</span>
+                        <span className="text-sm font-black font-mono text-ink-2">{fuel.estimatedKj} kcal</span>
                     </div>
                     <div className="bg-white dark:bg-zinc-900 rounded-md px-3 py-1.5 border border-line flex items-center gap-2 shadow-sm">
-                        <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400 dark:text-zinc-500">IF Est.</span>
-                        <span className="text-sm font-black font-mono text-slate-800 dark:text-zinc-100">{fuel.estimatedIF}</span>
+                        <span className="text-[10px] font-bold uppercase tracking-widest text-ink-4">IF Est.</span>
+                        <span className="text-sm font-black font-mono text-ink-2">{fuel.estimatedIF}</span>
                     </div>
                 </div>
             </div>
@@ -265,7 +265,7 @@ export const FuelingPanel = ({ workout }) => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 {/* Carb rows */}
                 <div>
-                    <p className="text-xs font-bold uppercase tracking-widest text-slate-700 dark:text-zinc-300 mb-3 flex items-center gap-1.5 border-b border-line pb-2">
+                    <p className="text-xs font-bold uppercase tracking-widest text-body mb-3 flex items-center gap-1.5 border-b border-line pb-2">
                         <Zap size={14} className="text-yellow-500" />
                         Carbohidratos
                     </p>
@@ -273,7 +273,7 @@ export const FuelingPanel = ({ workout }) => {
                         <Row label="Pre-entreno (1-2h antes)" value={fuel.preCarbsVal} sub={fuel.preCarbsSub} why={WHY_PRE} fuel={fuel} />
                         {fuel.needsDuringFueling
                             ? <Row label="Durante (si >45min)" value={`${fuel.duringCarbs}g total`} sub={`${fuel.recommendedCarbRate}g/hr · Geles, isotónico`} why={WHY_DURING} fuel={fuel} />
-                            : <div className="px-4 py-3 rounded-lg border border-line text-xs text-slate-500 dark:text-zinc-400 bg-slate-50/50 dark:bg-zinc-900/50">Sesión corta o baja intensidad — no requiere ingesta durante.</div>
+                            : <div className="px-4 py-3 rounded-lg border border-line text-xs text-ink-3 bg-slate-50/50 dark:bg-zinc-900/50">Sesión corta o baja intensidad — no requiere ingesta durante.</div>
                         }
                         <Row label="Post-entreno (ventana 30m)" value={fuel.postCarbsVal} sub={fuel.postCarbsSub} why={WHY_POST} fuel={fuel} />
                     </div>
@@ -281,7 +281,7 @@ export const FuelingPanel = ({ workout }) => {
 
                 {/* Hydration rows */}
                 <div>
-                    <p className="text-xs font-bold uppercase tracking-widest text-slate-700 dark:text-zinc-300 mb-3 flex items-center gap-1.5 border-b border-line pb-2">
+                    <p className="text-xs font-bold uppercase tracking-widest text-body mb-3 flex items-center gap-1.5 border-b border-line pb-2">
                         <Droplets size={14} className="text-blue-500" />
                         Hidratación
                     </p>
@@ -289,16 +289,16 @@ export const FuelingPanel = ({ workout }) => {
                         <Row label="Durante el entreno" value={`${fuel.duringHydration}ml`} sub={`+ ${fuel.sodiumMg}mg sodio${fuel.needsElectrolytes ? ' (vital)' : ''}`} why={WHY_HYDRA} fuel={fuel} />
                         <div className="px-4 py-3 rounded-lg border border-line flex justify-between bg-white dark:bg-zinc-900">
                             <div>
-                                <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400 dark:text-zinc-500">Post-entreno</p>
-                                <p className="text-sm font-black font-mono text-slate-800 dark:text-zinc-100">{fuel.postHydration}ml+</p>
+                                <p className="text-[10px] font-bold uppercase tracking-widest text-ink-4">Post-entreno</p>
+                                <p className="text-sm font-black font-mono text-ink-2">{fuel.postHydration}ml+</p>
                             </div>
-                            <p className="text-[10px] text-slate-500 dark:text-zinc-400 max-w-[150px] text-right leading-relaxed self-center">Recupera 1.5ml por ml de sudor perdido. Orina clara = hidratado.</p>
+                            <p className="text-[10px] text-ink-3 max-w-[150px] text-right leading-relaxed self-center">Recupera 1.5ml por ml de sudor perdido. Orina clara = hidratado.</p>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <p className="text-[10px] text-slate-400 dark:text-zinc-500 text-center italic pt-4">Estimaciones genéricas. Ajusta por nivel de sudoración, temperatura y peso corporal.</p>
+            <p className="text-[10px] text-ink-4 text-center italic pt-4">Estimaciones genéricas. Ajusta por nivel de sudoración, temperatura y peso corporal.</p>
         </div>
     );
 };

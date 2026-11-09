@@ -62,10 +62,10 @@ export const LoginPage = () => {
               <Activity size={32} strokeWidth={2.5} />
           </div>
           <div className="text-center">
-              <h1 className="text-2xl font-black text-slate-900 dark:text-zinc-100 tracking-tight leading-none uppercase">
+              <h1 className="text-2xl font-black text-ink-soft tracking-tight leading-none uppercase">
                 FORMA<span className="text-blue-500">LAB</span>
               </h1>
-              <p className="text-[10px] font-bold text-slate-500 dark:text-zinc-500 uppercase tracking-widest mt-1">
+              <p className="text-[10px] font-bold text-ink-3-flat uppercase tracking-widest mt-1">
                 Performance Analytics
               </p>
           </div>
@@ -80,7 +80,7 @@ export const LoginPage = () => {
             </button>
           )}
 
-          <h2 className="text-sm font-bold uppercase tracking-widest text-slate-800 dark:text-zinc-100 mb-6 text-center mt-2">
+          <h2 className="text-sm font-bold uppercase tracking-widest text-ink-2 mb-6 text-center mt-2">
             {isForgotPassword ? 'Recuperar Clave' : (isLogin ? 'Iniciar Sesión' : 'Crear Cuenta')}
           </h2>
 
@@ -89,12 +89,12 @@ export const LoginPage = () => {
 
           <form onSubmit={handleAuth} className="space-y-4">
             <div>
-              <label className="text-[10px] font-bold text-slate-500 dark:text-zinc-400 uppercase tracking-widest block mb-1">Email</label>
+              <label className="text-[10px] font-bold text-ink-3 uppercase tracking-widest block mb-1">Email</label>
               <div className="relative">
-                <Mail size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 dark:text-zinc-500" />
+                <Mail size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-ink-4" />
                 <input 
                   type="email" value={email} onChange={(e) => setEmail(e.target.value)} required
-                  className="w-full pl-10 pr-4 py-2.5 bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 rounded font-mono text-sm text-slate-800 dark:text-zinc-200 focus:border-blue-500 outline-none transition-colors"
+                  className="w-full pl-10 pr-4 py-2.5 bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 rounded font-mono text-sm text-ink-2-soft focus:border-blue-500 outline-none transition-colors"
                   placeholder="atleta@ejemplo.com"
                 />
               </div>
@@ -102,12 +102,12 @@ export const LoginPage = () => {
 
             {!isLogin && !isForgotPassword && (
               <div>
-                <label className="text-[10px] font-bold text-slate-500 dark:text-zinc-400 uppercase tracking-widest block mb-1">Nombre Completo</label>
+                <label className="text-[10px] font-bold text-ink-3 uppercase tracking-widest block mb-1">Nombre Completo</label>
                 <div className="relative">
-                  <User size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 dark:text-zinc-500" />
+                  <User size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-ink-4" />
                   <input 
                     type="text" value={fullName} onChange={(e) => setFullName(e.target.value)} required
-                    className="w-full pl-10 pr-4 py-2.5 bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 rounded font-mono text-sm text-slate-800 dark:text-zinc-200 focus:border-blue-500 outline-none transition-colors"
+                    className="w-full pl-10 pr-4 py-2.5 bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 rounded font-mono text-sm text-ink-2-soft focus:border-blue-500 outline-none transition-colors"
                     placeholder="Tu nombre..."
                   />
                 </div>
@@ -116,12 +116,12 @@ export const LoginPage = () => {
 
             {!isForgotPassword && (
               <div>
-                <label className="text-[10px] font-bold text-slate-500 dark:text-zinc-400 uppercase tracking-widest block mb-1">Contraseña</label>
+                <label className="text-[10px] font-bold text-ink-3 uppercase tracking-widest block mb-1">Contraseña</label>
                 <div className="relative">
-                  <Lock size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 dark:text-zinc-500" />
+                  <Lock size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-ink-4" />
                   <input 
                     type="password" value={password} onChange={(e) => setPassword(e.target.value)} required
-                    className="w-full pl-10 pr-4 py-2.5 bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 rounded font-mono text-sm text-slate-800 dark:text-zinc-200 focus:border-blue-500 outline-none transition-colors"
+                    className="w-full pl-10 pr-4 py-2.5 bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 rounded font-mono text-sm text-ink-2-soft focus:border-blue-500 outline-none transition-colors"
                     placeholder="••••••••"
                   />
                 </div>
@@ -135,7 +135,7 @@ export const LoginPage = () => {
 
           {!isForgotPassword && (
             <div className="mt-6 text-center border-t border-line-soft-2 pt-4 flex flex-col gap-3">
-              <button onClick={() => { setIsLogin(!isLogin); setError(null); setMessage(null); }} className="text-[10px] font-bold text-slate-500 dark:text-zinc-400 hover:text-slate-800 dark:hover:text-zinc-200 transition-colors uppercase tracking-widest">
+              <button onClick={() => { setIsLogin(!isLogin); setError(null); setMessage(null); }} className="text-[10px] font-bold text-ink-3 hover:text-ink-2-soft transition-colors uppercase tracking-widest">
                 {isLogin ? '¿No tienes cuenta? Regístrate' : '¿Ya tienes cuenta? Inicia Sesión'}
               </button>
               

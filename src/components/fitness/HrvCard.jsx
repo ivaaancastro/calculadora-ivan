@@ -10,7 +10,7 @@ export const HrvCard = ({ hrv }) => {
             <div className="bg-white dark:bg-zinc-900/50 rounded-2xl border border-line-muted p-6 sm:p-8 shadow-sm relative overflow-hidden">
                 <div className="flex items-center justify-between mb-8">
                     <div className="flex items-center gap-2">
-                        <h3 className="text-[10px] font-bold text-slate-400 dark:text-zinc-500 uppercase tracking-[0.1em]">Estado de VFC</h3>
+                        <h3 className="text-[10px] font-bold text-ink-4 uppercase tracking-[0.1em]">Estado de VFC</h3>
                         <InfoTooltip text="La Variabilidad de Frecuencia Cardíaca (RMSSD) indica tu recuperación real." />
                     </div>
                     {hrv.source === 'garmin' && (
@@ -23,13 +23,13 @@ export const HrvCard = ({ hrv }) => {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
                     <div>
                         <div className="flex items-baseline gap-2 mb-2">
-                            <span className="text-4xl font-bold tracking-tighter text-slate-900 dark:text-zinc-100">{hrv.rmssd}</span>
+                            <span className="text-4xl font-bold tracking-tighter text-ink-soft">{hrv.rmssd}</span>
                             <span className="text-sm font-bold text-slate-400 uppercase tracking-widest">ms</span>
                             <div className="ml-4 px-2 py-0.5 rounded-md text-[9px] font-bold uppercase border shadow-sm" style={{ backgroundColor: `${hrv.color}10`, color: hrv.color, borderColor: `${hrv.color}20` }}>
                                 {hrv.state}
                             </div>
                         </div>
-                        <p className="text-sm font-medium text-slate-600 dark:text-zinc-400 leading-relaxed max-w-sm">{hrv.msg}</p>
+                        <p className="text-sm font-medium text-body-soft leading-relaxed max-w-sm">{hrv.msg}</p>
                         
                         <div className="mt-8 space-y-3">
                             <div className="h-1.5 w-full bg-slate-100 dark:bg-zinc-800 rounded-full overflow-hidden">
@@ -47,15 +47,15 @@ export const HrvCard = ({ hrv }) => {
                             <div>
                                 <p className="text-[9px] font-bold text-slate-400 uppercase tracking-[0.1em] mb-1">Stress Score</p>
                                 <div className="flex items-baseline gap-1">
-                                    <span className="text-2xl font-bold text-slate-800 dark:text-zinc-100">{hrv.stress}</span>
+                                    <span className="text-2xl font-bold text-ink-2">{hrv.stress}</span>
                                     <span className="text-[10px] font-medium text-slate-400">/ 100</span>
                                 </div>
                             </div>
-                            <Brain size={24} className="text-slate-300 dark:text-zinc-700" />
+                            <Brain size={24} className="text-faint-2" />
                         </div>
                         <div className="flex items-center gap-2">
                             <div className={`w-2 h-2 rounded-full ${hrv.stress > 60 ? 'bg-orange-500' : 'bg-emerald-500'}`} />
-                            <p className="text-[11px] font-bold text-slate-600 dark:text-zinc-400 uppercase tracking-tight">
+                            <p className="text-[11px] font-bold text-body-soft uppercase tracking-tight">
                                 {hrv.stress > 60 ? 'Necesitas recuperación' : 'Cuerpo listo para entrenar'}
                             </p>
                         </div>
