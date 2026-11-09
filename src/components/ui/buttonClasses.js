@@ -9,8 +9,8 @@
  *  - `soft`: volver del detalle de actividad (círculo con fondo).
  *  - `ghost`: mes anterior y siguiente del Calendario.
  *  - `bare`: volver del formulario de contraseña olvidada (acceso y landing).
- * Borrar actividad del detalle no entra: su `dark:text-zinc-500` gana hoy al `hover:text-red-500`
- * (D-08) y moverlo a tokens cambiaría el hover en oscuro.
+ * Borrar actividad del detalle no entra: en oscuro, su color de base gana hoy al rojo del hover
+ * (D-08) y pasarlo a tokens haría aparecer ese hover.
  * El tamaño y el relleno van en `className`.
  */
 import { cx } from './cx.js';
