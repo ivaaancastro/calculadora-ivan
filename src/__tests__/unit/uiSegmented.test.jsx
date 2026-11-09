@@ -32,7 +32,7 @@ describe('ui/Segmented recetas', () => {
     expect(classes(segmentedOptionClass({ variant: 'mini', active: true, tone: 'hr' }))).toEqual(
       classes('px-2 py-0.5 text-[10px] font-semibold rounded-full transition-all duration-200 bg-surface-3 text-legacy-hr-red shadow-sm'),
     );
-    expect(segmentedOptionClass({ variant: 'mini' })).toMatch(/text-segmented-mini-off hover:text-segmented-mini-off-hover$/);
+    expect(segmentedOptionClass({ variant: 'mini' })).toMatch(/text-ink-4-fixed hover:text-segmented-mini-off-hover$/);
     expect(segmentedClass({ variant: 'mini' })).toBe('flex bg-fill-5 rounded-full p-0.5');
   });
 

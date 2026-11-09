@@ -18,6 +18,6 @@
   "ink-inverse": { "light": "white", "dark": "zinc-900" },
   "segmented-off": { "light": "slate-500", "dark": "slate-500" },
   "segmented-off-hover": { "light": "slate-700", "dark": "slate-700" },
-  "segmented-mini-off": { "light": "slate-400", "dark": "slate-400" },
+  "ink-4-fixed": { "light": "slate-400", "dark": "slate-400" },
   "segmented-mini-off-hover": { "light": "slate-600", "dark": "slate-600" }
 }
