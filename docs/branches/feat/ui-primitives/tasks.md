@@ -11,7 +11,7 @@ Solo se marca lo verificado. Spec y plan aprobados el 2026-11-09 ("Apruebo todo"
 - [x] Detección: un cambio de relleno y uno de radio se ven con `full` y no con el volcado de color; retirados
 - [x] Retirar las 14 clases sin uso de `index.css` y `MetricHelp`; volcado `full` frente a `develop` con 0 diferencias
 - [x] Verificación completa
-- [ ] PR hacia `develop`
+- [x] PR hacia `develop` (#60)
 
 ### Notas de verificación del PR 0
 - **Volcado `full`:** 51 propiedades más (tipografía, relleno, margen, bordes, radios, disposición, transformaciones, transiciones, efectos e interacción) y el tamaño de la caja fuera de los SVG. Estados nuevos: `calendario-planificador`, `calendario-visor`, `salud-historial-punto-activo` (la gráfica de Salud solo existe en la vista "Historial", que antes no se volcaba) y `rendimiento-punto-activo` (solo escritorio y tableta). En total, 104 volcados.
