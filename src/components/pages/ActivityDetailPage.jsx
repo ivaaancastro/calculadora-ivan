@@ -2,11 +2,11 @@ import React, { useEffect, useState, useRef, useMemo } from 'react';
 import { ArrowLeft, ExternalLink, Trash2, Calendar, Activity, Layers, Loader2, Heart, Clock, MapPin, Zap, Target, Info } from 'lucide-react';
 import { AreaChart, Area, BarChart, Bar, Cell, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer } from 'recharts';
 import { InteractiveMap } from '../activity/ActivityMap';
-import { MetricCard, PillTab, CustomChartTooltip } from '../activity/ActivitySharedUI';
+import { PillTab, CustomChartTooltip } from '../activity/ActivitySharedUI';
 import { useActivityMetrics } from '../../hooks/useActivityMetrics';
 import { formatPace, formatMinsToHMM, formatDuration } from '../../utils/formatters';
 import { useChartTheme } from '../charts/useChartTheme';
-import { Card } from '../ui';
+import { Card, Stat } from '../ui';
 export const ActivityDetailPage = ({ activity, settings, fetchStreams, onBack, onDelete }) => {
     const ct = useChartTheme();
     const [streams, setStreams] = useState(null);
@@ -219,21 +219,21 @@ export const ActivityDetailPage = ({ activity, settings, fetchStreams, onBack, o
 
                 {/* Expanded Compact Metric Grid - Desktop Solo (en móvil se muestra en cuadrícula bajo el Mapa) */}
                 <div className="hidden lg:flex items-center gap-2 py-1 overflow-x-auto hide-scrollbar touch-scroll overscroll-contain sm:flex-wrap -mx-3 px-3 sm:mx-0 sm:px-0 mt-2">
-                    <MetricCard label="Distancia" value={(activity.distance / 1000).toFixed(2)} unit="km" />
-                    <MetricCard label="Tiempo" value={formatTimeStr(activity.duration)} />
-                    <MetricCard label="Desnivel" value={activity.elevation_gain || 0} unit="m" />
-                    <MetricCard label="Carga" value={Math.round(activity.tss || 0)} unit="TSS" accent="text-load" />
-                    {proMetrics.ifFactor > 0 && <MetricCard label="IF" value={proMetrics.ifFactor} accent="text-power" />}
-                    {proMetrics.workKj > 0 && <MetricCard label="Trabajo" value={proMetrics.workKj} unit="kJ" />}
-                    {activity.hr_avg > 0 && <MetricCard label="FC Media" value={activity.hr_avg} unit="bpm" accent="text-hr" />}
-                    {speedMetric && <MetricCard label={speedMetric.label} value={speedMetric.value} unit={speedMetric.unit} accent="text-speed" />}
-                    {proMetrics.avgWatts > 0 && <MetricCard label="W Media" value={proMetrics.avgWatts} unit="w" accent="text-power" />}
-                    {proMetrics.npWatts > 0 && <MetricCard label="NP" value={proMetrics.npWatts} unit="w" accent="text-power-strong" />}
-                    {proMetrics.efObj && <MetricCard label="EF" value={proMetrics.efObj.value} unit={proMetrics.efObj.unit} />}
+                    <Stat label="Distancia" value={(activity.distance / 1000).toFixed(2)} unit="km" />
+                    <Stat label="Tiempo" value={formatTimeStr(activity.duration)} />
+                    <Stat label="Desnivel" value={activity.elevation_gain || 0} unit="m" />
+                    <Stat label="Carga" value={Math.round(activity.tss || 0)} unit="TSS" accent="text-load" />
+                    {proMetrics.ifFactor > 0 && <Stat label="IF" value={proMetrics.ifFactor} accent="text-power" />}
+                    {proMetrics.workKj > 0 && <Stat label="Trabajo" value={proMetrics.workKj} unit="kJ" />}
+                    {activity.hr_avg > 0 && <Stat label="FC Media" value={activity.hr_avg} unit="bpm" accent="text-hr" />}
+                    {speedMetric && <Stat label={speedMetric.label} value={speedMetric.value} unit={speedMetric.unit} accent="text-speed" />}
+                    {proMetrics.avgWatts > 0 && <Stat label="W Media" value={proMetrics.avgWatts} unit="w" accent="text-power" />}
+                    {proMetrics.npWatts > 0 && <Stat label="NP" value={proMetrics.npWatts} unit="w" accent="text-power-strong" />}
+                    {proMetrics.efObj && <Stat label="EF" value={proMetrics.efObj.value} unit={proMetrics.efObj.unit} />}
                     {proMetrics.decouplingObj && (
-                        <MetricCard label="Drift" value={proMetrics.decouplingObj.value} unit="%" accent={proMetrics.decouplingObj.color} />
+                        <Stat label="Drift" value={proMetrics.decouplingObj.value} unit="%" accent={proMetrics.decouplingObj.color} />
                     )}
-                    {proMetrics.cadenceAvg > 0 && <MetricCard label="Cadencia" value={proMetrics.cadenceAvg} unit={isPaceBased ? 'ppm' : 'rpm'} />}
+                    {proMetrics.cadenceAvg > 0 && <Stat label="Cadencia" value={proMetrics.cadenceAvg} unit={isPaceBased ? 'ppm' : 'rpm'} />}
                 </div>
             </header>
 
@@ -267,20 +267,20 @@ export const ActivityDetailPage = ({ activity, settings, fetchStreams, onBack, o
 
                                         {/* Resumen de Métricas en varias Columnas y Filas (Estilo Apple / Strava) */}
                                         <div className="grid grid-cols-3 gap-2 py-0.5">
-                                            <MetricCard label="Distancia" value={(activity.distance / 1000).toFixed(2)} unit="km" />
-                                            <MetricCard label="Tiempo" value={formatTimeStr(activity.duration)} />
-                                            <MetricCard label="Desnivel" value={activity.elevation_gain || 0} unit="m" />
-                                            {speedMetric && <MetricCard label={speedMetric.label} value={speedMetric.value} unit={speedMetric.unit} accent="text-speed" />}
-                                            {activity.hr_avg > 0 && <MetricCard label="FC Media" value={activity.hr_avg} unit="bpm" accent="text-hr" />}
-                                            <MetricCard label="Carga" value={Math.round(activity.tss || 0)} unit="TSS" accent="text-load" />
-                                            {proMetrics.avgWatts > 0 && <MetricCard label="W Media" value={proMetrics.avgWatts} unit="w" accent="text-power" />}
-                                            {proMetrics.ifFactor > 0 && <MetricCard label="IF" value={proMetrics.ifFactor} accent="text-power" />}
-                                            {proMetrics.cadenceAvg > 0 && <MetricCard label="Cadencia" value={proMetrics.cadenceAvg} unit={isPaceBased ? 'ppm' : 'rpm'} />}
-                                            {proMetrics.workKj > 0 && <MetricCard label="Trabajo" value={proMetrics.workKj} unit="kJ" />}
-                                            {proMetrics.npWatts > 0 && <MetricCard label="NP" value={proMetrics.npWatts} unit="w" accent="text-power-strong" />}
-                                            {proMetrics.efObj && <MetricCard label="EF" value={proMetrics.efObj.value} unit={proMetrics.efObj.unit} />}
+                                            <Stat label="Distancia" value={(activity.distance / 1000).toFixed(2)} unit="km" />
+                                            <Stat label="Tiempo" value={formatTimeStr(activity.duration)} />
+                                            <Stat label="Desnivel" value={activity.elevation_gain || 0} unit="m" />
+                                            {speedMetric && <Stat label={speedMetric.label} value={speedMetric.value} unit={speedMetric.unit} accent="text-speed" />}
+                                            {activity.hr_avg > 0 && <Stat label="FC Media" value={activity.hr_avg} unit="bpm" accent="text-hr" />}
+                                            <Stat label="Carga" value={Math.round(activity.tss || 0)} unit="TSS" accent="text-load" />
+                                            {proMetrics.avgWatts > 0 && <Stat label="W Media" value={proMetrics.avgWatts} unit="w" accent="text-power" />}
+                                            {proMetrics.ifFactor > 0 && <Stat label="IF" value={proMetrics.ifFactor} accent="text-power" />}
+                                            {proMetrics.cadenceAvg > 0 && <Stat label="Cadencia" value={proMetrics.cadenceAvg} unit={isPaceBased ? 'ppm' : 'rpm'} />}
+                                            {proMetrics.workKj > 0 && <Stat label="Trabajo" value={proMetrics.workKj} unit="kJ" />}
+                                            {proMetrics.npWatts > 0 && <Stat label="NP" value={proMetrics.npWatts} unit="w" accent="text-power-strong" />}
+                                            {proMetrics.efObj && <Stat label="EF" value={proMetrics.efObj.value} unit={proMetrics.efObj.unit} />}
                                             {proMetrics.decouplingObj && (
-                                                <MetricCard label="Drift" value={proMetrics.decouplingObj.value} unit="%" accent={proMetrics.decouplingObj.color} />
+                                                <Stat label="Drift" value={proMetrics.decouplingObj.value} unit="%" accent={proMetrics.decouplingObj.color} />
                                             )}
                                         </div>
                                     </div>

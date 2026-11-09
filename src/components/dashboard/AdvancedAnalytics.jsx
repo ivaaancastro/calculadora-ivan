@@ -19,7 +19,7 @@ import { EvolutionChart } from './EvolutionChart';
 import { InfoTooltip } from '../common/InfoTooltip';
 import { supabase } from '../../supabase';
 import { useTheme } from '../../hooks/useTheme';
-import { Card, SectionHeader } from '../ui';
+import { Card, SectionHeader, StatTile } from '../ui';
 
 const TIME_INTERVALS = [1, 5, 15, 30, 60, 180, 300, 600, 1200, 2400, 3600, 7200];
 // const formatInterval = (secs) => { if (secs < 60) return `${secs}s`; if (secs < 3600) return `${secs / 60}m`; return `${secs / 3600}h`; };
@@ -181,76 +181,16 @@ export const AdvancedAnalytics = React.memo(({ activities, settings,  timeRange,
                 <SectionHeader as="p">Fisiología y Carga</SectionHeader>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-2.5 sm:gap-3">
                     {/* Fitness (CTL) */}
-                    <Card pressable className="p-3.5 sm:p-4 flex flex-col justify-between">
-                        <div className="flex items-center justify-between mb-2">
-                            <span className="text-[11px] font-semibold text-ink-3">Fitness (CTL)</span>
-                            <div className="w-7 h-7 rounded-xl bg-blue-500/10 text-blue-600 dark:text-blue-400 flex items-center justify-center">
-                                <Activity size={15} strokeWidth={2.3} />
-                            </div>
-                        </div>
-                        <div>
-                            <div className="text-2xl sm:text-3xl font-bold tracking-tight text-ink tabular-nums">
-                                {Math.round(model.ctl)}
-                            </div>
-                            <span className="text-[10px] font-medium text-ink-4">
-                                {model.loadTrend >= 0 ? '+' : ''}{model.loadTrend.toFixed(1)}% vs 28d
-                            </span>
-                        </div>
-                    </Card>
+                    <StatTile size="lg" label="Fitness (CTL)" icon={Activity} iconTone="ctl" value={Math.round(model.ctl)} sub={`${model.loadTrend >= 0 ? '+' : ''}${model.loadTrend.toFixed(1)}% vs 28d`} />
 
                     {/* Fatiga (ATL) */}
-                    <Card pressable className="p-3.5 sm:p-4 flex flex-col justify-between">
-                        <div className="flex items-center justify-between mb-2">
-                            <span className="text-[11px] font-semibold text-ink-3">Fatiga (ATL)</span>
-                            <div className="w-7 h-7 rounded-xl bg-[#FA114F]/10 text-[#FA114F] flex items-center justify-center">
-                                <Battery size={15} strokeWidth={2.3} />
-                            </div>
-                        </div>
-                        <div>
-                            <div className="text-2xl sm:text-3xl font-bold tracking-tight text-ink tabular-nums">
-                                {Math.round(model.atl)}
-                            </div>
-                            <span className="text-[10px] font-medium text-ink-4">
-                                Carga últ. 7 días
-                            </span>
-                        </div>
-                    </Card>
+                    <StatTile size="lg" label="Fatiga (ATL)" icon={Battery} iconTone="atl" value={Math.round(model.atl)} sub="Carga últ. 7 días" />
 
                     {/* Forma (TSB) */}
-                    <Card pressable className="p-3.5 sm:p-4 flex flex-col justify-between">
-                        <div className="flex items-center justify-between mb-2">
-                            <span className="text-[11px] font-semibold text-ink-3">Forma (TSB)</span>
-                            <div className="w-7 h-7 rounded-xl bg-[#30D158]/10 text-[#30D158] flex items-center justify-center">
-                                <Zap size={15} strokeWidth={2.3} />
-                            </div>
-                        </div>
-                        <div>
-                            <div className="text-2xl sm:text-3xl font-bold tracking-tight text-ink tabular-nums">
-                                {(model.tsb > 0 ? '+' : '') + Math.round(model.tsb)}
-                            </div>
-                            <span className="text-[10px] font-medium text-ink-4">
-                                Balance CTL / ATL
-                            </span>
-                        </div>
-                    </Card>
+                    <StatTile size="lg" label="Forma (TSB)" icon={Zap} iconTone="tsb" value={(model.tsb > 0 ? '+' : '') + Math.round(model.tsb)} sub="Balance CTL / ATL" />
 
                     {/* Ratio Carga (ACWR) */}
-                    <Card pressable className="p-3.5 sm:p-4 flex flex-col justify-between">
-                        <div className="flex items-center justify-between mb-2">
-                            <span className="text-[11px] font-semibold text-ink-3">Ratio Carga</span>
-                            <div className="w-7 h-7 rounded-xl bg-[#FF9F0A]/10 text-[#FF9F0A] flex items-center justify-center">
-                                <Target size={15} strokeWidth={2.3} />
-                            </div>
-                        </div>
-                        <div>
-                            <div className="text-2xl sm:text-3xl font-bold tracking-tight text-ink tabular-nums">
-                                {model.acwr.toFixed(2)}
-                            </div>
-                            <span className="text-[10px] font-medium text-ink-4">
-                                Aguda vs Crónica
-                            </span>
-                        </div>
-                    </Card>
+                    <StatTile size="lg" label="Ratio Carga" icon={Target} iconTone="acwr" value={model.acwr.toFixed(2)} sub="Aguda vs Crónica" />
                 </div>
             </div>
 
@@ -259,29 +199,12 @@ export const AdvancedAnalytics = React.memo(({ activities, settings,  timeRange,
                 <SectionHeader as="p">Tendencia y Capacidad</SectionHeader>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-2.5 sm:gap-3">
                     {[
-                        { label: 'Rampa Semanal', value: `${model.rampRate > 0 ? '+' : ''}${model.rampRate.toFixed(1)}`, icon: model.rampRate >= 0 ? ArrowUpRight : ArrowDownRight, color: 'text-indigo-500', bg: 'bg-indigo-500/10', sub: 'pts/sem' },
-                        { label: 'Monotonía', value: model.monotony.toFixed(2), icon: Brain, color: 'text-purple-500', bg: 'bg-purple-500/10', sub: 'Índice carga' },
-                        { label: 'Volumen 30D', value: `${Math.round(model.totalVolume / 60)}h`, icon: CalendarDays, color: 'text-cyan-500', bg: 'bg-cyan-500/10', sub: `${model.totalActivities} sesiones` },
-                        { label: 'VO2 Max', value: globalMaxVo2 || '--', icon: TrendingUp, color: 'text-vo2', bg: 'bg-vo2/10', sub: vo2IsGarmin ? 'Sincronizado' : 'Estimado' }
+                        { label: 'Rampa Semanal', value: `${model.rampRate > 0 ? '+' : ''}${model.rampRate.toFixed(1)}`, icon: model.rampRate >= 0 ? ArrowUpRight : ArrowDownRight, tone: 'ramp', sub: 'pts/sem' },
+                        { label: 'Monotonía', value: model.monotony.toFixed(2), icon: Brain, tone: 'monotony', sub: 'Índice carga' },
+                        { label: 'Volumen 30D', value: `${Math.round(model.totalVolume / 60)}h`, icon: CalendarDays, tone: 'volume', sub: `${model.totalActivities} sesiones` },
+                        { label: 'VO2 Max', value: globalMaxVo2 || '--', icon: TrendingUp, tone: 'vo2', sub: vo2IsGarmin ? 'Sincronizado' : 'Estimado' }
                     ].map((kpi, i) => (
-                        <Card pressable key={i} className="p-3 sm:p-3.5 flex flex-col justify-between">
-                            <div className="flex items-center justify-between mb-1.5">
-                                <span className="text-[10px] font-semibold text-ink-3">{kpi.label}</span>
-                                <div className={`w-6 h-6 rounded-lg ${kpi.bg} ${kpi.color} flex items-center justify-center shrink-0`}>
-                                    <kpi.icon size={13} strokeWidth={2.2} />
-                                </div>
-                            </div>
-                            <div>
-                                <span className="text-lg sm:text-xl font-bold tracking-tight text-ink tabular-nums">
-                                    {kpi.value}
-                                </span>
-                                {kpi.sub && (
-                                    <p className="text-[9px] font-medium text-ink-4 truncate">
-                                        {kpi.sub}
-                                    </p>
-                                )}
-                            </div>
-                        </Card>
+                        <StatTile key={i} size="sm" label={kpi.label} icon={kpi.icon} iconTone={kpi.tone} value={kpi.value} sub={kpi.sub} />
                     ))}
                 </div>
             </div>

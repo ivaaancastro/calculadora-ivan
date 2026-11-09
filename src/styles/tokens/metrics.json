@@ -11,5 +11,11 @@
   "legacy-tsb-up-ink": { "light": "emerald-600", "dark": "emerald-400" },
   "legacy-tsb-down": { "light": "orange-400", "dark": "orange-400" },
   "legacy-tsb-down-2": { "light": "orange-500", "dark": "orange-500" },
-  "legacy-tsb-low": { "light": "red-500", "dark": "red-500" }
+  "legacy-tsb-low": { "light": "red-500", "dark": "red-500" },
+  "metric-atl-tile": { "light": "[#FA114F]", "dark": "[#FA114F]" },
+  "metric-tsb-tile": { "light": "[#30D158]", "dark": "[#30D158]" },
+  "metric-acwr-tile": { "light": "[#FF9F0A]", "dark": "[#FF9F0A]" },
+  "metric-ramp-tile": { "light": "indigo-500", "dark": "indigo-500" },
+  "metric-monotony-tile": { "light": "purple-500", "dark": "purple-500" },
+  "metric-volume-tile": { "light": "cyan-500", "dark": "cyan-500" }
 }

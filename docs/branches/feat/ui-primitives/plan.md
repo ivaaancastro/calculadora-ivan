@@ -41,7 +41,7 @@ Los mismos pasos en cada PR:
 
 Notas por familia:
 - **PR 1, Card:** las clases `ios-*` estaban en `@layer utilities` y ganaban a las utilidades de Tailwind (ver spec 6.2, corrección): el borde y el texto de peligro de "Zona de peligro" y el `mb-3` de 4 títulos de Salud no se veían y se retiran, sin `tone`. La sombra de la tarjeta pasa a `--shadow-card` (`shadow-card`); `dark:shadow-none` se mantiene como clase. Lo confirma el volcado `full` (`box-shadow`, `margin`, `border-color`, `color`).
-- **PR 2, Stat:** `MetricCard` lleva un `border-black/[0.04] dark:border-white/[0.07]` sin token. Si D2 se aprueba, se crea su token; si no, `Stat` no puede incluirlo y `MetricCard` se queda.
+- **PR 2, Stat:** el borde de `MetricCard` pasa al token `hairline-5` (D2). `StatTile` solo cubre el Dashboard (`lg`, `sm`); las fichas de Salud se quedan con `Card pressable` (alcance acordado el 2026-11-09, ver spec 6.2).
 - **PR 3, Segmented:** antes de tocar nada, comprobar que los E2E y el volcado (estados `calendario-forma`, `detalle-mapa`) localizan las opciones por rol `button` y nombre: `aria-pressed` no cambia ni el rol ni el nombre.
 - **PR 4, Field:** las pruebas de integración de `AddActivityModal`, `HistoryList` y `ProfilePage` deben pasar sin tocarlas. Los campos de acceso con D-08 no entran.
 - **PR 5, Button:** se respeta el `type` de cada botón original (`submit` en los formularios de acceso y de añadir).

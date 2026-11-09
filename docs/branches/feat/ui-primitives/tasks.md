@@ -38,8 +38,17 @@ Solo se marca lo verificado. Spec y plan aprobados el 2026-11-09 ("Apruebo todo"
 - Resultados: lint ✓, lint:colors ✓, lint:ui ✓ (2 exportaciones), unit 138/138, integración 10/10, build ✓, E2E macOS 79 ✓, E2E Docker 127 ✓ (48 capturas sin diferencias; el ✘ de `gestures.spec.js:37` es D-01). En la primera ejecución de Docker falló `dashboard.spec.js:33` por tiempo (16 s); repetido 3 veces, 21/21, y la suite completa otra vez, 127 ✓. Informe táctil en macOS: 113 en `develop` y en la rama, igual por pantalla. En Docker las cifras son otras (97) por las fuentes de Linux: se compara siempre en la misma plataforma.
 
 ## PR 2 — Stat y StatTile (`feat/ui-primitives-stat`)
-- [ ] Inventario, primitivas, sustitución, retirada de `MetricCard`
-- [ ] Verificación completa y PR
+- [x] Inventario, primitivas, sustitución, retirada de `MetricCard`
+- [x] Verificación completa
+- [x] PR hacia `develop` (#62)
+
+### Notas del PR 2
+- **Alcance (acordado el 2026-11-09):** `Stat` + `StatTile` solo en el Dashboard. Las 8 fichas de biomarcadores de Salud no son idénticas entre sí: cada una tiene un pie distinto (barra de progreso de pasos, tendencia de peso con icono, texto), valores con color dinámico de paleta, unidad condicional y `gap-0.5` en SpO₂. Se quedan con `Card pressable`, para la Capa 3.
+- **Cobertura:** `Stat` 26 (todas las `MetricCard`, en el detalle); `StatTile` 8: `lg` 4 ("Fisiología y Carga") y `sm` 4 ("Tendencia y Capacidad", en bucle).
+- **Tokens nuevos (D2):** `hairline-5` (`black/[0.04]`, `white/[0.07]`, el borde de `MetricCard`) en `borders.json`; `metric-atl-tile` (`#FA114F`), `metric-tsb-tile` (`#30D158`), `metric-acwr-tile` (`#FF9F0A`), `metric-ramp-tile` (indigo-500), `metric-monotony-tile` (purple-500) y `metric-volume-tile` (cyan-500) en `metrics.json`. Bloques de `tokens.css` regenerados con `--tokens`. CTL usa `metric-ctl` y `metric-ctl-ink`, y VO2 usa `vo2`, que ya existían con ese valor.
+- `accent` del drift: la clase llega de `src/hooks/useActivityMetrics.js` (paleta) y no se toca.
+- `lint:colors`: `palette` 859 → 848, `arbitrary` 9 → 3, `dark` 188 → 186 (`AdvancedAnalytics`, `ActivitySharedUI`).
+- Resultados: lint ✓, lint:colors ✓, lint:ui ✓ (4 exportaciones), unit 145/145, integración 10/10, build ✓, E2E macOS 79 ✓, E2E Docker 127 ✓ (48 capturas sin diferencias; el ✘ de `gestures.spec.js:37` es D-01). Volcado `full` frente a `develop`: **104 volcados, 90.548 elementos, 0 diferencias**. Los dos volcados se lanzaron en paralelo y 7 estados fallaron por tiempo en un lado u otro; repetidos solos, los 104 están completos. Informe táctil en macOS: 113, igual que en `develop` por pantalla.
 
 ## PR 3 — Segmented (`feat/ui-primitives-segmented`)
 - [ ] Inventario, primitiva, sustitución, retirada de `PillTab`

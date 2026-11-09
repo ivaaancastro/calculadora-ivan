@@ -21,6 +21,7 @@
   ],
   "components": [
     "MetricHelp",
-    "IosCard"
+    "IosCard",
+    "MetricCard"
   ]
 }

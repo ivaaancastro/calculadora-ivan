@@ -1,11 +1,11 @@
 {
   "$comment": "Línea base de scripts/check-colors.mjs. Solo debe bajar (npm run lint:colors -- --update). Subirla a mano exige justificarlo en el PR.",
   "totals": {
-    "palette": 859,
-    "arbitrary": 9,
+    "palette": 848,
+    "arbitrary": 3,
     "hex": 100,
     "rgb": 10,
-    "dark": 188
+    "dark": 186
   },
   "files": {
     "src/App.jsx": {
@@ -23,11 +23,11 @@
       "dark": 3
     },
     "src/components/activity/ActivitySharedUI.jsx": {
-      "palette": 9,
+      "palette": 7,
       "arbitrary": 0,
       "hex": 0,
       "rgb": 0,
-      "dark": 1
+      "dark": 0
     },
     "src/components/auth/LoginPage.jsx": {
       "palette": 14,
@@ -58,11 +58,11 @@
       "dark": 0
     },
     "src/components/dashboard/AdvancedAnalytics.jsx": {
-      "palette": 13,
-      "arbitrary": 6,
+      "palette": 4,
+      "arbitrary": 0,
       "hex": 7,
       "rgb": 0,
-      "dark": 2
+      "dark": 1
     },
     "src/components/dashboard/ChartsSection.jsx": {
       "palette": 4,
