@@ -66,7 +66,7 @@ Solo se marca lo verificado. Spec y plan aprobados el 2026-11-09 ("Apruebo todo"
 ## PR 4 — Input y Select (`feat/ui-primitives-field`)
 - [x] Inventario, primitivas, sustitución
 - [x] Verificación completa
-- [ ] PR hacia `develop`
+- [x] PR hacia `develop` (#64)
 
 ### Notas del PR 4
 - **Cobertura:** 22 de los 44 campos. `filled` 6 (modal de añadir: 5 `Input`, 4 con `mono`, y 1 `Select`). `search` 3 (historial: el buscador y los 2 selectores, cada uno con su receta). `cell` 6 y `cell-bare` 2 (bloques y pasos del Calendario: `Input` `md` con `mono` para la distancia, `Input` `sm` para el objetivo, `Select` `cell` para la zona y `Select` `cell-bare` para el tipo de objetivo). `inline` 5 (Ajustes: `md` para peso, FC en reposo y CTL, con `ringTone` `action-bright`, `hr` y `positive`; `sm` para el mínimo y el máximo de cada zona).
