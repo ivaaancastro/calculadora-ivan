@@ -133,14 +133,21 @@ async function dumpPseudoStates(page) {
   await cdp.send('DOM.enable');
   await cdp.send('CSS.enable');
   const { root } = await cdp.send('DOM.getDocument', { depth: -1 });
-  const states = [['hover'], ['focus'], ['focus', 'focus-visible'], ['active']];
+  // [estado forzado, dónde se fuerza, qué se vuelca, etiqueta]. `group-hover:` depende del
+  // `:hover` del ancestro `.group`, no del propio elemento (único group-*/peer-* en uso).
+  const states = [
+    [['hover'], '[class*="hover:"]', '[class*="hover:"]', 'hover'],
+    [['focus'], '[class*="focus:"]', '[class*="focus:"]', 'focus'],
+    [['focus', 'focus-visible'], '[class*="focus-visible:"]', '[class*="focus-visible:"]', 'focus+focus-visible'],
+    [['active'], '[class*="active:"]', '[class*="active:"]', 'active'],
+    [['hover'], '.group', '[class*="group-hover:"]', 'group-hover'],
+  ];
   const out = {};
-  for (const forced of states) {
-    const sel = `[class*="${forced[forced.length - 1]}:"]`;
-    const { nodeIds } = await cdp.send('DOM.querySelectorAll', { nodeId: root.nodeId, selector: sel });
+  for (const [forced, target, sel, label] of states) {
+    const { nodeIds } = await cdp.send('DOM.querySelectorAll', { nodeId: root.nodeId, selector: target });
     for (const nodeId of nodeIds) await cdp.send('CSS.forcePseudoState', { nodeId, forcedPseudoClasses: forced });
     const dump = await dumpStyles(page, sel);
-    for (const [k, v] of Object.entries(dump)) out[`${k}::${forced.join('+')}`] = v;
+    for (const [k, v] of Object.entries(dump)) out[`${k}::${label}`] = v;
     for (const nodeId of nodeIds) await cdp.send('CSS.forcePseudoState', { nodeId, forcedPseudoClasses: [] });
   }
   await cdp.detach();
