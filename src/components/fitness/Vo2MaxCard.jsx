@@ -1,6 +1,6 @@
 import React from 'react';
 import { Footprints, Bike } from 'lucide-react';
-import { Card } from '../ui';
+import { Card, Segmented } from '../ui';
 
 export const Vo2MaxCard = ({ vo2Sport, setVo2Sport, currentVo2, vo2Level, vo2Stats }) => {
     return (
@@ -10,17 +10,17 @@ export const Vo2MaxCard = ({ vo2Sport, setVo2Sport, currentVo2, vo2Level, vo2Sta
                     <div className="flex items-center gap-2">
                         <h3 className="text-[10px] font-bold text-ink-4 uppercase tracking-[0.1em]">VO2 Máximo</h3>
                     </div>
-                    <div className="flex bg-fill p-1 rounded-xl">
-                        {['run', 'bike'].map(s => (
-                            <button
-                                key={s}
-                                onClick={() => setVo2Sport(s)}
-                                className={`px-4 py-1.5 text-[9px] font-bold uppercase tracking-widest rounded-lg transition-all ${vo2Sport === s ? 'bg-surface-3 text-ink-soft shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
-                            >
-                                {s === 'run' ? 'Carrera' : 'Bici'}
-                            </button>
-                        ))}
-                    </div>
+                    <Segmented
+                        variant="card"
+                        size="md-wide"
+                        optionClassName="px-4 py-1.5"
+                        value={vo2Sport}
+                        onChange={setVo2Sport}
+                        options={[
+                            { value: 'run', label: 'Carrera' },
+                            { value: 'bike', label: 'Bici' },
+                        ]}
+                    />
                 </div>
 
                 <div className="flex items-end gap-3 mb-8">

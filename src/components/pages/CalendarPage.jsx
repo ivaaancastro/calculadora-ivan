@@ -14,6 +14,7 @@ import {
     getEffectiveTSS, computeZoneTssPerHour, estimateTssFromBlocks,
 } from '../../utils/tssEngine';
 import { useChartTheme } from '../charts/useChartTheme';
+import { Segmented } from '../ui';
 
 const WEEKDAYS = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'];
 
@@ -1845,14 +1846,12 @@ export const CalendarPage = ({ activities, plannedWorkouts = [], addPlannedWorko
                                                                 className="w-9 bg-surface-7 rounded-lg text-[13px] font-mono px-1.5 py-0.5 outline-none no-spinner text-center text-body" />
                                                             <span className="text-[10px] font-medium text-ink-4">veces</span>
                                                             {canUsePower && !isStr && (
-                                                                <div className="flex shrink-0 bg-fill-5 rounded-full p-0.5 ml-auto mr-2">
-                                                                    <button onClick={() => handleZoneModeChange('hr')}
-                                                                        className={`px-2 py-0.5 text-[10px] font-semibold rounded-full transition-all duration-200 ${currentZoneMode === 'hr' ? 'bg-surface-3 text-legacy-hr-red shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}
-                                                                    >FC</button>
-                                                                    <button onClick={() => handleZoneModeChange('power')}
-                                                                        className={`px-2 py-0.5 text-[10px] font-semibold rounded-full transition-all duration-200 ${currentZoneMode === 'power' ? 'bg-surface-3 text-power shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}
-                                                                    >W</button>
-                                                                </div>
+                                                                <Segmented variant="mini" className="shrink-0 ml-auto mr-2">
+                                                                    <Segmented.Option onClick={() => handleZoneModeChange('hr')}
+                                                                        active={currentZoneMode === 'hr'} tone="hr">FC</Segmented.Option>
+                                                                    <Segmented.Option onClick={() => handleZoneModeChange('power')}
+                                                                        active={currentZoneMode === 'power'} tone="power">W</Segmented.Option>
+                                                                </Segmented>
                                                             )}
                                                             <button onClick={() => removeBlock(block.id)} className={`${canUsePower && !isStr ? '' : 'ml-auto'} text-slate-300 hover:text-red-500 transition-colors`}><X size={13} /></button>
                                                         </div>
@@ -1867,16 +1866,14 @@ export const CalendarPage = ({ activities, plannedWorkouts = [], addPlannedWorko
                                                                         </select>
 
                                                                         {/* KM/MIN toggle */}
-                                                                        <div className="flex shrink-0 bg-fill-5 rounded-full p-0.5">
+                                                                        <Segmented variant="mini" className="shrink-0">
                                                                              {!isStr && (
-                                                                                 <button onClick={() => updateStep(block.id, step.id, 'unit', 'dist')}
-                                                                                    className={`px-2 py-0.5 text-[10px] font-semibold rounded-full transition-all duration-200 ${step.unit === 'dist' ? 'bg-surface-3 text-ink-2 shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}
-                                                                                 >KM</button>
+                                                                                 <Segmented.Option onClick={() => updateStep(block.id, step.id, 'unit', 'dist')}
+                                                                                    active={step.unit === 'dist'}>KM</Segmented.Option>
                                                                              )}
-                                                                             <button onClick={() => updateStep(block.id, step.id, 'unit', 'time')}
-                                                                                 className={`px-2 py-0.5 text-[10px] font-semibold rounded-full transition-all duration-200 ${(step.unit === 'time' || isStr) ? 'bg-surface-3 text-ink-2 shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}
-                                                                             >MIN</button>
-                                                                        </div>
+                                                                             <Segmented.Option onClick={() => updateStep(block.id, step.id, 'unit', 'time')}
+                                                                                 active={step.unit === 'time' || isStr}>MIN</Segmented.Option>
+                                                                        </Segmented>
 
                                                                         {step.unit === 'dist' && !isStr ? (
                                                                             <input type="number" value={step.duration} min={0} onChange={e => updateStep(block.id, step.id, 'duration', e.target.value)}
@@ -1954,16 +1951,14 @@ export const CalendarPage = ({ activities, plannedWorkouts = [], addPlannedWorko
                                                         <span className={`text-[11px] font-semibold w-14 shrink-0 ${bLabelStyle}`}>{bLabel}</span>
                                                         
                                                         {/* KM / MIN toggle */}
-                                                        <div className="flex shrink-0 bg-fill-5 rounded-full p-0.5">
+                                                        <Segmented variant="mini" className="shrink-0">
                                                             {!isStr && (
-                                                                <button onClick={() => updateBlock(block.id, 'unit', 'dist')}
-                                                                    className={`px-2 py-0.5 text-[10px] font-semibold rounded-full transition-all duration-200 ${block.unit === 'dist' ? 'bg-surface-3 text-ink-2 shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}
-                                                                >KM</button>
+                                                                <Segmented.Option onClick={() => updateBlock(block.id, 'unit', 'dist')}
+                                                                    active={block.unit === 'dist'}>KM</Segmented.Option>
                                                             )}
-                                                            <button onClick={() => updateBlock(block.id, 'unit', 'time')}
-                                                                className={`px-2 py-0.5 text-[10px] font-semibold rounded-full transition-all duration-200 ${(block.unit === 'time' || isStr) ? 'bg-surface-3 text-ink-2 shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}
-                                                            >MIN</button>
-                                                        </div>
+                                                            <Segmented.Option onClick={() => updateBlock(block.id, 'unit', 'time')}
+                                                                active={block.unit === 'time' || isStr}>MIN</Segmented.Option>
+                                                        </Segmented>
 
                                                         {block.unit === 'dist' && !isStr ? (
                                                             <input type="number" placeholder="km" value={block.duration} min={0} onChange={e => updateBlock(block.id, 'duration', e.target.value)}
@@ -1974,14 +1969,12 @@ export const CalendarPage = ({ activities, plannedWorkouts = [], addPlannedWorko
 
                                                         {/* FC / W mode toggle (only for bike) */}
                                                         {canUsePower && !isStr && (
-                                                            <div className="flex shrink-0 bg-fill-5 rounded-full p-0.5">
-                                                                <button onClick={() => handleZoneModeChange('hr')}
-                                                                    className={`px-2 py-0.5 text-[10px] font-semibold rounded-full transition-all duration-200 ${currentZoneMode === 'hr' ? 'bg-surface-3 text-legacy-hr-red shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}
-                                                                >FC</button>
-                                                                <button onClick={() => handleZoneModeChange('power')}
-                                                                    className={`px-2 py-0.5 text-[10px] font-semibold rounded-full transition-all duration-200 ${currentZoneMode === 'power' ? 'bg-surface-3 text-power shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}
-                                                                >W</button>
-                                                            </div>
+                                                            <Segmented variant="mini" className="shrink-0">
+                                                                <Segmented.Option onClick={() => handleZoneModeChange('hr')}
+                                                                    active={currentZoneMode === 'hr'} tone="hr">FC</Segmented.Option>
+                                                                <Segmented.Option onClick={() => handleZoneModeChange('power')}
+                                                                    active={currentZoneMode === 'power'} tone="power">W</Segmented.Option>
+                                                            </Segmented>
                                                         )}
 
                                                         {/* Zone selector */}

@@ -8,7 +8,7 @@ import { InfoTooltip } from '../common/InfoTooltip';
 import { tooltipStyleFor } from './fitnessConstants';
 import { formatInterval } from '../../hooks/useFitnessAnalytics';
 import { useChartTheme } from '../charts/useChartTheme';
-import { Card } from '../ui';
+import { Card, Segmented } from '../ui';
 
 export const PowerProfileCard = ({
     showPowerConfig,
@@ -45,35 +45,34 @@ export const PowerProfileCard = ({
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                             <div>
                                 <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-6">Unidad de Medida</p>
-                                <div className="flex bg-fill p-1 rounded-xl w-fit">
-                                    {['wkg', 'w'].map(unit => (
-                                        <button
-                                            key={unit}
-                                            onClick={() => setPowerUnit(unit)}
-                                            className={`px-4 py-1.5 rounded-lg text-[9px] font-bold uppercase tracking-widest transition-all ${powerUnit === unit ? 'bg-surface-3 text-ink-soft shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
-                                        >
-                                            {unit === 'wkg' ? 'W/kg' : 'Vatios'}
-                                        </button>
-                                    ))}
-                                </div>
+                                <Segmented
+                                    variant="card"
+                                    size="md-wide"
+                                    className="w-fit"
+                                    optionClassName="px-4 py-1.5"
+                                    value={powerUnit}
+                                    onChange={setPowerUnit}
+                                    options={[
+                                        { value: 'wkg', label: 'W/kg' },
+                                        { value: 'w', label: 'Vatios' },
+                                    ]}
+                                />
                             </div>
                             <div>
                                 <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-6">Periodo Analizado</p>
-                                <div className="flex bg-fill p-1 rounded-xl w-fit">
-                                    {[
-                                        { id: '90d', label: '90 Días' },
-                                        { id: '1y', label: '1 Año' },
-                                        { id: 'all', label: 'Histórico' }
-                                    ].map(item => (
-                                        <button
-                                            key={item.id}
-                                            onClick={() => setPowerProfileTimeframe && setPowerProfileTimeframe(item.id)}
-                                            className={`px-3 py-1.5 rounded-lg text-[9px] font-bold uppercase tracking-widest transition-all ${powerProfileTimeframe === item.id ? 'bg-surface-3 text-ink-soft shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
-                                        >
-                                            {item.label}
-                                        </button>
-                                    ))}
-                                </div>
+                                <Segmented
+                                    variant="card"
+                                    size="md-wide"
+                                    className="w-fit"
+                                    optionClassName="px-3 py-1.5"
+                                    value={powerProfileTimeframe}
+                                    onChange={(id) => setPowerProfileTimeframe && setPowerProfileTimeframe(id)}
+                                    options={[
+                                        { value: '90d', label: '90 Días' },
+                                        { value: '1y', label: '1 Año' },
+                                        { value: 'all', label: 'Histórico' },
+                                    ]}
+                                />
                             </div>
                             <div>
                                 <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-6">Tiempos Visibles</p>

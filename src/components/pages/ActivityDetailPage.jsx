@@ -2,11 +2,11 @@ import React, { useEffect, useState, useRef, useMemo } from 'react';
 import { ArrowLeft, ExternalLink, Trash2, Calendar, Activity, Layers, Loader2, Heart, Clock, MapPin, Zap, Target, Info } from 'lucide-react';
 import { AreaChart, Area, BarChart, Bar, Cell, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer } from 'recharts';
 import { InteractiveMap } from '../activity/ActivityMap';
-import { PillTab, CustomChartTooltip } from '../activity/ActivitySharedUI';
+import { CustomChartTooltip } from '../activity/ActivitySharedUI';
 import { useActivityMetrics } from '../../hooks/useActivityMetrics';
 import { formatPace, formatMinsToHMM, formatDuration } from '../../utils/formatters';
 import { useChartTheme } from '../charts/useChartTheme';
-import { Card, Stat } from '../ui';
+import { Card, Segmented, Stat } from '../ui';
 export const ActivityDetailPage = ({ activity, settings, fetchStreams, onBack, onDelete }) => {
     const ct = useChartTheme();
     const [streams, setStreams] = useState(null);
@@ -135,12 +135,18 @@ export const ActivityDetailPage = ({ activity, settings, fetchStreams, onBack, o
             <header className="glass-nav px-3.5 py-2 sm:px-6 sm:py-3 shrink-0 z-50">
                 {/* --- DESKTOP HEADER (lg:flex) --- */}
                 <div className="hidden lg:flex items-center justify-between gap-2 mb-2.5 sm:mb-3 border-b border-hairline pb-2">
-                    <div className="flex bg-slate-200/60 dark:bg-zinc-800/80 p-0.5 rounded-full gap-0.5 overflow-x-auto hide-scrollbar min-w-0">
-                        <PillTab active={activeTab === 'analyze'} label="Análisis" onClick={() => setActiveTab('analyze')} />
-                        <PillTab active={activeTab === 'map'} label="Mapa" onClick={() => setActiveTab('map')} />
-                        <PillTab active={activeTab === 'laps'} label="Intervalos" onClick={() => setActiveTab('laps')} />
-                        <PillTab active={activeTab === 'data'} label="Detalle" onClick={() => setActiveTab('data')} />
-                    </div>
+                    <Segmented
+                        variant="pill"
+                        className="overflow-x-auto min-w-0"
+                        value={activeTab}
+                        onChange={setActiveTab}
+                        options={[
+                            { value: 'analyze', label: 'Análisis' },
+                            { value: 'map', label: 'Mapa' },
+                            { value: 'laps', label: 'Intervalos' },
+                            { value: 'data', label: 'Detalle' },
+                        ]}
+                    />
                     
                     <div className="flex items-center gap-1.5 shrink-0">
                         {activity.strava_id && (

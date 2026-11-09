@@ -6,7 +6,7 @@ import {
 import { InfoTooltip } from '../common/InfoTooltip';
 import { tooltipStyleFor } from './fitnessConstants';
 import { useChartTheme } from '../charts/useChartTheme';
-import { Card } from '../ui';
+import { Card, Segmented } from '../ui';
 
 export const WeeklyVolumeAndFocusCard = ({
     weeklyChart,
@@ -43,17 +43,14 @@ export const WeeklyVolumeAndFocusCard = ({
                 <Card variant="panel" className="p-6 sm:p-8 lg:col-span-1">
                     <div className="flex justify-between items-center mb-8">
                         <h3 className="text-[10px] font-bold text-ink-4 uppercase tracking-[0.1em]">Distribución de Foco</h3>
-                        <div className="flex bg-fill p-1 rounded-xl">
-                            {['28d', '90d'].map(t => (
-                                <button
-                                    key={t}
-                                    onClick={() => setIntensityTimeframe(t)}
-                                    className={`px-3 py-1 text-[8px] font-bold uppercase rounded-lg transition-all ${intensityTimeframe === t ? 'bg-surface-3 text-ink-soft shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
-                                >
-                                    {t.toUpperCase()}
-                                </button>
-                            ))}
-                        </div>
+                        <Segmented
+                            variant="card"
+                            size="sm"
+                            optionClassName="px-3 py-1"
+                            value={intensityTimeframe}
+                            onChange={setIntensityTimeframe}
+                            options={['28d', '90d'].map((t) => ({ value: t, label: t.toUpperCase() }))}
+                        />
                     </div>
 
                     <div className="flex flex-col gap-6">

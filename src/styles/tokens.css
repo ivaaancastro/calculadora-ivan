@@ -113,6 +113,10 @@
   --faint: 203 213 225; /* slate-300 */
   --faint-2: 203 213 225; /* slate-300 */
   --ink-inverse: 255 255 255; /* white */
+  --segmented-off: 100 116 139; /* slate-500 */
+  --segmented-off-hover: 51 65 85; /* slate-700 */
+  --segmented-mini-off: 148 163 184; /* slate-400 */
+  --segmented-mini-off-hover: 71 85 105; /* slate-600 */
 }
 .dark {
   --ink: 255 255 255; /* white */
@@ -132,6 +136,10 @@
   --faint: 82 82 91; /* zinc-600 */
   --faint-2: 63 63 70; /* zinc-700 */
   --ink-inverse: 24 24 27; /* zinc-900 */
+  --segmented-off: 100 116 139; /* slate-500 */
+  --segmented-off-hover: 51 65 85; /* slate-700 */
+  --segmented-mini-off: 148 163 184; /* slate-400 */
+  --segmented-mini-off-hover: 71 85 105; /* slate-600 */
 }
 /* @tokens:text:end */
 
@@ -169,6 +177,7 @@
   --fill-7: 226 232 240; /* slate-200 */
   --fill-8: 241 245 249; --fill-8-a: 1; /* slate-100 */
   --fill-segmented: 226 232 240; --fill-segmented-a: 0.6; /* slate-200/60 */
+  --fill-segmented-2: 226 232 240; --fill-segmented-2-a: 0.6; /* slate-200/60 */
   --inverse: 15 23 42; /* slate-900 */
   --inverse-2: 51 65 85; /* slate-700 */
   --glass-nav: 255 255 255; --glass-nav-a: 0.8; /* white/80 */
@@ -211,6 +220,7 @@
   --fill-7: 63 63 70; /* zinc-700 */
   --fill-8: 39 39 42; --fill-8-a: 0.6; /* zinc-800/60 */
   --fill-segmented: 28 28 30; --fill-segmented-a: 1; /* [#1c1c1e] */
+  --fill-segmented-2: 39 39 42; --fill-segmented-2-a: 0.8; /* zinc-800/80 */
   --inverse: 255 255 255; /* white */
   --inverse-2: 228 228 231; /* zinc-200 */
   --glass-nav: 0 0 0; --glass-nav-a: 0.8; /* black/80 */

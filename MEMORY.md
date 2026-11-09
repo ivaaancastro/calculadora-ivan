@@ -14,7 +14,7 @@
 
 ## 1. Estado del proyecto
 - **Nombre:** Forma — Dashboard de rendimiento deportivo y salud
-- **Rama actual:** `feat/ui-primitives-stat` (Capa 2, PR 2: `Stat`, `StatTile`, solo Dashboard). PR 0 (#60) y PR 1 (#61) mergeados. Siguiente: PR 3 (`Segmented`).
+- **Rama actual:** `feat/ui-primitives-segmented` (Capa 2, PR 3: `Segmented`; `pill` solo cubre las pestañas del detalle). PR 0 (#60), PR 1 (#61) y PR 2 (#62) mergeados. Siguiente: PR 4 (`Input`, `Select`).
 - **Rama base:** `develop`
 - **Rama de producción:** `main` (desplegada en Vercel)
 - **Versión:** 0.1.0
@@ -44,7 +44,7 @@
 | spec-rediseno-02 | Rediseño de la webapp por capas (roadmap) | en curso | 2026-11-06 | `docs/branches/feat/webapp-redesign/` |
 | spec-rediseno-02-c0 | Capa 0: red de seguridad de UI | implementada (PR #51 mergeado en `develop`) | 2026-11-06 | test/ui-safety-net |
 | spec-rediseno-02-c1 | Capa 1: tokens y tema | implementada (PRs #52 a #58 mergeados en `develop`; cobertura y pendientes en `tasks.md`, Cierre) | 2026-11-09 | `docs/branches/feat/ui-tokens/` |
-| spec-rediseno-02-c2 | Capa 2: primitivas | en curso (aprobada el 2026-11-09; PR 0 y 1 mergeados, PR 2 en revisión) | 2026-11-09 | `docs/branches/feat/ui-primitives/` |
+| spec-rediseno-02-c2 | Capa 2: primitivas | en curso (aprobada el 2026-11-09; PR 0, 1 y 2 mergeados, PR 3 en revisión) | 2026-11-09 | `docs/branches/feat/ui-primitives/` |
 
 > Cuando un agente implemente una spec, debe añadir una fila aquí y marcarla como `implementada`.
 
@@ -110,6 +110,7 @@
 - **Clases propias de `index.css` en `@layer utilities`** (como las antiguas `ios-*`, y hoy `glass-nav` y `liquid-glass`): Tailwind las emite después de sus utilidades, así que ganan a cualquier clase del mismo atributo que se les ponga al lado. Antes de sustituir una por clases de Tailwind, mirar en el CSS compilado de `develop` (`npx tailwindcss -i src/index.css -o <archivo>`) qué clases de su lado no se veían: se retiran, no se conservan.
 - El volcado solo fuerza `:active`/`:hover`/`:focus` en los elementos con `active:`/`hover:`/`focus:` en `class`: si una clase propia escondía esa variante (p. ej. `.ios-touch`), la rama da claves nuevas. Para compararlas, repetir el volcado de `develop` añadiendo esa clase al selector del estado (solo en el worktree).
 - Los dos volcados `full` (develop y rama) en paralelo hacen fallar por tiempo algunos estados: repetir solos los que falten (`--project=<p> -g "<estado>"`) y comprobar que salen 104 volcados antes de dar el 0 por bueno. Con `-g`, el título es "Volcado de estilos · tema <t> <estado>" (sin `›`).
+- El volcado no cubre todo: el planificador se abre sin bloques (no hay conmutadores KM/MIN ni FC/W) y `PowerProfileCard` no se pinta con los datos de prueba. Para un control que no sale, comparar sus estilos calculados (en reposo y con `:hover` forzado por CDP) con una prueba temporal sin commit en la rama y en el worktree de `develop`.
 - En móvil, `MobileSwipePager` monta las otras pestañas fuera de pantalla: al buscar "la primera gráfica" hay que filtrar por posición horizontal (`hoverChart` del volcado). La gráfica de Salud solo existe en la vista "Historial".
 
 ### Cómo trabajar con la red de seguridad (Capa 0)

@@ -1,17 +1,6 @@
 import React from 'react';
 import { formatMinsToHMM } from '../../utils/formatters';
 
-export const PillTab = ({ active, label, onClick }) => (
-    <button 
-        onClick={onClick}
-        className={`px-3 sm:px-4 py-1 text-xs font-semibold rounded-full whitespace-nowrap shrink-0 transition-all duration-200 select-none active:scale-95 ${active 
-            ? 'bg-surface-4 text-ink shadow-xs font-bold' 
-            : 'text-ink-3 hover:text-ink-2-soft'}`}
-    >
-        {label}
-    </button>
-);
-
 export const CustomChartTooltip = ({ active, payload, label, unit = '' }) => {
     if (active && payload && payload.length) {
         const data = payload[0]?.payload;

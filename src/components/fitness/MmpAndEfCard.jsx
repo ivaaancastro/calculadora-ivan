@@ -8,7 +8,7 @@ import { InfoTooltip } from '../common/InfoTooltip';
 import { tooltipStyleFor } from './fitnessConstants';
 import { formatInterval, formatPace } from '../../hooks/useFitnessAnalytics';
 import { useChartTheme } from '../charts/useChartTheme';
-import { Card } from '../ui';
+import { Card, Segmented } from '../ui';
 
 export const MmpAndEfCard = ({
     activities,
@@ -129,15 +129,24 @@ export const MmpAndEfCard = ({
                     </div>
 
                     <div className="flex flex-wrap items-center gap-3">
-                        <div className="flex bg-fill p-1 rounded-xl">
-                            <button onClick={() => setCurveSport('bike')} className={`px-4 py-1.5 text-[9px] font-bold uppercase rounded-lg transition-all ${curveSport === 'bike' ? 'bg-surface-3 text-action shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}>Ciclismo</button>
-                            <button onClick={() => setCurveSport('run')} className={`px-4 py-1.5 text-[9px] font-bold uppercase rounded-lg transition-all ${curveSport === 'run' ? 'bg-surface-3 text-sport-run-ink shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}>Carrera</button>
-                        </div>
-                        <div className="flex bg-fill p-1 rounded-xl">
-                            {['90d', '1y', 'all'].map(t => (
-                                <button key={t} onClick={() => setMmpTimeframe(t)} className={`px-3 py-1.5 text-[8px] font-bold uppercase rounded-lg transition-all ${mmpTimeframe === t ? 'bg-surface-3 text-ink-soft shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}>{t === 'all' ? 'Todo' : t.toUpperCase()}</button>
-                            ))}
-                        </div>
+                        <Segmented
+                            variant="card"
+                            optionClassName="px-4 py-1.5"
+                            value={curveSport}
+                            onChange={setCurveSport}
+                            options={[
+                                { value: 'bike', label: 'Ciclismo', tone: 'action' },
+                                { value: 'run', label: 'Carrera', tone: 'run' },
+                            ]}
+                        />
+                        <Segmented
+                            variant="card"
+                            size="sm"
+                            optionClassName="px-3 py-1.5"
+                            value={mmpTimeframe}
+                            onChange={setMmpTimeframe}
+                            options={['90d', '1y', 'all'].map((t) => ({ value: t, label: t === 'all' ? 'Todo' : t.toUpperCase() }))}
+                        />
                         <div className="flex gap-4 ml-2">
                             {['power', 'speed', 'hr'].map(t => (
                                 <button key={t} onClick={() => setCurveType(t)} className={`text-[9px] font-bold uppercase pb-1 border-b-2 transition-all ${curveType === t ? 'text-action-bright border-action-bright' : 'text-slate-400 border-transparent hover:border-slate-300'}`}>
@@ -225,20 +234,17 @@ export const MmpAndEfCard = ({
                                 </span>
                                 <InfoTooltip text={peaksViewMode === 'alltime' ? "Tus mejores marcas de todos los tiempos en actividades con telemetría registrada." : "Tus mejores marcas dentro del periodo seleccionado arriba (90d / 1y / Todo)."} />
                             </div>
-                            <div className="flex bg-surface-2 p-0.5 rounded-lg text-[8px] font-bold uppercase">
-                                <button
-                                    onClick={() => setPeaksViewMode && setPeaksViewMode('period')}
-                                    className={`px-2 py-1 rounded transition-all ${peaksViewMode === 'period' ? 'bg-surface-3 text-ink-soft shadow-xs' : 'text-slate-500 hover:text-slate-700'}`}
-                                >
-                                    Periodo
-                                </button>
-                                <button
-                                    onClick={() => setPeaksViewMode && setPeaksViewMode('alltime')}
-                                    className={`px-2 py-1 rounded transition-all ${peaksViewMode === 'alltime' ? 'bg-surface-3 text-ink-soft shadow-xs' : 'text-slate-500 hover:text-slate-700'}`}
-                                >
-                                    Histórico
-                                </button>
-                            </div>
+                            <Segmented
+                                variant="card"
+                                size="xs"
+                                optionClassName="px-2 py-1"
+                                value={peaksViewMode}
+                                onChange={(mode) => setPeaksViewMode && setPeaksViewMode(mode)}
+                                options={[
+                                    { value: 'period', label: 'Periodo' },
+                                    { value: 'alltime', label: 'Histórico' },
+                                ]}
+                            />
                         </div>
                         <div className="space-y-3">
                             {[1, 60, 300, 1200].map(secs => {
