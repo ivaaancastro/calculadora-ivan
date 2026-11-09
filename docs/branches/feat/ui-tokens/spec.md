@@ -5,7 +5,7 @@
 - **Título:** Capa 1 del rediseño: tokens de color, tema de Tailwind y tema de gráficas, sin cambio visible
 - **Autor:** agente Claude Code
 - **Fecha:** 2026-11-09
-- **Estado:** aprobada (2026-11-09, por el usuario: "Apruebo todo", incluidas las 5 decisiones de la sección 8)
+- **Estado:** implementada (2026-11-09; PRs #52 a #58 mergeados en `develop`). Aprobada el 2026-11-09 por el usuario: "Apruebo todo", incluidas las 5 decisiones de la sección 8
 - **Depende de:** `spec-rediseno-02` (roadmap) y `spec-rediseno-02-c0` (red de seguridad, mergeada en `develop` por el PR #51)
 
 ## 2. Objetivo
@@ -78,28 +78,28 @@ Hay 16 familias de Tailwind de acento en uso; **11 con 4 o más usos** (las "11 
 - Una diferencia de color pequeña en una zona reducida puede quedar por debajo de 100 píxeles.
 
 ## 4. Requisitos funcionales
-- [ ] **RF1. Tokens:** `src/styles/tokens.css` declara los colores como canales RGB (`--ink: 15 23 42`) en `:root` y su valor oscuro en `.dark`, con los **valores exactos de hoy**. Reserva `html[data-ui="v2"]` para la Capa 3 sin definir valores.
-- [ ] **RF2. Tema de Tailwind:** `tailwind.config.js` expone los tokens en `theme.extend.colors` como `rgb(var(--x) / <alpha-value>)`, de modo que `bg-surface/80` funcione. Para pares cuyo valor oscuro lleva opacidad propia (p. ej. `zinc-800/50`), se usa `rgb(var(--x) / calc(var(--x-a, 1) * <alpha-value>))`. La paleta de Tailwind por defecto **se mantiene** hasta la Capa 6.
-- [ ] **RF3. Tokens exactos:** cada token equivale a un único par (claro, oscuro) que ya existe. Un codemod solo sustituye una clase o un par si coincide exactamente con un token. Los valores parecidos **no se unifican** en esta capa: eso es un cambio visual y corresponde a la Capa 3 o a la 5.
-- [ ] **RF4. Significado:** existen tokens semánticos `action`, `positive`, `warning`, `danger`, `metric-ctl`, `metric-atl` y `metric-tsb`, además de los de categoría (deportes, zonas) que el inventario justifique. Su valor es el actual en el Dashboard. Donde otra pantalla usa otro valor para la misma métrica, se migra a un token con nombre `legacy-*` que conserva su valor, y la incoherencia queda registrada como defecto D-07 en `paridad.md`.
-- [ ] **RF5. Tema de gráficas:** `src/components/charts/chartTheme.js` exporta los colores de series, ejes, rejilla, cursor, líneas de referencia, puntos activos y tooltip para claro y oscuro, y `useChartTheme()` (en `src/components/charts/`, no en `src/hooks`) devuelve el del tema activo. Sigue la estructura de parámetros de la skill `dataviz` (series, estado, superficies). Una prueba unitaria comprueba que sus valores coinciden con `tokens.css`.
-- [ ] **RF6. Migración por familias:** bordes, texto, superficies, acentos y gráficas, en ese orden (sección 6.4), con un codemod reproducible por familia y una rama y un PR por familia.
-- [ ] **RF7. Sin regresión de colores:** se mantiene la regla `no se reintroducen valores sueltos` con un script de comprobación (6.5) que se ejecuta en CI.
-- [ ] **RF8. 768 px:** se añade un proyecto `tablet` (768 × 1024) a las capturas antes de migrar nada, generado desde `develop` sin cambios y revisado una a una.
-- [ ] **RF9. Fuera de alcance explícito:** `src/hooks`, `src/utils`, `src/services`, `src/store`, `src/supabase.js` (RF3 general); el canvas de partículas de la landing (Capa 4); tipografía, radios y sombras (se tokenizarán en la Capa 2 con las primitivas o en la Capa 3).
+- [x] **RF1. Tokens:** `src/styles/tokens.css` declara los colores como canales RGB (`--ink: 15 23 42`) en `:root` y su valor oscuro en `.dark`, con los **valores exactos de hoy**. Reserva `html[data-ui="v2"]` para la Capa 3 sin definir valores.
+- [x] **RF2. Tema de Tailwind:** `tailwind.config.js` expone los tokens en `theme.extend.colors` como `rgb(var(--x) / <alpha-value>)`, de modo que `bg-surface/80` funcione. Para pares cuyo valor oscuro lleva opacidad propia (p. ej. `zinc-800/50`), se usa `rgb(var(--x) / calc(var(--x-a, 1) * <alpha-value>))`. La paleta de Tailwind por defecto **se mantiene** hasta la Capa 6.
+- [x] **RF3. Tokens exactos:** cada token equivale a un único par (claro, oscuro) que ya existe. Un codemod solo sustituye una clase o un par si coincide exactamente con un token. Los valores parecidos **no se unifican** en esta capa: eso es un cambio visual y corresponde a la Capa 3 o a la 5.
+- [x] **RF4. Significado:** existen tokens semánticos `action`, `positive`, `warning`, `danger`, `metric-ctl`, `metric-atl` y `metric-tsb`, además de los de categoría (deportes, zonas) que el inventario justifique. Su valor es el actual en el Dashboard. Donde otra pantalla usa otro valor para la misma métrica, se migra a un token con nombre `legacy-*` que conserva su valor, y la incoherencia queda registrada como defecto D-07 en `paridad.md`.
+- [x] **RF5. Tema de gráficas:** `src/components/charts/chartTheme.js` exporta los colores de series, ejes, rejilla, cursor, líneas de referencia, puntos activos y tooltip para claro y oscuro, y `useChartTheme()` (en `src/components/charts/`, no en `src/hooks`) devuelve el del tema activo. Sigue la estructura de parámetros de la skill `dataviz` (series, estado, superficies). Una prueba unitaria comprueba que sus valores coinciden con `tokens.css`. Implementado con los grupos `series`, `sports`, `distribution`, `zones`, `anatomy`, `tooltip`, `map` y `pmc`; no hay grupo de estado porque ninguna gráfica usa hoy colores de estado.
+- [x] **RF6. Migración por familias:** bordes, texto, superficies, acentos y gráficas, en ese orden (sección 6.4), con un codemod reproducible por familia y una rama y un PR por familia.
+- [x] **RF7. Sin regresión de colores:** se mantiene la regla `no se reintroducen valores sueltos` con un script de comprobación (6.5) que se ejecuta en CI.
+- [x] **RF8. 768 px:** se añade un proyecto `tablet` (768 × 1024) a las capturas antes de migrar nada, generado desde `develop` sin cambios y revisado una a una.
+- [x] **RF9. Fuera de alcance explícito:** `src/hooks`, `src/utils`, `src/services`, `src/store`, `src/supabase.js` (RF3 general); el canvas de partículas de la landing (Capa 4); tipografía, radios y sombras (se tokenizarán en la Capa 2 con las primitivas o en la Capa 3).
 
 ## 5. Criterios de aceptación
 En cada PR:
-- [ ] `npm run lint`, `npm run test:unit`, `npm run test:integration`, `npm run test:e2e`, `npm run test:e2e:docker` y `npm run build` en verde, con los resultados copiados en el PR. El CI manda si difiere de local.
-- [ ] **Capturas: cero diferencias** en las 48 (32 + 16 de 768 px). Si alguna difiere, se justifica una a una en el PR o se corrige; no se regenera ninguna referencia en los PR de migración.
-- [ ] **Volcado de estilos idéntico** (6.6) en todas las pantallas y estados extra, en claro y oscuro, comparando `develop` con la rama.
-- [ ] El script de colores (6.5) pasa, y la línea base baja en la familia migrada.
-- [ ] No hay cambios en las carpetas de RF9 ni en `.opencode/skills/git-release/SKILL.md`.
+- [x] `npm run lint`, `npm run test:unit`, `npm run test:integration`, `npm run test:e2e`, `npm run test:e2e:docker` y `npm run build` en verde, con los resultados copiados en el PR. El CI manda si difiere de local.
+- [x] **Capturas: cero diferencias** en las 48 (32 + 16 de 768 px). Si alguna difiere, se justifica una a una en el PR o se corrige; no se regenera ninguna referencia en los PR de migración.
+- [x] **Volcado de estilos idéntico** (6.6) en todas las pantallas y estados extra, en claro y oscuro, comparando `develop` con la rama.
+- [x] El script de colores (6.5) pasa, y la línea base baja en la familia migrada.
+- [x] No hay cambios en las carpetas de RF9 ni en `.opencode/skills/git-release/SKILL.md`.
 
 Al terminar la capa (todas las familias):
-- [ ] Cobertura mínima de lo migrado, medida por el script: texto ≥ 90 %, bordes ≥ 80 %, superficies ≥ 75 %; acentos y gráficas, el objetivo que fije su inventario en la tabla del PR (orientativo ≥ 70 %). El resto queda en la línea base con su motivo (par de uso único, valor dentro de lógica protegida…).
-- [ ] Pares `dark:` de color en lo migrado: solo los que queden en la línea base.
-- [ ] `MEMORY.md`, `CHANGELOG.md` y `paridad.md` (D-07) actualizados.
+- [x] Cobertura mínima de lo migrado, medida por el script: texto ≥ 90 %, bordes ≥ 80 %, superficies ≥ 75 %; acentos y gráficas, el objetivo que fije su inventario en la tabla del PR (orientativo ≥ 70 %). El resto queda en la línea base con su motivo (par de uso único, valor dentro de lógica protegida…). Resultado: texto 95,3 %, bordes 80,5 %, superficies 81,3 %, acentos 64 % (aceptado por el usuario), gráficas 95 % (tabla en `tasks.md`, Cierre).
+- [x] Pares `dark:` de color en lo migrado: solo los que queden en la línea base.
+- [x] `MEMORY.md`, `CHANGELOG.md` y `paridad.md` (D-07) actualizados. También D-08, D-09 y D-10.
 
 ## 6. Diseño técnico
 

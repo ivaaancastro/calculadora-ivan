@@ -7,6 +7,9 @@ y este proyecto adhiere a [Semantic Versioning](https://semver.org/lang/es/).
 
 ## [Unreleased]
 
+### Rediseño — Capa 1: tokens y tema (`spec-rediseno-02-c1`), cierre
+- `docs(ui-tokens):` Capa 1 implementada (PRs #52 a #58). Cobertura final: texto 95,3 %, bordes 80,5 %, superficies 81,3 %, acentos 64 %, gráficas 95 %; pares `dark:` sueltos 1.314 → 188. Lista de lo pendiente para las capas siguientes en `docs/branches/feat/ui-tokens/tasks.md`.
+
 ### Rediseño — Capa 1: tokens y tema (`spec-rediseno-02-c1`), PR 6 de 6: gráficas
 - `refactor(ui-tokens):` las gráficas de Recharts (Dashboard, Rendimiento, Salud, detalle de actividad), el SVG de la PMC del Calendario y el mapa de Leaflet leen sus colores de `useChartTheme()`; 156 colores pasan a `chartTheme` (72 tokens: series, deportes, zonas, anatomía, tooltip, mapa y PMC; 56 nuevos en `src/styles/tokens/charts.json`). Sin cambios visibles.
 - `chore(ui-tokens):` `scripts/codemods/charts.mjs` (asignación por línea que comprueba cada valor) y prueba de paridad `chartTheme` ↔ `tokens.css` sobre todos los bloques.

@@ -14,7 +14,7 @@
 
 ## 1. Estado del proyecto
 - **Nombre:** Forma — Dashboard de rendimiento deportivo y salud
-- **Rama actual:** `feat/ui-tokens-charts` (Capa 1 del rediseño, PR 6: gráficas; PR hacia `develop`). El PR 5 se partió en 5a (estados y métricas, #56) y 5b (categorías, #57) por decisión del usuario.
+- **Rama actual:** `docs/ui-tokens-close` (cierre de la Capa 1; PR hacia `develop`). Siguiente: spec de la Capa 2 (primitivas), que necesita aprobación antes de tocar código.
 - **Rama base:** `develop`
 - **Rama de producción:** `main` (desplegada en Vercel)
 - **Versión:** 0.1.0
@@ -43,7 +43,7 @@
 | spec-e2e-01 | Pruebas E2E críticas (auth, dashboard, Strava sync, exportación de datos) | implementada | 2026-11-05 | feat/e2e-critical-flows |
 | spec-rediseno-02 | Rediseño de la webapp por capas (roadmap) | en curso | 2026-11-06 | `docs/branches/feat/webapp-redesign/` |
 | spec-rediseno-02-c0 | Capa 0: red de seguridad de UI | implementada (PR #51 mergeado en `develop`) | 2026-11-06 | test/ui-safety-net |
-| spec-rediseno-02-c1 | Capa 1: tokens y tema | en curso (PR 1 #52, bordes #53, texto #54, superficies #55 y acentos de estado #56 y categorías #57 mergeados; PR 6 gráficas en curso) | 2026-11-09 | `docs/branches/feat/ui-tokens/` |
+| spec-rediseno-02-c1 | Capa 1: tokens y tema | implementada (PRs #52 a #58 mergeados en `develop`; cobertura y pendientes en `tasks.md`, Cierre) | 2026-11-09 | `docs/branches/feat/ui-tokens/` |
 
 > Cuando un agente implemente una spec, debe añadir una fila aquí y marcarla como `implementada`.
 
@@ -98,6 +98,7 @@
 - `npm run lint:colors` es un trinquete por archivo (`scripts/color-baseline.json`): tras migrar, `npm run lint:colors -- --update` (solo baja). `--report` da totales.
 - Verificación de una migración: además de las capturas, volcado de estilos calculados (incluye `:hover`/`:focus`/`:active` forzados y `:hover` en los `.group` para `group-hover:`) en `develop` y en la rama (`STYLE_DUMP_DIR=<dir> npx playwright test e2e/tools/style-dump.spec.js`, con `E2E_PORT` distinto si se usa un worktree) y `node scripts/style-diff.mjs <antes> <después>`: debe dar 0 diferencias.
 - Fuera de alcance de la Capa 1: colores en `src/hooks` y `src/utils` (74 líneas), canvas de la landing, tipografía, radios y sombras.
+- **Lo que la Capa 1 dejó para después** (lista completa en `docs/branches/feat/ui-tokens/tasks.md`, "Pendiente para capas siguientes"): unificar D-07, D-09 y D-10, valores `.dark` propios de las gráficas, escalas ordinales, descartes por precedencia (D-08) y código sin uso (`ChartsSection`, `ZONE_COLORS` de `AdvancedAnalytics`).
 
 ### Cómo trabajar con la red de seguridad (Capa 0)
 - Las capturas de referencia están en `e2e/__screenshots__/` y **solo se generan en Linux** con `npm run test:e2e:update` (Docker, imagen oficial de Playwright, `linux/amd64` como CI). Las de macOS no son comparables, por eso `visual.spec.js` se omite fuera de Linux. Para compararlas: `npm run test:e2e:docker`.
