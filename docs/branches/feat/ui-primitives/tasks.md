@@ -25,7 +25,7 @@ Solo se marca lo verificado. Spec y plan aprobados el 2026-11-09 ("Apruebo todo"
 ## PR 1 — Card y SectionHeader (`feat/ui-primitives-card`)
 - [x] Inventario, primitivas, sustitución, retirada de `ios-card`, `ios-touch`, `ios-header` e `IosCard`
 - [x] Verificación completa
-- [ ] PR hacia `develop`
+- [x] PR hacia `develop` (#61)
 
 ### Notas del PR 1
 - **Cobertura:** `Card grouped` 39 (33 `ios-card` + 6 `IosCard`, 2 de ellas como receta local, abajo), de ellas 13 `pressable` y 3 `divided`; `Card panel` 11 (todas las tarjetas de Rendimiento); `SectionHeader` 13 (`as="p"` en 7). Codemod sobre el AST: cambia el elemento de apertura y el de cierre y conserva los demás atributos (`key`).
