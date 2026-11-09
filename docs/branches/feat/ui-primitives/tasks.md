@@ -40,7 +40,7 @@ Solo se marca lo verificado. Spec y plan aprobados el 2026-11-09 ("Apruebo todo"
 ## PR 2 — Stat y StatTile (`feat/ui-primitives-stat`)
 - [x] Inventario, primitivas, sustitución, retirada de `MetricCard`
 - [x] Verificación completa
-- [ ] PR hacia `develop`
+- [x] PR hacia `develop` (#62)
 
 ### Notas del PR 2
 - **Alcance (acordado el 2026-11-09):** `Stat` + `StatTile` solo en el Dashboard. Las 8 fichas de biomarcadores de Salud no son idénticas entre sí: cada una tiene un pie distinto (barra de progreso de pasos, tendencia de peso con icono, texto), valores con color dinámico de paleta, unidad condicional y `gap-0.5` en SpO₂. Se quedan con `Card pressable`, para la Capa 3.
