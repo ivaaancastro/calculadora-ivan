@@ -71,7 +71,7 @@ Partido en 5a y 5b (decisión del usuario, 2026-11-09): clasificar unos 740 usos
 - [x] Métricas fuera de las gráficas: `metric-*-ink` y `legacy-*` (`src/styles/tokens/metrics.json`, 13 tokens, a mano); D-07 en `paridad.md`
 - [x] Codemod con lista de inclusión revisada (`scripts/codemods/accents.mjs`), clases sueltas y opacidad
 - [x] Verificación completa
-- [ ] PR
+- [x] PR (#56)
 
 ### Notas del PR 5a
 - Los acentos no se migran por color: `emerald-500` es "positivo" en un mensaje de éxito y "VO2" o "carrera" en otra pantalla. El codemod solo toca las expresiones de `ALLOW` (archivo y línea, revisadas una a una) y todo lo demás queda excluido y bloquea lo que coexiste con ello.
