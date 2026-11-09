@@ -274,6 +274,9 @@ export function collectPairs(root, files, props, colors = NEUTRALS, opts = {}) {
  * `dark:`, que hoy se genera después de `hover:`/`focus:`.
  */
 export function transform(source, props, table, colors = NEUTRALS, file = 'x.jsx', opts = {}) {
+  // `opts.tableOf(lit)` permite una tabla distinta por literal (categorías: el mismo color significa
+  // cosas distintas según dónde esté); si devuelve null se usa `table`.
+  const tbl = (lit) => opts.tableOf?.(lit, source) ?? table;
   const lits = literalsOf(file, source).map((lit) => {
     const pairs = findPairs(lit, props, colors, opts);
     // Literal excluido a mano (otro significado): no se migra y bloquea lo que coexiste con él.
@@ -284,8 +287,27 @@ export function transform(source, props, table, colors = NEUTRALS, file = 'x.jsx
   const stuck = new Map();
   for (const { lit, pairs } of lits) {
     const s = new Set(pairs.blocked);
-    for (const p of pairs) if (p.reason || !tokenFor(p, table)) s.add(conflictGroup(p.light.parsed.prop));
+    for (const p of pairs) if (p.reason || !tokenFor(p, tbl(lit))) s.add(conflictGroup(p.light.parsed.prop));
     stuck.set(lit, s);
+  }
+  // `opts.guardStates`: un par `dark:` de base (`text-slate-400 dark:text-zinc-500`) junto a una
+  // clase de estado sin su `dark:` (`hover:text-red-500`) de la misma propiedad no se migra. Hoy
+  // `.dark .dark\:x` (0,2,0) gana a `.hover\:y:hover` (0,2,0) por orden y en oscuro no hay hover;
+  // con el token (0,1,0) ganaría el hover (D-08). Se mira en todo lo que puede coexistir.
+  if (opts.guardStates) {
+    const STATE = /^(hover|focus|focus-visible|focus-within|active|disabled)$/;
+    const kinds = (pairs, pick) =>
+      new Set(pairs.filter(pick).map((p) => conflictGroup(p.light.parsed.prop)));
+    const darkBase = new Map(lits.map(({ lit, pairs }) => [lit, kinds(pairs, (p) => p.dark && !p.light.parsed.variants.length)]));
+    const stateSingle = new Map(
+      lits.map(({ lit, pairs }) => [lit, kinds(pairs, (p) => !p.dark && p.light.parsed.variants.some((v) => STATE.test(v)))]),
+    );
+    for (const { lit } of lits) {
+      const near = lits.filter(({ lit: o }) => o === lit || (o.group === lit.group && canCoexist(lit, o))).map(({ lit: o }) => o);
+      for (const g of new Set([...darkBase.get(lit), ...stateSingle.get(lit)])) {
+        if (near.some((o) => darkBase.get(o).has(g)) && near.some((o) => stateSingle.get(o).has(g))) stuck.get(lit).add(g);
+      }
+    }
   }
   // Un literal se migra para una propiedad si ningún literal que pueda coexistir con él en el
   // mismo elemento (misma expresión y no en la rama opuesta de un ternario) la deja sin migrar.
@@ -312,7 +334,7 @@ export function transform(source, props, table, colors = NEUTRALS, file = 'x.jsx
   const skipped = [];
   for (const { lit, pairs } of lits) {
     for (const p of pairs) {
-      const token = tokenFor(p, table);
+      const token = tokenFor(p, tbl(lit));
       if (!token) continue;
       const g = conflictGroup(p.light.parsed.prop);
       const reason = p.reason ?? (migrable(lit, g) ? null : 'precedencia (misma expresión)');
