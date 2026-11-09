@@ -53,7 +53,7 @@ Solo se marca lo verificado. Spec y plan aprobados el 2026-11-09 ("Apruebo todo"
 - [x] Inventario, tabla (`src/styles/tokens/surfaces.json`, 43 tokens), codemod (`scripts/codemods/surfaces.mjs`, incluye `index.css`) y revisión manual
 - [x] Cobertura ≥ 75 %: **79,2 %** (266 de 336 pares de fondo)
 - [x] Verificación completa
-- [ ] PR
+- [x] PR (#55)
 
 ### Notas de verificación del PR 4
 - El codemod lee también los `@apply` de CSS (cada uno es una expresión de clases) y los grises de iOS en hex (`[#1c1c1e]`, `[#2c2c2e]`); los acentos en hex (`#0A84FF`…) siguen para el PR 5.
