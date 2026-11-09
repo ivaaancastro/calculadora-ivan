@@ -26,7 +26,7 @@ Solo se marca lo verificado. Spec y plan aprobados el 2026-11-09 ("Apruebo todo"
 - [x] Codemod con pruebas (`scripts/codemods/lib.mjs`, `borders.mjs`; 13 pruebas), revisión manual de clases dinámicas
 - [x] Verificación completa y línea base bajada
 - [ ] Cobertura ≥ 80 %: **79,5 %** (167 de 210 pares). Los 13 pares con token que no se migran son descartes deliberados por precedencia (ver notas)
-- [ ] PR
+- [x] PR (#53)
 
 ### Notas de verificación del PR 2
 - Codemod basado en el AST (`@babel/parser`, declarado como `devDependency`): solo sustituye pares claro/`dark:` exactos dentro del mismo literal y conserva variantes y lados (`hover:`, `border-b-`…).
