@@ -9,6 +9,7 @@ import {
     Footprints, Wind, TrendingDown, TrendingUp, Minus, Calendar, ChevronRight
 } from 'lucide-react';
 import { useWellnessInfo } from '../../hooks/useWellnessInfo';
+import { useChartTheme } from '../charts/useChartTheme';
 
 // Componente de Tarjeta Apple iOS
 const IosCard = ({ children, className = '' }) => (
@@ -162,6 +163,7 @@ const computeDayReadiness = (day, baselineRhr = 50) => {
 };
 
 export const HealthPage = ({ activities, settings, chartData }) => {
+    const ct = useChartTheme();
     const { wellnessMetrics, loading: wellnessLoading, error: apiError } = useWellnessInfo(activities, settings, chartData);
 
     const [activeTab, setActiveTab] = useState('today'); // 'today' | 'history'
@@ -392,7 +394,7 @@ export const HealthPage = ({ activities, settings, chartData }) => {
                             <AppleRingGauge
                                 value={wellnessMetrics?.todayReadiness}
                                 colorClass={readinessInfo.color}
-                                strokeColor="#10b981"
+                                strokeColor={ct.series.readiness}
                                 gradientId="apple-ring-rec"
                                 icon={Battery}
                                 title="Recuperación"
@@ -421,7 +423,7 @@ export const HealthPage = ({ activities, settings, chartData }) => {
                                 value={strainInfo.val}
                                 max={10}
                                 colorClass={strainInfo.color}
-                                strokeColor="#f43f5e"
+                                strokeColor={ct.series.strain}
                                 gradientId="apple-ring-strain"
                                 icon={Zap}
                                 title="Carga Diaria"
@@ -448,7 +450,7 @@ export const HealthPage = ({ activities, settings, chartData }) => {
                             <AppleRingGauge
                                 value={wellnessMetrics?.latestSleepScore ?? '--'}
                                 colorClass={sleepInfo.color}
-                                strokeColor="#3b82f6"
+                                strokeColor={ct.series.sleep}
                                 gradientId="apple-ring-sleep"
                                 icon={Moon}
                                 title="Calidad Sueño"
@@ -901,14 +903,14 @@ export const HealthPage = ({ activities, settings, chartData }) => {
                         <div className="h-48 sm:h-56 w-full -ml-3 sm:ml-0">
                             <ResponsiveContainer width="100%" height="100%">
                                 <ComposedChart data={historySeries} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-                                    <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" dark:stroke="#27272a" vertical={false} opacity={0.6} />
-                                    <XAxis dataKey="dateLabel" tick={{ fontSize: 10, fill: '#71717a', fontWeight: 'bold' }} axisLine={false} tickLine={false} />
-                                    <YAxis yAxisId="left" domain={[0, 100]} tick={{ fontSize: 10, fill: '#71717a', fontWeight: 'bold' }} axisLine={false} tickLine={false} />
+                                    <CartesianGrid strokeDasharray="3 3" stroke={ct.anatomy.gridSoft} dark:stroke="#27272a" vertical={false} opacity={0.6} />
+                                    <XAxis dataKey="dateLabel" tick={{ fontSize: 10, fill: ct.anatomy.tickZinc, fontWeight: 'bold' }} axisLine={false} tickLine={false} />
+                                    <YAxis yAxisId="left" domain={[0, 100]} tick={{ fontSize: 10, fill: ct.anatomy.tickZinc, fontWeight: 'bold' }} axisLine={false} tickLine={false} />
                                     <YAxis yAxisId="right" orientation="right" domain={[0, 12]} hide />
-                                    <RechartsTooltip content={<HistoryChartTooltip />} cursor={{ strokeDasharray: '3 3', stroke: '#71717a', opacity: 0.5 }} isAnimationActive={false} />
+                                    <RechartsTooltip content={<HistoryChartTooltip />} cursor={{ strokeDasharray: '3 3', stroke: ct.anatomy.cursorZinc, opacity: 0.5 }} isAnimationActive={false} />
                                     
-                                    <Bar yAxisId="left" dataKey="readinessScore" fill="#10b981" radius={[4, 4, 0, 0]} maxBarSize={28} opacity={0.85} />
-                                    <Line yAxisId="right" type="monotone" dataKey="sleep" stroke="#3b82f6" strokeWidth={2.5} dot={{ r: 3, fill: '#3b82f6', stroke: '#fff', strokeWidth: 1.5 }} />
+                                    <Bar yAxisId="left" dataKey="readinessScore" fill={ct.series.readiness} radius={[4, 4, 0, 0]} maxBarSize={28} opacity={0.85} />
+                                    <Line yAxisId="right" type="monotone" dataKey="sleep" stroke={ct.series.sleep} strokeWidth={2.5} dot={{ r: 3, fill: ct.series.sleep, stroke: ct.anatomy.dotRing, strokeWidth: 1.5 }} />
                                 </ComposedChart>
                             </ResponsiveContainer>
                         </div>

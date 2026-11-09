@@ -3,8 +3,8 @@
   "totals": {
     "palette": 865,
     "arbitrary": 9,
-    "hex": 266,
-    "rgb": 13,
+    "hex": 100,
+    "rgb": 11,
     "dark": 188
   },
   "files": {
@@ -18,7 +18,7 @@
     "src/components/activity/ActivityMap.jsx": {
       "palette": 6,
       "arbitrary": 0,
-      "hex": 10,
+      "hex": 0,
       "rgb": 0,
       "dark": 3
     },
@@ -67,14 +67,14 @@
     "src/components/dashboard/ChartsSection.jsx": {
       "palette": 4,
       "arbitrary": 0,
-      "hex": 11,
+      "hex": 0,
       "rgb": 0,
       "dark": 0
     },
     "src/components/dashboard/EvolutionChart.jsx": {
       "palette": 9,
       "arbitrary": 0,
-      "hex": 19,
+      "hex": 0,
       "rgb": 0,
       "dark": 3
     },
@@ -109,7 +109,7 @@
     "src/components/fitness/EstimatedFtpCard.jsx": {
       "palette": 12,
       "arbitrary": 0,
-      "hex": 7,
+      "hex": 0,
       "rgb": 0,
       "dark": 3
     },
@@ -123,14 +123,14 @@
     "src/components/fitness/MmpAndEfCard.jsx": {
       "palette": 40,
       "arbitrary": 0,
-      "hex": 8,
+      "hex": 0,
       "rgb": 0,
       "dark": 3
     },
     "src/components/fitness/PowerProfileCard.jsx": {
       "palette": 35,
       "arbitrary": 0,
-      "hex": 8,
+      "hex": 0,
       "rgb": 0,
       "dark": 7
     },
@@ -172,15 +172,15 @@
     "src/components/fitness/WeeklyVolumeAndFocusCard.jsx": {
       "palette": 4,
       "arbitrary": 0,
-      "hex": 7,
+      "hex": 0,
       "rgb": 0,
       "dark": 0
     },
     "src/components/fitness/fitnessConstants.js": {
       "palette": 0,
       "arbitrary": 0,
-      "hex": 1,
-      "rgb": 3,
+      "hex": 0,
+      "rgb": 1,
       "dark": 0
     },
     "src/components/modals/AddActivityModal.jsx": {
@@ -193,14 +193,14 @@
     "src/components/pages/ActivityDetailPage.jsx": {
       "palette": 132,
       "arbitrary": 0,
-      "hex": 51,
+      "hex": 0,
       "rgb": 0,
       "dark": 29
     },
     "src/components/pages/CalendarPage.jsx": {
       "palette": 150,
       "arbitrary": 0,
-      "hex": 55,
+      "hex": 22,
       "rgb": 0,
       "dark": 39
     },
@@ -214,7 +214,7 @@
     "src/components/pages/HealthPage.jsx": {
       "palette": 132,
       "arbitrary": 0,
-      "hex": 12,
+      "hex": 1,
       "rgb": 0,
       "dark": 29
     },

@@ -13,6 +13,7 @@ import {
     getSportCategory, SPORT_LOAD_CONFIG,
     getEffectiveTSS, computeZoneTssPerHour, estimateTssFromBlocks,
 } from '../../utils/tssEngine';
+import { useChartTheme } from '../charts/useChartTheme';
 
 const WEEKDAYS = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'];
 
@@ -55,6 +56,7 @@ const DurationInput = ({ value, onChange, className = '' }) => {
 };
 // ── Floating draggable PMC projection chart ─────────────────────────────────
 const PmcFloatingChart = ({ pmcByDate, onClose, initPos }) => {
+    const ct = useChartTheme();
     const initialWidth = Math.min(480, window.innerWidth - 32);
     const startX = Math.max(16, window.innerWidth / 2 - initialWidth / 2);
     const [pos, setPos] = React.useState({ x: startX, y: Math.max(50, window.innerHeight / 2 - 170) });
@@ -213,88 +215,88 @@ const PmcFloatingChart = ({ pmcByDate, onClose, initPos }) => {
 
                 <defs>
                     <linearGradient id="tcbGrad" x1="0" x2="0" y1="0" y2="1">
-                        <stop offset="0%" stopColor="#10b981" stopOpacity="0.2" />
-                        <stop offset="100%" stopColor="#f87171" stopOpacity="0.2" />
+                        <stop offset="0%" stopColor={ct.pmc.bandUp} stopOpacity="0.2" />
+                        <stop offset="100%" stopColor={ct.pmc.bandDown} stopOpacity="0.2" />
                     </linearGradient>
                 </defs>
 
                 {/* Section Dividers */}
-                <line x1={PAD.l} y1={yTopLine} x2={W - PAD.r} y2={yTopLine} stroke="#cbd5e1" strokeWidth="1" />
-                <line x1={PAD.l} y1={yMidLine} x2={W - PAD.r} y2={yMidLine} stroke="#cbd5e1" strokeWidth="1" />
+                <line x1={PAD.l} y1={yTopLine} x2={W - PAD.r} y2={yTopLine} stroke={ct.anatomy.grid} strokeWidth="1" />
+                <line x1={PAD.l} y1={yMidLine} x2={W - PAD.r} y2={yMidLine} stroke={ct.anatomy.grid} strokeWidth="1" />
 
                 {/* Y Axis Grid & Labels - TOP */}
                 {[minTop, (minTop + maxTop) / 2, maxTop].map(v => (
                     <g key={`top-${v}`}>
-                        <line x1={PAD.l} y1={yTopS(v)} x2={W - PAD.r} y2={yTopS(v)} stroke="#e2e8f0" strokeWidth="0.5" strokeDasharray="3,3" />
-                        <text x={PAD.l - 6} y={yTopS(v) + 3} textAnchor="end" fontSize={9} fill="#94a3b8">{Math.round(v)}</text>
+                        <line x1={PAD.l} y1={yTopS(v)} x2={W - PAD.r} y2={yTopS(v)} stroke={ct.anatomy.grid2} strokeWidth="0.5" strokeDasharray="3,3" />
+                        <text x={PAD.l - 6} y={yTopS(v) + 3} textAnchor="end" fontSize={9} fill={ct.anatomy.tick}>{Math.round(v)}</text>
                     </g>
                 ))}
 
                 {/* Y Axis Grid & Labels - MID */}
-                <line x1={PAD.l} y1={zeroYMid} x2={W - PAD.r} y2={zeroYMid} stroke="#cbd5e1" strokeWidth="1" strokeDasharray="3,3" />
-                <rect x={PAD.l} y={yMidS(5)} width={cw} height={yMidS(-20) - yMidS(5)} fill="#f1f5f9" fillOpacity="0.5" />
-                <rect x={PAD.l} y={yMidS(25)} width={cw} height={yMidS(5) - yMidS(25)} fill="#10b981" fillOpacity="0.05" />
-                <rect x={PAD.l} y={yMidS(-10)} width={cw} height={yMidS(-30) - yMidS(-10)} fill="#f87171" fillOpacity="0.05" />
+                <line x1={PAD.l} y1={zeroYMid} x2={W - PAD.r} y2={zeroYMid} stroke={ct.anatomy.grid} strokeWidth="1" strokeDasharray="3,3" />
+                <rect x={PAD.l} y={yMidS(5)} width={cw} height={yMidS(-20) - yMidS(5)} fill={ct.pmc.band} fillOpacity="0.5" />
+                <rect x={PAD.l} y={yMidS(25)} width={cw} height={yMidS(5) - yMidS(25)} fill={ct.pmc.bandUp} fillOpacity="0.05" />
+                <rect x={PAD.l} y={yMidS(-10)} width={cw} height={yMidS(-30) - yMidS(-10)} fill={ct.pmc.bandDown} fillOpacity="0.05" />
                 {[20, 5, -10, -30].map(v => (
-                    <text key={`mid-${v}`} x={PAD.l - 6} y={yMidS(v) + 3} textAnchor="end" fontSize={9} fill="#94a3b8">{v}</text>
+                    <text key={`mid-${v}`} x={PAD.l - 6} y={yMidS(v) + 3} textAnchor="end" fontSize={9} fill={ct.anatomy.tick}>{v}</text>
                 ))}
 
                 {/* Y Axis Grid & Labels - BOT */}
-                <line x1={PAD.l} y1={zeroYBot} x2={W - PAD.r} y2={zeroYBot} stroke="#cbd5e1" strokeWidth="1" />
+                <line x1={PAD.l} y1={zeroYBot} x2={W - PAD.r} y2={zeroYBot} stroke={ct.anatomy.grid} strokeWidth="1" />
                 {[maxBot, 0, minBot].map(v => (
-                    <text key={`bot-${v}`} x={PAD.l - 6} y={yBotS(v) + 3} textAnchor="end" fontSize={9} fill="#94a3b8">{v.toFixed(1)}</text>
+                    <text key={`bot-${v}`} x={PAD.l - 6} y={yBotS(v) + 3} textAnchor="end" fontSize={9} fill={ct.anatomy.tick}>{v.toFixed(1)}</text>
                 ))}
 
                 {/* Today marker (Vertical Line across all sections) */}
                 {todayX != null && <>
-                    <line x1={todayX} y1={PAD.t} x2={todayX} y2={H - PAD.b} stroke="#475569" strokeWidth="1.2" />
+                    <line x1={todayX} y1={PAD.t} x2={todayX} y2={H - PAD.b} stroke={ct.pmc.today} strokeWidth="1.2" />
                 </>}
 
                 {/* === TOP SECTION: CTL & ATL === */}
-                <path d={buildPath('atl', realE, yTopS)} fill="none" stroke="#a78bfa" strokeWidth="1.5" strokeLinejoin="round" />
-                <path d={buildPath('ctl', realE, yTopS)} fill="none" stroke="#38bdf8" strokeWidth="2.5" strokeLinejoin="round" />
+                <path d={buildPath('atl', realE, yTopS)} fill="none" stroke={ct.pmc.atl} strokeWidth="1.5" strokeLinejoin="round" />
+                <path d={buildPath('ctl', realE, yTopS)} fill="none" stroke={ct.pmc.ctl} strokeWidth="2.5" strokeLinejoin="round" />
                 {projWithJoin.length > 1 && <>
-                    <path d={buildPath('atl', projWithJoin, yTopS)} fill="none" stroke="#a78bfa" strokeWidth="1.5" strokeDasharray="4,3" opacity="0.6" strokeLinejoin="round" />
-                    <path d={buildPath('ctl', projWithJoin, yTopS)} fill="none" stroke="#38bdf8" strokeWidth="2.5" strokeDasharray="4,3" opacity="0.6" strokeLinejoin="round" />
+                    <path d={buildPath('atl', projWithJoin, yTopS)} fill="none" stroke={ct.pmc.atl} strokeWidth="1.5" strokeDasharray="4,3" opacity="0.6" strokeLinejoin="round" />
+                    <path d={buildPath('ctl', projWithJoin, yTopS)} fill="none" stroke={ct.pmc.ctl} strokeWidth="2.5" strokeDasharray="4,3" opacity="0.6" strokeLinejoin="round" />
                 </>}
 
                 {/* === MID SECTION: TCB (Forma) === */}
-                <path d={buildPath('tcb', realE, yMidS)} fill="none" stroke="#22c55e" strokeWidth="2.5" strokeLinejoin="round" />
+                <path d={buildPath('tcb', realE, yMidS)} fill="none" stroke={ct.pmc.tsb} strokeWidth="2.5" strokeLinejoin="round" />
                 {projWithJoin.length > 1 && <>
-                    <path d={buildPath('tcb', projWithJoin, yMidS)} fill="none" stroke="#22c55e" strokeWidth="2.5" strokeDasharray="4,3" opacity="0.6" strokeLinejoin="round" />
+                    <path d={buildPath('tcb', projWithJoin, yMidS)} fill="none" stroke={ct.pmc.tsb} strokeWidth="2.5" strokeDasharray="4,3" opacity="0.6" strokeLinejoin="round" />
                 </>}
 
                 {/* === BOTTOM SECTION: Ramp Rate === */}
-                <path d={buildRampPath(realE)} fill="none" stroke="#22c55e" strokeWidth="1.5" />
+                <path d={buildRampPath(realE)} fill="none" stroke={ct.pmc.ramp} strokeWidth="1.5" />
                 {projWithJoin.length > 1 && <>
-                    <path d={buildRampPath(projWithJoin)} fill="none" stroke="#38bdf8" strokeWidth="1.5" strokeDasharray="2,2" />
+                    <path d={buildRampPath(projWithJoin)} fill="none" stroke={ct.pmc.rampProj} strokeWidth="1.5" strokeDasharray="2,2" />
                 </>}
 
                 {/* Current latest values on right edge */}
                 {lastReal && (
                     <g>
-                        <text x={W - PAD.r + 6} y={yTopS(lastReal.ctl) + 3} fontSize={10} fontWeight="bold" fill="#0284c7">{Math.round(lastReal.ctl)}</text>
-                        <text x={W - PAD.r + 6} y={yTopS(lastReal.atl) + 3} fontSize={10} fontWeight="bold" fill="#7c3aed">{Math.round(lastReal.atl)}</text>
-                        <text x={W - PAD.r + 6} y={yMidS(lastReal.tcb) + 3} fontSize={10} fontWeight="bold" fill="#64748b">{Math.round(lastReal.tcb)}</text>
-                        <text x={W - PAD.r + 6} y={yBotS(lastReal.ramp) + 3} fontSize={10} fontWeight="bold" fill="#16a34a">{lastReal.ramp.toFixed(1)}</text>
+                        <text x={W - PAD.r + 6} y={yTopS(lastReal.ctl) + 3} fontSize={10} fontWeight="bold" fill={ct.pmc.ctlInk}>{Math.round(lastReal.ctl)}</text>
+                        <text x={W - PAD.r + 6} y={yTopS(lastReal.atl) + 3} fontSize={10} fontWeight="bold" fill={ct.pmc.atlInk}>{Math.round(lastReal.atl)}</text>
+                        <text x={W - PAD.r + 6} y={yMidS(lastReal.tcb) + 3} fontSize={10} fontWeight="bold" fill={ct.pmc.tsbInk}>{Math.round(lastReal.tcb)}</text>
+                        <text x={W - PAD.r + 6} y={yBotS(lastReal.ramp) + 3} fontSize={10} fontWeight="bold" fill={ct.pmc.rampInk}>{lastReal.ramp.toFixed(1)}</text>
                     </g>
                 )}
 
                 {/* Hover crosshair */}
                 {hover != null && <>
-                    <line x1={hover.x} y1={PAD.t} x2={hover.x} y2={H - PAD.b} stroke="#94a3b8" strokeWidth="1" opacity="0.8" />
-                    {hoverEntry?.ctl != null && <circle cx={hover.x} cy={yTopS(hoverEntry.ctl)} r={3.5} fill="#38bdf8" stroke="white" strokeWidth="1.5" />}
-                    {hoverEntry?.atl != null && <circle cx={hover.x} cy={yTopS(hoverEntry.atl)} r={3.5} fill="#a78bfa" stroke="white" strokeWidth="1.5" />}
-                    {hoverEntry?.tcb != null && <circle cx={hover.x} cy={yMidS(hoverEntry.tcb)} r={3.5} fill="#22c55e" stroke="white" strokeWidth="1.5" />}
-                    {hoverEntry?.ramp != null && <circle cx={hover.x} cy={yBotS(hoverEntry.ramp)} r={2.5} fill="#16a34a" />}
+                    <line x1={hover.x} y1={PAD.t} x2={hover.x} y2={H - PAD.b} stroke={ct.anatomy.cursor} strokeWidth="1" opacity="0.8" />
+                    {hoverEntry?.ctl != null && <circle cx={hover.x} cy={yTopS(hoverEntry.ctl)} r={3.5} fill={ct.pmc.ctl} stroke={ct.anatomy.dotRing} strokeWidth="1.5" />}
+                    {hoverEntry?.atl != null && <circle cx={hover.x} cy={yTopS(hoverEntry.atl)} r={3.5} fill={ct.pmc.atl} stroke={ct.anatomy.dotRing} strokeWidth="1.5" />}
+                    {hoverEntry?.tcb != null && <circle cx={hover.x} cy={yMidS(hoverEntry.tcb)} r={3.5} fill={ct.pmc.tsb} stroke={ct.anatomy.dotRing} strokeWidth="1.5" />}
+                    {hoverEntry?.ramp != null && <circle cx={hover.x} cy={yBotS(hoverEntry.ramp)} r={2.5} fill={ct.pmc.rampInk} />}
                 </>}
 
                 {/* X axis Base Line */}
-                <line x1={PAD.l} y1={H - PAD.b} x2={W - PAD.r} y2={H - PAD.b} stroke="#cbd5e1" strokeWidth="1" />
+                <line x1={PAD.l} y1={H - PAD.b} x2={W - PAD.r} y2={H - PAD.b} stroke={ct.anatomy.grid} strokeWidth="1" />
                 {labels.map((e, li) => {
                     const i = visibleWithRamp.findIndex(v => v.date === e.date);
                     const d = new Date(e.date + 'T00:00:00');
-                    return <text key={li} x={xS(i)} y={H - PAD.b + 14} textAnchor="middle" fontSize={10} fill="#64748b">
+                    return <text key={li} x={xS(i)} y={H - PAD.b + 14} textAnchor="middle" fontSize={10} fill={ct.anatomy.axis}>
                         {d.toLocaleDateString('es-ES', { day: 'numeric', month: 'short' })}
                     </text>;
                 })}

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { ComposedChart, Area, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine } from 'recharts';
 import { Activity } from 'lucide-react';
+import { useChartTheme } from '../charts/useChartTheme';
 
 const CustomTooltip = ({ active, payload, label }) => {
   if (active && payload && payload.length) {
@@ -44,6 +45,7 @@ const CustomTooltip = ({ active, payload, label }) => {
 };
 
 export const EvolutionChart = ({ data, timeRange, setTimeRange }) => {
+  const ct = useChartTheme();
   const [hoverPoint, setHoverPoint] = useState(null);
 
   if (!data || data.length === 0) {
@@ -164,20 +166,20 @@ export const EvolutionChart = ({ data, timeRange, setTimeRange }) => {
           >
             <defs>
               <linearGradient id="colorCtl" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor="#3b82f6" stopOpacity={0.18} />
-                <stop offset="100%" stopColor="#3b82f6" stopOpacity={0} />
+                <stop offset="0%" stopColor={ct.series.ctl} stopOpacity={0.18} />
+                <stop offset="100%" stopColor={ct.series.ctl} stopOpacity={0} />
               </linearGradient>
               <linearGradient id="colorTcb" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor="#eab308" stopOpacity={0.15} />
-                <stop offset="100%" stopColor="#eab308" stopOpacity={0} />
+                <stop offset="0%" stopColor={ct.series.tsb} stopOpacity={0.15} />
+                <stop offset="100%" stopColor={ct.series.tsb} stopOpacity={0} />
               </linearGradient>
             </defs>
 
-            <CartesianGrid strokeDasharray="3 3" stroke="#cbd5e1" opacity={0.3} vertical={false} />
+            <CartesianGrid strokeDasharray="3 3" stroke={ct.anatomy.grid} opacity={0.3} vertical={false} />
 
             <XAxis
               dataKey="date"
-              tick={{ fontSize: 10, fill: '#64748b', fontWeight: '500' }}
+              tick={{ fontSize: 10, fill: ct.anatomy.axis, fontWeight: '500' }}
               tickFormatter={(val) => new Date(val).toLocaleDateString('es-ES', { day: 'numeric', month: 'short' })}
               minTickGap={40}
               axisLine={false}
@@ -186,33 +188,33 @@ export const EvolutionChart = ({ data, timeRange, setTimeRange }) => {
               dy={10}
             />
 
-            <YAxis yAxisId="left" tick={{ fontSize: 10, fill: '#64748b', fontWeight: '500' }} axisLine={false} tickLine={false} dx={-10} />
+            <YAxis yAxisId="left" tick={{ fontSize: 10, fill: ct.anatomy.axis, fontWeight: '500' }} axisLine={false} tickLine={false} dx={-10} />
             <YAxis yAxisId="right" orientation="right" hide domain={['dataMin - 30', 'dataMax + 30']} />
 
             <Tooltip
               content={<CustomTooltip />}
-              cursor={{ stroke: '#94a3b8', strokeWidth: 1, strokeDasharray: '4 4' }}
+              cursor={{ stroke: ct.anatomy.cursor, strokeWidth: 1, strokeDasharray: '4 4' }}
               isAnimationActive={false}
             />
 
             <ReferenceLine
               x={todayStr}
               yAxisId="left"
-              stroke="#94a3b8"
+              stroke={ct.anatomy.cursor}
               strokeWidth={1}
               strokeDasharray="4 4"
-              label={{ position: 'insideTopLeft', value: 'HOY', fill: '#64748b', fontSize: 9, fontWeight: '600', letterSpacing: '0.05em' }}
+              label={{ position: 'insideTopLeft', value: 'HOY', fill: ct.anatomy.axis, fontSize: 9, fontWeight: '600', letterSpacing: '0.05em' }}
             />
             
             <Area 
                 yAxisId="right" 
                 type="monotone" 
                 dataKey="tsb" 
-                stroke="#eab308" 
+                stroke={ct.series.tsb} 
                 strokeWidth={2} 
                 fillOpacity={1} 
                 fill="url(#colorTcb)"
-                activeDot={{ r: 4, stroke: '#fff', strokeWidth: 2, fill: '#eab308' }} 
+                activeDot={{ r: 4, stroke: ct.anatomy.dotRing, strokeWidth: 2, fill: ct.series.tsb }} 
                 isAnimationActive={false} 
             />
             
@@ -220,11 +222,11 @@ export const EvolutionChart = ({ data, timeRange, setTimeRange }) => {
                 yAxisId="left" 
                 type="monotone" 
                 dataKey="ctl" 
-                stroke="#3b82f6" 
+                stroke={ct.series.ctl} 
                 strokeWidth={3} 
                 fillOpacity={1} 
                 fill="url(#colorCtl)"
-                activeDot={{ r: 5, stroke: '#fff', strokeWidth: 2, fill: '#3b82f6' }} 
+                activeDot={{ r: 5, stroke: ct.anatomy.dotRing, strokeWidth: 2, fill: ct.series.ctl }} 
                 isAnimationActive={false} 
             />
             
@@ -232,11 +234,11 @@ export const EvolutionChart = ({ data, timeRange, setTimeRange }) => {
                 yAxisId="left" 
                 type="monotone" 
                 dataKey="atl" 
-                stroke="#f43f5e" 
+                stroke={ct.series.atl} 
                 strokeWidth={2} 
                 strokeDasharray="3 3"
                 dot={false} 
-                activeDot={{ r: 4, stroke: '#fff', strokeWidth: 1.5, fill: '#f43f5e' }} 
+                activeDot={{ r: 4, stroke: ct.anatomy.dotRing, strokeWidth: 1.5, fill: ct.series.atl }} 
                 isAnimationActive={false} 
             />
           </ComposedChart>
