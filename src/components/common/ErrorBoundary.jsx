@@ -34,8 +34,8 @@ export class ErrorBoundary extends React.Component {
         <div className="min-h-screen flex items-center justify-center bg-sunken-2 p-4">
           <div className="bg-surface rounded-2xl shadow-xl p-8 max-w-lg w-full border border-line text-center">
             <div className="flex justify-center mb-6">
-              <div className="w-16 h-16 bg-red-100 dark:bg-red-500/10 rounded-full flex items-center justify-center">
-                <AlertTriangle className="text-red-600 dark:text-red-500" size={32} />
+              <div className="w-16 h-16 bg-danger-tint-4 rounded-full flex items-center justify-center">
+                <AlertTriangle className="text-danger-ink-3" size={32} />
               </div>
             </div>
             
@@ -48,7 +48,7 @@ export class ErrorBoundary extends React.Component {
 
             {import.meta.env.DEV && this.state.error && (
               <div className="text-left bg-slate-100 dark:bg-zinc-950 p-4 rounded-lg overflow-auto mb-8 border border-line">
-                <p className="text-xs font-mono text-red-600 dark:text-red-400 font-bold mb-2">
+                <p className="text-xs font-mono text-danger-ink font-bold mb-2">
                   {this.state.error.toString()}
                 </p>
                 <p className="text-[10px] font-mono text-ink-3-flat whitespace-pre-wrap">
@@ -60,7 +60,7 @@ export class ErrorBoundary extends React.Component {
             <div className="flex flex-col gap-3">
               <button 
                 onClick={this.handleReload}
-                className="w-full flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-xl font-bold text-sm uppercase tracking-widest transition-colors"
+                className="w-full flex items-center justify-center gap-2 bg-action-solid hover:bg-action-hover text-white py-3 rounded-xl font-bold text-sm uppercase tracking-widest transition-colors"
               >
                 <RefreshCw size={16} />
                 Reiniciar Aplicación

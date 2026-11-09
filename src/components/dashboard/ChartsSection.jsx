@@ -9,7 +9,7 @@ export const ChartsSection = ({ chartData, distribution }) => (
     <Card className="xl:col-span-2 flex flex-col min-h-[350px]">
       <div className="flex justify-between mb-6">
         <h3 className="text-lg font-bold text-slate-800">Evolución</h3>
-        <div className="flex gap-4 text-[10px] font-bold uppercase"><span className="text-blue-500">Fitness</span> <span className="text-orange-500">Fatiga</span></div>
+        <div className="flex gap-4 text-[10px] font-bold uppercase"><span className="text-metric-ctl">Fitness</span> <span className="text-legacy-atl-orange">Fatiga</span></div>
       </div>
       <div className="flex-1">
         <ResponsiveContainer width="100%" height="100%">

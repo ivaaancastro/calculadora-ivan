@@ -11,19 +11,20 @@
 import { readFileSync, writeFileSync, existsSync } from 'node:fs';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { listFiles, collectPairs, transform, tokensCss, NEUTRALS } from './lib.mjs';
+import { listFiles, collectPairs, transform, tokensCss, tokenFor, NEUTRALS } from './lib.mjs';
 
 const ROOT = fileURLToPath(new URL('../..', import.meta.url));
 const TOKENS_CSS = join(ROOT, 'src/styles/tokens.css');
 
 export const tableFrom = (defs) => Object.fromEntries(Object.entries(defs).map(([t, d]) => [`${d.light}|${d.dark}`, t]));
 
-export function defineFamily({ family, props, entries, colors = NEUTRALS }) {
+export function defineFamily({ family, props, entries, colors = NEUTRALS, singles = false, skip = null }) {
+  const opts = { singles, skip };
   const tableFile = join(ROOT, 'src/styles/tokens', `${family}.json`);
   const loadDefs = () => (existsSync(tableFile) ? JSON.parse(readFileSync(tableFile, 'utf8')) : {});
 
   function inventory() {
-    const pairs = collectPairs(ROOT, listFiles(ROOT, entries), props, colors);
+    const pairs = collectPairs(ROOT, listFiles(ROOT, entries), props, colors, opts);
     const table = tableFrom(loadDefs());
     const byValue = new Map();
     for (const p of pairs) {
@@ -33,6 +34,7 @@ export function defineFamily({ family, props, entries, colors = NEUTRALS }) {
       e.uses++;
       e.files.add(p.file);
       if (p.reason) e.skipped[p.reason] = (e.skipped[p.reason] || 0) + 1;
+      e.token ??= tokenFor(p, table);
     }
     const rows = [...byValue.entries()].sort((a, b) => b[1].uses - a[1].uses);
     console.log('| Usos | Claro | Oscuro | Token | Archivos | Descartes |');
@@ -40,10 +42,10 @@ export function defineFamily({ family, props, entries, colors = NEUTRALS }) {
     for (const [k, e] of rows) {
       const [l, d] = k.split('|');
       const sk = Object.entries(e.skipped).map(([r, n]) => `${r} ${n}`).join(', ');
-      console.log(`| ${e.uses} | \`${l}\` | \`${d}\` | ${table[k] ? `\`${table[k]}\`` : '—'} | ${e.files.size} | ${sk} |`);
+      console.log(`| ${e.uses} | \`${l}\` | \`${d}\` | ${e.token ? `\`${e.token}\`` : '—'} | ${e.files.size} | ${sk} |`);
     }
     const total = pairs.length;
-    const withToken = pairs.filter((p) => table[`${p.lightValue}|${p.darkValue}`]).length;
+    const withToken = pairs.filter((p) => tokenFor(p, table)).length;
     console.log(`\nPares: ${total} (${rows.length} distintos). Con token: ${withToken} (${Math.round((withToken * 100) / total)} %).`);
   }
 
@@ -62,7 +64,7 @@ export function defineFamily({ family, props, entries, colors = NEUTRALS }) {
     const skipped = {};
     for (const file of listFiles(ROOT, entries)) {
       const path = join(ROOT, file);
-      const { code, replaced, skipped: sk } = transform(readFileSync(path, 'utf8'), props, table, colors, file);
+      const { code, replaced, skipped: sk } = transform(readFileSync(path, 'utf8'), props, table, colors, file, opts);
       for (const s of sk) skipped[`${s.reason}: ${s.pair}`] = (skipped[`${s.reason}: ${s.pair}`] || 0) + 1;
       if (replaced) {
         writeFileSync(path, code);

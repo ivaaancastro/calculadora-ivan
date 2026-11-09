@@ -1,0 +1,15 @@
+{
+  "metric-ctl-ink": { "light": "blue-600", "dark": "blue-400" },
+  "metric-atl-ink": { "light": "rose-600", "dark": "rose-400" },
+  "metric-tsb-ink": { "light": "amber-600", "dark": "amber-400" },
+  "legacy-ctl-sky": { "light": "sky-500", "dark": "sky-500" },
+  "legacy-atl-red": { "light": "red-400", "dark": "red-400" },
+  "legacy-atl-orange": { "light": "orange-500", "dark": "orange-500" },
+  "legacy-atl-purple": { "light": "purple-400", "dark": "purple-400" },
+  "legacy-atl-purple-ink": { "light": "purple-600", "dark": "purple-400" },
+  "legacy-tsb-up": { "light": "emerald-500", "dark": "emerald-500" },
+  "legacy-tsb-up-ink": { "light": "emerald-600", "dark": "emerald-400" },
+  "legacy-tsb-down": { "light": "orange-400", "dark": "orange-400" },
+  "legacy-tsb-down-2": { "light": "orange-500", "dark": "orange-500" },
+  "legacy-tsb-low": { "light": "red-500", "dark": "red-500" }
+}

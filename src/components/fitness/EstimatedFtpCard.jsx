@@ -34,8 +34,8 @@ export const EstimatedFtpCard = ({
 
                         {ftpDiff !== null && (
                             <div className="mt-8 flex items-center gap-2.5 p-3.5 rounded-2xl bg-sunken-3 border border-line-soft w-fit">
-                                {ftpDiff > 0 ? <ArrowUp size={16} className="text-emerald-500" /> : ftpDiff < 0 ? <ArrowDown size={16} className="text-red-500" /> : <Minus size={16} className="text-slate-400" />}
-                                <span className={`text-[10px] font-bold uppercase tracking-tight ${ftpDiff > 0 ? 'text-emerald-600' : ftpDiff < 0 ? 'text-red-600' : 'text-slate-500'}`}>
+                                {ftpDiff > 0 ? <ArrowUp size={16} className="text-positive" /> : ftpDiff < 0 ? <ArrowDown size={16} className="text-danger" /> : <Minus size={16} className="text-slate-400" />}
+                                <span className={`text-[10px] font-bold uppercase tracking-tight ${ftpDiff > 0 ? 'text-positive-solid' : ftpDiff < 0 ? 'text-danger-solid' : 'text-slate-500'}`}>
                                     {ftpDiff > 0 ? '+' : ''}{ftpDiff}W <span className="opacity-50 font-bold ml-1">vs config ({configFTP}W)</span>
                                 </span>
                             </div>

@@ -177,7 +177,7 @@ const WHY_DURING = ({ fuel }) => (
         <p>Para esta combinación de duración ({Math.round(fuel.durationHours * 60)} min) e intensidad (IF {fuel.estimatedIF}), se estiman <strong className="text-body-2">{fuel.recommendedCarbRate}g de carbos por hora</strong>.</p>
         <p>El intestino puede absorber hasta 60g/hr de glucosa sola, o hasta 90g/hr combinando fuentes (Jeukendrup, 2014).</p>
         {fuel.recommendedCarbRate >= 60 && (
-            <div className="mt-2 p-2 bg-amber-50 dark:bg-amber-900/20 text-amber-800 dark:text-amber-300 rounded border border-amber-200 dark:border-amber-800/30">
+            <div className="mt-2 p-2 bg-warning-tint-2 text-warning-ink-2 rounded border border-warning-edge-2">
                 <strong className="font-bold">⚠️ Alerta Digestiva:</strong> Para tolerar {fuel.recommendedCarbRate}g/h, usa mezclas de Doble Transportador (Glucosa + Fructosa, ratio 2:1 o 1:0.8).
             </div>
         )}

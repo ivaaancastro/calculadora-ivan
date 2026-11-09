@@ -8,7 +8,7 @@ const ActivityDetailPage = React.lazy(() =>
 
 const LazyFallback = () => (
   <div className="flex items-center justify-center py-32">
-    <span className="animate-spin text-blue-500">Cargando...</span>
+    <span className="animate-spin text-action-bright">Cargando...</span>
   </div>
 );
 

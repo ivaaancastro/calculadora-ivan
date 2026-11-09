@@ -177,9 +177,9 @@ export const Navbar = ({
               <div className="p-1.5 border-t border-black/[0.05] dark:border-white/[0.08]">
                 <button
                   onClick={handleLogout}
-                  className="w-full flex items-center gap-2.5 p-2 rounded-xl text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/30 active:scale-[0.98] transition-all text-left text-xs font-semibold"
+                  className="w-full flex items-center gap-2.5 p-2 rounded-xl text-danger-ink hover:bg-danger-tint-2 active:scale-[0.98] transition-all text-left text-xs font-semibold"
                 >
-                  <div className="w-7 h-7 rounded-[8px] bg-red-500/10 text-red-600 dark:text-red-400 flex items-center justify-center shrink-0">
+                  <div className="w-7 h-7 rounded-[8px] bg-danger/10 text-danger-ink flex items-center justify-center shrink-0">
                     <LogOut size={15} strokeWidth={2.3} />
                   </div>
                   <span>Cerrar Sesión</span>
@@ -217,7 +217,7 @@ export const Navbar = ({
           </button>
 
           {isStravaConnected ? (
-            <button onClick={onSync} disabled={uploading} className="bg-blue-500/10 text-blue-600 dark:text-blue-400 hover:bg-blue-500/20 active:scale-95 font-semibold py-1.5 px-3 rounded-full flex items-center gap-1.5 transition-all text-xs">
+            <button onClick={onSync} disabled={uploading} className="bg-action-bright/10 text-action hover:bg-action-bright/20 active:scale-95 font-semibold py-1.5 px-3 rounded-full flex items-center gap-1.5 transition-all text-xs">
               <RefreshCw size={13} className={uploading ? "animate-spin" : ""} />
               <span className={uploading ? "hidden" : "hidden sm:inline"}>Sincronizar</span>
             </button>
@@ -246,13 +246,13 @@ export const Navbar = ({
 
             <div className="h-4 w-px bg-fill-2 mx-1"></div>
 
-            <button onClick={handleLogout} className="p-2 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-full transition-colors text-red-400" title="Cerrar Sesión">
+            <button onClick={handleLogout} className="p-2 hover:bg-danger-tint rounded-full transition-colors text-danger-light" title="Cerrar Sesión">
               <LogOut size={16} />
             </button>
           </div>
 
           {/* Mobile logout button (the settings wheel button has been removed as requested) */}
-          <button onClick={handleLogout} className="md:hidden w-9 h-9 flex items-center justify-center rounded-full text-red-500/80 hover:text-red-500 bg-red-500/10 hover:bg-red-500/20 active:scale-90 transition-all" title="Cerrar sesión">
+          <button onClick={handleLogout} className="md:hidden w-9 h-9 flex items-center justify-center rounded-full text-danger/80 hover:text-danger bg-danger/10 hover:bg-danger/20 active:scale-90 transition-all" title="Cerrar sesión">
             <LogOut size={16} />
           </button>
         </div>

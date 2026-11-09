@@ -50,7 +50,7 @@ export const BottomNav = ({ activeIndex, onTabChange }) => {
                 onClick={(e) => handleTabClick(e, tab.path, tab.index)}
                 className={`flex flex-col items-center justify-center h-[46px] px-3.5 rounded-full transition-all duration-200 select-none touch-manipulation touch-callout-none active:scale-95 ${
                   isActive
-                    ? 'liquid-glass-active text-[#007AFF] dark:text-[#0A84FF]'
+                    ? 'liquid-glass-active text-action-ios'
                     : 'text-ink-4 hover:text-body'
                 }`}
               >
@@ -62,7 +62,7 @@ export const BottomNav = ({ activeIndex, onTabChange }) => {
                 <span
                   className={`text-[9.5px] tracking-tight leading-none mt-1 transition-all ${
                     isActive
-                      ? 'font-bold text-[#007AFF] dark:text-[#0A84FF]'
+                      ? 'font-bold text-action-ios'
                       : 'font-medium'
                   }`}
                 >
@@ -80,7 +80,7 @@ export const BottomNav = ({ activeIndex, onTabChange }) => {
           onClick={(e) => handleTabClick(e, '/history', 4)}
           className={`liquid-glass w-[54px] h-[54px] rounded-full flex items-center justify-center shrink-0 shadow-2xl transition-transform active:scale-90 select-none touch-manipulation touch-callout-none ${
             isSearchActive
-              ? 'liquid-glass-active text-[#007AFF] dark:text-[#0A84FF]'
+              ? 'liquid-glass-active text-action-ios'
               : 'text-ink-4 hover:text-body'
           }`}
         >

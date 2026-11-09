@@ -198,7 +198,11 @@ const keyOf = (p) => `${p.variants.join(':')}|${p.prop}`;
  * Un par se descarta (conservador) si en el mismo literal hay otra clase de la misma propiedad
  * sin pareja: al convertir el par en un solo token cambiaría la precedencia CSS frente a ella.
  */
-export function findPairs(lit, props, colors = NEUTRALS) {
+/**
+ * `opts.singles`: una clase sin pareja `dark:` cuenta como par consigo misma (token con el
+ * mismo valor en claro y oscuro). Solo para la familia de acentos.
+ */
+export function findPairs(lit, props, colors = NEUTRALS, opts = {}) {
   const classes = splitClasses(lit);
   const items = classes
     .map((c) => ({ ...c, parsed: c.glued ? null : parseColorClass(c.cls, props, colors) }))
@@ -214,7 +218,10 @@ export function findPairs(lit, props, colors = NEUTRALS) {
   // Clases de color de la misma propiedad que no forman un par de la familia (otro color,
   // otra variante sin pareja, un token, transparent…) o que tocan una expresión `${…}`.
   const familyItems = new Set(items);
-  const pairedKeys = new Set([...base.keys()].filter((k) => dark.has(k)));
+  const singleKeys = new Set(
+    opts.singles ? [...base.keys()].filter((k) => !dark.has(k) && base.get(k).length === 1) : [],
+  );
+  const pairedKeys = new Set([...base.keys()].filter((k) => dark.has(k) || singleKeys.has(k)));
   const blocked = new Set();
   for (const c of classes) {
     const any = parseColorClass(c.cls, props, [], ANY_COLOR);
@@ -232,24 +239,26 @@ export function findPairs(lit, props, colors = NEUTRALS) {
   }
   const pairs = [];
   for (const [k, list] of base) {
-    const d = dark.get(k);
+    const d = dark.get(k) ?? (singleKeys.has(k) ? [null] : null);
     if (!d) continue;
     const prop = k.split('|')[1];
     const reason =
       list.length > 1 || d.length > 1 ? 'ambiguo' : blocked.has(conflictGroup(prop)) ? 'precedencia' : null;
-    pairs.push({ key: k, light: list[0], dark: d[0], lightValue: valueOf(list[0].parsed), darkValue: valueOf(d[0].parsed), reason });
+    const lightValue = valueOf(list[0].parsed);
+    pairs.push({ key: k, light: list[0], dark: d[0], lightValue, darkValue: d[0] ? valueOf(d[0].parsed) : lightValue, reason });
   }
   pairs.blocked = blocked;
   return pairs;
 }
 
 /** Recorre archivos y devuelve todos los pares con su ubicación. */
-export function collectPairs(root, files, props, colors = NEUTRALS) {
+export function collectPairs(root, files, props, colors = NEUTRALS, opts = {}) {
   const out = [];
   for (const file of files) {
     const src = readFileSync(join(root, file), 'utf8');
     for (const lit of literalsOf(file, src)) {
-      for (const p of findPairs(lit, props, colors)) out.push({ file, lit, ...p });
+      const excluded = opts.skip?.(file, lit, src);
+      for (const p of findPairs(lit, props, colors, opts)) out.push({ file, lit, ...p, reason: excluded ? 'excluido' : p.reason });
     }
   }
   return out;
@@ -264,13 +273,18 @@ export function collectPairs(root, files, props, colors = NEUTRALS) {
  * se deja todo como está: un token es una sola clase y cambiaría cuál gana en CSS frente a
  * `dark:`, que hoy se genera después de `hover:`/`focus:`.
  */
-export function transform(source, props, table, colors = NEUTRALS, file = 'x.jsx') {
-  const lits = literalsOf(file, source).map((lit) => ({ lit, pairs: findPairs(lit, props, colors) }));
+export function transform(source, props, table, colors = NEUTRALS, file = 'x.jsx', opts = {}) {
+  const lits = literalsOf(file, source).map((lit) => {
+    const pairs = findPairs(lit, props, colors, opts);
+    // Literal excluido a mano (otro significado): no se migra y bloquea lo que coexiste con él.
+    if (opts.skip?.(file, lit, source)) for (const p of pairs) p.reason = 'excluido';
+    return { lit, pairs };
+  });
   // Propiedades que cada literal deja sin migrar (clase suelta, par sin token, par descartado).
   const stuck = new Map();
   for (const { lit, pairs } of lits) {
     const s = new Set(pairs.blocked);
-    for (const p of pairs) if (p.reason || !table[`${p.lightValue}|${p.darkValue}`]) s.add(conflictGroup(p.light.parsed.prop));
+    for (const p of pairs) if (p.reason || !tokenFor(p, table)) s.add(conflictGroup(p.light.parsed.prop));
     stuck.set(lit, s);
   }
   // Un literal se migra para una propiedad si ningún literal que pueda coexistir con él en el
@@ -298,7 +312,7 @@ export function transform(source, props, table, colors = NEUTRALS, file = 'x.jsx
   const skipped = [];
   for (const { lit, pairs } of lits) {
     for (const p of pairs) {
-      const token = table[`${p.lightValue}|${p.darkValue}`];
+      const token = tokenFor(p, table);
       if (!token) continue;
       const g = conflictGroup(p.light.parsed.prop);
       const reason = p.reason ?? (migrable(lit, g) ? null : 'precedencia (misma expresión)');
@@ -308,6 +322,10 @@ export function transform(source, props, table, colors = NEUTRALS, file = 'x.jsx
       }
       const prefix = p.light.parsed.variants.length ? `${p.light.parsed.variants.join(':')}:` : '';
       edits.push({ start: lit.start + p.light.start, end: lit.start + p.light.end, text: `${prefix}${p.light.parsed.prop}-${token}` });
+      if (!p.dark) {
+        replaced++;
+        continue;
+      }
       // Se quita la clase dark y el espacio que la separa de la anterior (o de la siguiente).
       let s = lit.start + p.dark.start;
       let e = lit.start + p.dark.end;
@@ -326,6 +344,22 @@ export function transform(source, props, table, colors = NEUTRALS, file = 'x.jsx
   let code = source;
   for (const ed of edits) code = code.slice(0, ed.start) + ed.text + code.slice(ed.end);
   return { code, replaced, skipped };
+}
+
+/**
+ * Token (con su modificador de opacidad, si hace falta) para un par. Una clase suelta con
+ * opacidad (`bg-red-500/10`) usa el token de su color con el mismo modificador
+ * (`bg-danger/10`): da exactamente el mismo color.
+ */
+export function tokenFor(p, table) {
+  const direct = table[`${p.lightValue}|${p.darkValue}`];
+  if (direct) return direct;
+  if (!p.dark && p.light.parsed.alpha) {
+    const c = p.light.parsed.color;
+    const base = table[`${c}|${c}`];
+    if (base) return `${base}/${p.light.parsed.alpha}`;
+  }
+  return null;
 }
 
 /** Bloque CSS de tokens a partir de { token: { light, dark } }. */

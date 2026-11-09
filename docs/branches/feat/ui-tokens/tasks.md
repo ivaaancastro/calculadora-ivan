@@ -63,9 +63,27 @@ Solo se marca lo verificado. Spec y plan aprobados el 2026-11-09 ("Apruebo todo"
 - `lint:colors`: `dark` 607 → 334, `palette` 1.901 → 1.373; 980 clases con tokens.
 - Resultados: lint ✓, lint:colors ✓, unit 94/94, integración 10/10, build ✓, E2E macOS 79 ✓ (133 omitidas), E2E Docker 127 ✓ (48 capturas sin diferencias; el ✘ de `gestures.spec.js:37` es el fallo esperado de D-01).
 
-## PR 5 — Acentos (`feat/ui-tokens-accents`)
-- [ ] Mapa de significado y tokens `legacy-*`; D-07 en `paridad.md`
-- [ ] Codemod, revisión manual, verificación completa
+## PR 5 — Acentos
+Partido en 5a y 5b (decisión del usuario, 2026-11-09): clasificar unos 740 usos por significado en un solo PR no era revisable.
+
+### PR 5a — Estados y métricas (`feat/ui-tokens-accents`)
+- [x] Mapa de significado: `action`, `danger`, `positive`, `warning` (`src/styles/tokens/accents.json`, 43 tokens, incluido el azul iOS `action-ios`)
+- [x] Métricas fuera de las gráficas: `metric-*-ink` y `legacy-*` (`src/styles/tokens/metrics.json`, 13 tokens, a mano); D-07 en `paridad.md`
+- [x] Codemod con lista de inclusión revisada (`scripts/codemods/accents.mjs`), clases sueltas y opacidad
+- [x] Verificación completa
+- [x] PR (#56)
+
+### Notas del PR 5a
+- Los acentos no se migran por color: `emerald-500` es "positivo" en un mensaje de éxito y "VO2" o "carrera" en otra pantalla. El codemod solo toca las expresiones de `ALLOW` (archivo y línea, revisadas una a una) y todo lo demás queda excluido y bloquea lo que coexiste con ello.
+- Clases sueltas sin pareja `dark:` (`text-red-500`) → token con el mismo valor en ambos modos. Con opacidad (`bg-red-500/10`) se reutiliza el token con el mismo modificador (`bg-danger/10`): mismo color. Solo cambia la precedencia frente a otra clase de la misma variante y propiedad presente a la vez, caso que la regla ya bloquea.
+- 144 usos de estado migrados en 21 archivos (25 descartes por precedencia) y 15 usos de CTL/ATL/TSB a mano (Calendario, `EvolutionChart`, `ChartsSection`, `TrainingStatusCard`). CTL en `blue-500` es exactamente `metric-ctl` (`#3b82f6`).
+- Volcado frente a `develop` (`74e2bfb`; referencia tomada en `18adc4e`, mismo árbol), con estados y métricas: 82 volcados, 64.132 entradas, **0 diferencias**.
+- `lint:colors`: `dark` 334 → 271, `palette` 1.373 → 1.155; 1.145 clases con tokens.
+- Resultados: lint ✓, lint:colors ✓, unit 102/102, integración 10/10, build ✓, E2E macOS 79 ✓ (133 omitidas), E2E Docker 127 ✓ (48 capturas sin diferencias; el ✘ de `gestures.spec.js:37` es el fallo esperado de D-01).
+
+### PR 5b — Categorías (`feat/ui-tokens-categories`)
+- [ ] Deportes, zonas, FC, potencia, VO2, iconos de sección y el resto de acentos excluidos en 5a (incluido el `red-500` de "hoy" del Calendario y los verdes/naranjas iOS de `AdvancedAnalytics`)
+- [ ] Verificación completa
 - [ ] PR
 
 ## PR 6 — Gráficas (`feat/ui-tokens-charts`)
