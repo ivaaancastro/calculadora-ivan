@@ -1,0 +1,338 @@
+{
+  "cadence": {
+    "light": "emerald-500",
+    "dark": "emerald-500"
+  },
+  "ef": {
+    "light": "violet-500",
+    "dark": "violet-500"
+  },
+  "form-critical": {
+    "light": "[#FA114F]",
+    "dark": "[#FA114F]"
+  },
+  "form-critical-tint": {
+    "light": "[#FA114F]/10",
+    "dark": "[#FA114F]/15"
+  },
+  "form-overload": {
+    "light": "[#FF9F0A]",
+    "dark": "[#FF9F0A]"
+  },
+  "form-overload-tint": {
+    "light": "[#FF9F0A]/10",
+    "dark": "[#FF9F0A]/15"
+  },
+  "form-peak": {
+    "light": "[#30D158]",
+    "dark": "[#30D158]"
+  },
+  "form-peak-tint": {
+    "light": "[#30D158]/10",
+    "dark": "[#30D158]/15"
+  },
+  "form-productive": {
+    "light": "[#0A84FF]",
+    "dark": "[#0A84FF]"
+  },
+  "form-productive-tint": {
+    "light": "[#0A84FF]/10",
+    "dark": "[#0A84FF]/15"
+  },
+  "hr": {
+    "light": "rose-500",
+    "dark": "rose-500"
+  },
+  "hr-edge": {
+    "light": "rose-200",
+    "dark": "rose-900/50"
+  },
+  "hr-ink": {
+    "light": "rose-600",
+    "dark": "rose-400"
+  },
+  "hr-soft": {
+    "light": "rose-400",
+    "dark": "rose-400"
+  },
+  "hr-strong": {
+    "light": "rose-600",
+    "dark": "rose-600"
+  },
+  "hr-tint": {
+    "light": "rose-50",
+    "dark": "rose-950/30"
+  },
+  "hrv": {
+    "light": "emerald-500",
+    "dark": "emerald-500"
+  },
+  "legacy-hr-red": {
+    "light": "red-500",
+    "dark": "red-500"
+  },
+  "legacy-sport-run-emerald": {
+    "light": "emerald-500",
+    "dark": "emerald-500"
+  },
+  "legacy-sport-strength-emerald": {
+    "light": "emerald-500",
+    "dark": "emerald-500"
+  },
+  "legacy-sport-strength-emerald-end": {
+    "light": "green-500",
+    "dark": "green-500"
+  },
+  "legacy-sport-strength-emerald-tint": {
+    "light": "emerald-50",
+    "dark": "emerald-950/30"
+  },
+  "legacy-sport-strength-orange": {
+    "light": "orange-500",
+    "dark": "orange-500"
+  },
+  "legacy-tsb-ios-down": {
+    "light": "[#FF9F0A]",
+    "dark": "[#FF9F0A]"
+  },
+  "legacy-tsb-ios-up": {
+    "light": "[#30D158]",
+    "dark": "[#30D158]"
+  },
+  "load": {
+    "light": "indigo-500",
+    "dark": "indigo-500"
+  },
+  "pace": {
+    "light": "indigo-500",
+    "dark": "indigo-500"
+  },
+  "pace-ink": {
+    "light": "indigo-600",
+    "dark": "indigo-400"
+  },
+  "power": {
+    "light": "amber-500",
+    "dark": "amber-500"
+  },
+  "power-edge": {
+    "light": "amber-200",
+    "dark": "amber-900/50"
+  },
+  "power-ink": {
+    "light": "amber-600",
+    "dark": "amber-400"
+  },
+  "power-ink-2": {
+    "light": "amber-600",
+    "dark": "amber-500"
+  },
+  "power-soft": {
+    "light": "amber-400",
+    "dark": "amber-500"
+  },
+  "power-strong": {
+    "light": "amber-600",
+    "dark": "amber-600"
+  },
+  "power-tint": {
+    "light": "amber-100",
+    "dark": "amber-900/30"
+  },
+  "power-tint-2": {
+    "light": "amber-50",
+    "dark": "amber-950/30"
+  },
+  "power-tint-3": {
+    "light": "amber-50",
+    "dark": "amber-900/20"
+  },
+  "section-general": {
+    "light": "blue-500",
+    "dark": "blue-500"
+  },
+  "section-integrations": {
+    "light": "indigo-500",
+    "dark": "indigo-500"
+  },
+  "section-security": {
+    "light": "amber-500",
+    "dark": "amber-500"
+  },
+  "section-zones": {
+    "light": "rose-500",
+    "dark": "rose-500"
+  },
+  "sleep": {
+    "light": "blue-500",
+    "dark": "blue-500"
+  },
+  "speed": {
+    "light": "blue-500",
+    "dark": "blue-500"
+  },
+  "speed-edge": {
+    "light": "blue-200",
+    "dark": "blue-900/50"
+  },
+  "speed-ink": {
+    "light": "blue-600",
+    "dark": "blue-400"
+  },
+  "speed-strong": {
+    "light": "blue-600",
+    "dark": "blue-600"
+  },
+  "speed-tint": {
+    "light": "blue-50",
+    "dark": "blue-950/30"
+  },
+  "sport-bike": {
+    "light": "blue-500",
+    "dark": "blue-500"
+  },
+  "sport-bike-edge": {
+    "light": "blue-200",
+    "dark": "blue-900/50"
+  },
+  "sport-bike-edge-2": {
+    "light": "blue-200",
+    "dark": "blue-900/40"
+  },
+  "sport-bike-end": {
+    "light": "indigo-500",
+    "dark": "indigo-500"
+  },
+  "sport-bike-ink": {
+    "light": "blue-700",
+    "dark": "blue-400"
+  },
+  "sport-bike-ios": {
+    "light": "[#007AFF]",
+    "dark": "[#0A84FF]"
+  },
+  "sport-bike-tint": {
+    "light": "blue-100",
+    "dark": "blue-900/20"
+  },
+  "sport-bike-tint-2": {
+    "light": "blue-50",
+    "dark": "blue-950/30"
+  },
+  "sport-run": {
+    "light": "orange-500",
+    "dark": "orange-500"
+  },
+  "sport-run-edge": {
+    "light": "orange-200",
+    "dark": "orange-900/50"
+  },
+  "sport-run-edge-2": {
+    "light": "orange-200",
+    "dark": "orange-900/40"
+  },
+  "sport-run-end": {
+    "light": "red-500",
+    "dark": "red-500"
+  },
+  "sport-run-ink": {
+    "light": "orange-600",
+    "dark": "orange-400"
+  },
+  "sport-run-ink-2": {
+    "light": "orange-700",
+    "dark": "orange-400"
+  },
+  "sport-run-ink-3": {
+    "light": "orange-600",
+    "dark": "orange-500"
+  },
+  "sport-run-tint": {
+    "light": "orange-100",
+    "dark": "orange-900/30"
+  },
+  "sport-run-tint-2": {
+    "light": "orange-100",
+    "dark": "orange-900/20"
+  },
+  "sport-run-tint-3": {
+    "light": "orange-50",
+    "dark": "orange-950/30"
+  },
+  "sport-strength": {
+    "light": "purple-500",
+    "dark": "purple-500"
+  },
+  "sport-strength-edge": {
+    "light": "purple-200",
+    "dark": "purple-900/50"
+  },
+  "sport-strength-edge-2": {
+    "light": "purple-200",
+    "dark": "purple-900/40"
+  },
+  "sport-strength-ink": {
+    "light": "purple-700",
+    "dark": "purple-400"
+  },
+  "sport-strength-tint": {
+    "light": "purple-100",
+    "dark": "purple-900/20"
+  },
+  "sport-swim": {
+    "light": "cyan-500",
+    "dark": "cyan-500"
+  },
+  "sport-swim-edge": {
+    "light": "cyan-200",
+    "dark": "cyan-900/50"
+  },
+  "sport-swim-edge-2": {
+    "light": "cyan-200",
+    "dark": "cyan-900/40"
+  },
+  "sport-swim-end": {
+    "light": "teal-500",
+    "dark": "teal-500"
+  },
+  "sport-swim-ink": {
+    "light": "cyan-700",
+    "dark": "cyan-400"
+  },
+  "sport-swim-tint": {
+    "light": "cyan-100",
+    "dark": "cyan-900/20"
+  },
+  "sport-swim-tint-2": {
+    "light": "cyan-50",
+    "dark": "cyan-950/30"
+  },
+  "sport-walk": {
+    "light": "lime-500",
+    "dark": "lime-500"
+  },
+  "sport-yoga": {
+    "light": "pink-500",
+    "dark": "pink-500"
+  },
+  "steps": {
+    "light": "purple-500",
+    "dark": "purple-500"
+  },
+  "strava": {
+    "light": "[#FC4C02]",
+    "dark": "[#FC4C02]"
+  },
+  "strava-hover": {
+    "light": "[#E34402]",
+    "dark": "[#E34402]"
+  },
+  "today": {
+    "light": "red-500",
+    "dark": "red-500"
+  },
+  "vo2": {
+    "light": "emerald-500",
+    "dark": "emerald-500"
+  }
+}

@@ -7,21 +7,21 @@ const getSportIcon = (type) => {
     const t = String(type).toLowerCase();
     if (t.includes('run') || t.includes('carrera')) {
         return (
-            <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-[12px] sm:rounded-[14px] bg-orange-500/15 text-orange-500 flex items-center justify-center shrink-0 shadow-2xs">
+            <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-[12px] sm:rounded-[14px] bg-sport-run/15 text-sport-run flex items-center justify-center shrink-0 shadow-2xs">
                 <Footprints size={17} strokeWidth={2.3} />
             </div>
         );
     }
     if (t.includes('bike') || t.includes('bici') || t.includes('ciclismo') || t.includes('ride')) {
         return (
-            <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-[12px] sm:rounded-[14px] bg-blue-500/15 text-[#007AFF] dark:text-[#0A84FF] flex items-center justify-center shrink-0 shadow-2xs">
+            <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-[12px] sm:rounded-[14px] bg-sport-bike/15 text-sport-bike-ios flex items-center justify-center shrink-0 shadow-2xs">
                 <Bike size={17} strokeWidth={2.3} />
             </div>
         );
     }
     if (t.includes('gym') || t.includes('fuerza') || t.includes('weight') || t.includes('workout')) {
         return (
-            <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-[12px] sm:rounded-[14px] bg-purple-500/15 text-purple-500 flex items-center justify-center shrink-0 shadow-2xs">
+            <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-[12px] sm:rounded-[14px] bg-sport-strength/15 text-sport-strength flex items-center justify-center shrink-0 shadow-2xs">
                 <Dumbbell size={17} strokeWidth={2.3} />
             </div>
         );
@@ -233,7 +233,7 @@ export const HistoryList = React.memo(({ activities, onDelete, onSelectActivity 
                                         >
                                             <Trash2 size={13} />
                                         </button>
-                                        <ChevronRight size={15} className="text-slate-300 dark:text-zinc-600 group-hover:text-blue-500 transition-colors" />
+                                        <ChevronRight size={15} className="text-faint group-hover:text-action-bright transition-colors" />
                                     </div>
                                 </div>
                             );

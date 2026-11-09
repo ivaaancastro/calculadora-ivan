@@ -4,7 +4,7 @@ import { CheckCircle2, Activity, ArrowRight } from 'lucide-react';
 
 export const EmailConfirmedPage = () => {
   return (
-    <div className="min-h-screen bg-white dark:bg-zinc-950 flex flex-col items-center justify-center p-6 selection:bg-blue-500/30">
+    <div className="min-h-screen bg-surface-6 flex flex-col items-center justify-center p-6 selection:bg-action-bright/30">
       
       <div className="max-w-md w-full bg-slate-50 dark:bg-zinc-900/50 backdrop-blur-xl border border-slate-200 dark:border-zinc-800/50 rounded-2xl p-8 text-center shadow-2xl animate-in fade-in zoom-in duration-500">
         

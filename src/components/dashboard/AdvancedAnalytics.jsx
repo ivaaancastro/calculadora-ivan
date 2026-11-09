@@ -122,10 +122,10 @@ export const AdvancedAnalytics = React.memo(({ activities, settings,  timeRange,
     const fitnessStatus = (() => {
         const tsb = model.tsb;
         if (tsb > 25) return { label: 'Transición', desc: 'Pérdida de forma por descanso', badge: 'text-body-soft bg-fill-3 border-line-muted-2' };
-        if (tsb >= 5) return { label: 'Pico de Forma', desc: 'Fresco y listo para competir al máximo', badge: 'text-[#30D158] bg-[#30D158]/10 border-[#30D158]/25 dark:bg-[#30D158]/15' };
-        if (tsb >= -10) return { label: 'Zona Productiva', desc: 'Balance óptimo entre carga y adaptación', badge: 'text-[#0A84FF] bg-[#0A84FF]/10 border-[#0A84FF]/25 dark:bg-[#0A84FF]/15' };
-        if (tsb >= -30) return { label: 'Sobrecarga', desc: 'Fatiga alta, programa recuperación', badge: 'text-[#FF9F0A] bg-[#FF9F0A]/10 border-[#FF9F0A]/25 dark:bg-[#FF9F0A]/15' };
-        return { label: 'Fatiga Crítica', desc: 'Riesgo de sobreentrenamiento', badge: 'text-[#FA114F] bg-[#FA114F]/10 border-[#FA114F]/25 dark:bg-[#FA114F]/15' };
+        if (tsb >= 5) return { label: 'Pico de Forma', desc: 'Fresco y listo para competir al máximo', badge: 'text-form-peak bg-form-peak-tint border-form-peak/25' };
+        if (tsb >= -10) return { label: 'Zona Productiva', desc: 'Balance óptimo entre carga y adaptación', badge: 'text-form-productive bg-form-productive-tint border-form-productive/25' };
+        if (tsb >= -30) return { label: 'Sobrecarga', desc: 'Fatiga alta, programa recuperación', badge: 'text-form-overload bg-form-overload-tint border-form-overload/25' };
+        return { label: 'Fatiga Crítica', desc: 'Riesgo de sobreentrenamiento', badge: 'text-form-critical bg-form-critical-tint border-form-critical/25' };
     })();
 
     return (
@@ -261,7 +261,7 @@ export const AdvancedAnalytics = React.memo(({ activities, settings,  timeRange,
                         { label: 'Rampa Semanal', value: `${model.rampRate > 0 ? '+' : ''}${model.rampRate.toFixed(1)}`, icon: model.rampRate >= 0 ? ArrowUpRight : ArrowDownRight, color: 'text-indigo-500', bg: 'bg-indigo-500/10', sub: 'pts/sem' },
                         { label: 'Monotonía', value: model.monotony.toFixed(2), icon: Brain, color: 'text-purple-500', bg: 'bg-purple-500/10', sub: 'Índice carga' },
                         { label: 'Volumen 30D', value: `${Math.round(model.totalVolume / 60)}h`, icon: CalendarDays, color: 'text-cyan-500', bg: 'bg-cyan-500/10', sub: `${model.totalActivities} sesiones` },
-                        { label: 'VO2 Max', value: globalMaxVo2 || '--', icon: TrendingUp, color: 'text-emerald-500', bg: 'bg-emerald-500/10', sub: vo2IsGarmin ? 'Sincronizado' : 'Estimado' }
+                        { label: 'VO2 Max', value: globalMaxVo2 || '--', icon: TrendingUp, color: 'text-vo2', bg: 'bg-vo2/10', sub: vo2IsGarmin ? 'Sincronizado' : 'Estimado' }
                     ].map((kpi, i) => (
                         <div key={i} className="ios-card ios-touch p-3 sm:p-3.5 flex flex-col justify-between">
                             <div className="flex items-center justify-between mb-1.5">

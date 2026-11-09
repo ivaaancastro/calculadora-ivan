@@ -31,7 +31,7 @@ export const PowerProfileCard = ({
                     </div>
                     <button
                         onClick={() => setShowPowerConfig(!showPowerConfig)}
-                        className={`flex items-center gap-2 px-4 py-1.5 rounded-xl text-[9px] font-bold uppercase tracking-widest transition-all border shadow-sm ${showPowerConfig ? 'bg-surface-2 border-line-2 text-blue-500' : 'bg-surface border-line text-slate-400 hover:text-slate-600'}`}
+                        className={`flex items-center gap-2 px-4 py-1.5 rounded-xl text-[9px] font-bold uppercase tracking-widest transition-all border shadow-sm ${showPowerConfig ? 'bg-surface-2 border-line-2 text-action-bright' : 'bg-surface border-line text-slate-400 hover:text-slate-600'}`}
                     >
                         <Settings size={14} /> {showPowerConfig ? 'Cerrar' : 'Configurar'}
                     </button>
@@ -79,7 +79,7 @@ export const PowerProfileCard = ({
                                         <button
                                             key={id}
                                             onClick={() => toggleDur(id)}
-                                            className={`px-3 py-1.5 rounded-lg text-[9px] font-bold uppercase transition-all border ${selectedDurs.has(id) ? 'bg-blue-500 border-blue-600 text-white shadow-sm' : 'bg-surface-7 border-slate-200 dark:border-zinc-700 text-slate-500 hover:border-slate-300'}`}
+                                            className={`px-3 py-1.5 rounded-lg text-[9px] font-bold uppercase transition-all border ${selectedDurs.has(id) ? 'bg-action-bright border-action-solid text-white shadow-sm' : 'bg-surface-7 border-slate-200 dark:border-zinc-700 text-slate-500 hover:border-slate-300'}`}
                                         >
                                             {formatInterval(id)}
                                         </button>

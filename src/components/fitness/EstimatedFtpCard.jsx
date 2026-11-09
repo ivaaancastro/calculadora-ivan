@@ -29,7 +29,7 @@ export const EstimatedFtpCard = ({
                             <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">Vatios</span>
                         </div>
                         {ftp?.wPerKg && (
-                            <p className="text-2xl font-bold text-amber-500 tracking-tighter mt-3">{ftp.wPerKg} <span className="text-[10px] text-slate-400 font-bold uppercase tracking-widest ml-1">W/kg</span></p>
+                            <p className="text-2xl font-bold text-power tracking-tighter mt-3">{ftp.wPerKg} <span className="text-[10px] text-slate-400 font-bold uppercase tracking-widest ml-1">W/kg</span></p>
                         )}
 
                         {ftpDiff !== null && (

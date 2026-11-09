@@ -57,7 +57,7 @@ export const TrainingBalanceCard = ({ balance, balanceDays, setBalanceDays }) =>
                                                 <span className="text-[10px] font-bold text-ink-3 uppercase tracking-tight">{b.label}</span>
                                                 <div className="flex items-center gap-2 mt-1">
                                                     <span className={`text-[13px] font-black ${status === 'Alto' ? 'text-rose-500' : 'text-ink-soft'}`}>{Math.round(b.pct)}%</span>
-                                                    <span className={`text-[8px] font-black uppercase px-1.5 py-0.5 rounded-md border ${status === 'Óptimo' ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-500' : 'bg-surface-2 border-slate-200 dark:border-zinc-700 text-slate-400'}`}>
+                                                    <span className={`text-[8px] font-black uppercase px-1.5 py-0.5 rounded-md border ${status === 'Óptimo' ? 'bg-positive/10 border-positive/20 text-positive' : 'bg-surface-2 border-line-2 text-slate-400'}`}>
                                                         {status}
                                                     </span>
                                                 </div>

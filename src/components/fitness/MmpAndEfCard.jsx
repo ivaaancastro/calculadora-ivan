@@ -62,7 +62,7 @@ export const MmpAndEfCard = ({
                 <div style={tooltipStyle} className="shadow-xl w-48 z-[200]">
                     <p className="text-xs font-semibold text-ink-3 mb-1.5 border-b border-slate-200/50 dark:border-zinc-700/50 pb-1">Factor de Eficiencia</p>
                     <div className="flex justify-between items-end mb-2">
-                        <span className="text-xl font-bold text-violet-500 leading-none">{data.ef}</span>
+                        <span className="text-xl font-bold text-ef leading-none">{data.ef}</span>
                         <span className="text-[10px] text-slate-500 font-medium uppercase">{isRun ? 'm/bpm' : 'w/bpm'}</span>
                     </div>
                     <div className="grid grid-cols-2 gap-2 mb-2 bg-zinc-800 p-2 rounded">
@@ -72,7 +72,7 @@ export const MmpAndEfCard = ({
                         </div>
                         <div>
                             <p className="text-[8px] uppercase text-zinc-500 font-bold mb-0.5">Pulso</p>
-                            <p className="text-xs font-bold text-rose-400">{data.hr} ppm</p>
+                            <p className="text-xs font-bold text-hr-soft">{data.hr} ppm</p>
                         </div>
                     </div>
                     <div className="border-t border-slate-200/50 dark:border-zinc-700/50 pt-2 mt-1">
@@ -107,7 +107,7 @@ export const MmpAndEfCard = ({
                         )}
 
                         {isLoadingHistoricalStreams && (
-                            <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-blue-500/10 text-blue-500 text-[8px] font-bold uppercase tracking-wider animate-pulse">
+                            <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-action-bright/10 text-action-bright text-[8px] font-bold uppercase tracking-wider animate-pulse">
                                 <RefreshCw size={10} className="animate-spin" />
                                 Cargando telemetría histórica...
                             </div>
@@ -128,7 +128,7 @@ export const MmpAndEfCard = ({
                     <div className="flex flex-wrap items-center gap-3">
                         <div className="flex bg-fill p-1 rounded-xl">
                             <button onClick={() => setCurveSport('bike')} className={`px-4 py-1.5 text-[9px] font-bold uppercase rounded-lg transition-all ${curveSport === 'bike' ? 'bg-surface-3 text-action shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}>Ciclismo</button>
-                            <button onClick={() => setCurveSport('run')} className={`px-4 py-1.5 text-[9px] font-bold uppercase rounded-lg transition-all ${curveSport === 'run' ? 'bg-surface-3 text-orange-600 dark:text-orange-400 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}>Carrera</button>
+                            <button onClick={() => setCurveSport('run')} className={`px-4 py-1.5 text-[9px] font-bold uppercase rounded-lg transition-all ${curveSport === 'run' ? 'bg-surface-3 text-sport-run-ink shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}>Carrera</button>
                         </div>
                         <div className="flex bg-fill p-1 rounded-xl">
                             {['90d', '1y', 'all'].map(t => (
@@ -137,7 +137,7 @@ export const MmpAndEfCard = ({
                         </div>
                         <div className="flex gap-4 ml-2">
                             {['power', 'speed', 'hr'].map(t => (
-                                <button key={t} onClick={() => setCurveType(t)} className={`text-[9px] font-bold uppercase pb-1 border-b-2 transition-all ${curveType === t ? 'text-blue-500 border-blue-500' : 'text-slate-400 border-transparent hover:border-slate-300'}`}>
+                                <button key={t} onClick={() => setCurveType(t)} className={`text-[9px] font-bold uppercase pb-1 border-b-2 transition-all ${curveType === t ? 'text-action-bright border-action-bright' : 'text-slate-400 border-transparent hover:border-slate-300'}`}>
                                     {t === 'power' ? 'Potencia' : (t === 'speed' ? (curveSport === 'run' ? 'Ritmo' : 'Veloc.') : 'Pulso')}
                                 </button>
                             ))}
@@ -150,7 +150,7 @@ export const MmpAndEfCard = ({
                     <div className="flex flex-col lg:col-span-1">
                         <div className="flex items-center gap-2 mb-6">
                             <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Eficiencia Aeróbica (EF)</span>
-                            <div className={`px-2 py-0.5 rounded-full text-[8px] font-black uppercase ${curveSport === 'bike' ? 'bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-500' : 'bg-orange-100 dark:bg-orange-900/30 text-orange-600 dark:text-orange-500'}`}>
+                            <div className={`px-2 py-0.5 rounded-full text-[8px] font-black uppercase ${curveSport === 'bike' ? 'bg-power-tint text-power-ink-2' : 'bg-sport-run-tint text-sport-run-ink-3'}`}>
                                 {curveSport === 'bike' ? 'Potencia / FC' : 'Ritmo / FC'}
                             </div>
                             <InfoTooltip text={curveSport === 'bike' ? "Relación entre vatios medios y pulso medio. Un EF al alza indica que eres más eficiente (generas más vatios a menos pulso)." : "Relación entre velocidad (m/min) y pulso medio. Un EF al alza indica que eres más eficiente (corres más rápido a menos pulso)."} />

@@ -149,7 +149,7 @@ const SportZonesSection = ({ sport, sportLabel, icon: Icon, color, showPace, sho
                                     value={data.thresholdPace} 
                                     onChange={(e) => onChange(e, sport, 'thresholdPace')} 
                                     placeholder="4:30"
-                                    className="w-full bg-transparent font-mono font-bold text-sm sm:text-base text-orange-600 dark:text-orange-400 outline-none" 
+                                    className="w-full bg-transparent font-mono font-bold text-sm sm:text-base text-sport-run-ink outline-none" 
                                 />
                                 <span className="text-[10px] font-semibold text-slate-400">/km</span>
                             </div>
@@ -178,7 +178,7 @@ const SportZonesSection = ({ sport, sportLabel, icon: Icon, color, showPace, sho
             <div className="ios-card overflow-hidden">
                 <div className="p-3.5 sm:p-4 border-b border-hairline flex items-center justify-between gap-2">
                     <div className="flex items-center gap-2">
-                        <Heart size={14} className="text-rose-500" />
+                        <Heart size={14} className="text-hr" />
                         <span className="text-xs sm:text-sm font-bold text-ink">Zonas de Frecuencia Cardíaca</span>
                     </div>
                     <ModeSelector sport={sport} data={data} onZonesMode={onZonesMode} />
@@ -221,7 +221,7 @@ const SportZonesSection = ({ sport, sportLabel, icon: Icon, color, showPace, sho
                 <div className="ios-card overflow-hidden">
                     <div className="p-3.5 sm:p-4 border-b border-hairline flex items-center justify-between">
                         <div className="flex items-center gap-2">
-                            <Timer size={14} className="text-orange-500" />
+                            <Timer size={14} className="text-sport-run" />
                             <span className="text-xs sm:text-sm font-bold text-ink">Zonas de Ritmo</span>
                         </div>
                         <span className="text-[10px] font-semibold text-slate-400">por km</span>
@@ -253,7 +253,7 @@ const SportZonesSection = ({ sport, sportLabel, icon: Icon, color, showPace, sho
                 <div className="ios-card overflow-hidden">
                     <div className="p-3.5 sm:p-4 border-b border-hairline flex items-center justify-between">
                         <div className="flex items-center gap-2">
-                            <Zap size={14} className="text-amber-500" />
+                            <Zap size={14} className="text-power" />
                             <span className="text-xs sm:text-sm font-bold text-ink">Zonas de Potencia ({data.ftp} W)</span>
                         </div>
                     </div>
@@ -716,7 +716,7 @@ export const ProfilePage = ({
                                     {/* FC Reposo */}
                                     <div className="p-3 sm:p-3.5 flex items-center justify-between gap-3">
                                         <div className="flex items-center gap-3">
-                                            <div className="w-7 h-7 rounded-[8px] bg-rose-500 text-white flex items-center justify-center shrink-0 shadow-2xs">
+                                            <div className="w-7 h-7 rounded-[8px] bg-hr text-white flex items-center justify-center shrink-0 shadow-2xs">
                                                 <Heart size={15} strokeWidth={2.3} />
                                             </div>
                                             <div>
@@ -731,7 +731,7 @@ export const ProfilePage = ({
                                                 name="fcReposo"
                                                 value={formData.fcReposo}
                                                 onChange={handleChange}
-                                                className="w-16 text-right font-mono font-bold text-xs sm:text-sm text-ink bg-fill-3 rounded-lg px-2 py-1 outline-none focus:ring-1 focus:ring-rose-500"
+                                                className="w-16 text-right font-mono font-bold text-xs sm:text-sm text-ink bg-fill-3 rounded-lg px-2 py-1 outline-none focus:ring-1 focus:ring-hr"
                                             />
                                             <span className="text-xs font-semibold text-ink-4">bpm</span>
                                         </div>
@@ -793,7 +793,7 @@ export const ProfilePage = ({
                                 <button 
                                     onClick={() => setActiveTab('run')} 
                                     className={`flex-1 py-1.5 text-xs font-semibold rounded-full transition-all flex items-center justify-center gap-1.5 select-none touch-manipulation active:scale-95 ${
-                                        activeTab === 'run' ? 'bg-surface-4 text-orange-600 dark:text-orange-400 shadow-xs' : 'text-ink-3'
+                                        activeTab === 'run' ? 'bg-surface-4 text-sport-run-ink shadow-xs' : 'text-ink-3'
                                     }`}
                                 >
                                     <Footprints size={14} strokeWidth={2.3} /> Correr
@@ -820,7 +820,7 @@ export const ProfilePage = ({
                             <div className="ios-card overflow-hidden divide-y divide-hairline">
                                 <div className="p-3.5 sm:p-4 flex items-center justify-between gap-3">
                                     <div className="flex items-center gap-3">
-                                        <div className="w-8 h-8 rounded-[10px] bg-indigo-500 text-white flex items-center justify-center shrink-0 shadow-2xs">
+                                        <div className="w-8 h-8 rounded-[10px] bg-section-integrations text-white flex items-center justify-center shrink-0 shadow-2xs">
                                             <Link2 size={17} strokeWidth={2.3} />
                                         </div>
                                         <div>
@@ -830,7 +830,7 @@ export const ProfilePage = ({
                                     </div>
                                     <span className={`text-[10px] font-bold px-2.5 py-0.5 rounded-full ${
                                         formData.intervalsId && formData.intervalsKey 
-                                            ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20' 
+                                            ? 'bg-positive/10 text-positive-ink border border-positive/20' 
                                             : 'bg-surface-2 text-slate-400'
                                     }`}>
                                         {formData.intervalsId && formData.intervalsKey ? 'Conectado' : 'No configurado'}
@@ -846,7 +846,7 @@ export const ProfilePage = ({
                                             value={formData.intervalsId || ''} 
                                             onChange={handleChange} 
                                             placeholder="i12345" 
-                                            className="w-40 text-right bg-sunken-11 border border-line-3 rounded-lg px-2.5 py-1.5 text-xs font-mono text-slate-900 dark:text-zinc-200 outline-none focus:ring-1 focus:ring-indigo-500" 
+                                            className="w-40 text-right bg-sunken-11 border border-line-3 rounded-lg px-2.5 py-1.5 text-xs font-mono text-slate-900 dark:text-zinc-200 outline-none focus:ring-1 focus:ring-section-integrations" 
                                         />
                                     </div>
                                     <div className="flex items-center justify-between gap-3">
@@ -857,7 +857,7 @@ export const ProfilePage = ({
                                             value={formData.intervalsKey || ''} 
                                             onChange={handleChange} 
                                             placeholder="••••••••" 
-                                            className="w-40 text-right bg-sunken-11 border border-line-3 rounded-lg px-2.5 py-1.5 text-xs font-mono text-slate-900 dark:text-zinc-200 outline-none focus:ring-1 focus:ring-indigo-500" 
+                                            className="w-40 text-right bg-sunken-11 border border-line-3 rounded-lg px-2.5 py-1.5 text-xs font-mono text-slate-900 dark:text-zinc-200 outline-none focus:ring-1 focus:ring-section-integrations" 
                                         />
                                     </div>
 

@@ -60,7 +60,7 @@ export const MetricHelp = ({ title, text, optimal }) => (
             <p className="text-[9px] leading-relaxed text-zinc-400 mb-1.5">{text}</p>
             {optimal && (
                 <div className="pt-1 border-t border-zinc-800 flex items-center gap-1">
-                    <span className="text-[8px] font-bold text-emerald-500 uppercase">Óptimo:</span>
+                    <span className="text-[8px] font-bold text-positive uppercase">Óptimo:</span>
                     <span className="text-[8px] text-zinc-300">{optimal}</span>
                 </div>
             )}
