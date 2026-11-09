@@ -73,28 +73,47 @@ export function findLiterals(source) {
   });
   const out = [];
   let nextGroup = 0;
-  const visit = (node, group) => {
+  let nextCond = 0;
+  // `branches`: ramas de ternario por las que se llega al literal ('3:c', '3:a'). Dos literales
+  // en ramas opuestas del mismo ternario nunca se aplican a la vez al mismo elemento.
+  const visit = (node, group, branches) => {
     if (!node || typeof node.type !== 'string') return;
-    if (GROUP_RESETS.has(node.type)) group = null;
+    if (GROUP_RESETS.has(node.type)) {
+      group = null;
+      branches = [];
+    }
     if (group === null && GROUP_STARTS.has(node.type)) group = ++nextGroup;
     const own = group ?? ++nextGroup;
     if (node.type === 'StringLiteral') {
       // Texto crudo del fuente, para que las posiciones coincidan aunque haya escapes.
-      out.push({ start: node.start + 1, end: node.end - 1, text: source.slice(node.start + 1, node.end - 1), gluedStart: false, gluedEnd: false, group: own });
+      out.push({ start: node.start + 1, end: node.end - 1, text: source.slice(node.start + 1, node.end - 1), gluedStart: false, gluedEnd: false, group: own, branches });
     } else if (node.type === 'TemplateLiteral') {
       node.quasis.forEach((q, i) => {
-        out.push({ start: q.start, end: q.end, text: source.slice(q.start, q.end), gluedStart: i > 0, gluedEnd: !q.tail, group: own });
+        out.push({ start: q.start, end: q.end, text: source.slice(q.start, q.end), gluedStart: i > 0, gluedEnd: !q.tail, group: own, branches });
       });
     }
+    const cond = node.type === 'ConditionalExpression' ? ++nextCond : null;
     for (const key of Object.keys(node)) {
       if (key === 'loc' || key === 'extra' || key === 'leadingComments' || key === 'trailingComments') continue;
+      const b =
+        cond && key === 'consequent' ? [...branches, `${cond}:c`] : cond && key === 'alternate' ? [...branches, `${cond}:a`] : branches;
       const v = node[key];
-      if (Array.isArray(v)) v.forEach((c) => visit(c, group));
-      else if (v && typeof v.type === 'string') visit(v, group);
+      if (Array.isArray(v)) v.forEach((c) => visit(c, group, b));
+      else if (v && typeof v.type === 'string') visit(v, group, b);
     }
   };
-  visit(ast.program, null);
+  visit(ast.program, null, []);
   return out;
+}
+
+/** ¿Pueden dos literales de la misma expresión acabar a la vez en el mismo elemento? */
+export function canCoexist(a, b) {
+  if (a === b) return true;
+  const ma = new Map(a.branches.map((x) => x.split(':')));
+  return !b.branches.some((x) => {
+    const [id, side] = x.split(':');
+    return ma.has(id) && ma.get(id) !== side;
+  });
 }
 
 /** Divide un literal en clases con su posición: [{ cls, start, end, glued }]. */
@@ -226,14 +245,31 @@ export function collectPairs(root, files, props, colors = NEUTRALS) {
  */
 export function transform(source, props, table, colors = NEUTRALS) {
   const lits = findLiterals(source).map((lit) => ({ lit, pairs: findPairs(lit, props, colors) }));
-  const status = new Map(); // `${group}|${propGroup}` → true (migrable) / false (bloqueado)
-  const mark = (lit, g, ok) => {
-    const k = `${lit.group}|${g}`;
-    status.set(k, (status.get(k) ?? true) && ok);
-  };
+  // Propiedades que cada literal deja sin migrar (clase suelta, par sin token, par descartado).
+  const stuck = new Map();
   for (const { lit, pairs } of lits) {
-    for (const g of pairs.blocked) mark(lit, g, false);
-    for (const p of pairs) mark(lit, conflictGroup(p.light.parsed.prop), !p.reason && !!table[`${p.lightValue}|${p.darkValue}`]);
+    const s = new Set(pairs.blocked);
+    for (const p of pairs) if (p.reason || !table[`${p.lightValue}|${p.darkValue}`]) s.add(conflictGroup(p.light.parsed.prop));
+    stuck.set(lit, s);
+  }
+  // Un literal se migra para una propiedad si ningún literal que pueda coexistir con él en el
+  // mismo elemento (misma expresión y no en la rama opuesta de un ternario) la deja sin migrar.
+  const migrable = (lit, g) =>
+    lits.every(({ lit: other }) => other.group !== lit.group || !stuck.get(other).has(g) || !canCoexist(lit, other));
+  // El bloqueo se propaga: un literal que acaba sin migrar bloquea a todo lo que coexiste con él
+  // (p. ej. `base ${on ? 'text-blue-500' : 'hover:…'}`: la base no se migra, así que la otra
+  // rama tampoco). Se repite hasta que no cambia nada.
+  for (let changed = true; changed; ) {
+    changed = false;
+    for (const { lit, pairs } of lits) {
+      for (const p of pairs) {
+        const g = conflictGroup(p.light.parsed.prop);
+        if (!stuck.get(lit).has(g) && !migrable(lit, g)) {
+          stuck.get(lit).add(g);
+          changed = true;
+        }
+      }
+    }
   }
 
   const edits = [];
@@ -244,7 +280,7 @@ export function transform(source, props, table, colors = NEUTRALS) {
       const token = table[`${p.lightValue}|${p.darkValue}`];
       if (!token) continue;
       const g = conflictGroup(p.light.parsed.prop);
-      const reason = p.reason ?? (status.get(`${lit.group}|${g}`) ? null : 'precedencia (misma expresión)');
+      const reason = p.reason ?? (migrable(lit, g) ? null : 'precedencia (misma expresión)');
       if (reason) {
         skipped.push({ pair: `${p.lightValue} | dark:${p.darkValue}`, reason });
         continue;
