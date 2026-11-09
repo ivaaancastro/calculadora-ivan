@@ -6,7 +6,7 @@ import { CustomChartTooltip } from '../activity/ActivitySharedUI';
 import { useActivityMetrics } from '../../hooks/useActivityMetrics';
 import { formatPace, formatMinsToHMM, formatDuration } from '../../utils/formatters';
 import { useChartTheme } from '../charts/useChartTheme';
-import { Card, Segmented, Stat } from '../ui';
+import { Card, IconButton, Segmented, Stat } from '../ui';
 export const ActivityDetailPage = ({ activity, settings, fetchStreams, onBack, onDelete }) => {
     const ct = useChartTheme();
     const [streams, setStreams] = useState(null);
@@ -162,9 +162,7 @@ export const ActivityDetailPage = ({ activity, settings, fetchStreams, onBack, o
                 </div>
 
                 <div className="hidden lg:flex items-center gap-2.5 sm:gap-3 mb-2 sm:mb-3">
-                    <button onClick={onBack} className="w-8 h-8 flex items-center justify-center bg-slate-100/80 dark:bg-zinc-800/80 hover:bg-slate-200/70 dark:hover:bg-zinc-700 active:scale-90 rounded-full transition-all text-body-soft-2 shrink-0" title="Volver">
-                        <ArrowLeft size={16} />
-                    </button>
+                    <IconButton variant="soft" onClick={onBack} className="w-8 h-8 shrink-0" title="Volver" label="Volver" icon={ArrowLeft} iconSize={16} />
                     <div className="min-w-0">
                         <h1 className="text-sm font-bold text-ink tracking-tight leading-tight truncate">
                             {activity.name || `${activity.type}`}
@@ -177,9 +175,7 @@ export const ActivityDetailPage = ({ activity, settings, fetchStreams, onBack, o
                 {/* Fila 1: Flecha atrás + Título + Acciones Strava y Borrar */}
                 <div className="lg:hidden flex items-center justify-between gap-2 mb-2.5">
                     <div className="flex items-center gap-2 min-w-0">
-                        <button onClick={onBack} className="w-8 h-8 flex items-center justify-center bg-slate-100/80 dark:bg-zinc-800/80 hover:bg-slate-200/70 dark:hover:bg-zinc-700 active:scale-90 rounded-full transition-all text-body-soft-2 shrink-0" title="Volver">
-                            <ArrowLeft size={16} />
-                        </button>
+                        <IconButton variant="soft" onClick={onBack} className="w-8 h-8 shrink-0" title="Volver" label="Volver" icon={ArrowLeft} iconSize={16} />
                         <div className="min-w-0">
                             <h1 className="text-sm font-bold text-ink tracking-tight leading-tight truncate">
                                 {activity.name || `${activity.type}`}
