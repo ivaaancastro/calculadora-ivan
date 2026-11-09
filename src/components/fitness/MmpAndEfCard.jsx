@@ -8,6 +8,7 @@ import { InfoTooltip } from '../common/InfoTooltip';
 import { tooltipStyleFor } from './fitnessConstants';
 import { formatInterval, formatPace } from '../../hooks/useFitnessAnalytics';
 import { useChartTheme } from '../charts/useChartTheme';
+import { Card } from '../ui';
 
 export const MmpAndEfCard = ({
     activities,
@@ -92,7 +93,7 @@ export const MmpAndEfCard = ({
 
     return (
         <section className="mb-8">
-            <div className="bg-surface-5 rounded-2xl border border-line-muted p-3.5 sm:p-6 lg:p-8 shadow-sm">
+            <Card variant="panel" className="p-3.5 sm:p-6 lg:p-8">
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 sm:gap-6 mb-6 sm:mb-10">
                     <div className="flex flex-wrap items-center gap-2 sm:gap-3">
                         <div className="flex items-center gap-2">
@@ -267,7 +268,7 @@ export const MmpAndEfCard = ({
                         </div>
                     </div>
                 </div>
-            </div>
+            </Card>
         </section>
     );
 };

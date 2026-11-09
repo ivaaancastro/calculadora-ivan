@@ -1,13 +1,14 @@
 import React from 'react';
 import { Trophy, Clock } from 'lucide-react';
 import { InfoTooltip } from '../common/InfoTooltip';
+import { Card } from '../ui';
 
 export const RacePredictionsCard = ({ racePredictions }) => {
     if (!racePredictions) return null;
 
     return (
         <section className="mb-8">
-            <div className="bg-surface-5 rounded-2xl border border-line-muted p-6 sm:p-8 shadow-sm">
+            <Card variant="panel" className="p-6 sm:p-8">
                 <div className="flex items-center gap-2 mb-8">
                     <h3 className="text-[10px] font-bold text-ink-4 uppercase tracking-[0.1em]">Pronóstico de Carrera</h3>
                     <InfoTooltip text="Predicción teórica basada en tu VO2max actual." />
@@ -33,7 +34,7 @@ export const RacePredictionsCard = ({ racePredictions }) => {
                         </div>
                     ))}
                 </div>
-            </div>
+            </Card>
         </section>
     );
 };

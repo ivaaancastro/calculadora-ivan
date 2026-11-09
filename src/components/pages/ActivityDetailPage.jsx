@@ -6,6 +6,7 @@ import { MetricCard, PillTab, CustomChartTooltip } from '../activity/ActivitySha
 import { useActivityMetrics } from '../../hooks/useActivityMetrics';
 import { formatPace, formatMinsToHMM, formatDuration } from '../../utils/formatters';
 import { useChartTheme } from '../charts/useChartTheme';
+import { Card } from '../ui';
 export const ActivityDetailPage = ({ activity, settings, fetchStreams, onBack, onDelete }) => {
     const ct = useChartTheme();
     const [streams, setStreams] = useState(null);
@@ -463,7 +464,7 @@ export const ActivityDetailPage = ({ activity, settings, fetchStreams, onBack, o
                                     )}
 
                                     {chartData.length > 0 ? (
-                                        <div className="ios-card overflow-hidden">
+                                        <Card className="overflow-hidden">
                                             {/* Velocity/Pace */}
                                             <div className="h-[120px] pt-3.5 px-3.5 sm:px-6 border-b border-line-soft-3">
                                                 <div className="flex justify-between items-center mb-1">
@@ -612,7 +613,7 @@ export const ActivityDetailPage = ({ activity, settings, fetchStreams, onBack, o
                                                     </ResponsiveContainer>
                                                 </div>
                                             )}
-                                        </div>
+                                        </Card>
                                     ) : (
                                         <div className="h-64 flex items-center justify-center text-faint text-sm">Sin datos de análisis</div>
                                     )}

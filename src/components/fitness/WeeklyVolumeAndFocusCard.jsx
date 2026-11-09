@@ -6,6 +6,7 @@ import {
 import { InfoTooltip } from '../common/InfoTooltip';
 import { tooltipStyleFor } from './fitnessConstants';
 import { useChartTheme } from '../charts/useChartTheme';
+import { Card } from '../ui';
 
 export const WeeklyVolumeAndFocusCard = ({
     weeklyChart,
@@ -18,7 +19,7 @@ export const WeeklyVolumeAndFocusCard = ({
     return (
         <section className="mb-8">
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                <div className="bg-surface-5 rounded-2xl border border-line-muted p-6 sm:p-8 lg:col-span-2 shadow-sm">
+                <Card variant="panel" className="p-6 sm:p-8 lg:col-span-2">
                     <div className="flex justify-between items-center mb-6">
                         <div className="flex items-center gap-2">
                             <h3 className="text-[10px] font-bold text-ink-4 uppercase tracking-[0.1em]">Volumen Semanal (TSS/Horas)</h3>
@@ -37,9 +38,9 @@ export const WeeklyVolumeAndFocusCard = ({
                             </ComposedChart>
                         </ResponsiveContainer>
                     </div>
-                </div>
+                </Card>
 
-                <div className="bg-surface-5 rounded-2xl border border-line-muted p-6 sm:p-8 lg:col-span-1 shadow-sm">
+                <Card variant="panel" className="p-6 sm:p-8 lg:col-span-1">
                     <div className="flex justify-between items-center mb-8">
                         <h3 className="text-[10px] font-bold text-ink-4 uppercase tracking-[0.1em]">Distribución de Foco</h3>
                         <div className="flex bg-fill p-1 rounded-xl">
@@ -88,7 +89,7 @@ export const WeeklyVolumeAndFocusCard = ({
                             </div>
                         </div>
                     </div>
-                </div>
+                </Card>
             </div>
         </section>
     );

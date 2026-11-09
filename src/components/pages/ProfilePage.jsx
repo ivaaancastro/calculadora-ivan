@@ -4,6 +4,7 @@ import { supabase } from '../../supabase';
 import toast from 'react-hot-toast';
 import { LTHR_ZONE_PCT, calcZonesFromLTHR } from '../../utils/tssEngine';
 import { useIntervalsSync } from '../../hooks/useIntervalsSync';
+import { Card, SectionHeader } from '../ui';
 
 const getPeakByTime = (hrData, timeData, windowSeconds) => {
     if (!hrData || !timeData || hrData.length < 2) return 0;
@@ -100,7 +101,7 @@ const SportZonesSection = ({ sport, sportLabel, icon: Icon, color, showPace, sho
     return (
         <div className="space-y-4">
             {/* Threshold values card */}
-            <div className="ios-card p-3.5 sm:p-4">
+            <Card className="p-3.5 sm:p-4">
                 <div className="flex items-center gap-2.5 mb-3">
                     <div className={`w-7 h-7 rounded-[8px] bg-${color}-500/15 text-${color}-600 dark:text-${color}-400 flex items-center justify-center shrink-0`}>
                         <Icon size={16} strokeWidth={2.3} />
@@ -172,10 +173,10 @@ const SportZonesSection = ({ sport, sportLabel, icon: Icon, color, showPace, sho
                         </div>
                     )}
                 </div>
-            </div>
+            </Card>
 
             {/* HR Zones card */}
-            <div className="ios-card overflow-hidden">
+            <Card className="overflow-hidden">
                 <div className="p-3.5 sm:p-4 border-b border-hairline flex items-center justify-between gap-2">
                     <div className="flex items-center gap-2">
                         <Heart size={14} className="text-hr" />
@@ -214,11 +215,11 @@ const SportZonesSection = ({ sport, sportLabel, icon: Icon, color, showPace, sho
                         );
                     })}
                 </div>
-            </div>
+            </Card>
 
             {/* Pace Zones (Carrera) */}
             {showPace && (
-                <div className="ios-card overflow-hidden">
+                <Card className="overflow-hidden">
                     <div className="p-3.5 sm:p-4 border-b border-hairline flex items-center justify-between">
                         <div className="flex items-center gap-2">
                             <Timer size={14} className="text-sport-run" />
@@ -245,12 +246,12 @@ const SportZonesSection = ({ sport, sportLabel, icon: Icon, color, showPace, sho
                             </div>
                         ))}
                     </div>
-                </div>
+                </Card>
             )}
 
             {/* Power Zones (Ciclismo) */}
             {showPower && data.ftp > 0 && (
-                <div className="ios-card overflow-hidden">
+                <Card className="overflow-hidden">
                     <div className="p-3.5 sm:p-4 border-b border-hairline flex items-center justify-between">
                         <div className="flex items-center gap-2">
                             <Zap size={14} className="text-power" />
@@ -280,7 +281,7 @@ const SportZonesSection = ({ sport, sportLabel, icon: Icon, color, showPace, sho
                             );
                         })}
                     </div>
-                </div>
+                </Card>
             )}
         </div>
     );
@@ -625,7 +626,7 @@ export const ProfilePage = ({
                     {activeSection === 'general' && (
                         <div className="space-y-5 animate-in fade-in slide-in-from-right-3 duration-250">
                             {/* AVATAR PROFILE BANNER — HORIZONTAL APPLE SETTINGS STYLE */}
-                            <div className="ios-card p-4 sm:p-5 flex items-center gap-4 text-left mb-5">
+                            <Card className="p-4 sm:p-5 flex items-center gap-4 text-left mb-5">
                                 <div className="relative shrink-0">
                                     <div 
                                         className="rounded-full overflow-hidden bg-surface-2 border-2 border-white dark:border-zinc-700 shadow-sm flex items-center justify-center relative shrink-0"
@@ -661,12 +662,12 @@ export const ProfilePage = ({
                                         Atleta Forma
                                     </span>
                                 </div>
-                            </div>
+                            </Card>
 
                             {/* DATOS PERSONALES */}
                             <div>
-                                <div className="ios-header">Datos Personales</div>
-                                <div className="ios-card overflow-hidden divide-y divide-hairline mb-5">
+                                <SectionHeader>Datos Personales</SectionHeader>
+                                <Card divided className="overflow-hidden mb-5">
                                     <div className="p-3 sm:p-3.5 flex items-center justify-between gap-3">
                                         <span className="text-xs sm:text-sm font-medium text-body-soft">Nombre</span>
                                         <input
@@ -682,13 +683,13 @@ export const ProfilePage = ({
                                         <span className="text-xs sm:text-sm font-medium text-body-soft">Correo</span>
                                         <span className="text-xs sm:text-sm font-medium text-ink-4 truncate max-w-[220px]">{formData.email}</span>
                                     </div>
-                                </div>
+                                </Card>
                             </div>
 
                             {/* AJUSTES FISIOLÓGICOS */}
                             <div>
-                                <div className="ios-header">Fisiología y Métricas</div>
-                                <div className="ios-card overflow-hidden divide-y divide-hairline">
+                                <SectionHeader>Fisiología y Métricas</SectionHeader>
+                                <Card divided className="overflow-hidden">
                                     {/* Peso */}
                                     <div className="p-3 sm:p-3.5 flex items-center justify-between gap-3">
                                         <div className="flex items-center gap-3">
@@ -761,7 +762,7 @@ export const ProfilePage = ({
                                             <span className="text-xs font-semibold text-ink-4">CTL</span>
                                         </div>
                                     </div>
-                                </div>
+                                </Card>
                             </div>
                         </div>
                     )}
@@ -769,7 +770,7 @@ export const ProfilePage = ({
                     {activeSection === 'zones' && (
                         <div className="space-y-4 animate-in fade-in slide-in-from-right-3 duration-250">
                             {/* AUTO-DETECT LTHR BANNER */}
-                            <div className="ios-card p-3.5 sm:p-4 flex items-center justify-between gap-3">
+                            <Card className="p-3.5 sm:p-4 flex items-center justify-between gap-3">
                                 <div className="flex items-center gap-3 min-w-0">
                                     <div className="w-7 h-7 rounded-[8px] bg-orange-500 text-white flex items-center justify-center shrink-0 shadow-2xs">
                                         <RefreshCw size={15} strokeWidth={2.3} />
@@ -786,7 +787,7 @@ export const ProfilePage = ({
                                 >
                                     {isScanning ? <><Loader2 size={13} className="animate-spin" /> Analizando...</> : 'Escanear'}
                                 </button>
-                            </div>
+                            </Card>
 
                             {/* SPORT SELECTOR SEGMENTED */}
                             <div className="flex p-1 bg-fill-segmented rounded-full backdrop-blur-md gap-0.5 select-none">
@@ -815,9 +816,9 @@ export const ProfilePage = ({
 
                     {activeSection === 'integrations' && (
                         <div className="space-y-5 animate-in fade-in slide-in-from-right-3 duration-250">
-                            <div className="ios-header">SERVICIOS CONECTADOS</div>
+                            <SectionHeader>SERVICIOS CONECTADOS</SectionHeader>
                             
-                            <div className="ios-card overflow-hidden divide-y divide-hairline">
+                            <Card divided className="overflow-hidden">
                                 <div className="p-3.5 sm:p-4 flex items-center justify-between gap-3">
                                     <div className="flex items-center gap-3">
                                         <div className="w-8 h-8 rounded-[10px] bg-section-integrations text-white flex items-center justify-center shrink-0 shadow-2xs">
@@ -901,7 +902,7 @@ export const ProfilePage = ({
                                         </div>
                                     </div>
                                 )}
-                            </div>
+                            </Card>
                         </div>
                     )}
 
@@ -909,8 +910,8 @@ export const ProfilePage = ({
                         <div className="space-y-5 animate-in fade-in slide-in-from-right-3 duration-250">
                             {/* CONTRASEÑA */}
                             <div>
-                                <div className="ios-header">SEGURIDAD</div>
-                                <div className="ios-card p-3.5 sm:p-4 mb-5">
+                                <SectionHeader>SEGURIDAD</SectionHeader>
+                                <Card className="p-3.5 sm:p-4 mb-5">
                                     <div className="flex items-center gap-3 mb-3">
                                         <div className="w-7 h-7 rounded-[8px] bg-slate-500/15 text-body flex items-center justify-center shrink-0">
                                             <Key size={15} strokeWidth={2.3} />
@@ -936,13 +937,13 @@ export const ProfilePage = ({
                                             {isUpdatingPwd ? <Loader2 size={13} className="animate-spin" /> : 'Actualizar'}
                                         </button>
                                     </form>
-                                </div>
+                                </Card>
                             </div>
 
                             {/* DEEP SYNC */}
                             <div>
-                                <div className="ios-header">GESTIÓN DE DATOS</div>
-                                <div className="ios-card p-3.5 sm:p-4 mb-5">
+                                <SectionHeader>GESTIÓN DE DATOS</SectionHeader>
+                                <Card className="p-3.5 sm:p-4 mb-5">
                                     <div className="flex items-center gap-3 mb-3">
                                         <div className="w-7 h-7 rounded-[8px] bg-blue-500/15 text-blue-600 dark:text-blue-400 flex items-center justify-center shrink-0">
                                             <Database size={15} strokeWidth={2.3} />
@@ -964,13 +965,13 @@ export const ProfilePage = ({
                                     >
                                         {isDeepSyncing ? <><Loader2 size={14} className="animate-spin" /> Descargando...</> : syncPct === 100 ? <><CheckCircle2 size={14} /> Base de datos sincronizada</> : 'Iniciar Descarga Completa'}
                                     </button>
-                                </div>
+                                </Card>
                             </div>
                             
                             {/* DANGER ZONE */}
                             <div>
-                                <div className="ios-header text-danger-ink-2">ZONA DE PELIGRO</div>
-                                <div className="ios-card border border-danger-edge-2 p-3.5 sm:p-4">
+                                <SectionHeader>ZONA DE PELIGRO</SectionHeader>
+                                <Card className="p-3.5 sm:p-4">
                                     <div className="flex items-center gap-3 mb-3">
                                         <div className="w-7 h-7 rounded-[8px] bg-danger/15 text-danger-ink flex items-center justify-center shrink-0">
                                             <AlertTriangle size={15} strokeWidth={2.3} />
@@ -987,7 +988,7 @@ export const ProfilePage = ({
                                     >
                                         {isDeletingAccount ? <Loader2 size={13} className="animate-spin" /> : <><Trash2 size={13} /> Eliminar Cuenta</>}
                                     </button>
-                                </div>
+                                </Card>
                             </div>
                         </div>
                     )}

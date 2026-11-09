@@ -1,13 +1,14 @@
 import React from 'react';
 import { ShieldCheck, Brain } from 'lucide-react';
 import { InfoTooltip } from '../common/InfoTooltip';
+import { Card } from '../ui';
 
 export const HrvCard = ({ hrv }) => {
     if (!hrv) return null;
 
     return (
         <section className="mb-8">
-            <div className="bg-surface-5 rounded-2xl border border-line-muted p-6 sm:p-8 shadow-sm relative overflow-hidden">
+            <Card variant="panel" className="p-6 sm:p-8 relative overflow-hidden">
                 <div className="flex items-center justify-between mb-8">
                     <div className="flex items-center gap-2">
                         <h3 className="text-[10px] font-bold text-ink-4 uppercase tracking-[0.1em]">Estado de VFC</h3>
@@ -61,7 +62,7 @@ export const HrvCard = ({ hrv }) => {
                         </div>
                     </div>
                 </div>
-            </div>
+            </Card>
         </section>
     );
 };
