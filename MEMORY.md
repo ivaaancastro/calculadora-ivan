@@ -14,7 +14,7 @@
 
 ## 1. Estado del proyecto
 - **Nombre:** Forma — Dashboard de rendimiento deportivo y salud
-- **Rama actual:** `test/ui-safety-net` (Capa 0 del rediseño; PR hacia `develop`)
+- **Rama actual:** `feat/ui-tokens` (Capa 1 del rediseño, PR 1 de 6; PR hacia `develop`)
 - **Rama base:** `develop`
 - **Rama de producción:** `main` (desplegada en Vercel)
 - **Versión:** 0.1.0
@@ -42,7 +42,8 @@
 | spec-audit-08 | Hardening Edge Function `intervals-proxy` (rate limiting, validación, timeout) | implementada | 2026-11-05 | feat/edge-function-intervals-proxy-hardening |
 | spec-e2e-01 | Pruebas E2E críticas (auth, dashboard, Strava sync, exportación de datos) | implementada | 2026-11-05 | feat/e2e-critical-flows |
 | spec-rediseno-02 | Rediseño de la webapp por capas (roadmap) | en curso | 2026-11-06 | `docs/branches/feat/webapp-redesign/` |
-| spec-rediseno-02-c0 | Capa 0: red de seguridad de UI | implementada (PR abierto, pendiente de revisión) | 2026-11-06 | test/ui-safety-net |
+| spec-rediseno-02-c0 | Capa 0: red de seguridad de UI | implementada (PR #51 mergeado en `develop`) | 2026-11-06 | test/ui-safety-net |
+| spec-rediseno-02-c1 | Capa 1: tokens y tema | en curso (PR 1 de 6: infraestructura) | 2026-11-09 | `docs/branches/feat/ui-tokens/` |
 
 > Cuando un agente implemente una spec, debe añadir una fila aquí y marcarla como `implementada`.
 
@@ -87,6 +88,13 @@
 - `feat/webapp-redesign` en el remoto conserva el primer intento descartado: **no hacer `git pull` ahí**, ni usar `archive/webapp-redesign-v1` ni `stash@{0}` como base.
 - Antes de cualquier merge a `main`: revisar que el último despliegue de producción corresponde a `cda7df1`.
 
+### Cómo trabajar con los tokens (Capa 1)
+- Colores: `src/styles/tokens.css` (canales RGB, `:root` y `.dark`) → `src/styles/tailwindTokens.cjs` → `tailwind.config.js`. Gráficas: `src/components/charts/chartTheme.js` + `useChartTheme()` (hex, deben coincidir con `tokens.css`; lo comprueba un test).
+- **Tokens exactos:** cada token copia un par claro/oscuro existente; no se unifican valores parecidos hasta la Capa 3. Cada token llega con la familia que lo usa (orden: bordes, texto, superficies, acentos, gráficas; una rama/PR por familia).
+- `npm run lint:colors` es un trinquete por archivo (`scripts/color-baseline.json`): tras migrar, `npm run lint:colors -- --update` (solo baja). `--report` da totales.
+- Verificación de una migración: además de las capturas, volcado de estilos calculados en `develop` y en la rama (`STYLE_DUMP_DIR=<dir> npx playwright test e2e/tools/style-dump.spec.js`, con `E2E_PORT` distinto si se usa un worktree) y `node scripts/style-diff.mjs <antes> <después>`: debe dar 0 diferencias.
+- Fuera de alcance de la Capa 1: colores en `src/hooks` y `src/utils` (74 líneas), canvas de la landing, tipografía, radios y sombras.
+
 ### Cómo trabajar con la red de seguridad (Capa 0)
 - Las capturas de referencia están en `e2e/__screenshots__/` y **solo se generan en Linux** con `npm run test:e2e:update` (Docker, imagen oficial de Playwright, `linux/amd64` como CI). Las de macOS no son comparables, por eso `visual.spec.js` se omite fuera de Linux. Para compararlas: `npm run test:e2e:docker`.
 - Revisar cada captura nueva antes de aceptarla. La tolerancia es de 100 píxeles (`maxDiffPixels`).
@@ -110,4 +118,4 @@
 - **Informe de auditoría:** `AUDIT_REPORT.md` (rama `analysis/project-audit`) — contiene puntos débiles (P-01 a P-30), deuda técnica, hallazgos de tests/coverage y roadmap priorizado (R-01 a R-17).
 
 ---
-Última actualización: 2026-11-06
+Última actualización: 2026-11-09

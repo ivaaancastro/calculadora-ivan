@@ -1,4 +1,7 @@
 /* src/index.css */
+/* Tokens de color (Capa 1): deben ir antes de las capas de Tailwind. */
+@import './styles/tokens.css';
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;

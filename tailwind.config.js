@@ -1,4 +1,6 @@
-/* global module */
+/* global module, require */
+const { colors } = require('./src/styles/tailwindTokens.cjs');
+
 /** @type {import('tailwindcss').Config} */
 module.exports = {
   content: [
@@ -7,7 +9,11 @@ module.exports = {
   ],
   darkMode: 'class',
   theme: {
-    extend: {},
+    extend: {
+      // Tokens de src/styles/tokens.css (spec-rediseno-02-c1). La paleta por defecto
+      // de Tailwind se mantiene hasta que todo esté migrado (Capa 6).
+      colors,
+    },
   },
   plugins: [],
 }

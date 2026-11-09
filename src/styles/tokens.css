@@ -1,0 +1,39 @@
+/*
+ * Tokens de color de Forma (Capa 1 del rediseño, spec-rediseno-02-c1).
+ *
+ * - Cada token guarda canales RGB ("59 130 246") para que Tailwind admita
+ *   modificadores de opacidad: `bg-metric-ctl/20` → rgb(var(--metric-ctl) / 0.2).
+ * - Los valores son EXACTAMENTE los actuales (v1): esta capa no cambia el aspecto.
+ *   Cada token copia un par claro/oscuro que ya existe; no se unifican valores parecidos.
+ * - Si el valor oscuro lleva opacidad propia (p. ej. zinc-800/50), se declara además
+ *   `--<token>-a` y el tema lo multiplica por el modificador de opacidad.
+ * - Los tokens se añaden con la familia que los usa por primera vez (bordes, texto,
+ *   superficies, acentos, gráficas); `chartTheme.js` debe coincidir con este archivo
+ *   (lo comprueba src/__tests__/unit/chartTheme.test.js).
+ * - `html[data-ui="v2"]` queda reservado para la piel v2 (Capa 3).
+ */
+
+:root {
+  /* Métricas de carga (valores del Dashboard, EvolutionChart) */
+  --metric-ctl: 59 130 246;   /* #3b82f6 */
+  --metric-atl: 244 63 94;    /* #f43f5e */
+  --metric-tsb: 234 179 8;    /* #eab308 */
+
+  /* Anatomía de gráficas (EvolutionChart) */
+  --chart-grid: 203 213 225;      /* #cbd5e1, se pinta al 30 % */
+  --chart-axis: 100 116 139;      /* #64748b, ticks y etiqueta de "HOY" */
+  --chart-cursor: 148 163 184;    /* #94a3b8, cursor y línea de referencia */
+  --chart-dot-ring: 255 255 255;  /* #ffffff, anillo del punto activo */
+}
+
+/* Hoy las gráficas usan los mismos valores en claro y oscuro. */
+.dark {
+  --metric-ctl: 59 130 246;
+  --metric-atl: 244 63 94;
+  --metric-tsb: 234 179 8;
+
+  --chart-grid: 203 213 225;
+  --chart-axis: 100 116 139;
+  --chart-cursor: 148 163 184;
+  --chart-dot-ring: 255 255 255;
+}
