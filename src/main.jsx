@@ -7,14 +7,15 @@ import { ErrorBoundary } from './components/common/ErrorBoundary.jsx'
 
 // ---------------------------------------------------------------------------
 // Validación temprana de variables de entorno críticas.
-// La aplicación no arranca si falta alguna de estas claves, evitando fallos
-// impredecibles en tiempo de ejecución (supabase.js y services/ai.js dependen
-// de ellas). Los valores reales viven en .env (no versionado); véase .env.example.
+// La aplicación no arranca en producción si falta alguna de estas claves,
+// evitando fallos impredecibles en tiempo de ejecución (supabase.js depende de
+// ellas). Los valores reales viven en .env (no versionado); véase .env.example.
+// VITE_GEMINI_API_KEY es opcional: ningún componente usa askGemini y
+// services/ai ya avisa con un error claro si se invoca sin clave.
 // ---------------------------------------------------------------------------
 const requiredEnvVars = {
   VITE_SUPABASE_URL: import.meta.env.VITE_SUPABASE_URL,
   VITE_SUPABASE_KEY: import.meta.env.VITE_SUPABASE_KEY,
-  VITE_GEMINI_API_KEY: import.meta.env.VITE_GEMINI_API_KEY,
 };
 
 const missingEnvVars = Object.entries(requiredEnvVars)
@@ -35,6 +36,10 @@ if (missingEnvVars.length > 0) {
     throw new Error(message);
   }
   console.error(message);
+}
+
+if (!import.meta.env.VITE_GEMINI_API_KEY) {
+  console.warn('[CONFIG] VITE_GEMINI_API_KEY no está definida: las funciones de IA quedan desactivadas.');
 }
 
 // ---------------------------------------------------------------------------

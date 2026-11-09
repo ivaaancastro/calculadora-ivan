@@ -654,11 +654,11 @@ export const ProfilePage = ({
                                 </div>
                                 <div className="min-w-0 flex-1">
                                     <h3 className="text-base sm:text-lg font-bold text-slate-900 dark:text-white leading-tight truncate">
-                                        {formData.fullName || 'Atleta FormaLab'}
+                                        {formData.fullName || 'Atleta Forma'}
                                     </h3>
                                     <p className="text-xs text-slate-500 dark:text-zinc-400 mt-0.5 truncate">{formData.email}</p>
                                     <span className="inline-flex items-center gap-1 mt-2 text-[10px] font-semibold text-blue-600 dark:text-blue-400 bg-blue-500/10 px-2.5 py-0.5 rounded-full border border-blue-500/15">
-                                        Atleta FormaLab
+                                        Atleta Forma
                                     </span>
                                 </div>
                             </div>

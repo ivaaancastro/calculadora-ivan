@@ -184,11 +184,11 @@ const AuthModal = ({ open, onClose }) => {
 
         <form onSubmit={handleAuth} className="space-y-4">
           <div>
-            <label className="text-[10px] font-semibold text-slate-500 dark:text-zinc-400 uppercase tracking-wider block mb-1.5">Email</label>
+            <label htmlFor="auth-email" className="text-[10px] font-semibold text-slate-500 dark:text-zinc-400 uppercase tracking-wider block mb-1.5">Email</label>
             <div className="relative">
               <Mail size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 dark:text-zinc-500" />
               <input
-                type="email" value={email} onChange={(e) => setEmail(e.target.value)} required
+                id="auth-email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} required
                 className="w-full pl-10 pr-4 py-3 bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 rounded-xl text-sm text-slate-800 dark:text-zinc-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/10 outline-none transition-all"
                 placeholder="atleta@ejemplo.com"
               />
@@ -197,11 +197,11 @@ const AuthModal = ({ open, onClose }) => {
 
           {!isForgotPassword && (
             <div>
-              <label className="text-[10px] font-semibold text-slate-500 dark:text-zinc-400 uppercase tracking-wider block mb-1.5">Contraseña</label>
+              <label htmlFor="auth-password" className="text-[10px] font-semibold text-slate-500 dark:text-zinc-400 uppercase tracking-wider block mb-1.5">Contraseña</label>
               <div className="relative">
                 <Lock size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 dark:text-zinc-500" />
                 <input
-                  type="password" value={password} onChange={(e) => setPassword(e.target.value)} required
+                  id="auth-password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} required
                   className="w-full pl-10 pr-4 py-3 bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 rounded-xl text-sm text-slate-800 dark:text-zinc-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/10 outline-none transition-all"
                   placeholder="••••••••"
                 />
@@ -287,7 +287,7 @@ export const LandingPage = () => {
               <Activity size={18} strokeWidth={2.5} />
             </div>
             <span className="text-base font-black uppercase tracking-tight text-slate-900 dark:text-zinc-100">
-              Forma<span className="text-blue-500">Lab</span>
+              Forma
             </span>
           </div>
 
@@ -480,9 +480,9 @@ export const LandingPage = () => {
         <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4 text-[11px] text-slate-400 dark:text-zinc-600 font-medium">
           <div className="flex items-center gap-2">
             <Activity size={14} className="text-blue-500" />
-            <span className="font-bold uppercase tracking-wider text-slate-600 dark:text-zinc-400">FormaLab</span>
+            <span className="font-bold uppercase tracking-wider text-slate-600 dark:text-zinc-400">Forma</span>
           </div>
-          <span>© {new Date().getFullYear()} FormaLab · Performance Analytics</span>
+          <span>© {new Date().getFullYear()} Forma · Performance Analytics</span>
         </div>
       </footer>
 

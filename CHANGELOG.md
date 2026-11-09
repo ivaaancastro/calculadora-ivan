@@ -7,6 +7,17 @@ y este proyecto adhiere a [Semantic Versioning](https://semver.org/lang/es/).
 
 ## [Unreleased]
 
+### Rediseño — Capa 0: red de seguridad de UI (`spec-rediseno-02-c0`)
+- `test(e2e):` regresión visual con `toHaveScreenshot` de 8 pantallas (landing, dashboard, rendimiento, calendario, actividades, detalle, salud, perfil) a 390 y 1440 px, en claro y oscuro (32 capturas de referencia generadas en Linux con la imagen oficial de Playwright).
+- `test(e2e):` pruebas de layout (desbordamiento horizontal y barras fijas que tapan contenido), informe táctil de controles < 44 px (sin bloquear) y gestos de deslizamiento (D-01 registrado como fallo esperado).
+- `test(e2e):` módulo único de datos simulados con fecha fija (`e2e/support/mockApp.js`); E2E migrados a rol y etiqueta, con comprobaciones reales en lugar de ramas condicionales. Proyecto móvil y puerto propio (5273).
+- `ci:` el job E2E corre en la imagen oficial de Playwright; nuevos scripts `test:e2e:docker` y `test:e2e:update`.
+- `docs(ui-safety-net):` lista de paridad por pantalla con los defectos conocidos D-01, D-03 a D-06.
+- `chore(repo):` `playwright-report/` y `test-results/` dejan de versionarse; se ignoran `.playwright-mcp/` y `.taste-skill/`; ESLint ignora carpetas locales de agentes.
+- `fix(ui):` "FormaLab" pasa a "Forma" (Navbar, landing, perfil, correo confirmado) y se permite el zoom (`maximum-scale`/`user-scalable=no` fuera del viewport).
+- `fix(ui):` etiquetas asociadas (`htmlFor`/`id`) en `AddActivityModal` y en el modal de acceso.
+- `fix(config):` `VITE_GEMINI_API_KEY` deja de ser obligatoria al arrancar (aviso en consola); un build de producción solo con las variables de Supabase muestra la landing.
+
 ### Seguridad
 - `fix(security):` remover `.env` del rastreo de git (`git rm --cached`), agregar `.env` y `.env.*` a `.gitignore`, crear `.env.example` sin valores secretos y validar variables de entorno críticas al arranque (`spec-audit-01`).
 
