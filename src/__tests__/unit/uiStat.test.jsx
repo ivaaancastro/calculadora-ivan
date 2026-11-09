@@ -6,7 +6,7 @@ import { STAT, ICON_TONES, tileRecipe } from '../../components/ui/statClasses.js
 const Icon = ({ size, strokeWidth }) => <svg data-size={size} data-stroke={strokeWidth} />;
 
 describe('ui/Stat', () => {
-  it('copia la estructura de MetricCard, con text-ink si no hay accent', () => {
+  it('copia la estructura de la antigua tarjeta de cifra, con text-ink si no hay accent', () => {
     const html = renderToStaticMarkup(<Stat label="Distancia" value="12.40" unit="km" />);
     expect(html).toBe(
       `<div class="${STAT.root}"><span class="${STAT.label}">Distancia</span>` +

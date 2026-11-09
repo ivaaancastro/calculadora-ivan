@@ -1,16 +1,6 @@
 import React from 'react';
 import { formatMinsToHMM } from '../../utils/formatters';
 
-export const MetricCard = ({ label, value, unit, accent, className = '' }) => (
-    <div className={`flex flex-col py-2 px-2.5 sm:px-3 bg-surface-card rounded-xl sm:rounded-2xl border border-black/[0.04] dark:border-white/[0.07] shadow-xs select-none transition-all justify-between ${className}`}>
-        <span className="text-[9px] font-semibold text-ink-4 uppercase tracking-wider truncate">{label}</span>
-        <div className="flex items-baseline gap-1 truncate mt-0.5">
-            <span className={`text-sm sm:text-base font-bold tracking-tight tabular-nums truncate ${accent || 'text-ink'}`}>{value}</span>
-            {unit && <span className="text-[9px] font-medium text-ink-4 shrink-0">{unit}</span>}
-        </div>
-    </div>
-);
-
 export const PillTab = ({ active, label, onClick }) => (
     <button 
         onClick={onClick}

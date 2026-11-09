@@ -1,7 +1,7 @@
 /**
  * Recetas de Stat y StatTile (spec-rediseno-02-c2, 6.2; PR 2).
  *
- *  - `Stat`: la antigua `MetricCard` del detalle de actividad (26 usos). Su borde
+ *  - `Stat`: la tarjeta de cifra que vivía en `ActivitySharedUI` (detalle de actividad, 26 usos). Su borde
  *    (`black/[0.04]`, `white/[0.07]`) pasa al token `hairline-5`.
  *  - `StatTile`: las fichas de métricas del Dashboard (`AdvancedAnalytics`), sobre `Card pressable`.
  *    `lg` = "Fisiología y Carga" (4), `sm` = "Tendencia y Capacidad" (4). Las fichas de Salud no
