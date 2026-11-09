@@ -158,6 +158,7 @@ Las variantes llevan el nombre de su papel, no el de la pantalla. Si dos recetas
 ```
 - `variant`: `pill` (familia A, 10 + `PillTab`), `card` (B, 10), `mini` (C, 8). `size` según los tamaños de cada familia. `tone` para el color de la opción activa (`ink`, `action`, `run`, `power`, `hr`…, todos tokens existentes). Cada opción es un `<button>` con `aria-pressed`: el rol no cambia y los E2E siguen funcionando.
 - `PillTab` se elimina. Las pestañas de Rendimiento y de Ajustes no entran (D1).
+- **Alcance reducido (PR 3, acordado el 2026-11-09):** la familia A no cambia solo de tono. Sus 10 sitios son 8 recetas distintas: el radio (`rounded-full` o `rounded-lg`), la negrita de la opción activa, el hover de la inactiva (de 3 tipos o ninguno), `duration-200`, `active:scale-95` o `active:scale-[0.98]` y el tamaño de letra (`text-xs` o `text-[10px]`). `pill` copia solo la receta de `PillTab` y su contenedor. Los otros 9 sitios de A siguen con su receta local y quedan para la Capa 3. `card` cubre los 10 sitios de B: el tamaño `md-wide` lleva 9 px y `tracking-widest`, `md` 9 px, `sm` 8 px y `xs` es Periodo/Histórico de MMP, con `rounded`, `shadow-xs` y la letra en el contenedor. El relleno de cada opción va en `optionClassName`. `mini` cubre los 8 de C. El gris de la opción inactiva de B y C (paleta igual en claro y oscuro) pasa a los tokens `segmented-off(-hover)` y `segmented-mini-off(-hover)`, y el contenedor de `pill` a `fill-segmented-2` (D2).
 
 **Input y Select** (PR 4)
 ```jsx

@@ -51,8 +51,17 @@ Solo se marca lo verificado. Spec y plan aprobados el 2026-11-09 ("Apruebo todo"
 - Resultados: lint ✓, lint:colors ✓, lint:ui ✓ (4 exportaciones), unit 145/145, integración 10/10, build ✓, E2E macOS 79 ✓, E2E Docker 127 ✓ (48 capturas sin diferencias; el ✘ de `gestures.spec.js:37` es D-01). Volcado `full` frente a `develop`: **104 volcados, 90.548 elementos, 0 diferencias**. Los dos volcados se lanzaron en paralelo y 7 estados fallaron por tiempo en un lado u otro; repetidos solos, los 104 están completos. Informe táctil en macOS: 113, igual que en `develop` por pantalla.
 
 ## PR 3 — Segmented (`feat/ui-primitives-segmented`)
-- [ ] Inventario, primitiva, sustitución, retirada de `PillTab`
-- [ ] Verificación completa y PR
+- [x] Inventario, primitiva, sustitución, retirada de `PillTab`
+- [x] Verificación completa
+- [ ] PR hacia `develop`
+
+### Notas del PR 3
+- **Alcance (acordado el 2026-11-09):** `pill` copia solo la receta de `PillTab` (pestañas del detalle en escritorio). Los otros 9 sitios de la familia A son 8 recetas distintas entre sí (radio, negrita de la activa, hover de la inactiva, `duration-200`, compresión, tamaño de letra) y quedan con su receta local para la Capa 3. También quedan fuera las pestañas de la `Navbar` (son `Link`), las categorías de Rendimiento en móvil (`bg-inverse`) y las pestañas con subrayado de MMP (D1).
+- **Cobertura:** `pill` 4 opciones (detalle). `card` 10 sitios: `md-wide` 4 (Perfil de potencia ×2, VO2, Balance), `md` 1 (deporte de MMP, con tonos `action` y `run`), `sm` 2 (periodo de MMP, Distribución de foco) y `xs` 1 (Periodo/Histórico de MMP). `mini` 8 opciones en 4 conmutadores del Calendario (KM/MIN, FC/W con tonos `hr` y `power`), con `Segmented.Option` porque KM es condicional.
+- **Tokens nuevos (D2):** `segmented-off` (slate-500), `segmented-off-hover` (slate-700), `segmented-mini-off` (slate-400) y `segmented-mini-off-hover` (slate-600), con el mismo valor en claro y oscuro, como antes; y `fill-segmented-2` (`slate-200/60`, `zinc-800/80`), el contenedor de `pill`.
+- **D4 (a):** cada opción lleva `aria-pressed`. Rol y nombre no cambian (los E2E y el volcado las buscan por `button` y nombre), y no se añade `type`.
+- `lint:colors`: `palette` 848 → 810, `dark` 186 → 185.
+- Resultados: lint ✓, lint:colors ✓, lint:ui ✓ (5 exportaciones), unit 151/151, integración 10/10, build ✓, E2E macOS 79 ✓, E2E Docker 127 ✓ (48 capturas sin diferencias; el ✘ de `gestures.spec.js:37` es D-01). Volcado `full` frente a `develop`: **104 volcados, 90.548 elementos, 0 diferencias** (un estado falló por tiempo y se repitió solo). El volcado no llega a los conmutadores `mini` (el planificador se abre sin bloques): una prueba temporal sin commit añade un calentamiento y un circuito de ciclismo y compara los estilos calculados de los 4 conmutadores en reposo y con `:hover` forzado, en claro y oscuro: 0 diferencias en los 15 elementos. `PowerProfileCard` no se pinta con los datos de prueba; usa la misma receta `md-wide` que VO2 y Balance, que sí están en el volcado. Informe táctil en macOS: 113, igual que en `develop`.
 
 ## PR 4 — Input y Select (`feat/ui-primitives-field`)
 - [ ] Inventario, primitivas, sustitución
