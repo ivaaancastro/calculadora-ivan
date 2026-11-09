@@ -233,7 +233,7 @@ const AuthModal = ({ open, onClose }) => {
             {isLogin && (
               <button
                 onClick={() => { setIsForgotPassword(true); reset(); }}
-                className="text-[10px] font-medium text-slate-400 dark:text-zinc-500 hover:text-blue-500 dark:hover:text-blue-400 transition-colors"
+                className="text-[10px] font-medium text-ink-4 hover:text-action-2 transition-colors"
               >
                 ¿Has olvidado tu contraseña?
               </button>
@@ -277,7 +277,7 @@ export const LandingPage = () => {
   }, []);
 
   return (
-    <div className="min-h-screen bg-white dark:bg-zinc-950 text-ink-2-soft overflow-x-hidden selection:bg-blue-500/30">
+    <div className="min-h-screen bg-surface-6 text-ink-2-soft overflow-x-hidden selection:bg-action-bright/30">
 
       {/* ─── NAVBAR ─── */}
       <nav className="fixed top-0 left-0 right-0 z-40 bg-surface-9 backdrop-blur-xl border-b border-slate-100/80 dark:border-zinc-900/80">

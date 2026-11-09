@@ -94,7 +94,7 @@ export const EvolutionChart = ({ data, timeRange, setTimeRange }) => {
             {activePoint ? new Date(activePoint.date).toLocaleDateString('es-ES', { weekday: 'short', day: 'numeric', month: 'short' }) : 'Hoy'}
           </span>
           {hoverPoint ? (
-            <span className="text-[9px] font-semibold text-blue-600 dark:text-blue-400 bg-blue-500/10 px-1.5 py-0.2 rounded-full">
+            <span className="text-[9px] font-semibold text-metric-ctl-ink bg-metric-ctl/10 px-1.5 py-0.2 rounded-full">
               Punto
             </span>
           ) : (
@@ -106,24 +106,24 @@ export const EvolutionChart = ({ data, timeRange, setTimeRange }) => {
 
         <div className="flex items-center gap-3 sm:gap-4 shrink-0 text-xs">
           <div className="flex items-center gap-1">
-            <span className="w-2 h-2 rounded-full bg-[#3b82f6]"></span>
+            <span className="w-2 h-2 rounded-full bg-metric-ctl"></span>
             <span className="text-[10px] text-ink-4 font-medium">CTL</span>
-            <span className="font-mono font-bold text-[#3b82f6] text-xs">
+            <span className="font-mono font-bold text-metric-ctl text-xs">
               {activePoint?.ctl !== undefined ? Math.round(activePoint.ctl) : '--'}
             </span>
           </div>
           <div className="flex items-center gap-1">
-            <span className="w-2 h-2 rounded-full bg-[#f43f5e]"></span>
+            <span className="w-2 h-2 rounded-full bg-metric-atl"></span>
             <span className="text-[10px] text-ink-4 font-medium">ATL</span>
-            <span className="font-mono font-bold text-[#f43f5e] text-xs">
+            <span className="font-mono font-bold text-metric-atl text-xs">
               {activePoint?.atl !== undefined ? Math.round(activePoint.atl) : '--'}
             </span>
           </div>
           <div className="flex items-center gap-1">
-            <span className="w-2 h-2 rounded-full bg-[#eab308]"></span>
+            <span className="w-2 h-2 rounded-full bg-metric-tsb"></span>
             <span className="text-[10px] text-ink-4 font-medium">TSB</span>
             <span className={`font-mono font-bold text-xs ${
-              (activePoint?.tsb ?? 0) >= 0 ? 'text-[#30D158]' : 'text-[#FF9F0A]'
+              (activePoint?.tsb ?? 0) >= 0 ? 'text-legacy-tsb-ios-up' : 'text-legacy-tsb-ios-down'
             }`}>
               {activePoint?.tsb !== undefined ? `${activePoint.tsb > 0 ? '+' : ''}${Math.round(activePoint.tsb)}` : '--'}
             </span>
@@ -135,15 +135,15 @@ export const EvolutionChart = ({ data, timeRange, setTimeRange }) => {
       <div className="flex justify-between items-center mb-2 px-1">
         <div className="flex gap-3 sm:gap-5">
           <div className="flex items-center gap-1.5">
-            <div className="w-2 h-2 rounded-full bg-[#3b82f6]"></div>
+            <div className="w-2 h-2 rounded-full bg-metric-ctl"></div>
             <span className="text-[9px] font-semibold text-ink-3 uppercase tracking-wider">Fitness</span>
           </div>
           <div className="flex items-center gap-1.5">
-            <div className="w-2 h-2 rounded-full bg-[#f43f5e]"></div>
+            <div className="w-2 h-2 rounded-full bg-metric-atl"></div>
             <span className="text-[9px] font-semibold text-ink-3 uppercase tracking-wider">Fatiga</span>
           </div>
           <div className="flex items-center gap-1.5">
-            <div className="w-2 h-2 rounded-full bg-[#eab308]"></div>
+            <div className="w-2 h-2 rounded-full bg-metric-tsb"></div>
             <span className="text-[9px] font-semibold text-ink-3 uppercase tracking-wider">Forma</span>
           </div>
         </div>

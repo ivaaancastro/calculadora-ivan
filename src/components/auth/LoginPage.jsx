@@ -53,7 +53,7 @@ export const LoginPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-zinc-950 flex flex-col items-center justify-center p-4 selection:bg-blue-500/30 transition-colors duration-300">
+    <div className="min-h-screen bg-sunken-2 flex flex-col items-center justify-center p-4 selection:bg-action-bright/30 transition-colors duration-300">
       
       <div className="w-full max-w-sm">
         {/* LOGO */}
@@ -140,7 +140,7 @@ export const LoginPage = () => {
               </button>
               
               {isLogin && (
-                <button onClick={() => { setIsForgotPassword(true); setError(null); setMessage(null); }} className="text-[10px] font-bold text-slate-400 dark:text-zinc-500 hover:text-blue-500 dark:hover:text-blue-400 transition-colors">
+                <button onClick={() => { setIsForgotPassword(true); setError(null); setMessage(null); }} className="text-[10px] font-bold text-ink-4 hover:text-action-2 transition-colors">
                   ¿Has olvidado tu contraseña?
                 </button>
               )}

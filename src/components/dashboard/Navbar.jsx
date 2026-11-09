@@ -55,10 +55,10 @@ export const Navbar = ({
   };
 
   const configOptions = [
-    { id: 'general', label: 'General', desc: 'Perfil, peso, FC reposo y CTL', icon: Activity, color: 'text-blue-500 bg-blue-500/15' },
-    { id: 'zones', label: 'Zonas y Umbrales', desc: 'Carrera, ciclismo, FC y ritmos', icon: Heart, color: 'text-rose-500 bg-rose-500/15' },
-    { id: 'integrations', label: 'Cuentas Conectadas', desc: 'Intervals.icu y sincronización', icon: Link2, color: 'text-indigo-500 bg-indigo-500/15' },
-    { id: 'security', label: 'Seguridad y Datos', desc: 'Contraseña y Deep Sync', icon: Lock, color: 'text-amber-500 bg-amber-500/15' },
+    { id: 'general', label: 'General', desc: 'Perfil, peso, FC reposo y CTL', icon: Activity, color: 'text-section-general bg-section-general/15' },
+    { id: 'zones', label: 'Zonas y Umbrales', desc: 'Carrera, ciclismo, FC y ritmos', icon: Heart, color: 'text-section-zones bg-section-zones/15' },
+    { id: 'integrations', label: 'Cuentas Conectadas', desc: 'Intervals.icu y sincronización', icon: Link2, color: 'text-section-integrations bg-section-integrations/15' },
+    { id: 'security', label: 'Seguridad y Datos', desc: 'Contraseña y Deep Sync', icon: Lock, color: 'text-section-security bg-section-security/15' },
   ];
 
   const tabs = [
@@ -84,7 +84,7 @@ export const Navbar = ({
           >
             {/* AVATAR CIRCULAR CON BORDE APPLE */}
             <div 
-              className="rounded-full overflow-hidden bg-surface-2 border-2 border-white dark:border-zinc-700 shadow-xs flex items-center justify-center shrink-0 ring-1 ring-black/5 dark:ring-white/10 group-hover:ring-blue-500/40 transition-all"
+              className="rounded-full overflow-hidden bg-surface-2 border-2 border-surface-3 shadow-xs flex items-center justify-center shrink-0 ring-1 ring-black/5 dark:ring-white/10 group-hover:ring-blue-500/40 transition-all"
               style={{ width: '36px', height: '36px', minWidth: '36px', minHeight: '36px' }}
             >
               {settings?.avatarUrl ? (
@@ -107,7 +107,7 @@ export const Navbar = ({
                 </h1>
                 <ChevronDown 
                   size={13} 
-                  className={`text-slate-400 dark:text-zinc-500 transition-transform duration-200 ${isMenuOpen ? 'rotate-180 text-blue-500' : 'group-hover:text-slate-700 dark:group-hover:text-zinc-300'}`} 
+                  className={`text-ink-4 transition-transform duration-200 ${isMenuOpen ? 'rotate-180 text-action-bright' : 'group-hover:text-body'}`} 
                 />
               </div>
               <p className="text-[10px] font-medium text-ink-4 truncate max-w-[110px] sm:max-w-[160px] leading-tight mt-0.5">
@@ -159,7 +159,7 @@ export const Navbar = ({
                           <Icon size={15} strokeWidth={2.3} />
                         </div>
                         <div className="min-w-0">
-                          <p className="text-xs font-semibold text-slate-900 dark:text-zinc-100 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+                          <p className="text-xs font-semibold text-ink-soft group-hover:text-action transition-colors">
                             {opt.label}
                           </p>
                           <p className="text-[10px] text-ink-4 truncate">
@@ -236,11 +236,11 @@ export const Navbar = ({
               <Upload size={16} />
             </button>
 
-            <button onClick={onAddClick} className="p-2 text-slate-400 hover:text-blue-500 dark:text-zinc-400 dark:hover:text-blue-400 rounded-full hover:bg-fill-8 transition-colors" title="Añadir Manual">
+            <button onClick={onAddClick} className="p-2 text-ink-4-flat hover:text-action-2 rounded-full hover:bg-fill-8 transition-colors" title="Añadir Manual">
               <Plus size={16} />
             </button>
 
-            <button onClick={handleClearDb} className="p-2 text-slate-400 hover:text-red-500 dark:text-zinc-400 dark:hover:text-red-400 rounded-full hover:bg-fill-8 transition-colors" title="Borrar DB">
+            <button onClick={handleClearDb} className="p-2 text-ink-4-flat hover:text-danger-ink-2 rounded-full hover:bg-fill-8 transition-colors" title="Borrar DB">
               <Trash2 size={16} />
             </button>
 

@@ -73,16 +73,16 @@ export const ActivityDetailPage = ({ activity, settings, fetchStreams, onBack, o
     const activePeakType = useMemo(() => {
         if (!activePayload || !peaks) return null;
         if (peaks.maxHrPt && activePayload.hr && activePayload.hr >= peaks.maxHrPt.hr - 2) {
-            return { label: 'Pico FC', value: `${peaks.maxHrPt.hr} bpm`, color: 'text-rose-600 bg-rose-500/10 border-rose-500/30 dark:text-rose-400' };
+            return { label: 'Pico FC', value: `${peaks.maxHrPt.hr} bpm`, color: 'text-hr-ink bg-hr/10 border-hr/30' };
         }
         if (peaks.maxWattsPt && activePayload.watts && activePayload.watts >= peaks.maxWattsPt.watts - 15) {
-            return { label: 'Pico Potencia', value: `${peaks.maxWattsPt.watts} W`, color: 'text-amber-600 bg-amber-500/10 border-amber-500/30 dark:text-amber-400' };
+            return { label: 'Pico Potencia', value: `${peaks.maxWattsPt.watts} W`, color: 'text-power-ink bg-power/10 border-power/30' };
         }
         if (isPaceBased && peaks.bestPacePt && activePayload.pace && activePayload.pace <= peaks.bestPacePt.pace + 0.1) {
-            return { label: 'Ritmo Máx', value: formatPace(peaks.bestPacePt.pace), color: 'text-indigo-600 bg-indigo-500/10 border-indigo-500/30 dark:text-indigo-400' };
+            return { label: 'Ritmo Máx', value: formatPace(peaks.bestPacePt.pace), color: 'text-pace-ink bg-pace/10 border-pace/30' };
         }
         if (!isPaceBased && peaks.maxSpeedPt && activePayload.speed && activePayload.speed >= peaks.maxSpeedPt.speed - 1) {
-            return { label: 'Velocidad Máx', value: `${peaks.maxSpeedPt.speed} km/h`, color: 'text-blue-600 bg-blue-500/10 border-blue-500/30 dark:text-blue-400' };
+            return { label: 'Velocidad Máx', value: `${peaks.maxSpeedPt.speed} km/h`, color: 'text-speed-ink bg-speed/10 border-speed/30' };
         }
         if (peaks.maxAltPt && activePayload.alt && activePayload.alt >= peaks.maxAltPt.alt - 3) {
             return { label: 'Cima', value: `${peaks.maxAltPt.alt} m`, color: 'text-body-2 bg-fill-2 border-line-strong' };
@@ -219,13 +219,13 @@ export const ActivityDetailPage = ({ activity, settings, fetchStreams, onBack, o
                     <MetricCard label="Distancia" value={(activity.distance / 1000).toFixed(2)} unit="km" />
                     <MetricCard label="Tiempo" value={formatTimeStr(activity.duration)} />
                     <MetricCard label="Desnivel" value={activity.elevation_gain || 0} unit="m" />
-                    <MetricCard label="Carga" value={Math.round(activity.tss || 0)} unit="TSS" accent="text-indigo-500" />
-                    {proMetrics.ifFactor > 0 && <MetricCard label="IF" value={proMetrics.ifFactor} accent="text-amber-500" />}
+                    <MetricCard label="Carga" value={Math.round(activity.tss || 0)} unit="TSS" accent="text-load" />
+                    {proMetrics.ifFactor > 0 && <MetricCard label="IF" value={proMetrics.ifFactor} accent="text-power" />}
                     {proMetrics.workKj > 0 && <MetricCard label="Trabajo" value={proMetrics.workKj} unit="kJ" />}
-                    {activity.hr_avg > 0 && <MetricCard label="FC Media" value={activity.hr_avg} unit="bpm" accent="text-rose-500" />}
-                    {speedMetric && <MetricCard label={speedMetric.label} value={speedMetric.value} unit={speedMetric.unit} accent="text-blue-500" />}
-                    {proMetrics.avgWatts > 0 && <MetricCard label="W Media" value={proMetrics.avgWatts} unit="w" accent="text-amber-500" />}
-                    {proMetrics.npWatts > 0 && <MetricCard label="NP" value={proMetrics.npWatts} unit="w" accent="text-amber-600" />}
+                    {activity.hr_avg > 0 && <MetricCard label="FC Media" value={activity.hr_avg} unit="bpm" accent="text-hr" />}
+                    {speedMetric && <MetricCard label={speedMetric.label} value={speedMetric.value} unit={speedMetric.unit} accent="text-speed" />}
+                    {proMetrics.avgWatts > 0 && <MetricCard label="W Media" value={proMetrics.avgWatts} unit="w" accent="text-power" />}
+                    {proMetrics.npWatts > 0 && <MetricCard label="NP" value={proMetrics.npWatts} unit="w" accent="text-power-strong" />}
                     {proMetrics.efObj && <MetricCard label="EF" value={proMetrics.efObj.value} unit={proMetrics.efObj.unit} />}
                     {proMetrics.decouplingObj && (
                         <MetricCard label="Drift" value={proMetrics.decouplingObj.value} unit="%" accent={proMetrics.decouplingObj.color} />
@@ -267,14 +267,14 @@ export const ActivityDetailPage = ({ activity, settings, fetchStreams, onBack, o
                                             <MetricCard label="Distancia" value={(activity.distance / 1000).toFixed(2)} unit="km" />
                                             <MetricCard label="Tiempo" value={formatTimeStr(activity.duration)} />
                                             <MetricCard label="Desnivel" value={activity.elevation_gain || 0} unit="m" />
-                                            {speedMetric && <MetricCard label={speedMetric.label} value={speedMetric.value} unit={speedMetric.unit} accent="text-blue-500" />}
-                                            {activity.hr_avg > 0 && <MetricCard label="FC Media" value={activity.hr_avg} unit="bpm" accent="text-rose-500" />}
-                                            <MetricCard label="Carga" value={Math.round(activity.tss || 0)} unit="TSS" accent="text-indigo-500" />
-                                            {proMetrics.avgWatts > 0 && <MetricCard label="W Media" value={proMetrics.avgWatts} unit="w" accent="text-amber-500" />}
-                                            {proMetrics.ifFactor > 0 && <MetricCard label="IF" value={proMetrics.ifFactor} accent="text-amber-500" />}
+                                            {speedMetric && <MetricCard label={speedMetric.label} value={speedMetric.value} unit={speedMetric.unit} accent="text-speed" />}
+                                            {activity.hr_avg > 0 && <MetricCard label="FC Media" value={activity.hr_avg} unit="bpm" accent="text-hr" />}
+                                            <MetricCard label="Carga" value={Math.round(activity.tss || 0)} unit="TSS" accent="text-load" />
+                                            {proMetrics.avgWatts > 0 && <MetricCard label="W Media" value={proMetrics.avgWatts} unit="w" accent="text-power" />}
+                                            {proMetrics.ifFactor > 0 && <MetricCard label="IF" value={proMetrics.ifFactor} accent="text-power" />}
                                             {proMetrics.cadenceAvg > 0 && <MetricCard label="Cadencia" value={proMetrics.cadenceAvg} unit={isPaceBased ? 'ppm' : 'rpm'} />}
                                             {proMetrics.workKj > 0 && <MetricCard label="Trabajo" value={proMetrics.workKj} unit="kJ" />}
-                                            {proMetrics.npWatts > 0 && <MetricCard label="NP" value={proMetrics.npWatts} unit="w" accent="text-amber-600" />}
+                                            {proMetrics.npWatts > 0 && <MetricCard label="NP" value={proMetrics.npWatts} unit="w" accent="text-power-strong" />}
                                             {proMetrics.efObj && <MetricCard label="EF" value={proMetrics.efObj.value} unit={proMetrics.efObj.unit} />}
                                             {proMetrics.decouplingObj && (
                                                 <MetricCard label="Drift" value={proMetrics.decouplingObj.value} unit="%" accent={proMetrics.decouplingObj.color} />
@@ -297,8 +297,8 @@ export const ActivityDetailPage = ({ activity, settings, fetchStreams, onBack, o
                                                             onClick={() => setActivePayload(peaks.maxHrPt)}
                                                             className={`px-2.5 py-1 rounded-full text-[10px] font-bold shrink-0 border transition-all active:scale-95 flex items-center gap-1.5 ${
                                                                 activePayload?.rawTime === peaks.maxHrPt.rawTime
-                                                                    ? 'bg-rose-500 text-white border-rose-600 shadow-xs'
-                                                                    : 'bg-white dark:bg-zinc-900 text-rose-600 dark:text-rose-400 border-rose-200 dark:border-rose-900/50 hover:bg-rose-50 dark:hover:bg-rose-950/30'
+                                                                    ? 'bg-hr text-white border-hr-strong shadow-xs'
+                                                                    : 'bg-ink-inverse text-hr-ink border-hr-edge hover:bg-hr-tint'
                                                             }`}
                                                         >
                                                             <span>Pico FC</span>
@@ -311,8 +311,8 @@ export const ActivityDetailPage = ({ activity, settings, fetchStreams, onBack, o
                                                             onClick={() => setActivePayload(peaks.maxWattsPt)}
                                                             className={`px-2.5 py-1 rounded-full text-[10px] font-bold shrink-0 border transition-all active:scale-95 flex items-center gap-1.5 ${
                                                                 activePayload?.rawTime === peaks.maxWattsPt.rawTime
-                                                                    ? 'bg-amber-500 text-white border-amber-600 shadow-xs'
-                                                                    : 'bg-white dark:bg-zinc-900 text-amber-600 dark:text-amber-400 border-amber-200 dark:border-amber-900/50 hover:bg-amber-50 dark:hover:bg-amber-950/30'
+                                                                    ? 'bg-power text-white border-power-strong shadow-xs'
+                                                                    : 'bg-ink-inverse text-power-ink border-power-edge hover:bg-power-tint-2'
                                                             }`}
                                                         >
                                                             <span>Pico W</span>
@@ -325,8 +325,8 @@ export const ActivityDetailPage = ({ activity, settings, fetchStreams, onBack, o
                                                             onClick={() => setActivePayload(isPaceBased ? peaks.bestPacePt : peaks.maxSpeedPt)}
                                                             className={`px-2.5 py-1 rounded-full text-[10px] font-bold shrink-0 border transition-all active:scale-95 flex items-center gap-1.5 ${
                                                                 activePayload?.rawTime === (isPaceBased ? peaks.bestPacePt?.rawTime : peaks.maxSpeedPt?.rawTime)
-                                                                    ? 'bg-blue-500 text-white border-blue-600 shadow-xs'
-                                                                    : 'bg-white dark:bg-zinc-900 text-blue-600 dark:text-blue-400 border-blue-200 dark:border-blue-900/50 hover:bg-blue-50 dark:hover:bg-blue-950/30'
+                                                                    ? 'bg-speed text-white border-speed-strong shadow-xs'
+                                                                    : 'bg-ink-inverse text-speed-ink border-speed-edge hover:bg-speed-tint'
                                                             }`}
                                                         >
                                                             <span>{isPaceBased ? 'Mejor Ritmo' : 'Max Vel'}</span>
@@ -384,7 +384,7 @@ export const ActivityDetailPage = ({ activity, settings, fetchStreams, onBack, o
                                                                 <span className="text-[8px] font-bold uppercase tracking-wider text-ink-4 block">
                                                                     {isPaceBased ? 'Ritmo' : 'Velocidad'}
                                                                 </span>
-                                                                <span className="text-xs sm:text-sm font-black font-mono tabular-nums text-indigo-500">
+                                                                <span className="text-xs sm:text-sm font-black font-mono tabular-nums text-pace">
                                                                     {isPaceBased ? formatPace(activePayload.pace) : `${activePayload.speed} km/h`}
                                                                 </span>
                                                             </div>
@@ -395,7 +395,7 @@ export const ActivityDetailPage = ({ activity, settings, fetchStreams, onBack, o
                                                                     <span className="text-[8px] font-bold uppercase tracking-wider text-ink-4 block">
                                                                         FC
                                                                     </span>
-                                                                    <span className="text-xs sm:text-sm font-black font-mono tabular-nums text-rose-500">
+                                                                    <span className="text-xs sm:text-sm font-black font-mono tabular-nums text-hr">
                                                                         {activePayload.hr} <span className="text-[9px] font-normal">bpm</span>
                                                                     </span>
                                                                 </div>
@@ -407,7 +407,7 @@ export const ActivityDetailPage = ({ activity, settings, fetchStreams, onBack, o
                                                                     <span className="text-[8px] font-bold uppercase tracking-wider text-ink-4 block">
                                                                         Potencia
                                                                     </span>
-                                                                    <span className="text-xs sm:text-sm font-black font-mono tabular-nums text-amber-500">
+                                                                    <span className="text-xs sm:text-sm font-black font-mono tabular-nums text-power">
                                                                         {activePayload.watts} <span className="text-[9px] font-normal">W</span>
                                                                     </span>
                                                                 </div>
@@ -436,7 +436,7 @@ export const ActivityDetailPage = ({ activity, settings, fetchStreams, onBack, o
                                                                     <span className="text-[8px] font-bold uppercase tracking-wider text-ink-4 block">
                                                                         Cadencia
                                                                     </span>
-                                                                    <span className="text-xs sm:text-sm font-black font-mono tabular-nums text-emerald-500">
+                                                                    <span className="text-xs sm:text-sm font-black font-mono tabular-nums text-cadence">
                                                                         {activePayload.cadence} <span className="text-[9px] font-normal">{isPaceBased ? 'ppm' : 'rpm'}</span>
                                                                     </span>
                                                                 </div>
@@ -471,11 +471,11 @@ export const ActivityDetailPage = ({ activity, settings, fetchStreams, onBack, o
                                                             <div className="px-1.5 py-0.5 bg-surface-2 rounded flex items-center gap-2 text-[9px] font-bold tabular-nums">
                                                                 <span className="text-body-soft">{formatDuration(activePayload.rawTime)}</span>
                                                                 <span className="w-px h-2 bg-slate-300 dark:bg-zinc-700"></span>
-                                                                <span className="text-indigo-500">{activePayload.distanceKm} km</span>
+                                                                <span className="text-pace">{activePayload.distanceKm} km</span>
                                                             </div>
                                                         )}
                                                     </div>
-                                                    {activePayload && <span className="text-xs font-bold tabular-nums text-indigo-500">{isPaceBased ? formatPace(activePayload.pace) : activePayload.speed + ' km/h'}</span>}
+                                                    {activePayload && <span className="text-xs font-bold tabular-nums text-pace">{isPaceBased ? formatPace(activePayload.pace) : activePayload.speed + ' km/h'}</span>}
                                                 </div>
                                                 <ResponsiveContainer width="100%" height={80}>
                                                     <AreaChart 
@@ -501,7 +501,7 @@ export const ActivityDetailPage = ({ activity, settings, fetchStreams, onBack, o
                                                 <div className="h-[120px] pt-3.5 px-3.5 sm:px-6 border-b border-line-soft-3">
                                                     <div className="flex justify-between items-center mb-1">
                                                         <h4 className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">FC</h4>
-                                                        {activePayload && <span className="text-xs font-bold tabular-nums text-rose-500">{activePayload.hr} bpm</span>}
+                                                        {activePayload && <span className="text-xs font-bold tabular-nums text-hr">{activePayload.hr} bpm</span>}
                                                     </div>
                                                     <ResponsiveContainer width="100%" height={80}>
                                                         <AreaChart 
@@ -528,7 +528,7 @@ export const ActivityDetailPage = ({ activity, settings, fetchStreams, onBack, o
                                                 <div className="h-[120px] pt-3.5 px-3.5 sm:px-6 border-b border-line-soft-3">
                                                     <div className="flex justify-between items-center mb-1">
                                                         <h4 className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Potencia</h4>
-                                                        {activePayload && <span className="text-xs font-bold tabular-nums text-amber-500">{activePayload.watts} w</span>}
+                                                        {activePayload && <span className="text-xs font-bold tabular-nums text-power">{activePayload.watts} w</span>}
                                                     </div>
                                                     <ResponsiveContainer width="100%" height={80}>
                                                         <AreaChart 
@@ -589,7 +589,7 @@ export const ActivityDetailPage = ({ activity, settings, fetchStreams, onBack, o
                                                 <div className="h-[120px] pt-3.5 px-3.5 sm:px-6">
                                                     <div className="flex justify-between items-center mb-1">
                                                         <h4 className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Cadencia</h4>
-                                                        {activePayload && <span className="text-xs font-bold tabular-nums text-emerald-500">{activePayload.cadence} {isPaceBased ? 'ppm' : 'rpm'}</span>}
+                                                        {activePayload && <span className="text-xs font-bold tabular-nums text-cadence">{activePayload.cadence} {isPaceBased ? 'ppm' : 'rpm'}</span>}
                                                     </div>
                                                     <ResponsiveContainer width="100%" height={80}>
                                                         <AreaChart 
@@ -761,12 +761,12 @@ export const ActivityDetailPage = ({ activity, settings, fetchStreams, onBack, o
                                                     <td className={`p-4 text-right font-black ${isFastest ? 'text-emerald-500' : 'text-ink-soft'}`}>{lap.speedVal}</td>
                                                     {lap.pwrAvg !== null && (
                                                         <td className="p-4 text-right">
-                                                            <span className="text-amber-500 font-black">{lap.pwrAvg}</span>
+                                                            <span className="text-power font-black">{lap.pwrAvg}</span>
                                                             <span className="ml-1 text-[9px] text-slate-400 font-bold opacity-0 group-hover:opacity-100 transition-opacity">w</span>
                                                         </td>
                                                     )}
                                                     <td className="p-4 text-right">
-                                                        <span className="text-rose-500 font-black">{lap.hrAvg}</span>
+                                                        <span className="text-hr font-black">{lap.hrAvg}</span>
                                                     </td>
                                                     {lap.cadAvg !== null && <td className="p-4 text-right text-slate-400">{lap.cadAvg}</td>}
                                                     <td className="p-4 text-right text-slate-400 font-medium">+{lap.elev}m</td>
@@ -926,10 +926,10 @@ export const ActivityDetailPage = ({ activity, settings, fetchStreams, onBack, o
                                         <div className="space-y-1.5">
                                             <div className="flex justify-between text-[9px] font-bold text-slate-400 uppercase tracking-widest">
                                                 <span>Intensidad (IF)</span>
-                                                <span className="text-amber-500 font-black">{proMetrics.ifFactor}</span>
+                                                <span className="text-power font-black">{proMetrics.ifFactor}</span>
                                             </div>
                                             <div className="h-1.5 bg-fill-2 rounded-full overflow-hidden">
-                                                <div className="h-full bg-amber-500 rounded-full" style={{ width: `${(proMetrics.ifFactor / 1.1) * 100}%` }} />
+                                                <div className="h-full bg-power rounded-full" style={{ width: `${(proMetrics.ifFactor / 1.1) * 100}%` }} />
                                             </div>
                                         </div>
 
@@ -981,7 +981,7 @@ export const ActivityDetailPage = ({ activity, settings, fetchStreams, onBack, o
                                             ))}
                                             <div className="flex justify-between items-center p-3.5 bg-slate-50/30 dark:bg-zinc-900/10">
                                                 <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">FC Máxima</span>
-                                                <span className="text-xs font-black text-rose-500">{maxHr} <span className="text-[9px] font-bold text-slate-400">bpm</span></span>
+                                                <span className="text-xs font-black text-hr">{maxHr} <span className="text-[9px] font-bold text-slate-400">bpm</span></span>
                                             </div>
                                         </div>
                                     </div>

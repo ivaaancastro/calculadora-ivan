@@ -350,3 +350,178 @@
   --legacy-tsb-low: 239 68 68; /* red-500 */
 }
 /* @tokens:metrics:end */
+
+/* @tokens:categories:start (generado por scripts/codemods/categories.mjs --tokens; no editar a mano) */
+:root {
+  --cadence: 16 185 129; /* emerald-500 */
+  --ef: 139 92 246; /* violet-500 */
+  --form-critical: 250 17 79; /* [#FA114F] */
+  --form-critical-tint: 250 17 79; --form-critical-tint-a: 0.1; /* [#FA114F]/10 */
+  --form-overload: 255 159 10; /* [#FF9F0A] */
+  --form-overload-tint: 255 159 10; --form-overload-tint-a: 0.1; /* [#FF9F0A]/10 */
+  --form-peak: 48 209 88; /* [#30D158] */
+  --form-peak-tint: 48 209 88; --form-peak-tint-a: 0.1; /* [#30D158]/10 */
+  --form-productive: 10 132 255; /* [#0A84FF] */
+  --form-productive-tint: 10 132 255; --form-productive-tint-a: 0.1; /* [#0A84FF]/10 */
+  --hr: 244 63 94; /* rose-500 */
+  --hr-edge: 254 205 211; --hr-edge-a: 1; /* rose-200 */
+  --hr-ink: 225 29 72; /* rose-600 */
+  --hr-soft: 251 113 133; /* rose-400 */
+  --hr-strong: 225 29 72; /* rose-600 */
+  --hr-tint: 255 241 242; --hr-tint-a: 1; /* rose-50 */
+  --hrv: 16 185 129; /* emerald-500 */
+  --legacy-hr-red: 239 68 68; /* red-500 */
+  --legacy-sport-run-emerald: 16 185 129; /* emerald-500 */
+  --legacy-sport-strength-emerald: 16 185 129; /* emerald-500 */
+  --legacy-sport-strength-emerald-end: 34 197 94; /* green-500 */
+  --legacy-sport-strength-emerald-tint: 236 253 245; --legacy-sport-strength-emerald-tint-a: 1; /* emerald-50 */
+  --legacy-sport-strength-orange: 249 115 22; /* orange-500 */
+  --legacy-tsb-ios-down: 255 159 10; /* [#FF9F0A] */
+  --legacy-tsb-ios-up: 48 209 88; /* [#30D158] */
+  --load: 99 102 241; /* indigo-500 */
+  --pace: 99 102 241; /* indigo-500 */
+  --pace-ink: 79 70 229; /* indigo-600 */
+  --power: 245 158 11; /* amber-500 */
+  --power-edge: 253 230 138; --power-edge-a: 1; /* amber-200 */
+  --power-ink: 217 119 6; /* amber-600 */
+  --power-ink-2: 217 119 6; /* amber-600 */
+  --power-soft: 251 191 36; /* amber-400 */
+  --power-strong: 217 119 6; /* amber-600 */
+  --power-tint: 254 243 199; --power-tint-a: 1; /* amber-100 */
+  --power-tint-2: 255 251 235; --power-tint-2-a: 1; /* amber-50 */
+  --power-tint-3: 255 251 235; --power-tint-3-a: 1; /* amber-50 */
+  --section-general: 59 130 246; /* blue-500 */
+  --section-integrations: 99 102 241; /* indigo-500 */
+  --section-security: 245 158 11; /* amber-500 */
+  --section-zones: 244 63 94; /* rose-500 */
+  --sleep: 59 130 246; /* blue-500 */
+  --speed: 59 130 246; /* blue-500 */
+  --speed-edge: 191 219 254; --speed-edge-a: 1; /* blue-200 */
+  --speed-ink: 37 99 235; /* blue-600 */
+  --speed-strong: 37 99 235; /* blue-600 */
+  --speed-tint: 239 246 255; --speed-tint-a: 1; /* blue-50 */
+  --sport-bike: 59 130 246; /* blue-500 */
+  --sport-bike-edge: 191 219 254; --sport-bike-edge-a: 1; /* blue-200 */
+  --sport-bike-edge-2: 191 219 254; --sport-bike-edge-2-a: 1; /* blue-200 */
+  --sport-bike-end: 99 102 241; /* indigo-500 */
+  --sport-bike-ink: 29 78 216; /* blue-700 */
+  --sport-bike-ios: 0 122 255; /* [#007AFF] */
+  --sport-bike-tint: 219 234 254; --sport-bike-tint-a: 1; /* blue-100 */
+  --sport-bike-tint-2: 239 246 255; --sport-bike-tint-2-a: 1; /* blue-50 */
+  --sport-run: 249 115 22; /* orange-500 */
+  --sport-run-edge: 254 215 170; --sport-run-edge-a: 1; /* orange-200 */
+  --sport-run-edge-2: 254 215 170; --sport-run-edge-2-a: 1; /* orange-200 */
+  --sport-run-end: 239 68 68; /* red-500 */
+  --sport-run-ink: 234 88 12; /* orange-600 */
+  --sport-run-ink-2: 194 65 12; /* orange-700 */
+  --sport-run-ink-3: 234 88 12; /* orange-600 */
+  --sport-run-tint: 255 237 213; --sport-run-tint-a: 1; /* orange-100 */
+  --sport-run-tint-2: 255 237 213; --sport-run-tint-2-a: 1; /* orange-100 */
+  --sport-run-tint-3: 255 247 237; --sport-run-tint-3-a: 1; /* orange-50 */
+  --sport-strength: 168 85 247; /* purple-500 */
+  --sport-strength-edge: 233 213 255; --sport-strength-edge-a: 1; /* purple-200 */
+  --sport-strength-edge-2: 233 213 255; --sport-strength-edge-2-a: 1; /* purple-200 */
+  --sport-strength-ink: 126 34 206; /* purple-700 */
+  --sport-strength-tint: 243 232 255; --sport-strength-tint-a: 1; /* purple-100 */
+  --sport-swim: 6 182 212; /* cyan-500 */
+  --sport-swim-edge: 165 243 252; --sport-swim-edge-a: 1; /* cyan-200 */
+  --sport-swim-edge-2: 165 243 252; --sport-swim-edge-2-a: 1; /* cyan-200 */
+  --sport-swim-end: 20 184 166; /* teal-500 */
+  --sport-swim-ink: 14 116 144; /* cyan-700 */
+  --sport-swim-tint: 207 250 254; --sport-swim-tint-a: 1; /* cyan-100 */
+  --sport-swim-tint-2: 236 254 255; --sport-swim-tint-2-a: 1; /* cyan-50 */
+  --sport-walk: 132 204 22; /* lime-500 */
+  --sport-yoga: 236 72 153; /* pink-500 */
+  --steps: 168 85 247; /* purple-500 */
+  --strava: 252 76 2; /* [#FC4C02] */
+  --strava-hover: 227 68 2; /* [#E34402] */
+  --today: 239 68 68; /* red-500 */
+  --vo2: 16 185 129; /* emerald-500 */
+}
+.dark {
+  --cadence: 16 185 129; /* emerald-500 */
+  --ef: 139 92 246; /* violet-500 */
+  --form-critical: 250 17 79; /* [#FA114F] */
+  --form-critical-tint: 250 17 79; --form-critical-tint-a: 0.15; /* [#FA114F]/15 */
+  --form-overload: 255 159 10; /* [#FF9F0A] */
+  --form-overload-tint: 255 159 10; --form-overload-tint-a: 0.15; /* [#FF9F0A]/15 */
+  --form-peak: 48 209 88; /* [#30D158] */
+  --form-peak-tint: 48 209 88; --form-peak-tint-a: 0.15; /* [#30D158]/15 */
+  --form-productive: 10 132 255; /* [#0A84FF] */
+  --form-productive-tint: 10 132 255; --form-productive-tint-a: 0.15; /* [#0A84FF]/15 */
+  --hr: 244 63 94; /* rose-500 */
+  --hr-edge: 136 19 55; --hr-edge-a: 0.5; /* rose-900/50 */
+  --hr-ink: 251 113 133; /* rose-400 */
+  --hr-soft: 251 113 133; /* rose-400 */
+  --hr-strong: 225 29 72; /* rose-600 */
+  --hr-tint: 76 5 25; --hr-tint-a: 0.3; /* rose-950/30 */
+  --hrv: 16 185 129; /* emerald-500 */
+  --legacy-hr-red: 239 68 68; /* red-500 */
+  --legacy-sport-run-emerald: 16 185 129; /* emerald-500 */
+  --legacy-sport-strength-emerald: 16 185 129; /* emerald-500 */
+  --legacy-sport-strength-emerald-end: 34 197 94; /* green-500 */
+  --legacy-sport-strength-emerald-tint: 2 44 34; --legacy-sport-strength-emerald-tint-a: 0.3; /* emerald-950/30 */
+  --legacy-sport-strength-orange: 249 115 22; /* orange-500 */
+  --legacy-tsb-ios-down: 255 159 10; /* [#FF9F0A] */
+  --legacy-tsb-ios-up: 48 209 88; /* [#30D158] */
+  --load: 99 102 241; /* indigo-500 */
+  --pace: 99 102 241; /* indigo-500 */
+  --pace-ink: 129 140 248; /* indigo-400 */
+  --power: 245 158 11; /* amber-500 */
+  --power-edge: 120 53 15; --power-edge-a: 0.5; /* amber-900/50 */
+  --power-ink: 251 191 36; /* amber-400 */
+  --power-ink-2: 245 158 11; /* amber-500 */
+  --power-soft: 245 158 11; /* amber-500 */
+  --power-strong: 217 119 6; /* amber-600 */
+  --power-tint: 120 53 15; --power-tint-a: 0.3; /* amber-900/30 */
+  --power-tint-2: 69 26 3; --power-tint-2-a: 0.3; /* amber-950/30 */
+  --power-tint-3: 120 53 15; --power-tint-3-a: 0.2; /* amber-900/20 */
+  --section-general: 59 130 246; /* blue-500 */
+  --section-integrations: 99 102 241; /* indigo-500 */
+  --section-security: 245 158 11; /* amber-500 */
+  --section-zones: 244 63 94; /* rose-500 */
+  --sleep: 59 130 246; /* blue-500 */
+  --speed: 59 130 246; /* blue-500 */
+  --speed-edge: 30 58 138; --speed-edge-a: 0.5; /* blue-900/50 */
+  --speed-ink: 96 165 250; /* blue-400 */
+  --speed-strong: 37 99 235; /* blue-600 */
+  --speed-tint: 23 37 84; --speed-tint-a: 0.3; /* blue-950/30 */
+  --sport-bike: 59 130 246; /* blue-500 */
+  --sport-bike-edge: 30 58 138; --sport-bike-edge-a: 0.5; /* blue-900/50 */
+  --sport-bike-edge-2: 30 58 138; --sport-bike-edge-2-a: 0.4; /* blue-900/40 */
+  --sport-bike-end: 99 102 241; /* indigo-500 */
+  --sport-bike-ink: 96 165 250; /* blue-400 */
+  --sport-bike-ios: 10 132 255; /* [#0A84FF] */
+  --sport-bike-tint: 30 58 138; --sport-bike-tint-a: 0.2; /* blue-900/20 */
+  --sport-bike-tint-2: 23 37 84; --sport-bike-tint-2-a: 0.3; /* blue-950/30 */
+  --sport-run: 249 115 22; /* orange-500 */
+  --sport-run-edge: 124 45 18; --sport-run-edge-a: 0.5; /* orange-900/50 */
+  --sport-run-edge-2: 124 45 18; --sport-run-edge-2-a: 0.4; /* orange-900/40 */
+  --sport-run-end: 239 68 68; /* red-500 */
+  --sport-run-ink: 251 146 60; /* orange-400 */
+  --sport-run-ink-2: 251 146 60; /* orange-400 */
+  --sport-run-ink-3: 249 115 22; /* orange-500 */
+  --sport-run-tint: 124 45 18; --sport-run-tint-a: 0.3; /* orange-900/30 */
+  --sport-run-tint-2: 124 45 18; --sport-run-tint-2-a: 0.2; /* orange-900/20 */
+  --sport-run-tint-3: 67 20 7; --sport-run-tint-3-a: 0.3; /* orange-950/30 */
+  --sport-strength: 168 85 247; /* purple-500 */
+  --sport-strength-edge: 88 28 135; --sport-strength-edge-a: 0.5; /* purple-900/50 */
+  --sport-strength-edge-2: 88 28 135; --sport-strength-edge-2-a: 0.4; /* purple-900/40 */
+  --sport-strength-ink: 192 132 252; /* purple-400 */
+  --sport-strength-tint: 88 28 135; --sport-strength-tint-a: 0.2; /* purple-900/20 */
+  --sport-swim: 6 182 212; /* cyan-500 */
+  --sport-swim-edge: 22 78 99; --sport-swim-edge-a: 0.5; /* cyan-900/50 */
+  --sport-swim-edge-2: 22 78 99; --sport-swim-edge-2-a: 0.4; /* cyan-900/40 */
+  --sport-swim-end: 20 184 166; /* teal-500 */
+  --sport-swim-ink: 34 211 238; /* cyan-400 */
+  --sport-swim-tint: 22 78 99; --sport-swim-tint-a: 0.2; /* cyan-900/20 */
+  --sport-swim-tint-2: 8 51 68; --sport-swim-tint-2-a: 0.3; /* cyan-950/30 */
+  --sport-walk: 132 204 22; /* lime-500 */
+  --sport-yoga: 236 72 153; /* pink-500 */
+  --steps: 168 85 247; /* purple-500 */
+  --strava: 252 76 2; /* [#FC4C02] */
+  --strava-hover: 227 68 2; /* [#E34402] */
+  --today: 239 68 68; /* red-500 */
+  --vo2: 16 185 129; /* emerald-500 */
+}
+/* @tokens:categories:end */

@@ -7,6 +7,11 @@ y este proyecto adhiere a [Semantic Versioning](https://semver.org/lang/es/).
 
 ## [Unreleased]
 
+### Rediseño — Capa 1: tokens y tema (`spec-rediseno-02-c1`), PR 5b de 6: acentos de categoría
+- `refactor(ui-tokens):` 237 pares de acento pasan a 84 tokens de categoría (`sport-*`, `hr`, `power`, `pace`, `speed`, `cadence`, `load`, `vo2`, `hrv`, `sleep`, `steps`, `section-*`, `form-*`, `strava`, `today`, `legacy-*`) y a los de estado y métricas, con `scripts/codemods/categories.mjs` y una asignación por línea revisada a mano. Sin cambios visibles.
+- `chore(ui-tokens):` el codemod admite una tabla por expresión y no migra un par `dark:` de base junto a una clase de estado sin `dark:` (caso D-08).
+- `docs(ui-safety-net):` D-09, colores distintos para la misma categoría según la pantalla.
+
 ### Rediseño — Capa 1: tokens y tema (`spec-rediseno-02-c1`), PR 5a de 6: acentos de estado y métricas
 - `refactor(ui-tokens):` 144 usos de estado pasan a 43 tokens con significado (`action`, `danger`, `positive`, `warning`, `action-ios`…) con `scripts/codemods/accents.mjs` y una lista de inclusión revisada a mano. Sin cambios visibles.
 - `refactor(ui-tokens):` CTL/ATL/TSB fuera de las gráficas usan `metric-*` y `legacy-*` (13 tokens en `metrics.json`).

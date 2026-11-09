@@ -516,7 +516,7 @@ export const HealthPage = ({ activities, settings, chartData }) => {
                             <div className="ios-card ios-touch p-3.5 sm:p-4 flex flex-col justify-between">
                                 <div className="flex items-center justify-between mb-2">
                                     <span className="text-[10px] font-bold uppercase tracking-wider text-ink-4">FC Reposo</span>
-                                    <div className="w-6 h-6 rounded-lg bg-rose-500/10 text-rose-500 flex items-center justify-center shrink-0">
+                                    <div className="w-6 h-6 rounded-lg bg-hr/10 text-hr flex items-center justify-center shrink-0">
                                         <Activity size={13} strokeWidth={2.5} />
                                     </div>
                                 </div>
@@ -537,7 +537,7 @@ export const HealthPage = ({ activities, settings, chartData }) => {
                             <div className="ios-card ios-touch p-3.5 sm:p-4 flex flex-col justify-between">
                                 <div className="flex items-center justify-between mb-2">
                                     <span className="text-[10px] font-bold uppercase tracking-wider text-ink-4">VFC Anoche</span>
-                                    <div className="w-6 h-6 rounded-lg bg-emerald-500/10 text-emerald-500 flex items-center justify-center shrink-0">
+                                    <div className="w-6 h-6 rounded-lg bg-hrv/10 text-hrv flex items-center justify-center shrink-0">
                                         <Zap size={13} strokeWidth={2.5} />
                                     </div>
                                 </div>
@@ -560,7 +560,7 @@ export const HealthPage = ({ activities, settings, chartData }) => {
                             <div className="ios-card ios-touch p-3.5 sm:p-4 flex flex-col justify-between">
                                 <div className="flex items-center justify-between mb-2">
                                     <span className="text-[10px] font-bold uppercase tracking-wider text-ink-4">Sueño</span>
-                                    <div className="w-6 h-6 rounded-lg bg-blue-500/10 text-blue-500 flex items-center justify-center shrink-0">
+                                    <div className="w-6 h-6 rounded-lg bg-sleep/10 text-sleep flex items-center justify-center shrink-0">
                                         <Moon size={13} strokeWidth={2.5} />
                                     </div>
                                 </div>
@@ -606,7 +606,7 @@ export const HealthPage = ({ activities, settings, chartData }) => {
                             <div className="ios-card ios-touch p-3.5 sm:p-4 flex flex-col justify-between">
                                 <div className="flex items-center justify-between mb-2">
                                     <span className="text-[10px] font-bold uppercase tracking-wider text-ink-4">Pasos</span>
-                                    <div className="w-6 h-6 rounded-lg bg-purple-500/10 text-purple-500 flex items-center justify-center shrink-0">
+                                    <div className="w-6 h-6 rounded-lg bg-steps/10 text-steps flex items-center justify-center shrink-0">
                                         <Footprints size={13} strokeWidth={2.5} />
                                     </div>
                                 </div>
@@ -621,7 +621,7 @@ export const HealthPage = ({ activities, settings, chartData }) => {
                                     {typeof wellnessMetrics?.latestSteps === 'number' && wellnessMetrics.latestSteps > 0 && (
                                         <div className="w-full mt-2 h-1.5 bg-surface-2 rounded-full overflow-hidden">
                                             <div
-                                                className="h-full bg-purple-500 rounded-full transition-all"
+                                                className="h-full bg-steps rounded-full transition-all"
                                                 style={{ width: `${Math.min(100, (wellnessMetrics.latestSteps / 10000) * 100)}%` }}
                                             />
                                         </div>
@@ -657,7 +657,7 @@ export const HealthPage = ({ activities, settings, chartData }) => {
                             <div className="ios-card ios-touch p-3.5 sm:p-4 flex flex-col justify-between">
                                 <div className="flex items-center justify-between mb-2">
                                     <span className="text-[10px] font-bold uppercase tracking-wider text-ink-4">VO₂ Max</span>
-                                    <div className="w-6 h-6 rounded-lg bg-emerald-500/10 text-emerald-500 flex items-center justify-center shrink-0">
+                                    <div className="w-6 h-6 rounded-lg bg-vo2/10 text-vo2 flex items-center justify-center shrink-0">
                                         <TrendingUp size={13} strokeWidth={2.5} />
                                     </div>
                                 </div>
@@ -830,7 +830,7 @@ export const HealthPage = ({ activities, settings, chartData }) => {
                                     <span className="text-[10px] font-bold uppercase tracking-wider text-ink-4 block">
                                         Sueño
                                     </span>
-                                    <span className="text-lg font-black font-mono tabular-nums text-blue-500">
+                                    <span className="text-lg font-black font-mono tabular-nums text-sleep">
                                         {currentSelectedDay.sleep ? `${currentSelectedDay.sleep} h` : '--'}
                                     </span>
                                     <span className="text-[10px] text-slate-400 block mt-0.5">
@@ -842,7 +842,7 @@ export const HealthPage = ({ activities, settings, chartData }) => {
                                     <span className="text-[10px] font-bold uppercase tracking-wider text-ink-4 block">
                                         VFC
                                     </span>
-                                    <span className="text-lg font-black font-mono tabular-nums text-emerald-500">
+                                    <span className="text-lg font-black font-mono tabular-nums text-hrv">
                                         {currentSelectedDay.hrv ? `${currentSelectedDay.hrv} ms` : '--'}
                                     </span>
                                     <span className="text-[10px] text-slate-400 block mt-0.5">
@@ -854,7 +854,7 @@ export const HealthPage = ({ activities, settings, chartData }) => {
                                     <span className="text-[10px] font-bold uppercase tracking-wider text-ink-4 block">
                                         FC Reposo
                                     </span>
-                                    <span className="text-lg font-black font-mono tabular-nums text-rose-500">
+                                    <span className="text-lg font-black font-mono tabular-nums text-hr">
                                         {currentSelectedDay.rhr ? `${currentSelectedDay.rhr} lpm` : '--'}
                                     </span>
                                     <span className="text-[10px] text-slate-400 block mt-0.5">
@@ -866,7 +866,7 @@ export const HealthPage = ({ activities, settings, chartData }) => {
                                     <span className="text-[10px] font-bold uppercase tracking-wider text-ink-4 block">
                                         Estrés / Pasos
                                     </span>
-                                    <span className="text-lg font-black font-mono tabular-nums text-purple-500">
+                                    <span className="text-lg font-black font-mono tabular-nums text-steps">
                                         {currentSelectedDay.stress != null ? `${currentSelectedDay.stress}%` : (currentSelectedDay.steps ? `${Math.round(currentSelectedDay.steps / 1000)}k` : '--')}
                                     </span>
                                     <span className="text-[10px] text-slate-400 block mt-0.5">
@@ -892,8 +892,8 @@ export const HealthPage = ({ activities, settings, chartData }) => {
                                 <span className="flex items-center gap-1 text-emerald-500">
                                     <span className="w-2 h-2 rounded-full bg-emerald-500" /> Recuperación
                                 </span>
-                                <span className="flex items-center gap-1 text-blue-500">
-                                    <span className="w-2 h-2 rounded-full bg-blue-500" /> Sueño (h)
+                                <span className="flex items-center gap-1 text-sleep">
+                                    <span className="w-2 h-2 rounded-full bg-sleep" /> Sueño (h)
                                 </span>
                             </div>
                         </div>

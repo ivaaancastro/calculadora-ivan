@@ -339,10 +339,10 @@ const PmcFloatingChart = ({ pmcByDate, onClose, initPos }) => {
 
 const getSportColor = (type) => {
     const t = String(type).toLowerCase();
-    if (t.includes('run') || t.includes('carrera') || t.includes('correr')) return 'bg-orange-100 text-orange-700 border-orange-200 dark:bg-orange-900/20 dark:text-orange-400 dark:border-orange-900/50 hover:bg-orange-200 dark:hover:bg-orange-900/40';
-    if (t.includes('bike') || t.includes('bici') || t.includes('ciclismo')) return 'bg-blue-100 text-blue-700 border-blue-200 dark:bg-blue-900/20 dark:text-blue-400 dark:border-blue-900/50 hover:bg-blue-200 dark:hover:bg-blue-900/40';
-    if (t.includes('swim') || t.includes('nadar')) return 'bg-cyan-100 text-cyan-700 border-cyan-200 dark:bg-cyan-900/20 dark:text-cyan-400 dark:border-cyan-900/50 hover:bg-cyan-200 dark:hover:bg-cyan-900/40';
-    if (t.includes('gym') || t.includes('fuerza')) return 'bg-purple-100 text-purple-700 border-purple-200 dark:bg-purple-900/20 dark:text-purple-400 dark:border-purple-900/50 hover:bg-purple-200 dark:hover:bg-purple-900/40';
+    if (t.includes('run') || t.includes('carrera') || t.includes('correr')) return 'bg-sport-run-tint-2 text-sport-run-ink-2 border-sport-run-edge hover:bg-sport-run-edge-2';
+    if (t.includes('bike') || t.includes('bici') || t.includes('ciclismo')) return 'bg-sport-bike-tint text-sport-bike-ink border-sport-bike-edge hover:bg-sport-bike-edge-2';
+    if (t.includes('swim') || t.includes('nadar')) return 'bg-sport-swim-tint text-sport-swim-ink border-sport-swim-edge hover:bg-sport-swim-edge-2';
+    if (t.includes('gym') || t.includes('fuerza')) return 'bg-sport-strength-tint text-sport-strength-ink border-sport-strength-edge hover:bg-sport-strength-edge-2';
     return 'bg-slate-100 text-slate-700 border-line-2 dark:bg-zinc-800 dark:text-zinc-400 hover:bg-slate-200 dark:hover:bg-zinc-700/50';
 };
 
@@ -1191,7 +1191,7 @@ export const CalendarPage = ({ activities, plannedWorkouts = [], addPlannedWorko
                         <h2 className="text-base sm:text-2xl font-semibold text-ink-2 capitalize tracking-tight flex items-center">
                             {new Date(year, month).toLocaleDateString('es-ES', { month: 'long', year: 'numeric' })}
                         </h2>
-                        <button onClick={goToday} className="text-[11px] font-medium text-slate-500 dark:text-zinc-400 hover:text-red-500 dark:hover:text-red-400 active:scale-95 transition-all ml-1 sm:ml-2 bg-sunken-6 px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full">Hoy</button>
+                        <button onClick={goToday} className="text-[11px] font-medium text-ink-3 hover:text-danger-ink-2 active:scale-95 transition-all ml-1 sm:ml-2 bg-sunken-6 px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full">Hoy</button>
                     </div>
                     <div className="flex items-center gap-1.5 sm:gap-2">
                         {/* PMC CHART TOGGLE */}
@@ -1420,7 +1420,7 @@ export const CalendarPage = ({ activities, plannedWorkouts = [], addPlannedWorko
                                                     <div className="flex justify-between items-start mb-2 shrink-0">
                                                         <div className="flex items-center gap-1.5 -ml-1 -mt-1">
                                                             <span className={`text-[13px] font-semibold leading-none flex items-center justify-center
-                                                                ${isToday ? 'text-white bg-red-500 w-7 h-7 rounded-full shadow-sm' : !day.isCurrentMonth ? 'text-faint' : 'text-ink-2-soft'}`}>
+                                                                ${isToday ? 'text-white bg-today w-7 h-7 rounded-full shadow-sm' : !day.isCurrentMonth ? 'text-faint' : 'text-ink-2-soft'}`}>
                                                                 {day.date.getDate()}
                                                             </span>
                                                             <span className="lg:hidden text-[11px] font-medium text-ink-4 uppercase tracking-wide">
@@ -1486,12 +1486,12 @@ export const CalendarPage = ({ activities, plannedWorkouts = [], addPlannedWorko
                                                                 const t = String(act.type).toLowerCase();
                                                                 let accent = 'text-ink-3-flat';
                                                                 let dot = 'bg-slate-400 dark:bg-zinc-600';
-                                                                if (t.includes('run') || t.includes('carrera') || t.includes('correr')) { accent = 'text-emerald-500'; dot = 'bg-emerald-500'; }
-                                                                if (t.includes('ride') || t.includes('bici') || t.includes('ciclismo')) { accent = 'text-blue-500'; dot = 'bg-blue-500'; }
-                                                                if (t.includes('weight') || t.includes('fuerza') || t.includes('crossfit') || t.includes('workout')) { accent = 'text-orange-500'; dot = 'bg-orange-500'; }
-                                                                if (t.includes('swim') || t.includes('nadar') || t.includes('natacion')) { accent = 'text-cyan-500'; dot = 'bg-cyan-500'; }
-                                                                if (t.includes('yoga') || t.includes('stretch')) { accent = 'text-pink-500'; dot = 'bg-pink-500'; }
-                                                                if (t.includes('walk') || t.includes('hike') || t.includes('caminata')) { accent = 'text-lime-500'; dot = 'bg-lime-500'; }
+                                                                if (t.includes('run') || t.includes('carrera') || t.includes('correr')) { accent = 'text-legacy-sport-run-emerald'; dot = 'bg-legacy-sport-run-emerald'; }
+                                                                if (t.includes('ride') || t.includes('bici') || t.includes('ciclismo')) { accent = 'text-sport-bike'; dot = 'bg-sport-bike'; }
+                                                                if (t.includes('weight') || t.includes('fuerza') || t.includes('crossfit') || t.includes('workout')) { accent = 'text-legacy-sport-strength-orange'; dot = 'bg-legacy-sport-strength-orange'; }
+                                                                if (t.includes('swim') || t.includes('nadar') || t.includes('natacion')) { accent = 'text-sport-swim'; dot = 'bg-sport-swim'; }
+                                                                if (t.includes('yoga') || t.includes('stretch')) { accent = 'text-sport-yoga'; dot = 'bg-sport-yoga'; }
+                                                                if (t.includes('walk') || t.includes('hike') || t.includes('caminata')) { accent = 'text-sport-walk'; dot = 'bg-sport-walk'; }
                                                                 
                                                                 return {
                                                                     accent, dot,
@@ -1682,7 +1682,7 @@ export const CalendarPage = ({ activities, plannedWorkouts = [], addPlannedWorko
                                             <button key={i} onClick={() => applyTemplate(t)}
                                                 className={`px-2.5 py-1 rounded-full text-[11px] font-medium transition-all duration-200
                                                     ${newPlan.name === t.name
-                                                        ? 'bg-blue-500/10 text-blue-600 dark:bg-blue-500/20 dark:text-blue-400'
+                                                        ? 'bg-blue-500/10 text-action dark:bg-blue-500/20'
                                                         : 'text-ink-4 hover:text-body-soft-2 hover:bg-sunken'}`}
                                             >
                                                 {t.name}
@@ -1716,7 +1716,7 @@ export const CalendarPage = ({ activities, plannedWorkouts = [], addPlannedWorko
                                     <div className="flex flex-col sm:flex-row justify-between sm:items-center mb-3 gap-2">
                                         <div className="flex items-center gap-2">
                                             <h4 className="text-[13px] font-semibold text-ink-2-soft tracking-tight">Estructura</h4>
-                                            <button onClick={() => setIsPastingString(!isPastingString)} className={`px-2 py-0.5 rounded-full text-[10px] font-medium transition-all duration-200 ${isPastingString ? 'bg-blue-500/10 text-blue-600' : 'text-slate-400 hover:text-slate-600 hover:bg-surface-2'}`} title="Importar desde texto">
+                                            <button onClick={() => setIsPastingString(!isPastingString)} className={`px-2 py-0.5 rounded-full text-[10px] font-medium transition-all duration-200 ${isPastingString ? 'bg-action-bright/10 text-action-solid' : 'text-slate-400 hover:text-slate-600 hover:bg-surface-2'}`} title="Importar desde texto">
                                                 Texto
                                             </button>
                                         </div>
@@ -1845,10 +1845,10 @@ export const CalendarPage = ({ activities, plannedWorkouts = [], addPlannedWorko
                                                             {canUsePower && !isStr && (
                                                                 <div className="flex shrink-0 bg-fill-5 rounded-full p-0.5 ml-auto mr-2">
                                                                     <button onClick={() => handleZoneModeChange('hr')}
-                                                                        className={`px-2 py-0.5 text-[10px] font-semibold rounded-full transition-all duration-200 ${currentZoneMode === 'hr' ? 'bg-surface-3 text-red-500 shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}
+                                                                        className={`px-2 py-0.5 text-[10px] font-semibold rounded-full transition-all duration-200 ${currentZoneMode === 'hr' ? 'bg-surface-3 text-legacy-hr-red shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}
                                                                     >FC</button>
                                                                     <button onClick={() => handleZoneModeChange('power')}
-                                                                        className={`px-2 py-0.5 text-[10px] font-semibold rounded-full transition-all duration-200 ${currentZoneMode === 'power' ? 'bg-surface-3 text-amber-500 shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}
+                                                                        className={`px-2 py-0.5 text-[10px] font-semibold rounded-full transition-all duration-200 ${currentZoneMode === 'power' ? 'bg-surface-3 text-power shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}
                                                                     >W</button>
                                                                 </div>
                                                             )}
@@ -1891,7 +1891,7 @@ export const CalendarPage = ({ activities, plannedWorkouts = [], addPlannedWorko
 
                                                                         {/* Target value display */}
                                                                         {currentZoneMode === 'power' && step.targetValue && (
-                                                                            <span className="text-[11px] font-mono font-semibold text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-900/20 px-2 py-0.5 rounded-full">
+                                                                            <span className="text-[11px] font-mono font-semibold text-power-ink bg-power-tint-3 px-2 py-0.5 rounded-full">
                                                                                 {step.targetValue}w
                                                                             </span>
                                                                         )}
@@ -1974,10 +1974,10 @@ export const CalendarPage = ({ activities, plannedWorkouts = [], addPlannedWorko
                                                         {canUsePower && !isStr && (
                                                             <div className="flex shrink-0 bg-fill-5 rounded-full p-0.5">
                                                                 <button onClick={() => handleZoneModeChange('hr')}
-                                                                    className={`px-2 py-0.5 text-[10px] font-semibold rounded-full transition-all duration-200 ${currentZoneMode === 'hr' ? 'bg-surface-3 text-red-500 shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}
+                                                                    className={`px-2 py-0.5 text-[10px] font-semibold rounded-full transition-all duration-200 ${currentZoneMode === 'hr' ? 'bg-surface-3 text-legacy-hr-red shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}
                                                                 >FC</button>
                                                                 <button onClick={() => handleZoneModeChange('power')}
-                                                                    className={`px-2 py-0.5 text-[10px] font-semibold rounded-full transition-all duration-200 ${currentZoneMode === 'power' ? 'bg-surface-3 text-amber-500 shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}
+                                                                    className={`px-2 py-0.5 text-[10px] font-semibold rounded-full transition-all duration-200 ${currentZoneMode === 'power' ? 'bg-surface-3 text-power shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}
                                                                 >W</button>
                                                             </div>
                                                         )}
@@ -1990,9 +1990,9 @@ export const CalendarPage = ({ activities, plannedWorkouts = [], addPlannedWorko
 
                                                         {/* Target value (auto for power, manual for pace) */}
                                                         {currentZoneMode === 'power' && block.targetValue && (
-                                                            <span className="text-[11px] font-mono font-semibold text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-900/20 px-2 py-0.5 rounded-full">
+                                                            <span className="text-[11px] font-mono font-semibold text-power-ink bg-power-tint-3 px-2 py-0.5 rounded-full">
                                                                 {block.targetValue}w
-                                                                {ftp > 0 && <span className="text-[9px] text-amber-400 dark:text-amber-500 ml-1">{Math.round((Number(block.targetValue) / ftp) * 100)}%</span>}
+                                                                {ftp > 0 && <span className="text-[9px] text-power-soft ml-1">{Math.round((Number(block.targetValue) / ftp) * 100)}%</span>}
                                                             </span>
                                                         )}
                                                         {!isStr && currentZoneMode !== 'power' && (
@@ -2110,10 +2110,10 @@ const WorkoutViewerModal = ({ workout, onClose, onDelete, onEdit }) => {
 
     // Sport styling
     const sportConfig = {
-        run: { label: 'Carrera', icon: <User size={18} />, gradient: 'from-orange-500 to-red-500', accent: 'text-orange-500', bg: 'bg-orange-50 dark:bg-orange-950/30' },
-        bike: { label: 'Ciclismo', icon: <Bike size={18} />, gradient: 'from-blue-500 to-indigo-500', accent: 'text-blue-500', bg: 'bg-blue-50 dark:bg-blue-950/30' },
-        swim: { label: 'Natación', icon: <Waves size={18} />, gradient: 'from-cyan-500 to-teal-500', accent: 'text-cyan-500', bg: 'bg-cyan-50 dark:bg-cyan-950/30' },
-        strength: { label: 'Fuerza', icon: <Dumbbell size={18} />, gradient: 'from-emerald-500 to-green-500', accent: 'text-emerald-500', bg: 'bg-emerald-50 dark:bg-emerald-950/30' },
+        run: { label: 'Carrera', icon: <User size={18} />, gradient: 'from-sport-run to-sport-run-end', accent: 'text-sport-run', bg: 'bg-sport-run-tint-3' },
+        bike: { label: 'Ciclismo', icon: <Bike size={18} />, gradient: 'from-sport-bike to-sport-bike-end', accent: 'text-sport-bike', bg: 'bg-sport-bike-tint-2' },
+        swim: { label: 'Natación', icon: <Waves size={18} />, gradient: 'from-sport-swim to-sport-swim-end', accent: 'text-sport-swim', bg: 'bg-sport-swim-tint-2' },
+        strength: { label: 'Fuerza', icon: <Dumbbell size={18} />, gradient: 'from-legacy-sport-strength-emerald to-legacy-sport-strength-emerald-end', accent: 'text-legacy-sport-strength-emerald', bg: 'bg-legacy-sport-strength-emerald-tint' },
     };
     const sport = sportConfig[workout.type] || { label: workout.type, icon: <Activity size={18} />, gradient: 'from-slate-500 to-slate-600', accent: 'text-slate-500', bg: 'bg-sunken-6' };
 
@@ -2288,7 +2288,7 @@ const WorkoutViewerModal = ({ workout, onClose, onDelete, onEdit }) => {
                                                                             {step.duration}<span className="text-[9px] text-slate-400 ml-0.5">{step.unit === 'dist' ? 'km' : "'"}</span>
                                                                         </span>
                                                                         {step.targetType === 'power' && step.targetValue ? (
-                                                                            <span className="text-[10px] font-mono font-bold text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-900/20 px-2 py-0.5 rounded-full">{step.targetValue}w</span>
+                                                                            <span className="text-[10px] font-mono font-bold text-power-ink bg-power-tint-3 px-2 py-0.5 rounded-full">{step.targetValue}w</span>
                                                                         ) : (
                                                                             <span className="text-[10px] font-bold px-2 py-0.5 rounded-full" style={{ background: getZoneColor(step.zone) + '20', color: getZoneColor(step.zone) }}>{step.zone}</span>
                                                                         )}
@@ -2315,7 +2315,7 @@ const WorkoutViewerModal = ({ workout, onClose, onDelete, onEdit }) => {
                                                         {block.duration}<span className="text-[10px] font-semibold text-slate-400 ml-0.5">{block.unit === 'dist' ? 'km' : "'"}</span>
                                                     </span>
                                                     {block.targetType === 'power' && block.targetValue ? (
-                                                        <span className="text-[10px] font-mono font-bold text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-900/20 px-2 py-0.5 rounded-full">{block.targetValue}w</span>
+                                                        <span className="text-[10px] font-mono font-bold text-power-ink bg-power-tint-3 px-2 py-0.5 rounded-full">{block.targetValue}w</span>
                                                     ) : (
                                                         <span className="text-[10px] font-bold px-2 py-0.5 rounded-full" style={{ background: getZoneColor(block.zone) + '20', color: getZoneColor(block.zone) }}>{block.zone}</span>
                                                     )}

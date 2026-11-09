@@ -27,7 +27,7 @@ const StravaConnect = () => {
   return (
     <button 
       onClick={handleConnect}
-      className="bg-[#FC4C02] hover:bg-[#E34402] text-white font-bold py-2 px-4 rounded-xl flex items-center gap-2 transition shadow-sm text-sm"
+      className="bg-strava hover:bg-strava-hover text-white font-bold py-2 px-4 rounded-xl flex items-center gap-2 transition shadow-sm text-sm"
     >
       <Activity size={18} />
       Conectar con Strava

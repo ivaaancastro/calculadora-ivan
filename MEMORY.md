@@ -14,7 +14,7 @@
 
 ## 1. Estado del proyecto
 - **Nombre:** Forma — Dashboard de rendimiento deportivo y salud
-- **Rama actual:** `feat/ui-tokens-accents` (Capa 1 del rediseño, PR 5a: acentos de estado y métricas; PR hacia `develop`). El PR 5 se partió en 5a (estados y métricas) y 5b (categorías) por decisión del usuario.
+- **Rama actual:** `feat/ui-tokens-categories` (Capa 1 del rediseño, PR 5b: acentos de categoría; PR hacia `develop`). El PR 5 se partió en 5a (estados y métricas, #56) y 5b (categorías) por decisión del usuario.
 - **Rama base:** `develop`
 - **Rama de producción:** `main` (desplegada en Vercel)
 - **Versión:** 0.1.0
@@ -43,7 +43,7 @@
 | spec-e2e-01 | Pruebas E2E críticas (auth, dashboard, Strava sync, exportación de datos) | implementada | 2026-11-05 | feat/e2e-critical-flows |
 | spec-rediseno-02 | Rediseño de la webapp por capas (roadmap) | en curso | 2026-11-06 | `docs/branches/feat/webapp-redesign/` |
 | spec-rediseno-02-c0 | Capa 0: red de seguridad de UI | implementada (PR #51 mergeado en `develop`) | 2026-11-06 | test/ui-safety-net |
-| spec-rediseno-02-c1 | Capa 1: tokens y tema | en curso (PR 1 #52, bordes #53, texto #54 y superficies #55 mergeados; PR 5a acentos de estado abierto) | 2026-11-09 | `docs/branches/feat/ui-tokens/` |
+| spec-rediseno-02-c1 | Capa 1: tokens y tema | en curso (PR 1 #52, bordes #53, texto #54, superficies #55 y acentos de estado #56 mergeados; PR 5b categorías en curso) | 2026-11-09 | `docs/branches/feat/ui-tokens/` |
 
 > Cuando un agente implemente una spec, debe añadir una fila aquí y marcarla como `implementada`.
 

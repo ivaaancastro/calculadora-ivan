@@ -188,7 +188,7 @@ const Dashboard = () => {
   );
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-zinc-950 text-ink-2-soft font-sans md:pb-12 transition-colors duration-300 selection:bg-blue-500/30 overflow-x-hidden">
+    <div className="min-h-screen bg-sunken-2 text-ink-2-soft font-sans md:pb-12 transition-colors duration-300 selection:bg-action-bright/30 overflow-x-hidden">
       <Navbar
         activities={activities}
         settings={settings}
