@@ -31,6 +31,7 @@
   "fill-7": { "light": "slate-200", "dark": "zinc-700" },
   "fill-8": { "light": "slate-100", "dark": "zinc-800/60" },
   "fill-segmented": { "light": "slate-200/60", "dark": "[#1c1c1e]" },
+  "fill-segmented-2": { "light": "slate-200/60", "dark": "zinc-800/80" },
   "inverse": { "light": "slate-900", "dark": "white" },
   "inverse-2": { "light": "slate-700", "dark": "zinc-200" },
   "glass-nav": { "light": "white/80", "dark": "black/80" },
