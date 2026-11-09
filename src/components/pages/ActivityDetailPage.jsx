@@ -2,7 +2,7 @@ import React, { useEffect, useState, useRef, useMemo } from 'react';
 import { ArrowLeft, ExternalLink, Trash2, Calendar, Activity, Layers, Loader2, Heart, Clock, MapPin, Zap, Target, Info } from 'lucide-react';
 import { AreaChart, Area, BarChart, Bar, Cell, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer } from 'recharts';
 import { InteractiveMap } from '../activity/ActivityMap';
-import { MetricCard, PillTab, CustomChartTooltip, MetricHelp } from '../activity/ActivitySharedUI';
+import { MetricCard, PillTab, CustomChartTooltip } from '../activity/ActivitySharedUI';
 import { useActivityMetrics } from '../../hooks/useActivityMetrics';
 import { formatPace, formatMinsToHMM, formatDuration } from '../../utils/formatters';
 import { useChartTheme } from '../charts/useChartTheme';

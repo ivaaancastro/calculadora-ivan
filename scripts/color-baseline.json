@@ -1,7 +1,7 @@
 {
   "$comment": "Línea base de scripts/check-colors.mjs. Solo debe bajar (npm run lint:colors -- --update). Subirla a mano exige justificarlo en el PR.",
   "totals": {
-    "palette": 865,
+    "palette": 859,
     "arbitrary": 9,
     "hex": 100,
     "rgb": 11,
@@ -23,7 +23,7 @@
       "dark": 3
     },
     "src/components/activity/ActivitySharedUI.jsx": {
-      "palette": 15,
+      "palette": 9,
       "arbitrary": 0,
       "hex": 0,
       "rgb": 0,
