@@ -109,8 +109,29 @@ Partido en 5a y 5b (decisión del usuario, 2026-11-09): clasificar unos 740 usos
 - Resultados: lint ✓, lint:colors ✓, unit + integración 128/128, build ✓, E2E macOS 79 ✓ (133 omitidas), E2E Docker 127 ✓ (48 capturas sin diferencias; el ✘ de `gestures.spec.js:37` es el fallo esperado de D-01).
 
 ## Cierre
-- [ ] Cobertura final frente a los objetivos
-- [ ] `MEMORY.md`, `CHANGELOG.md`, roadmap
+- [x] Cobertura final frente a los objetivos
+- [x] `MEMORY.md`, `CHANGELOG.md`, roadmap; spec marcada como implementada
+
+### Cobertura final (`develop` en `89a85ba`, `--inventory` de cada familia)
+| Familia | Objetivo | Antes | Quedan | Cobertura | Lo que queda |
+|---|---|---|---|---|---|
+| Texto | ≥ 90 % | 577 pares | 27 | **95,3 %** | 11 con token descartados por precedencia; 16 pares de uso único |
+| Bordes | ≥ 80 % | 210 pares | 41 | **80,5 %** | 14 con token descartados por precedencia (D-08); 27 pares de uso único. Al cerrar el PR 2 era 79,5 %; el PR 5b migró los neutros que compartían expresión con un acento |
+| Superficies | ≥ 75 % | 336 pares | 63 | **81,3 %** | 9 con token descartados por precedencia; 54 pares de uso único |
+| Acentos | orientativo ≥ 70 % | 795 clases | 285 | **64 %** (aceptado por el usuario el 2026-11-09) | 83 en escalas ordinales, 17 por precedencia, usos sueltos sin categoría estable |
+| Gráficas | según inventario | 164 colores en marcas de gráfica | 8 | **95 %** | `ZONE_COLORS` sin uso en `AdvancedAnalytics` (7) y el `dark:stroke` sin efecto de Salud (1, D-10) |
+
+Totales de `lint:colors` (línea base del PR 1 → hoy): `dark` 1.314 → 188 (−86 %), `palette` 3.315 → 865, `arbitrary` 66 → 9, `hex` 274 → 100 (58 en carpetas protegidas), `rgb` 19 → 11. 1.382 clases usan tokens (286 tokens definidos), más 72 tokens en `chartTheme`. Ningún cambio en `src/hooks`, `src/utils`, `src/services`, `src/store`, `src/supabase.js` ni `.opencode/skills/git-release/SKILL.md` desde `8ab2963` (Capa 0).
+
+### Pendiente para capas siguientes
+Todo lo que la Capa 1 conservó tal cual porque cambiarlo sería un cambio visual:
+- **Incoherencias de color**, con token `legacy-*` o rol propio y su valor actual: D-07 (CTL/ATL/TSB), D-09 (categorías), D-10 (gráficas). Se unifican en la Capa 3 cambiando valores.
+- **Modo oscuro de las gráficas:** hoy todos los roles de `chartTheme` tienen el mismo valor en claro y oscuro (D-10). La Capa 3 da valores `.dark` propios, validados con `validate_palette.js` de `dataviz`, que hoy falla con la paleta del Dashboard (`#eab308` fuera de banda, contraste 1,87:1 en claro).
+- **Escalas ordinales** (RPE, sueño, IF, zonas de los bloques del Calendario, nivel de VO2…): sin token; se definen como escalas de estado en la Capa 3.
+- **Descartes por precedencia** (D-08 y similares): pares `dark:` de base junto a un estado sin `dark:`. Se resuelven cuando la Capa 3 defina el estado de foco/hover en oscuro.
+- **Antipatrones de `dataviz`:** valores pintados con el color de la serie en `EvolutionChart` y ejes del color de la serie en `WeeklyVolumeAndFocusCard`.
+- **Código sin uso** (Capa 6): `ChartsSection` (no se renderiza), `ZONE_COLORS` e imports de Recharts en `AdvancedAnalytics`.
+- **Fuera de la Capa 1:** colores en carpetas protegidas (58 hex), canvas de la landing (Capa 4), tipografía, radios y sombras (Capa 2 o 3).
 
 ---
 Versión: 0.1.0 — 2026-11-09
