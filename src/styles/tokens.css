@@ -39,6 +39,8 @@
   --chart-axis: 100 116 139;
   --chart-cursor: 148 163 184;
   --chart-dot-ring: 255 255 255;
+
+  --shadow-card: 0 2px 12px rgba(0, 0, 0, 0.03); /* igual que en claro; no se ve: la tarjeta lleva dark:shadow-none */
 }
 
 /* @tokens:borders:start (generado por scripts/codemods/borders.mjs --tokens; no editar a mano) */
