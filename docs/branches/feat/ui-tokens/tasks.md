@@ -98,7 +98,7 @@ Partido en 5a y 5b (decisión del usuario, 2026-11-09): clasificar unos 740 usos
 ## PR 6 — Gráficas (`feat/ui-tokens-charts`)
 - [x] Recharts (9 archivos), SVG del Calendario y `ActivityMap` con `useChartTheme()`; tooltip de las tarjetas de Forma (`tooltipStyleFor`); D-10 en `paridad.md`
 - [x] Volcado: rejilla, mapa y vista "Forma" revisados expresamente
-- [ ] PR
+- [x] PR (#58)
 
 ### Notas del PR 6
 - `chartTheme.js` agrupa los colores por rol según `dataviz`: `series`, `sports`, `distribution`, `zones`, `anatomy`, `tooltip`, `map` y `pmc` (72 tokens distintos). Las series reutilizan tokens existentes (`metric-*`, `legacy-atl-orange`, `hr`, `pace`, `power`, `cadence`, `ef`, `sleep`, `sport-bike`, `sport-run`); 56 tokens nuevos en `src/styles/tokens/charts.json`. `useChartTheme()` devuelve solo los colores (`ct.series.hr`).
