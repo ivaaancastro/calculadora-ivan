@@ -12,7 +12,7 @@ Solo se marca lo verificado. Spec y plan aprobados el 2026-11-09 ("Apruebo todo"
 - [x] Proyecto `tablet` (768 px): 16 capturas generadas en Docker y revisadas una a una; las 32 existentes sin cambios
 - [x] `layout.spec.js` a 768 px (o defecto registrado en `paridad.md`)
 - [x] Verificación: lint, lint:colors, unit, integration, build, e2e (macOS), e2e en Docker y volcado idéntico a `develop`
-- [ ] PR hacia `develop` con resultados
+- [x] PR hacia `develop` con resultados (#52)
 
 ### Notas de verificación del PR 1
 - Prueba de concepto: `rgb(var(--x) / calc(var(--x-a, 1) * <alpha-value>))` da el mismo color calculado que las clases originales (opacidad propia, modificador `/80`, `/[0.04]`, sin opacidad).
