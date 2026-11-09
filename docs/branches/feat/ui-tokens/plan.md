@@ -15,7 +15,7 @@ Leído antes: `AGENTS.md`, `MEMORY.md` (5b), roadmap (`feat/webapp-redesign`) y 
 ## PR 1 — Infraestructura (`feat/ui-tokens`)
 Sin cambios en componentes.
 1. **Prueba de concepto de la opacidad:** comprobar en una página temporal que `rgb(var(--x) / <alpha-value>)` y la variante con `calc(var(--x-a) * <alpha-value>)` dan el mismo color calculado que `bg-zinc-800/50`, `bg-white/80`, `border-black/[0.04]`, etc. Si la variante con `calc` no funciona en Tailwind 3.4, **paro y te consulto** (la alternativa es un token sin modificador de opacidad para esos pares).
-2. `src/styles/tokens.css` con los tokens de las tres familias neutras y los semánticos (generados con el inventario de los codemods), importado en `src/index.css`.
+2. `src/styles/tokens.css`, importado en `src/index.css`, con los tokens que ya tienen consumidor: los de `chartTheme` (métricas CTL/ATL/TSB y anatomía de gráficas). **Ajuste durante la implementación (2026-11-09):** el resto de tokens llega con la familia que los usa por primera vez, porque su tabla exacta sale del inventario de su codemod y así cada PR revisa juntos tokens y sustituciones. Los semánticos (`action`, `positive`…) llegan en el PR 5, ya que cada uno necesita variantes según la propiedad (p. ej. `text-blue-600 dark:text-blue-400` frente a `bg-blue-600`).
 3. `tailwind.config.js` con `theme.extend.colors`.
 4. `src/components/charts/chartTheme.js` y `useChartTheme.js`, con la prueba de paridad contra `tokens.css`.
 5. `scripts/check-colors.mjs`, `scripts/color-baseline.json` inicial, `npm run lint:colors` y el paso en CI.

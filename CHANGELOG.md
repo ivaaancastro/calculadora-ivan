@@ -7,6 +7,11 @@ y este proyecto adhiere a [Semantic Versioning](https://semver.org/lang/es/).
 
 ## [Unreleased]
 
+### Rediseño — Capa 1: tokens y tema (`spec-rediseno-02-c1`), PR 1 de 6
+- `feat(ui-tokens):` `src/styles/tokens.css` (canales RGB, claro y `.dark`, valores actuales) expuesto en `tailwind.config.js` con soporte de opacidad (`src/styles/tailwindTokens.cjs`), y `chartTheme`/`useChartTheme` para Recharts en `src/components/charts/`. Sin cambios visibles: ningún componente los usa todavía.
+- `ci:` `npm run lint:colors` (`scripts/check-colors.mjs`): trinquete por archivo de colores sueltos con línea base en `scripts/color-baseline.json`.
+- `test(e2e):` proyecto `tablet` (768 px) con 16 capturas nuevas y prueba de layout; herramienta de volcado de estilos calculados (`e2e/tools/style-dump.spec.js` + `scripts/style-diff.mjs`) para demostrar migraciones sin cambios, incluida la rejilla de gráficas, el mapa y la vista "Forma" del Calendario.
+
 ### Rediseño — Capa 0: red de seguridad de UI (`spec-rediseno-02-c0`)
 - `test(e2e):` regresión visual con `toHaveScreenshot` de 8 pantallas (landing, dashboard, rendimiento, calendario, actividades, detalle, salud, perfil) a 390 y 1440 px, en claro y oscuro (32 capturas de referencia generadas en Linux con la imagen oficial de Playwright).
 - `test(e2e):` pruebas de layout (desbordamiento horizontal y barras fijas que tapan contenido), informe táctil de controles < 44 px (sin bloquear) y gestos de deslizamiento (D-01 registrado como fallo esperado).
