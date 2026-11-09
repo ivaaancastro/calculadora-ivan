@@ -61,8 +61,6 @@
   --hairline-2: 0 0 0; --hairline-2-a: 0.03; /* black/[0.03] */
   --hairline-3: 0 0 0; --hairline-3-a: 0.04; /* black/[0.04] */
   --hairline-4: 0 0 0; --hairline-4-a: 0.05; /* black/[0.05] */
-  --hairline-5: 0 0 0; --hairline-5-a: 0.03; /* black/[0.03] */
-  --hairline-6: 0 0 0; --hairline-6-a: 0.06; /* black/[0.06] */
 }
 .dark {
   --line: 39 39 42; /* zinc-800 */
@@ -86,8 +84,6 @@
   --hairline-2: 255 255 255; --hairline-2-a: 0.04; /* white/[0.04] */
   --hairline-3: 255 255 255; --hairline-3-a: 0.08; /* white/[0.08] */
   --hairline-4: 255 255 255; --hairline-4-a: 0.08; /* white/[0.08] */
-  --hairline-5: 255 255 255; --hairline-5-a: 0.05; /* white/[0.05] */
-  --hairline-6: 255 255 255; --hairline-6-a: 0.08; /* white/[0.08] */
 }
 /* @tokens:borders:end */
 
@@ -157,7 +153,6 @@
   --sunken-9: 248 250 252; /* slate-50 */
   --sunken-10: 248 250 252; --sunken-10-a: 1; /* slate-50 */
   --sunken-11: 248 250 252; --sunken-11-a: 1; /* slate-50 */
-  --sunken-card: 248 250 252; --sunken-card-a: 0.9; /* slate-50/90 */
   --fill: 241 245 249; --fill-a: 0.8; /* slate-100/80 */
   --fill-2: 226 232 240; /* slate-200 */
   --fill-3: 241 245 249; --fill-3-a: 1; /* slate-100 */
@@ -169,9 +164,7 @@
   --fill-segmented: 226 232 240; --fill-segmented-a: 0.6; /* slate-200/60 */
   --inverse: 15 23 42; /* slate-900 */
   --inverse-2: 51 65 85; /* slate-700 */
-  --glass: 255 255 255; --glass-a: 0.8; /* white/80 */
   --glass-nav: 255 255 255; --glass-nav-a: 0.8; /* white/80 */
-  --glass-bar: 255 255 255; --glass-bar-a: 0.85; /* white/85 */
   --liquid-fill: 255 255 255; --liquid-fill-a: 0.68; /* white/[0.68] */
   --liquid-edge: 255 255 255; --liquid-edge-a: 0.85; /* white/[0.85] */
   --liquid-active: 0 0 0; --liquid-active-a: 0.08; /* black/[0.08] */
@@ -202,7 +195,6 @@
   --sunken-9: 39 39 42; /* zinc-800 */
   --sunken-10: 24 24 27; --sunken-10-a: 0.4; /* zinc-900/40 */
   --sunken-11: 24 24 27; --sunken-11-a: 0.8; /* zinc-900/80 */
-  --sunken-card: 44 44 46; --sunken-card-a: 0.7; /* [#2c2c2e]/70 */
   --fill: 39 39 42; --fill-a: 0.8; /* zinc-800/80 */
   --fill-2: 39 39 42; /* zinc-800 */
   --fill-3: 39 39 42; --fill-3-a: 0.8; /* zinc-800/80 */
@@ -214,9 +206,7 @@
   --fill-segmented: 28 28 30; --fill-segmented-a: 1; /* [#1c1c1e] */
   --inverse: 255 255 255; /* white */
   --inverse-2: 228 228 231; /* zinc-200 */
-  --glass: 28 28 30; --glass-a: 0.85; /* [#1c1c1e]/85 */
   --glass-nav: 0 0 0; --glass-nav-a: 0.8; /* black/80 */
-  --glass-bar: 0 0 0; --glass-bar-a: 0.85; /* black/85 */
   --liquid-fill: 30 30 34; --liquid-fill-a: 0.68; /* [#1e1e22]/[0.68] */
   --liquid-edge: 255 255 255; --liquid-edge-a: 0.18; /* white/[0.18] */
   --liquid-active: 255 255 255; --liquid-active-a: 0.16; /* white/[0.16] */

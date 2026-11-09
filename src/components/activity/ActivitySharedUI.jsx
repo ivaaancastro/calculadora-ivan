@@ -1,5 +1,4 @@
 import React from 'react';
-import { Info } from 'lucide-react';
 import { formatMinsToHMM } from '../../utils/formatters';
 
 export const MetricCard = ({ label, value, unit, accent, className = '' }) => (
@@ -51,19 +50,3 @@ export const CustomChartTooltip = ({ active, payload, label, unit = '' }) => {
     }
     return null;
 };
-
-export const MetricHelp = ({ title, text, optimal }) => (
-    <div className="group relative inline-block ml-1 align-middle">
-        <Info size={10} className="text-faint cursor-help" />
-        <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-48 p-2 bg-zinc-900 border border-zinc-800 rounded shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-[100] pointer-events-none">
-            <p className="text-[9px] font-bold text-zinc-100 mb-1 uppercase tracking-widest">{title}</p>
-            <p className="text-[9px] leading-relaxed text-zinc-400 mb-1.5">{text}</p>
-            {optimal && (
-                <div className="pt-1 border-t border-zinc-800 flex items-center gap-1">
-                    <span className="text-[8px] font-bold text-positive uppercase">Óptimo:</span>
-                    <span className="text-[8px] text-zinc-300">{optimal}</span>
-                </div>
-            )}
-        </div>
-    </div>
-);

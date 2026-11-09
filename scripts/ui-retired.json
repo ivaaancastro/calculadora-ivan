@@ -1,0 +1,20 @@
+{
+  "_comment": "Clases y componentes retirados por la Capa 2 (spec-rediseno-02-c2). npm run lint:ui falla si reaparecen en src/.",
+  "classes": [
+    "glass-panel",
+    "ios-card-secondary",
+    "ios-tab-bar",
+    "ios-segmented",
+    "ios-squircle",
+    "apple-label",
+    "pulse-animation",
+    "pt-safe",
+    "pt-safe-top",
+    "pl-safe",
+    "pr-safe",
+    "px-safe",
+    "pb-safe-nav",
+    "mb-safe-nav"
+  ],
+  "components": ["MetricHelp"]
+}

@@ -22,6 +22,8 @@ jobs:
         run: npm run lint
       - name: Check loose colors (tokens ratchet)
         run: npm run lint:colors
+      - name: Check UI primitives (usage, retired classes, className)
+        run: npm run lint:ui
 
   validate-specs:
     runs-on: ubuntu-latest

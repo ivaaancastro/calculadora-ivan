@@ -14,7 +14,7 @@
 
 ## 1. Estado del proyecto
 - **Nombre:** Forma — Dashboard de rendimiento deportivo y salud
-- **Rama actual:** `docs/ui-tokens-close` (cierre de la Capa 1; PR hacia `develop`). Siguiente: spec de la Capa 2 (primitivas), que necesita aprobación antes de tocar código.
+- **Rama actual:** `feat/ui-primitives` (Capa 2, PR 0: infraestructura). Spec y plan aprobados el 2026-11-09; siguiente: PR 1 (`Card`, `SectionHeader`).
 - **Rama base:** `develop`
 - **Rama de producción:** `main` (desplegada en Vercel)
 - **Versión:** 0.1.0
@@ -44,6 +44,7 @@
 | spec-rediseno-02 | Rediseño de la webapp por capas (roadmap) | en curso | 2026-11-06 | `docs/branches/feat/webapp-redesign/` |
 | spec-rediseno-02-c0 | Capa 0: red de seguridad de UI | implementada (PR #51 mergeado en `develop`) | 2026-11-06 | test/ui-safety-net |
 | spec-rediseno-02-c1 | Capa 1: tokens y tema | implementada (PRs #52 a #58 mergeados en `develop`; cobertura y pendientes en `tasks.md`, Cierre) | 2026-11-09 | `docs/branches/feat/ui-tokens/` |
+| spec-rediseno-02-c2 | Capa 2: primitivas | en curso (aprobada el 2026-11-09; PR 0 de 9) | 2026-11-09 | `docs/branches/feat/ui-primitives/` |
 
 > Cuando un agente implemente una spec, debe añadir una fila aquí y marcarla como `implementada`.
 
@@ -99,6 +100,14 @@
 - Verificación de una migración: además de las capturas, volcado de estilos calculados (incluye `:hover`/`:focus`/`:active` forzados y `:hover` en los `.group` para `group-hover:`) en `develop` y en la rama (`STYLE_DUMP_DIR=<dir> npx playwright test e2e/tools/style-dump.spec.js`, con `E2E_PORT` distinto si se usa un worktree) y `node scripts/style-diff.mjs <antes> <después>`: debe dar 0 diferencias.
 - Fuera de alcance de la Capa 1: colores en `src/hooks` y `src/utils` (74 líneas), canvas de la landing, tipografía, radios y sombras.
 - **Lo que la Capa 1 dejó para después** (lista completa en `docs/branches/feat/ui-tokens/tasks.md`, "Pendiente para capas siguientes"): unificar D-07, D-09 y D-10, valores `.dark` propios de las gráficas, escalas ordinales, descartes por precedencia (D-08) y código sin uso (`ChartsSection`, `ZONE_COLORS` de `AdvancedAnalytics`).
+
+### Cómo trabajar con las primitivas (Capa 2)
+- Viven en `src/components/ui/` y se exportan desde `index.js`. Regla: **centralizar sin unificar**. Cada variante copia exactamente una receta actual con ≥ 2 usos; el resto se queda y se lista (spec, RF2). El `className` de una primitiva solo admite colocación y espaciado (RF3).
+- `npm run lint:ui` (`scripts/check-ui.mjs`): toda exportación de `ui/` debe tener uso fuera de `ui/`, lo de `scripts/ui-retired.json` no puede reaparecer y el `className` literal de una primitiva no puede llevar color, tipografía, radio, borde ni sombra.
+- `node scripts/ui-inventory.mjs <button|field|card|modal|tooltip|loading|any> [--all]`: recetas y usos (archivo:línea).
+- Un archivo nuevo empieza con `lint:colors` en 0: una primitiva no puede llevarse un color suelto; se crea un token exacto (D2).
+- **Volcado de la Capa 2:** `STYLE_DUMP_PROPS=full STYLE_DUMP_DIR=<dir> npx playwright test e2e/tools/style-dump.spec.js` (color + tipografía, caja, radios, disposición y efectos; 104 volcados). Solo se comparan volcados del mismo modo. El de color no ve rellenos ni radios.
+- En móvil, `MobileSwipePager` monta las otras pestañas fuera de pantalla: al buscar "la primera gráfica" hay que filtrar por posición horizontal (`hoverChart` del volcado). La gráfica de Salud solo existe en la vista "Historial".
 
 ### Cómo trabajar con la red de seguridad (Capa 0)
 - Las capturas de referencia están en `e2e/__screenshots__/` y **solo se generan en Linux** con `npm run test:e2e:update` (Docker, imagen oficial de Playwright, `linux/amd64` como CI). Las de macOS no son comparables, por eso `visual.spec.js` se omite fuera de Linux. Para compararlas: `npm run test:e2e:docker`.
