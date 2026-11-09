@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { X, Save, Activity } from 'lucide-react';
 import { supabase } from '../../supabase';
 import toast from 'react-hot-toast';
+import { Input, Select } from '../ui';
 
 const AddActivityModal = ({ isOpen, onClose, onSave }) => {
     const [formData, setFormData] = useState({
@@ -70,31 +71,31 @@ const AddActivityModal = ({ isOpen, onClose, onSave }) => {
                     <div className="grid grid-cols-2 gap-3 sm:gap-4">
                         <div className="space-y-1">
                             <label htmlFor="activity-date" className="text-[11px] font-bold text-ink-3 uppercase tracking-wider">Fecha</label>
-                            <input id="activity-date" type="date" required value={formData.date} onChange={e => setFormData({ ...formData, date: e.target.value })}
-                                className="w-full bg-sunken-5 border border-line-muted-2 rounded-xl p-3 text-sm font-semibold text-body-3 focus:ring-2 focus:ring-action-bright outline-none"
+                            <Input id="activity-date" type="date" required value={formData.date} onChange={e => setFormData({ ...formData, date: e.target.value })}
+                                variant="filled" className="w-full p-3"
                             />
                         </div>
                         <div className="space-y-1">
                             <label htmlFor="activity-type" className="text-[11px] font-bold text-ink-3 uppercase tracking-wider">Deporte</label>
-                            <select id="activity-type" value={formData.type} onChange={e => setFormData({ ...formData, type: e.target.value })}
-                                className="w-full bg-sunken-5 border border-line-muted-2 rounded-xl p-3 text-sm font-semibold text-body-3 focus:ring-2 focus:ring-action-bright outline-none"
+                            <Select id="activity-type" value={formData.type} onChange={e => setFormData({ ...formData, type: e.target.value })}
+                                variant="filled" className="w-full p-3"
                             >
                                 <option>Carrera</option><option>Ciclismo</option><option>Fuerza</option><option>Caminata</option><option>Natación</option>
-                            </select>
+                            </Select>
                         </div>
                     </div>
 
                     <div className="grid grid-cols-2 gap-3 sm:gap-4">
                         <div className="space-y-1">
                             <label htmlFor="duration-input" className="text-[11px] font-bold text-ink-3 uppercase tracking-wider">Duración (min)</label>
-                            <input id="duration-input" type="number" inputMode="decimal" min="0.1" step="any" required placeholder="0" value={formData.duration} onChange={e => setFormData({ ...formData, duration: e.target.value })}
-                                className="w-full bg-sunken-5 border border-line-muted-2 rounded-xl p-3 text-sm font-semibold text-body-3 focus:ring-2 focus:ring-action-bright outline-none font-mono"
+                            <Input id="duration-input" type="number" inputMode="decimal" min="0.1" step="any" required placeholder="0" value={formData.duration} onChange={e => setFormData({ ...formData, duration: e.target.value })}
+                                variant="filled" mono className="w-full p-3"
                             />
                         </div>
                         <div className="space-y-1">
                             <label htmlFor="activity-hr" className="text-[11px] font-bold text-ink-3 uppercase tracking-wider">Pulso Medio</label>
-                            <input id="activity-hr" type="number" inputMode="numeric" min="0" placeholder="Opcional" value={formData.hr_avg} onChange={e => setFormData({ ...formData, hr_avg: e.target.value })}
-                                className="w-full bg-sunken-5 border border-line-muted-2 rounded-xl p-3 text-sm font-semibold text-body-3 focus:ring-2 focus:ring-action-bright outline-none font-mono"
+                            <Input id="activity-hr" type="number" inputMode="numeric" min="0" placeholder="Opcional" value={formData.hr_avg} onChange={e => setFormData({ ...formData, hr_avg: e.target.value })}
+                                variant="filled" mono className="w-full p-3"
                             />
                         </div>
                     </div>
@@ -102,14 +103,14 @@ const AddActivityModal = ({ isOpen, onClose, onSave }) => {
                     <div className="grid grid-cols-2 gap-3 sm:gap-4">
                         <div className="space-y-1">
                             <label htmlFor="activity-distance" className="text-[11px] font-bold text-ink-3 uppercase tracking-wider">Distancia (m)</label>
-                            <input id="activity-distance" type="number" inputMode="decimal" min="0" placeholder="Ej: 5000" value={formData.distance} onChange={e => setFormData({ ...formData, distance: e.target.value })}
-                                className="w-full bg-sunken-5 border border-line-muted-2 rounded-xl p-3 text-sm font-semibold text-body-3 focus:ring-2 focus:ring-action-bright outline-none font-mono"
+                            <Input id="activity-distance" type="number" inputMode="decimal" min="0" placeholder="Ej: 5000" value={formData.distance} onChange={e => setFormData({ ...formData, distance: e.target.value })}
+                                variant="filled" mono className="w-full p-3"
                             />
                         </div>
                         <div className="space-y-1">
                             <label htmlFor="activity-elevation" className="text-[11px] font-bold text-ink-3 uppercase tracking-wider">Desnivel (m)</label>
-                            <input id="activity-elevation" type="number" inputMode="decimal" min="0" placeholder="Ej: 100" value={formData.elevation_gain} onChange={e => setFormData({ ...formData, elevation_gain: e.target.value })}
-                                className="w-full bg-sunken-5 border border-line-muted-2 rounded-xl p-3 text-sm font-semibold text-body-3 focus:ring-2 focus:ring-action-bright outline-none font-mono"
+                            <Input id="activity-elevation" type="number" inputMode="decimal" min="0" placeholder="Ej: 100" value={formData.elevation_gain} onChange={e => setFormData({ ...formData, elevation_gain: e.target.value })}
+                                variant="filled" mono className="w-full p-3"
                             />
                         </div>
                     </div>

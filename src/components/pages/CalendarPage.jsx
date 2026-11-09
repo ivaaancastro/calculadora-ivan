@@ -14,7 +14,7 @@ import {
     getEffectiveTSS, computeZoneTssPerHour, estimateTssFromBlocks,
 } from '../../utils/tssEngine';
 import { useChartTheme } from '../charts/useChartTheme';
-import { Segmented } from '../ui';
+import { Input, Segmented, Select } from '../ui';
 
 const WEEKDAYS = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'];
 
@@ -1876,17 +1876,17 @@ export const CalendarPage = ({ activities, plannedWorkouts = [], addPlannedWorko
                                                                         </Segmented>
 
                                                                         {step.unit === 'dist' && !isStr ? (
-                                                                            <input type="number" value={step.duration} min={0} onChange={e => updateStep(block.id, step.id, 'duration', e.target.value)}
-                                                                                className="w-12 shrink-0 bg-sunken text-[13px] font-mono px-2 py-1 rounded-lg outline-none no-spinner text-center text-body" />
+                                                                            <Input type="number" value={step.duration} min={0} onChange={e => updateStep(block.id, step.id, 'duration', e.target.value)}
+                                                                                variant="cell" mono className="w-12 shrink-0 px-2 py-1 text-center" />
                                                                         ) : (
                                                                             <DurationInput value={step.duration} onChange={v => updateStep(block.id, step.id, 'duration', v)} />
                                                                         )}
 
                                                                         {/* Zone selector */}
-                                                                        <select value={step.zone} onChange={e => handleZoneChangeWithPower(e.target.value, (k, v) => updateStep(block.id, step.id, k, v))}
-                                                                            className="shrink-0 bg-sunken text-[11px] font-medium text-body px-2 py-1.5 rounded-lg outline-none cursor-pointer">
+                                                                        <Select value={step.zone} onChange={e => handleZoneChangeWithPower(e.target.value, (k, v) => updateStep(block.id, step.id, k, v))}
+                                                                            variant="cell" className="shrink-0 px-2 py-1.5">
                                                                             {zones.map(z => <option key={z.v} value={z.v}>{z.l}</option>)}
-                                                                        </select>
+                                                                        </Select>
 
                                                                         {/* Target value display */}
                                                                         {currentZoneMode === 'power' && step.targetValue && (
@@ -1896,18 +1896,18 @@ export const CalendarPage = ({ activities, plannedWorkouts = [], addPlannedWorko
                                                                         )}
                                                                         {!isStr && currentZoneMode !== 'power' && (
                                                                             <div className="flex items-center gap-1">
-                                                                                <select value={step.targetType || 'none'} onChange={e => { updateStep(block.id, step.id, 'targetType', e.target.value); if(e.target.value === 'none') updateStep(block.id, step.id, 'targetValue', ''); }}
-                                                                                    className="bg-transparent text-[10px] text-ink-4 px-1 py-0.5 outline-none cursor-pointer">
+                                                                                <Select value={step.targetType || 'none'} onChange={e => { updateStep(block.id, step.id, 'targetType', e.target.value); if(e.target.value === 'none') updateStep(block.id, step.id, 'targetValue', ''); }}
+                                                                                    variant="cell-bare" className="px-1 py-0.5">
                                                                                     <option value="none">--</option>
                                                                                     <option value="power">W</option>
                                                                                     <option value="pace">/km</option>
-                                                                                </select>
+                                                                                </Select>
                                                                                 {(step.targetType === 'power' || step.targetType === 'pace') && (
-                                                                                    <input type={step.targetType === 'power' ? "number" : "text"} 
+                                                                                    <Input type={step.targetType === 'power' ? "number" : "text"} 
                                                                                         placeholder={step.targetType === 'power' ? "200" : "4:30"} 
                                                                                         value={step.targetValue || ''} 
                                                                                         onChange={e => updateStep(block.id, step.id, 'targetValue', e.target.value)}
-                                                                                        className="w-12 shrink-0 bg-sunken rounded-lg text-[11px] px-1.5 py-0.5 outline-none no-spinner text-center text-body" 
+                                                                                        variant="cell" size="sm" className="w-12 shrink-0 px-1.5 py-0.5 text-center" 
                                                                                     />
                                                                                 )}
                                                                             </div>
@@ -1961,8 +1961,8 @@ export const CalendarPage = ({ activities, plannedWorkouts = [], addPlannedWorko
                                                         </Segmented>
 
                                                         {block.unit === 'dist' && !isStr ? (
-                                                            <input type="number" placeholder="km" value={block.duration} min={0} onChange={e => updateBlock(block.id, 'duration', e.target.value)}
-                                                                className="w-12 shrink-0 bg-sunken text-[13px] font-mono px-2 py-1 rounded-lg outline-none no-spinner text-center text-body" />
+                                                            <Input type="number" placeholder="km" value={block.duration} min={0} onChange={e => updateBlock(block.id, 'duration', e.target.value)}
+                                                                variant="cell" mono className="w-12 shrink-0 px-2 py-1 text-center" />
                                                         ) : (
                                                             <DurationInput value={block.duration} onChange={v => updateBlock(block.id, 'duration', v)} />
                                                         )}
@@ -1978,10 +1978,10 @@ export const CalendarPage = ({ activities, plannedWorkouts = [], addPlannedWorko
                                                         )}
 
                                                         {/* Zone selector */}
-                                                        <select value={block.zone} onChange={e => handleZoneChangeWithPower(e.target.value, (k, v) => updateBlock(block.id, k, v))}
-                                                            className="shrink-0 bg-sunken text-[11px] font-medium text-body px-2 py-1.5 rounded-lg outline-none cursor-pointer">
+                                                        <Select value={block.zone} onChange={e => handleZoneChangeWithPower(e.target.value, (k, v) => updateBlock(block.id, k, v))}
+                                                            variant="cell" className="shrink-0 px-2 py-1.5">
                                                             {zones.map(z => <option key={z.v} value={z.v}>{z.l}</option>)}
-                                                        </select>
+                                                        </Select>
 
                                                         {/* Target value (auto for power, manual for pace) */}
                                                         {currentZoneMode === 'power' && block.targetValue && (
@@ -1992,18 +1992,18 @@ export const CalendarPage = ({ activities, plannedWorkouts = [], addPlannedWorko
                                                         )}
                                                         {!isStr && currentZoneMode !== 'power' && (
                                                             <div className="flex items-center gap-1">
-                                                                <select value={block.targetType || 'none'} onChange={e => { updateBlock(block.id, 'targetType', e.target.value); if(e.target.value === 'none') updateBlock(block.id, 'targetValue', ''); }}
-                                                                    className="bg-transparent text-[10px] text-ink-4 px-1 py-0.5 outline-none cursor-pointer">
+                                                                <Select value={block.targetType || 'none'} onChange={e => { updateBlock(block.id, 'targetType', e.target.value); if(e.target.value === 'none') updateBlock(block.id, 'targetValue', ''); }}
+                                                                    variant="cell-bare" className="px-1 py-0.5">
                                                                     <option value="none">--</option>
                                                                     <option value="power">W</option>
                                                                     <option value="pace">/km</option>
-                                                                </select>
+                                                                </Select>
                                                                 {(block.targetType === 'power' || block.targetType === 'pace') && (
-                                                                    <input type={block.targetType === 'power' ? "number" : "text"} 
+                                                                    <Input type={block.targetType === 'power' ? "number" : "text"} 
                                                                         placeholder={block.targetType === 'power' ? "200" : "4:30"} 
                                                                         value={block.targetValue || ''} 
                                                                         onChange={e => updateBlock(block.id, 'targetValue', e.target.value)}
-                                                                        className="w-12 shrink-0 bg-sunken rounded-lg text-[11px] px-1.5 py-0.5 outline-none no-spinner text-center text-body" 
+                                                                        variant="cell" size="sm" className="w-12 shrink-0 px-1.5 py-0.5 text-center" 
                                                                     />
                                                                 )}
                                                             </div>
