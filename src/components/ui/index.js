@@ -3,3 +3,4 @@
  * `npm run lint:ui` comprueba que todo lo que se exporta tiene al menos un uso fuera de `ui/`.
  */
 export { Card, SectionHeader } from './Card.jsx';
+export { Stat, StatTile } from './Stat.jsx';
