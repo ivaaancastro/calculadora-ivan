@@ -84,7 +84,7 @@ const ModeSelector = ({ sport, data, onZonesMode }) => (
         {[{ k: 'lthr', l: '% LTHR' }, { k: 'fcmax', l: '% FCmax' }, { k: 'custom', l: 'Manual' }].map(m => (
             <button key={m.k} onClick={() => onZonesMode(sport, m.k)}
                 className={`px-2.5 py-1 rounded-full text-[10px] font-semibold transition-all select-none touch-manipulation active:scale-95 ${data.zonesMode === m.k
-                    ? 'bg-white dark:bg-[#2c2c2e] shadow-xs text-ink'
+                    ? 'bg-surface-4 shadow-xs text-ink'
                     : 'text-slate-500 dark:text-zinc-400 hover:text-slate-700'
                     }`}>{m.l}</button>
         ))}
@@ -112,7 +112,7 @@ const SportZonesSection = ({ sport, sportLabel, icon: Icon, color, showPace, sho
                 </div>
 
                 <div className={`grid ${showPace ? 'grid-cols-2 sm:grid-cols-3' : showPower ? 'grid-cols-2 sm:grid-cols-3' : 'grid-cols-2'} gap-2 sm:gap-3`}>
-                    <div className="bg-slate-50 dark:bg-zinc-800/40 rounded-xl p-2.5 border border-hairline-2">
+                    <div className="bg-sunken-4 rounded-xl p-2.5 border border-hairline-2">
                         <label className="text-[10px] font-semibold text-ink-3 block mb-0.5">FC Umbral</label>
                         <div className="flex items-baseline gap-1">
                             <input 
@@ -126,7 +126,7 @@ const SportZonesSection = ({ sport, sportLabel, icon: Icon, color, showPace, sho
                         </div>
                     </div>
 
-                    <div className="bg-slate-50 dark:bg-zinc-800/40 rounded-xl p-2.5 border border-hairline-2">
+                    <div className="bg-sunken-4 rounded-xl p-2.5 border border-hairline-2">
                         <label className="text-[10px] font-semibold text-ink-3 block mb-0.5">FC Máx.</label>
                         <div className="flex items-baseline gap-1">
                             <input 
@@ -141,7 +141,7 @@ const SportZonesSection = ({ sport, sportLabel, icon: Icon, color, showPace, sho
                     </div>
 
                     {showPace && (
-                        <div className="bg-slate-50 dark:bg-zinc-800/40 rounded-xl p-2.5 border border-hairline-2 col-span-2 sm:col-span-1">
+                        <div className="bg-sunken-4 rounded-xl p-2.5 border border-hairline-2 col-span-2 sm:col-span-1">
                             <label className="text-[10px] font-semibold text-ink-3 block mb-0.5">Ritmo Umbral</label>
                             <div className="flex items-baseline gap-1">
                                 <input 
@@ -157,7 +157,7 @@ const SportZonesSection = ({ sport, sportLabel, icon: Icon, color, showPace, sho
                     )}
 
                     {showPower && (
-                        <div className="bg-slate-50 dark:bg-zinc-800/40 rounded-xl p-2.5 border border-hairline-2 col-span-2 sm:col-span-1">
+                        <div className="bg-sunken-4 rounded-xl p-2.5 border border-hairline-2 col-span-2 sm:col-span-1">
                             <label className="text-[10px] font-semibold text-ink-3 block mb-0.5">FTP</label>
                             <div className="flex items-baseline gap-1">
                                 <input 
@@ -188,7 +188,7 @@ const SportZonesSection = ({ sport, sportLabel, icon: Icon, color, showPace, sho
                         const pcts = data.zonesMode === 'lthr' ? lthrPcts[i] : data.zonesMode === 'fcmax' ? fcmaxPcts[i] : null;
                         const pctStr = pcts ? `${Math.round(pcts.pMin * 100)} - ${i === 6 ? Math.round(pcts.pMax * 100) + '%+' : Math.round(pcts.pMax * 100) + '%'}` : '';
                         return (
-                            <div key={i} className="px-3.5 py-2.5 flex items-center justify-between text-xs hover:bg-slate-50/50 dark:hover:bg-zinc-800/30 transition-colors">
+                            <div key={i} className="px-3.5 py-2.5 flex items-center justify-between text-xs hover:bg-sunken-3 transition-colors">
                                 <div className="flex items-center gap-2.5 min-w-0">
                                     <div className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: ZONE_COLORS[i] }} />
                                     <span className="font-bold text-ink-2-soft shrink-0">{HR_LABELS[i]}</span>
@@ -204,9 +204,9 @@ const SportZonesSection = ({ sport, sportLabel, icon: Icon, color, showPace, sho
                                         </span>
                                     ) : (
                                         <div className="flex items-center gap-1">
-                                            <input type="number" value={zone.min} onChange={(e) => onZoneChange(e, sport, i, 'min')} className="w-12 bg-slate-100 dark:bg-zinc-800 rounded px-1 py-0.5 text-xs font-mono text-center outline-none focus:ring-1 focus:ring-blue-500" />
+                                            <input type="number" value={zone.min} onChange={(e) => onZoneChange(e, sport, i, 'min')} className="w-12 bg-surface-2 rounded px-1 py-0.5 text-xs font-mono text-center outline-none focus:ring-1 focus:ring-blue-500" />
                                             <span className="text-slate-400">-</span>
-                                            <input type="number" value={zone.max} onChange={(e) => onZoneChange(e, sport, i, 'max')} className="w-12 bg-slate-100 dark:bg-zinc-800 rounded px-1 py-0.5 text-xs font-mono text-center outline-none focus:ring-1 focus:ring-blue-500" />
+                                            <input type="number" value={zone.max} onChange={(e) => onZoneChange(e, sport, i, 'max')} className="w-12 bg-surface-2 rounded px-1 py-0.5 text-xs font-mono text-center outline-none focus:ring-1 focus:ring-blue-500" />
                                         </div>
                                     )}
                                 </div>
@@ -228,7 +228,7 @@ const SportZonesSection = ({ sport, sportLabel, icon: Icon, color, showPace, sho
                     </div>
                     <div className="divide-y divide-hairline-2">
                         {(data?.paceZones || calcPaceZones(data?.thresholdPace) || []).map((zone, i) => (
-                            <div key={i} className="px-3.5 py-2.5 flex items-center justify-between text-xs hover:bg-slate-50/50 dark:hover:bg-zinc-800/30 transition-colors">
+                            <div key={i} className="px-3.5 py-2.5 flex items-center justify-between text-xs hover:bg-sunken-3 transition-colors">
                                 <div className="flex items-center gap-2.5 min-w-0">
                                     <div className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: ZONE_COLORS[i] }} />
                                     <span className="font-bold text-ink-2-soft shrink-0">{HR_LABELS[i]}</span>
@@ -262,7 +262,7 @@ const SportZonesSection = ({ sport, sportLabel, icon: Icon, color, showPace, sho
                             const minW = Math.round(data.ftp * pz.pMin);
                             const maxW = Math.round(data.ftp * pz.pMax);
                             return (
-                                <div key={i} className="px-3.5 py-2.5 flex items-center justify-between text-xs hover:bg-slate-50/50 dark:hover:bg-zinc-800/30 transition-colors">
+                                <div key={i} className="px-3.5 py-2.5 flex items-center justify-between text-xs hover:bg-sunken-3 transition-colors">
                                     <div className="flex items-center gap-2.5 min-w-0">
                                         <div className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: ZONE_COLORS[i] }} />
                                         <span className="font-bold text-ink-2-soft shrink-0">Z{i + 1}</span>
@@ -573,7 +573,7 @@ export const ProfilePage = ({
             onClick={() => handleSectionChange(id)}
             className={`flex items-center gap-2.5 px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-xl transition-all text-left whitespace-nowrap select-none touch-manipulation active:scale-95 ${activeSection === id
                 ? 'bg-blue-600 text-white shadow-xs font-bold'
-                : 'text-body hover:bg-slate-100 dark:hover:bg-zinc-800/50 font-medium'
+                : 'text-body hover:bg-fill-5 font-medium'
                 }`}
         >
             <IconComponent size={17} className={activeSection === id ? 'text-white' : 'text-ink-4'} />
@@ -628,7 +628,7 @@ export const ProfilePage = ({
                             <div className="ios-card p-4 sm:p-5 flex items-center gap-4 text-left mb-5">
                                 <div className="relative shrink-0">
                                     <div 
-                                        className="rounded-full overflow-hidden bg-slate-100 dark:bg-zinc-800 border-2 border-white dark:border-zinc-700 shadow-sm flex items-center justify-center relative shrink-0"
+                                        className="rounded-full overflow-hidden bg-surface-2 border-2 border-white dark:border-zinc-700 shadow-sm flex items-center justify-center relative shrink-0"
                                         style={{ width: '76px', height: '76px', minWidth: '76px', minHeight: '76px' }}
                                     >
                                         {formData.avatarUrl ? (
@@ -707,7 +707,7 @@ export const ProfilePage = ({
                                                 name="weight"
                                                 value={formData.weight}
                                                 onChange={handleChange}
-                                                className="w-16 text-right font-mono font-bold text-xs sm:text-sm text-ink bg-slate-100 dark:bg-zinc-800/80 rounded-lg px-2 py-1 outline-none focus:ring-1 focus:ring-blue-500"
+                                                className="w-16 text-right font-mono font-bold text-xs sm:text-sm text-ink bg-fill-3 rounded-lg px-2 py-1 outline-none focus:ring-1 focus:ring-blue-500"
                                             />
                                             <span className="text-xs font-semibold text-ink-4">kg</span>
                                         </div>
@@ -731,7 +731,7 @@ export const ProfilePage = ({
                                                 name="fcReposo"
                                                 value={formData.fcReposo}
                                                 onChange={handleChange}
-                                                className="w-16 text-right font-mono font-bold text-xs sm:text-sm text-ink bg-slate-100 dark:bg-zinc-800/80 rounded-lg px-2 py-1 outline-none focus:ring-1 focus:ring-rose-500"
+                                                className="w-16 text-right font-mono font-bold text-xs sm:text-sm text-ink bg-fill-3 rounded-lg px-2 py-1 outline-none focus:ring-1 focus:ring-rose-500"
                                             />
                                             <span className="text-xs font-semibold text-ink-4">bpm</span>
                                         </div>
@@ -756,7 +756,7 @@ export const ProfilePage = ({
                                                 value={targetCtl ?? ''}
                                                 onChange={(e) => setTargetCtl(e.target.value ? parseInt(e.target.value) : null)}
                                                 placeholder="Auto"
-                                                className="w-16 text-right font-mono font-bold text-xs sm:text-sm text-ink bg-slate-100 dark:bg-zinc-800/80 rounded-lg px-2 py-1 outline-none focus:ring-1 focus:ring-emerald-500"
+                                                className="w-16 text-right font-mono font-bold text-xs sm:text-sm text-ink bg-fill-3 rounded-lg px-2 py-1 outline-none focus:ring-1 focus:ring-emerald-500"
                                             />
                                             <span className="text-xs font-semibold text-ink-4">CTL</span>
                                         </div>
@@ -782,18 +782,18 @@ export const ProfilePage = ({
                                 <button 
                                     onClick={handleAutoDetectLTHR} 
                                     disabled={isScanning || pureActs.length === 0} 
-                                    className="px-3.5 py-1.5 bg-slate-100 dark:bg-zinc-800 hover:bg-slate-200 dark:hover:bg-zinc-700 text-ink-2-soft rounded-full text-xs font-semibold transition-colors disabled:opacity-50 flex items-center gap-1.5 shrink-0 active:scale-95"
+                                    className="px-3.5 py-1.5 bg-surface-2 hover:bg-fill-7 text-ink-2-soft rounded-full text-xs font-semibold transition-colors disabled:opacity-50 flex items-center gap-1.5 shrink-0 active:scale-95"
                                 >
                                     {isScanning ? <><Loader2 size={13} className="animate-spin" /> Analizando...</> : 'Escanear'}
                                 </button>
                             </div>
 
                             {/* SPORT SELECTOR SEGMENTED */}
-                            <div className="flex p-1 bg-slate-200/60 dark:bg-[#1c1c1e] rounded-full backdrop-blur-md gap-0.5 select-none">
+                            <div className="flex p-1 bg-fill-segmented rounded-full backdrop-blur-md gap-0.5 select-none">
                                 <button 
                                     onClick={() => setActiveTab('run')} 
                                     className={`flex-1 py-1.5 text-xs font-semibold rounded-full transition-all flex items-center justify-center gap-1.5 select-none touch-manipulation active:scale-95 ${
-                                        activeTab === 'run' ? 'bg-white dark:bg-[#2c2c2e] text-orange-600 dark:text-orange-400 shadow-xs' : 'text-ink-3'
+                                        activeTab === 'run' ? 'bg-surface-4 text-orange-600 dark:text-orange-400 shadow-xs' : 'text-ink-3'
                                     }`}
                                 >
                                     <Footprints size={14} strokeWidth={2.3} /> Correr
@@ -801,7 +801,7 @@ export const ProfilePage = ({
                                 <button 
                                     onClick={() => setActiveTab('bike')} 
                                     className={`flex-1 py-1.5 text-xs font-semibold rounded-full transition-all flex items-center justify-center gap-1.5 select-none touch-manipulation active:scale-95 ${
-                                        activeTab === 'bike' ? 'bg-white dark:bg-[#2c2c2e] text-blue-600 dark:text-blue-400 shadow-xs' : 'text-ink-3'
+                                        activeTab === 'bike' ? 'bg-surface-4 text-blue-600 dark:text-blue-400 shadow-xs' : 'text-ink-3'
                                     }`}
                                 >
                                     <Bike size={14} strokeWidth={2.3} /> Ciclismo
@@ -831,7 +831,7 @@ export const ProfilePage = ({
                                     <span className={`text-[10px] font-bold px-2.5 py-0.5 rounded-full ${
                                         formData.intervalsId && formData.intervalsKey 
                                             ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20' 
-                                            : 'bg-slate-100 dark:bg-zinc-800 text-slate-400'
+                                            : 'bg-surface-2 text-slate-400'
                                     }`}>
                                         {formData.intervalsId && formData.intervalsKey ? 'Conectado' : 'No configurado'}
                                     </span>
@@ -846,7 +846,7 @@ export const ProfilePage = ({
                                             value={formData.intervalsId || ''} 
                                             onChange={handleChange} 
                                             placeholder="i12345" 
-                                            className="w-40 text-right bg-slate-50 dark:bg-zinc-900/80 border border-line-3 rounded-lg px-2.5 py-1.5 text-xs font-mono text-slate-900 dark:text-zinc-200 outline-none focus:ring-1 focus:ring-indigo-500" 
+                                            className="w-40 text-right bg-sunken-11 border border-line-3 rounded-lg px-2.5 py-1.5 text-xs font-mono text-slate-900 dark:text-zinc-200 outline-none focus:ring-1 focus:ring-indigo-500" 
                                         />
                                     </div>
                                     <div className="flex items-center justify-between gap-3">
@@ -857,7 +857,7 @@ export const ProfilePage = ({
                                             value={formData.intervalsKey || ''} 
                                             onChange={handleChange} 
                                             placeholder="••••••••" 
-                                            className="w-40 text-right bg-slate-50 dark:bg-zinc-900/80 border border-line-3 rounded-lg px-2.5 py-1.5 text-xs font-mono text-slate-900 dark:text-zinc-200 outline-none focus:ring-1 focus:ring-indigo-500" 
+                                            className="w-40 text-right bg-sunken-11 border border-line-3 rounded-lg px-2.5 py-1.5 text-xs font-mono text-slate-900 dark:text-zinc-200 outline-none focus:ring-1 focus:ring-indigo-500" 
                                         />
                                     </div>
 
@@ -926,12 +926,12 @@ export const ProfilePage = ({
                                             value={newPassword} 
                                             onChange={(e) => setNewPassword(e.target.value)} 
                                             placeholder="Nueva contraseña..." 
-                                            className="flex-1 px-3 py-2 bg-slate-50 dark:bg-zinc-900/80 border border-line-3 rounded-xl text-xs font-mono dark:text-zinc-200 focus:ring-1 focus:ring-blue-500 outline-none transition-all" 
+                                            className="flex-1 px-3 py-2 bg-sunken-11 border border-line-3 rounded-xl text-xs font-mono dark:text-zinc-200 focus:ring-1 focus:ring-blue-500 outline-none transition-all" 
                                         />
                                         <button 
                                             type="submit" 
                                             disabled={isUpdatingPwd || !newPassword} 
-                                            className="px-4 py-2 bg-slate-900 dark:bg-white text-ink-inverse rounded-xl text-xs font-semibold transition-all disabled:opacity-50 shrink-0 shadow-xs active:scale-95"
+                                            className="px-4 py-2 bg-inverse text-ink-inverse rounded-xl text-xs font-semibold transition-all disabled:opacity-50 shrink-0 shadow-xs active:scale-95"
                                         >
                                             {isUpdatingPwd ? <Loader2 size={13} className="animate-spin" /> : 'Actualizar'}
                                         </button>
@@ -953,7 +953,7 @@ export const ProfilePage = ({
                                         </div>
                                     </div>
                                     
-                                    <div className="w-full h-2 bg-slate-100 dark:bg-zinc-800 rounded-full overflow-hidden mb-3">
+                                    <div className="w-full h-2 bg-surface-2 rounded-full overflow-hidden mb-3">
                                         <div className={`h-full transition-all duration-500 ${syncPct === 100 ? 'bg-emerald-500' : 'bg-blue-500'}`} style={{ width: `${syncPct}%` }} />
                                     </div>
                                     

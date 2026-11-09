@@ -84,7 +84,7 @@ export const Navbar = ({
           >
             {/* AVATAR CIRCULAR CON BORDE APPLE */}
             <div 
-              className="rounded-full overflow-hidden bg-slate-100 dark:bg-zinc-800 border-2 border-white dark:border-zinc-700 shadow-xs flex items-center justify-center shrink-0 ring-1 ring-black/5 dark:ring-white/10 group-hover:ring-blue-500/40 transition-all"
+              className="rounded-full overflow-hidden bg-surface-2 border-2 border-white dark:border-zinc-700 shadow-xs flex items-center justify-center shrink-0 ring-1 ring-black/5 dark:ring-white/10 group-hover:ring-blue-500/40 transition-all"
               style={{ width: '36px', height: '36px', minWidth: '36px', minHeight: '36px' }}
             >
               {settings?.avatarUrl ? (
@@ -122,7 +122,7 @@ export const Navbar = ({
               {/* CABECERA CON PERFIL */}
               <div className="p-3.5 border-b border-black/[0.05] dark:border-white/[0.08] flex items-center gap-3">
                 <div 
-                  className="rounded-full overflow-hidden bg-slate-100 dark:bg-zinc-800 border border-black/10 dark:border-white/10 shrink-0"
+                  className="rounded-full overflow-hidden bg-surface-2 border border-black/10 dark:border-white/10 shrink-0"
                   style={{ width: '42px', height: '42px', minWidth: '42px', minHeight: '42px' }}
                 >
                   {settings?.avatarUrl ? (
@@ -152,7 +152,7 @@ export const Navbar = ({
                     <button
                       key={opt.id}
                       onClick={() => handleNavigateSection(opt.id)}
-                      className="w-full flex items-center justify-between p-2 rounded-xl hover:bg-slate-100/80 dark:hover:bg-zinc-800/80 active:scale-[0.98] transition-all text-left group"
+                      className="w-full flex items-center justify-between p-2 rounded-xl hover:bg-fill active:scale-[0.98] transition-all text-left group"
                     >
                       <div className="flex items-center gap-2.5 min-w-0">
                         <div className={`w-7 h-7 rounded-[8px] ${opt.color} flex items-center justify-center shrink-0`}>
@@ -198,7 +198,7 @@ export const Navbar = ({
               return (
                 <Link key={tab.path} to={tab.path}
                   className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-semibold transition-all ${isActive
-                    ? 'bg-white dark:bg-[#2c2c2e] text-ink shadow-xs'
+                    ? 'bg-surface-4 text-ink shadow-xs'
                     : 'text-ink-3 hover:text-ink-2-soft'
                     }`}>
                   <Icon size={14} strokeWidth={isActive ? 2.5 : 2} />
@@ -229,22 +229,22 @@ export const Navbar = ({
 
           {/* Desktop utility buttons */}
           <div className="hidden md:flex items-center gap-1">
-            <div className="h-4 w-px bg-slate-200 dark:bg-zinc-800 mx-1"></div>
+            <div className="h-4 w-px bg-fill-2 mx-1"></div>
 
             <input type="file" ref={fileInputRef} onChange={(e) => e.target.files[0] && onFileUpload(e.target.files[0])} accept=".csv" className="hidden" />
-            <button onClick={() => fileInputRef.current?.click()} disabled={uploading} className="p-2 text-slate-400 hover:text-slate-700 dark:text-zinc-400 dark:hover:text-zinc-100 rounded-full hover:bg-slate-100 dark:hover:bg-zinc-800/60 transition-colors" title="Importar CSV">
+            <button onClick={() => fileInputRef.current?.click()} disabled={uploading} className="p-2 text-slate-400 hover:text-slate-700 dark:text-zinc-400 dark:hover:text-zinc-100 rounded-full hover:bg-fill-8 transition-colors" title="Importar CSV">
               <Upload size={16} />
             </button>
 
-            <button onClick={onAddClick} className="p-2 text-slate-400 hover:text-blue-500 dark:text-zinc-400 dark:hover:text-blue-400 rounded-full hover:bg-slate-100 dark:hover:bg-zinc-800/60 transition-colors" title="Añadir Manual">
+            <button onClick={onAddClick} className="p-2 text-slate-400 hover:text-blue-500 dark:text-zinc-400 dark:hover:text-blue-400 rounded-full hover:bg-fill-8 transition-colors" title="Añadir Manual">
               <Plus size={16} />
             </button>
 
-            <button onClick={handleClearDb} className="p-2 text-slate-400 hover:text-red-500 dark:text-zinc-400 dark:hover:text-red-400 rounded-full hover:bg-slate-100 dark:hover:bg-zinc-800/60 transition-colors" title="Borrar DB">
+            <button onClick={handleClearDb} className="p-2 text-slate-400 hover:text-red-500 dark:text-zinc-400 dark:hover:text-red-400 rounded-full hover:bg-fill-8 transition-colors" title="Borrar DB">
               <Trash2 size={16} />
             </button>
 
-            <div className="h-4 w-px bg-slate-200 dark:bg-zinc-800 mx-1"></div>
+            <div className="h-4 w-px bg-fill-2 mx-1"></div>
 
             <button onClick={handleLogout} className="p-2 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-full transition-colors text-red-400" title="Cerrar Sesión">
               <LogOut size={16} />

@@ -89,8 +89,8 @@ export const FitnessStatsPage = ({
                         onClick={() => setMobileCategory(cat.id)}
                         className={`px-4 py-2 rounded-full text-xs font-semibold whitespace-nowrap transition-all select-none touch-manipulation active:scale-95 shrink-0 ${
                             mobileCategory === cat.id
-                                ? 'bg-slate-900 dark:bg-white text-ink-inverse shadow-xs font-bold'
-                                : 'bg-slate-200/70 dark:bg-zinc-800/80 text-body-soft hover:text-ink'
+                                ? 'bg-inverse text-ink-inverse shadow-xs font-bold'
+                                : 'bg-fill-4 text-body-soft hover:text-ink'
                         }`}
                     >
                         {cat.label}

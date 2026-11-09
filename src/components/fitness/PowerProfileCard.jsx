@@ -23,7 +23,7 @@ export const PowerProfileCard = ({
 }) => {
     return (
         <section className="mb-8">
-            <div className="bg-white dark:bg-zinc-900/50 rounded-2xl border border-line-muted p-6 sm:p-8 shadow-sm">
+            <div className="bg-surface-5 rounded-2xl border border-line-muted p-6 sm:p-8 shadow-sm">
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-10">
                     <div className="flex items-center gap-2">
                         <h3 className="text-[10px] font-bold text-ink-4 uppercase tracking-[0.1em]">Perfil de Potencia</h3>
@@ -31,23 +31,23 @@ export const PowerProfileCard = ({
                     </div>
                     <button
                         onClick={() => setShowPowerConfig(!showPowerConfig)}
-                        className={`flex items-center gap-2 px-4 py-1.5 rounded-xl text-[9px] font-bold uppercase tracking-widest transition-all border shadow-sm ${showPowerConfig ? 'bg-slate-100 dark:bg-zinc-800 border-line-2 text-blue-500' : 'bg-white dark:bg-zinc-900 border-line text-slate-400 hover:text-slate-600'}`}
+                        className={`flex items-center gap-2 px-4 py-1.5 rounded-xl text-[9px] font-bold uppercase tracking-widest transition-all border shadow-sm ${showPowerConfig ? 'bg-surface-2 border-line-2 text-blue-500' : 'bg-surface border-line text-slate-400 hover:text-slate-600'}`}
                     >
                         <Settings size={14} /> {showPowerConfig ? 'Cerrar' : 'Configurar'}
                     </button>
                 </div>
 
                 {showPowerConfig && (
-                    <div className="mb-10 p-6 bg-slate-50/50 dark:bg-zinc-800/30 rounded-2xl border border-line-soft animate-in slide-in-from-top-2 duration-300">
+                    <div className="mb-10 p-6 bg-sunken-3 rounded-2xl border border-line-soft animate-in slide-in-from-top-2 duration-300">
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                             <div>
                                 <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-6">Unidad de Medida</p>
-                                <div className="flex bg-slate-100/80 dark:bg-zinc-800/80 p-1 rounded-xl w-fit">
+                                <div className="flex bg-fill p-1 rounded-xl w-fit">
                                     {['wkg', 'w'].map(unit => (
                                         <button
                                             key={unit}
                                             onClick={() => setPowerUnit(unit)}
-                                            className={`px-4 py-1.5 rounded-lg text-[9px] font-bold uppercase tracking-widest transition-all ${powerUnit === unit ? 'bg-white dark:bg-zinc-700 text-ink-soft shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
+                                            className={`px-4 py-1.5 rounded-lg text-[9px] font-bold uppercase tracking-widest transition-all ${powerUnit === unit ? 'bg-surface-3 text-ink-soft shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
                                         >
                                             {unit === 'wkg' ? 'W/kg' : 'Vatios'}
                                         </button>
@@ -56,7 +56,7 @@ export const PowerProfileCard = ({
                             </div>
                             <div>
                                 <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-6">Periodo Analizado</p>
-                                <div className="flex bg-slate-100/80 dark:bg-zinc-800/80 p-1 rounded-xl w-fit">
+                                <div className="flex bg-fill p-1 rounded-xl w-fit">
                                     {[
                                         { id: '90d', label: '90 Días' },
                                         { id: '1y', label: '1 Año' },
@@ -65,7 +65,7 @@ export const PowerProfileCard = ({
                                         <button
                                             key={item.id}
                                             onClick={() => setPowerProfileTimeframe && setPowerProfileTimeframe(item.id)}
-                                            className={`px-3 py-1.5 rounded-lg text-[9px] font-bold uppercase tracking-widest transition-all ${powerProfileTimeframe === item.id ? 'bg-white dark:bg-zinc-700 text-ink-soft shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
+                                            className={`px-3 py-1.5 rounded-lg text-[9px] font-bold uppercase tracking-widest transition-all ${powerProfileTimeframe === item.id ? 'bg-surface-3 text-ink-soft shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
                                         >
                                             {item.label}
                                         </button>
@@ -79,7 +79,7 @@ export const PowerProfileCard = ({
                                         <button
                                             key={id}
                                             onClick={() => toggleDur(id)}
-                                            className={`px-3 py-1.5 rounded-lg text-[9px] font-bold uppercase transition-all border ${selectedDurs.has(id) ? 'bg-blue-500 border-blue-600 text-white shadow-sm' : 'bg-white dark:bg-zinc-800 border-slate-200 dark:border-zinc-700 text-slate-500 hover:border-slate-300'}`}
+                                            className={`px-3 py-1.5 rounded-lg text-[9px] font-bold uppercase transition-all border ${selectedDurs.has(id) ? 'bg-blue-500 border-blue-600 text-white shadow-sm' : 'bg-surface-7 border-slate-200 dark:border-zinc-700 text-slate-500 hover:border-slate-300'}`}
                                         >
                                             {formatInterval(id)}
                                         </button>
@@ -92,7 +92,7 @@ export const PowerProfileCard = ({
 
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
                     <div className="lg:col-span-2">
-                        <div className="h-[340px] w-full bg-slate-50/30 dark:bg-zinc-800/20 rounded-3xl p-4 border border-line-faint-2">
+                        <div className="h-[340px] w-full bg-sunken-7 rounded-3xl p-4 border border-line-faint-2">
                             <ResponsiveContainer width="100%" height="100%">
                                 <LineChart data={ppChartData} margin={{ top: 10, right: 10, left: -20, bottom: 5 }}>
                                     <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" opacity={0.3} vertical={false} />
@@ -111,12 +111,12 @@ export const PowerProfileCard = ({
                         {profile && (
                             <div className="mt-8 grid grid-cols-1 sm:grid-cols-2 gap-4">
                                 {profile?.strengths?.map((s, i) => (
-                                    <div key={i} className="flex items-center justify-between p-4 rounded-2xl bg-slate-50/50 dark:bg-zinc-800/30 border border-line-soft group">
+                                    <div key={i} className="flex items-center justify-between p-4 rounded-2xl bg-sunken-3 border border-line-soft group">
                                         <div>
                                             <p className="text-[10px] font-bold text-ink-2-soft uppercase tracking-tight mb-0.5">{s.area}</p>
                                             <p className="text-[9px] text-slate-400 font-bold uppercase tracking-tighter opacity-70 leading-tight">{s.desc}</p>
                                         </div>
-                                        <span className={`text-[8px] font-bold uppercase px-2 py-0.5 rounded-md shadow-sm border ${s.level === 'elite' ? 'text-purple-600 bg-purple-50 border-purple-100 dark:bg-purple-900/20 dark:border-purple-800/30' : s.level === 'good' ? 'text-emerald-600 bg-emerald-50 border-emerald-100 dark:bg-emerald-900/20 dark:border-emerald-800/30' : 'text-slate-500 bg-slate-50 border-slate-200 dark:bg-zinc-800 dark:border-zinc-700'}`}>
+                                        <span className={`text-[8px] font-bold uppercase px-2 py-0.5 rounded-md shadow-sm border ${s.level === 'elite' ? 'text-purple-600 bg-purple-50 border-purple-100 dark:bg-purple-900/20 dark:border-purple-800/30' : s.level === 'good' ? 'text-emerald-600 bg-emerald-50 border-emerald-100 dark:bg-emerald-900/20 dark:border-emerald-800/30' : 'text-slate-500 bg-sunken-9 border-slate-200 dark:border-zinc-700'}`}>
                                             {s.level === 'elite' ? 'Élite' : s.level === 'good' ? 'Destacado' : 'Base'}
                                         </span>
                                     </div>
@@ -127,7 +127,7 @@ export const PowerProfileCard = ({
                     <div className="space-y-3 overflow-y-auto max-h-[480px] custom-scrollbar pr-2 pt-1 border-l border-line-faint-2 pl-6">
                         <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-4">Mejores Esfuerzos</p>
                         {ppChartData.map(p => (
-                            <div key={p.name} className="flex items-center justify-between p-4 rounded-xl bg-slate-50/30 dark:bg-zinc-800/20 border border-slate-100/50 dark:border-zinc-800/50 hover:border-blue-500/20 transition-all cursor-default group">
+                            <div key={p.name} className="flex items-center justify-between p-4 rounded-xl bg-sunken-7 border border-slate-100/50 dark:border-zinc-800/50 hover:border-blue-500/20 transition-all cursor-default group">
                                 <div>
                                     <p className="text-[8px] font-bold text-slate-400 uppercase tracking-widest mb-1">{p.name}</p>
                                     <p className="text-sm font-bold text-ink-2 leading-none">

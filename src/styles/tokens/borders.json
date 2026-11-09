@@ -74,5 +74,21 @@
   "hairline-2": {
     "light": "black/[0.03]",
     "dark": "white/[0.04]"
+  },
+  "hairline-3": {
+    "light": "black/[0.04]",
+    "dark": "white/[0.08]"
+  },
+  "hairline-4": {
+    "light": "black/[0.05]",
+    "dark": "white/[0.08]"
+  },
+  "hairline-5": {
+    "light": "black/[0.03]",
+    "dark": "white/[0.05]"
+  },
+  "hairline-6": {
+    "light": "black/[0.06]",
+    "dark": "white/[0.08]"
   }
 }

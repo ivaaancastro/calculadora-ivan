@@ -72,7 +72,7 @@ export const LoginPage = () => {
         </div>
 
         {/* CAJA DE FORMULARIO */}
-        <div className="bg-white dark:bg-zinc-900 rounded-lg border border-line p-6 sm:p-8 shadow-sm relative overflow-hidden">
+        <div className="bg-surface rounded-lg border border-line p-6 sm:p-8 shadow-sm relative overflow-hidden">
           
           {isForgotPassword && (
             <button onClick={() => {setIsForgotPassword(false); setError(null); setMessage(null);}} className="absolute top-4 left-4 p-2 text-slate-400 hover:text-slate-700 dark:hover:text-zinc-200 transition-colors">
@@ -94,7 +94,7 @@ export const LoginPage = () => {
                 <Mail size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-ink-4" />
                 <input 
                   type="email" value={email} onChange={(e) => setEmail(e.target.value)} required
-                  className="w-full pl-10 pr-4 py-2.5 bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 rounded font-mono text-sm text-ink-2-soft focus:border-blue-500 outline-none transition-colors"
+                  className="w-full pl-10 pr-4 py-2.5 bg-sunken-2 border border-slate-200 dark:border-zinc-800 rounded font-mono text-sm text-ink-2-soft focus:border-blue-500 outline-none transition-colors"
                   placeholder="atleta@ejemplo.com"
                 />
               </div>
@@ -107,7 +107,7 @@ export const LoginPage = () => {
                   <User size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-ink-4" />
                   <input 
                     type="text" value={fullName} onChange={(e) => setFullName(e.target.value)} required
-                    className="w-full pl-10 pr-4 py-2.5 bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 rounded font-mono text-sm text-ink-2-soft focus:border-blue-500 outline-none transition-colors"
+                    className="w-full pl-10 pr-4 py-2.5 bg-sunken-2 border border-slate-200 dark:border-zinc-800 rounded font-mono text-sm text-ink-2-soft focus:border-blue-500 outline-none transition-colors"
                     placeholder="Tu nombre..."
                   />
                 </div>
@@ -121,7 +121,7 @@ export const LoginPage = () => {
                   <Lock size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-ink-4" />
                   <input 
                     type="password" value={password} onChange={(e) => setPassword(e.target.value)} required
-                    className="w-full pl-10 pr-4 py-2.5 bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 rounded font-mono text-sm text-ink-2-soft focus:border-blue-500 outline-none transition-colors"
+                    className="w-full pl-10 pr-4 py-2.5 bg-sunken-2 border border-slate-200 dark:border-zinc-800 rounded font-mono text-sm text-ink-2-soft focus:border-blue-500 outline-none transition-colors"
                     placeholder="••••••••"
                   />
                 </div>

@@ -108,7 +108,7 @@ const HistoryChartTooltip = ({ active, payload }) => {
 
 // Helper para calcular la recuperación de cualquier día
 const computeDayReadiness = (day, baselineRhr = 50) => {
-    if (!day) return { score: '--', label: 'Sin datos', color: 'text-slate-400', dot: 'bg-slate-400', badge: 'bg-slate-100 dark:bg-zinc-800 text-body-soft' };
+    if (!day) return { score: '--', label: 'Sin datos', color: 'text-slate-400', dot: 'bg-slate-400', badge: 'bg-surface-2 text-body-soft' };
 
     let score = day.readiness;
     if (score == null) {
@@ -222,7 +222,7 @@ export const HealthPage = ({ activities, settings, chartData }) => {
                 color: 'text-slate-400',
                 label: 'Desconocida',
                 msg: 'Registra o sincroniza tus datos biométricos para ver tu estado.',
-                badge: 'bg-slate-100 dark:bg-zinc-800 text-body-soft'
+                badge: 'bg-surface-2 text-body-soft'
             };
         }
         const r = wellnessMetrics.todayReadiness;
@@ -290,7 +290,7 @@ export const HealthPage = ({ activities, settings, chartData }) => {
     if (wellnessLoading && !wellnessMetrics) {
         return (
             <div className="animate-in fade-in duration-300 pb-20 w-full max-w-[1400px] mx-auto px-3 sm:px-6 py-24 flex flex-col items-center justify-center gap-4 text-center">
-                <div className="w-14 h-14 rounded-2xl bg-slate-100 dark:bg-zinc-800/80 flex items-center justify-center shadow-xs">
+                <div className="w-14 h-14 rounded-2xl bg-fill-3 flex items-center justify-center shadow-xs">
                     <Activity size={24} className="text-emerald-500 animate-pulse" />
                 </div>
                 <div>
@@ -306,7 +306,7 @@ export const HealthPage = ({ activities, settings, chartData }) => {
     if (!wellnessMetrics) {
         return (
             <div className="animate-in fade-in duration-300 pb-20 w-full max-w-[1400px] mx-auto px-3 sm:px-6 py-16 flex flex-col items-center justify-center gap-4 text-center">
-                <div className="w-14 h-14 rounded-2xl bg-slate-100 dark:bg-zinc-800/80 flex items-center justify-center text-slate-400">
+                <div className="w-14 h-14 rounded-2xl bg-fill-3 flex items-center justify-center text-slate-400">
                     <Activity size={24} className="text-slate-400" />
                 </div>
                 <div className="max-w-md">
@@ -331,7 +331,7 @@ export const HealthPage = ({ activities, settings, chartData }) => {
                                 Salud
                             </h1>
                             {wellnessMetrics && (
-                                <span className="text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-slate-200/70 dark:bg-zinc-800/80 text-body-soft uppercase tracking-wider">
+                                <span className="text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-fill-4 text-body-soft uppercase tracking-wider">
                                     {wellnessMetrics.isSimulated ? 'Modo Demo' : 'Biometría Diaria'}
                                 </span>
                             )}
@@ -342,13 +342,13 @@ export const HealthPage = ({ activities, settings, chartData }) => {
                     </div>
 
                     {/* Selector de Vista: Hoy vs Historial */}
-                    <div className="w-full sm:w-auto grid grid-cols-2 p-1 bg-slate-200/70 dark:bg-zinc-800/80 rounded-xl gap-1 shrink-0">
+                    <div className="w-full sm:w-auto grid grid-cols-2 p-1 bg-fill-4 rounded-xl gap-1 shrink-0">
                         <button
                             type="button"
                             onClick={() => setActiveTab('today')}
                             className={`py-1.5 px-4 text-xs font-semibold rounded-lg text-center transition-all active:scale-95 ${
                                 activeTab === 'today'
-                                    ? 'bg-white dark:bg-[#2c2c2e] text-ink shadow-xs font-bold'
+                                    ? 'bg-surface-4 text-ink shadow-xs font-bold'
                                     : 'text-ink-3 hover:text-ink-2-soft'
                             }`}
                         >
@@ -359,7 +359,7 @@ export const HealthPage = ({ activities, settings, chartData }) => {
                             onClick={() => setActiveTab('history')}
                             className={`py-1.5 px-4 text-xs font-semibold rounded-lg text-center transition-all active:scale-95 ${
                                 activeTab === 'history'
-                                    ? 'bg-white dark:bg-[#2c2c2e] text-ink shadow-xs font-bold'
+                                    ? 'bg-surface-4 text-ink shadow-xs font-bold'
                                     : 'text-ink-3 hover:text-ink-2-soft'
                             }`}
                         >
@@ -483,7 +483,7 @@ export const HealthPage = ({ activities, settings, chartData }) => {
                             </div>
 
                             {/* Barra estilo batería de iPhone */}
-                            <div className="w-full h-7 bg-slate-200/70 dark:bg-zinc-800/80 rounded-xl overflow-hidden p-1 relative shadow-inner">
+                            <div className="w-full h-7 bg-fill-4 rounded-xl overflow-hidden p-1 relative shadow-inner">
                                 <div
                                     className={`h-full rounded-lg transition-all duration-1000 ${
                                         energyBankAmount === '--' ? 'w-0' :
@@ -619,7 +619,7 @@ export const HealthPage = ({ activities, settings, chartData }) => {
                                         </span>
                                     </div>
                                     {typeof wellnessMetrics?.latestSteps === 'number' && wellnessMetrics.latestSteps > 0 && (
-                                        <div className="w-full mt-2 h-1.5 bg-slate-100 dark:bg-zinc-800 rounded-full overflow-hidden">
+                                        <div className="w-full mt-2 h-1.5 bg-surface-2 rounded-full overflow-hidden">
                                             <div
                                                 className="h-full bg-purple-500 rounded-full transition-all"
                                                 style={{ width: `${Math.min(100, (wellnessMetrics.latestSteps / 10000) * 100)}%` }}
@@ -753,7 +753,7 @@ export const HealthPage = ({ activities, settings, chartData }) => {
                             </span>
                         </div>
 
-                        <div className="flex items-center p-1 bg-slate-200/70 dark:bg-zinc-800/80 rounded-xl gap-1">
+                        <div className="flex items-center p-1 bg-fill-4 rounded-xl gap-1">
                             {[
                                 { days: 7, label: '7D' },
                                 { days: 14, label: '14D' },
@@ -765,7 +765,7 @@ export const HealthPage = ({ activities, settings, chartData }) => {
                                     onClick={() => setHistoryRange(r.days)}
                                     className={`py-1 px-3 text-xs font-bold rounded-lg transition-all active:scale-95 ${
                                         historyRange === r.days
-                                            ? 'bg-white dark:bg-[#2c2c2e] text-ink shadow-xs'
+                                            ? 'bg-surface-4 text-ink shadow-xs'
                                             : 'text-ink-3 hover:text-ink-2-soft'
                                     }`}
                                 >
@@ -826,7 +826,7 @@ export const HealthPage = ({ activities, settings, chartData }) => {
 
                             {/* Cuadrícula de Métricas de ese día */}
                             <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 sm:gap-3">
-                                <div className="p-3 bg-slate-50 dark:bg-zinc-800/40 rounded-xl border border-line-soft-3">
+                                <div className="p-3 bg-sunken-4 rounded-xl border border-line-soft-3">
                                     <span className="text-[10px] font-bold uppercase tracking-wider text-ink-4 block">
                                         Sueño
                                     </span>
@@ -838,7 +838,7 @@ export const HealthPage = ({ activities, settings, chartData }) => {
                                     </span>
                                 </div>
 
-                                <div className="p-3 bg-slate-50 dark:bg-zinc-800/40 rounded-xl border border-line-soft-3">
+                                <div className="p-3 bg-sunken-4 rounded-xl border border-line-soft-3">
                                     <span className="text-[10px] font-bold uppercase tracking-wider text-ink-4 block">
                                         VFC
                                     </span>
@@ -850,7 +850,7 @@ export const HealthPage = ({ activities, settings, chartData }) => {
                                     </span>
                                 </div>
 
-                                <div className="p-3 bg-slate-50 dark:bg-zinc-800/40 rounded-xl border border-line-soft-3">
+                                <div className="p-3 bg-sunken-4 rounded-xl border border-line-soft-3">
                                     <span className="text-[10px] font-bold uppercase tracking-wider text-ink-4 block">
                                         FC Reposo
                                     </span>
@@ -862,7 +862,7 @@ export const HealthPage = ({ activities, settings, chartData }) => {
                                     </span>
                                 </div>
 
-                                <div className="p-3 bg-slate-50 dark:bg-zinc-800/40 rounded-xl border border-line-soft-3">
+                                <div className="p-3 bg-sunken-4 rounded-xl border border-line-soft-3">
                                     <span className="text-[10px] font-bold uppercase tracking-wider text-ink-4 block">
                                         Estrés / Pasos
                                     </span>

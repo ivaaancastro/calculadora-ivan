@@ -8,7 +8,7 @@ import { Database } from 'lucide-react';
 export function EmptyState() {
   return (
     <div className="text-center py-20 px-4">
-      <div className="bg-white dark:bg-zinc-900 rounded-lg border border-line p-8 max-w-md mx-auto">
+      <div className="bg-surface rounded-lg border border-line p-8 max-w-md mx-auto">
         <Database
           size={32}
           className="mx-auto text-ink-4-dim mb-4"

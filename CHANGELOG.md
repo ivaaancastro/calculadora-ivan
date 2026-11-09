@@ -7,6 +7,10 @@ y este proyecto adhiere a [Semantic Versioning](https://semver.org/lang/es/).
 
 ## [Unreleased]
 
+### Rediseño — Capa 1: tokens y tema (`spec-rediseno-02-c1`), PR 4 de 6: superficies
+- `refactor(ui-tokens):` 266 de 336 pares de fondo claro/oscuro, incluidos los grises de iOS en hex, pasan a 43 tokens (`surface`, `sunken`, `fill`, `inverse`, `glass`, `canvas`…) con `scripts/codemods/surfaces.mjs`. `index.css` (`glass-*`, `ios-*`, `body`, `liquid-glass`, scrollbars) usa los tokens. Sin cambios visibles.
+- `chore(ui-tokens):` el codemod lee los `@apply` de CSS y los colores en hex.
+
 ### Rediseño — Capa 1: tokens y tema (`spec-rediseno-02-c1`), PR 3 de 6: texto
 - `refactor(ui-tokens):` 540 de 577 pares de texto neutro claro/oscuro (`text`, `placeholder:`, `group-hover:`…) pasan a 17 tokens (`ink`, `ink-2`, `ink-3`, `ink-4`, `body`, `faint`, `ink-inverse`…) con `scripts/codemods/text.mjs`. Sin cambios visibles.
 - `chore(ui-tokens):` CLI común de los codemods (`scripts/codemods/family.mjs`); la regla de precedencia distingue las ramas opuestas de un ternario y propaga el bloqueo a lo que coexiste con un literal no migrado.

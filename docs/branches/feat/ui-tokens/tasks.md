@@ -50,9 +50,18 @@ Solo se marca lo verificado. Spec y plan aprobados el 2026-11-09 ("Apruebo todo"
 - Resultados: lint ✓, lint:colors ✓, unit 88/88, integración 10/10, build ✓, E2E macOS 79 ✓ (133 omitidas: capturas y volcado), E2E Docker 127 ✓ (48 capturas sin diferencias; el ✘ de `gestures.spec.js:37` es el fallo esperado de D-01).
 
 ## PR 4 — Superficies (`feat/ui-tokens-surfaces`)
-- [ ] Inventario, tabla, codemod (incluye `index.css`), revisión manual
-- [ ] Verificación completa, cobertura ≥ 75 %
-- [ ] PR
+- [x] Inventario, tabla (`src/styles/tokens/surfaces.json`, 43 tokens), codemod (`scripts/codemods/surfaces.mjs`, incluye `index.css`) y revisión manual
+- [x] Cobertura ≥ 75 %: **79,2 %** (266 de 336 pares de fondo)
+- [x] Verificación completa
+- [x] PR (#55)
+
+### Notas de verificación del PR 4
+- El codemod lee también los `@apply` de CSS (cada uno es una expresión de clases) y los grises de iOS en hex (`[#1c1c1e]`, `[#2c2c2e]`); los acentos en hex (`#0A84FF`…) siguen para el PR 5.
+- `index.css`: `glass-*`, `ios-*` (fondo, borde fino con 4 tokens `hairline-3…6` y texto `ink-3`), fondo y color de `body` (`canvas`, `canvas-ink`), fondo y borde de `liquid-glass` y `liquid-glass-active` (`liquid-*`) y scrollbars (`scrollbar-thumb*`). Las sombras no se tocan (fuera de la capa). Las clases siguen existiendo.
+- Al pasar a token, la regla oscura de esas utilidades baja de `.dark .x` (0,2,0) a `.x` (0,1,0). Revisado: ninguna se combina con clases de color en el mismo elemento; `liquid-glass` + `liquid-glass-active` (`BottomNav`) sigue ganando la segunda por orden.
+- **La red detectó un cambio y se corrigió:** `sportColors.planned` (`CalendarPage.jsx:1498`) se interpola en otra plantilla junto a `bg-white`; con el token, en oscuro ganaba `bg-white` (volcado: 72 diferencias en el Calendario oscuro; capturas: `calendario` oscuro en los 3 tamaños). El codemod no puede verlo (la clase se define en un sitio y se combina en otro): ese par vuelve a mano a `bg-white dark:bg-zinc-900` con un comentario. Tras revertirlo: 82 volcados, 64.132 entradas, **0 diferencias**.
+- `lint:colors`: `dark` 607 → 334, `palette` 1.901 → 1.373; 980 clases con tokens.
+- Resultados: lint ✓, lint:colors ✓, unit 94/94, integración 10/10, build ✓, E2E macOS 79 ✓ (133 omitidas), E2E Docker 127 ✓ (48 capturas sin diferencias; el ✘ de `gestures.spec.js:37` es el fallo esperado de D-01).
 
 ## PR 5 — Acentos (`feat/ui-tokens-accents`)
 - [ ] Mapa de significado y tokens `legacy-*`; D-07 en `paridad.md`

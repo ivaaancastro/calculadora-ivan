@@ -15,7 +15,7 @@ export const EstimatedFtpCard = ({
 }) => {
     return (
         <section className="mb-12">
-            <div className="bg-white dark:bg-zinc-900/50 rounded-2xl border border-line-muted p-6 sm:p-8 shadow-sm">
+            <div className="bg-surface-5 rounded-2xl border border-line-muted p-6 sm:p-8 shadow-sm">
                 <div className="flex items-center gap-2 mb-10">
                     <h3 className="text-[10px] font-bold text-ink-4 uppercase tracking-[0.1em]">FTP Estimado</h3>
                     <InfoTooltip text="Umbral funcional de potencia proyectado (eFTP)." />
@@ -33,7 +33,7 @@ export const EstimatedFtpCard = ({
                         )}
 
                         {ftpDiff !== null && (
-                            <div className="mt-8 flex items-center gap-2.5 p-3.5 rounded-2xl bg-slate-50/50 dark:bg-zinc-800/30 border border-line-soft w-fit">
+                            <div className="mt-8 flex items-center gap-2.5 p-3.5 rounded-2xl bg-sunken-3 border border-line-soft w-fit">
                                 {ftpDiff > 0 ? <ArrowUp size={16} className="text-emerald-500" /> : ftpDiff < 0 ? <ArrowDown size={16} className="text-red-500" /> : <Minus size={16} className="text-slate-400" />}
                                 <span className={`text-[10px] font-bold uppercase tracking-tight ${ftpDiff > 0 ? 'text-emerald-600' : ftpDiff < 0 ? 'text-red-600' : 'text-slate-500'}`}>
                                     {ftpDiff > 0 ? '+' : ''}{ftpDiff}W <span className="opacity-50 font-bold ml-1">vs config ({configFTP}W)</span>
@@ -41,7 +41,7 @@ export const EstimatedFtpCard = ({
                             </div>
                         )}
                     </div>
-                    <div className="h-[240px] w-full bg-slate-50/30 dark:bg-zinc-800/20 rounded-3xl p-4 border border-line-faint-2">
+                    <div className="h-[240px] w-full bg-sunken-7 rounded-3xl p-4 border border-line-faint-2">
                         {curveChartData.length > 0 ? (
                             <ResponsiveContainer width="100%" height="100%">
                                 <AreaChart data={curveChartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
@@ -59,7 +59,7 @@ export const EstimatedFtpCard = ({
                                 </AreaChart>
                             </ResponsiveContainer>
                         ) : (
-                            <div className="h-full flex items-center justify-center text-slate-400 text-[9px] font-bold uppercase tracking-widest bg-slate-50/30 dark:bg-zinc-800/20 rounded-3xl border border-dashed border-slate-200 dark:border-zinc-800/50">No hay datos de potencia</div>
+                            <div className="h-full flex items-center justify-center text-slate-400 text-[9px] font-bold uppercase tracking-widest bg-sunken-7 rounded-3xl border border-dashed border-slate-200 dark:border-zinc-800/50">No hay datos de potencia</div>
                         )}
                     </div>
                 </div>

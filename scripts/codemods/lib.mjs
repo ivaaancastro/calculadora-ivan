@@ -35,17 +35,17 @@ const ANY_COLOR = `(?:(?:${[...PALETTE, 'white', 'black', 'transparent', 'curren
 /** Grupo de propiedad CSS: `border`, `border-b`… compiten entre sí. */
 const conflictGroup = (prop) => (prop.startsWith('border') ? 'border' : prop);
 
-/** Lista los archivos .js/.jsx de `dirs` (relativos a `root`), sin pruebas. */
+/** Lista los archivos .js/.jsx de `entries` (relativos a `root`), sin pruebas. Un archivo nombrado (p. ej. index.css) entra siempre. */
 export function listFiles(root, entries) {
   const out = [];
-  const walk = (p) => {
+  const walk = (p, named = false) => {
     const st = statSync(p);
     if (st.isDirectory()) {
       if (p.endsWith('__tests__')) return;
       for (const n of readdirSync(p)) walk(join(p, n));
-    } else if (/\.(jsx?|tsx?)$/.test(p)) out.push(p);
+    } else if (named || /\.(jsx?|tsx?)$/.test(p)) out.push(p);
   };
-  for (const e of entries) walk(join(root, e));
+  for (const e of entries) walk(join(root, e), true);
   return out.map((p) => relative(root, p).split(sep).join('/')).sort();
 }
 
@@ -106,6 +106,25 @@ export function findLiterals(source) {
   return out;
 }
 
+/**
+ * Literales de un CSS: cada `@apply …;` es una expresión de clases (Tailwind aplica sus
+ * utilidades con el mismo orden que en un className, así que rige la misma precedencia).
+ */
+export function findCssLiterals(source) {
+  const out = [];
+  const re = /@apply\s+([^;]+);/g;
+  let m;
+  let group = 0;
+  while ((m = re.exec(source))) {
+    const start = m.index + m[0].indexOf(m[1]);
+    out.push({ start, end: start + m[1].length, text: m[1], gluedStart: false, gluedEnd: false, group: `css${++group}`, branches: [] });
+  }
+  return out;
+}
+
+/** Literales de un archivo según su tipo. */
+export const literalsOf = (file, source) => (/\.css$/.test(file) ? findCssLiterals(source) : findLiterals(source));
+
 /** ¿Pueden dos literales de la misma expresión acabar a la vez en el mismo elemento? */
 export function canCoexist(a, b) {
   if (a === b) return true;
@@ -151,11 +170,13 @@ export function parseColorClass(cls, props, colors = NEUTRALS, colorPattern = nu
   };
 }
 
-/** Valor de un color de Tailwind ("zinc-800/50", "black/[0.04]") → { rgb: 'r g b', a: número }. */
+/** Valor de un color de Tailwind ("zinc-800/50", "black/[0.04]", "[#1c1c1e]/95") → { rgb: 'r g b', a: número }. */
 export function resolveColor(spec) {
   const [name, alphaRaw] = spec.split('/');
   let hex;
-  if (name === 'white') hex = '#ffffff';
+  const arbitrary = name.match(/^\[(#[0-9a-fA-F]{6})\]$/) || name.match(/^(#[0-9a-fA-F]{6})$/);
+  if (arbitrary) hex = arbitrary[1];
+  else if (name === 'white') hex = '#ffffff';
   else if (name === 'black') hex = '#000000';
   else {
     const [family, shade] = name.split(/-(?=\d+$)/);
@@ -227,7 +248,7 @@ export function collectPairs(root, files, props, colors = NEUTRALS) {
   const out = [];
   for (const file of files) {
     const src = readFileSync(join(root, file), 'utf8');
-    for (const lit of findLiterals(src)) {
+    for (const lit of literalsOf(file, src)) {
       for (const p of findPairs(lit, props, colors)) out.push({ file, lit, ...p });
     }
   }
@@ -243,8 +264,8 @@ export function collectPairs(root, files, props, colors = NEUTRALS) {
  * se deja todo como está: un token es una sola clase y cambiaría cuál gana en CSS frente a
  * `dark:`, que hoy se genera después de `hover:`/`focus:`.
  */
-export function transform(source, props, table, colors = NEUTRALS) {
-  const lits = findLiterals(source).map((lit) => ({ lit, pairs: findPairs(lit, props, colors) }));
+export function transform(source, props, table, colors = NEUTRALS, file = 'x.jsx') {
+  const lits = literalsOf(file, source).map((lit) => ({ lit, pairs: findPairs(lit, props, colors) }));
   // Propiedades que cada literal deja sin migrar (clase suelta, par sin token, par descartado).
   const stuck = new Map();
   for (const { lit, pairs } of lits) {

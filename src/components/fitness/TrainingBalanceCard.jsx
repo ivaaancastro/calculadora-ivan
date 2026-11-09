@@ -5,18 +5,18 @@ import { InfoTooltip } from '../common/InfoTooltip';
 export const TrainingBalanceCard = ({ balance, balanceDays, setBalanceDays }) => {
     return (
         <section className="mb-8">
-            <div className="bg-white dark:bg-zinc-900/50 rounded-2xl border border-line-muted p-6 sm:p-8 shadow-sm">
+            <div className="bg-surface-5 rounded-2xl border border-line-muted p-6 sm:p-8 shadow-sm">
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-10">
                     <div className="flex items-center gap-2">
                         <h3 className="text-[10px] font-bold text-ink-4 uppercase tracking-[0.1em]">Balance de Entrenamiento</h3>
                         <InfoTooltip text="Distribución de la carga en los últimos días según intensidad." />
                     </div>
-                    <div className="flex bg-slate-100/80 dark:bg-zinc-800/80 p-1 rounded-xl">
+                    <div className="flex bg-fill p-1 rounded-xl">
                         {[{ l: '7D', v: 7 }, { l: '30D', v: 30 }, { l: '90D', v: 90 }].map(p => (
                             <button
                                 key={p.v}
                                 onClick={() => setBalanceDays(p.v)}
-                                className={`px-4 py-1.5 rounded-lg text-[9px] font-bold uppercase tracking-widest transition-all ${balanceDays === p.v ? 'bg-white dark:bg-zinc-700 text-blue-500 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
+                                className={`px-4 py-1.5 rounded-lg text-[9px] font-bold uppercase tracking-widest transition-all ${balanceDays === p.v ? 'bg-surface-3 text-blue-500 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
                             >
                                 {p.l}
                             </button>
@@ -27,11 +27,11 @@ export const TrainingBalanceCard = ({ balance, balanceDays, setBalanceDays }) =>
                 {balance && !balance.empty ? (
                     <div className="space-y-12">
                         <div className="grid grid-cols-2 gap-8 px-2">
-                            <div className="p-4 rounded-2xl bg-slate-50/50 dark:bg-zinc-800/30 border border-line-soft">
+                            <div className="p-4 rounded-2xl bg-sunken-3 border border-line-soft">
                                 <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1">Carga Total</p>
                                 <p className="text-3xl font-black text-ink-soft">{Math.round(balance.totalLoad)} <span className="text-xs font-bold text-slate-400">Pts</span></p>
                             </div>
-                            <div className="p-4 rounded-2xl bg-slate-50/50 dark:bg-zinc-800/30 border border-line-soft">
+                            <div className="p-4 rounded-2xl bg-sunken-3 border border-line-soft">
                                 <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1">Ratio An/Ae</p>
                                 <p className="text-3xl font-black text-ink-soft">{(balance.anaerobic / (balance.aerobicHigh + balance.aerobicLow || 1)).toFixed(2)}</p>
                                 <p className="text-[8px] font-bold text-slate-500 uppercase mt-1 tracking-tighter">Aeróbico vs Anaeróbico</p>
@@ -57,7 +57,7 @@ export const TrainingBalanceCard = ({ balance, balanceDays, setBalanceDays }) =>
                                                 <span className="text-[10px] font-bold text-ink-3 uppercase tracking-tight">{b.label}</span>
                                                 <div className="flex items-center gap-2 mt-1">
                                                     <span className={`text-[13px] font-black ${status === 'Alto' ? 'text-rose-500' : 'text-ink-soft'}`}>{Math.round(b.pct)}%</span>
-                                                    <span className={`text-[8px] font-black uppercase px-1.5 py-0.5 rounded-md border ${status === 'Óptimo' ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-500' : 'bg-slate-100 dark:bg-zinc-800 border-slate-200 dark:border-zinc-700 text-slate-400'}`}>
+                                                    <span className={`text-[8px] font-black uppercase px-1.5 py-0.5 rounded-md border ${status === 'Óptimo' ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-500' : 'bg-surface-2 border-slate-200 dark:border-zinc-700 text-slate-400'}`}>
                                                         {status}
                                                     </span>
                                                 </div>
@@ -94,8 +94,8 @@ export const TrainingBalanceCard = ({ balance, balanceDays, setBalanceDays }) =>
                             })}
                         </div>
 
-                        <div className="p-6 rounded-3xl bg-slate-50/50 dark:bg-zinc-800/30 border border-line-soft flex items-start gap-5 shadow-sm transition-all hover:shadow-md">
-                            <div className="p-3 rounded-2xl bg-white dark:bg-zinc-700 shadow-sm">
+                        <div className="p-6 rounded-3xl bg-sunken-3 border border-line-soft flex items-start gap-5 shadow-sm transition-all hover:shadow-md">
+                            <div className="p-3 rounded-2xl bg-surface-3 shadow-sm">
                                 <Brain size={24} style={{ color: balance.color }} />
                             </div>
                             <div className="flex-1">
