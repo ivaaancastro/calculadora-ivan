@@ -7,6 +7,11 @@ y este proyecto adhiere a [Semantic Versioning](https://semver.org/lang/es/).
 
 ## [Unreleased]
 
+### Rediseño — Capa 1: tokens y tema (`spec-rediseno-02-c1`), PR 6 de 6: gráficas
+- `refactor(ui-tokens):` las gráficas de Recharts (Dashboard, Rendimiento, Salud, detalle de actividad), el SVG de la PMC del Calendario y el mapa de Leaflet leen sus colores de `useChartTheme()`; 156 colores pasan a `chartTheme` (72 tokens: series, deportes, zonas, anatomía, tooltip, mapa y PMC; 56 nuevos en `src/styles/tokens/charts.json`). Sin cambios visibles.
+- `chore(ui-tokens):` `scripts/codemods/charts.mjs` (asignación por línea que comprueba cada valor) y prueba de paridad `chartTheme` ↔ `tokens.css` sobre todos los bloques.
+- `docs(ui-safety-net):` D-10, las gráficas no cambian en oscuro y cada pantalla usa su propia anatomía.
+
 ### Rediseño — Capa 1: tokens y tema (`spec-rediseno-02-c1`), PR 5b de 6: acentos de categoría
 - `refactor(ui-tokens):` 237 pares de acento pasan a 84 tokens de categoría (`sport-*`, `hr`, `power`, `pace`, `speed`, `cadence`, `load`, `vo2`, `hrv`, `sleep`, `steps`, `section-*`, `form-*`, `strava`, `today`, `legacy-*`) y a los de estado y métricas, con `scripts/codemods/categories.mjs` y una asignación por línea revisada a mano. Sin cambios visibles.
 - `chore(ui-tokens):` el codemod admite una tabla por expresión y no migra un par `dark:` de base junto a una clase de estado sin `dark:` (caso D-08).

@@ -96,9 +96,17 @@ Partido en 5a y 5b (decisión del usuario, 2026-11-09): clasificar unos 740 usos
 - Resultados: lint ✓, lint:colors ✓, unit 113/113, integración 10/10, build ✓, E2E macOS 79 ✓ (133 omitidas), E2E Docker 127 ✓ (48 capturas sin diferencias; el ✘ de `gestures.spec.js:37` es el fallo esperado de D-01).
 
 ## PR 6 — Gráficas (`feat/ui-tokens-charts`)
-- [ ] Recharts (9 archivos), SVG del Calendario y `ActivityMap` con `useChartTheme()`
-- [ ] Volcado: rejilla, mapa y vista "Forma" revisados expresamente
+- [x] Recharts (9 archivos), SVG del Calendario y `ActivityMap` con `useChartTheme()`; tooltip de las tarjetas de Forma (`tooltipStyleFor`); D-10 en `paridad.md`
+- [x] Volcado: rejilla, mapa y vista "Forma" revisados expresamente
 - [ ] PR
+
+### Notas del PR 6
+- `chartTheme.js` agrupa los colores por rol según `dataviz`: `series`, `sports`, `distribution`, `zones`, `anatomy`, `tooltip`, `map` y `pmc` (72 tokens distintos). Las series reutilizan tokens existentes (`metric-*`, `legacy-atl-orange`, `hr`, `pace`, `power`, `cadence`, `ef`, `sleep`, `sport-bike`, `sport-run`); 56 tokens nuevos en `src/styles/tokens/charts.json`. `useChartTheme()` devuelve solo los colores (`ct.series.hr`).
+- No hay pares por valor: el mismo hex es cosas distintas según la gráfica. `scripts/codemods/charts.mjs --apply` sustituye cada literal según `ASSIGN` (archivo → línea → roles) y falla si el valor no es el del rol: 156 colores en 10 archivos. Lo estructural se hizo a mano: `const ct = useChartTheme()` en cada componente, `COLORS` de `ChartsSection` dentro del componente, las listas de zonas del detalle (`ct.zones.hr`, `ct.zones.all`) y `tooltipStyle` → `tooltipStyleFor(ct)`.
+- Sin migrar, con motivo: los colores de zona de los bloques de entreno del Calendario (no son gráficas; escalas ordinales, Capa 3), `ZONE_COLORS` sin uso e imports de Recharts sin uso en `AdvancedAnalytics`, el `dark:stroke` sin efecto de Salud (D-10) y la sombra del tooltip (sombras, fuera de la Capa 1).
+- Volcado: **0 diferencias** en 82 volcados (64.132 elementos). Revisado expresamente: rejilla y series del Dashboard (`#cbd5e1`, CTL, TSB, punto activo), mapa (halo, ruta, inicio y fin en `detalle-mapa`), PMC de la vista "Forma" (CTL `sky-400`, línea de hoy), tarjetas de Rendimiento (EF, rejilla `zinc-700`, perfil) y Salud (anillos, rejilla, barras). No los ve: la gráfica de zonas del detalle (otra pestaña) y `ChartsSection` (no se renderiza); sus valores los comprueban el codemod y la prueba de paridad.
+- `lint:colors`: `hex` 266 → 100, `rgb` 13 → 11.
+- Resultados: lint ✓, lint:colors ✓, unit + integración 128/128, build ✓, E2E macOS 79 ✓ (133 omitidas), E2E Docker 127 ✓ (48 capturas sin diferencias; el ✘ de `gestures.spec.js:37` es el fallo esperado de D-01).
 
 ## Cierre
 - [ ] Cobertura final frente a los objetivos
