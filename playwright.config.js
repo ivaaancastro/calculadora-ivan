@@ -12,6 +12,10 @@ const E2E_ENV = {
   VITE_SUPABASE_URL: 'https://e2e-forma.supabase.co',
   VITE_SUPABASE_KEY: 'e2e-anon-key',
   VITE_GEMINI_API_KEY: '',
+  // Sin estas variables el callback de Strava muestra "Faltan las claves API" (en CI no hay .env).
+  VITE_STRAVA_CLIENT_ID: 'e2e-strava-client',
+  VITE_STRAVA_CLIENT_SECRET: 'e2e-strava-secret',
+  VITE_STRAVA_REDIRECT_URI: 'http://localhost:5273/strava-callback',
 };
 
 const VISUAL_SPECS = /(visual|layout|touch|gestures)\.spec\.js/;
