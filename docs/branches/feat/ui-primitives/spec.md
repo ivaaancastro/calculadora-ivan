@@ -133,11 +133,12 @@ Las variantes llevan el nombre de su papel, no el de la pantalla. Si dos recetas
 **Card y SectionHeader** (PR 1)
 ```jsx
 <Card variant="grouped" pressable className="p-3.5 sm:p-4 flex flex-col justify-between">…</Card>
-<SectionHeader as="p" className="mb-3">Biomarcadores clave</SectionHeader>
+<SectionHeader as="p">Biomarcadores clave</SectionHeader>
 ```
 - `variant`: `grouped` (= `ios-card`: 33 + 6 de `IosCard`) | `panel` (tarjetas de Rendimiento: 11).
-- `pressable` (= `ios-touch`, 13). `as` (por defecto `div`; también `section`). Sin relleno propio: el relleno sigue en `className`, como hoy.
-- `SectionHeader`: `as` (`p` o `div`, como hoy) y `tone="danger"` para "Zona de peligro" (hoy `ios-header text-danger-ink-2`).
+- `pressable` (= `ios-touch`, 13), `divided` (= `divide-y divide-hairline`, 3 listas de Ajustes). `as` (por defecto `div`; también `section`). Sin relleno propio: el relleno sigue en `className`, como hoy.
+- `SectionHeader`: `as` (`p` o `div`, como hoy).
+- **Corrección (PR 1):** `ios-card`, `ios-touch` e `ios-header` estaban en `@layer utilities` y se emitían después de las utilidades de Tailwind, así que ganaban a cualquier clase del mismo atributo puesta a su lado. El `border-danger-edge-2` y el `text-danger-ink-2` de "Zona de peligro" y el `mb-3` de 4 títulos de Salud nunca se veían. No hay `tone="danger"`: no existe una receta que copiar, y esas clases se retiran.
 
 **Stat y StatTile** (PR 2)
 ```jsx

@@ -14,7 +14,7 @@
 
 ## 1. Estado del proyecto
 - **Nombre:** Forma — Dashboard de rendimiento deportivo y salud
-- **Rama actual:** `feat/ui-primitives` (Capa 2, PR 0: infraestructura). Spec y plan aprobados el 2026-11-09; siguiente: PR 1 (`Card`, `SectionHeader`).
+- **Rama actual:** `feat/ui-primitives-card` (Capa 2, PR 1: `Card`, `SectionHeader`). PR 0 mergeado (#60). Siguiente: PR 2 (`Stat`, `StatTile`).
 - **Rama base:** `develop`
 - **Rama de producción:** `main` (desplegada en Vercel)
 - **Versión:** 0.1.0
@@ -44,7 +44,7 @@
 | spec-rediseno-02 | Rediseño de la webapp por capas (roadmap) | en curso | 2026-11-06 | `docs/branches/feat/webapp-redesign/` |
 | spec-rediseno-02-c0 | Capa 0: red de seguridad de UI | implementada (PR #51 mergeado en `develop`) | 2026-11-06 | test/ui-safety-net |
 | spec-rediseno-02-c1 | Capa 1: tokens y tema | implementada (PRs #52 a #58 mergeados en `develop`; cobertura y pendientes en `tasks.md`, Cierre) | 2026-11-09 | `docs/branches/feat/ui-tokens/` |
-| spec-rediseno-02-c2 | Capa 2: primitivas | en curso (aprobada el 2026-11-09; PR 0 de 9) | 2026-11-09 | `docs/branches/feat/ui-primitives/` |
+| spec-rediseno-02-c2 | Capa 2: primitivas | en curso (aprobada el 2026-11-09; PR 0 mergeado, PR 1 en revisión) | 2026-11-09 | `docs/branches/feat/ui-primitives/` |
 
 > Cuando un agente implemente una spec, debe añadir una fila aquí y marcarla como `implementada`.
 
@@ -107,6 +107,8 @@
 - `node scripts/ui-inventory.mjs <button|field|card|modal|tooltip|loading|any> [--all]`: recetas y usos (archivo:línea).
 - Un archivo nuevo empieza con `lint:colors` en 0: una primitiva no puede llevarse un color suelto; se crea un token exacto (D2).
 - **Volcado de la Capa 2:** `STYLE_DUMP_PROPS=full STYLE_DUMP_DIR=<dir> npx playwright test e2e/tools/style-dump.spec.js` (color + tipografía, caja, radios, disposición y efectos; 104 volcados). Solo se comparan volcados del mismo modo. El de color no ve rellenos ni radios.
+- **Clases propias de `index.css` en `@layer utilities`** (como las antiguas `ios-*`, y hoy `glass-nav` y `liquid-glass`): Tailwind las emite después de sus utilidades, así que ganan a cualquier clase del mismo atributo que se les ponga al lado. Antes de sustituir una por clases de Tailwind, mirar en el CSS compilado de `develop` (`npx tailwindcss -i src/index.css -o <archivo>`) qué clases de su lado no se veían: se retiran, no se conservan.
+- El volcado solo fuerza `:active`/`:hover`/`:focus` en los elementos con `active:`/`hover:`/`focus:` en `class`: si una clase propia escondía esa variante (p. ej. `.ios-touch`), la rama da claves nuevas. Para compararlas, repetir el volcado de `develop` añadiendo esa clase al selector del estado (solo en el worktree).
 - En móvil, `MobileSwipePager` monta las otras pestañas fuera de pantalla: al buscar "la primera gráfica" hay que filtrar por posición horizontal (`hoverChart` del volcado). La gráfica de Salud solo existe en la vista "Historial".
 
 ### Cómo trabajar con la red de seguridad (Capa 0)
