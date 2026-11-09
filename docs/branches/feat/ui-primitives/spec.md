@@ -146,8 +146,9 @@ Las variantes llevan el nombre de su papel, no el de la pantalla. Si dos recetas
 <StatTile size="lg" label="Fitness (CTL)" icon={Activity} iconTone="metric-ctl"
           value={62} sub="+3,1 % vs 28d" />                                       // fichas
 ```
-- `Stat` sustituye a `MetricCard` con la misma API. `accent` solo acepta un token de texto.
-- `StatTile` compone `Card grouped pressable`. `size`: `lg` (Fisiología de `AdvancedAnalytics`, 4), `md` (biomarcadores de Salud, 8), `sm` (KPI de `AdvancedAnalytics`, en bucle). `iconTone` elige de una lista cerrada los pares icono/fondo que hoy existen.
+- `Stat` sustituye a `MetricCard` con la misma API. Su borde (`black/[0.04]`, `white/[0.07]`) pasa al token `hairline-5`. `accent` es la clase de color del valor: un token, salvo el del drift, que llega de `src/hooks/useActivityMetrics.js` como clase de paleta (no se toca).
+- `StatTile` compone `Card grouped pressable`. `size`: `lg` (Fisiología y Carga de `AdvancedAnalytics`, 4) y `sm` (KPI de `AdvancedAnalytics`, 4, en bucle). `iconTone` elige de una lista cerrada los pares icono/fondo que ya existen; los que usaban paleta o hex pasan a tokens nuevos de `metrics.json` (`metric-*-tile`).
+- **Alcance reducido (PR 2, acordado el 2026-11-09):** las 8 fichas de Salud (`md`) no entran. Cada una tiene un pie distinto (barra de progreso, tendencia con icono, texto), valores con colores dinámicos de paleta, unidad condicional y un hueco distinto en SpO₂. Siguen con `Card pressable` y su contenido; quedan para la Capa 3.
 
 **Segmented** (PR 3)
 ```jsx
