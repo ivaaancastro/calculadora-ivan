@@ -20,6 +20,8 @@ jobs:
         run: npm ci
       - name: Run Linter
         run: npm run lint
+      - name: Check loose colors (tokens ratchet)
+        run: npm run lint:colors
 
   validate-specs:
     runs-on: ubuntu-latest

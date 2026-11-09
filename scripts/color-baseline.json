@@ -1,0 +1,320 @@
+{
+  "$comment": "Línea base de scripts/check-colors.mjs. Solo debe bajar (npm run lint:colors -- --update). Subirla a mano exige justificarlo en el PR.",
+  "totals": {
+    "palette": 3315,
+    "arbitrary": 66,
+    "hex": 274,
+    "rgb": 19,
+    "dark": 1314
+  },
+  "files": {
+    "src/App.jsx": {
+      "palette": 4,
+      "arbitrary": 0,
+      "hex": 2,
+      "rgb": 0,
+      "dark": 2
+    },
+    "src/components/Dashboard.jsx": {
+      "palette": 18,
+      "arbitrary": 0,
+      "hex": 0,
+      "rgb": 0,
+      "dark": 8
+    },
+    "src/components/activity/ActivityMap.jsx": {
+      "palette": 26,
+      "arbitrary": 0,
+      "hex": 10,
+      "rgb": 0,
+      "dark": 13
+    },
+    "src/components/activity/ActivitySharedUI.jsx": {
+      "palette": 32,
+      "arbitrary": 2,
+      "hex": 0,
+      "rgb": 0,
+      "dark": 10
+    },
+    "src/components/auth/LoginPage.jsx": {
+      "palette": 78,
+      "arbitrary": 0,
+      "hex": 0,
+      "rgb": 0,
+      "dark": 33
+    },
+    "src/components/common/ErrorBoundary.jsx": {
+      "palette": 29,
+      "arbitrary": 0,
+      "hex": 0,
+      "rgb": 0,
+      "dark": 13
+    },
+    "src/components/common/InfoTooltip.jsx": {
+      "palette": 11,
+      "arbitrary": 0,
+      "hex": 0,
+      "rgb": 0,
+      "dark": 5
+    },
+    "src/components/common/StravaCallback.jsx": {
+      "palette": 24,
+      "arbitrary": 0,
+      "hex": 0,
+      "rgb": 0,
+      "dark": 11
+    },
+    "src/components/common/StravaConnect.jsx": {
+      "palette": 1,
+      "arbitrary": 2,
+      "hex": 0,
+      "rgb": 0,
+      "dark": 0
+    },
+    "src/components/dashboard/ActivityRouteWrapper.jsx": {
+      "palette": 1,
+      "arbitrary": 0,
+      "hex": 0,
+      "rgb": 0,
+      "dark": 0
+    },
+    "src/components/dashboard/ActivitySubRoutes.jsx": {
+      "palette": 1,
+      "arbitrary": 0,
+      "hex": 0,
+      "rgb": 0,
+      "dark": 0
+    },
+    "src/components/dashboard/AdvancedAnalytics.jsx": {
+      "palette": 64,
+      "arbitrary": 23,
+      "hex": 7,
+      "rgb": 0,
+      "dark": 31
+    },
+    "src/components/dashboard/ChartsSection.jsx": {
+      "palette": 6,
+      "arbitrary": 0,
+      "hex": 11,
+      "rgb": 0,
+      "dark": 0
+    },
+    "src/components/dashboard/EmptyState.jsx": {
+      "palette": 10,
+      "arbitrary": 0,
+      "hex": 0,
+      "rgb": 0,
+      "dark": 5
+    },
+    "src/components/dashboard/EvolutionChart.jsx": {
+      "palette": 55,
+      "arbitrary": 11,
+      "hex": 19,
+      "rgb": 0,
+      "dark": 26
+    },
+    "src/components/dashboard/FuelingPanel.jsx": {
+      "palette": 88,
+      "arbitrary": 0,
+      "hex": 0,
+      "rgb": 0,
+      "dark": 43
+    },
+    "src/components/dashboard/HistoryList.jsx": {
+      "palette": 79,
+      "arbitrary": 2,
+      "hex": 0,
+      "rgb": 0,
+      "dark": 31
+    },
+    "src/components/dashboard/Navbar.jsx": {
+      "palette": 113,
+      "arbitrary": 2,
+      "hex": 0,
+      "rgb": 0,
+      "dark": 48
+    },
+    "src/components/dashboard/UploadStatusBanner.jsx": {
+      "palette": 3,
+      "arbitrary": 0,
+      "hex": 0,
+      "rgb": 0,
+      "dark": 1
+    },
+    "src/components/fitness/EstimatedFtpCard.jsx": {
+      "palette": 35,
+      "arbitrary": 0,
+      "hex": 7,
+      "rgb": 0,
+      "dark": 12
+    },
+    "src/components/fitness/HrvCard.jsx": {
+      "palette": 36,
+      "arbitrary": 0,
+      "hex": 0,
+      "rgb": 0,
+      "dark": 14
+    },
+    "src/components/fitness/MmpAndEfCard.jsx": {
+      "palette": 108,
+      "arbitrary": 0,
+      "hex": 8,
+      "rgb": 0,
+      "dark": 34
+    },
+    "src/components/fitness/PowerProfileCard.jsx": {
+      "palette": 88,
+      "arbitrary": 0,
+      "hex": 8,
+      "rgb": 0,
+      "dark": 32
+    },
+    "src/components/fitness/RacePredictionsCard.jsx": {
+      "palette": 18,
+      "arbitrary": 0,
+      "hex": 3,
+      "rgb": 0,
+      "dark": 6
+    },
+    "src/components/fitness/ThresholdsCard.jsx": {
+      "palette": 29,
+      "arbitrary": 0,
+      "hex": 0,
+      "rgb": 0,
+      "dark": 11
+    },
+    "src/components/fitness/TrainingBalanceCard.jsx": {
+      "palette": 73,
+      "arbitrary": 1,
+      "hex": 0,
+      "rgb": 0,
+      "dark": 27
+    },
+    "src/components/fitness/TrainingStatusCard.jsx": {
+      "palette": 19,
+      "arbitrary": 0,
+      "hex": 0,
+      "rgb": 0,
+      "dark": 7
+    },
+    "src/components/fitness/Vo2MaxCard.jsx": {
+      "palette": 43,
+      "arbitrary": 0,
+      "hex": 0,
+      "rgb": 0,
+      "dark": 15
+    },
+    "src/components/fitness/WeeklyVolumeAndFocusCard.jsx": {
+      "palette": 32,
+      "arbitrary": 0,
+      "hex": 7,
+      "rgb": 0,
+      "dark": 14
+    },
+    "src/components/fitness/fitnessConstants.js": {
+      "palette": 0,
+      "arbitrary": 0,
+      "hex": 1,
+      "rgb": 3,
+      "dark": 0
+    },
+    "src/components/layout/BottomNav.jsx": {
+      "palette": 8,
+      "arbitrary": 6,
+      "hex": 0,
+      "rgb": 0,
+      "dark": 7
+    },
+    "src/components/modals/AddActivityModal.jsx": {
+      "palette": 74,
+      "arbitrary": 0,
+      "hex": 0,
+      "rgb": 0,
+      "dark": 31
+    },
+    "src/components/pages/ActivityDetailPage.jsx": {
+      "palette": 453,
+      "arbitrary": 1,
+      "hex": 51,
+      "rgb": 0,
+      "dark": 169
+    },
+    "src/components/pages/CalendarPage.jsx": {
+      "palette": 713,
+      "arbitrary": 0,
+      "hex": 55,
+      "rgb": 0,
+      "dark": 299
+    },
+    "src/components/pages/EmailConfirmedPage.jsx": {
+      "palette": 20,
+      "arbitrary": 0,
+      "hex": 0,
+      "rgb": 0,
+      "dark": 5
+    },
+    "src/components/pages/FitnessStatsPage.jsx": {
+      "palette": 14,
+      "arbitrary": 0,
+      "hex": 0,
+      "rgb": 0,
+      "dark": 7
+    },
+    "src/components/pages/HealthPage.jsx": {
+      "palette": 365,
+      "arbitrary": 3,
+      "hex": 12,
+      "rgb": 0,
+      "dark": 135
+    },
+    "src/components/pages/LandingPage.jsx": {
+      "palette": 177,
+      "arbitrary": 0,
+      "hex": 0,
+      "rgb": 1,
+      "dark": 68
+    },
+    "src/components/pages/ProfilePage.jsx": {
+      "palette": 320,
+      "arbitrary": 9,
+      "hex": 7,
+      "rgb": 0,
+      "dark": 128
+    },
+    "src/hooks/useActivityMetrics.js": {
+      "palette": 4,
+      "arbitrary": 0,
+      "hex": 0,
+      "rgb": 0,
+      "dark": 0
+    },
+    "src/hooks/useFitnessAnalytics.js": {
+      "palette": 0,
+      "arbitrary": 0,
+      "hex": 20,
+      "rgb": 0,
+      "dark": 0
+    },
+    "src/hooks/useWellnessAnalytics.js": {
+      "palette": 10,
+      "arbitrary": 0,
+      "hex": 0,
+      "rgb": 0,
+      "dark": 0
+    },
+    "src/index.css": {
+      "palette": 22,
+      "arbitrary": 4,
+      "hex": 8,
+      "rgb": 15,
+      "dark": 13
+    },
+    "src/utils/fitnessStatsEngine.ts": {
+      "palette": 11,
+      "arbitrary": 0,
+      "hex": 38,
+      "rgb": 0,
+      "dark": 0
+    }
+  }
+}
