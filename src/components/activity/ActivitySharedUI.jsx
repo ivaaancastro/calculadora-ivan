@@ -3,7 +3,7 @@ import { Info } from 'lucide-react';
 import { formatMinsToHMM } from '../../utils/formatters';
 
 export const MetricCard = ({ label, value, unit, accent, className = '' }) => (
-    <div className={`flex flex-col py-2 px-2.5 sm:px-3 bg-white dark:bg-[#1c1c1e] rounded-xl sm:rounded-2xl border border-black/[0.04] dark:border-white/[0.07] shadow-xs select-none transition-all justify-between ${className}`}>
+    <div className={`flex flex-col py-2 px-2.5 sm:px-3 bg-surface-card rounded-xl sm:rounded-2xl border border-black/[0.04] dark:border-white/[0.07] shadow-xs select-none transition-all justify-between ${className}`}>
         <span className="text-[9px] font-semibold text-ink-4 uppercase tracking-wider truncate">{label}</span>
         <div className="flex items-baseline gap-1 truncate mt-0.5">
             <span className={`text-sm sm:text-base font-bold tracking-tight tabular-nums truncate ${accent || 'text-ink'}`}>{value}</span>
@@ -16,7 +16,7 @@ export const PillTab = ({ active, label, onClick }) => (
     <button 
         onClick={onClick}
         className={`px-3 sm:px-4 py-1 text-xs font-semibold rounded-full whitespace-nowrap shrink-0 transition-all duration-200 select-none active:scale-95 ${active 
-            ? 'bg-white dark:bg-[#2c2c2e] text-ink shadow-xs font-bold' 
+            ? 'bg-surface-4 text-ink shadow-xs font-bold' 
             : 'text-ink-3 hover:text-ink-2-soft'}`}
     >
         {label}

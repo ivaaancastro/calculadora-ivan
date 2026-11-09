@@ -16,7 +16,7 @@ export const WeeklyVolumeAndFocusCard = ({
     return (
         <section className="mb-8">
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                <div className="bg-white dark:bg-zinc-900/50 rounded-2xl border border-line-muted p-6 sm:p-8 lg:col-span-2 shadow-sm">
+                <div className="bg-surface-5 rounded-2xl border border-line-muted p-6 sm:p-8 lg:col-span-2 shadow-sm">
                     <div className="flex justify-between items-center mb-6">
                         <div className="flex items-center gap-2">
                             <h3 className="text-[10px] font-bold text-ink-4 uppercase tracking-[0.1em]">Volumen Semanal (TSS/Horas)</h3>
@@ -37,15 +37,15 @@ export const WeeklyVolumeAndFocusCard = ({
                     </div>
                 </div>
 
-                <div className="bg-white dark:bg-zinc-900/50 rounded-2xl border border-line-muted p-6 sm:p-8 lg:col-span-1 shadow-sm">
+                <div className="bg-surface-5 rounded-2xl border border-line-muted p-6 sm:p-8 lg:col-span-1 shadow-sm">
                     <div className="flex justify-between items-center mb-8">
                         <h3 className="text-[10px] font-bold text-ink-4 uppercase tracking-[0.1em]">Distribución de Foco</h3>
-                        <div className="flex bg-slate-100/80 dark:bg-zinc-800/80 p-1 rounded-xl">
+                        <div className="flex bg-fill p-1 rounded-xl">
                             {['28d', '90d'].map(t => (
                                 <button
                                     key={t}
                                     onClick={() => setIntensityTimeframe(t)}
-                                    className={`px-3 py-1 text-[8px] font-bold uppercase rounded-lg transition-all ${intensityTimeframe === t ? 'bg-white dark:bg-zinc-700 text-ink-soft shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
+                                    className={`px-3 py-1 text-[8px] font-bold uppercase rounded-lg transition-all ${intensityTimeframe === t ? 'bg-surface-3 text-ink-soft shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
                                 >
                                     {t.toUpperCase()}
                                 </button>
@@ -64,7 +64,7 @@ export const WeeklyVolumeAndFocusCard = ({
                                         </div>
                                         <span className="text-body">{focus.value}%</span>
                                     </div>
-                                    <div className="h-1.5 w-full bg-slate-100 dark:bg-zinc-800 rounded-full overflow-hidden">
+                                    <div className="h-1.5 w-full bg-surface-2 rounded-full overflow-hidden">
                                         <div className="h-full rounded-full transition-all duration-500" style={{ width: `${focus.value}%`, backgroundColor: focus.color }} />
                                     </div>
                                 </div>

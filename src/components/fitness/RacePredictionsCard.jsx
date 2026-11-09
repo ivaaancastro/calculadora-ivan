@@ -7,14 +7,14 @@ export const RacePredictionsCard = ({ racePredictions }) => {
 
     return (
         <section className="mb-8">
-            <div className="bg-white dark:bg-zinc-900/50 rounded-2xl border border-line-muted p-6 sm:p-8 shadow-sm">
+            <div className="bg-surface-5 rounded-2xl border border-line-muted p-6 sm:p-8 shadow-sm">
                 <div className="flex items-center gap-2 mb-8">
                     <h3 className="text-[10px] font-bold text-ink-4 uppercase tracking-[0.1em]">Pronóstico de Carrera</h3>
                     <InfoTooltip text="Predicción teórica basada en tu VO2max actual." />
                 </div>
                 <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
                     {racePredictions.map(r => (
-                        <div key={r.name} className="p-5 rounded-2xl bg-slate-50/50 dark:bg-zinc-800/30 border border-line-soft group relative">
+                        <div key={r.name} className="p-5 rounded-2xl bg-sunken-3 border border-line-soft group relative">
                             <div className="flex items-center justify-between mb-4">
                                 <div className="flex flex-col">
                                     <span className="text-[9px] font-bold uppercase tracking-[0.1em] text-slate-400">{r.name}</span>

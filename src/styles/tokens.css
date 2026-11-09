@@ -59,6 +59,10 @@
   --line-strong-2: 148 163 184; /* slate-400 */
   --hairline: 0 0 0; --hairline-a: 0.04; /* black/[0.04] */
   --hairline-2: 0 0 0; --hairline-2-a: 0.03; /* black/[0.03] */
+  --hairline-3: 0 0 0; --hairline-3-a: 0.04; /* black/[0.04] */
+  --hairline-4: 0 0 0; --hairline-4-a: 0.05; /* black/[0.05] */
+  --hairline-5: 0 0 0; --hairline-5-a: 0.03; /* black/[0.03] */
+  --hairline-6: 0 0 0; --hairline-6-a: 0.06; /* black/[0.06] */
 }
 .dark {
   --line: 39 39 42; /* zinc-800 */
@@ -80,6 +84,10 @@
   --line-strong-2: 82 82 91; /* zinc-600 */
   --hairline: 255 255 255; --hairline-a: 0.06; /* white/[0.06] */
   --hairline-2: 255 255 255; --hairline-2-a: 0.04; /* white/[0.04] */
+  --hairline-3: 255 255 255; --hairline-3-a: 0.08; /* white/[0.08] */
+  --hairline-4: 255 255 255; --hairline-4-a: 0.08; /* white/[0.08] */
+  --hairline-5: 255 255 255; --hairline-5-a: 0.05; /* white/[0.05] */
+  --hairline-6: 255 255 255; --hairline-6-a: 0.08; /* white/[0.08] */
 }
 /* @tokens:borders:end */
 
@@ -123,3 +131,96 @@
   --ink-inverse: 24 24 27; /* zinc-900 */
 }
 /* @tokens:text:end */
+
+/* @tokens:surfaces:start (generado por scripts/codemods/surfaces.mjs --tokens; no editar a mano) */
+:root {
+  --canvas: 242 242 247; /* #f2f2f7 */
+  --canvas-ink: 29 29 31; /* #1d1d1f */
+  --surface: 255 255 255; /* white */
+  --surface-2: 241 245 249; /* slate-100 */
+  --surface-3: 255 255 255; /* white */
+  --surface-4: 255 255 255; /* white */
+  --surface-5: 255 255 255; --surface-5-a: 1; /* white */
+  --surface-6: 255 255 255; /* white */
+  --surface-7: 255 255 255; /* white */
+  --surface-8: 255 255 255; --surface-8-a: 0.95; /* white/95 */
+  --surface-9: 255 255 255; --surface-9-a: 0.8; /* white/80 */
+  --surface-card: 255 255 255; /* white */
+  --sunken: 248 250 252; --sunken-a: 1; /* slate-50 */
+  --sunken-2: 248 250 252; /* slate-50 */
+  --sunken-3: 248 250 252; --sunken-3-a: 0.5; /* slate-50/50 */
+  --sunken-4: 248 250 252; --sunken-4-a: 1; /* slate-50 */
+  --sunken-5: 248 250 252; --sunken-5-a: 1; /* slate-50 */
+  --sunken-6: 248 250 252; /* slate-50 */
+  --sunken-7: 248 250 252; --sunken-7-a: 0.3; /* slate-50/30 */
+  --sunken-8: 248 250 252; --sunken-8-a: 1; /* slate-50 */
+  --sunken-9: 248 250 252; /* slate-50 */
+  --sunken-10: 248 250 252; --sunken-10-a: 1; /* slate-50 */
+  --sunken-11: 248 250 252; --sunken-11-a: 1; /* slate-50 */
+  --sunken-card: 248 250 252; --sunken-card-a: 0.9; /* slate-50/90 */
+  --fill: 241 245 249; --fill-a: 0.8; /* slate-100/80 */
+  --fill-2: 226 232 240; /* slate-200 */
+  --fill-3: 241 245 249; --fill-3-a: 1; /* slate-100 */
+  --fill-4: 226 232 240; --fill-4-a: 0.7; /* slate-200/70 */
+  --fill-5: 241 245 249; --fill-5-a: 1; /* slate-100 */
+  --fill-6: 226 232 240; --fill-6-a: 0.6; /* slate-200/60 */
+  --fill-7: 226 232 240; /* slate-200 */
+  --fill-8: 241 245 249; --fill-8-a: 1; /* slate-100 */
+  --fill-segmented: 226 232 240; --fill-segmented-a: 0.6; /* slate-200/60 */
+  --inverse: 15 23 42; /* slate-900 */
+  --inverse-2: 51 65 85; /* slate-700 */
+  --glass: 255 255 255; --glass-a: 0.8; /* white/80 */
+  --glass-nav: 255 255 255; --glass-nav-a: 0.8; /* white/80 */
+  --glass-bar: 255 255 255; --glass-bar-a: 0.85; /* white/85 */
+  --liquid-fill: 255 255 255; --liquid-fill-a: 0.68; /* white/[0.68] */
+  --liquid-edge: 255 255 255; --liquid-edge-a: 0.85; /* white/[0.85] */
+  --liquid-active: 0 0 0; --liquid-active-a: 0.08; /* black/[0.08] */
+  --scrollbar-thumb: 203 213 225; /* slate-300 */
+  --scrollbar-thumb-hover: 148 163 184; /* slate-400 */
+}
+.dark {
+  --canvas: 0 0 0; /* black */
+  --canvas-ink: 245 245 247; /* #f5f5f7 */
+  --surface: 24 24 27; /* zinc-900 */
+  --surface-2: 39 39 42; /* zinc-800 */
+  --surface-3: 63 63 70; /* zinc-700 */
+  --surface-4: 44 44 46; /* [#2c2c2e] */
+  --surface-5: 24 24 27; --surface-5-a: 0.5; /* zinc-900/50 */
+  --surface-6: 9 9 11; /* zinc-950 */
+  --surface-7: 39 39 42; /* zinc-800 */
+  --surface-8: 24 24 27; --surface-8-a: 0.95; /* zinc-900/95 */
+  --surface-9: 9 9 11; --surface-9-a: 0.8; /* zinc-950/80 */
+  --surface-card: 28 28 30; /* [#1c1c1e] */
+  --sunken: 39 39 42; --sunken-a: 0.5; /* zinc-800/50 */
+  --sunken-2: 9 9 11; /* zinc-950 */
+  --sunken-3: 39 39 42; --sunken-3-a: 0.3; /* zinc-800/30 */
+  --sunken-4: 39 39 42; --sunken-4-a: 0.4; /* zinc-800/40 */
+  --sunken-5: 39 39 42; --sunken-5-a: 0.8; /* zinc-800/80 */
+  --sunken-6: 24 24 27; /* zinc-900 */
+  --sunken-7: 39 39 42; --sunken-7-a: 0.2; /* zinc-800/20 */
+  --sunken-8: 39 39 42; --sunken-8-a: 0.6; /* zinc-800/60 */
+  --sunken-9: 39 39 42; /* zinc-800 */
+  --sunken-10: 24 24 27; --sunken-10-a: 0.4; /* zinc-900/40 */
+  --sunken-11: 24 24 27; --sunken-11-a: 0.8; /* zinc-900/80 */
+  --sunken-card: 44 44 46; --sunken-card-a: 0.7; /* [#2c2c2e]/70 */
+  --fill: 39 39 42; --fill-a: 0.8; /* zinc-800/80 */
+  --fill-2: 39 39 42; /* zinc-800 */
+  --fill-3: 39 39 42; --fill-3-a: 0.8; /* zinc-800/80 */
+  --fill-4: 39 39 42; --fill-4-a: 0.8; /* zinc-800/80 */
+  --fill-5: 39 39 42; --fill-5-a: 0.5; /* zinc-800/50 */
+  --fill-6: 39 39 42; --fill-6-a: 0.7; /* zinc-800/70 */
+  --fill-7: 63 63 70; /* zinc-700 */
+  --fill-8: 39 39 42; --fill-8-a: 0.6; /* zinc-800/60 */
+  --fill-segmented: 28 28 30; --fill-segmented-a: 1; /* [#1c1c1e] */
+  --inverse: 255 255 255; /* white */
+  --inverse-2: 228 228 231; /* zinc-200 */
+  --glass: 28 28 30; --glass-a: 0.85; /* [#1c1c1e]/85 */
+  --glass-nav: 0 0 0; --glass-nav-a: 0.8; /* black/80 */
+  --glass-bar: 0 0 0; --glass-bar-a: 0.85; /* black/85 */
+  --liquid-fill: 30 30 34; --liquid-fill-a: 0.68; /* [#1e1e22]/[0.68] */
+  --liquid-edge: 255 255 255; --liquid-edge-a: 0.18; /* white/[0.18] */
+  --liquid-active: 255 255 255; --liquid-active-a: 0.16; /* white/[0.16] */
+  --scrollbar-thumb: 203 213 225; /* slate-300 */
+  --scrollbar-thumb-hover: 148 163 184; /* slate-400 */
+}
+/* @tokens:surfaces:end */

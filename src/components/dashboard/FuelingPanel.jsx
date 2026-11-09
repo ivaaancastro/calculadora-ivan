@@ -250,11 +250,11 @@ export const FuelingPanel = ({ workout }) => {
                 </div>
 
                 <div className="flex gap-3">
-                    <div className="bg-white dark:bg-zinc-900 rounded-md px-3 py-1.5 border border-line flex items-center gap-2 shadow-sm">
+                    <div className="bg-surface rounded-md px-3 py-1.5 border border-line flex items-center gap-2 shadow-sm">
                         <span className="text-[10px] font-bold uppercase tracking-widest text-ink-4">Gasto Est.</span>
                         <span className="text-sm font-black font-mono text-ink-2">{fuel.estimatedKj} kcal</span>
                     </div>
-                    <div className="bg-white dark:bg-zinc-900 rounded-md px-3 py-1.5 border border-line flex items-center gap-2 shadow-sm">
+                    <div className="bg-surface rounded-md px-3 py-1.5 border border-line flex items-center gap-2 shadow-sm">
                         <span className="text-[10px] font-bold uppercase tracking-widest text-ink-4">IF Est.</span>
                         <span className="text-sm font-black font-mono text-ink-2">{fuel.estimatedIF}</span>
                     </div>
@@ -287,7 +287,7 @@ export const FuelingPanel = ({ workout }) => {
                     </p>
                     <div className="space-y-2">
                         <Row label="Durante el entreno" value={`${fuel.duringHydration}ml`} sub={`+ ${fuel.sodiumMg}mg sodio${fuel.needsElectrolytes ? ' (vital)' : ''}`} why={WHY_HYDRA} fuel={fuel} />
-                        <div className="px-4 py-3 rounded-lg border border-line flex justify-between bg-white dark:bg-zinc-900">
+                        <div className="px-4 py-3 rounded-lg border border-line flex justify-between bg-surface">
                             <div>
                                 <p className="text-[10px] font-bold uppercase tracking-widest text-ink-4">Post-entreno</p>
                                 <p className="text-sm font-black font-mono text-ink-2">{fuel.postHydration}ml+</p>

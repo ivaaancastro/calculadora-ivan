@@ -90,7 +90,7 @@ export const MmpAndEfCard = ({
 
     return (
         <section className="mb-8">
-            <div className="bg-white dark:bg-zinc-900/50 rounded-2xl border border-line-muted p-3.5 sm:p-6 lg:p-8 shadow-sm">
+            <div className="bg-surface-5 rounded-2xl border border-line-muted p-3.5 sm:p-6 lg:p-8 shadow-sm">
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 sm:gap-6 mb-6 sm:mb-10">
                     <div className="flex flex-wrap items-center gap-2 sm:gap-3">
                         <div className="flex items-center gap-2">
@@ -99,7 +99,7 @@ export const MmpAndEfCard = ({
                         </div>
 
                         {telemetryStats && telemetryStats.total > 0 && (
-                            <div className="flex items-center gap-2 px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-zinc-800/80 text-[9px] font-medium text-body-soft-2 border border-line-muted-2">
+                            <div className="flex items-center gap-2 px-2.5 py-1 rounded-lg bg-fill-3 text-[9px] font-medium text-body-soft-2 border border-line-muted-2">
                                 <span className={`w-1.5 h-1.5 rounded-full ${telemetryStats.percentage >= 85 ? 'bg-emerald-500' : (telemetryStats.percentage >= 40 ? 'bg-amber-500' : 'bg-rose-500')}`} />
                                 <span>Telemetría: {telemetryStats.withStreams}/{telemetryStats.total} ({telemetryStats.percentage}%)</span>
                                 <InfoTooltip text="Las curvas MMP requieren telemetría detallada. Las sincronizaciones rápidas de Strava solo traen resúmenes hasta procesar el Deep Sync." />
@@ -126,13 +126,13 @@ export const MmpAndEfCard = ({
                     </div>
 
                     <div className="flex flex-wrap items-center gap-3">
-                        <div className="flex bg-slate-100/80 dark:bg-zinc-800/80 p-1 rounded-xl">
-                            <button onClick={() => setCurveSport('bike')} className={`px-4 py-1.5 text-[9px] font-bold uppercase rounded-lg transition-all ${curveSport === 'bike' ? 'bg-white dark:bg-zinc-700 text-blue-600 dark:text-blue-400 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}>Ciclismo</button>
-                            <button onClick={() => setCurveSport('run')} className={`px-4 py-1.5 text-[9px] font-bold uppercase rounded-lg transition-all ${curveSport === 'run' ? 'bg-white dark:bg-zinc-700 text-orange-600 dark:text-orange-400 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}>Carrera</button>
+                        <div className="flex bg-fill p-1 rounded-xl">
+                            <button onClick={() => setCurveSport('bike')} className={`px-4 py-1.5 text-[9px] font-bold uppercase rounded-lg transition-all ${curveSport === 'bike' ? 'bg-surface-3 text-blue-600 dark:text-blue-400 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}>Ciclismo</button>
+                            <button onClick={() => setCurveSport('run')} className={`px-4 py-1.5 text-[9px] font-bold uppercase rounded-lg transition-all ${curveSport === 'run' ? 'bg-surface-3 text-orange-600 dark:text-orange-400 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}>Carrera</button>
                         </div>
-                        <div className="flex bg-slate-100/80 dark:bg-zinc-800/80 p-1 rounded-xl">
+                        <div className="flex bg-fill p-1 rounded-xl">
                             {['90d', '1y', 'all'].map(t => (
-                                <button key={t} onClick={() => setMmpTimeframe(t)} className={`px-3 py-1.5 text-[8px] font-bold uppercase rounded-lg transition-all ${mmpTimeframe === t ? 'bg-white dark:bg-zinc-700 text-ink-soft shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}>{t === 'all' ? 'Todo' : t.toUpperCase()}</button>
+                                <button key={t} onClick={() => setMmpTimeframe(t)} className={`px-3 py-1.5 text-[8px] font-bold uppercase rounded-lg transition-all ${mmpTimeframe === t ? 'bg-surface-3 text-ink-soft shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}>{t === 'all' ? 'Todo' : t.toUpperCase()}</button>
                             ))}
                         </div>
                         <div className="flex gap-4 ml-2">
@@ -222,16 +222,16 @@ export const MmpAndEfCard = ({
                                 </span>
                                 <InfoTooltip text={peaksViewMode === 'alltime' ? "Tus mejores marcas de todos los tiempos en actividades con telemetría registrada." : "Tus mejores marcas dentro del periodo seleccionado arriba (90d / 1y / Todo)."} />
                             </div>
-                            <div className="flex bg-slate-100 dark:bg-zinc-800 p-0.5 rounded-lg text-[8px] font-bold uppercase">
+                            <div className="flex bg-surface-2 p-0.5 rounded-lg text-[8px] font-bold uppercase">
                                 <button
                                     onClick={() => setPeaksViewMode && setPeaksViewMode('period')}
-                                    className={`px-2 py-1 rounded transition-all ${peaksViewMode === 'period' ? 'bg-white dark:bg-zinc-700 text-ink-soft shadow-xs' : 'text-slate-500 hover:text-slate-700'}`}
+                                    className={`px-2 py-1 rounded transition-all ${peaksViewMode === 'period' ? 'bg-surface-3 text-ink-soft shadow-xs' : 'text-slate-500 hover:text-slate-700'}`}
                                 >
                                     Periodo
                                 </button>
                                 <button
                                     onClick={() => setPeaksViewMode && setPeaksViewMode('alltime')}
-                                    className={`px-2 py-1 rounded transition-all ${peaksViewMode === 'alltime' ? 'bg-white dark:bg-zinc-700 text-ink-soft shadow-xs' : 'text-slate-500 hover:text-slate-700'}`}
+                                    className={`px-2 py-1 rounded transition-all ${peaksViewMode === 'alltime' ? 'bg-surface-3 text-ink-soft shadow-xs' : 'text-slate-500 hover:text-slate-700'}`}
                                 >
                                     Histórico
                                 </button>
@@ -250,7 +250,7 @@ export const MmpAndEfCard = ({
                                 }
 
                                 return (
-                                    <div key={secs} className="flex items-center justify-between p-3 rounded-xl bg-slate-50/50 dark:bg-zinc-800/30 border border-slate-100 dark:border-zinc-800/50 hover:border-blue-500/30 transition-all cursor-default">
+                                    <div key={secs} className="flex items-center justify-between p-3 rounded-xl bg-sunken-3 border border-slate-100 dark:border-zinc-800/50 hover:border-blue-500/30 transition-all cursor-default">
                                         <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">{formatInterval(secs)}</span>
                                         <div className="text-right">
                                             <p className="text-sm font-black text-ink-2">

@@ -147,12 +147,12 @@ const AuthModal = ({ open, onClose }) => {
 
       {/* Modal */}
       <div
-        className="relative w-full max-w-md bg-white/95 dark:bg-zinc-900/95 backdrop-blur-2xl rounded-2xl border border-line-muted-3 shadow-2xl p-8 animate-[modalIn_0.3s_ease-out]"
+        className="relative w-full max-w-md bg-surface-8 backdrop-blur-2xl rounded-2xl border border-line-muted-3 shadow-2xl p-8 animate-[modalIn_0.3s_ease-out]"
         onClick={(e) => e.stopPropagation()}
       >
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 p-2 text-slate-400 hover:text-slate-600 dark:hover:text-zinc-200 transition-colors rounded-full hover:bg-slate-100 dark:hover:bg-zinc-800"
+          className="absolute top-4 right-4 p-2 text-slate-400 hover:text-slate-600 dark:hover:text-zinc-200 transition-colors rounded-full hover:bg-surface-2"
         >
           <X size={18} />
         </button>
@@ -189,7 +189,7 @@ const AuthModal = ({ open, onClose }) => {
               <Mail size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-ink-4" />
               <input
                 id="auth-email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} required
-                className="w-full pl-10 pr-4 py-3 bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 rounded-xl text-sm text-ink-2-soft focus:border-blue-500 focus:ring-2 focus:ring-blue-500/10 outline-none transition-all"
+                className="w-full pl-10 pr-4 py-3 bg-sunken-2 border border-slate-200 dark:border-zinc-800 rounded-xl text-sm text-ink-2-soft focus:border-blue-500 focus:ring-2 focus:ring-blue-500/10 outline-none transition-all"
                 placeholder="atleta@ejemplo.com"
               />
             </div>
@@ -202,7 +202,7 @@ const AuthModal = ({ open, onClose }) => {
                 <Lock size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-ink-4" />
                 <input
                   id="auth-password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} required
-                  className="w-full pl-10 pr-4 py-3 bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 rounded-xl text-sm text-ink-2-soft focus:border-blue-500 focus:ring-2 focus:ring-blue-500/10 outline-none transition-all"
+                  className="w-full pl-10 pr-4 py-3 bg-sunken-2 border border-slate-200 dark:border-zinc-800 rounded-xl text-sm text-ink-2-soft focus:border-blue-500 focus:ring-2 focus:ring-blue-500/10 outline-none transition-all"
                   placeholder="••••••••"
                 />
               </div>
@@ -280,7 +280,7 @@ export const LandingPage = () => {
     <div className="min-h-screen bg-white dark:bg-zinc-950 text-ink-2-soft overflow-x-hidden selection:bg-blue-500/30">
 
       {/* ─── NAVBAR ─── */}
-      <nav className="fixed top-0 left-0 right-0 z-40 bg-white/80 dark:bg-zinc-950/80 backdrop-blur-xl border-b border-slate-100/80 dark:border-zinc-900/80">
+      <nav className="fixed top-0 left-0 right-0 z-40 bg-surface-9 backdrop-blur-xl border-b border-slate-100/80 dark:border-zinc-900/80">
         <div className="max-w-6xl mx-auto flex items-center justify-between h-16 px-6">
           <div className="flex items-center gap-2.5">
             <div className="bg-blue-600 text-white p-1.5 rounded-lg">

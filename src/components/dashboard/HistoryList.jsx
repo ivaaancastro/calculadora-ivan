@@ -109,7 +109,7 @@ export const HistoryList = React.memo(({ activities, onDelete, onSelectActivity 
                         placeholder="Buscar por título..."
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
-                        className="w-full pl-10 pr-3.5 py-2 bg-slate-200/60 dark:bg-zinc-800/70 border-0 rounded-xl text-sm font-medium text-ink-soft placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/40 transition-all"
+                        className="w-full pl-10 pr-3.5 py-2 bg-fill-6 border-0 rounded-xl text-sm font-medium text-ink-soft placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/40 transition-all"
                     />
                 </div>
 
@@ -119,7 +119,7 @@ export const HistoryList = React.memo(({ activities, onDelete, onSelectActivity 
                     <select
                         value={sportFilter}
                         onChange={(e) => setSportFilter(e.target.value)}
-                        className="w-full pl-9 pr-3 py-2 bg-slate-200/60 dark:bg-zinc-800/70 border-0 rounded-xl text-xs sm:text-sm font-semibold text-ink-2-soft focus:outline-none focus:ring-2 focus:ring-blue-500/40 appearance-none cursor-pointer transition-all"
+                        className="w-full pl-9 pr-3 py-2 bg-fill-6 border-0 rounded-xl text-xs sm:text-sm font-semibold text-ink-2-soft focus:outline-none focus:ring-2 focus:ring-blue-500/40 appearance-none cursor-pointer transition-all"
                     >
                         <option value="all">Todos los Deportes</option>
                         <option value="run">Carrera</option>
@@ -135,7 +135,7 @@ export const HistoryList = React.memo(({ activities, onDelete, onSelectActivity 
                     <select
                         value={dateFilter}
                         onChange={(e) => setDateFilter(e.target.value)}
-                        className="w-full pl-9 pr-3 py-2 bg-slate-200/60 dark:bg-zinc-800/70 border-0 rounded-xl text-xs sm:text-sm font-semibold text-ink-2-soft focus:outline-none focus:ring-2 focus:ring-blue-500/40 appearance-none cursor-pointer transition-all"
+                        className="w-full pl-9 pr-3 py-2 bg-fill-6 border-0 rounded-xl text-xs sm:text-sm font-semibold text-ink-2-soft focus:outline-none focus:ring-2 focus:ring-blue-500/40 appearance-none cursor-pointer transition-all"
                     >
                         <option value="all">Todo el Historial</option>
                         <option value="7d">Últimos 7 Días</option>

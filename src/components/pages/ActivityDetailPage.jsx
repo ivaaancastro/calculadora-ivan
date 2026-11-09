@@ -85,7 +85,7 @@ export const ActivityDetailPage = ({ activity, settings, fetchStreams, onBack, o
             return { label: 'Velocidad Máx', value: `${peaks.maxSpeedPt.speed} km/h`, color: 'text-blue-600 bg-blue-500/10 border-blue-500/30 dark:text-blue-400' };
         }
         if (peaks.maxAltPt && activePayload.alt && activePayload.alt >= peaks.maxAltPt.alt - 3) {
-            return { label: 'Cima', value: `${peaks.maxAltPt.alt} m`, color: 'text-body-2 bg-slate-200 border-line-strong dark:bg-zinc-800' };
+            return { label: 'Cima', value: `${peaks.maxAltPt.alt} m`, color: 'text-body-2 bg-fill-2 border-line-strong' };
         }
         return null;
     }, [activePayload, peaks, isPaceBased]);
@@ -127,7 +127,7 @@ export const ActivityDetailPage = ({ activity, settings, fetchStreams, onBack, o
     };
 
     return (
-        <div className={`animate-in fade-in duration-500 bg-slate-50 dark:bg-zinc-950 ${activeTab === 'analyze' ? 'min-h-[calc(100dvh-4rem)]' : 'h-[calc(100dvh-4rem)]'} lg:h-[calc(100vh-70px)] flex flex-col font-sans pb-safe`}>
+        <div className={`animate-in fade-in duration-500 bg-sunken-2 ${activeTab === 'analyze' ? 'min-h-[calc(100dvh-4rem)]' : 'h-[calc(100dvh-4rem)]'} lg:h-[calc(100vh-70px)] flex flex-col font-sans pb-safe`}>
             {/* Premium Header */}
             <header className="glass-nav px-3.5 py-2 sm:px-6 sm:py-3 shrink-0 z-50">
                 {/* --- DESKTOP HEADER (lg:flex) --- */}
@@ -193,7 +193,7 @@ export const ActivityDetailPage = ({ activity, settings, fetchStreams, onBack, o
                 </div>
 
                 {/* Fila 2: Selector Segmentado iOS nativo a ancho completo (4 columnas iguales, cómodo y sin cortes) */}
-                <div className="lg:hidden grid grid-cols-4 w-full bg-slate-200/70 dark:bg-zinc-800/80 p-1 rounded-xl gap-1 shadow-2xs">
+                <div className="lg:hidden grid grid-cols-4 w-full bg-fill-4 p-1 rounded-xl gap-1 shadow-2xs">
                     {[
                         { id: 'analyze', label: 'Análisis' },
                         { id: 'map', label: 'Mapa' },
@@ -205,7 +205,7 @@ export const ActivityDetailPage = ({ activity, settings, fetchStreams, onBack, o
                             onClick={() => setActiveTab(tab.id)}
                             className={`py-1.5 text-xs font-semibold rounded-lg text-center transition-all select-none touch-manipulation active:scale-[0.98] ${
                                 activeTab === tab.id
-                                    ? 'bg-white dark:bg-[#2c2c2e] text-ink shadow-xs font-bold'
+                                    ? 'bg-surface-4 text-ink shadow-xs font-bold'
                                     : 'text-ink-3 hover:text-ink'
                             }`}
                         >
@@ -237,7 +237,7 @@ export const ActivityDetailPage = ({ activity, settings, fetchStreams, onBack, o
             {/* 4. Tab Content */}
             <div className="flex-1 min-h-0 overflow-hidden relative flex flex-col w-full">
                 {loadingStreams ? (
-                    <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-white/80 dark:bg-zinc-950/80 z-20">
+                    <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-surface-9 z-20">
                         <Loader2 size={24} className="animate-spin text-indigo-500" />
                         <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Procesando telemetría técnica...</span>
                     </div>
@@ -247,7 +247,7 @@ export const ActivityDetailPage = ({ activity, settings, fetchStreams, onBack, o
                 {activeTab === 'analyze' && (
                     <div className="flex-1 flex flex-col lg:flex-row overflow-y-auto lg:overflow-hidden custom-scrollbar touch-scroll min-h-0 pb-24 lg:pb-0">
                         {/* Charts Panel */}
-                        <div className="flex-1 lg:overflow-y-auto custom-scrollbar p-2.5 sm:p-5 bg-white dark:bg-zinc-950 min-w-0">
+                        <div className="flex-1 lg:overflow-y-auto custom-scrollbar p-2.5 sm:p-5 bg-surface-6 min-w-0">
                                 <div className="max-w-5xl mx-auto space-y-3">
                                     {/* HERO MAP (MÓVIL SOLO - ESTILO STRAVA) */}
                                     <div className="lg:hidden space-y-2.5">
@@ -341,8 +341,8 @@ export const ActivityDetailPage = ({ activity, settings, fetchStreams, onBack, o
                                                             onClick={() => setActivePayload(peaks.maxAltPt)}
                                                             className={`px-2.5 py-1 rounded-full text-[10px] font-bold shrink-0 border transition-all active:scale-95 flex items-center gap-1.5 ${
                                                                 activePayload?.rawTime === peaks.maxAltPt.rawTime
-                                                                    ? 'bg-slate-700 dark:bg-zinc-200 text-ink-inverse border-slate-800 shadow-xs'
-                                                                    : 'bg-white dark:bg-zinc-900 text-body-soft-2 border-slate-200 dark:border-zinc-800 hover:bg-slate-50 dark:hover:bg-zinc-800'
+                                                                    ? 'bg-inverse-2 text-ink-inverse border-slate-800 shadow-xs'
+                                                                    : 'bg-surface text-body-soft-2 border-slate-200 dark:border-zinc-800 hover:bg-sunken-9'
                                                             }`}
                                                         >
                                                             <span>Cima</span>
@@ -353,12 +353,12 @@ export const ActivityDetailPage = ({ activity, settings, fetchStreams, onBack, o
                                             )}
 
                                             {/* HUD de Telemetría Dinámico */}
-                                            <div className="bg-white/95 dark:bg-zinc-900/95 backdrop-blur-md border border-line-4 rounded-2xl p-2.5 sm:p-3 shadow-sm transition-all">
+                                            <div className="bg-surface-8 backdrop-blur-md border border-line-4 rounded-2xl p-2.5 sm:p-3 shadow-sm transition-all">
                                                 {activePayload ? (
                                                     <div className="space-y-2">
                                                         <div className="flex items-center justify-between border-b border-line-soft-4 pb-1.5">
                                                             <div className="flex items-center gap-2 flex-wrap">
-                                                                <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-slate-100 dark:bg-zinc-800 font-mono text-[11px] font-bold tabular-nums text-body">
+                                                                <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-surface-2 font-mono text-[11px] font-bold tabular-nums text-body">
                                                                     <span>⏱️ {formatDuration(activePayload.rawTime)}</span>
                                                                     <span className="text-faint-2">|</span>
                                                                     <span>📍 {activePayload.distanceKm} km</span>
@@ -372,7 +372,7 @@ export const ActivityDetailPage = ({ activity, settings, fetchStreams, onBack, o
                                                             <button
                                                                 type="button"
                                                                 onClick={() => setActivePayload(null)}
-                                                                className="text-[10px] font-bold text-ink-4 hover:text-body-soft-2 px-1.5 py-0.5 rounded hover:bg-slate-100 dark:hover:bg-zinc-800 transition-colors"
+                                                                className="text-[10px] font-bold text-ink-4 hover:text-body-soft-2 px-1.5 py-0.5 rounded hover:bg-surface-2 transition-colors"
                                                             >
                                                                 Resetear
                                                             </button>
@@ -380,7 +380,7 @@ export const ActivityDetailPage = ({ activity, settings, fetchStreams, onBack, o
 
                                                         <div className="grid grid-cols-3 sm:grid-cols-5 gap-1.5 text-center">
                                                             {/* Ritmo / Velocidad */}
-                                                            <div className="bg-slate-50 dark:bg-zinc-800/50 rounded-xl p-1.5 border border-line-soft-3">
+                                                            <div className="bg-sunken rounded-xl p-1.5 border border-line-soft-3">
                                                                 <span className="text-[8px] font-bold uppercase tracking-wider text-ink-4 block">
                                                                     {isPaceBased ? 'Ritmo' : 'Velocidad'}
                                                                 </span>
@@ -391,7 +391,7 @@ export const ActivityDetailPage = ({ activity, settings, fetchStreams, onBack, o
 
                                                             {/* FC */}
                                                             {activePayload.hr !== null && (
-                                                                <div className="bg-slate-50 dark:bg-zinc-800/50 rounded-xl p-1.5 border border-line-soft-3">
+                                                                <div className="bg-sunken rounded-xl p-1.5 border border-line-soft-3">
                                                                     <span className="text-[8px] font-bold uppercase tracking-wider text-ink-4 block">
                                                                         FC
                                                                     </span>
@@ -403,7 +403,7 @@ export const ActivityDetailPage = ({ activity, settings, fetchStreams, onBack, o
 
                                                             {/* Potencia */}
                                                             {activePayload.watts !== null && (
-                                                                <div className="bg-slate-50 dark:bg-zinc-800/50 rounded-xl p-1.5 border border-line-soft-3">
+                                                                <div className="bg-sunken rounded-xl p-1.5 border border-line-soft-3">
                                                                     <span className="text-[8px] font-bold uppercase tracking-wider text-ink-4 block">
                                                                         Potencia
                                                                     </span>
@@ -415,7 +415,7 @@ export const ActivityDetailPage = ({ activity, settings, fetchStreams, onBack, o
 
                                                             {/* Altitud y Pendiente */}
                                                             {activePayload.alt !== null && (
-                                                                <div className="bg-slate-50 dark:bg-zinc-800/50 rounded-xl p-1.5 border border-line-soft-3">
+                                                                <div className="bg-sunken rounded-xl p-1.5 border border-line-soft-3">
                                                                     <span className="text-[8px] font-bold uppercase tracking-wider text-ink-4 block">
                                                                         Altitud
                                                                     </span>
@@ -432,7 +432,7 @@ export const ActivityDetailPage = ({ activity, settings, fetchStreams, onBack, o
 
                                                             {/* Cadencia */}
                                                             {activePayload.cadence !== null && (
-                                                                <div className="bg-slate-50 dark:bg-zinc-800/50 rounded-xl p-1.5 border border-line-soft-3">
+                                                                <div className="bg-sunken rounded-xl p-1.5 border border-line-soft-3">
                                                                     <span className="text-[8px] font-bold uppercase tracking-wider text-ink-4 block">
                                                                         Cadencia
                                                                     </span>
@@ -468,7 +468,7 @@ export const ActivityDetailPage = ({ activity, settings, fetchStreams, onBack, o
                                                     <div className="flex items-center gap-3">
                                                         <h4 className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">{isPaceBased ? 'Ritmo' : 'Velocidad'}</h4>
                                                         {activePayload && (
-                                                            <div className="px-1.5 py-0.5 bg-slate-100 dark:bg-zinc-800 rounded flex items-center gap-2 text-[9px] font-bold tabular-nums">
+                                                            <div className="px-1.5 py-0.5 bg-surface-2 rounded flex items-center gap-2 text-[9px] font-bold tabular-nums">
                                                                 <span className="text-body-soft">{formatDuration(activePayload.rawTime)}</span>
                                                                 <span className="w-px h-2 bg-slate-300 dark:bg-zinc-700"></span>
                                                                 <span className="text-indigo-500">{activePayload.distanceKm} km</span>
@@ -618,7 +618,7 @@ export const ActivityDetailPage = ({ activity, settings, fetchStreams, onBack, o
                             </div>
 
                             {/* Sidebar */}
-                            <aside className="w-full lg:w-[380px] border-t lg:border-t-0 lg:border-l border-line-soft-6 bg-white dark:bg-zinc-950 overflow-y-auto custom-scrollbar p-4 sm:p-5 space-y-6 shrink-0">
+                            <aside className="w-full lg:w-[380px] border-t lg:border-t-0 lg:border-l border-line-soft-6 bg-surface-6 overflow-y-auto custom-scrollbar p-4 sm:p-5 space-y-6 shrink-0">
                                 {/* Map - Desktop Solo (en móvil se muestra arriba estilo Strava) */}
                                 <div className="hidden lg:block h-56 rounded-xl border border-line-soft-2 overflow-hidden shadow-sm">
                                     <InteractiveMap polyline={activity.map_polyline} highResCoords={streams?.latlng?.data} color={themeColor} currentPosition={activePayload?.latlng} />
@@ -627,7 +627,7 @@ export const ActivityDetailPage = ({ activity, settings, fetchStreams, onBack, o
                                 {/* Impact Analysis & Coach Summary (Unified Premium Section) */}
                                 {trainingEffect && (
                                     <div className="space-y-4">
-                                        <div className="bg-white dark:bg-zinc-900 border border-line-soft-2 rounded-2xl p-6 shadow-sm space-y-6">
+                                        <div className="bg-surface border border-line-soft-2 rounded-2xl p-6 shadow-sm space-y-6">
                                             <div className="flex items-center justify-between">
                                                 <div className="space-y-1">
                                                     <h3 className="text-xs font-bold text-ink-soft uppercase tracking-tight">Impacto del Entrenamiento</h3>
@@ -638,7 +638,7 @@ export const ActivityDetailPage = ({ activity, settings, fetchStreams, onBack, o
                                                         )}
                                                     </div>
                                                 </div>
-                                                <span className={`px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-tight bg-slate-100 dark:bg-zinc-800 border ${trainingEffect.benefitColor.replace('text-', 'border-').replace('dark:', '')} ${trainingEffect.benefitColor}`}>
+                                                <span className={`px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-tight bg-surface-2 border ${trainingEffect.benefitColor.replace('text-', 'border-').replace('dark:', '')} ${trainingEffect.benefitColor}`}>
                                                     {trainingEffect.primaryBenefit}
                                                 </span>
                                             </div>
@@ -649,7 +649,7 @@ export const ActivityDetailPage = ({ activity, settings, fetchStreams, onBack, o
                                                         <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Aeróbico</span>
                                                         <span className="text-sm font-black text-ink-soft">{trainingEffect.aerobic}</span>
                                                     </div>
-                                                    <div className="h-2 bg-slate-100 dark:bg-zinc-800 rounded-full overflow-hidden">
+                                                    <div className="h-2 bg-surface-2 rounded-full overflow-hidden">
                                                         <div className={`h-full transition-all duration-1000 ${trainingEffect.aerobic >= 3 ? 'bg-indigo-500' : 'bg-indigo-400'}`} style={{ width: `${(trainingEffect.aerobic / 5) * 100}%` }} />
                                                     </div>
                                                     <p className="text-[8px] font-bold text-slate-400 uppercase tracking-tighter">{trainingEffect.aerobicLabel}</p>
@@ -660,7 +660,7 @@ export const ActivityDetailPage = ({ activity, settings, fetchStreams, onBack, o
                                                         <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Anaeróbico</span>
                                                         <span className="text-sm font-black text-ink-soft">{trainingEffect.anaerobic}</span>
                                                     </div>
-                                                    <div className="h-2 bg-slate-100 dark:bg-zinc-800 rounded-full overflow-hidden">
+                                                    <div className="h-2 bg-surface-2 rounded-full overflow-hidden">
                                                         <div className={`h-full transition-all duration-1000 ${trainingEffect.anaerobic >= 3 ? 'bg-purple-600' : 'bg-purple-400'}`} style={{ width: `${(trainingEffect.anaerobic / 5) * 100}%` }} />
                                                     </div>
                                                     <p className="text-[8px] font-bold text-slate-400 uppercase tracking-tighter">{trainingEffect.anaerobicLabel}</p>
@@ -723,7 +723,7 @@ export const ActivityDetailPage = ({ activity, settings, fetchStreams, onBack, o
 
                 {/* --- pestaña: LAPS --- */}
                 {activeTab === 'laps' && (
-                    <div className="h-full overflow-y-auto p-4 sm:p-8 custom-scrollbar bg-white dark:bg-zinc-950">
+                    <div className="h-full overflow-y-auto p-4 sm:p-8 custom-scrollbar bg-surface-6">
                         <div className="max-w-6xl mx-auto space-y-8 pb-12">
                             <div className="flex items-center justify-between border-b border-line-soft-6 pb-4">
                                 <div className="space-y-1">
@@ -734,7 +734,7 @@ export const ActivityDetailPage = ({ activity, settings, fetchStreams, onBack, o
                             
                             <div className="bg-white dark:bg-zinc-900/20 rounded-2xl border border-line-soft-3 overflow-x-auto custom-scrollbar shadow-sm">
                                 <table className="w-full text-left border-collapse">
-                                    <thead className="bg-slate-50 dark:bg-zinc-900/40">
+                                    <thead className="bg-sunken-10">
                                         <tr className="text-[9px] font-bold text-ink-4 uppercase tracking-widest border-b border-line-soft-2">
                                             <th className="p-4">#</th>
                                             <th className="p-4">Tiempo</th>
@@ -782,7 +782,7 @@ export const ActivityDetailPage = ({ activity, settings, fetchStreams, onBack, o
 
                 {/* --- pestaña: DETALLE (Deep Analysis) --- */}
                 {activeTab === 'data' && (
-                    <div className="h-full overflow-y-auto custom-scrollbar p-6 bg-white dark:bg-zinc-950">
+                    <div className="h-full overflow-y-auto custom-scrollbar p-6 bg-surface-6">
                         <div className="max-w-[1400px] mx-auto grid grid-cols-1 lg:grid-cols-12 gap-8 pb-32">
                             
                             {/* --- COLUMNA PRINCIPAL (ANÁLISIS TÉCNICO) --- */}
@@ -792,7 +792,7 @@ export const ActivityDetailPage = ({ activity, settings, fetchStreams, onBack, o
                                 {(zoneType === 'hr' ? exactZoneAnalysis : exactPacePowerZoneAnalysis) && (
                                 <div className="space-y-3">
                                     <h3 className="text-[10px] font-bold text-ink-4 uppercase tracking-widest">Distribución Volumétrica (Zonas)</h3>
-                                    <div className="h-[280px] bg-white dark:bg-zinc-950 rounded-2xl border border-line-soft p-6 shadow-sm">
+                                    <div className="h-[280px] bg-surface-6 rounded-2xl border border-line-soft p-6 shadow-sm">
                                         <ResponsiveContainer width="100%" height="100%">
                                             <BarChart data={zoneType === 'hr' ? exactZoneAnalysis : exactPacePowerZoneAnalysis} margin={{ bottom: 20 }}>
                                                 <CartesianGrid vertical={false} strokeDasharray="3 3" stroke="#f1f5f9" opacity={0.5} />
@@ -839,14 +839,14 @@ export const ActivityDetailPage = ({ activity, settings, fetchStreams, onBack, o
                                                 </thead>
                                                 <tbody className="text-[10px] font-bold tabular-nums text-body-soft-2 divide-y divide-line-soft-5">
                                                     {proMetrics.climbPro.map((climb) => (
-                                                        <tr key={climb.index} className="hover:bg-slate-50 dark:hover:bg-zinc-800/40 transition-colors group">
+                                                        <tr key={climb.index} className="hover:bg-sunken-4 transition-colors group">
                                                             <td className="p-4">
                                                                 <span className={`px-2 py-0.5 rounded-md text-[9px] font-black ${
                                                                     climb.category === 'HC' ? 'bg-zinc-900 text-white dark:bg-zinc-100 dark:text-black shadow-lg shadow-black/10' :
                                                                     climb.category === '1' ? 'bg-rose-500 text-white' :
                                                                     climb.category === '2' ? 'bg-orange-500 text-white' :
                                                                     climb.category === '3' ? 'bg-amber-500 text-white' :
-                                                                    'bg-slate-200 text-body-soft dark:bg-zinc-800'
+                                                                    'bg-fill-2 text-body-soft'
                                                                 }`}>
                                                                     {climb.category}
                                                                 </span>
@@ -871,7 +871,7 @@ export const ActivityDetailPage = ({ activity, settings, fetchStreams, onBack, o
                                 </div>
 
                                 {/* Metabolic Profile (Bottom) */}
-                                <div className="bg-slate-50 dark:bg-zinc-900/40 rounded-2xl p-5 border border-line-soft">
+                                <div className="bg-sunken-10 rounded-2xl p-5 border border-line-soft">
                                     <div className="flex items-center justify-between mb-4">
                                         <div className="space-y-1">
                                             <h3 className="text-xs font-bold text-ink-soft uppercase tracking-tight">Perfil Metabólico Estimado</h3>
@@ -889,7 +889,7 @@ export const ActivityDetailPage = ({ activity, settings, fetchStreams, onBack, o
                                                 <span className="text-emerald-500">Grasas ({Math.max(0, 100 - (proMetrics.ifFactor * 100)).toFixed(0)}%)</span>
                                                 <span className="text-orange-500">Carbos ({Math.min(100, (proMetrics.ifFactor * 100)).toFixed(0)}%)</span>
                                             </div>
-                                            <div className="h-2.5 bg-slate-200 dark:bg-zinc-800 rounded-full overflow-hidden flex">
+                                            <div className="h-2.5 bg-fill-2 rounded-full overflow-hidden flex">
                                                 <div className="h-full bg-emerald-500 transition-all duration-1000" style={{ width: `${Math.max(5, 100 - (proMetrics.ifFactor * 100))}%` }} />
                                                 <div className="h-full bg-orange-500 transition-all duration-1000" style={{ width: `${Math.min(95, (proMetrics.ifFactor * 100))}%` }} />
                                             </div>
@@ -919,7 +919,7 @@ export const ActivityDetailPage = ({ activity, settings, fetchStreams, onBack, o
                             <div className="lg:col-span-4 space-y-6">
                                 
                                 {/* Efficiency Gauges */}
-                                <div className="bg-slate-50 dark:bg-zinc-900/40 rounded-2xl p-6 border border-line-soft space-y-6">
+                                <div className="bg-sunken-10 rounded-2xl p-6 border border-line-soft space-y-6">
                                     <h3 className="text-xs font-bold text-ink-soft uppercase tracking-tight">Métricas de Eficiencia</h3>
                                     
                                     <div className="space-y-4">
@@ -928,7 +928,7 @@ export const ActivityDetailPage = ({ activity, settings, fetchStreams, onBack, o
                                                 <span>Intensidad (IF)</span>
                                                 <span className="text-amber-500 font-black">{proMetrics.ifFactor}</span>
                                             </div>
-                                            <div className="h-1.5 bg-slate-200 dark:bg-zinc-800 rounded-full overflow-hidden">
+                                            <div className="h-1.5 bg-fill-2 rounded-full overflow-hidden">
                                                 <div className="h-full bg-amber-500 rounded-full" style={{ width: `${(proMetrics.ifFactor / 1.1) * 100}%` }} />
                                             </div>
                                         </div>
@@ -938,7 +938,7 @@ export const ActivityDetailPage = ({ activity, settings, fetchStreams, onBack, o
                                                 <span>Variabilidad (VI)</span>
                                                 <span className="text-indigo-500 font-black">{proMetrics.vi}</span>
                                             </div>
-                                            <div className="h-1.5 bg-slate-200 dark:bg-zinc-800 rounded-full overflow-hidden">
+                                            <div className="h-1.5 bg-fill-2 rounded-full overflow-hidden">
                                                 <div className="h-full bg-indigo-500 rounded-full" style={{ width: `${((proMetrics.vi - 1) / 0.3) * 100}%` }} />
                                             </div>
                                         </div>
@@ -948,7 +948,7 @@ export const ActivityDetailPage = ({ activity, settings, fetchStreams, onBack, o
                                                 <span>Eficiencia (EF)</span>
                                                 <span className="text-rose-500 font-black">{proMetrics.efObj?.value}</span>
                                             </div>
-                                            <div className="h-1.5 bg-slate-200 dark:bg-zinc-800 rounded-full overflow-hidden">
+                                            <div className="h-1.5 bg-fill-2 rounded-full overflow-hidden">
                                                 <div className="h-full bg-rose-500 rounded-full" style={{ width: `70%` }} />
                                             </div>
                                         </div>
@@ -969,7 +969,7 @@ export const ActivityDetailPage = ({ activity, settings, fetchStreams, onBack, o
                                             {proMetrics.powerCurve?.map((peak, idx) => (
                                                 <div key={idx} className="flex justify-between items-center p-3.5 hover:bg-slate-50 dark:hover:bg-zinc-800/30 transition-colors">
                                                     <div className="flex items-center gap-3">
-                                                        <div className="w-8 h-8 rounded-lg bg-slate-100 dark:bg-zinc-800 flex items-center justify-center text-[10px] font-black text-slate-400">
+                                                        <div className="w-8 h-8 rounded-lg bg-surface-2 flex items-center justify-center text-[10px] font-black text-slate-400">
                                                             {peak.label}
                                                         </div>
                                                         <span className="text-[10px] font-bold text-body-soft uppercase">Pico {peak.label}</span>

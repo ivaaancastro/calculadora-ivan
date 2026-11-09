@@ -121,7 +121,7 @@ export const AdvancedAnalytics = React.memo(({ activities, settings,  timeRange,
 
     const fitnessStatus = (() => {
         const tsb = model.tsb;
-        if (tsb > 25) return { label: 'Transición', desc: 'Pérdida de forma por descanso', badge: 'text-body-soft bg-slate-100 dark:bg-zinc-800/80 border-line-muted-2' };
+        if (tsb > 25) return { label: 'Transición', desc: 'Pérdida de forma por descanso', badge: 'text-body-soft bg-fill-3 border-line-muted-2' };
         if (tsb >= 5) return { label: 'Pico de Forma', desc: 'Fresco y listo para competir al máximo', badge: 'text-[#30D158] bg-[#30D158]/10 border-[#30D158]/25 dark:bg-[#30D158]/15' };
         if (tsb >= -10) return { label: 'Zona Productiva', desc: 'Balance óptimo entre carga y adaptación', badge: 'text-[#0A84FF] bg-[#0A84FF]/10 border-[#0A84FF]/25 dark:bg-[#0A84FF]/15' };
         if (tsb >= -30) return { label: 'Sobrecarga', desc: 'Fatiga alta, programa recuperación', badge: 'text-[#FF9F0A] bg-[#FF9F0A]/10 border-[#FF9F0A]/25 dark:bg-[#FF9F0A]/15' };
@@ -153,7 +153,7 @@ export const AdvancedAnalytics = React.memo(({ activities, settings,  timeRange,
 
                 {/* Apple Segmented Control para Rango de Tiempo - En Desktop permanece en la cabecera */}
                 <div className="hidden md:flex items-center self-end sm:self-center w-auto">
-                    <div className="flex bg-slate-200/60 dark:bg-zinc-800/70 p-1 rounded-full backdrop-blur-md w-auto justify-start shadow-xs">
+                    <div className="flex bg-fill-6 p-1 rounded-full backdrop-blur-md w-auto justify-start shadow-xs">
                         {[
                             { id: "7d", label: "7D" },
                             { id: "30d", label: "30D" },
@@ -164,7 +164,7 @@ export const AdvancedAnalytics = React.memo(({ activities, settings,  timeRange,
                                 key={t.id}
                                 onClick={() => setTimeRange(t.id)}
                                 className={`px-3.5 py-1 min-h-[30px] text-xs font-semibold transition-all rounded-full select-none touch-manipulation active:scale-95 ${timeRange === t.id
-                                    ? "bg-white dark:bg-[#2c2c2e] text-ink shadow-xs font-bold"
+                                    ? "bg-surface-4 text-ink shadow-xs font-bold"
                                     : "text-ink-3 hover:text-ink-2-soft"
                                     }`}
                             >

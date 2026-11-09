@@ -7,7 +7,7 @@ export const HrvCard = ({ hrv }) => {
 
     return (
         <section className="mb-8">
-            <div className="bg-white dark:bg-zinc-900/50 rounded-2xl border border-line-muted p-6 sm:p-8 shadow-sm relative overflow-hidden">
+            <div className="bg-surface-5 rounded-2xl border border-line-muted p-6 sm:p-8 shadow-sm relative overflow-hidden">
                 <div className="flex items-center justify-between mb-8">
                     <div className="flex items-center gap-2">
                         <h3 className="text-[10px] font-bold text-ink-4 uppercase tracking-[0.1em]">Estado de VFC</h3>
@@ -32,7 +32,7 @@ export const HrvCard = ({ hrv }) => {
                         <p className="text-sm font-medium text-body-soft leading-relaxed max-w-sm">{hrv.msg}</p>
                         
                         <div className="mt-8 space-y-3">
-                            <div className="h-1.5 w-full bg-slate-100 dark:bg-zinc-800 rounded-full overflow-hidden">
+                            <div className="h-1.5 w-full bg-surface-2 rounded-full overflow-hidden">
                                 <div className="h-full bg-blue-500 rounded-full transition-all duration-1000" style={{ width: `${Math.min(100, (hrv.rmssd / hrv.baseline) * 80)}%` }} />
                             </div>
                             <div className="flex justify-between px-0.5 text-[9px] font-bold text-slate-400 uppercase tracking-widest opacity-60">
@@ -42,7 +42,7 @@ export const HrvCard = ({ hrv }) => {
                             </div>
                         </div>
                     </div>
-                    <div className="bg-slate-50/50 dark:bg-zinc-800/30 rounded-3xl p-6 border border-line-soft">
+                    <div className="bg-sunken-3 rounded-3xl p-6 border border-line-soft">
                         <div className="flex items-center justify-between mb-6">
                             <div>
                                 <p className="text-[9px] font-bold text-slate-400 uppercase tracking-[0.1em] mb-1">Stress Score</p>

@@ -10,10 +10,10 @@ const CustomTooltip = ({ active, payload, label }) => {
     const title = date.toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long' });
 
     return (
-      <div className="bg-white/95 dark:bg-zinc-900/95 backdrop-blur-md p-2.5 sm:p-3 rounded-xl border border-line-muted-3 shadow-xl min-w-[140px] pointer-events-none select-none z-50">
+      <div className="bg-surface-8 backdrop-blur-md p-2.5 sm:p-3 rounded-xl border border-line-muted-3 shadow-xl min-w-[140px] pointer-events-none select-none z-50">
         <p className="text-[9px] font-medium uppercase tracking-widest text-ink-4 mb-1.5 flex justify-between items-center capitalize">
           {title}
-          {diffDays > 0 && <span className="bg-slate-100 dark:bg-zinc-800 text-slate-500 px-1 py-0.5 rounded text-[8px] ml-2 font-mono font-normal">+{diffDays}d</span>}
+          {diffDays > 0 && <span className="bg-surface-2 text-slate-500 px-1 py-0.5 rounded text-[8px] ml-2 font-mono font-normal">+{diffDays}d</span>}
         </p>
         <div className="space-y-1">
           {payload.map((entry, index) => {
@@ -65,7 +65,7 @@ export const EvolutionChart = ({ data, timeRange, setTimeRange }) => {
     <div className="h-full w-full flex flex-col font-sans touch-manipulation select-none">
       {/* Selector SOLO en móvil (en escritorio permanece en la cabecera original) */}
       {timeRange && setTimeRange && (
-        <div className="md:hidden flex bg-slate-200/60 dark:bg-zinc-800/70 p-1 rounded-full backdrop-blur-md w-full justify-between shadow-xs mb-3">
+        <div className="md:hidden flex bg-fill-6 p-1 rounded-full backdrop-blur-md w-full justify-between shadow-xs mb-3">
           {[
             { id: "7d", label: "7D" },
             { id: "30d", label: "30D" },
@@ -77,7 +77,7 @@ export const EvolutionChart = ({ data, timeRange, setTimeRange }) => {
               onClick={() => setTimeRange(t.id)}
               className={`flex-1 px-3 py-1 min-h-[30px] text-xs font-semibold transition-all rounded-full select-none touch-manipulation active:scale-95 ${
                 timeRange === t.id
-                  ? "bg-white dark:bg-[#2c2c2e] text-ink shadow-xs font-bold"
+                  ? "bg-surface-4 text-ink shadow-xs font-bold"
                   : "text-ink-3"
               }`}
             >

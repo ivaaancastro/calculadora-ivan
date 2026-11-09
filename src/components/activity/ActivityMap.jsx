@@ -73,7 +73,7 @@ export const InteractiveMap = ({ polyline, highResCoords, color, currentPosition
     }, [polyline, highResCoords]);
 
     if (!coords || coords.length === 0) return (
-        <div className="w-full h-full min-h-[350px] flex flex-col items-center justify-center bg-slate-50 dark:bg-zinc-900 rounded-2xl border border-line p-8 text-center">
+        <div className="w-full h-full min-h-[350px] flex flex-col items-center justify-center bg-sunken-6 rounded-2xl border border-line p-8 text-center">
             <MapPin size={32} className="text-ink-4-dim mb-2" />
             <span className="text-body font-bold text-sm">Sin datos GPS</span>
             <p className="text-ink-4 text-xs mt-1 max-w-xs">Esta actividad no contiene coordenadas de ruta o track GPS.</p>

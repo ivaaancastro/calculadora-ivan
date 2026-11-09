@@ -93,8 +93,8 @@ const StravaCallback = () => {
   }, [navigate]);
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-slate-50 dark:bg-zinc-950 p-4 transition-colors duration-300">
-      <div className="bg-white dark:bg-zinc-900 p-8 rounded-lg shadow-sm text-center max-w-md w-full border border-line">
+    <div className="min-h-screen flex flex-col items-center justify-center bg-sunken-2 p-4 transition-colors duration-300">
+      <div className="bg-surface p-8 rounded-lg shadow-sm text-center max-w-md w-full border border-line">
         
         {status === 'processing' && (
             <>
@@ -120,7 +120,7 @@ const StravaCallback = () => {
         <p className="text-[11px] font-bold text-ink-3 uppercase tracking-widest mt-3">{message}</p>
         
         {status === 'error' && (
-            <button onClick={() => navigate('/')} className="mt-6 w-full py-2.5 bg-slate-100 dark:bg-zinc-800 hover:bg-slate-200 dark:hover:bg-zinc-700 text-body-2 rounded font-bold text-[11px] uppercase tracking-widest transition-colors">
+            <button onClick={() => navigate('/')} className="mt-6 w-full py-2.5 bg-surface-2 hover:bg-fill-7 text-body-2 rounded font-bold text-[11px] uppercase tracking-widest transition-colors">
                 Volver a intentar
             </button>
         )}

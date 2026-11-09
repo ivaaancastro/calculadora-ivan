@@ -38,7 +38,7 @@ const DurationInput = ({ value, onChange, className = '' }) => {
     const inCls = 'w-8 shrink-0 bg-transparent text-[13px] font-mono font-medium py-1 text-center outline-none text-body no-spinner';
     const sep = <span className="text-faint text-[11px] font-semibold select-none">:</span>;
     return (
-        <div className={`inline-flex shrink-0 items-center rounded-lg bg-slate-50 dark:bg-zinc-800/50 px-1.5 py-0.5 gap-0.5 ${className}`} title="HH:MM:SS">
+        <div className={`inline-flex shrink-0 items-center rounded-lg bg-sunken px-1.5 py-0.5 gap-0.5 ${className}`} title="HH:MM:SS">
             <input type="number" value={h} min={0} max={23}
                 onChange={e => commit(e.target.value, m, s)}
                 className={inCls} placeholder="0" />
@@ -168,10 +168,10 @@ const PmcFloatingChart = ({ pmcByDate, onClose, initPos }) => {
     const isMobileScreen = typeof window !== 'undefined' && window.innerWidth < 640;
 
     return (
-        <div className={isMobileScreen ? "fixed z-[100] inset-x-0 bottom-0 bg-white dark:bg-zinc-900 border-t border-line-2 rounded-t-3xl shadow-2xl overflow-y-auto max-h-[90vh] pb-safe select-none" : "fixed z-[100] bg-white dark:bg-zinc-900 border border-line-2 rounded-xl shadow-2xl overflow-visible select-none"}
+        <div className={isMobileScreen ? "fixed z-[100] inset-x-0 bottom-0 bg-surface border-t border-line-2 rounded-t-3xl shadow-2xl overflow-y-auto max-h-[90vh] pb-safe select-none" : "fixed z-[100] bg-surface border border-line-2 rounded-xl shadow-2xl overflow-visible select-none"}
             style={isMobileScreen ? {} : { left: pos.x, top: pos.y, width: Math.min(480, window.innerWidth - 32) }}>
             {/* Title / drag bar */}
-            <div className="flex items-center justify-between px-3 py-2 bg-slate-50 dark:bg-zinc-950 border-b border-line-soft-2 rounded-t-xl cursor-grab active:cursor-grabbing"
+            <div className="flex items-center justify-between px-3 py-2 bg-sunken-2 border-b border-line-soft-2 rounded-t-xl cursor-grab active:cursor-grabbing"
                 onPointerDown={handleDragDown} onPointerMove={handleDragMove} onPointerUp={handleDragUp}>
                 <div className="flex items-center gap-2">
                     <Activity size={12} className="text-violet-500" />
@@ -304,7 +304,7 @@ const PmcFloatingChart = ({ pmcByDate, onClose, initPos }) => {
             {hoverEntry && (() => {
                 const tooltipLeft = hover.x > W * 0.65;
                 return (
-                    <div className="absolute top-3 pointer-events-none bg-white dark:bg-zinc-800 border border-line-2 rounded-lg shadow-lg px-3 py-2 text-[10px] z-10 min-w-[130px]"
+                    <div className="absolute top-3 pointer-events-none bg-surface-7 border border-line-2 rounded-lg shadow-lg px-3 py-2 text-[10px] z-10 min-w-[130px]"
                         style={{ [tooltipLeft ? 'right' : 'left']: tooltipLeft ? 16 : 50 }}>
                         <p className="font-bold text-body-soft-2 mb-1.5">
                             {new Date(hoverEntry.date + 'T00:00:00').toLocaleDateString('es-ES', { weekday: 'short', day: 'numeric', month: 'short' })}
@@ -1183,7 +1183,7 @@ export const CalendarPage = ({ activities, plannedWorkouts = [], addPlannedWorko
 
     return (
         <>
-            <div className="flex flex-col bg-white dark:bg-zinc-950 rounded-3xl border border-line-soft overflow-hidden mb-6 shadow-sm">
+            <div className="flex flex-col bg-surface-6 rounded-3xl border border-line-soft overflow-hidden mb-6 shadow-sm">
 
                 {/* HEADER */}
                 <div className="flex items-center justify-between px-3 sm:px-5 py-3 sm:py-4 bg-transparent border-b border-line-soft-5">
@@ -1191,17 +1191,17 @@ export const CalendarPage = ({ activities, plannedWorkouts = [], addPlannedWorko
                         <h2 className="text-base sm:text-2xl font-semibold text-ink-2 capitalize tracking-tight flex items-center">
                             {new Date(year, month).toLocaleDateString('es-ES', { month: 'long', year: 'numeric' })}
                         </h2>
-                        <button onClick={goToday} className="text-[11px] font-medium text-slate-500 dark:text-zinc-400 hover:text-red-500 dark:hover:text-red-400 active:scale-95 transition-all ml-1 sm:ml-2 bg-slate-50 dark:bg-zinc-900 px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full">Hoy</button>
+                        <button onClick={goToday} className="text-[11px] font-medium text-slate-500 dark:text-zinc-400 hover:text-red-500 dark:hover:text-red-400 active:scale-95 transition-all ml-1 sm:ml-2 bg-sunken-6 px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full">Hoy</button>
                     </div>
                     <div className="flex items-center gap-1.5 sm:gap-2">
                         {/* PMC CHART TOGGLE */}
-                        <button onClick={() => setShowPmcChart(p => !p)} className={`hidden sm:flex items-center gap-1.5 px-3 py-1.5 border rounded-lg text-[9px] font-black uppercase tracking-widest transition-colors shadow-sm ${showPmcChart ? 'bg-violet-50 dark:bg-violet-900/20 text-violet-600 dark:text-violet-400 border-violet-200 dark:border-violet-800/50' : 'bg-white dark:bg-zinc-900 text-ink-3 border-slate-200 dark:border-zinc-700 hover:border-slate-400'}`}>
+                        <button onClick={() => setShowPmcChart(p => !p)} className={`hidden sm:flex items-center gap-1.5 px-3 py-1.5 border rounded-lg text-[9px] font-black uppercase tracking-widest transition-colors shadow-sm ${showPmcChart ? 'bg-violet-50 dark:bg-violet-900/20 text-violet-600 dark:text-violet-400 border-violet-200 dark:border-violet-800/50' : 'bg-surface text-ink-3 border-slate-200 dark:border-zinc-700 hover:border-slate-400'}`}>
                             <Activity size={12} /> Forma
                         </button>
 
                         <div className="flex items-center border border-line-2 rounded-lg overflow-hidden ml-1 sm:ml-2">
                             <button onClick={prevMonth} className="w-10 h-10 flex items-center justify-center bg-transparent hover:bg-slate-100 dark:hover:bg-zinc-800 active:scale-95 text-ink-3 transition-all touch-manipulation" title="Mes anterior"><ChevronLeft size={18} /></button>
-                            <div className="w-px h-5 bg-slate-200 dark:bg-zinc-700"></div>
+                            <div className="w-px h-5 bg-fill-7"></div>
                             <button onClick={nextMonth} className="w-10 h-10 flex items-center justify-center bg-transparent hover:bg-slate-100 dark:hover:bg-zinc-800 active:scale-95 text-ink-3 transition-all touch-manipulation" title="Mes siguiente"><ChevronRight size={18} /></button>
                         </div>
                     </div>
@@ -1215,7 +1215,7 @@ export const CalendarPage = ({ activities, plannedWorkouts = [], addPlannedWorko
                     <div className="w-full relative">
 
                         {/* CABECERA DÍAS DE LA SEMANA */}
-                        <div className="hidden lg:grid grid-cols-[130px_repeat(7,1fr)] bg-white/80 dark:bg-zinc-950/80 backdrop-blur-md border-b border-line-soft-5 sticky top-0 z-20">
+                        <div className="hidden lg:grid grid-cols-[130px_repeat(7,1fr)] bg-surface-9 backdrop-blur-md border-b border-line-soft-5 sticky top-0 z-20">
                             <div className="py-2.5 border-r border-line-faint"></div>
                             {WEEKDAYS.map((day, i) => (
                                 <div key={day} className={`py-2 text-center text-[10px] font-medium tracking-widest uppercase border-r border-line-faint last:border-r-0
@@ -1378,7 +1378,7 @@ export const CalendarPage = ({ activities, plannedWorkouts = [], addPlannedWorko
                                                         {Math.round(weekRealizedTSS)}/{Math.round(weekPlannedTSS)}
                                                     </span>
                                                 </div>
-                                                <div className="w-full h-1.5 bg-slate-200 dark:bg-zinc-700 rounded-full overflow-hidden mt-0.5">
+                                                <div className="w-full h-1.5 bg-fill-7 rounded-full overflow-hidden mt-0.5">
                                                     <div className={`h-full rounded-full transition-all ${
                                                         Math.min((weekRealizedTSS / (weekPlannedTSS || 1)) * 100, 100) >= 90 ? 'bg-emerald-500' : 
                                                         Math.min((weekRealizedTSS / (weekPlannedTSS || 1)) * 100, 100) >= 70 ? 'bg-blue-500' : 'bg-amber-500'}`}
@@ -1495,6 +1495,7 @@ export const CalendarPage = ({ activities, plannedWorkouts = [], addPlannedWorko
                                                                 
                                                                 return {
                                                                     accent, dot,
+                                                                    // Sin token: se combina con `bg-white` más abajo y hoy gana `dark:` (ver tasks.md, PR 4).
                                                                     planned: 'bg-white dark:bg-zinc-900 border border-line-muted-3 ring-1 ring-line-soft',
                                                                     done: 'bg-slate-50/80 dark:bg-zinc-800/80 border border-line-2'
                                                                 };
@@ -1564,7 +1565,7 @@ export const CalendarPage = ({ activities, plannedWorkouts = [], addPlannedWorko
                                                                                 {extraInfo.length > 0 && (
                                                                                     <span className="text-[9px] font-semibold text-ink-4 flex gap-1.5">
                                                                                         {extraInfo.map((info, idx) => (
-                                                                                            <span key={idx} className="bg-slate-100 dark:bg-zinc-800 px-1 py-0.5 rounded">{info}</span>
+                                                                                            <span key={idx} className="bg-surface-2 px-1 py-0.5 rounded">{info}</span>
                                                                                         ))}
                                                                                     </span>
                                                                                 )}
@@ -1638,7 +1639,7 @@ export const CalendarPage = ({ activities, plannedWorkouts = [], addPlannedWorko
             {/* MODAL PLANIFICADOR */}
             {isModalOpen && (
                 <div className="fixed inset-0 bg-black/40 dark:bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-                    <div className="bg-white dark:bg-zinc-900 rounded-2xl max-w-3xl w-full shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200 border border-line-muted flex flex-col max-h-[90vh]">
+                    <div className="bg-surface rounded-2xl max-w-3xl w-full shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200 border border-line-muted flex flex-col max-h-[90vh]">
                         {/* HEADER */}
                         <div className="flex items-center justify-between px-6 py-4 border-b border-line-soft shrink-0">
                             <div>
@@ -1649,10 +1650,10 @@ export const CalendarPage = ({ activities, plannedWorkouts = [], addPlannedWorko
                                     {selectedDateForPlan?.toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long' })}
                                 </p>
                             </div>
-                            <button onClick={() => setIsModalOpen(false)} className="shrink-0 ml-4 w-7 h-7 flex items-center justify-center text-slate-400 hover:text-slate-700 dark:hover:text-zinc-200 hover:bg-slate-100 dark:hover:bg-zinc-800 rounded-full transition-colors"><X size={15} /></button>
+                            <button onClick={() => setIsModalOpen(false)} className="shrink-0 ml-4 w-7 h-7 flex items-center justify-center text-slate-400 hover:text-slate-700 dark:hover:text-zinc-200 hover:bg-surface-2 rounded-full transition-colors"><X size={15} /></button>
                         </div>
 
-                        <div className="px-6 py-5 overflow-y-auto flex-1 bg-white dark:bg-zinc-900 custom-scrollbar">
+                        <div className="px-6 py-5 overflow-y-auto flex-1 bg-surface custom-scrollbar">
                             <div className="space-y-5">
 
                                 {/* SPORT SELECTOR */}
@@ -1667,8 +1668,8 @@ export const CalendarPage = ({ activities, plannedWorkouts = [], addPlannedWorko
                                         <button key={s.key} onClick={() => setNewPlan(prev => ({ ...prev, type: s.key, blocks: [] }))}
                                             className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-all duration-200
                                                 ${newPlan.type === s.key
-                                                    ? 'bg-slate-900 text-ink-inverse dark:bg-white shadow-sm'
-                                                    : 'text-ink-3 hover:bg-slate-100 dark:hover:bg-zinc-800'}`}>
+                                                    ? 'bg-inverse text-ink-inverse shadow-sm'
+                                                    : 'text-ink-3 hover:bg-surface-2'}`}>
                                             {s.icon}<span>{s.label}</span>
                                         </button>
                                     ))}
@@ -1682,7 +1683,7 @@ export const CalendarPage = ({ activities, plannedWorkouts = [], addPlannedWorko
                                                 className={`px-2.5 py-1 rounded-full text-[11px] font-medium transition-all duration-200
                                                     ${newPlan.name === t.name
                                                         ? 'bg-blue-500/10 text-blue-600 dark:bg-blue-500/20 dark:text-blue-400'
-                                                        : 'text-ink-4 hover:text-body-soft-2 hover:bg-slate-50 dark:hover:bg-zinc-800/50'}`}
+                                                        : 'text-ink-4 hover:text-body-soft-2 hover:bg-sunken'}`}
                                             >
                                                 {t.name}
                                             </button>
@@ -1715,35 +1716,35 @@ export const CalendarPage = ({ activities, plannedWorkouts = [], addPlannedWorko
                                     <div className="flex flex-col sm:flex-row justify-between sm:items-center mb-3 gap-2">
                                         <div className="flex items-center gap-2">
                                             <h4 className="text-[13px] font-semibold text-ink-2-soft tracking-tight">Estructura</h4>
-                                            <button onClick={() => setIsPastingString(!isPastingString)} className={`px-2 py-0.5 rounded-full text-[10px] font-medium transition-all duration-200 ${isPastingString ? 'bg-blue-500/10 text-blue-600' : 'text-slate-400 hover:text-slate-600 hover:bg-slate-100 dark:hover:bg-zinc-800'}`} title="Importar desde texto">
+                                            <button onClick={() => setIsPastingString(!isPastingString)} className={`px-2 py-0.5 rounded-full text-[10px] font-medium transition-all duration-200 ${isPastingString ? 'bg-blue-500/10 text-blue-600' : 'text-slate-400 hover:text-slate-600 hover:bg-surface-2'}`} title="Importar desde texto">
                                                 Texto
                                             </button>
                                         </div>
                                         <div className="flex gap-1.5">
                                             {newPlan.type === 'WeightTraining' ? (<>
-                                                <button onClick={() => addBlock('warmup')} className="px-2.5 py-1 text-ink-3 rounded-full text-[11px] font-medium hover:bg-slate-100 dark:hover:bg-zinc-800 transition-all">+ Calentar</button>
-                                                <button onClick={() => addBlock('main')} className="px-2.5 py-1 text-ink-3 rounded-full text-[11px] font-medium hover:bg-slate-100 dark:hover:bg-zinc-800 transition-all">+ Ejercicio</button>
-                                                <button onClick={() => addBlock('repeat')} className="px-2.5 py-1 bg-slate-900 dark:bg-white text-ink-inverse rounded-full text-[11px] font-medium hover:bg-slate-700 dark:hover:bg-zinc-200 transition-all shadow-sm">+ Circuito</button>
+                                                <button onClick={() => addBlock('warmup')} className="px-2.5 py-1 text-ink-3 rounded-full text-[11px] font-medium hover:bg-surface-2 transition-all">+ Calentar</button>
+                                                <button onClick={() => addBlock('main')} className="px-2.5 py-1 text-ink-3 rounded-full text-[11px] font-medium hover:bg-surface-2 transition-all">+ Ejercicio</button>
+                                                <button onClick={() => addBlock('repeat')} className="px-2.5 py-1 bg-inverse text-ink-inverse rounded-full text-[11px] font-medium hover:bg-inverse-2 transition-all shadow-sm">+ Circuito</button>
                                             </>) : (<>
-                                                <button onClick={() => addBlock('warmup')} className="px-2.5 py-1 text-ink-3 rounded-full text-[11px] font-medium hover:bg-slate-100 dark:hover:bg-zinc-800 transition-all">+ Calentar</button>
-                                                <button onClick={() => addBlock('main')} className="px-2.5 py-1 text-ink-3 rounded-full text-[11px] font-medium hover:bg-slate-100 dark:hover:bg-zinc-800 transition-all">+ Bloque</button>
-                                                <button onClick={() => addBlock('repeat')} className="px-2.5 py-1 bg-slate-900 dark:bg-white text-ink-inverse rounded-full text-[11px] font-medium hover:bg-slate-700 dark:hover:bg-zinc-200 transition-all shadow-sm">+ Intervalos</button>
+                                                <button onClick={() => addBlock('warmup')} className="px-2.5 py-1 text-ink-3 rounded-full text-[11px] font-medium hover:bg-surface-2 transition-all">+ Calentar</button>
+                                                <button onClick={() => addBlock('main')} className="px-2.5 py-1 text-ink-3 rounded-full text-[11px] font-medium hover:bg-surface-2 transition-all">+ Bloque</button>
+                                                <button onClick={() => addBlock('repeat')} className="px-2.5 py-1 bg-inverse text-ink-inverse rounded-full text-[11px] font-medium hover:bg-inverse-2 transition-all shadow-sm">+ Intervalos</button>
                                             </>)}
                                         </div>
                                     </div>
 
                                     {/* AI SMART PASTE AREA */}
                                     {isPastingString && (
-                                        <div className="mb-4 p-4 rounded-xl bg-slate-50 dark:bg-zinc-950 border border-line-soft">
+                                        <div className="mb-4 p-4 rounded-xl bg-sunken-2 border border-line-soft">
                                             <label className="block text-[10px] font-semibold text-ink-3 uppercase tracking-wider mb-2">Importar desde texto</label>
                                             <textarea
                                                 value={pasteText}
                                                 onChange={e => setPasteText(e.target.value)}
                                                 placeholder={`Pega el texto aquí línea a línea.\nEj:\no Calentamiento articular\no 4x8 Sentadillas Búlgaras\no 3x10 Press Banca`}
-                                                className="w-full bg-white dark:bg-zinc-900 border border-line rounded-lg p-3 text-sm text-body resize-y min-h-[80px] outline-none focus:border-line-strong-2 mb-3 placeholder:text-faint"
+                                                className="w-full bg-surface border border-line rounded-lg p-3 text-sm text-body resize-y min-h-[80px] outline-none focus:border-line-strong-2 mb-3 placeholder:text-faint"
                                             />
                                             <div className="flex justify-end gap-2">
-                                                <button onClick={() => setIsPastingString(false)} className="px-3 py-1.5 rounded-full text-[11px] font-medium text-ink-3 hover:bg-slate-100 dark:hover:bg-zinc-800 transition-all">Cancelar</button>
+                                                <button onClick={() => setIsPastingString(false)} className="px-3 py-1.5 rounded-full text-[11px] font-medium text-ink-3 hover:bg-surface-2 transition-all">Cancelar</button>
                                                 <button onClick={handleMagicPaste} disabled={!pasteText.trim()} className="px-4 py-1.5 rounded-full text-[11px] font-semibold bg-slate-900 dark:bg-white text-ink-inverse hover:bg-slate-700 disabled:opacity-50 transition-all shadow-sm">
                                                     Analizar e Insertar
                                                 </button>
@@ -1753,7 +1754,7 @@ export const CalendarPage = ({ activities, plannedWorkouts = [], addPlannedWorko
 
                                     <div className="space-y-2 mt-4">
                                         {newPlan.blocks.length === 0 && (
-                                            <div className="flex flex-col items-center justify-center py-8 text-center bg-slate-50 dark:bg-zinc-900 border border-dashed border-line-strong rounded-lg">
+                                            <div className="flex flex-col items-center justify-center py-8 text-center bg-sunken-6 border border-dashed border-line-strong rounded-lg">
                                                 <p className="text-ink-3 text-sm">Entrenamiento vacío.</p>
                                                 <p className="text-ink-4 text-xs mt-1">Inserta filas usando los botones superiores.</p>
                                             </div>
@@ -1835,25 +1836,25 @@ export const CalendarPage = ({ activities, plannedWorkouts = [], addPlannedWorko
                                                         onDragOver={(e) => handleDragBlockOver(e, idx)}
                                                         onDrop={(e) => handleDropBlock(e, idx)}
                                                         onDragEnd={handleDragBlockEnd}
-                                                        className={`rounded-xl bg-white dark:bg-zinc-950 overflow-hidden cursor-move transition-all border border-line-soft ${draggedBlockIdx === idx ? 'opacity-50' : 'hover:border-line-2'}`}>
+                                                        className={`rounded-xl bg-surface-6 overflow-hidden cursor-move transition-all border border-line-soft ${draggedBlockIdx === idx ? 'opacity-50' : 'hover:border-line-2'}`}>
                                                         <div className="flex items-center gap-2 px-3 py-2 bg-slate-50/50 dark:bg-zinc-900/50 border-b border-line-soft">
                                                             <span className="text-[11px] font-semibold text-body-soft">Repetir</span>
                                                             <input type="number" value={block.repeats} min={1} onChange={e => updateBlock(block.id, 'repeats', parseInt(e.target.value) || 1)}
-                                                                className="w-9 bg-white dark:bg-zinc-800 rounded-lg text-[13px] font-mono px-1.5 py-0.5 outline-none no-spinner text-center text-body" />
+                                                                className="w-9 bg-surface-7 rounded-lg text-[13px] font-mono px-1.5 py-0.5 outline-none no-spinner text-center text-body" />
                                                             <span className="text-[10px] font-medium text-ink-4">veces</span>
                                                             {canUsePower && !isStr && (
-                                                                <div className="flex shrink-0 bg-slate-100 dark:bg-zinc-800/50 rounded-full p-0.5 ml-auto mr-2">
+                                                                <div className="flex shrink-0 bg-fill-5 rounded-full p-0.5 ml-auto mr-2">
                                                                     <button onClick={() => handleZoneModeChange('hr')}
-                                                                        className={`px-2 py-0.5 text-[10px] font-semibold rounded-full transition-all duration-200 ${currentZoneMode === 'hr' ? 'bg-white dark:bg-zinc-700 text-red-500 shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}
+                                                                        className={`px-2 py-0.5 text-[10px] font-semibold rounded-full transition-all duration-200 ${currentZoneMode === 'hr' ? 'bg-surface-3 text-red-500 shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}
                                                                     >FC</button>
                                                                     <button onClick={() => handleZoneModeChange('power')}
-                                                                        className={`px-2 py-0.5 text-[10px] font-semibold rounded-full transition-all duration-200 ${currentZoneMode === 'power' ? 'bg-white dark:bg-zinc-700 text-amber-500 shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}
+                                                                        className={`px-2 py-0.5 text-[10px] font-semibold rounded-full transition-all duration-200 ${currentZoneMode === 'power' ? 'bg-surface-3 text-amber-500 shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}
                                                                     >W</button>
                                                                 </div>
                                                             )}
                                                             <button onClick={() => removeBlock(block.id)} className={`${canUsePower && !isStr ? '' : 'ml-auto'} text-slate-300 hover:text-red-500 transition-colors`}><X size={13} /></button>
                                                         </div>
-                                                        <div className="p-3 bg-white dark:bg-zinc-950">
+                                                        <div className="p-3 bg-surface-6">
                                                             <div className="space-y-3">
                                                                 {(block.steps || []).map((step, sIdx) => (
                                                                      <div key={step.id} className="flex flex-wrap items-center gap-2 relative">
@@ -1864,27 +1865,27 @@ export const CalendarPage = ({ activities, plannedWorkouts = [], addPlannedWorko
                                                                         </select>
 
                                                                         {/* KM/MIN toggle */}
-                                                                        <div className="flex shrink-0 bg-slate-100 dark:bg-zinc-800/50 rounded-full p-0.5">
+                                                                        <div className="flex shrink-0 bg-fill-5 rounded-full p-0.5">
                                                                              {!isStr && (
                                                                                  <button onClick={() => updateStep(block.id, step.id, 'unit', 'dist')}
-                                                                                    className={`px-2 py-0.5 text-[10px] font-semibold rounded-full transition-all duration-200 ${step.unit === 'dist' ? 'bg-white dark:bg-zinc-700 text-ink-2 shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}
+                                                                                    className={`px-2 py-0.5 text-[10px] font-semibold rounded-full transition-all duration-200 ${step.unit === 'dist' ? 'bg-surface-3 text-ink-2 shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}
                                                                                  >KM</button>
                                                                              )}
                                                                              <button onClick={() => updateStep(block.id, step.id, 'unit', 'time')}
-                                                                                 className={`px-2 py-0.5 text-[10px] font-semibold rounded-full transition-all duration-200 ${(step.unit === 'time' || isStr) ? 'bg-white dark:bg-zinc-700 text-ink-2 shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}
+                                                                                 className={`px-2 py-0.5 text-[10px] font-semibold rounded-full transition-all duration-200 ${(step.unit === 'time' || isStr) ? 'bg-surface-3 text-ink-2 shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}
                                                                              >MIN</button>
                                                                         </div>
 
                                                                         {step.unit === 'dist' && !isStr ? (
                                                                             <input type="number" value={step.duration} min={0} onChange={e => updateStep(block.id, step.id, 'duration', e.target.value)}
-                                                                                className="w-12 shrink-0 bg-slate-50 dark:bg-zinc-800/50 text-[13px] font-mono px-2 py-1 rounded-lg outline-none no-spinner text-center text-body" />
+                                                                                className="w-12 shrink-0 bg-sunken text-[13px] font-mono px-2 py-1 rounded-lg outline-none no-spinner text-center text-body" />
                                                                         ) : (
                                                                             <DurationInput value={step.duration} onChange={v => updateStep(block.id, step.id, 'duration', v)} />
                                                                         )}
 
                                                                         {/* Zone selector */}
                                                                         <select value={step.zone} onChange={e => handleZoneChangeWithPower(e.target.value, (k, v) => updateStep(block.id, step.id, k, v))}
-                                                                            className="shrink-0 bg-slate-50 dark:bg-zinc-800/50 text-[11px] font-medium text-body px-2 py-1.5 rounded-lg outline-none cursor-pointer">
+                                                                            className="shrink-0 bg-sunken text-[11px] font-medium text-body px-2 py-1.5 rounded-lg outline-none cursor-pointer">
                                                                             {zones.map(z => <option key={z.v} value={z.v}>{z.l}</option>)}
                                                                         </select>
 
@@ -1907,7 +1908,7 @@ export const CalendarPage = ({ activities, plannedWorkouts = [], addPlannedWorko
                                                                                         placeholder={step.targetType === 'power' ? "200" : "4:30"} 
                                                                                         value={step.targetValue || ''} 
                                                                                         onChange={e => updateStep(block.id, step.id, 'targetValue', e.target.value)}
-                                                                                        className="w-12 shrink-0 bg-slate-50 dark:bg-zinc-800/50 rounded-lg text-[11px] px-1.5 py-0.5 outline-none no-spinner text-center text-body" 
+                                                                                        className="w-12 shrink-0 bg-sunken rounded-lg text-[11px] px-1.5 py-0.5 outline-none no-spinner text-center text-body" 
                                                                                     />
                                                                                 )}
                                                                             </div>
@@ -1944,46 +1945,46 @@ export const CalendarPage = ({ activities, plannedWorkouts = [], addPlannedWorko
                                                     onDragOver={(e) => handleDragBlockOver(e, idx)}
                                                     onDrop={(e) => handleDropBlock(e, idx)}
                                                     onDragEnd={handleDragBlockEnd}
-                                                    className={`py-2.5 px-3 flex flex-wrap items-center gap-2.5 bg-white dark:bg-zinc-950 rounded-xl border border-line-soft cursor-move transition-all ${draggedBlockIdx === idx ? 'opacity-50' : 'hover:border-line-2'}`}>
+                                                    className={`py-2.5 px-3 flex flex-wrap items-center gap-2.5 bg-surface-6 rounded-xl border border-line-soft cursor-move transition-all ${draggedBlockIdx === idx ? 'opacity-50' : 'hover:border-line-2'}`}>
 
                                                     <div className="flex-1 min-w-0 flex flex-wrap items-center gap-2">
                                                         <div className={`w-1 h-5 rounded-full shrink-0`} style={{ background: zoneColors[block.zone] || '#cbd5e1' }}></div>
                                                         <span className={`text-[11px] font-semibold w-14 shrink-0 ${bLabelStyle}`}>{bLabel}</span>
                                                         
                                                         {/* KM / MIN toggle */}
-                                                        <div className="flex shrink-0 bg-slate-100 dark:bg-zinc-800/50 rounded-full p-0.5">
+                                                        <div className="flex shrink-0 bg-fill-5 rounded-full p-0.5">
                                                             {!isStr && (
                                                                 <button onClick={() => updateBlock(block.id, 'unit', 'dist')}
-                                                                    className={`px-2 py-0.5 text-[10px] font-semibold rounded-full transition-all duration-200 ${block.unit === 'dist' ? 'bg-white dark:bg-zinc-700 text-ink-2 shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}
+                                                                    className={`px-2 py-0.5 text-[10px] font-semibold rounded-full transition-all duration-200 ${block.unit === 'dist' ? 'bg-surface-3 text-ink-2 shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}
                                                                 >KM</button>
                                                             )}
                                                             <button onClick={() => updateBlock(block.id, 'unit', 'time')}
-                                                                className={`px-2 py-0.5 text-[10px] font-semibold rounded-full transition-all duration-200 ${(block.unit === 'time' || isStr) ? 'bg-white dark:bg-zinc-700 text-ink-2 shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}
+                                                                className={`px-2 py-0.5 text-[10px] font-semibold rounded-full transition-all duration-200 ${(block.unit === 'time' || isStr) ? 'bg-surface-3 text-ink-2 shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}
                                                             >MIN</button>
                                                         </div>
 
                                                         {block.unit === 'dist' && !isStr ? (
                                                             <input type="number" placeholder="km" value={block.duration} min={0} onChange={e => updateBlock(block.id, 'duration', e.target.value)}
-                                                                className="w-12 shrink-0 bg-slate-50 dark:bg-zinc-800/50 text-[13px] font-mono px-2 py-1 rounded-lg outline-none no-spinner text-center text-body" />
+                                                                className="w-12 shrink-0 bg-sunken text-[13px] font-mono px-2 py-1 rounded-lg outline-none no-spinner text-center text-body" />
                                                         ) : (
                                                             <DurationInput value={block.duration} onChange={v => updateBlock(block.id, 'duration', v)} />
                                                         )}
 
                                                         {/* FC / W mode toggle (only for bike) */}
                                                         {canUsePower && !isStr && (
-                                                            <div className="flex shrink-0 bg-slate-100 dark:bg-zinc-800/50 rounded-full p-0.5">
+                                                            <div className="flex shrink-0 bg-fill-5 rounded-full p-0.5">
                                                                 <button onClick={() => handleZoneModeChange('hr')}
-                                                                    className={`px-2 py-0.5 text-[10px] font-semibold rounded-full transition-all duration-200 ${currentZoneMode === 'hr' ? 'bg-white dark:bg-zinc-700 text-red-500 shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}
+                                                                    className={`px-2 py-0.5 text-[10px] font-semibold rounded-full transition-all duration-200 ${currentZoneMode === 'hr' ? 'bg-surface-3 text-red-500 shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}
                                                                 >FC</button>
                                                                 <button onClick={() => handleZoneModeChange('power')}
-                                                                    className={`px-2 py-0.5 text-[10px] font-semibold rounded-full transition-all duration-200 ${currentZoneMode === 'power' ? 'bg-white dark:bg-zinc-700 text-amber-500 shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}
+                                                                    className={`px-2 py-0.5 text-[10px] font-semibold rounded-full transition-all duration-200 ${currentZoneMode === 'power' ? 'bg-surface-3 text-amber-500 shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}
                                                                 >W</button>
                                                             </div>
                                                         )}
 
                                                         {/* Zone selector */}
                                                         <select value={block.zone} onChange={e => handleZoneChangeWithPower(e.target.value, (k, v) => updateBlock(block.id, k, v))}
-                                                            className="shrink-0 bg-slate-50 dark:bg-zinc-800/50 text-[11px] font-medium text-body px-2 py-1.5 rounded-lg outline-none cursor-pointer">
+                                                            className="shrink-0 bg-sunken text-[11px] font-medium text-body px-2 py-1.5 rounded-lg outline-none cursor-pointer">
                                                             {zones.map(z => <option key={z.v} value={z.v}>{z.l}</option>)}
                                                         </select>
 
@@ -2007,7 +2008,7 @@ export const CalendarPage = ({ activities, plannedWorkouts = [], addPlannedWorko
                                                                         placeholder={block.targetType === 'power' ? "200" : "4:30"} 
                                                                         value={block.targetValue || ''} 
                                                                         onChange={e => updateBlock(block.id, 'targetValue', e.target.value)}
-                                                                        className="w-12 shrink-0 bg-slate-50 dark:bg-zinc-800/50 rounded-lg text-[11px] px-1.5 py-0.5 outline-none no-spinner text-center text-body" 
+                                                                        className="w-12 shrink-0 bg-sunken rounded-lg text-[11px] px-1.5 py-0.5 outline-none no-spinner text-center text-body" 
                                                                     />
                                                                 )}
                                                             </div>
@@ -2030,8 +2031,8 @@ export const CalendarPage = ({ activities, plannedWorkouts = [], addPlannedWorko
 
                         {/* FOOTER */}
                         <div className="px-6 py-3.5 border-t border-line-soft flex justify-end items-center gap-2 shrink-0">
-                            <button onClick={() => setIsModalOpen(false)} className="px-4 py-2 rounded-full text-xs font-medium text-ink-3 hover:bg-slate-100 dark:hover:bg-zinc-800 transition-all">Cancelar</button>
-                            <button onClick={handleSavePlan} disabled={isSaving} className="px-5 py-2 rounded-full text-xs font-semibold text-ink-inverse bg-slate-900 dark:bg-white hover:bg-slate-700 dark:hover:bg-zinc-200 disabled:opacity-50 transition-all shadow-sm">
+                            <button onClick={() => setIsModalOpen(false)} className="px-4 py-2 rounded-full text-xs font-medium text-ink-3 hover:bg-surface-2 transition-all">Cancelar</button>
+                            <button onClick={handleSavePlan} disabled={isSaving} className="px-5 py-2 rounded-full text-xs font-semibold text-ink-inverse bg-inverse hover:bg-inverse-2 disabled:opacity-50 transition-all shadow-sm">
                                 {isSaving ? 'Guardando...' : editingPlanId ? 'Guardar' : 'Añadir'}
                             </button>
                         </div>
@@ -2041,7 +2042,7 @@ export const CalendarPage = ({ activities, plannedWorkouts = [], addPlannedWorko
             {/* MODAL VER ENTRENAMIENTO PLANEADO */}
             {viewingPlan && (
                 <div className="fixed inset-0 bg-slate-900/60 dark:bg-black/80 backdrop-blur-sm z-[60] flex items-center justify-center p-4 sm:p-8" onClick={() => setViewingPlan(null)} style={{ overscrollBehavior: 'contain' }}>
-                    <div className="bg-white dark:bg-zinc-900 rounded-lg w-full max-w-4xl shadow-2xl overflow-hidden border border-line max-h-[90vh] flex flex-col animate-in zoom-in-95 duration-200" onClick={(e) => e.stopPropagation()}>
+                    <div className="bg-surface rounded-lg w-full max-w-4xl shadow-2xl overflow-hidden border border-line max-h-[90vh] flex flex-col animate-in zoom-in-95 duration-200" onClick={(e) => e.stopPropagation()}>
                         <WorkoutViewerModal
                             workout={viewingPlan}
                             onClose={() => setViewingPlan(null)}
@@ -2114,7 +2115,7 @@ const WorkoutViewerModal = ({ workout, onClose, onDelete, onEdit }) => {
         swim: { label: 'Natación', icon: <Waves size={18} />, gradient: 'from-cyan-500 to-teal-500', accent: 'text-cyan-500', bg: 'bg-cyan-50 dark:bg-cyan-950/30' },
         strength: { label: 'Fuerza', icon: <Dumbbell size={18} />, gradient: 'from-emerald-500 to-green-500', accent: 'text-emerald-500', bg: 'bg-emerald-50 dark:bg-emerald-950/30' },
     };
-    const sport = sportConfig[workout.type] || { label: workout.type, icon: <Activity size={18} />, gradient: 'from-slate-500 to-slate-600', accent: 'text-slate-500', bg: 'bg-slate-50 dark:bg-zinc-900' };
+    const sport = sportConfig[workout.type] || { label: workout.type, icon: <Activity size={18} />, gradient: 'from-slate-500 to-slate-600', accent: 'text-slate-500', bg: 'bg-sunken-6' };
 
     const fmtDur = (m) => { const h = Math.floor(m / 60); const mm = Math.round(m % 60); return h > 0 ? `${h}h ${mm > 0 ? mm + 'm' : ''}` : `${mm}m`; };
 
@@ -2130,7 +2131,7 @@ const WorkoutViewerModal = ({ workout, onClose, onDelete, onEdit }) => {
             
             {/* ── HEADER ── */}
             <div className="relative px-6 pt-6 pb-5 shrink-0">
-                <button onClick={onClose} className="absolute top-4 right-4 w-7 h-7 flex items-center justify-center rounded-full bg-slate-100 dark:bg-zinc-800 text-slate-400 hover:text-slate-700 dark:hover:text-zinc-200 transition-colors z-10">
+                <button onClick={onClose} className="absolute top-4 right-4 w-7 h-7 flex items-center justify-center rounded-full bg-surface-2 text-slate-400 hover:text-slate-700 dark:hover:text-zinc-200 transition-colors z-10">
                     <X size={14} />
                 </button>
 
@@ -2155,21 +2156,21 @@ const WorkoutViewerModal = ({ workout, onClose, onDelete, onEdit }) => {
 
                 {/* ── METRICS GRID ── */}
                 <div className="grid grid-cols-4 gap-2 mt-5">
-                    <div className="bg-slate-50 dark:bg-zinc-800/50 rounded-xl px-3 py-2.5 text-center">
+                    <div className="bg-sunken rounded-xl px-3 py-2.5 text-center">
                         <div className="text-[9px] font-semibold text-ink-4 uppercase tracking-wider mb-0.5">TSS</div>
                         <div className="text-[18px] font-black text-ink-2 leading-none font-mono">{workout.tss || '—'}</div>
                     </div>
-                    <div className="bg-slate-50 dark:bg-zinc-800/50 rounded-xl px-3 py-2.5 text-center">
+                    <div className="bg-sunken rounded-xl px-3 py-2.5 text-center">
                         <div className="text-[9px] font-semibold text-ink-4 uppercase tracking-wider mb-0.5">Duración</div>
                         <div className="text-[18px] font-black text-ink-2 leading-none font-mono">{fmtDur(workout.duration || 0)}</div>
                     </div>
-                    <div className="bg-slate-50 dark:bg-zinc-800/50 rounded-xl px-3 py-2.5 text-center">
+                    <div className="bg-sunken rounded-xl px-3 py-2.5 text-center">
                         <div className="text-[9px] font-semibold text-ink-4 uppercase tracking-wider mb-0.5">IF</div>
                         <div className={`text-[18px] font-black leading-none font-mono ${weightedIF >= 0.85 ? 'text-red-500' : weightedIF >= 0.7 ? 'text-amber-500' : 'text-emerald-500'}`}>
                             {weightedIF > 0 ? weightedIF.toFixed(2) : '—'}
                         </div>
                     </div>
-                    <div className="bg-slate-50 dark:bg-zinc-800/50 rounded-xl px-3 py-2.5 text-center">
+                    <div className="bg-sunken rounded-xl px-3 py-2.5 text-center">
                         <div className="text-[9px] font-semibold text-ink-4 uppercase tracking-wider mb-0.5">Bloques</div>
                         <div className="text-[18px] font-black text-ink-2 leading-none font-mono">
                             {totalBlocks}
@@ -2183,7 +2184,7 @@ const WorkoutViewerModal = ({ workout, onClose, onDelete, onEdit }) => {
             {segments.length > 0 && (
                 <div className="px-6 pb-4 shrink-0">
                     {/* Timeline bar — Apple Watch style */}
-                    <div className="flex items-end h-[24px] gap-[1px] rounded-lg overflow-hidden bg-slate-100 dark:bg-zinc-800/50 p-[2px]">
+                    <div className="flex items-end h-[24px] gap-[1px] rounded-lg overflow-hidden bg-fill-5 p-[2px]">
                         {segments.map((s, i) => {
                             const zoneH = { Z1: '25%', Z2: '40%', Z3: '55%', Z4: '70%', Z5: '82%', Z6: '92%', Z7: '100%', R12: '32%', R23: '47%', R34: '62%' };
                             return (
@@ -2232,7 +2233,7 @@ const WorkoutViewerModal = ({ workout, onClose, onDelete, onEdit }) => {
                                                         <span className="text-[9px] font-semibold text-ink-4 tabular-nums w-7 text-right">{pct}%</span>
                                                     </div>
                                                 </div>
-                                                <div className="h-1.5 bg-slate-100 dark:bg-zinc-800 rounded-full overflow-hidden">
+                                                <div className="h-1.5 bg-surface-2 rounded-full overflow-hidden">
                                                     <div className="h-full rounded-full transition-all duration-500" style={{ width: `${(min / maxZoneMin) * 100}%`, background: getZoneColor(zone) }} />
                                                 </div>
                                             </div>
@@ -2335,10 +2336,10 @@ const WorkoutViewerModal = ({ workout, onClose, onDelete, onEdit }) => {
                     Eliminar
                 </button>
                 <div className="flex gap-2">
-                    <button onClick={onClose} className="px-4 py-2 rounded-full text-[11px] font-medium text-ink-3 hover:bg-slate-100 dark:hover:bg-zinc-800 transition-colors">
+                    <button onClick={onClose} className="px-4 py-2 rounded-full text-[11px] font-medium text-ink-3 hover:bg-surface-2 transition-colors">
                         Cerrar
                     </button>
-                    <button onClick={() => { onClose(); onEdit(); }} className="px-5 py-2 rounded-full text-[11px] font-semibold bg-slate-900 dark:bg-white text-ink-inverse hover:bg-slate-700 dark:hover:bg-zinc-200 transition-colors shadow-sm">
+                    <button onClick={() => { onClose(); onEdit(); }} className="px-5 py-2 rounded-full text-[11px] font-semibold bg-inverse text-ink-inverse hover:bg-inverse-2 transition-colors shadow-sm">
                         Editar
                     </button>
                 </div>
