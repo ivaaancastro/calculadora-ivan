@@ -11,19 +11,19 @@
 import { readFileSync, writeFileSync, existsSync } from 'node:fs';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { listFiles, collectPairs, transform, tokensCss } from './lib.mjs';
+import { listFiles, collectPairs, transform, tokensCss, NEUTRALS } from './lib.mjs';
 
 const ROOT = fileURLToPath(new URL('../..', import.meta.url));
 const TOKENS_CSS = join(ROOT, 'src/styles/tokens.css');
 
 export const tableFrom = (defs) => Object.fromEntries(Object.entries(defs).map(([t, d]) => [`${d.light}|${d.dark}`, t]));
 
-export function defineFamily({ family, props, entries }) {
+export function defineFamily({ family, props, entries, colors = NEUTRALS }) {
   const tableFile = join(ROOT, 'src/styles/tokens', `${family}.json`);
   const loadDefs = () => (existsSync(tableFile) ? JSON.parse(readFileSync(tableFile, 'utf8')) : {});
 
   function inventory() {
-    const pairs = collectPairs(ROOT, listFiles(ROOT, entries), props);
+    const pairs = collectPairs(ROOT, listFiles(ROOT, entries), props, colors);
     const table = tableFrom(loadDefs());
     const byValue = new Map();
     for (const p of pairs) {
@@ -62,7 +62,7 @@ export function defineFamily({ family, props, entries }) {
     const skipped = {};
     for (const file of listFiles(ROOT, entries)) {
       const path = join(ROOT, file);
-      const { code, replaced, skipped: sk } = transform(readFileSync(path, 'utf8'), props, table);
+      const { code, replaced, skipped: sk } = transform(readFileSync(path, 'utf8'), props, table, colors, file);
       for (const s of sk) skipped[`${s.reason}: ${s.pair}`] = (skipped[`${s.reason}: ${s.pair}`] || 0) + 1;
       if (replaced) {
         writeFileSync(path, code);
