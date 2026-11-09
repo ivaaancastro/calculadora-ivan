@@ -5,7 +5,8 @@ import {
 } from 'recharts';
 import { ArrowUp, ArrowDown, Minus } from 'lucide-react';
 import { InfoTooltip } from '../common/InfoTooltip';
-import { tooltipStyle } from './fitnessConstants';
+import { tooltipStyleFor } from './fitnessConstants';
+import { useChartTheme } from '../charts/useChartTheme';
 
 export const EstimatedFtpCard = ({
     ftp,
@@ -13,6 +14,7 @@ export const EstimatedFtpCard = ({
     configFTP,
     curveChartData
 }) => {
+    const ct = useChartTheme();
     return (
         <section className="mb-12">
             <div className="bg-surface-5 rounded-2xl border border-line-muted p-6 sm:p-8 shadow-sm">
@@ -47,15 +49,15 @@ export const EstimatedFtpCard = ({
                                 <AreaChart data={curveChartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                                     <defs>
                                         <linearGradient id="ftpGradFinal" x1="0" y1="0" x2="0" y2="1">
-                                            <stop offset="5%" stopColor="#f59e0b" stopOpacity={0.15} />
-                                            <stop offset="95%" stopColor="#f59e0b" stopOpacity={0} />
+                                            <stop offset="5%" stopColor={ct.series.power} stopOpacity={0.15} />
+                                            <stop offset="95%" stopColor={ct.series.power} stopOpacity={0} />
                                         </linearGradient>
                                     </defs>
-                                    <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" opacity={0.3} vertical={false} />
-                                    <XAxis dataKey="name" tick={{ fontSize: 9, fontWeight: 700, fill: '#94a3b8' }} axisLine={false} tickLine={false} />
+                                    <CartesianGrid strokeDasharray="3 3" stroke={ct.anatomy.grid2} opacity={0.3} vertical={false} />
+                                    <XAxis dataKey="name" tick={{ fontSize: 9, fontWeight: 700, fill: ct.anatomy.tick }} axisLine={false} tickLine={false} />
                                     <YAxis hide />
-                                    <RechartsTooltip contentStyle={tooltipStyle} isAnimationActive={false} />
-                                    <Area type="monotone" dataKey="actual" stroke="#f59e0b" strokeWidth={3} fill="url(#ftpGradFinal)" dot={{ r: 4, fill: '#f59e0b', strokeWidth: 2, stroke: '#fff' }} connectNulls isAnimationActive={false} />
+                                    <RechartsTooltip contentStyle={tooltipStyleFor(ct)} isAnimationActive={false} />
+                                    <Area type="monotone" dataKey="actual" stroke={ct.series.power} strokeWidth={3} fill="url(#ftpGradFinal)" dot={{ r: 4, fill: ct.series.power, strokeWidth: 2, stroke: ct.anatomy.dotRing }} connectNulls isAnimationActive={false} />
                                 </AreaChart>
                             </ResponsiveContainer>
                         ) : (

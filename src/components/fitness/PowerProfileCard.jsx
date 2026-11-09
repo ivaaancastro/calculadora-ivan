@@ -5,8 +5,9 @@ import {
 } from 'recharts';
 import { Settings } from 'lucide-react';
 import { InfoTooltip } from '../common/InfoTooltip';
-import { tooltipStyle } from './fitnessConstants';
+import { tooltipStyleFor } from './fitnessConstants';
 import { formatInterval } from '../../hooks/useFitnessAnalytics';
+import { useChartTheme } from '../charts/useChartTheme';
 
 export const PowerProfileCard = ({
     showPowerConfig,
@@ -21,6 +22,7 @@ export const PowerProfileCard = ({
     profile,
     powerProfile
 }) => {
+    const ct = useChartTheme();
     return (
         <section className="mb-8">
             <div className="bg-surface-5 rounded-2xl border border-line-muted p-6 sm:p-8 shadow-sm">
@@ -95,14 +97,14 @@ export const PowerProfileCard = ({
                         <div className="h-[340px] w-full bg-sunken-7 rounded-3xl p-4 border border-line-faint-2">
                             <ResponsiveContainer width="100%" height="100%">
                                 <LineChart data={ppChartData} margin={{ top: 10, right: 10, left: -20, bottom: 5 }}>
-                                    <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" opacity={0.3} vertical={false} />
-                                    <XAxis dataKey="name" tick={{ fontSize: 9, fontWeight: 700, fill: '#94a3b8' }} axisLine={false} tickLine={false} />
-                                    <YAxis tick={{ fontSize: 9, fontWeight: 700, fill: '#94a3b8' }} axisLine={false} tickLine={false} />
-                                    <RechartsTooltip contentStyle={tooltipStyle} formatter={(v, name) => [`${v} ${powerUnit === 'w' ? 'W' : 'W/kg'}`, name]} isAnimationActive={false} />
+                                    <CartesianGrid strokeDasharray="3 3" stroke={ct.anatomy.grid2} opacity={0.3} vertical={false} />
+                                    <XAxis dataKey="name" tick={{ fontSize: 9, fontWeight: 700, fill: ct.anatomy.tick }} axisLine={false} tickLine={false} />
+                                    <YAxis tick={{ fontSize: 9, fontWeight: 700, fill: ct.anatomy.tick }} axisLine={false} tickLine={false} />
+                                    <RechartsTooltip contentStyle={tooltipStyleFor(ct)} formatter={(v, name) => [`${v} ${powerUnit === 'w' ? 'W' : 'W/kg'}`, name]} isAnimationActive={false} />
                                     {['World Class', 'Cat 1 / Elite', 'Cat 2', 'Cat 3', 'Cat 4', 'Cat 5', 'Untrained'].map((cat, idx) => (
-                                        <Line key={cat} type="monotone" dataKey={cat} stroke={idx === 0 ? '#fbbf24' : '#94a3b8'} strokeWidth={1} dot={false} opacity={0.08} isAnimationActive={false} />
+                                        <Line key={cat} type="monotone" dataKey={cat} stroke={idx === 0 ? ct.series.profileTop : ct.series.profileOther} strokeWidth={1} dot={false} opacity={0.08} isAnimationActive={false} />
                                     ))}
-                                    <Line type="monotone" dataKey="Usuario" stroke="#3b82f6" strokeWidth={3} dot={{ r: 4, fill: '#3b82f6', strokeWidth: 2, stroke: '#fff' }} isAnimationActive={false} />
+                                    <Line type="monotone" dataKey="Usuario" stroke={ct.series.profileUser} strokeWidth={3} dot={{ r: 4, fill: ct.series.profileUser, strokeWidth: 2, stroke: ct.anatomy.dotRing }} isAnimationActive={false} />
                                 </LineChart>
                             </ResponsiveContainer>
                         </div>

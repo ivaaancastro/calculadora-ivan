@@ -14,7 +14,7 @@
 
 ## 1. Estado del proyecto
 - **Nombre:** Forma — Dashboard de rendimiento deportivo y salud
-- **Rama actual:** `feat/ui-tokens-categories` (Capa 1 del rediseño, PR 5b: acentos de categoría; PR hacia `develop`). El PR 5 se partió en 5a (estados y métricas, #56) y 5b (categorías) por decisión del usuario.
+- **Rama actual:** `feat/ui-tokens-charts` (Capa 1 del rediseño, PR 6: gráficas; PR hacia `develop`). El PR 5 se partió en 5a (estados y métricas, #56) y 5b (categorías, #57) por decisión del usuario.
 - **Rama base:** `develop`
 - **Rama de producción:** `main` (desplegada en Vercel)
 - **Versión:** 0.1.0
@@ -43,7 +43,7 @@
 | spec-e2e-01 | Pruebas E2E críticas (auth, dashboard, Strava sync, exportación de datos) | implementada | 2026-11-05 | feat/e2e-critical-flows |
 | spec-rediseno-02 | Rediseño de la webapp por capas (roadmap) | en curso | 2026-11-06 | `docs/branches/feat/webapp-redesign/` |
 | spec-rediseno-02-c0 | Capa 0: red de seguridad de UI | implementada (PR #51 mergeado en `develop`) | 2026-11-06 | test/ui-safety-net |
-| spec-rediseno-02-c1 | Capa 1: tokens y tema | en curso (PR 1 #52, bordes #53, texto #54, superficies #55 y acentos de estado #56 mergeados; PR 5b categorías en curso) | 2026-11-09 | `docs/branches/feat/ui-tokens/` |
+| spec-rediseno-02-c1 | Capa 1: tokens y tema | en curso (PR 1 #52, bordes #53, texto #54, superficies #55 y acentos de estado #56 y categorías #57 mergeados; PR 6 gráficas en curso) | 2026-11-09 | `docs/branches/feat/ui-tokens/` |
 
 > Cuando un agente implemente una spec, debe añadir una fila aquí y marcarla como `implementada`.
 
@@ -94,6 +94,7 @@
 - Codemods: `scripts/codemods/<familia>.mjs --inventory | --tokens | --apply` (CLI común en `family.mjs`, lógica en `lib.mjs`; una familia nueva solo declara nombre, propiedades y ámbito). La tabla de cada familia es `src/styles/tokens/<familia>.json`; `--tokens` regenera su bloque en `tokens.css` (no editarlo a mano).
 - **Precedencia:** en Tailwind 3 `dark:` va después de `hover:`/`focus:` en el CSS. El codemod migra por expresión de clases y propiedad todo o nada, salvo entre ramas opuestas de un ternario (nunca coexisten); un literal que no se migra bloquea a todo lo que coexiste con él. No forzar a mano un par descartado (ver D-08). El codemod no ve una clase definida en un sitio (objeto, variable) e interpolada en otra plantilla junto a una clase suelta de la misma propiedad: lo detecta el volcado (caso de `sportColors.planned` en `CalendarPage`, PR 4). `group-hover:` no corre ese riesgo (gana por especificidad, `.group:hover .x` > `.dark .x`), pero se trata igual.
 - **Acentos:** no se migran por color sino por significado. `scripts/codemods/accents.mjs` solo toca las expresiones de su lista `ALLOW` (archivo y línea); las métricas (`metric-*-ink`, `legacy-*`) se migraron a mano (`metrics.json`). Un mismo valor puede tener varios tokens con distinto significado.
+- **Gráficas:** los componentes usan `const ct = useChartTheme()` y `ct.<grupo>.<rol>` (`ct.series.hr`, `ct.anatomy.grid`, `ct.zones.hr[i]`); un color nuevo se añade como rol en `chartTheme.js` con su token (`charts.json` + `charts.mjs --tokens`). Nunca un hex suelto en una gráfica.
 - `npm run lint:colors` es un trinquete por archivo (`scripts/color-baseline.json`): tras migrar, `npm run lint:colors -- --update` (solo baja). `--report` da totales.
 - Verificación de una migración: además de las capturas, volcado de estilos calculados (incluye `:hover`/`:focus`/`:active` forzados y `:hover` en los `.group` para `group-hover:`) en `develop` y en la rama (`STYLE_DUMP_DIR=<dir> npx playwright test e2e/tools/style-dump.spec.js`, con `E2E_PORT` distinto si se usa un worktree) y `node scripts/style-diff.mjs <antes> <después>`: debe dar 0 diferencias.
 - Fuera de alcance de la Capa 1: colores en `src/hooks` y `src/utils` (74 líneas), canvas de la landing, tipografía, radios y sombras.

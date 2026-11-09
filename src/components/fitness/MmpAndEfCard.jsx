@@ -5,8 +5,9 @@ import {
 } from 'recharts';
 import { MousePointer2, RefreshCw } from 'lucide-react';
 import { InfoTooltip } from '../common/InfoTooltip';
-import { tooltipStyle } from './fitnessConstants';
+import { tooltipStyleFor } from './fitnessConstants';
 import { formatInterval, formatPace } from '../../hooks/useFitnessAnalytics';
+import { useChartTheme } from '../charts/useChartTheme';
 
 export const MmpAndEfCard = ({
     activities,
@@ -30,11 +31,12 @@ export const MmpAndEfCard = ({
     isDeepSyncing,
     deepSyncProgress
 }) => {
+    const ct = useChartTheme();
     const renderCustomCurveTooltip = ({ active, payload, label }) => {
         if (active && payload && payload.length) {
             const data = payload[0].payload;
             return (
-                <div style={tooltipStyle} className="shadow-xl min-w-[150px]">
+                <div style={tooltipStyleFor(ct)} className="shadow-xl min-w-[150px]">
                     <p className="text-[9px] text-zinc-400 uppercase tracking-widest mb-1">Pico de {label}</p>
                     <p className="text-sm font-black mb-2" style={{ color: curveColor }}>
                         {isPace ? formatPace(data.value) : data.value} <span className="text-[9px] font-bold">{curveUnit}</span>
@@ -59,7 +61,7 @@ export const MmpAndEfCard = ({
             const data = payload[0].payload;
             const isRun = curveSport === 'run';
             return (
-                <div style={tooltipStyle} className="shadow-xl w-48 z-[200]">
+                <div style={tooltipStyleFor(ct)} className="shadow-xl w-48 z-[200]">
                     <p className="text-xs font-semibold text-ink-3 mb-1.5 border-b border-slate-200/50 dark:border-zinc-700/50 pb-1">Factor de Eficiencia</p>
                     <div className="flex justify-between items-end mb-2">
                         <span className="text-xl font-bold text-ef leading-none">{data.ef}</span>
@@ -160,15 +162,15 @@ export const MmpAndEfCard = ({
                                 <ComposedChart data={analytics?.efData?.[curveSport] || []}>
                                     <defs>
                                         <linearGradient id="efGrad" x1="0" y1="0" x2="0" y2="1">
-                                            <stop offset="5%" stopColor="#8b5cf6" stopOpacity={0.15} />
-                                            <stop offset="95%" stopColor="#8b5cf6" stopOpacity={0} />
+                                            <stop offset="5%" stopColor={ct.series.ef} stopOpacity={0.15} />
+                                            <stop offset="95%" stopColor={ct.series.ef} stopOpacity={0} />
                                         </linearGradient>
                                     </defs>
-                                    <CartesianGrid strokeDasharray="2 2" stroke="#3f3f46" opacity={0.1} vertical={false} />
+                                    <CartesianGrid strokeDasharray="2 2" stroke={ct.anatomy.gridZinc} opacity={0.1} vertical={false} />
                                     <XAxis dataKey="dateLabel" hide />
                                     <YAxis hide domain={['dataMin - 0.1', 'dataMax + 0.1']} />
                                     <RechartsTooltip content={renderCustomEfTooltip} isAnimationActive={false} />
-                                    <Area type="monotone" dataKey="ef" stroke="#8b5cf6" strokeWidth={3} fill="url(#efGrad)" activeDot={{ r: 5, fill: '#8b5cf6', strokeWidth: 2, stroke: '#fff' }} isAnimationActive={false} />
+                                    <Area type="monotone" dataKey="ef" stroke={ct.series.ef} strokeWidth={3} fill="url(#efGrad)" activeDot={{ r: 5, fill: ct.series.ef, strokeWidth: 2, stroke: ct.anatomy.dotRing }} isAnimationActive={false} />
                                     <Scatter
                                         dataKey="ef"
                                         fill="transparent"
@@ -192,8 +194,8 @@ export const MmpAndEfCard = ({
                         <div className="h-[220px] w-full">
                             <ResponsiveContainer width="100%" height="100%">
                                 <ComposedChart data={currentCurve}>
-                                    <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" opacity={0.3} vertical={false} />
-                                    <XAxis dataKey="name" tick={{ fontSize: 9, fontWeight: 700, fill: '#94a3b8' }} axisLine={false} tickLine={false} />
+                                    <CartesianGrid strokeDasharray="3 3" stroke={ct.anatomy.grid2} opacity={0.3} vertical={false} />
+                                    <XAxis dataKey="name" tick={{ fontSize: 9, fontWeight: 700, fill: ct.anatomy.tick }} axisLine={false} tickLine={false} />
                                     <YAxis hide reversed={isPace} domain={['auto', 'auto']} />
                                     <RechartsTooltip content={renderCustomCurveTooltip} isAnimationActive={false} />
                                     <Area type="stepAfter" dataKey="value" stroke={curveColor} strokeWidth={3} fill={curveColor} fillOpacity={0.05} dot={false} isAnimationActive={false} />

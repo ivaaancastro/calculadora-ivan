@@ -5,7 +5,9 @@ import { InteractiveMap } from '../activity/ActivityMap';
 import { MetricCard, PillTab, CustomChartTooltip, MetricHelp } from '../activity/ActivitySharedUI';
 import { useActivityMetrics } from '../../hooks/useActivityMetrics';
 import { formatPace, formatMinsToHMM, formatDuration } from '../../utils/formatters';
+import { useChartTheme } from '../charts/useChartTheme';
 export const ActivityDetailPage = ({ activity, settings, fetchStreams, onBack, onDelete }) => {
+    const ct = useChartTheme();
     const [streams, setStreams] = useState(null);
     const [loadingStreams, setLoadingStreams] = useState(true);
     const fetchedRef = useRef(null);
@@ -105,16 +107,16 @@ export const ActivityDetailPage = ({ activity, settings, fetchStreams, onBack, o
 
     const getTheme = (type) => {
         const t = String(type).toLowerCase();
-        if (t.includes('run') || t.includes('carrera')) return '#ea580c';
-        if (t.includes('andar') || t.includes('walk') || t.includes('caminata')) return '#10b981';
-        if (t.includes('bike') || t.includes('bici')) return '#2563eb';
-        if (t.includes('gym') || t.includes('fuerza')) return '#7c3aed';
-        return '#71717a';
+        if (t.includes('run') || t.includes('carrera')) return ct.sports.run;
+        if (t.includes('andar') || t.includes('walk') || t.includes('caminata')) return ct.sports.walk;
+        if (t.includes('bike') || t.includes('bici')) return ct.sports.bike;
+        if (t.includes('gym') || t.includes('fuerza')) return ct.sports.strength;
+        return ct.sports.other;
     };
     const themeColor = getTheme(activity.type);
 
     const ZONE_LABELS = ['Z1 Recuperación', 'Z2 Base', 'Z3 Tempo', 'Z4 Umbral', 'Z5 VO2Max'];
-    const ZONE_COLORS = ['#94a3b8', '#3b82f6', '#10b981', '#eab308', '#ef4444'];
+    const ZONE_COLORS = ct.zones.hr;
 
     const handleMouseMove = (state) => {
         if (state && typeof state.activeTooltipIndex !== 'undefined' && state.activeTooltipIndex !== null) {
@@ -487,11 +489,11 @@ export const ActivityDetailPage = ({ activity, settings, fetchStreams, onBack, o
                                                         onClick={handleMouseMove}
                                                         style={{ touchAction: 'pan-y' }}
                                                     >
-                                                        <CartesianGrid vertical={false} strokeDasharray="3 3" stroke="#f1f5f9" opacity={0.5} />
+                                                        <CartesianGrid vertical={false} strokeDasharray="3 3" stroke={ct.anatomy.gridSoft} opacity={0.5} />
                                                         <XAxis dataKey="time" hide />
                                                         <YAxis reversed={isPaceBased} hide domain={['dataMin', 'dataMax']} />
-                                                        <RechartsTooltip isAnimationActive={false} content={() => null} cursor={{ stroke: '#6366f1', strokeWidth: 1.5, strokeDasharray: '3 3' }} />
-                                                        <Area type="monotone" dataKey={isPaceBased ? "pace" : "speed"} stroke="#6366f1" fill="#6366f1" fillOpacity={0.06} strokeWidth={1.5} dot={false} activeDot={{ r: 3, stroke: '#fff', strokeWidth: 1.5, fill: '#6366f1' }} />
+                                                        <RechartsTooltip isAnimationActive={false} content={() => null} cursor={{ stroke: ct.series.pace, strokeWidth: 1.5, strokeDasharray: '3 3' }} />
+                                                        <Area type="monotone" dataKey={isPaceBased ? "pace" : "speed"} stroke={ct.series.pace} fill={ct.series.pace} fillOpacity={0.06} strokeWidth={1.5} dot={false} activeDot={{ r: 3, stroke: ct.anatomy.dotRing, strokeWidth: 1.5, fill: ct.series.pace }} />
                                                     </AreaChart>
                                                 </ResponsiveContainer>
                                             </div>
@@ -513,11 +515,11 @@ export const ActivityDetailPage = ({ activity, settings, fetchStreams, onBack, o
                                                             onClick={handleMouseMove}
                                                             style={{ touchAction: 'pan-y' }}
                                                         >
-                                                            <CartesianGrid vertical={false} strokeDasharray="3 3" stroke="#f1f5f9" opacity={0.5} />
+                                                            <CartesianGrid vertical={false} strokeDasharray="3 3" stroke={ct.anatomy.gridSoft} opacity={0.5} />
                                                             <XAxis dataKey="time" hide />
                                                             <YAxis hide domain={['dataMin - 5', 'dataMax + 5']} />
-                                                            <RechartsTooltip isAnimationActive={false} content={() => null} cursor={{ stroke: '#f43f5e', strokeWidth: 1.5, strokeDasharray: '3 3' }} />
-                                                            <Area type="monotone" dataKey="hr" stroke="#f43f5e" fill="#f43f5e" fillOpacity={0.06} strokeWidth={1.5} dot={false} activeDot={{ r: 3, stroke: '#fff', strokeWidth: 1.5, fill: '#f43f5e' }} />
+                                                            <RechartsTooltip isAnimationActive={false} content={() => null} cursor={{ stroke: ct.series.hr, strokeWidth: 1.5, strokeDasharray: '3 3' }} />
+                                                            <Area type="monotone" dataKey="hr" stroke={ct.series.hr} fill={ct.series.hr} fillOpacity={0.06} strokeWidth={1.5} dot={false} activeDot={{ r: 3, stroke: ct.anatomy.dotRing, strokeWidth: 1.5, fill: ct.series.hr }} />
                                                         </AreaChart>
                                                     </ResponsiveContainer>
                                                 </div>
@@ -540,11 +542,11 @@ export const ActivityDetailPage = ({ activity, settings, fetchStreams, onBack, o
                                                             onClick={handleMouseMove}
                                                             style={{ touchAction: 'pan-y' }}
                                                         >
-                                                            <CartesianGrid vertical={false} strokeDasharray="3 3" stroke="#f1f5f9" opacity={0.5} />
+                                                            <CartesianGrid vertical={false} strokeDasharray="3 3" stroke={ct.anatomy.gridSoft} opacity={0.5} />
                                                             <XAxis dataKey="time" hide />
                                                             <YAxis hide domain={['dataMin', 'dataMax']} />
-                                                            <RechartsTooltip isAnimationActive={false} content={() => null} cursor={{ stroke: '#f59e0b', strokeWidth: 1.5, strokeDasharray: '3 3' }} />
-                                                            <Area type="monotone" dataKey="watts" stroke="#f59e0b" fill="#f59e0b" fillOpacity={0.06} strokeWidth={1.5} dot={false} activeDot={{ r: 3, stroke: '#fff', strokeWidth: 1.5, fill: '#f59e0b' }} />
+                                                            <RechartsTooltip isAnimationActive={false} content={() => null} cursor={{ stroke: ct.series.power, strokeWidth: 1.5, strokeDasharray: '3 3' }} />
+                                                            <Area type="monotone" dataKey="watts" stroke={ct.series.power} fill={ct.series.power} fillOpacity={0.06} strokeWidth={1.5} dot={false} activeDot={{ r: 3, stroke: ct.anatomy.dotRing, strokeWidth: 1.5, fill: ct.series.power }} />
                                                         </AreaChart>
                                                     </ResponsiveContainer>
                                                 </div>
@@ -574,11 +576,11 @@ export const ActivityDetailPage = ({ activity, settings, fetchStreams, onBack, o
                                                             onClick={handleMouseMove}
                                                             style={{ touchAction: 'pan-y' }}
                                                         >
-                                                            <CartesianGrid vertical={false} strokeDasharray="3 3" stroke="#f1f5f9" opacity={0.5} />
+                                                            <CartesianGrid vertical={false} strokeDasharray="3 3" stroke={ct.anatomy.gridSoft} opacity={0.5} />
                                                             <XAxis dataKey="time" hide />
                                                             <YAxis hide domain={['dataMin - 10', 'dataMax + 10']} />
-                                                            <RechartsTooltip isAnimationActive={false} content={() => null} cursor={{ stroke: '#64748b', strokeWidth: 1.5, strokeDasharray: '3 3' }} />
-                                                            <Area type="monotone" dataKey="alt" stroke="#64748b" fill="#64748b" fillOpacity={0.06} strokeWidth={1.5} dot={false} activeDot={{ r: 3, stroke: '#fff', strokeWidth: 1.5, fill: '#64748b' }} />
+                                                            <RechartsTooltip isAnimationActive={false} content={() => null} cursor={{ stroke: ct.series.altitude, strokeWidth: 1.5, strokeDasharray: '3 3' }} />
+                                                            <Area type="monotone" dataKey="alt" stroke={ct.series.altitude} fill={ct.series.altitude} fillOpacity={0.06} strokeWidth={1.5} dot={false} activeDot={{ r: 3, stroke: ct.anatomy.dotRing, strokeWidth: 1.5, fill: ct.series.altitude }} />
                                                         </AreaChart>
                                                     </ResponsiveContainer>
                                                 </div>
@@ -601,11 +603,11 @@ export const ActivityDetailPage = ({ activity, settings, fetchStreams, onBack, o
                                                             onClick={handleMouseMove}
                                                             style={{ touchAction: 'pan-y' }}
                                                         >
-                                                            <CartesianGrid vertical={false} strokeDasharray="3 3" stroke="#f1f5f9" opacity={0.5} />
+                                                            <CartesianGrid vertical={false} strokeDasharray="3 3" stroke={ct.anatomy.gridSoft} opacity={0.5} />
                                                             <XAxis dataKey="time" hide />
                                                             <YAxis hide domain={['dataMin - 5', 'dataMax + 5']} />
-                                                            <RechartsTooltip isAnimationActive={false} content={() => null} cursor={{ stroke: '#10b981', strokeWidth: 1.5, strokeDasharray: '3 3' }} />
-                                                            <Area type="monotone" dataKey="cadence" stroke="#10b981" fill="#10b981" fillOpacity={0.06} strokeWidth={1.5} dot={false} activeDot={{ r: 3, stroke: '#fff', strokeWidth: 1.5, fill: '#10b981' }} />
+                                                            <RechartsTooltip isAnimationActive={false} content={() => null} cursor={{ stroke: ct.series.cadence, strokeWidth: 1.5, strokeDasharray: '3 3' }} />
+                                                            <Area type="monotone" dataKey="cadence" stroke={ct.series.cadence} fill={ct.series.cadence} fillOpacity={0.06} strokeWidth={1.5} dot={false} activeDot={{ r: 3, stroke: ct.anatomy.dotRing, strokeWidth: 1.5, fill: ct.series.cadence }} />
                                                         </AreaChart>
                                                     </ResponsiveContainer>
                                                 </div>
@@ -708,7 +710,7 @@ export const ActivityDetailPage = ({ activity, settings, fetchStreams, onBack, o
                             <InteractiveMap 
                                 polyline={activity.map_polyline} 
                                 highResCoords={streams?.latlng?.data} 
-                                color={themeColor || "#6366f1"} 
+                                color={themeColor || ct.sports.fallback} 
                                 currentPosition={activePayload?.latlng} 
                             />
                             <div className="absolute top-4 left-4 z-[400] bg-white/90 dark:bg-zinc-900/90 backdrop-blur p-3 rounded-xl border border-line-soft-2 shadow-md space-y-1 pointer-events-none max-w-[220px]">
@@ -795,15 +797,15 @@ export const ActivityDetailPage = ({ activity, settings, fetchStreams, onBack, o
                                     <div className="h-[280px] bg-surface-6 rounded-2xl border border-line-soft p-6 shadow-sm">
                                         <ResponsiveContainer width="100%" height="100%">
                                             <BarChart data={zoneType === 'hr' ? exactZoneAnalysis : exactPacePowerZoneAnalysis} margin={{ bottom: 20 }}>
-                                                <CartesianGrid vertical={false} strokeDasharray="3 3" stroke="#f1f5f9" opacity={0.5} />
-                                                <XAxis dataKey="label" axisLine={false} tickLine={false} tick={{ fontSize: 9, fontWeight: 700, fill: '#94a3b8' }} />
+                                                <CartesianGrid vertical={false} strokeDasharray="3 3" stroke={ct.anatomy.gridSoft} opacity={0.5} />
+                                                <XAxis dataKey="label" axisLine={false} tickLine={false} tick={{ fontSize: 9, fontWeight: 700, fill: ct.anatomy.tick }} />
                                                 <YAxis hide />
-                                                <RechartsTooltip content={<CustomChartTooltip unit=" min" />} cursor={{ fill: '#f8fafc' }} />
+                                                <RechartsTooltip content={<CustomChartTooltip unit=" min" />} cursor={{ fill: ct.anatomy.cursorFill }} />
                                                 <Bar dataKey="minutes" radius={[4, 4, 0, 0]}>
                                                     {(zoneType === 'hr' ? exactZoneAnalysis : exactPacePowerZoneAnalysis).map((entry, index) => (
                                                         <Cell 
                                                             key={`cell-${index}`} 
-                                                            fill={zoneType === 'hr' ? ZONE_COLORS[index] : ['#94a3b8', '#3b82f6', '#10b981', '#f59e0b', '#f97316', '#ef4444', '#7c3aed'][index % 7]} 
+                                                            fill={zoneType === 'hr' ? ZONE_COLORS[index] : ct.zones.all[index % 7]} 
                                                             fillOpacity={0.85}
                                                         />
                                                     ))}

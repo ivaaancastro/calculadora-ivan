@@ -2,6 +2,7 @@ import React, { useMemo, useEffect, useState } from 'react';
 import { MapContainer, TileLayer, Polyline, useMap, CircleMarker } from 'react-leaflet';
 import { MapPin } from 'lucide-react';
 import 'leaflet/dist/leaflet.css';
+import { useChartTheme } from '../charts/useChartTheme';
 
 const decodePolyline = (str, precision = 5) => {
     let index = 0, lat = 0, lng = 0, coordinates = [], shift = 0, result = 0, byte = null, latitude_change, longitude_change, factor = Math.pow(10, precision);
@@ -64,6 +65,7 @@ const MapResizer = () => {
 };
 
 export const InteractiveMap = ({ polyline, highResCoords, color, currentPosition }) => {
+    const ct = useChartTheme();
     const [mapType, setMapType] = useState('light');
 
     const coords = useMemo(() => {
@@ -101,22 +103,22 @@ export const InteractiveMap = ({ polyline, highResCoords, color, currentPosition
 
             <MapContainer center={coords[0]} zoom={13} scrollWheelZoom={true} className="w-full h-full z-0" zoomControl={false}>
                 <TileLayer key={mapType} url={mapSources[mapType].url} attribution={mapSources[mapType].attribution} />
-                <Polyline positions={coords} pathOptions={{ color: mapType === 'light' ? "#ffffff" : "#000000", weight: 6, opacity: 0.3 }} />
-                <Polyline positions={coords} pathOptions={{ color: color || "#2563eb", weight: 3, opacity: 1 }} />
-                <CircleMarker center={coords[0]} radius={5} pathOptions={{ color: '#ffffff', fillColor: '#10b981', fillOpacity: 1, weight: 2 }} />
-                <CircleMarker center={coords[coords.length - 1]} radius={5} pathOptions={{ color: '#ffffff', fillColor: '#18181b', fillOpacity: 1, weight: 2 }} />
+                <Polyline positions={coords} pathOptions={{ color: mapType === 'light' ? ct.map.haloLight : ct.map.haloDark, weight: 6, opacity: 0.3 }} />
+                <Polyline positions={coords} pathOptions={{ color: color || ct.map.route, weight: 3, opacity: 1 }} />
+                <CircleMarker center={coords[0]} radius={5} pathOptions={{ color: ct.map.ring, fillColor: ct.map.start, fillOpacity: 1, weight: 2 }} />
+                <CircleMarker center={coords[coords.length - 1]} radius={5} pathOptions={{ color: ct.map.ring, fillColor: ct.map.end, fillOpacity: 1, weight: 2 }} />
 
                 {currentPosition && (
                     <>
                         <CircleMarker
                             center={currentPosition}
                             radius={10}
-                            pathOptions={{ color: 'transparent', fillColor: color || '#2563eb', fillOpacity: 0.3, weight: 0 }}
+                            pathOptions={{ color: 'transparent', fillColor: color || ct.map.route, fillOpacity: 0.3, weight: 0 }}
                         />
                         <CircleMarker
                             center={currentPosition}
                             radius={5}
-                            pathOptions={{ color: '#ffffff', fillColor: color || '#2563eb', fillOpacity: 1, weight: 2 }}
+                            pathOptions={{ color: ct.map.ring, fillColor: color || ct.map.route, fillOpacity: 1, weight: 2 }}
                         />
                     </>
                 )}

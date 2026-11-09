@@ -4,7 +4,8 @@ import {
     Tooltip as RechartsTooltip, ResponsiveContainer
 } from 'recharts';
 import { InfoTooltip } from '../common/InfoTooltip';
-import { tooltipStyle } from './fitnessConstants';
+import { tooltipStyleFor } from './fitnessConstants';
+import { useChartTheme } from '../charts/useChartTheme';
 
 export const WeeklyVolumeAndFocusCard = ({
     weeklyChart,
@@ -13,6 +14,7 @@ export const WeeklyVolumeAndFocusCard = ({
     intensityTimeframe,
     setIntensityTimeframe
 }) => {
+    const ct = useChartTheme();
     return (
         <section className="mb-8">
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -26,12 +28,12 @@ export const WeeklyVolumeAndFocusCard = ({
                     <div className="h-[240px]">
                         <ResponsiveContainer width="100%" height="100%">
                             <ComposedChart data={weeklyChart}>
-                                <CartesianGrid strokeDasharray="2 2" stroke="#3f3f46" opacity={0.1} vertical={false} />
-                                <XAxis dataKey="dateLabel" tick={{ fontSize: 9, fill: '#94a3b8' }} minTickGap={15} axisLine={false} tickLine={false} />
-                                <YAxis yAxisId="left" tick={{ fontSize: 9, fill: '#8b5cf6' }} axisLine={false} tickLine={false} />
-                                <RechartsTooltip contentStyle={tooltipStyle} itemStyle={{ color: '#fff' }} isAnimationActive={false} cursor={{ stroke: '#71717a', strokeWidth: 1 }} />
-                                <Bar yAxisId="left" dataKey="tss" name="TSS" fill="#8b5cf6" opacity={0.6} radius={[4, 4, 0, 0]} barSize={20} />
-                                <Line yAxisId="left" type="monotone" dataKey="hours" name="Horas" stroke="#10b981" strokeWidth={3} dot={false} />
+                                <CartesianGrid strokeDasharray="2 2" stroke={ct.anatomy.gridZinc} opacity={0.1} vertical={false} />
+                                <XAxis dataKey="dateLabel" tick={{ fontSize: 9, fill: ct.anatomy.tick }} minTickGap={15} axisLine={false} tickLine={false} />
+                                <YAxis yAxisId="left" tick={{ fontSize: 9, fill: ct.series.tss }} axisLine={false} tickLine={false} />
+                                <RechartsTooltip contentStyle={tooltipStyleFor(ct)} itemStyle={{ color: ct.tooltip.ink }} isAnimationActive={false} cursor={{ stroke: ct.anatomy.cursorZinc, strokeWidth: 1 }} />
+                                <Bar yAxisId="left" dataKey="tss" name="TSS" fill={ct.series.tss} opacity={0.6} radius={[4, 4, 0, 0]} barSize={20} />
+                                <Line yAxisId="left" type="monotone" dataKey="hours" name="Horas" stroke={ct.series.hours} strokeWidth={3} dot={false} />
                             </ComposedChart>
                         </ResponsiveContainer>
                     </div>
