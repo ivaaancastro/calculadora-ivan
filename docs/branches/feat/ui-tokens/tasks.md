@@ -82,9 +82,18 @@ Partido en 5a y 5b (decisión del usuario, 2026-11-09): clasificar unos 740 usos
 - Resultados: lint ✓, lint:colors ✓, unit 102/102, integración 10/10, build ✓, E2E macOS 79 ✓ (133 omitidas), E2E Docker 127 ✓ (48 capturas sin diferencias; el ✘ de `gestures.spec.js:37` es el fallo esperado de D-01).
 
 ### PR 5b — Categorías (`feat/ui-tokens-categories`)
-- [ ] Deportes, zonas, FC, potencia, VO2, iconos de sección y el resto de acentos excluidos en 5a (incluido el `red-500` de "hoy" del Calendario y los verdes/naranjas iOS de `AdvancedAnalytics`)
-- [ ] Verificación completa
+- [x] Deportes, FC, potencia, ritmo, velocidad, cadencia, carga, VO2, VFC, sueño, pasos, secciones de Ajustes, estado de forma (`AdvancedAnalytics`, iOS), Strava, "hoy" del Calendario, métricas fuera de las gráficas (`EvolutionChart`) y los estados excluidos en 5a (`src/styles/tokens/categories.json`, 84 tokens; `scripts/codemods/categories.mjs`); D-09 en `paridad.md`
+- [x] Verificación completa
 - [ ] PR
+
+### Notas del PR 5b
+- Cada expresión revisada se asigna a un grupo en `ASSIGN` (archivo → línea → grupo) y usa los tokens de ese grupo: el mismo `orange-500` es `sport-run` en el historial y `legacy-sport-strength-orange` en los puntos del Calendario. Los estados de 5a solo se usan en el grupo `state` (fuera de él, `emerald-500` es cadencia o VO2, no "positivo"). Cada grupo usa también los pares neutros (texto, bordes, superficies), para no dejar bloqueado el neutro que comparte expresión con el acento; un neutro suelto no pasa a un token que solo coincide en valor (`text-slate-300` no es `scrollbar-thumb`).
+- Donde una categoría tiene otro color en otra pantalla, el token es `legacy-*` con su valor (carrera en verde y fuerza en naranja/verde en el Calendario, FC en `red-500` en los bloques): D-09.
+- **La red detectó un cambio y se corrigió en el codemod:** la primera pasada migraba juntos `text-slate-400 dark:text-zinc-500` y `hover:text-red-500` (detalle), y `border-slate-100/50 dark:border-zinc-800/50` y `hover:border-blue-500/20` (Rendimiento). Hoy, en oscuro, gana `dark:` y no hay hover; con tokens ganaba el hover (volcado: 103 diferencias en `:hover`, oscuro). Es el caso de D-08. Ahora (`guardStates`) un par `dark:` de base no se migra si en lo que coexiste con él hay una clase de estado sin su `dark:` de la misma propiedad (prueba en `codemodCategories.test.js`). Tras corregirlo: 82 volcados, 64.132 entradas, **0 diferencias**.
+- 237 pares sustituidos; 17 descartes por precedencia en líneas asignadas (D-08 y similares).
+- Cobertura de acentos (clases de color de acento en `src/components` y `App.jsx`): 795 antes del PR 5a → 285 ahora, **64 %**. Lo que queda: 83 en escalas ordinales que reutilizan colores de estado (RPE, calidad del sueño, banco de energía, IF, categoría de puerto, nivel de VO2 y de perfil de potencia, estrés, telemetría, progreso del plan, rampa), 17 por precedencia (D-08) y el resto, usos sueltos sin categoría estable (iconos de tarjetas, tarjetas de la landing, degradados, tooltips de Salud, `FuelingPanel`…). Las escalas son estado según la regla de `dataviz` y se definen en la Capa 3.
+- `lint:colors`: `dark` 271 → 184, `palette` 1.155 → 853, `arbitrary` 39 → 9.
+- Resultados: lint ✓, lint:colors ✓, unit 113/113, integración 10/10, build ✓, E2E macOS 79 ✓ (133 omitidas), E2E Docker 127 ✓ (48 capturas sin diferencias; el ✘ de `gestures.spec.js:37` es el fallo esperado de D-01).
 
 ## PR 6 — Gráficas (`feat/ui-tokens-charts`)
 - [ ] Recharts (9 archivos), SVG del Calendario y `ActivityMap` con `useChartTheme()`
