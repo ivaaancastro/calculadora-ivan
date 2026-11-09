@@ -41,11 +41,6 @@ body {
     @apply bg-glass-nav backdrop-blur-2xl border-b border-hairline-4;
   }
 
-  /* Apple Grouped Inset Card */
-  .ios-card {
-    @apply bg-surface-card rounded-2xl sm:rounded-3xl border border-hairline-3 shadow-[0_2px_12px_rgba(0,0,0,0.03)] dark:shadow-none transition-all;
-  }
-
   /* Apple Liquid Glass Material (iOS 18+ Floating Glass Capsule) */
   .liquid-glass {
     background: rgb(var(--liquid-fill) / var(--liquid-fill-a));
@@ -77,15 +72,6 @@ body {
     box-shadow: inset 0 0.5px 1px rgba(255, 255, 255, 0.18);
   }
 
-  /* Apple Spring Touch Compression */
-  .ios-touch {
-    @apply active:scale-[0.97] transition-transform duration-150 ease-out select-none touch-manipulation;
-  }
-
-  /* Apple Section Header (outside card) */
-  .ios-header {
-    @apply text-[12px] font-semibold text-ink-3 uppercase tracking-wider px-0.5 mb-2;
-  }
 
 }
 

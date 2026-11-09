@@ -4,7 +4,7 @@
     "palette": 859,
     "arbitrary": 9,
     "hex": 100,
-    "rgb": 11,
+    "rgb": 10,
     "dark": 188
   },
   "files": {
@@ -257,7 +257,7 @@
       "palette": 0,
       "arbitrary": 0,
       "hex": 0,
-      "rgb": 9,
+      "rgb": 8,
       "dark": 0
     },
     "src/utils/fitnessStatsEngine.ts": {
