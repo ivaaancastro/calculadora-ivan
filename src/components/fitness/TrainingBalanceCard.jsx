@@ -1,7 +1,7 @@
 import React from 'react';
 import { Activity, Brain } from 'lucide-react';
 import { InfoTooltip } from '../common/InfoTooltip';
-import { Card } from '../ui';
+import { Card, Segmented } from '../ui';
 
 export const TrainingBalanceCard = ({ balance, balanceDays, setBalanceDays }) => {
     return (
@@ -12,17 +12,14 @@ export const TrainingBalanceCard = ({ balance, balanceDays, setBalanceDays }) =>
                         <h3 className="text-[10px] font-bold text-ink-4 uppercase tracking-[0.1em]">Balance de Entrenamiento</h3>
                         <InfoTooltip text="Distribución de la carga en los últimos días según intensidad." />
                     </div>
-                    <div className="flex bg-fill p-1 rounded-xl">
-                        {[{ l: '7D', v: 7 }, { l: '30D', v: 30 }, { l: '90D', v: 90 }].map(p => (
-                            <button
-                                key={p.v}
-                                onClick={() => setBalanceDays(p.v)}
-                                className={`px-4 py-1.5 rounded-lg text-[9px] font-bold uppercase tracking-widest transition-all ${balanceDays === p.v ? 'bg-surface-3 text-action-bright shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
-                            >
-                                {p.l}
-                            </button>
-                        ))}
-                    </div>
+                    <Segmented
+                        variant="card"
+                        size="md-wide"
+                        optionClassName="px-4 py-1.5"
+                        value={balanceDays}
+                        onChange={setBalanceDays}
+                        options={[7, 30, 90].map((v) => ({ value: v, label: `${v}D`, tone: 'action-bright' }))}
+                    />
                 </div>
 
                 {balance && !balance.empty ? (
