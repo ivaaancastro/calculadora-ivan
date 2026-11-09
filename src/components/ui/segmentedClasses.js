@@ -69,7 +69,7 @@ const RECIPES = {
       container: 'flex bg-fill-5 rounded-full p-0.5',
       option: 'px-2 py-0.5 text-[10px] font-semibold rounded-full transition-all duration-200',
       on: 'bg-surface-3 shadow-sm',
-      off: 'text-ink-4-fixed hover:text-segmented-mini-off-hover',
+      off: 'text-ink-4-fixed hover:text-body-soft-fixed',
     },
   },
 };

@@ -116,7 +116,7 @@
   --segmented-off: 100 116 139; /* slate-500 */
   --segmented-off-hover: 51 65 85; /* slate-700 */
   --ink-4-fixed: 148 163 184; /* slate-400 */
-  --segmented-mini-off-hover: 71 85 105; /* slate-600 */
+  --body-soft-fixed: 71 85 105; /* slate-600 */
 }
 .dark {
   --ink: 255 255 255; /* white */
@@ -139,7 +139,7 @@
   --segmented-off: 100 116 139; /* slate-500 */
   --segmented-off-hover: 51 65 85; /* slate-700 */
   --ink-4-fixed: 148 163 184; /* slate-400 */
-  --segmented-mini-off-hover: 71 85 105; /* slate-600 */
+  --body-soft-fixed: 71 85 105; /* slate-600 */
 }
 /* @tokens:text:end */
 
