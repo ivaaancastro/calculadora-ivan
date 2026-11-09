@@ -4,7 +4,7 @@ import { InfoTooltip } from '../common/InfoTooltip';
 export const ThresholdsCard = ({ settings }) => {
     return (
         <section className="mb-8">
-            <div className="bg-white dark:bg-zinc-900/50 rounded-2xl border border-slate-200/50 dark:border-zinc-800/50 p-6 sm:p-8 shadow-sm">
+            <div className="bg-white dark:bg-zinc-900/50 rounded-2xl border border-line-muted p-6 sm:p-8 shadow-sm">
                 <div className="flex items-center gap-2 mb-6">
                     <span className="text-[10px] font-bold text-slate-400 dark:text-zinc-500 uppercase tracking-[0.1em]">Umbrales Actuales</span>
                     <InfoTooltip text="Tus valores de referencia (FTP en bici, Ritmo Umbral en carrera) configurados en tu perfil." />

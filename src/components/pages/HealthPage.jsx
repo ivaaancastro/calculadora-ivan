@@ -401,7 +401,7 @@ export const HealthPage = ({ activities, settings, chartData }) => {
                                 strokeWidth={14}
                             />
 
-                            <div className="mt-4 pt-3 border-t border-slate-100 dark:border-zinc-800/80 w-full text-center">
+                            <div className="mt-4 pt-3 border-t border-line-soft-4 w-full text-center">
                                 <p className="text-[11px] font-medium text-slate-500 dark:text-zinc-400">
                                     Disponibilidad del SNC
                                 </p>
@@ -429,7 +429,7 @@ export const HealthPage = ({ activities, settings, chartData }) => {
                                 strokeWidth={14}
                             />
 
-                            <div className="mt-4 pt-3 border-t border-slate-100 dark:border-zinc-800/80 w-full text-center">
+                            <div className="mt-4 pt-3 border-t border-line-soft-4 w-full text-center">
                                 <p className="text-[11px] font-medium text-slate-500 dark:text-zinc-400">
                                     Impacto y fatiga acumulada
                                 </p>
@@ -457,7 +457,7 @@ export const HealthPage = ({ activities, settings, chartData }) => {
                                 strokeWidth={14}
                             />
 
-                            <div className="mt-4 pt-3 border-t border-slate-100 dark:border-zinc-800/80 w-full text-center">
+                            <div className="mt-4 pt-3 border-t border-line-soft-4 w-full text-center">
                                 <p className="text-[11px] font-medium text-slate-500 dark:text-zinc-400">
                                     {wellnessMetrics?.latestSleep || '--'} horas descansadas
                                 </p>
@@ -496,7 +496,7 @@ export const HealthPage = ({ activities, settings, chartData }) => {
                             </div>
                         </div>
 
-                        <div className="sm:border-l border-slate-200/80 dark:border-zinc-800 sm:pl-6 text-center sm:text-right shrink-0">
+                        <div className="sm:border-l border-line-4 sm:pl-6 text-center sm:text-right shrink-0">
                             <span className={`text-4xl sm:text-5xl font-black font-mono tabular-nums tracking-tighter ${
                                 energyBankAmount === '--' ? 'text-slate-400' :
                                 energyBankAmount > 60 ? 'text-emerald-500' :
@@ -810,7 +810,7 @@ export const HealthPage = ({ activities, settings, chartData }) => {
                     {/* SPOTLIGHT DEL DÍA SELECCIONADO (ESTILO APPLE HEALTH INSPECTOR) */}
                     {currentSelectedDay && (
                         <IosCard className="space-y-4">
-                            <div className="flex items-center justify-between border-b border-slate-100 dark:border-zinc-800 pb-3">
+                            <div className="flex items-center justify-between border-b border-line-soft-2 pb-3">
                                 <div>
                                     <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400 dark:text-zinc-500">
                                         Detalle del Día
@@ -826,7 +826,7 @@ export const HealthPage = ({ activities, settings, chartData }) => {
 
                             {/* Cuadrícula de Métricas de ese día */}
                             <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 sm:gap-3">
-                                <div className="p-3 bg-slate-50 dark:bg-zinc-800/40 rounded-xl border border-slate-100 dark:border-zinc-800/60">
+                                <div className="p-3 bg-slate-50 dark:bg-zinc-800/40 rounded-xl border border-line-soft-3">
                                     <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-zinc-500 block">
                                         Sueño
                                     </span>
@@ -838,7 +838,7 @@ export const HealthPage = ({ activities, settings, chartData }) => {
                                     </span>
                                 </div>
 
-                                <div className="p-3 bg-slate-50 dark:bg-zinc-800/40 rounded-xl border border-slate-100 dark:border-zinc-800/60">
+                                <div className="p-3 bg-slate-50 dark:bg-zinc-800/40 rounded-xl border border-line-soft-3">
                                     <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-zinc-500 block">
                                         VFC
                                     </span>
@@ -850,7 +850,7 @@ export const HealthPage = ({ activities, settings, chartData }) => {
                                     </span>
                                 </div>
 
-                                <div className="p-3 bg-slate-50 dark:bg-zinc-800/40 rounded-xl border border-slate-100 dark:border-zinc-800/60">
+                                <div className="p-3 bg-slate-50 dark:bg-zinc-800/40 rounded-xl border border-line-soft-3">
                                     <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-zinc-500 block">
                                         FC Reposo
                                     </span>
@@ -862,7 +862,7 @@ export const HealthPage = ({ activities, settings, chartData }) => {
                                     </span>
                                 </div>
 
-                                <div className="p-3 bg-slate-50 dark:bg-zinc-800/40 rounded-xl border border-slate-100 dark:border-zinc-800/60">
+                                <div className="p-3 bg-slate-50 dark:bg-zinc-800/40 rounded-xl border border-line-soft-3">
                                     <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-zinc-500 block">
                                         Estrés / Pasos
                                     </span>
@@ -917,7 +917,7 @@ export const HealthPage = ({ activities, settings, chartData }) => {
                     {/* LISTA AGRUPADA DÍA A DÍA (ESTILO REGISTRO APPLE HEALTH) */}
                     <div>
                         <p className="ios-header mb-3">Registros Diarios Detallados</p>
-                        <div className="ios-card overflow-hidden divide-y divide-slate-100 dark:divide-zinc-800/60 p-0">
+                        <div className="ios-card overflow-hidden divide-y divide-line-soft-3 p-0">
                             {historyReversed.map((day) => {
                                 const isSelected = currentSelectedDay?.date === day.date;
                                 return (

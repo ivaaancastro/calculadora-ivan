@@ -72,7 +72,7 @@ export const LoginPage = () => {
         </div>
 
         {/* CAJA DE FORMULARIO */}
-        <div className="bg-white dark:bg-zinc-900 rounded-lg border border-slate-200 dark:border-zinc-800 p-6 sm:p-8 shadow-sm relative overflow-hidden">
+        <div className="bg-white dark:bg-zinc-900 rounded-lg border border-line p-6 sm:p-8 shadow-sm relative overflow-hidden">
           
           {isForgotPassword && (
             <button onClick={() => {setIsForgotPassword(false); setError(null); setMessage(null);}} className="absolute top-4 left-4 p-2 text-slate-400 hover:text-slate-700 dark:hover:text-zinc-200 transition-colors">
@@ -134,7 +134,7 @@ export const LoginPage = () => {
           </form>
 
           {!isForgotPassword && (
-            <div className="mt-6 text-center border-t border-slate-100 dark:border-zinc-800 pt-4 flex flex-col gap-3">
+            <div className="mt-6 text-center border-t border-line-soft-2 pt-4 flex flex-col gap-3">
               <button onClick={() => { setIsLogin(!isLogin); setError(null); setMessage(null); }} className="text-[10px] font-bold text-slate-500 dark:text-zinc-400 hover:text-slate-800 dark:hover:text-zinc-200 transition-colors uppercase tracking-widest">
                 {isLogin ? '¿No tienes cuenta? Regístrate' : '¿Ya tienes cuenta? Inicia Sesión'}
               </button>

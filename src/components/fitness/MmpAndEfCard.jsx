@@ -90,7 +90,7 @@ export const MmpAndEfCard = ({
 
     return (
         <section className="mb-8">
-            <div className="bg-white dark:bg-zinc-900/50 rounded-2xl border border-slate-200/50 dark:border-zinc-800/50 p-3.5 sm:p-6 lg:p-8 shadow-sm">
+            <div className="bg-white dark:bg-zinc-900/50 rounded-2xl border border-line-muted p-3.5 sm:p-6 lg:p-8 shadow-sm">
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 sm:gap-6 mb-6 sm:mb-10">
                     <div className="flex flex-wrap items-center gap-2 sm:gap-3">
                         <div className="flex items-center gap-2">
@@ -99,7 +99,7 @@ export const MmpAndEfCard = ({
                         </div>
 
                         {telemetryStats && telemetryStats.total > 0 && (
-                            <div className="flex items-center gap-2 px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-zinc-800/80 text-[9px] font-medium text-slate-600 dark:text-zinc-300 border border-slate-200/60 dark:border-zinc-700/60">
+                            <div className="flex items-center gap-2 px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-zinc-800/80 text-[9px] font-medium text-slate-600 dark:text-zinc-300 border border-line-muted-2">
                                 <span className={`w-1.5 h-1.5 rounded-full ${telemetryStats.percentage >= 85 ? 'bg-emerald-500' : (telemetryStats.percentage >= 40 ? 'bg-amber-500' : 'bg-rose-500')}`} />
                                 <span>Telemetría: {telemetryStats.withStreams}/{telemetryStats.total} ({telemetryStats.percentage}%)</span>
                                 <InfoTooltip text="Las curvas MMP requieren telemetría detallada. Las sincronizaciones rápidas de Strava solo traen resúmenes hasta procesar el Deep Sync." />
@@ -184,7 +184,7 @@ export const MmpAndEfCard = ({
                     </div>
 
                     {/* MMP CURVE */}
-                    <div className="flex flex-col lg:col-span-1 lg:border-x border-slate-100 dark:border-zinc-800 lg:px-6">
+                    <div className="flex flex-col lg:col-span-1 lg:border-x border-line-soft-2 lg:px-6">
                         <div className="flex items-center gap-2 mb-6">
                             <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Curva MMP</span>
                             <InfoTooltip text="Tu mejor potencia/ritmo para cada duración. Refleja tu perfil de capacidades y récords históricos." />

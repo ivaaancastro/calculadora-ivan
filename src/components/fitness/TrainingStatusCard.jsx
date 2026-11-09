@@ -7,7 +7,7 @@ export const TrainingStatusCard = ({ trainingStatus }) => {
 
     return (
         <section className="mb-8">
-            <div className="bg-white dark:bg-zinc-900/50 rounded-2xl border border-slate-200/50 dark:border-zinc-800/50 p-6 sm:p-8 shadow-sm">
+            <div className="bg-white dark:bg-zinc-900/50 rounded-2xl border border-line-muted p-6 sm:p-8 shadow-sm">
                 <div className="flex items-center justify-between mb-6">
                     <div className="flex items-center gap-2">
                         <h3 className="text-[10px] font-bold text-slate-400 dark:text-zinc-500 uppercase tracking-[0.1em]">Estado de Entreno</h3>
@@ -26,7 +26,7 @@ export const TrainingStatusCard = ({ trainingStatus }) => {
                             </div>
                         </div>
                     </div>
-                    <div className="flex gap-12 md:pl-10 md:border-l border-slate-100 dark:border-zinc-800">
+                    <div className="flex gap-12 md:pl-10 md:border-l border-line-soft-2">
                         <div className="space-y-1">
                             <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Carga (7d)</p>
                             <p className="text-xl font-bold text-slate-900 dark:text-zinc-100">{trainingStatus.load7}</p>

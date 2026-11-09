@@ -1,11 +1,11 @@
 {
   "$comment": "Línea base de scripts/check-colors.mjs. Solo debe bajar (npm run lint:colors -- --update). Subirla a mano exige justificarlo en el PR.",
   "totals": {
-    "palette": 3315,
+    "palette": 2981,
     "arbitrary": 66,
     "hex": 274,
     "rgb": 19,
-    "dark": 1314
+    "dark": 1147
   },
   "files": {
     "src/App.jsx": {
@@ -16,18 +16,18 @@
       "dark": 2
     },
     "src/components/Dashboard.jsx": {
-      "palette": 18,
+      "palette": 16,
       "arbitrary": 0,
       "hex": 0,
       "rgb": 0,
-      "dark": 8
+      "dark": 7
     },
     "src/components/activity/ActivityMap.jsx": {
-      "palette": 26,
+      "palette": 20,
       "arbitrary": 0,
       "hex": 10,
       "rgb": 0,
-      "dark": 13
+      "dark": 10
     },
     "src/components/activity/ActivitySharedUI.jsx": {
       "palette": 32,
@@ -37,18 +37,18 @@
       "dark": 10
     },
     "src/components/auth/LoginPage.jsx": {
-      "palette": 78,
+      "palette": 74,
       "arbitrary": 0,
       "hex": 0,
       "rgb": 0,
-      "dark": 33
+      "dark": 31
     },
     "src/components/common/ErrorBoundary.jsx": {
-      "palette": 29,
+      "palette": 25,
       "arbitrary": 0,
       "hex": 0,
       "rgb": 0,
-      "dark": 13
+      "dark": 11
     },
     "src/components/common/InfoTooltip.jsx": {
       "palette": 11,
@@ -58,11 +58,11 @@
       "dark": 5
     },
     "src/components/common/StravaCallback.jsx": {
-      "palette": 24,
+      "palette": 22,
       "arbitrary": 0,
       "hex": 0,
       "rgb": 0,
-      "dark": 11
+      "dark": 10
     },
     "src/components/common/StravaConnect.jsx": {
       "palette": 1,
@@ -86,11 +86,11 @@
       "dark": 0
     },
     "src/components/dashboard/AdvancedAnalytics.jsx": {
-      "palette": 64,
+      "palette": 62,
       "arbitrary": 23,
       "hex": 7,
       "rgb": 0,
-      "dark": 31
+      "dark": 30
     },
     "src/components/dashboard/ChartsSection.jsx": {
       "palette": 6,
@@ -100,32 +100,32 @@
       "dark": 0
     },
     "src/components/dashboard/EmptyState.jsx": {
-      "palette": 10,
+      "palette": 8,
       "arbitrary": 0,
       "hex": 0,
       "rgb": 0,
-      "dark": 5
+      "dark": 4
     },
     "src/components/dashboard/EvolutionChart.jsx": {
-      "palette": 55,
+      "palette": 51,
       "arbitrary": 11,
       "hex": 19,
       "rgb": 0,
-      "dark": 26
+      "dark": 24
     },
     "src/components/dashboard/FuelingPanel.jsx": {
-      "palette": 88,
+      "palette": 72,
       "arbitrary": 0,
       "hex": 0,
       "rgb": 0,
-      "dark": 43
+      "dark": 35
     },
     "src/components/dashboard/HistoryList.jsx": {
-      "palette": 79,
+      "palette": 75,
       "arbitrary": 2,
       "hex": 0,
       "rgb": 0,
-      "dark": 31
+      "dark": 29
     },
     "src/components/dashboard/Navbar.jsx": {
       "palette": 113,
@@ -142,74 +142,74 @@
       "dark": 1
     },
     "src/components/fitness/EstimatedFtpCard.jsx": {
-      "palette": 35,
+      "palette": 29,
       "arbitrary": 0,
       "hex": 7,
       "rgb": 0,
-      "dark": 12
+      "dark": 9
     },
     "src/components/fitness/HrvCard.jsx": {
-      "palette": 36,
+      "palette": 32,
       "arbitrary": 0,
       "hex": 0,
       "rgb": 0,
-      "dark": 14
+      "dark": 12
     },
     "src/components/fitness/MmpAndEfCard.jsx": {
-      "palette": 108,
+      "palette": 102,
       "arbitrary": 0,
       "hex": 8,
       "rgb": 0,
-      "dark": 34
+      "dark": 31
     },
     "src/components/fitness/PowerProfileCard.jsx": {
-      "palette": 88,
+      "palette": 74,
       "arbitrary": 0,
       "hex": 8,
       "rgb": 0,
-      "dark": 32
+      "dark": 25
     },
     "src/components/fitness/RacePredictionsCard.jsx": {
-      "palette": 18,
+      "palette": 14,
       "arbitrary": 0,
       "hex": 3,
       "rgb": 0,
-      "dark": 6
+      "dark": 4
     },
     "src/components/fitness/ThresholdsCard.jsx": {
-      "palette": 29,
+      "palette": 27,
+      "arbitrary": 0,
+      "hex": 0,
+      "rgb": 0,
+      "dark": 10
+    },
+    "src/components/fitness/TrainingBalanceCard.jsx": {
+      "palette": 63,
+      "arbitrary": 1,
+      "hex": 0,
+      "rgb": 0,
+      "dark": 22
+    },
+    "src/components/fitness/TrainingStatusCard.jsx": {
+      "palette": 15,
+      "arbitrary": 0,
+      "hex": 0,
+      "rgb": 0,
+      "dark": 5
+    },
+    "src/components/fitness/Vo2MaxCard.jsx": {
+      "palette": 35,
       "arbitrary": 0,
       "hex": 0,
       "rgb": 0,
       "dark": 11
     },
-    "src/components/fitness/TrainingBalanceCard.jsx": {
-      "palette": 73,
-      "arbitrary": 1,
-      "hex": 0,
-      "rgb": 0,
-      "dark": 27
-    },
-    "src/components/fitness/TrainingStatusCard.jsx": {
-      "palette": 19,
-      "arbitrary": 0,
-      "hex": 0,
-      "rgb": 0,
-      "dark": 7
-    },
-    "src/components/fitness/Vo2MaxCard.jsx": {
-      "palette": 43,
-      "arbitrary": 0,
-      "hex": 0,
-      "rgb": 0,
-      "dark": 15
-    },
     "src/components/fitness/WeeklyVolumeAndFocusCard.jsx": {
-      "palette": 32,
+      "palette": 26,
       "arbitrary": 0,
       "hex": 7,
       "rgb": 0,
-      "dark": 14
+      "dark": 11
     },
     "src/components/fitness/fitnessConstants.js": {
       "palette": 0,
@@ -226,25 +226,25 @@
       "dark": 7
     },
     "src/components/modals/AddActivityModal.jsx": {
-      "palette": 74,
+      "palette": 58,
       "arbitrary": 0,
       "hex": 0,
       "rgb": 0,
-      "dark": 31
+      "dark": 23
     },
     "src/components/pages/ActivityDetailPage.jsx": {
-      "palette": 453,
+      "palette": 395,
       "arbitrary": 1,
       "hex": 51,
       "rgb": 0,
-      "dark": 169
+      "dark": 140
     },
     "src/components/pages/CalendarPage.jsx": {
-      "palette": 713,
+      "palette": 629,
       "arbitrary": 0,
       "hex": 55,
       "rgb": 0,
-      "dark": 299
+      "dark": 257
     },
     "src/components/pages/EmailConfirmedPage.jsx": {
       "palette": 20,
@@ -261,25 +261,25 @@
       "dark": 7
     },
     "src/components/pages/HealthPage.jsx": {
-      "palette": 365,
+      "palette": 345,
       "arbitrary": 3,
       "hex": 12,
       "rgb": 0,
-      "dark": 135
+      "dark": 125
     },
     "src/components/pages/LandingPage.jsx": {
-      "palette": 177,
+      "palette": 165,
       "arbitrary": 0,
       "hex": 0,
       "rgb": 1,
-      "dark": 68
+      "dark": 62
     },
     "src/components/pages/ProfilePage.jsx": {
-      "palette": 320,
+      "palette": 286,
       "arbitrary": 9,
       "hex": 7,
       "rgb": 0,
-      "dark": 128
+      "dark": 111
     },
     "src/hooks/useActivityMetrics.js": {
       "palette": 4,

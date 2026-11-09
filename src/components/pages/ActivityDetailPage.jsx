@@ -85,7 +85,7 @@ export const ActivityDetailPage = ({ activity, settings, fetchStreams, onBack, o
             return { label: 'Velocidad Máx', value: `${peaks.maxSpeedPt.speed} km/h`, color: 'text-blue-600 bg-blue-500/10 border-blue-500/30 dark:text-blue-400' };
         }
         if (peaks.maxAltPt && activePayload.alt && activePayload.alt >= peaks.maxAltPt.alt - 3) {
-            return { label: 'Cima', value: `${peaks.maxAltPt.alt} m`, color: 'text-slate-700 bg-slate-200 border-slate-300 dark:text-zinc-200 dark:bg-zinc-800 dark:border-zinc-700' };
+            return { label: 'Cima', value: `${peaks.maxAltPt.alt} m`, color: 'text-slate-700 bg-slate-200 border-line-strong dark:text-zinc-200 dark:bg-zinc-800' };
         }
         return null;
     }, [activePayload, peaks, isPaceBased]);
@@ -131,7 +131,7 @@ export const ActivityDetailPage = ({ activity, settings, fetchStreams, onBack, o
             {/* Premium Header */}
             <header className="glass-nav px-3.5 py-2 sm:px-6 sm:py-3 shrink-0 z-50">
                 {/* --- DESKTOP HEADER (lg:flex) --- */}
-                <div className="hidden lg:flex items-center justify-between gap-2 mb-2.5 sm:mb-3 border-b border-black/[0.04] dark:border-white/[0.06] pb-2">
+                <div className="hidden lg:flex items-center justify-between gap-2 mb-2.5 sm:mb-3 border-b border-hairline pb-2">
                     <div className="flex bg-slate-200/60 dark:bg-zinc-800/80 p-0.5 rounded-full gap-0.5 overflow-x-auto hide-scrollbar min-w-0">
                         <PillTab active={activeTab === 'analyze'} label="Análisis" onClick={() => setActiveTab('analyze')} />
                         <PillTab active={activeTab === 'map'} label="Mapa" onClick={() => setActiveTab('map')} />
@@ -353,10 +353,10 @@ export const ActivityDetailPage = ({ activity, settings, fetchStreams, onBack, o
                                             )}
 
                                             {/* HUD de Telemetría Dinámico */}
-                                            <div className="bg-white/95 dark:bg-zinc-900/95 backdrop-blur-md border border-slate-200/80 dark:border-zinc-800 rounded-2xl p-2.5 sm:p-3 shadow-sm transition-all">
+                                            <div className="bg-white/95 dark:bg-zinc-900/95 backdrop-blur-md border border-line-4 rounded-2xl p-2.5 sm:p-3 shadow-sm transition-all">
                                                 {activePayload ? (
                                                     <div className="space-y-2">
-                                                        <div className="flex items-center justify-between border-b border-slate-100 dark:border-zinc-800/80 pb-1.5">
+                                                        <div className="flex items-center justify-between border-b border-line-soft-4 pb-1.5">
                                                             <div className="flex items-center gap-2 flex-wrap">
                                                                 <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-slate-100 dark:bg-zinc-800 font-mono text-[11px] font-bold tabular-nums text-slate-700 dark:text-zinc-300">
                                                                     <span>⏱️ {formatDuration(activePayload.rawTime)}</span>
@@ -380,7 +380,7 @@ export const ActivityDetailPage = ({ activity, settings, fetchStreams, onBack, o
 
                                                         <div className="grid grid-cols-3 sm:grid-cols-5 gap-1.5 text-center">
                                                             {/* Ritmo / Velocidad */}
-                                                            <div className="bg-slate-50 dark:bg-zinc-800/50 rounded-xl p-1.5 border border-slate-100 dark:border-zinc-800/60">
+                                                            <div className="bg-slate-50 dark:bg-zinc-800/50 rounded-xl p-1.5 border border-line-soft-3">
                                                                 <span className="text-[8px] font-bold uppercase tracking-wider text-slate-400 dark:text-zinc-500 block">
                                                                     {isPaceBased ? 'Ritmo' : 'Velocidad'}
                                                                 </span>
@@ -391,7 +391,7 @@ export const ActivityDetailPage = ({ activity, settings, fetchStreams, onBack, o
 
                                                             {/* FC */}
                                                             {activePayload.hr !== null && (
-                                                                <div className="bg-slate-50 dark:bg-zinc-800/50 rounded-xl p-1.5 border border-slate-100 dark:border-zinc-800/60">
+                                                                <div className="bg-slate-50 dark:bg-zinc-800/50 rounded-xl p-1.5 border border-line-soft-3">
                                                                     <span className="text-[8px] font-bold uppercase tracking-wider text-slate-400 dark:text-zinc-500 block">
                                                                         FC
                                                                     </span>
@@ -403,7 +403,7 @@ export const ActivityDetailPage = ({ activity, settings, fetchStreams, onBack, o
 
                                                             {/* Potencia */}
                                                             {activePayload.watts !== null && (
-                                                                <div className="bg-slate-50 dark:bg-zinc-800/50 rounded-xl p-1.5 border border-slate-100 dark:border-zinc-800/60">
+                                                                <div className="bg-slate-50 dark:bg-zinc-800/50 rounded-xl p-1.5 border border-line-soft-3">
                                                                     <span className="text-[8px] font-bold uppercase tracking-wider text-slate-400 dark:text-zinc-500 block">
                                                                         Potencia
                                                                     </span>
@@ -415,7 +415,7 @@ export const ActivityDetailPage = ({ activity, settings, fetchStreams, onBack, o
 
                                                             {/* Altitud y Pendiente */}
                                                             {activePayload.alt !== null && (
-                                                                <div className="bg-slate-50 dark:bg-zinc-800/50 rounded-xl p-1.5 border border-slate-100 dark:border-zinc-800/60">
+                                                                <div className="bg-slate-50 dark:bg-zinc-800/50 rounded-xl p-1.5 border border-line-soft-3">
                                                                     <span className="text-[8px] font-bold uppercase tracking-wider text-slate-400 dark:text-zinc-500 block">
                                                                         Altitud
                                                                     </span>
@@ -432,7 +432,7 @@ export const ActivityDetailPage = ({ activity, settings, fetchStreams, onBack, o
 
                                                             {/* Cadencia */}
                                                             {activePayload.cadence !== null && (
-                                                                <div className="bg-slate-50 dark:bg-zinc-800/50 rounded-xl p-1.5 border border-slate-100 dark:border-zinc-800/60">
+                                                                <div className="bg-slate-50 dark:bg-zinc-800/50 rounded-xl p-1.5 border border-line-soft-3">
                                                                     <span className="text-[8px] font-bold uppercase tracking-wider text-slate-400 dark:text-zinc-500 block">
                                                                         Cadencia
                                                                     </span>
@@ -463,7 +463,7 @@ export const ActivityDetailPage = ({ activity, settings, fetchStreams, onBack, o
                                     {chartData.length > 0 ? (
                                         <div className="ios-card overflow-hidden">
                                             {/* Velocity/Pace */}
-                                            <div className="h-[120px] pt-3.5 px-3.5 sm:px-6 border-b border-slate-100 dark:border-zinc-800/60">
+                                            <div className="h-[120px] pt-3.5 px-3.5 sm:px-6 border-b border-line-soft-3">
                                                 <div className="flex justify-between items-center mb-1">
                                                     <div className="flex items-center gap-3">
                                                         <h4 className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">{isPaceBased ? 'Ritmo' : 'Velocidad'}</h4>
@@ -498,7 +498,7 @@ export const ActivityDetailPage = ({ activity, settings, fetchStreams, onBack, o
 
                                             {/* Heart Rate */}
                                             {chartData.some(d => d.hr > 0) && (
-                                                <div className="h-[120px] pt-3.5 px-3.5 sm:px-6 border-b border-slate-100 dark:border-zinc-800/60">
+                                                <div className="h-[120px] pt-3.5 px-3.5 sm:px-6 border-b border-line-soft-3">
                                                     <div className="flex justify-between items-center mb-1">
                                                         <h4 className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">FC</h4>
                                                         {activePayload && <span className="text-xs font-bold tabular-nums text-rose-500">{activePayload.hr} bpm</span>}
@@ -525,7 +525,7 @@ export const ActivityDetailPage = ({ activity, settings, fetchStreams, onBack, o
 
                                             {/* Power */}
                                             {chartData.some(d => d.watts > 0) && (
-                                                <div className="h-[120px] pt-3.5 px-3.5 sm:px-6 border-b border-slate-100 dark:border-zinc-800/60">
+                                                <div className="h-[120px] pt-3.5 px-3.5 sm:px-6 border-b border-line-soft-3">
                                                     <div className="flex justify-between items-center mb-1">
                                                         <h4 className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Potencia</h4>
                                                         {activePayload && <span className="text-xs font-bold tabular-nums text-amber-500">{activePayload.watts} w</span>}
@@ -552,7 +552,7 @@ export const ActivityDetailPage = ({ activity, settings, fetchStreams, onBack, o
 
                                             {/* Altitude */}
                                             {chartData.some(d => d.alt !== null) && (
-                                                <div className="h-[120px] pt-3.5 px-3.5 sm:px-6 border-b border-slate-100 dark:border-zinc-800/60">
+                                                <div className="h-[120px] pt-3.5 px-3.5 sm:px-6 border-b border-line-soft-3">
                                                     <div className="flex justify-between items-center mb-1">
                                                         <div className="flex items-center gap-3">
                                                             <h4 className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Altitud</h4>
@@ -618,16 +618,16 @@ export const ActivityDetailPage = ({ activity, settings, fetchStreams, onBack, o
                             </div>
 
                             {/* Sidebar */}
-                            <aside className="w-full lg:w-[380px] border-t lg:border-t-0 lg:border-l border-slate-100 dark:border-zinc-900 bg-white dark:bg-zinc-950 overflow-y-auto custom-scrollbar p-4 sm:p-5 space-y-6 shrink-0">
+                            <aside className="w-full lg:w-[380px] border-t lg:border-t-0 lg:border-l border-line-soft-6 bg-white dark:bg-zinc-950 overflow-y-auto custom-scrollbar p-4 sm:p-5 space-y-6 shrink-0">
                                 {/* Map - Desktop Solo (en móvil se muestra arriba estilo Strava) */}
-                                <div className="hidden lg:block h-56 rounded-xl border border-slate-100 dark:border-zinc-800 overflow-hidden shadow-sm">
+                                <div className="hidden lg:block h-56 rounded-xl border border-line-soft-2 overflow-hidden shadow-sm">
                                     <InteractiveMap polyline={activity.map_polyline} highResCoords={streams?.latlng?.data} color={themeColor} currentPosition={activePayload?.latlng} />
                                 </div>
 
                                 {/* Impact Analysis & Coach Summary (Unified Premium Section) */}
                                 {trainingEffect && (
                                     <div className="space-y-4">
-                                        <div className="bg-white dark:bg-zinc-900 border border-slate-100 dark:border-zinc-800 rounded-2xl p-6 shadow-sm space-y-6">
+                                        <div className="bg-white dark:bg-zinc-900 border border-line-soft-2 rounded-2xl p-6 shadow-sm space-y-6">
                                             <div className="flex items-center justify-between">
                                                 <div className="space-y-1">
                                                     <h3 className="text-xs font-bold text-slate-900 dark:text-zinc-100 uppercase tracking-tight">Impacto del Entrenamiento</h3>
@@ -711,7 +711,7 @@ export const ActivityDetailPage = ({ activity, settings, fetchStreams, onBack, o
                                 color={themeColor || "#6366f1"} 
                                 currentPosition={activePayload?.latlng} 
                             />
-                            <div className="absolute top-4 left-4 z-[400] bg-white/90 dark:bg-zinc-900/90 backdrop-blur p-3 rounded-xl border border-slate-100 dark:border-zinc-800 shadow-md space-y-1 pointer-events-none max-w-[220px]">
+                            <div className="absolute top-4 left-4 z-[400] bg-white/90 dark:bg-zinc-900/90 backdrop-blur p-3 rounded-xl border border-line-soft-2 shadow-md space-y-1 pointer-events-none max-w-[220px]">
                                 <h3 className="text-[10px] font-bold uppercase tracking-widest text-slate-400 dark:text-zinc-500">Ruta Detallada</h3>
                                 <div className="text-[10px] text-slate-600 dark:text-zinc-400 leading-tight">
                                     {activity.distance ? `${(activity.distance / 1000).toFixed(2)} km` : ''} 
@@ -725,17 +725,17 @@ export const ActivityDetailPage = ({ activity, settings, fetchStreams, onBack, o
                 {activeTab === 'laps' && (
                     <div className="h-full overflow-y-auto p-4 sm:p-8 custom-scrollbar bg-white dark:bg-zinc-950">
                         <div className="max-w-6xl mx-auto space-y-8 pb-12">
-                            <div className="flex items-center justify-between border-b border-slate-100 dark:border-zinc-900 pb-4">
+                            <div className="flex items-center justify-between border-b border-line-soft-6 pb-4">
                                 <div className="space-y-1">
                                     <h2 className="text-sm font-bold text-slate-900 dark:text-zinc-100 uppercase tracking-tight">Análisis Técnico por Intervalos</h2>
                                     <p className="text-[10px] text-slate-400 dark:text-zinc-500 font-medium tracking-wide uppercase">Segmentación automática ({isPaceBased ? '1km' : '5km'})</p>
                                 </div>
                             </div>
                             
-                            <div className="bg-white dark:bg-zinc-900/20 rounded-2xl border border-slate-100 dark:border-zinc-800/60 overflow-x-auto custom-scrollbar shadow-sm">
+                            <div className="bg-white dark:bg-zinc-900/20 rounded-2xl border border-line-soft-3 overflow-x-auto custom-scrollbar shadow-sm">
                                 <table className="w-full text-left border-collapse">
                                     <thead className="bg-slate-50 dark:bg-zinc-900/40">
-                                        <tr className="text-[9px] font-bold text-slate-400 dark:text-zinc-500 uppercase tracking-widest border-b border-slate-100 dark:border-zinc-800">
+                                        <tr className="text-[9px] font-bold text-slate-400 dark:text-zinc-500 uppercase tracking-widest border-b border-line-soft-2">
                                             <th className="p-4">#</th>
                                             <th className="p-4">Tiempo</th>
                                             <th className="p-4 text-right">Dist (km)</th>
@@ -792,7 +792,7 @@ export const ActivityDetailPage = ({ activity, settings, fetchStreams, onBack, o
                                 {(zoneType === 'hr' ? exactZoneAnalysis : exactPacePowerZoneAnalysis) && (
                                 <div className="space-y-3">
                                     <h3 className="text-[10px] font-bold text-slate-400 dark:text-zinc-500 uppercase tracking-widest">Distribución Volumétrica (Zonas)</h3>
-                                    <div className="h-[280px] bg-white dark:bg-zinc-950 rounded-2xl border border-slate-100 dark:border-zinc-800/50 p-6 shadow-sm">
+                                    <div className="h-[280px] bg-white dark:bg-zinc-950 rounded-2xl border border-line-soft p-6 shadow-sm">
                                         <ResponsiveContainer width="100%" height="100%">
                                             <BarChart data={zoneType === 'hr' ? exactZoneAnalysis : exactPacePowerZoneAnalysis} margin={{ bottom: 20 }}>
                                                 <CartesianGrid vertical={false} strokeDasharray="3 3" stroke="#f1f5f9" opacity={0.5} />
@@ -823,11 +823,11 @@ export const ActivityDetailPage = ({ activity, settings, fetchStreams, onBack, o
                                         </span>
                                     </div>
                                     
-                                    <div className="bg-white dark:bg-zinc-900/40 rounded-2xl border border-slate-100 dark:border-zinc-800/50 overflow-hidden shadow-sm max-h-[300px] overflow-y-auto custom-scrollbar">
+                                    <div className="bg-white dark:bg-zinc-900/40 rounded-2xl border border-line-soft overflow-hidden shadow-sm max-h-[300px] overflow-y-auto custom-scrollbar">
                                         {proMetrics.climbPro?.length > 0 ? (
                                             <table className="w-full text-left border-collapse">
                                                 <thead className="bg-slate-50/50 dark:bg-zinc-900/30">
-                                                    <tr className="text-[8px] font-bold text-slate-400 dark:text-zinc-500 uppercase tracking-widest border-b border-slate-100 dark:border-zinc-800/50">
+                                                    <tr className="text-[8px] font-bold text-slate-400 dark:text-zinc-500 uppercase tracking-widest border-b border-line-soft">
                                                         <th className="p-4">CAT</th>
                                                         <th className="p-4">Subida</th>
                                                         <th className="p-4 text-right">DIST (km)</th>
@@ -837,7 +837,7 @@ export const ActivityDetailPage = ({ activity, settings, fetchStreams, onBack, o
                                                         <th className="p-4 text-right">TIEMPO</th>
                                                     </tr>
                                                 </thead>
-                                                <tbody className="text-[10px] font-bold tabular-nums text-slate-600 dark:text-zinc-300 divide-y divide-slate-100 dark:divide-zinc-800/30">
+                                                <tbody className="text-[10px] font-bold tabular-nums text-slate-600 dark:text-zinc-300 divide-y divide-line-soft-5">
                                                     {proMetrics.climbPro.map((climb) => (
                                                         <tr key={climb.index} className="hover:bg-slate-50 dark:hover:bg-zinc-800/40 transition-colors group">
                                                             <td className="p-4">
@@ -863,7 +863,7 @@ export const ActivityDetailPage = ({ activity, settings, fetchStreams, onBack, o
                                             </table>
                                         ) : (
                                             <div className="flex flex-col items-center justify-center p-12 text-center space-y-2 opacity-40">
-                                                <div className="w-12 h-12 rounded-full border-2 border-dashed border-slate-300 dark:border-zinc-700" />
+                                                <div className="w-12 h-12 rounded-full border-2 border-dashed border-line-strong" />
                                                 <p className="text-[9px] font-bold uppercase tracking-widest">Sin ascensiones notables</p>
                                             </div>
                                         )}
@@ -871,7 +871,7 @@ export const ActivityDetailPage = ({ activity, settings, fetchStreams, onBack, o
                                 </div>
 
                                 {/* Metabolic Profile (Bottom) */}
-                                <div className="bg-slate-50 dark:bg-zinc-900/40 rounded-2xl p-5 border border-slate-100 dark:border-zinc-800/50">
+                                <div className="bg-slate-50 dark:bg-zinc-900/40 rounded-2xl p-5 border border-line-soft">
                                     <div className="flex items-center justify-between mb-4">
                                         <div className="space-y-1">
                                             <h3 className="text-xs font-bold text-slate-900 dark:text-zinc-100 uppercase tracking-tight">Perfil Metabólico Estimado</h3>
@@ -919,7 +919,7 @@ export const ActivityDetailPage = ({ activity, settings, fetchStreams, onBack, o
                             <div className="lg:col-span-4 space-y-6">
                                 
                                 {/* Efficiency Gauges */}
-                                <div className="bg-slate-50 dark:bg-zinc-900/40 rounded-2xl p-6 border border-slate-100 dark:border-zinc-800/50 space-y-6">
+                                <div className="bg-slate-50 dark:bg-zinc-900/40 rounded-2xl p-6 border border-line-soft space-y-6">
                                     <h3 className="text-xs font-bold text-slate-900 dark:text-zinc-100 uppercase tracking-tight">Métricas de Eficiencia</h3>
                                     
                                     <div className="space-y-4">
@@ -964,8 +964,8 @@ export const ActivityDetailPage = ({ activity, settings, fetchStreams, onBack, o
                                 {/* Session Highlights */}
                                 <div className="space-y-3">
                                     <h3 className="text-[10px] font-bold text-slate-400 dark:text-zinc-500 uppercase tracking-widest">Hitos de la Sesión</h3>
-                                    <div className="bg-white dark:bg-zinc-900/40 rounded-2xl border border-slate-100 dark:border-zinc-800/50 overflow-hidden shadow-sm max-h-[450px] overflow-y-auto custom-scrollbar">
-                                        <div className="divide-y divide-slate-100 dark:divide-zinc-800/50">
+                                    <div className="bg-white dark:bg-zinc-900/40 rounded-2xl border border-line-soft overflow-hidden shadow-sm max-h-[450px] overflow-y-auto custom-scrollbar">
+                                        <div className="divide-y divide-line-soft">
                                             {proMetrics.powerCurve?.map((peak, idx) => (
                                                 <div key={idx} className="flex justify-between items-center p-3.5 hover:bg-slate-50 dark:hover:bg-zinc-800/30 transition-colors">
                                                     <div className="flex items-center gap-3">

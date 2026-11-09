@@ -4,7 +4,7 @@ import { Footprints, Bike } from 'lucide-react';
 export const Vo2MaxCard = ({ vo2Sport, setVo2Sport, currentVo2, vo2Level, vo2Stats }) => {
     return (
         <section className="mb-8">
-            <div className="bg-white dark:bg-zinc-900/50 rounded-2xl border border-slate-200/50 dark:border-zinc-800/50 p-6 sm:p-8 shadow-sm">
+            <div className="bg-white dark:bg-zinc-900/50 rounded-2xl border border-line-muted p-6 sm:p-8 shadow-sm">
                 <div className="flex items-center justify-between mb-10">
                     <div className="flex items-center gap-2">
                         <h3 className="text-[10px] font-bold text-slate-400 dark:text-zinc-500 uppercase tracking-[0.1em]">VO2 Máximo</h3>
@@ -54,15 +54,15 @@ export const Vo2MaxCard = ({ vo2Sport, setVo2Sport, currentVo2, vo2Level, vo2Sta
                 </div>
 
                 {/* Both sports metrics */}
-                <div className="grid grid-cols-2 gap-4 mt-8 pt-6 border-t border-slate-100 dark:border-zinc-800">
-                    <div className="p-4 rounded-2xl bg-slate-50/50 dark:bg-zinc-800/30 border border-slate-100 dark:border-zinc-800/50">
+                <div className="grid grid-cols-2 gap-4 mt-8 pt-6 border-t border-line-soft-2">
+                    <div className="p-4 rounded-2xl bg-slate-50/50 dark:bg-zinc-800/30 border border-line-soft">
                         <div className="flex items-center gap-2 mb-1.5">
                             <Footprints size={12} className="text-slate-400" />
                             <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">VO2 Carrera</span>
                         </div>
                         <p className="text-lg font-bold text-slate-900 dark:text-zinc-100">{vo2Stats?.run?.vo2max > 0 ? vo2Stats.run.vo2max : '--'}</p>
                     </div>
-                    <div className="p-4 rounded-2xl bg-slate-50/50 dark:bg-zinc-800/30 border border-slate-100 dark:border-zinc-800/50">
+                    <div className="p-4 rounded-2xl bg-slate-50/50 dark:bg-zinc-800/30 border border-line-soft">
                         <div className="flex items-center gap-2 mb-1.5">
                             <Bike size={12} className="text-slate-400" />
                             <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">VO2 Bici</span>

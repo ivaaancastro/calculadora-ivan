@@ -94,7 +94,7 @@ const StravaCallback = () => {
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-slate-50 dark:bg-zinc-950 p-4 transition-colors duration-300">
-      <div className="bg-white dark:bg-zinc-900 p-8 rounded-lg shadow-sm text-center max-w-md w-full border border-slate-200 dark:border-zinc-800">
+      <div className="bg-white dark:bg-zinc-900 p-8 rounded-lg shadow-sm text-center max-w-md w-full border border-line">
         
         {status === 'processing' && (
             <>

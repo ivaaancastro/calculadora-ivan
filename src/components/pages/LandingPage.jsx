@@ -147,7 +147,7 @@ const AuthModal = ({ open, onClose }) => {
 
       {/* Modal */}
       <div
-        className="relative w-full max-w-md bg-white/95 dark:bg-zinc-900/95 backdrop-blur-2xl rounded-2xl border border-slate-200/60 dark:border-zinc-800/60 shadow-2xl p-8 animate-[modalIn_0.3s_ease-out]"
+        className="relative w-full max-w-md bg-white/95 dark:bg-zinc-900/95 backdrop-blur-2xl rounded-2xl border border-line-muted-3 shadow-2xl p-8 animate-[modalIn_0.3s_ease-out]"
         onClick={(e) => e.stopPropagation()}
       >
         <button
@@ -223,7 +223,7 @@ const AuthModal = ({ open, onClose }) => {
         </form>
 
         {!isForgotPassword && (
-          <div className="mt-6 text-center border-t border-slate-100 dark:border-zinc-800 pt-4 flex flex-col gap-2.5">
+          <div className="mt-6 text-center border-t border-line-soft-2 pt-4 flex flex-col gap-2.5">
             <button
               onClick={() => { setIsLogin(!isLogin); reset(); }}
               className="text-[11px] font-semibold text-slate-500 dark:text-zinc-400 hover:text-slate-800 dark:hover:text-zinc-200 transition-colors"
@@ -247,7 +247,7 @@ const AuthModal = ({ open, onClose }) => {
 
 /* ─── Feature Card ─── */
 const FeatureCard = ({ icon: Icon, title, description, color, span = '' }) => (
-  <div className={`group relative bg-white/70 dark:bg-zinc-900/50 backdrop-blur-xl border border-slate-200/50 dark:border-zinc-800/50 rounded-2xl p-6 hover:shadow-xl hover:shadow-slate-200/50 dark:hover:shadow-zinc-900/50 transition-all duration-300 hover:-translate-y-1 overflow-hidden ${span}`}>
+  <div className={`group relative bg-white/70 dark:bg-zinc-900/50 backdrop-blur-xl border border-line-muted rounded-2xl p-6 hover:shadow-xl hover:shadow-slate-200/50 dark:hover:shadow-zinc-900/50 transition-all duration-300 hover:-translate-y-1 overflow-hidden ${span}`}>
     <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-bl from-blue-500/5 to-transparent rounded-bl-full opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
     <div className={`w-10 h-10 rounded-xl flex items-center justify-center mb-4 ${color} transition-transform group-hover:scale-110`}>
       <Icon size={20} className="text-white" />
@@ -358,7 +358,7 @@ export const LandingPage = () => {
               </button>
               <button
                 onClick={scrollToFeatures}
-                className="text-sm font-semibold text-slate-600 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-zinc-100 px-8 py-3.5 rounded-full border border-slate-200 dark:border-zinc-800 hover:border-slate-300 dark:hover:border-zinc-700 transition-all hover:shadow-lg active:scale-95"
+                className="text-sm font-semibold text-slate-600 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-zinc-100 px-8 py-3.5 rounded-full border border-line hover:border-line-strong transition-all hover:shadow-lg active:scale-95"
               >
                 Explorar Funciones
               </button>
@@ -476,7 +476,7 @@ export const LandingPage = () => {
       </section>
 
       {/* ─── FOOTER ─── */}
-      <footer className="border-t border-slate-100 dark:border-zinc-900 py-8 px-6">
+      <footer className="border-t border-line-soft-6 py-8 px-6">
         <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4 text-[11px] text-slate-400 dark:text-zinc-600 font-medium">
           <div className="flex items-center gap-2">
             <Activity size={14} className="text-blue-500" />

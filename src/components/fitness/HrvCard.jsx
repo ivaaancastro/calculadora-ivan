@@ -7,7 +7,7 @@ export const HrvCard = ({ hrv }) => {
 
     return (
         <section className="mb-8">
-            <div className="bg-white dark:bg-zinc-900/50 rounded-2xl border border-slate-200/50 dark:border-zinc-800/50 p-6 sm:p-8 shadow-sm relative overflow-hidden">
+            <div className="bg-white dark:bg-zinc-900/50 rounded-2xl border border-line-muted p-6 sm:p-8 shadow-sm relative overflow-hidden">
                 <div className="flex items-center justify-between mb-8">
                     <div className="flex items-center gap-2">
                         <h3 className="text-[10px] font-bold text-slate-400 dark:text-zinc-500 uppercase tracking-[0.1em]">Estado de VFC</h3>
@@ -42,7 +42,7 @@ export const HrvCard = ({ hrv }) => {
                             </div>
                         </div>
                     </div>
-                    <div className="bg-slate-50/50 dark:bg-zinc-800/30 rounded-3xl p-6 border border-slate-100 dark:border-zinc-800/50">
+                    <div className="bg-slate-50/50 dark:bg-zinc-800/30 rounded-3xl p-6 border border-line-soft">
                         <div className="flex items-center justify-between mb-6">
                             <div>
                                 <p className="text-[9px] font-bold text-slate-400 uppercase tracking-[0.1em] mb-1">Stress Score</p>

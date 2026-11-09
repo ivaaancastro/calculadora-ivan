@@ -112,7 +112,7 @@ const SportZonesSection = ({ sport, sportLabel, icon: Icon, color, showPace, sho
                 </div>
 
                 <div className={`grid ${showPace ? 'grid-cols-2 sm:grid-cols-3' : showPower ? 'grid-cols-2 sm:grid-cols-3' : 'grid-cols-2'} gap-2 sm:gap-3`}>
-                    <div className="bg-slate-50 dark:bg-zinc-800/40 rounded-xl p-2.5 border border-black/[0.03] dark:border-white/[0.04]">
+                    <div className="bg-slate-50 dark:bg-zinc-800/40 rounded-xl p-2.5 border border-hairline-2">
                         <label className="text-[10px] font-semibold text-slate-500 dark:text-zinc-400 block mb-0.5">FC Umbral</label>
                         <div className="flex items-baseline gap-1">
                             <input 
@@ -126,7 +126,7 @@ const SportZonesSection = ({ sport, sportLabel, icon: Icon, color, showPace, sho
                         </div>
                     </div>
 
-                    <div className="bg-slate-50 dark:bg-zinc-800/40 rounded-xl p-2.5 border border-black/[0.03] dark:border-white/[0.04]">
+                    <div className="bg-slate-50 dark:bg-zinc-800/40 rounded-xl p-2.5 border border-hairline-2">
                         <label className="text-[10px] font-semibold text-slate-500 dark:text-zinc-400 block mb-0.5">FC Máx.</label>
                         <div className="flex items-baseline gap-1">
                             <input 
@@ -141,7 +141,7 @@ const SportZonesSection = ({ sport, sportLabel, icon: Icon, color, showPace, sho
                     </div>
 
                     {showPace && (
-                        <div className="bg-slate-50 dark:bg-zinc-800/40 rounded-xl p-2.5 border border-black/[0.03] dark:border-white/[0.04] col-span-2 sm:col-span-1">
+                        <div className="bg-slate-50 dark:bg-zinc-800/40 rounded-xl p-2.5 border border-hairline-2 col-span-2 sm:col-span-1">
                             <label className="text-[10px] font-semibold text-slate-500 dark:text-zinc-400 block mb-0.5">Ritmo Umbral</label>
                             <div className="flex items-baseline gap-1">
                                 <input 
@@ -157,7 +157,7 @@ const SportZonesSection = ({ sport, sportLabel, icon: Icon, color, showPace, sho
                     )}
 
                     {showPower && (
-                        <div className="bg-slate-50 dark:bg-zinc-800/40 rounded-xl p-2.5 border border-black/[0.03] dark:border-white/[0.04] col-span-2 sm:col-span-1">
+                        <div className="bg-slate-50 dark:bg-zinc-800/40 rounded-xl p-2.5 border border-hairline-2 col-span-2 sm:col-span-1">
                             <label className="text-[10px] font-semibold text-slate-500 dark:text-zinc-400 block mb-0.5">FTP</label>
                             <div className="flex items-baseline gap-1">
                                 <input 
@@ -176,14 +176,14 @@ const SportZonesSection = ({ sport, sportLabel, icon: Icon, color, showPace, sho
 
             {/* HR Zones card */}
             <div className="ios-card overflow-hidden">
-                <div className="p-3.5 sm:p-4 border-b border-black/[0.04] dark:border-white/[0.06] flex items-center justify-between gap-2">
+                <div className="p-3.5 sm:p-4 border-b border-hairline flex items-center justify-between gap-2">
                     <div className="flex items-center gap-2">
                         <Heart size={14} className="text-rose-500" />
                         <span className="text-xs sm:text-sm font-bold text-slate-900 dark:text-white">Zonas de Frecuencia Cardíaca</span>
                     </div>
                     <ModeSelector sport={sport} data={data} onZonesMode={onZonesMode} />
                 </div>
-                <div className="divide-y divide-black/[0.03] dark:divide-white/[0.04]">
+                <div className="divide-y divide-hairline-2">
                     {(data?.zones || []).map((zone, i) => {
                         const pcts = data.zonesMode === 'lthr' ? lthrPcts[i] : data.zonesMode === 'fcmax' ? fcmaxPcts[i] : null;
                         const pctStr = pcts ? `${Math.round(pcts.pMin * 100)} - ${i === 6 ? Math.round(pcts.pMax * 100) + '%+' : Math.round(pcts.pMax * 100) + '%'}` : '';
@@ -219,14 +219,14 @@ const SportZonesSection = ({ sport, sportLabel, icon: Icon, color, showPace, sho
             {/* Pace Zones (Carrera) */}
             {showPace && (
                 <div className="ios-card overflow-hidden">
-                    <div className="p-3.5 sm:p-4 border-b border-black/[0.04] dark:border-white/[0.06] flex items-center justify-between">
+                    <div className="p-3.5 sm:p-4 border-b border-hairline flex items-center justify-between">
                         <div className="flex items-center gap-2">
                             <Timer size={14} className="text-orange-500" />
                             <span className="text-xs sm:text-sm font-bold text-slate-900 dark:text-white">Zonas de Ritmo</span>
                         </div>
                         <span className="text-[10px] font-semibold text-slate-400">por km</span>
                     </div>
-                    <div className="divide-y divide-black/[0.03] dark:divide-white/[0.04]">
+                    <div className="divide-y divide-hairline-2">
                         {(data?.paceZones || calcPaceZones(data?.thresholdPace) || []).map((zone, i) => (
                             <div key={i} className="px-3.5 py-2.5 flex items-center justify-between text-xs hover:bg-slate-50/50 dark:hover:bg-zinc-800/30 transition-colors">
                                 <div className="flex items-center gap-2.5 min-w-0">
@@ -251,13 +251,13 @@ const SportZonesSection = ({ sport, sportLabel, icon: Icon, color, showPace, sho
             {/* Power Zones (Ciclismo) */}
             {showPower && data.ftp > 0 && (
                 <div className="ios-card overflow-hidden">
-                    <div className="p-3.5 sm:p-4 border-b border-black/[0.04] dark:border-white/[0.06] flex items-center justify-between">
+                    <div className="p-3.5 sm:p-4 border-b border-hairline flex items-center justify-between">
                         <div className="flex items-center gap-2">
                             <Zap size={14} className="text-amber-500" />
                             <span className="text-xs sm:text-sm font-bold text-slate-900 dark:text-white">Zonas de Potencia ({data.ftp} W)</span>
                         </div>
                     </div>
-                    <div className="divide-y divide-black/[0.03] dark:divide-white/[0.04]">
+                    <div className="divide-y divide-hairline-2">
                         {POWER_ZONES.map((pz, i) => {
                             const minW = Math.round(data.ftp * pz.pMin);
                             const maxW = Math.round(data.ftp * pz.pMax);
@@ -666,7 +666,7 @@ export const ProfilePage = ({
                             {/* DATOS PERSONALES */}
                             <div>
                                 <div className="ios-header">Datos Personales</div>
-                                <div className="ios-card overflow-hidden divide-y divide-black/[0.04] dark:divide-white/[0.06] mb-5">
+                                <div className="ios-card overflow-hidden divide-y divide-hairline mb-5">
                                     <div className="p-3 sm:p-3.5 flex items-center justify-between gap-3">
                                         <span className="text-xs sm:text-sm font-medium text-slate-600 dark:text-zinc-400">Nombre</span>
                                         <input
@@ -688,7 +688,7 @@ export const ProfilePage = ({
                             {/* AJUSTES FISIOLÓGICOS */}
                             <div>
                                 <div className="ios-header">Fisiología y Métricas</div>
-                                <div className="ios-card overflow-hidden divide-y divide-black/[0.04] dark:divide-white/[0.06]">
+                                <div className="ios-card overflow-hidden divide-y divide-hairline">
                                     {/* Peso */}
                                     <div className="p-3 sm:p-3.5 flex items-center justify-between gap-3">
                                         <div className="flex items-center gap-3">
@@ -817,7 +817,7 @@ export const ProfilePage = ({
                         <div className="space-y-5 animate-in fade-in slide-in-from-right-3 duration-250">
                             <div className="ios-header">SERVICIOS CONECTADOS</div>
                             
-                            <div className="ios-card overflow-hidden divide-y divide-black/[0.04] dark:divide-white/[0.06]">
+                            <div className="ios-card overflow-hidden divide-y divide-hairline">
                                 <div className="p-3.5 sm:p-4 flex items-center justify-between gap-3">
                                     <div className="flex items-center gap-3">
                                         <div className="w-8 h-8 rounded-[10px] bg-indigo-500 text-white flex items-center justify-center shrink-0 shadow-2xs">
@@ -846,7 +846,7 @@ export const ProfilePage = ({
                                             value={formData.intervalsId || ''} 
                                             onChange={handleChange} 
                                             placeholder="i12345" 
-                                            className="w-40 text-right bg-slate-50 dark:bg-zinc-900/80 border border-slate-200 dark:border-zinc-700/80 rounded-lg px-2.5 py-1.5 text-xs font-mono text-slate-900 dark:text-zinc-200 outline-none focus:ring-1 focus:ring-indigo-500" 
+                                            className="w-40 text-right bg-slate-50 dark:bg-zinc-900/80 border border-line-3 rounded-lg px-2.5 py-1.5 text-xs font-mono text-slate-900 dark:text-zinc-200 outline-none focus:ring-1 focus:ring-indigo-500" 
                                         />
                                     </div>
                                     <div className="flex items-center justify-between gap-3">
@@ -857,7 +857,7 @@ export const ProfilePage = ({
                                             value={formData.intervalsKey || ''} 
                                             onChange={handleChange} 
                                             placeholder="••••••••" 
-                                            className="w-40 text-right bg-slate-50 dark:bg-zinc-900/80 border border-slate-200 dark:border-zinc-700/80 rounded-lg px-2.5 py-1.5 text-xs font-mono text-slate-900 dark:text-zinc-200 outline-none focus:ring-1 focus:ring-indigo-500" 
+                                            className="w-40 text-right bg-slate-50 dark:bg-zinc-900/80 border border-line-3 rounded-lg px-2.5 py-1.5 text-xs font-mono text-slate-900 dark:text-zinc-200 outline-none focus:ring-1 focus:ring-indigo-500" 
                                         />
                                     </div>
 
@@ -897,7 +897,7 @@ export const ProfilePage = ({
                                         </div>
                                         <div className="flex gap-2">
                                             <button onClick={handleApplySyncedProfile} className="flex-1 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-semibold transition-colors">Aplicar</button>
-                                            <button onClick={() => setSyncPreview(null)} className="flex-1 py-1.5 bg-white dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 text-slate-700 dark:text-zinc-300 rounded-lg text-xs font-semibold hover:bg-slate-50 transition-colors">Ignorar</button>
+                                            <button onClick={() => setSyncPreview(null)} className="flex-1 py-1.5 bg-white dark:bg-zinc-800 border border-line-2 text-slate-700 dark:text-zinc-300 rounded-lg text-xs font-semibold hover:bg-slate-50 transition-colors">Ignorar</button>
                                         </div>
                                     </div>
                                 )}
@@ -926,7 +926,7 @@ export const ProfilePage = ({
                                             value={newPassword} 
                                             onChange={(e) => setNewPassword(e.target.value)} 
                                             placeholder="Nueva contraseña..." 
-                                            className="flex-1 px-3 py-2 bg-slate-50 dark:bg-zinc-900/80 border border-slate-200 dark:border-zinc-700/80 rounded-xl text-xs font-mono dark:text-zinc-200 focus:ring-1 focus:ring-blue-500 outline-none transition-all" 
+                                            className="flex-1 px-3 py-2 bg-slate-50 dark:bg-zinc-900/80 border border-line-3 rounded-xl text-xs font-mono dark:text-zinc-200 focus:ring-1 focus:ring-blue-500 outline-none transition-all" 
                                         />
                                         <button 
                                             type="submit" 

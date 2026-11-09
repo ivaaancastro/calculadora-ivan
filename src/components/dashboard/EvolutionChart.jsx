@@ -10,7 +10,7 @@ const CustomTooltip = ({ active, payload, label }) => {
     const title = date.toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long' });
 
     return (
-      <div className="bg-white/95 dark:bg-zinc-900/95 backdrop-blur-md p-2.5 sm:p-3 rounded-xl border border-slate-200/60 dark:border-zinc-800/60 shadow-xl min-w-[140px] pointer-events-none select-none z-50">
+      <div className="bg-white/95 dark:bg-zinc-900/95 backdrop-blur-md p-2.5 sm:p-3 rounded-xl border border-line-muted-3 shadow-xl min-w-[140px] pointer-events-none select-none z-50">
         <p className="text-[9px] font-medium uppercase tracking-widest text-slate-400 dark:text-zinc-500 mb-1.5 flex justify-between items-center capitalize">
           {title}
           {diffDays > 0 && <span className="bg-slate-100 dark:bg-zinc-800 text-slate-500 px-1 py-0.5 rounded text-[8px] ml-2 font-mono font-normal">+{diffDays}d</span>}
@@ -48,7 +48,7 @@ export const EvolutionChart = ({ data, timeRange, setTimeRange }) => {
 
   if (!data || data.length === 0) {
     return (
-      <div className="bg-transparent rounded-xl border border-dashed border-slate-200 dark:border-zinc-800 p-8 h-full w-full flex items-center justify-center text-center">
+      <div className="bg-transparent rounded-xl border border-dashed border-line p-8 h-full w-full flex items-center justify-center text-center">
         <div>
            <Activity size={16} className="mx-auto text-slate-300 mb-2" />
            <p className="text-[9px] text-slate-400 dark:text-zinc-600 uppercase tracking-widest font-medium">Sin Datos</p>
