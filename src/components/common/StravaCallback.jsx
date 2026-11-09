@@ -98,21 +98,21 @@ const StravaCallback = () => {
         
         {status === 'processing' && (
             <>
-                <Loader2 className="animate-spin h-12 w-12 text-blue-600 dark:text-blue-500 mx-auto mb-4" />
+                <Loader2 className="animate-spin h-12 w-12 text-action-3 mx-auto mb-4" />
                 <h2 className="text-xl font-black text-ink-2 uppercase tracking-tight">Procesando</h2>
             </>
         )}
 
         {status === 'success' && (
             <>
-                <CheckCircle className="h-12 w-12 text-emerald-500 mx-auto mb-4" />
+                <CheckCircle className="h-12 w-12 text-positive mx-auto mb-4" />
                 <h2 className="text-xl font-black text-ink-2 uppercase tracking-tight">¡Éxito!</h2>
             </>
         )}
 
         {status === 'error' && (
             <>
-                <XCircle className="h-12 w-12 text-red-500 mx-auto mb-4" />
+                <XCircle className="h-12 w-12 text-danger mx-auto mb-4" />
                 <h2 className="text-xl font-black text-ink-2 uppercase tracking-tight">Error</h2>
             </>
         )}

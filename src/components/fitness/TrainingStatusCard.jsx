@@ -33,7 +33,7 @@ export const TrainingStatusCard = ({ trainingStatus }) => {
                         </div>
                         <div className="space-y-1">
                             <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">TSB</p>
-                            <p className={`text-xl font-bold ${trainingStatus.tsb > 10 ? 'text-emerald-500' : trainingStatus.tsb < -10 ? 'text-orange-500' : 'text-slate-400'}`}>
+                            <p className={`text-xl font-bold ${trainingStatus.tsb > 10 ? 'text-legacy-tsb-up' : trainingStatus.tsb < -10 ? 'text-legacy-tsb-down-2' : 'text-slate-400'}`}>
                                 {trainingStatus.tsb > 0 ? '+' : ''}{trainingStatus.tsb}
                             </p>
                         </div>

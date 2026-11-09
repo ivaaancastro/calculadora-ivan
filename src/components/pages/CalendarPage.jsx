@@ -179,9 +179,9 @@ const PmcFloatingChart = ({ pmcByDate, onClose, initPos }) => {
                 </div>
                 {lastReal && (
                     <div className="flex items-center gap-3 mr-2">
-                        <span className="text-[9px] font-bold text-blue-500">CTL {Math.round(lastReal.ctl)}</span>
-                        <span className="text-[9px] font-bold text-red-400">ATL {Math.round(lastReal.atl)}</span>
-                        <span className={`text-[9px] font-bold ${lastReal.tcb >= 0 ? 'text-emerald-500' : 'text-orange-400'}`}>
+                        <span className="text-[9px] font-bold text-metric-ctl">CTL {Math.round(lastReal.ctl)}</span>
+                        <span className="text-[9px] font-bold text-legacy-atl-red">ATL {Math.round(lastReal.atl)}</span>
+                        <span className={`text-[9px] font-bold ${lastReal.tcb >= 0 ? 'text-legacy-tsb-up' : 'text-legacy-tsb-down'}`}>
                             TSB {lastReal.tcb >= 0 ? '+' : ''}{Math.round(lastReal.tcb)}
                         </span>
                     </div>
@@ -312,16 +312,16 @@ const PmcFloatingChart = ({ pmcByDate, onClose, initPos }) => {
                         </p>
                         <div className="space-y-1">
                             <div className="flex justify-between gap-4">
-                                <span className="text-sky-500 font-semibold">Aptitud (CTL)</span>
+                                <span className="text-legacy-ctl-sky font-semibold">Aptitud (CTL)</span>
                                 <span className="font-mono font-bold text-body-2">{Math.round(hoverEntry.ctl)}</span>
                             </div>
                             <div className="flex justify-between gap-4">
-                                <span className="text-purple-400 font-semibold">Fatiga (ATL)</span>
+                                <span className="text-legacy-atl-purple font-semibold">Fatiga (ATL)</span>
                                 <span className="font-mono font-bold text-body-2">{Math.round(hoverEntry.atl)}</span>
                             </div>
                             <div className="flex justify-between gap-4">
-                                <span className={`font-semibold ${hoverEntry.tcb >= 0 ? 'text-emerald-500' : 'text-orange-400'}`}>Forma (TSB)</span>
-                                <span className={`font-mono font-bold ${hoverEntry.tcb >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-orange-500'}`}>
+                                <span className={`font-semibold ${hoverEntry.tcb >= 0 ? 'text-legacy-tsb-up' : 'text-legacy-tsb-down'}`}>Forma (TSB)</span>
+                                <span className={`font-mono font-bold ${hoverEntry.tcb >= 0 ? 'text-legacy-tsb-up-ink' : 'text-legacy-tsb-down-2'}`}>
                                     {hoverEntry.tcb >= 0 ? '+' : ''}{Math.round(hoverEntry.tcb)}
                                 </span>
                             </div>
@@ -1318,7 +1318,7 @@ export const CalendarPage = ({ activities, plannedWorkouts = [], addPlannedWorko
                                                 <div className="flex items-center justify-between">
                                                     <div className="flex items-center gap-1.5">
                                                         <span className="text-[10px] text-ink-3 w-9">Aptitud</span>
-                                                        <span className="text-[11px] font-bold text-blue-500">{weekPmc.ctl != null ? Math.round(weekPmc.ctl) : '-'}</span>
+                                                        <span className="text-[11px] font-bold text-metric-ctl">{weekPmc.ctl != null ? Math.round(weekPmc.ctl) : '-'}</span>
                                                     </div>
                                                     <span className="text-[11px] font-bold text-ink-2-soft">{formatDuration(weekDuration)}</span>
                                                 </div>
@@ -1327,7 +1327,7 @@ export const CalendarPage = ({ activities, plannedWorkouts = [], addPlannedWorko
                                                 <div className="flex items-center justify-between">
                                                     <div className="flex items-center gap-1.5">
                                                         <span className="text-[10px] text-ink-3 w-9">Fatiga</span>
-                                                        <span className="text-[11px] font-bold text-purple-600 dark:text-purple-400">{weekPmc.atl != null ? Math.round(weekPmc.atl) : '-'}</span>
+                                                        <span className="text-[11px] font-bold text-legacy-atl-purple-ink">{weekPmc.atl != null ? Math.round(weekPmc.atl) : '-'}</span>
                                                     </div>
                                                     <div className="flex items-center gap-1">
                                                         <span className="text-[9px] text-ink-4">Carga</span>
@@ -1340,7 +1340,7 @@ export const CalendarPage = ({ activities, plannedWorkouts = [], addPlannedWorko
                                                     <div className="flex items-center gap-1.5">
                                                         <span className="text-[10px] text-ink-3 w-9">Forma</span>
                                                         {weekPmc.tcb != null ? (
-                                                            <span className={`text-[11px] font-semibold ${weekPmc.tcb > 5 ? 'text-emerald-500' : weekPmc.tcb < -15 ? 'text-red-500' : 'text-body-soft-2'}`}>
+                                                            <span className={`text-[11px] font-semibold ${weekPmc.tcb > 5 ? 'text-legacy-tsb-up' : weekPmc.tcb < -15 ? 'text-legacy-tsb-low' : 'text-body-soft-2'}`}>
                                                                 {Math.round(weekPmc.tcb)}
                                                             </span>
                                                         ) : (
@@ -1413,7 +1413,7 @@ export const CalendarPage = ({ activities, plannedWorkouts = [], addPlannedWorko
                                                     onDrop={(e) => handleDrop(e, day.date)}
                                                     className={`relative p-2 lg:p-2.5 border-r border-line-faint flex flex-col min-h-[72px] lg:h-[220px] overflow-y-auto custom-scrollbar transition-colors group/daycell
                                                         ${isToday ? 'bg-blue-50/10 dark:bg-blue-900/5' : 'bg-transparent'}
-                                                        ${dragOverDate === dateKey ? 'bg-blue-50 dark:bg-blue-900/20 ring-2 ring-blue-400 ring-inset rounded-lg z-10' : ''}
+                                                        ${dragOverDate === dateKey ? 'bg-blue-50 dark:bg-blue-900/20 ring-2 ring-action-light ring-inset rounded-lg z-10' : ''}
                                                         ${!day.isCurrentMonth ? 'opacity-40' : 'opacity-100'}
                                                     `}>
                                                     {/* Day number + add button */}
@@ -2332,7 +2332,7 @@ const WorkoutViewerModal = ({ workout, onClose, onDelete, onEdit }) => {
 
             {/* ── FOOTER ── */}
             <div className="px-6 py-3.5 border-t border-line-soft flex justify-between items-center shrink-0">
-                <button onClick={(e) => { onDelete(e); onClose(); }} className="text-[11px] font-medium text-red-400 hover:text-red-600 dark:text-red-400/60 dark:hover:text-red-400 transition-colors">
+                <button onClick={(e) => { onDelete(e); onClose(); }} className="text-[11px] font-medium text-danger-light-2 hover:text-danger-ink transition-colors">
                     Eliminar
                 </button>
                 <div className="flex gap-2">

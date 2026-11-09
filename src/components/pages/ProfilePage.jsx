@@ -204,9 +204,9 @@ const SportZonesSection = ({ sport, sportLabel, icon: Icon, color, showPace, sho
                                         </span>
                                     ) : (
                                         <div className="flex items-center gap-1">
-                                            <input type="number" value={zone.min} onChange={(e) => onZoneChange(e, sport, i, 'min')} className="w-12 bg-surface-2 rounded px-1 py-0.5 text-xs font-mono text-center outline-none focus:ring-1 focus:ring-blue-500" />
+                                            <input type="number" value={zone.min} onChange={(e) => onZoneChange(e, sport, i, 'min')} className="w-12 bg-surface-2 rounded px-1 py-0.5 text-xs font-mono text-center outline-none focus:ring-1 focus:ring-action-bright" />
                                             <span className="text-slate-400">-</span>
-                                            <input type="number" value={zone.max} onChange={(e) => onZoneChange(e, sport, i, 'max')} className="w-12 bg-surface-2 rounded px-1 py-0.5 text-xs font-mono text-center outline-none focus:ring-1 focus:ring-blue-500" />
+                                            <input type="number" value={zone.max} onChange={(e) => onZoneChange(e, sport, i, 'max')} className="w-12 bg-surface-2 rounded px-1 py-0.5 text-xs font-mono text-center outline-none focus:ring-1 focus:ring-action-bright" />
                                         </div>
                                     )}
                                 </div>
@@ -572,7 +572,7 @@ export const ProfilePage = ({
         <button
             onClick={() => handleSectionChange(id)}
             className={`flex items-center gap-2.5 px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-xl transition-all text-left whitespace-nowrap select-none touch-manipulation active:scale-95 ${activeSection === id
-                ? 'bg-blue-600 text-white shadow-xs font-bold'
+                ? 'bg-action-solid text-white shadow-xs font-bold'
                 : 'text-body hover:bg-fill-5 font-medium'
                 }`}
         >
@@ -588,7 +588,7 @@ export const ProfilePage = ({
                 <div className="flex items-center gap-2 sm:gap-4">
                     <button 
                         onClick={onBack} 
-                        className="flex items-center gap-1 text-[#007AFF] dark:text-[#0A84FF] text-sm font-semibold hover:opacity-80 active:opacity-50 transition-opacity -ml-1 select-none touch-manipulation"
+                        className="flex items-center gap-1 text-action-ios text-sm font-semibold hover:opacity-80 active:opacity-50 transition-opacity -ml-1 select-none touch-manipulation"
                         aria-label="Volver"
                     >
                         <ArrowLeft size={18} strokeWidth={2.5} />
@@ -605,7 +605,7 @@ export const ProfilePage = ({
                     const newOffset = targetCtl !== null ? (targetCtl - raw) : formData.offsetCtl;
                     onUpdate({ ...formData, offsetCtl: newOffset });
                   }} 
-                  className="flex items-center gap-1.5 bg-[#007AFF] hover:bg-blue-600 text-white px-4 sm:px-5 py-1.5 sm:py-2 rounded-full text-xs font-semibold tracking-wide transition-all shadow-xs active:scale-95 select-none touch-manipulation"
+                  className="flex items-center gap-1.5 bg-action-ios-solid hover:bg-action-solid text-white px-4 sm:px-5 py-1.5 sm:py-2 rounded-full text-xs font-semibold tracking-wide transition-all shadow-xs active:scale-95 select-none touch-manipulation"
                 >
                     <Save size={14} strokeWidth={2.5} /> <span>Guardar</span>
                 </button>
@@ -647,7 +647,7 @@ export const ProfilePage = ({
                                             </div>
                                         )}
                                     </div>
-                                    <label className="absolute -bottom-1 -right-1 p-2 bg-[#007AFF] text-white rounded-full shadow-md cursor-pointer hover:bg-blue-600 active:scale-90 transition-transform">
+                                    <label className="absolute -bottom-1 -right-1 p-2 bg-action-ios-solid text-white rounded-full shadow-md cursor-pointer hover:bg-action-solid active:scale-90 transition-transform">
                                         <Camera size={13} strokeWidth={2.5} />
                                         <input type="file" className="hidden" accept="image/*" onChange={handleAvatarUpload} disabled={isUploadingAvatar} />
                                     </label>
@@ -707,7 +707,7 @@ export const ProfilePage = ({
                                                 name="weight"
                                                 value={formData.weight}
                                                 onChange={handleChange}
-                                                className="w-16 text-right font-mono font-bold text-xs sm:text-sm text-ink bg-fill-3 rounded-lg px-2 py-1 outline-none focus:ring-1 focus:ring-blue-500"
+                                                className="w-16 text-right font-mono font-bold text-xs sm:text-sm text-ink bg-fill-3 rounded-lg px-2 py-1 outline-none focus:ring-1 focus:ring-action-bright"
                                             />
                                             <span className="text-xs font-semibold text-ink-4">kg</span>
                                         </div>
@@ -801,7 +801,7 @@ export const ProfilePage = ({
                                 <button 
                                     onClick={() => setActiveTab('bike')} 
                                     className={`flex-1 py-1.5 text-xs font-semibold rounded-full transition-all flex items-center justify-center gap-1.5 select-none touch-manipulation active:scale-95 ${
-                                        activeTab === 'bike' ? 'bg-surface-4 text-blue-600 dark:text-blue-400 shadow-xs' : 'text-ink-3'
+                                        activeTab === 'bike' ? 'bg-surface-4 text-action shadow-xs' : 'text-ink-3'
                                     }`}
                                 >
                                     <Bike size={14} strokeWidth={2.3} /> Ciclismo
@@ -926,7 +926,7 @@ export const ProfilePage = ({
                                             value={newPassword} 
                                             onChange={(e) => setNewPassword(e.target.value)} 
                                             placeholder="Nueva contraseña..." 
-                                            className="flex-1 px-3 py-2 bg-sunken-11 border border-line-3 rounded-xl text-xs font-mono dark:text-zinc-200 focus:ring-1 focus:ring-blue-500 outline-none transition-all" 
+                                            className="flex-1 px-3 py-2 bg-sunken-11 border border-line-3 rounded-xl text-xs font-mono dark:text-zinc-200 focus:ring-1 focus:ring-action-bright outline-none transition-all" 
                                         />
                                         <button 
                                             type="submit" 
@@ -969,21 +969,21 @@ export const ProfilePage = ({
                             
                             {/* DANGER ZONE */}
                             <div>
-                                <div className="ios-header text-red-500 dark:text-red-400">ZONA DE PELIGRO</div>
-                                <div className="ios-card border border-red-200 dark:border-red-900/30 p-3.5 sm:p-4">
+                                <div className="ios-header text-danger-ink-2">ZONA DE PELIGRO</div>
+                                <div className="ios-card border border-danger-edge-2 p-3.5 sm:p-4">
                                     <div className="flex items-center gap-3 mb-3">
-                                        <div className="w-7 h-7 rounded-[8px] bg-red-500/15 text-red-600 dark:text-red-400 flex items-center justify-center shrink-0">
+                                        <div className="w-7 h-7 rounded-[8px] bg-danger/15 text-danger-ink flex items-center justify-center shrink-0">
                                             <AlertTriangle size={15} strokeWidth={2.3} />
                                         </div>
                                         <div>
-                                            <h3 className="text-xs sm:text-sm font-bold text-red-600 dark:text-red-400">Eliminar cuenta definitivamente</h3>
+                                            <h3 className="text-xs sm:text-sm font-bold text-danger-ink">Eliminar cuenta definitivamente</h3>
                                             <p className="text-[10px] text-ink-4">Se eliminarán todas tus actividades y métricas</p>
                                         </div>
                                     </div>
                                     <button 
                                         onClick={handleDeleteAccount}
                                         disabled={isDeletingAccount}
-                                        className="w-full py-2 bg-red-600 hover:bg-red-700 text-white rounded-xl text-xs font-semibold transition-all disabled:opacity-50 flex items-center justify-center gap-1.5 shadow-xs active:scale-95"
+                                        className="w-full py-2 bg-danger-solid hover:bg-danger-hover text-white rounded-xl text-xs font-semibold transition-all disabled:opacity-50 flex items-center justify-center gap-1.5 shadow-xs active:scale-95"
                                     >
                                         {isDeletingAccount ? <Loader2 size={13} className="animate-spin" /> : <><Trash2 size={13} /> Eliminar Cuenta</>}
                                     </button>

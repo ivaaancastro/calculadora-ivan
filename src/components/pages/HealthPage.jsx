@@ -138,18 +138,18 @@ const computeDayReadiness = (day, baselineRhr = 50) => {
         return {
             score,
             label: 'Óptima',
-            color: 'text-emerald-500',
-            dot: 'bg-emerald-500',
-            badge: 'bg-emerald-50 text-emerald-600 dark:bg-emerald-950/40 dark:text-emerald-400 border border-emerald-200/50 dark:border-emerald-800/40'
+            color: 'text-positive',
+            dot: 'bg-positive',
+            badge: 'bg-positive-tint-2 text-positive-ink border border-positive-edge-2'
         };
     }
     if (score >= 34) {
         return {
             score,
             label: 'Adaptándose',
-            color: 'text-amber-500',
-            dot: 'bg-amber-500',
-            badge: 'bg-amber-50 text-amber-600 dark:bg-amber-950/40 dark:text-amber-400 border border-amber-200/50 dark:border-amber-800/40'
+            color: 'text-warning',
+            dot: 'bg-warning',
+            badge: 'bg-warning-tint text-warning-ink border border-warning-edge'
         };
     }
     return {
@@ -228,18 +228,18 @@ export const HealthPage = ({ activities, settings, chartData }) => {
         const r = wellnessMetrics.todayReadiness;
         if (r >= 67) {
             return {
-                color: 'text-emerald-500',
+                color: 'text-positive',
                 label: 'Óptima',
                 msg: 'Tu cuerpo se encuentra en condiciones óptimas para asimilar entrenamientos de alta intensidad.',
-                badge: 'bg-emerald-50 text-emerald-600 dark:bg-emerald-950/40 dark:text-emerald-400 border border-emerald-200/50 dark:border-emerald-800/40'
+                badge: 'bg-positive-tint-2 text-positive-ink border border-positive-edge-2'
             };
         }
         if (r >= 34) {
             return {
-                color: 'text-amber-500',
+                color: 'text-warning',
                 label: 'Adaptándose',
                 msg: 'Adaptación fisiológica activa. Es recomendable mantener intensidad controlada y vigilar la fatiga.',
-                badge: 'bg-amber-50 text-amber-600 dark:bg-amber-950/40 dark:text-amber-400 border border-amber-200/50 dark:border-amber-800/40'
+                badge: 'bg-warning-tint text-warning-ink border border-warning-edge'
             };
         }
         return {
@@ -369,7 +369,7 @@ export const HealthPage = ({ activities, settings, chartData }) => {
                 </div>
 
                 {apiError && (
-                    <div className="px-3.5 py-2 rounded-xl bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-900/50 text-red-600 dark:text-red-400 text-xs font-bold flex items-center gap-2">
+                    <div className="px-3.5 py-2 rounded-xl bg-danger-tint-3 border border-danger-edge text-danger-ink text-xs font-bold flex items-center gap-2">
                         <AlertTriangle size={14} /> Error al sincronizar datos biométricos
                     </div>
                 )}
@@ -787,7 +787,7 @@ export const HealthPage = ({ activities, settings, chartData }) => {
                                         onClick={() => setSelectedDate(d.date)}
                                         className={`shrink-0 flex flex-col items-center justify-between w-14 sm:w-16 py-2.5 px-1 rounded-2xl transition-all select-none active:scale-95 ${
                                             isSelected
-                                                ? 'bg-blue-600 text-white shadow-md'
+                                                ? 'bg-action-solid text-white shadow-md'
                                                 : 'bg-slate-100/80 dark:bg-zinc-800/60 hover:bg-slate-200/80 dark:hover:bg-zinc-700/60 text-body'
                                         }`}
                                     >

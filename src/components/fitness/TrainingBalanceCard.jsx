@@ -16,7 +16,7 @@ export const TrainingBalanceCard = ({ balance, balanceDays, setBalanceDays }) =>
                             <button
                                 key={p.v}
                                 onClick={() => setBalanceDays(p.v)}
-                                className={`px-4 py-1.5 rounded-lg text-[9px] font-bold uppercase tracking-widest transition-all ${balanceDays === p.v ? 'bg-surface-3 text-blue-500 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
+                                className={`px-4 py-1.5 rounded-lg text-[9px] font-bold uppercase tracking-widest transition-all ${balanceDays === p.v ? 'bg-surface-3 text-action-bright shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
                             >
                                 {p.l}
                             </button>

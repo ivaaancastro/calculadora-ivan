@@ -20,9 +20,9 @@ const CustomTooltip = ({ active, payload, label }) => {
             if (entry.dataKey === 'dailyTss') return null;
             
             const colors = {
-              ctl: 'text-blue-600 dark:text-blue-400',
-              atl: 'text-rose-600 dark:text-rose-400',
-              tsb: 'text-amber-600 dark:text-amber-400'
+              ctl: 'text-metric-ctl-ink',
+              atl: 'text-metric-atl-ink',
+              tsb: 'text-metric-tsb-ink'
             };
             const labels = {
               ctl: 'Fitness (CTL)',

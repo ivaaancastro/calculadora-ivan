@@ -168,7 +168,7 @@ const AuthModal = ({ open, onClose }) => {
 
         {/* Logo */}
         <div className="flex flex-col items-center gap-2 mb-6">
-          <div className="bg-blue-600 text-white p-2.5 rounded-xl shadow-lg shadow-blue-600/20">
+          <div className="bg-action-solid text-white p-2.5 rounded-xl shadow-lg shadow-action-solid/20">
             <Activity size={24} strokeWidth={2.5} />
           </div>
           <h2 className="text-lg font-black text-ink-soft tracking-tight uppercase">
@@ -179,8 +179,8 @@ const AuthModal = ({ open, onClose }) => {
           </p>
         </div>
 
-        {error && <div className="mb-4 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-900/50 rounded-xl text-red-600 dark:text-red-400 text-[11px] font-semibold text-center">{error}</div>}
-        {message && <div className="mb-4 p-3 bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-900/50 rounded-xl text-emerald-600 dark:text-emerald-400 text-[11px] font-semibold text-center">{message}</div>}
+        {error && <div className="mb-4 p-3 bg-danger-tint border border-danger-edge rounded-xl text-danger-ink text-[11px] font-semibold text-center">{error}</div>}
+        {message && <div className="mb-4 p-3 bg-positive-tint border border-positive-edge rounded-xl text-positive-ink text-[11px] font-semibold text-center">{message}</div>}
 
         <form onSubmit={handleAuth} className="space-y-4">
           <div>
@@ -189,7 +189,7 @@ const AuthModal = ({ open, onClose }) => {
               <Mail size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-ink-4" />
               <input
                 id="auth-email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} required
-                className="w-full pl-10 pr-4 py-3 bg-sunken-2 border border-slate-200 dark:border-zinc-800 rounded-xl text-sm text-ink-2-soft focus:border-blue-500 focus:ring-2 focus:ring-blue-500/10 outline-none transition-all"
+                className="w-full pl-10 pr-4 py-3 bg-sunken-2 border border-slate-200 dark:border-zinc-800 rounded-xl text-sm text-ink-2-soft focus:border-blue-500 focus:ring-2 focus:ring-action-bright/10 outline-none transition-all"
                 placeholder="atleta@ejemplo.com"
               />
             </div>
@@ -202,7 +202,7 @@ const AuthModal = ({ open, onClose }) => {
                 <Lock size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-ink-4" />
                 <input
                   id="auth-password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} required
-                  className="w-full pl-10 pr-4 py-3 bg-sunken-2 border border-slate-200 dark:border-zinc-800 rounded-xl text-sm text-ink-2-soft focus:border-blue-500 focus:ring-2 focus:ring-blue-500/10 outline-none transition-all"
+                  className="w-full pl-10 pr-4 py-3 bg-sunken-2 border border-slate-200 dark:border-zinc-800 rounded-xl text-sm text-ink-2-soft focus:border-blue-500 focus:ring-2 focus:ring-action-bright/10 outline-none transition-all"
                   placeholder="••••••••"
                 />
               </div>
@@ -211,7 +211,7 @@ const AuthModal = ({ open, onClose }) => {
 
           <button
             type="submit" disabled={loading}
-            className="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold text-sm flex items-center justify-center gap-2 transition-all disabled:opacity-50 mt-2 shadow-lg shadow-blue-600/20 hover:shadow-blue-600/30 active:scale-[0.98]"
+            className="w-full py-3 bg-action-solid hover:bg-action-hover text-white rounded-xl font-bold text-sm flex items-center justify-center gap-2 transition-all disabled:opacity-50 mt-2 shadow-lg shadow-action-solid/20 hover:shadow-action-solid/30 active:scale-[0.98]"
           >
             {loading ? <Loader2 size={16} className="animate-spin" /> : (
               <>
@@ -283,7 +283,7 @@ export const LandingPage = () => {
       <nav className="fixed top-0 left-0 right-0 z-40 bg-surface-9 backdrop-blur-xl border-b border-slate-100/80 dark:border-zinc-900/80">
         <div className="max-w-6xl mx-auto flex items-center justify-between h-16 px-6">
           <div className="flex items-center gap-2.5">
-            <div className="bg-blue-600 text-white p-1.5 rounded-lg">
+            <div className="bg-action-solid text-white p-1.5 rounded-lg">
               <Activity size={18} strokeWidth={2.5} />
             </div>
             <span className="text-base font-black uppercase tracking-tight text-ink-soft">
@@ -309,7 +309,7 @@ export const LandingPage = () => {
             </button>
             <button
               onClick={() => setAuthOpen(true)}
-              className="bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold px-5 py-2 rounded-full transition-all shadow-lg shadow-blue-600/20 hover:shadow-blue-600/30 active:scale-95"
+              className="bg-action-solid hover:bg-action-hover text-white text-sm font-bold px-5 py-2 rounded-full transition-all shadow-lg shadow-action-solid/20 hover:shadow-action-solid/30 active:scale-95"
             >
               Empezar Gratis
             </button>
@@ -324,9 +324,9 @@ export const LandingPage = () => {
         <div className="relative z-10 text-center max-w-4xl mx-auto">
           {/* Badge */}
           <FadeIn>
-            <div className="inline-flex items-center gap-2 bg-blue-50 dark:bg-blue-950/30 border border-blue-200/50 dark:border-blue-800/50 rounded-full px-4 py-1.5 mb-8">
-              <div className="w-2 h-2 rounded-full bg-blue-500 animate-pulse" />
-              <span className="text-xs font-semibold text-blue-600 dark:text-blue-400">
+            <div className="inline-flex items-center gap-2 bg-action-tint-3 border border-action-edge rounded-full px-4 py-1.5 mb-8">
+              <div className="w-2 h-2 rounded-full bg-action-bright animate-pulse" />
+              <span className="text-xs font-semibold text-action">
                 Performance Analytics Platform
               </span>
             </div>
@@ -377,7 +377,7 @@ export const LandingPage = () => {
         <div className="max-w-6xl mx-auto">
           <FadeIn>
             <div className="text-center mb-16">
-              <span className="text-xs font-bold text-blue-500 uppercase tracking-widest mb-3 block">Funciones</span>
+              <span className="text-xs font-bold text-action-bright uppercase tracking-widest mb-3 block">Funciones</span>
               <h2 className="text-3xl sm:text-4xl font-black text-ink tracking-tight mb-4">
                 Todo lo que necesitas para entrenar mejor
               </h2>
@@ -466,7 +466,7 @@ export const LandingPage = () => {
             </p>
             <button
               onClick={() => setAuthOpen(true)}
-              className="group bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold px-10 py-4 rounded-full transition-all shadow-xl shadow-blue-600/25 hover:shadow-blue-600/40 active:scale-95 inline-flex items-center gap-2"
+              className="group bg-action-solid hover:bg-action-hover text-white text-sm font-bold px-10 py-4 rounded-full transition-all shadow-xl shadow-action-solid/25 hover:shadow-action-solid/40 active:scale-95 inline-flex items-center gap-2"
             >
               Crear Cuenta Gratis
               <ArrowRight size={16} className="group-hover:translate-x-0.5 transition-transform" />

@@ -100,7 +100,7 @@ const Dashboard = () => {
   if (loading && !uploading) {
     return (
       <div className="h-screen flex flex-col items-center justify-center bg-sunken-2 gap-4 transition-colors">
-        <span className="animate-spin text-blue-500">Cargando...</span>
+        <span className="animate-spin text-action-bright">Cargando...</span>
         <p className="text-[10px] text-ink-3 font-bold uppercase tracking-widest animate-pulse">
           Cargando métricas...
         </p>

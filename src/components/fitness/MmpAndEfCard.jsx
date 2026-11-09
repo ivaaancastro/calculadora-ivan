@@ -117,7 +117,7 @@ export const MmpAndEfCard = ({
                             <button
                                 onClick={handleDeepSync}
                                 disabled={isDeepSyncing}
-                                className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-blue-50 hover:bg-blue-100 dark:bg-blue-950/40 dark:hover:bg-blue-900/40 text-blue-600 dark:text-blue-400 text-[9px] font-bold uppercase tracking-wider transition-all disabled:opacity-50"
+                                className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-action-tint hover:bg-action-tint-hover text-action text-[9px] font-bold uppercase tracking-wider transition-all disabled:opacity-50"
                             >
                                 <RefreshCw size={10} className={isDeepSyncing ? 'animate-spin' : ''} />
                                 {isDeepSyncing ? `Descargando (${deepSyncProgress?.current || 0}/${deepSyncProgress?.total || 0})...` : 'Completar telemetría'}
@@ -127,7 +127,7 @@ export const MmpAndEfCard = ({
 
                     <div className="flex flex-wrap items-center gap-3">
                         <div className="flex bg-fill p-1 rounded-xl">
-                            <button onClick={() => setCurveSport('bike')} className={`px-4 py-1.5 text-[9px] font-bold uppercase rounded-lg transition-all ${curveSport === 'bike' ? 'bg-surface-3 text-blue-600 dark:text-blue-400 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}>Ciclismo</button>
+                            <button onClick={() => setCurveSport('bike')} className={`px-4 py-1.5 text-[9px] font-bold uppercase rounded-lg transition-all ${curveSport === 'bike' ? 'bg-surface-3 text-action shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}>Ciclismo</button>
                             <button onClick={() => setCurveSport('run')} className={`px-4 py-1.5 text-[9px] font-bold uppercase rounded-lg transition-all ${curveSport === 'run' ? 'bg-surface-3 text-orange-600 dark:text-orange-400 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}>Carrera</button>
                         </div>
                         <div className="flex bg-fill p-1 rounded-xl">

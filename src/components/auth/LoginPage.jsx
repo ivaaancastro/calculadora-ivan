@@ -58,12 +58,12 @@ export const LoginPage = () => {
       <div className="w-full max-w-sm">
         {/* LOGO */}
         <div className="flex flex-col items-center justify-center gap-3 mb-8">
-          <div className="bg-blue-600 text-white p-3 rounded-lg shadow-lg shadow-blue-600/20">
+          <div className="bg-action-solid text-white p-3 rounded-lg shadow-lg shadow-action-solid/20">
               <Activity size={32} strokeWidth={2.5} />
           </div>
           <div className="text-center">
               <h1 className="text-2xl font-black text-ink-soft tracking-tight leading-none uppercase">
-                FORMA<span className="text-blue-500">LAB</span>
+                FORMA<span className="text-action-bright">LAB</span>
               </h1>
               <p className="text-[10px] font-bold text-ink-3-flat uppercase tracking-widest mt-1">
                 Performance Analytics
@@ -84,8 +84,8 @@ export const LoginPage = () => {
             {isForgotPassword ? 'Recuperar Clave' : (isLogin ? 'Iniciar Sesión' : 'Crear Cuenta')}
           </h2>
 
-          {error && <div className="mb-4 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-900/50 rounded text-red-600 dark:text-red-400 text-[11px] font-bold text-center">{error}</div>}
-          {message && <div className="mb-4 p-3 bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-900/50 rounded text-emerald-600 dark:text-emerald-400 text-[11px] font-bold text-center">{message}</div>}
+          {error && <div className="mb-4 p-3 bg-danger-tint border border-danger-edge rounded text-danger-ink text-[11px] font-bold text-center">{error}</div>}
+          {message && <div className="mb-4 p-3 bg-positive-tint border border-positive-edge rounded text-positive-ink text-[11px] font-bold text-center">{message}</div>}
 
           <form onSubmit={handleAuth} className="space-y-4">
             <div>
@@ -128,7 +128,7 @@ export const LoginPage = () => {
               </div>
             )}
 
-            <button type="submit" disabled={loading} className="w-full py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded font-bold text-[11px] uppercase tracking-widest flex items-center justify-center gap-2 transition-colors disabled:opacity-50 mt-6 shadow-sm">
+            <button type="submit" disabled={loading} className="w-full py-2.5 bg-action-solid hover:bg-action-hover text-white rounded font-bold text-[11px] uppercase tracking-widest flex items-center justify-center gap-2 transition-colors disabled:opacity-50 mt-6 shadow-sm">
               {loading ? <Loader2 size={16} className="animate-spin" /> : (isForgotPassword ? 'Enviar Enlace' : (isLogin ? 'Entrar al Laboratorio' : 'Registrarse'))}
             </button>
           </form>

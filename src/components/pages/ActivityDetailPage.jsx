@@ -146,7 +146,7 @@ export const ActivityDetailPage = ({ activity, settings, fetchStreams, onBack, o
                                 Strava
                             </a>
                         )}
-                        <button onClick={() => onDelete && onDelete(activity.id)} className="w-8 h-8 flex items-center justify-center text-slate-400 dark:text-zinc-500 hover:text-red-500 hover:bg-red-500/10 rounded-full active:scale-90 transition-all shrink-0" title="Eliminar actividad">
+                        <button onClick={() => onDelete && onDelete(activity.id)} className="w-8 h-8 flex items-center justify-center text-slate-400 dark:text-zinc-500 hover:text-red-500 hover:bg-danger/10 rounded-full active:scale-90 transition-all shrink-0" title="Eliminar actividad">
                             <Trash2 size={14} />
                         </button>
                     </div>
@@ -186,7 +186,7 @@ export const ActivityDetailPage = ({ activity, settings, fetchStreams, onBack, o
                                 Strava
                             </a>
                         )}
-                        <button onClick={() => onDelete && onDelete(activity.id)} className="w-8 h-8 flex items-center justify-center text-slate-400 dark:text-zinc-500 hover:text-red-500 hover:bg-red-500/10 rounded-full active:scale-90 transition-all shrink-0" title="Eliminar actividad">
+                        <button onClick={() => onDelete && onDelete(activity.id)} className="w-8 h-8 flex items-center justify-center text-slate-400 dark:text-zinc-500 hover:text-red-500 hover:bg-danger/10 rounded-full active:scale-90 transition-all shrink-0" title="Eliminar actividad">
                             <Trash2 size={14} />
                         </button>
                     </div>

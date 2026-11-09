@@ -10,13 +10,13 @@ export const EmailConfirmedPage = () => {
         
         {/* Logo */}
         <div className="flex justify-center mb-6">
-          <div className="bg-blue-600 text-white p-3 rounded-xl shadow-lg shadow-blue-600/20">
+          <div className="bg-action-solid text-white p-3 rounded-xl shadow-lg shadow-action-solid/20">
             <Activity size={32} strokeWidth={2.5} />
           </div>
         </div>
 
         {/* Success Icon */}
-        <div className="flex justify-center mb-4 text-emerald-500">
+        <div className="flex justify-center mb-4 text-positive">
           <CheckCircle2 size={64} strokeWidth={1.5} />
         </div>
 
@@ -30,7 +30,7 @@ export const EmailConfirmedPage = () => {
 
         <Link 
           to="/"
-          className="group w-full py-3.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold text-sm flex items-center justify-center gap-2 transition-all shadow-lg shadow-blue-600/20 hover:shadow-blue-600/30 active:scale-[0.98]"
+          className="group w-full py-3.5 bg-action-solid hover:bg-action-hover text-white rounded-xl font-bold text-sm flex items-center justify-center gap-2 transition-all shadow-lg shadow-action-solid/20 hover:shadow-action-solid/30 active:scale-[0.98]"
         >
           Ir a Iniciar Sesión
           <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
