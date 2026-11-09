@@ -115,7 +115,7 @@
   --ink-inverse: 255 255 255; /* white */
   --segmented-off: 100 116 139; /* slate-500 */
   --segmented-off-hover: 51 65 85; /* slate-700 */
-  --segmented-mini-off: 148 163 184; /* slate-400 */
+  --ink-4-fixed: 148 163 184; /* slate-400 */
   --segmented-mini-off-hover: 71 85 105; /* slate-600 */
 }
 .dark {
@@ -138,7 +138,7 @@
   --ink-inverse: 24 24 27; /* zinc-900 */
   --segmented-off: 100 116 139; /* slate-500 */
   --segmented-off-hover: 51 65 85; /* slate-700 */
-  --segmented-mini-off: 148 163 184; /* slate-400 */
+  --ink-4-fixed: 148 163 184; /* slate-400 */
   --segmented-mini-off-hover: 71 85 105; /* slate-600 */
 }
 /* @tokens:text:end */

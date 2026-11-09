@@ -4,7 +4,7 @@ import { supabase } from '../../supabase';
 import toast from 'react-hot-toast';
 import { LTHR_ZONE_PCT, calcZonesFromLTHR } from '../../utils/tssEngine';
 import { useIntervalsSync } from '../../hooks/useIntervalsSync';
-import { Card, SectionHeader } from '../ui';
+import { Card, Input, SectionHeader } from '../ui';
 
 const getPeakByTime = (hrData, timeData, windowSeconds) => {
     if (!hrData || !timeData || hrData.length < 2) return 0;
@@ -205,9 +205,9 @@ const SportZonesSection = ({ sport, sportLabel, icon: Icon, color, showPace, sho
                                         </span>
                                     ) : (
                                         <div className="flex items-center gap-1">
-                                            <input type="number" value={zone.min} onChange={(e) => onZoneChange(e, sport, i, 'min')} className="w-12 bg-surface-2 rounded px-1 py-0.5 text-xs font-mono text-center outline-none focus:ring-1 focus:ring-action-bright" />
+                                            <Input variant="inline" size="sm" mono type="number" value={zone.min} onChange={(e) => onZoneChange(e, sport, i, 'min')} className="w-12 px-1 py-0.5 text-center" />
                                             <span className="text-slate-400">-</span>
-                                            <input type="number" value={zone.max} onChange={(e) => onZoneChange(e, sport, i, 'max')} className="w-12 bg-surface-2 rounded px-1 py-0.5 text-xs font-mono text-center outline-none focus:ring-1 focus:ring-action-bright" />
+                                            <Input variant="inline" size="sm" mono type="number" value={zone.max} onChange={(e) => onZoneChange(e, sport, i, 'max')} className="w-12 px-1 py-0.5 text-center" />
                                         </div>
                                     )}
                                 </div>
@@ -702,13 +702,13 @@ export const ProfilePage = ({
                                             </div>
                                         </div>
                                         <div className="flex items-center gap-1.5">
-                                            <input
+                                            <Input
                                                 type="number"
                                                 inputMode="decimal"
                                                 name="weight"
                                                 value={formData.weight}
                                                 onChange={handleChange}
-                                                className="w-16 text-right font-mono font-bold text-xs sm:text-sm text-ink bg-fill-3 rounded-lg px-2 py-1 outline-none focus:ring-1 focus:ring-action-bright"
+                                                variant="inline" mono ringTone="action-bright" className="w-16 text-right px-2 py-1"
                                             />
                                             <span className="text-xs font-semibold text-ink-4">kg</span>
                                         </div>
@@ -726,13 +726,13 @@ export const ProfilePage = ({
                                             </div>
                                         </div>
                                         <div className="flex items-center gap-1.5">
-                                            <input
+                                            <Input
                                                 type="number"
                                                 inputMode="numeric"
                                                 name="fcReposo"
                                                 value={formData.fcReposo}
                                                 onChange={handleChange}
-                                                className="w-16 text-right font-mono font-bold text-xs sm:text-sm text-ink bg-fill-3 rounded-lg px-2 py-1 outline-none focus:ring-1 focus:ring-hr"
+                                                variant="inline" mono ringTone="hr" className="w-16 text-right px-2 py-1"
                                             />
                                             <span className="text-xs font-semibold text-ink-4">bpm</span>
                                         </div>
@@ -750,14 +750,14 @@ export const ProfilePage = ({
                                             </div>
                                         </div>
                                         <div className="flex items-center gap-1.5">
-                                            <input
+                                            <Input
                                                 type="number"
                                                 inputMode="numeric"
                                                 step="1"
                                                 value={targetCtl ?? ''}
                                                 onChange={(e) => setTargetCtl(e.target.value ? parseInt(e.target.value) : null)}
                                                 placeholder="Auto"
-                                                className="w-16 text-right font-mono font-bold text-xs sm:text-sm text-ink bg-fill-3 rounded-lg px-2 py-1 outline-none focus:ring-1 focus:ring-emerald-500"
+                                                variant="inline" mono ringTone="positive" className="w-16 text-right px-2 py-1"
                                             />
                                             <span className="text-xs font-semibold text-ink-4">CTL</span>
                                         </div>

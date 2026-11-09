@@ -2,7 +2,7 @@ import React, { useState, useMemo, useRef } from 'react';
 import { Search, Calendar, Activity, Clock, MapPin, Zap, Trash2, ChevronRight, Bike, Footprints, Dumbbell, Flame } from 'lucide-react';
 import { useVirtualizer } from '@tanstack/react-virtual';
 import { formatDuration } from '../../utils/formatDuration';
-import { Card } from '../ui';
+import { Card, Input, Select } from '../ui';
 
 const getSportIcon = (type) => {
     const t = String(type).toLowerCase();
@@ -105,45 +105,48 @@ export const HistoryList = React.memo(({ activities, onDelete, onSelectActivity 
                 {/* Buscador de Texto estilo iOS */}
                 <div className="relative flex-1">
                     <Search size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-ink-4" />
-                    <input
+                    <Input
+                        variant="search"
                         type="text"
                         placeholder="Buscar por título..."
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
-                        className="w-full pl-10 pr-3.5 py-2 bg-fill-6 border-0 rounded-xl text-sm font-medium text-ink-soft placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-action-bright/40 transition-all"
+                        className="w-full pl-10 pr-3.5 py-2"
                     />
                 </div>
 
                 {/* Selector de Deporte */}
                 <div className="sm:w-44 relative">
                     <Activity size={14} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-ink-4 pointer-events-none" />
-                    <select
+                    <Select
+                        variant="search"
                         value={sportFilter}
                         onChange={(e) => setSportFilter(e.target.value)}
-                        className="w-full pl-9 pr-3 py-2 bg-fill-6 border-0 rounded-xl text-xs sm:text-sm font-semibold text-ink-2-soft focus:outline-none focus:ring-2 focus:ring-action-bright/40 appearance-none cursor-pointer transition-all"
+                        className="w-full pl-9 pr-3 py-2"
                     >
                         <option value="all">Todos los Deportes</option>
                         <option value="run">Carrera</option>
                         <option value="bike">Ciclismo</option>
                         <option value="swim">Natación</option>
                         <option value="gym">Fuerza</option>
-                    </select>
+                    </Select>
                 </div>
 
                 {/* Selector de Fecha */}
                 <div className="sm:w-44 relative">
                     <Calendar size={14} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-ink-4 pointer-events-none" />
-                    <select
+                    <Select
+                        variant="search"
                         value={dateFilter}
                         onChange={(e) => setDateFilter(e.target.value)}
-                        className="w-full pl-9 pr-3 py-2 bg-fill-6 border-0 rounded-xl text-xs sm:text-sm font-semibold text-ink-2-soft focus:outline-none focus:ring-2 focus:ring-action-bright/40 appearance-none cursor-pointer transition-all"
+                        className="w-full pl-9 pr-3 py-2"
                     >
                         <option value="all">Todo el Historial</option>
                         <option value="7d">Últimos 7 Días</option>
                         <option value="30d">Últimos 30 Días</option>
                         <option value="90d">Últimos 90 Días</option>
                         <option value="1y">Último Año</option>
-                    </select>
+                    </Select>
                 </div>
             </div>
 
