@@ -53,7 +53,7 @@ Solo se marca lo verificado. Spec y plan aprobados el 2026-11-09 ("Apruebo todo"
 ## PR 3 — Segmented (`feat/ui-primitives-segmented`)
 - [x] Inventario, primitiva, sustitución, retirada de `PillTab`
 - [x] Verificación completa
-- [ ] PR hacia `develop`
+- [x] PR hacia `develop` (#63)
 
 ### Notas del PR 3
 - **Alcance (acordado el 2026-11-09):** `pill` copia solo la receta de `PillTab` (pestañas del detalle en escritorio). Los otros 9 sitios de la familia A son 8 recetas distintas entre sí (radio, negrita de la activa, hover de la inactiva, `duration-200`, compresión, tamaño de letra) y quedan con su receta local para la Capa 3. También quedan fuera las pestañas de la `Navbar` (son `Link`), las categorías de Rendimiento en móvil (`bg-inverse`) y las pestañas con subrayado de MMP (D1).
