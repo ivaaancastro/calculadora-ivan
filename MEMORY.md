@@ -14,7 +14,7 @@
 
 ## 1. Estado del proyecto
 - **Nombre:** Forma — Dashboard de rendimiento deportivo y salud
-- **Rama actual:** `feat/ui-primitives-tooltip` (Capa 2, PR 7: `ChartTooltip` e `InfoTooltip`). PR 0 a 6 (#60–#66) mergeados. Siguiente: PR 8 (`LoadingState`).
+- **Rama actual:** `docs/ui-primitives-close` (Cierre de la Capa 2). PR 0 a 8 (#60–#68) mergeados. Siguiente: Capa 3 (`feat/ui-shell`, `feat/ui-skin-v2`).
 - **Rama base:** `develop`
 - **Rama de producción:** `main` (desplegada en Vercel)
 - **Versión:** 0.1.0
@@ -44,7 +44,7 @@
 | spec-rediseno-02 | Rediseño de la webapp por capas (roadmap) | en curso | 2026-11-06 | `docs/branches/feat/webapp-redesign/` |
 | spec-rediseno-02-c0 | Capa 0: red de seguridad de UI | implementada (PR #51 mergeado en `develop`) | 2026-11-06 | test/ui-safety-net |
 | spec-rediseno-02-c1 | Capa 1: tokens y tema | implementada (PRs #52 a #58 mergeados en `develop`; cobertura y pendientes en `tasks.md`, Cierre) | 2026-11-09 | `docs/branches/feat/ui-tokens/` |
-| spec-rediseno-02-c2 | Capa 2: primitivas | en curso (aprobada el 2026-11-09; PR 0 a 6 mergeados, PR 7 en revisión) | 2026-11-09 | `docs/branches/feat/ui-primitives/` |
+| spec-rediseno-02-c2 | Capa 2: primitivas | implementada (PRs #60 a #68 mergeados en `develop`; cobertura y pendientes en `tasks.md`, Cierre) | 2026-11-10 | `docs/branches/feat/ui-primitives/` |
 
 > Cuando un agente implemente una spec, debe añadir una fila aquí y marcarla como `implementada`.
 
@@ -115,6 +115,14 @@
 - `LoginPage.jsx` no se renderiza en ninguna parte (el acceso real es el modal de la landing): no sale en el volcado ni en las capturas. Las pruebas temporales de estados forzados por CDP pueden fallar de forma intermitente (el DOM cambia entre lectura y forzado, o el planificador desaparece en una lectura): repetir antes de dar por buena una diferencia de número de elementos.
 - En móvil, `MobileSwipePager` monta las otras pestañas fuera de pantalla: al buscar "la primera gráfica" hay que filtrar por posición horizontal (`hoverChart` del volcado). La gráfica de Salud solo existe en la vista "Historial".
 
+### Cierre de la Capa 2 (2026-11-10)
+- **Estado:** cerrada. 14 exportaciones en `src/components/ui/` (8 familias) y sin las clases ni componentes de `scripts/ui-retired.json`. Detalle y pendientes: `docs/branches/feat/ui-primitives/tasks.md`, "Cierre".
+- **Antes de empezar la Capa 3:** el volcado y las capturas son la red que garantiza "sin cambio visual"; cualquier PR de piel debe correr `STYLE_DUMP_PROPS=full` en `develop` y en la rama y comparar, y las capturas solo se comparan en Docker.
+- **Lo que la Capa 2 dejó listo para la Capa 3:** la receta de cada familia en un solo sitio; tipografía, radios y sombras todavía sin token pero ya concentrados en `ui/`; ninguna primitiva con colores sueltos.
+- **Lo que la Capa 2 dejó pendiente:** variantes de un solo uso (`screen`/`boot` de `LoadingState`, 4 `Modal`, filas de los 5 tooltips, 10 recetas de la familia A del segmentado, 86 botones y 22 campos de receta única, 8 fichas de biomarcadores de Salud), escalas ordinales y `Badge`, D-07/D-08/D-09/D-10 y el código sin uso (`ChartsSection`, `ZONE_COLORS`, `LoginPage`).
+- **Herramientas que valen para cualquier capa:** `npm run lint:colors` (trinquete por archivo), `npm run lint:ui`, `node scripts/ui-inventory.mjs <familia> [--all]`, el volcado `full` y `node scripts/style-diff.mjs <antes> <después>`.
+- **Prueba temporal de estilos** (cuando el volcado no llega): spec sin commit en la rama y en el worktree de `develop`, mismo `STYLE_DUMP_DIR` distinto y `E2E_PORT` distinto; el volcado no abre más de un tooltip por pantalla ni monta la gráfica de zonas del detalle ni `PowerProfileCard` con los datos de prueba.
+
 ### Cómo trabajar con la red de seguridad (Capa 0)
 - Las capturas de referencia están en `e2e/__screenshots__/` y **solo se generan en Linux** con `npm run test:e2e:update` (Docker, imagen oficial de Playwright, `linux/amd64` como CI). Las de macOS no son comparables, por eso `visual.spec.js` se omite fuera de Linux. Para compararlas: `npm run test:e2e:docker`.
 - Revisar cada captura nueva antes de aceptarla. La tolerancia es de 100 píxeles (`maxDiffPixels`).
@@ -138,4 +146,4 @@
 - **Informe de auditoría:** `AUDIT_REPORT.md` (rama `analysis/project-audit`) — contiene puntos débiles (P-01 a P-30), deuda técnica, hallazgos de tests/coverage y roadmap priorizado (R-01 a R-17).
 
 ---
-Última actualización: 2026-11-09
+Última actualización: 2026-11-10

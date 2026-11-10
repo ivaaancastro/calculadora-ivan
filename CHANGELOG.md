@@ -7,6 +7,48 @@ y este proyecto adhiere a [Semantic Versioning](https://semver.org/lang/es/).
 
 ## [Unreleased]
 
+### Rediseño — Capa 2: primitivas (`spec-rediseno-02-c2`), cierre
+- `docs(ui-primitives):` Capa 2 implementada (PRs #60 a #68). 14 exportaciones en `src/components/ui/` en 8 familias, todas con uso: `Card`/`SectionHeader`, `Stat`/`StatTile`, `Segmented`, `Input`/`Select`, `Button`/`IconButton`, `Modal`, `ChartTooltip`/`chartTooltipStyle`/`InfoTooltip` y `LoadingState`. Retirados 14 clases sin uso de `index.css`, `MetricHelp`, `ios-card`, `ios-touch`, `ios-header`, `IosCard`, `MetricCard`, `PillTab`, `tooltipStyleFor` y los 2 `LazyFallback`. Colores sueltos: palette 865 → 760, arbitrary 9 → 3, rgb 11 → 9, dark 188 → 170. Unitaria 130 → 182, E2E 79 → 87. En los 9 PR el volcado ampliado frente a `develop` dio 0 diferencias y las capturas no cambiaron. Pendientes para las capas siguientes en `docs/branches/feat/ui-primitives/tasks.md`.
+
+### Rediseño — Capa 2: primitivas (`spec-rediseno-02-c2`), PR 8 de 8: estados de carga
+- `feat(ui-primitives):` `LoadingState` con 3 variantes que copian las recetas actuales: `inline` (los 2 fallbacks de `Suspense`), `screen` (carga del Dashboard) y `boot` (arranque de `App`).
+- `refactor(ui-primitives):` los 4 sitios usan la primitiva y `LazyFallback` se retira (añadido a `ui-retired.json`). Los textos de carga no cambian: los E2E los usan para esperar a que la pantalla esté lista.
+
+### Rediseño — Capa 2: primitivas (`spec-rediseno-02-c2`), PR 7 de 8: tooltip de gráfica
+- `feat(ui-primitives):` `ChartTooltip` (solo el marco, con `glass`, `dark`, `dark-history` y `card`) y `chartTooltipStyle`, que sustituye a `tooltipStyleFor`; `fitness/fitnessConstants.js` se borra. `InfoTooltip` pasa a `ui/` con tokens exactos.
+- `refactor(ui-primitives):` los 5 tooltips propios usan el marco y conservan sus filas hasta la Capa 3.
+- `feat(ui-primitives):` D4 d: `InfoTooltip` se abre al tocar y se cierra con otro toque, tocando fuera o con Escape; la burbuja lleva `role="tooltip"`. Prueba nueva `e2e/tooltip-touch.spec.js` (el tooltip de gráfica se abre al tocar en Dashboard, Salud y las 4 de Rendimiento).
+
+### Rediseño — Capa 2: primitivas (`spec-rediseno-02-c2`), PR 6 de 8: modal
+- `feat(ui-primitives):` `Modal` con una `variant` por modal (`sheet`, `auth`, `planner`, `viewer`), sin portal; los velos pasan a los tokens `scrim` a `scrim-4`.
+- `refactor(ui-primitives):` los 4 modales usan la primitiva.
+- `feat(ui-primitives):` D4: `role="dialog"`, `aria-modal` y `aria-labelledby`, Escape para cerrar el de arriba y bloqueo del desplazamiento del fondo. Prueba nueva `e2e/modal.spec.js` (4 pruebas).
+
+### Rediseño — Capa 2: primitivas (`spec-rediseno-02-c2`), PR 5 de 8: botones
+- `feat(ui-primitives):` `Button` (`ghost`, `inverse`, `link-muted`, `danger-text`) e `IconButton` (`soft`, `ghost`, `bare`), con `type="button"` por defecto y `label` obligatoria en el de icono.
+- `refactor(ui-primitives):` 17 botones del Calendario, el detalle y el acceso usan la primitiva. Tokens nuevos `faint-fixed` y `fill-hover`; `segmented-mini-off-hover` pasa a `body-soft-fixed`.
+
+### Rediseño — Capa 2: primitivas (`spec-rediseno-02-c2`), PR 4 de 8: campos
+- `feat(ui-primitives):` `Input` y `Select` con las variantes `filled`, `search`, `cell`, `cell-bare` e `inline`; reenvían `ref` y las props nativas.
+- `refactor(ui-primitives):` 22 de los 44 campos (modal de añadir, historial, bloques y pasos del Calendario y Ajustes). El gris del buscador pasa al token `ink-4-fixed` y el anillo al token `positive`.
+
+### Rediseño — Capa 2: primitivas (`spec-rediseno-02-c2`), PR 3 de 8: control segmentado
+- `feat(ui-primitives):` `Segmented` con `pill`, `card` (`md-wide`, `md`, `sm`, `xs`) y `mini`; cada opción lleva `aria-pressed` (D4 a) y `PillTab` se retira.
+- `refactor(ui-primitives):` 22 opciones del detalle, de Rendimiento y del planificador. Tokens `segmented-off(-hover)`, `segmented-mini-off(-hover)` y `fill-segmented-2`.
+
+### Rediseño — Capa 2: primitivas (`spec-rediseno-02-c2`), PR 2 de 8: stats del Dashboard
+- `feat(ui-primitives):` `Stat` y `StatTile` (`lg`, `sm`) y retirada de `MetricCard`; tokens `hairline-5` y los `metric-*-tile` de ATL, TSB, ACWR, rampa, monotonía y volumen.
+- `refactor(ui-primitives):` 26 stats del detalle y 8 fichas del Dashboard usan la primitiva. Las 8 de biomarcadores de Salud se quedan con `Card pressable` (Capa 3).
+
+### Rediseño — Capa 2: primitivas (`spec-rediseno-02-c2`), PR 1 de 8: tarjetas
+- `feat(ui-primitives):` `Card` (`grouped`, `panel`, con `pressable` y `divided`) y `SectionHeader`; la sombra pasa al token `--shadow-card` (`shadow-card`).
+- `refactor(ui-primitives):` 50 tarjetas y 13 cabeceras de sección usan la primitiva; se retiran `ios-card`, `ios-touch`, `ios-header` e `IosCard`. Las tres clases estaban en `@layer utilities` y ganaban a las utilidades de Tailwind: el borde y el texto de peligro de "Zona de peligro" y el `mb-3` de 4 títulos de Salud no se veían y se retiran con ellas.
+
+### Rediseño — Capa 2: primitivas (`spec-rediseno-02-c2`), PR 0 de 8: infraestructura
+- `feat(ui-primitives):` `src/components/ui/` (`index.js` y `cx.js`), `scripts/ui-inventory.mjs` (recetas por elemento) y `scripts/check-ui.mjs` con `npm run lint:ui` y su paso en CI (uso de cada exportación, clases y componentes retirados en `scripts/ui-retired.json`, y `className` acotado a colocación y espaciado).
+- `test(e2e):` el volcado de estilos admite `STYLE_DUMP_PROPS=full` (tipografía, caja, bordes, radios, disposición, efectos e interacción), con estados nuevos del planificador, el visor de entreno y los tooltips activos: 104 volcados. Dos volcados seguidos de `develop`: 0 diferencias.
+- `refactor(ui-primitives):` se retiran 14 clases sin uso de `index.css` (incluida la animación `map-pulse`), `MetricHelp` y 5 tokens que solo usaban esas clases.
+
 ### Rediseño — Capa 1: tokens y tema (`spec-rediseno-02-c1`), cierre
 - `docs(ui-tokens):` Capa 1 implementada (PRs #52 a #58). Cobertura final: texto 95,3 %, bordes 80,5 %, superficies 81,3 %, acentos 64 %, gráficas 95 %; pares `dark:` sueltos 1.314 → 188. Lista de lo pendiente para las capas siguientes en `docs/branches/feat/ui-tokens/tasks.md`.
 

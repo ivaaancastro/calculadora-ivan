@@ -5,7 +5,7 @@
 - **Título:** Capa 2 del rediseño: primitivas de UI en `src/components/ui/`, sin cambio visible
 - **Autor:** agente Claude Code
 - **Fecha:** 2026-11-09
-- **Estado:** en curso. Aprobada el 2026-11-09 por el usuario: "Apruebo todo", incluidas las propuestas de D1 a D6 (sección 8)
+- **Estado:** **implementada** (2026-11-10). Aprobada el 2026-11-09 por el usuario: "Apruebo todo", incluidas las propuestas de D1 a D6 (sección 8). PRs #60 a #68 mergeados en `develop`; cobertura y pendientes en `tasks.md`, "Cierre".
 - **Depende de:** `spec-rediseno-02` (roadmap, "Capa 2 — Primitivas"), `spec-rediseno-02-c0` (red de seguridad) y `spec-rediseno-02-c1` (tokens, mergeada en `develop` por los PR #52 a #59)
 
 ## 2. Objetivo

@@ -52,6 +52,8 @@ Cada capa termina con la app funcionando y se puede pausar sin dejar nada a medi
 
 **Hecho cuando:** ninguna primitiva queda sin uso y las clases antiguas han desaparecido.
 
+**Hecho (2026-11-10):** PRs #60 a #68. 14 exportaciones en `src/components/ui/` (8 familias, todas con uso) y sin clases `ios-*` ni `MetricHelp`, `IosCard`, `MetricCard`, `PillTab`, `tooltipStyleFor` ni `LazyFallback`. En los 9 PR el volcado `full` frente a `develop` dio 0 diferencias y las capturas no cambiaron. Detalle y pendientes en `docs/branches/feat/ui-primitives/tasks.md`.
+
 ## Capa 3 — Navegación y piel v2
 **Ramas:** `feat/ui-shell`, `feat/ui-skin-v2`
 - Definir la altura de barra con `--nav-h`, para que ninguna pantalla dependa de un número fijo.
