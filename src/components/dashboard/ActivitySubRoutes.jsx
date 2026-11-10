@@ -1,16 +1,11 @@
 import React, { Suspense } from 'react';
 import { Routes, Route } from 'react-router-dom';
 import { ErrorBoundary } from '../common/ErrorBoundary';
+import { LoadingState } from '../ui';
 import { ActivityRouteWrapper } from './ActivityRouteWrapper';
 
 const ProfilePage = React.lazy(() =>
   import('../pages/ProfilePage').then((m) => ({ default: m.ProfilePage }))
-);
-
-const LazyFallback = () => (
-  <div className="flex items-center justify-center py-32">
-    <span className="animate-spin text-action-bright">Cargando...</span>
-  </div>
 );
 
 /**
@@ -36,7 +31,7 @@ export function ActivitySubRoutes({
         path="/profile"
         element={
           <ErrorBoundary>
-            <Suspense fallback={<LazyFallback />}>
+            <Suspense fallback={<LoadingState />}>
               <ProfilePage
                 currentSettings={settings}
                 currentMetrics={currentMetrics}

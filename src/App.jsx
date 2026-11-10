@@ -5,6 +5,7 @@ import Dashboard from './components/Dashboard';
 import { LandingPage } from './components/pages/LandingPage';
 import { EmailConfirmedPage } from './components/pages/EmailConfirmedPage';
 import StravaCallback from './components/common/StravaCallback';
+import { LoadingState } from './components/ui';
 import { Toaster } from 'react-hot-toast';
 
 import { useQueryClient } from '@tanstack/react-query';
@@ -37,11 +38,7 @@ function App() {
   }, [queryClient, resetStore]);
 
   if (isInitializing) {
-    return (
-      <div className="min-h-screen bg-sunken-2 flex items-center justify-center">
-        <p className="text-[10px] font-bold text-ink-3-flat uppercase tracking-widest animate-pulse">Iniciando sistema...</p>
-      </div>
-    );
+    return <LoadingState variant="boot" />;
   }
 
   return (
