@@ -154,6 +154,7 @@ Conflictos reales: la cabecera del detalle (`z-50`) y los modales (`z-50`) empat
 En cada PR:
 - [ ] `npm run lint`, `npm run lint:colors`, `npm run lint:ui`, `npm run test:unit`, `npm run test:integration`, `npm run build`, E2E en macOS y en Docker en verde, con los resultados copiados en el PR.
 - [ ] **Volcado de estilos de `develop` frente a la rama: 0 diferencias** en todos los PR **menos el PR 2** (reorganización de la cabecera), donde las diferencias se revisan una a una y se justifican en el PR.
+  - **Excepción del PR 1 (decidida el 2026-11-10):** la renumeración de D5 cambia el valor calculado de `z-index` aunque conserve qué elemento gana. Se acepta siempre que **todas** las diferencias del volcado sean de la propiedad `z-index` (`style-diff | grep '^ *[a-z-]*:' | sort | uniq -c` debe dar solo `z-index`) y que el orden por pares se mantenga, cosa que fija `src/__tests__/unit/shellTokens.test.js`.
 - [ ] **Capturas:** en todos los PR menos el 2, las 48 referencias no cambian. En el PR 2 se regeneran **solo** las pantallas afectadas, se revisan una a una y la lista va en el PR.
 - [ ] `npm run lint:colors` no sube en ningún archivo; los tokens nuevos de `tokens.css` no cuentan como color suelto.
 - [ ] Informe táctil: se documenta el número por pantalla. Sube solo donde se añada un control en Ajustes; no se acepta un aumento en la cabecera.
@@ -259,7 +260,7 @@ En escritorio el resultado es simétrico: las pestañas siguen en el centro, tem
 | `e2e/visual-v2.spec.js` | capturas de v2 (8 pantallas × 2 temas × 3 tamaños) | 4+ |
 | Unitaria: `uiMode.test.js` | `useUiMode` aplica y retira el atributo y sincroniza a los suscriptores | 4 |
 | Unitaria: `shellTokens.test.js` | `tokens.css` declara `--nav-h`, `--nav-h-total` y la escala `--z-*` completa | 1 |
-| Volcado de estilos | 0 diferencias en v1 en todos los PR salvo el 2 | todos |
+| Volcado de estilos | 0 diferencias en v1 en todos los PR salvo el 2 (en el 1, solo `z-index`, por D5) | todos |
 
 ## 8. Notas adicionales
 

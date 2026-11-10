@@ -15,7 +15,7 @@ Dos ramas, en este orden: primero la estructura (`feat/ui-shell`), luego la piel
 | 6 | `feat/ui-skin-v2` | `feat(ui-skin-v2)`: extensión | el resto de pantallas y gráficas (`chartTheme` en oscuro, D-10) | 0 diferencias |
 | 7 | `feat/ui-skin-v2` | `docs(ui-skin-v2)`: cierre | cobertura, `MEMORY`, `CHANGELOG`, `paridad` (D-07/D-09/D-10), roadmap | — |
 
-Regla de oro de la capa: **cada PR, `node scripts/style-diff.mjs <develop> <rama>` = 0 diferencias**, salvo el PR 2 y, dentro de `feat/ui-skin-v2`, los estados con `data-ui="v2"` (que se comparan contra las capturas de v2, no contra v1).
+Regla de oro de la capa: **cada PR, `node scripts/style-diff.mjs <develop> <rama>` = 0 diferencias**, salvo el PR 1 en la propiedad `z-index` (D5 renumera; el orden se conserva y se prueba), el PR 2 y, dentro de `feat/ui-skin-v2`, los estados con `data-ui="v2"` (que se comparan contra las capturas de v2, no contra v1).
 
 ---
 
@@ -25,7 +25,7 @@ Sala de `develop` (`06ac9e3`). Una rama, tres PR pequeños y en serie.
 
 ### PR 1 — `refactor(ui-shell)`: tokens, z-index y D-01
 
-Sin cambio de aspecto: el PR se acepta solo si el volcado da 0 diferencias y las 48 capturas no cambian.
+Sin cambio de aspecto: el PR se acepta solo si las 48 capturas no cambian y el volcado difiere **únicamente** en `z-index`.
 
 - [ ] `tokens.css`: `--nav-h` (3.5rem = 56 px, lo que ya asumen pager y banner), `--nav-h-total`, `--bottom-nav-h` (3.375rem = 54 px), `--bottom-nav-gap` (0.75rem), `--bottom-nav-reserve` (8rem = 128 px, el `pb-32` actual) y la escala `--z-*` de 6.3; `tailwind.config.js` expone `zIndex` (`z-nav`, `z-nav-menu`, `z-bottom-nav`, `z-sheet`, `z-modal`, `z-tooltip`, `z-map`).
 - [ ] `MobileSwipePager.jsx:195`: `h-[calc(100dvh-var(--nav-h-total))]` y `pb-[var(--bottom-nav-reserve)]` (mismos 56 y 128 px de hoy).
@@ -35,7 +35,7 @@ Sin cambio de aspecto: el PR se acepta solo si el volcado da 0 diferencias y las
 - [ ] Pruebas nuevas: `e2e/shell.spec.js` (la cabecera mide `--nav-h-total` en móvil y escritorio) y `src/__tests__/unit/shellTokens.test.js` (los tokens existen y valen lo que dicen).
 - [ ] `grep` sin resultados para `56px`, `52px`, `h-\[54px\]` fuera de `tokens.css`.
 
-**Riesgo:** bajo. Si el volcado se mueve, es que un `z-*` cambió de orden: se corrige el token, no el elemento.
+**Riesgo:** bajo. Si el volcado se mueve en algo que no sea `z-index`, es un error: se corrige el token, no el elemento.
 
 ### PR 2 — `refactor(ui-shell)`: cabecera y acciones
 
