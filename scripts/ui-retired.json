@@ -23,6 +23,7 @@
     "MetricHelp",
     "IosCard",
     "MetricCard",
-    "PillTab"
+    "PillTab",
+    "tooltipStyleFor"
   ]
 }

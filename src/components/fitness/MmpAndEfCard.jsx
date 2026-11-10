@@ -5,10 +5,9 @@ import {
 } from 'recharts';
 import { MousePointer2, RefreshCw } from 'lucide-react';
 import { InfoTooltip } from '../common/InfoTooltip';
-import { tooltipStyleFor } from './fitnessConstants';
 import { formatInterval, formatPace } from '../../hooks/useFitnessAnalytics';
 import { useChartTheme } from '../charts/useChartTheme';
-import { Card, Segmented } from '../ui';
+import { Card, ChartTooltip, Segmented } from '../ui';
 
 export const MmpAndEfCard = ({
     activities,
@@ -37,7 +36,7 @@ export const MmpAndEfCard = ({
         if (active && payload && payload.length) {
             const data = payload[0].payload;
             return (
-                <div style={tooltipStyleFor(ct)} className="shadow-xl min-w-[150px]">
+                <ChartTooltip variant="card" className="min-w-[150px]">
                     <p className="text-[9px] text-zinc-400 uppercase tracking-widest mb-1">Pico de {label}</p>
                     <p className="text-sm font-black mb-2" style={{ color: curveColor }}>
                         {isPace ? formatPace(data.value) : data.value} <span className="text-[9px] font-bold">{curveUnit}</span>
@@ -51,7 +50,7 @@ export const MmpAndEfCard = ({
                             </div>
                         </div>
                     )}
-                </div>
+                </ChartTooltip>
             );
         }
         return null;
@@ -62,7 +61,7 @@ export const MmpAndEfCard = ({
             const data = payload[0].payload;
             const isRun = curveSport === 'run';
             return (
-                <div style={tooltipStyleFor(ct)} className="shadow-xl w-48 z-[200]">
+                <ChartTooltip variant="card" className="w-48 z-[200]">
                     <p className="text-xs font-semibold text-ink-3 mb-1.5 border-b border-slate-200/50 dark:border-zinc-700/50 pb-1">Factor de Eficiencia</p>
                     <div className="flex justify-between items-end mb-2">
                         <span className="text-xl font-bold text-ef leading-none">{data.ef}</span>
@@ -85,7 +84,7 @@ export const MmpAndEfCard = ({
                             <MousePointer2 size={10} /> Clic en el punto para abrir
                         </div>
                     </div>
-                </div>
+                </ChartTooltip>
             );
         }
         return null;
