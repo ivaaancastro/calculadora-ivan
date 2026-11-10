@@ -4,9 +4,8 @@ import {
     Tooltip as RechartsTooltip, ResponsiveContainer
 } from 'recharts';
 import { ArrowUp, ArrowDown, Minus } from 'lucide-react';
-import { InfoTooltip } from '../common/InfoTooltip';
 import { useChartTheme } from '../charts/useChartTheme';
-import { Card, chartTooltipStyle } from '../ui';
+import { Card, chartTooltipStyle, InfoTooltip } from '../ui';
 
 export const EstimatedFtpCard = ({
     ftp,

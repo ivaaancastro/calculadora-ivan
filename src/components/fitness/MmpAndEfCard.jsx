@@ -4,10 +4,9 @@ import {
     Tooltip as RechartsTooltip, ResponsiveContainer
 } from 'recharts';
 import { MousePointer2, RefreshCw } from 'lucide-react';
-import { InfoTooltip } from '../common/InfoTooltip';
 import { formatInterval, formatPace } from '../../hooks/useFitnessAnalytics';
 import { useChartTheme } from '../charts/useChartTheme';
-import { Card, ChartTooltip, Segmented } from '../ui';
+import { Card, ChartTooltip, InfoTooltip, Segmented } from '../ui';
 
 export const MmpAndEfCard = ({
     activities,

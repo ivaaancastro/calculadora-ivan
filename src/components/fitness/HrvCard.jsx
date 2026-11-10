@@ -1,7 +1,6 @@
 import React from 'react';
 import { ShieldCheck, Brain } from 'lucide-react';
-import { InfoTooltip } from '../common/InfoTooltip';
-import { Card } from '../ui';
+import { Card, InfoTooltip } from '../ui';
 
 export const HrvCard = ({ hrv }) => {
     if (!hrv) return null;

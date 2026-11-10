@@ -71,6 +71,8 @@
   --hairline-5: 0 0 0; --hairline-5-a: 0.04; /* black/[0.04] */
   --tooltip-dark-edge: 63 63 70; --tooltip-dark-edge-a: 0.8; /* zinc-700/80 */
   --tooltip-dark-edge-2: 51 65 85; --tooltip-dark-edge-2-a: 0.6; /* slate-700/60 */
+  --tooltip-info-edge: 255 255 255; --tooltip-info-edge-a: 0.1; /* white/10 */
+  --tooltip-info-arrow: 15 23 42; --tooltip-info-arrow-a: 0.95; /* slate-900/95 */
 }
 .dark {
   --line: 39 39 42; /* zinc-800 */
@@ -97,6 +99,8 @@
   --hairline-5: 255 255 255; --hairline-5-a: 0.07; /* white/[0.07] */
   --tooltip-dark-edge: 63 63 70; --tooltip-dark-edge-a: 0.8; /* zinc-700/80 */
   --tooltip-dark-edge-2: 39 39 42; --tooltip-dark-edge-2-a: 1; /* zinc-800 */
+  --tooltip-info-edge: 255 255 255; --tooltip-info-edge-a: 0.1; /* white/10 */
+  --tooltip-info-arrow: 39 39 42; --tooltip-info-arrow-a: 0.95; /* zinc-800/95 */
 }
 /* @tokens:borders:end */
 
@@ -125,6 +129,7 @@
   --body-soft-fixed: 71 85 105; /* slate-600 */
   --faint-fixed: 203 213 225; /* slate-300 */
   --tooltip-dark-ink: 244 244 245; /* zinc-100 */
+  --tooltip-info-ink: 255 255 255; /* white */
 }
 .dark {
   --ink: 255 255 255; /* white */
@@ -150,6 +155,7 @@
   --body-soft-fixed: 71 85 105; /* slate-600 */
   --faint-fixed: 203 213 225; /* slate-300 */
   --tooltip-dark-ink: 244 244 245; /* zinc-100 */
+  --tooltip-info-ink: 244 244 245; /* zinc-100 */
 }
 /* @tokens:text:end */
 
@@ -195,6 +201,7 @@
   --scrim-4: 15 23 42; --scrim-4-a: 0.6; /* slate-900/60 */
   --tooltip-dark: 24 24 27; --tooltip-dark-a: 0.95; /* zinc-900/95 */
   --tooltip-dark-2: 15 23 42; --tooltip-dark-2-a: 0.95; /* slate-900/95 */
+  --tooltip-info: 15 23 42; --tooltip-info-a: 0.95; /* slate-900/95 */
   --inverse: 15 23 42; /* slate-900 */
   --inverse-2: 51 65 85; /* slate-700 */
   --glass-nav: 255 255 255; --glass-nav-a: 0.8; /* white/80 */
@@ -245,6 +252,7 @@
   --scrim-4: 0 0 0; --scrim-4-a: 0.8; /* black/80 */
   --tooltip-dark: 24 24 27; --tooltip-dark-a: 0.95; /* zinc-900/95 */
   --tooltip-dark-2: 24 24 27; --tooltip-dark-2-a: 0.95; /* zinc-900/95 */
+  --tooltip-info: 39 39 42; --tooltip-info-a: 0.95; /* zinc-800/95 */
   --inverse: 255 255 255; /* white */
   --inverse-2: 228 228 231; /* zinc-200 */
   --glass-nav: 0 0 0; --glass-nav-a: 0.8; /* black/80 */

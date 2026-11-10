@@ -21,5 +21,6 @@
   "ink-4-fixed": { "light": "slate-400", "dark": "slate-400" },
   "body-soft-fixed": { "light": "slate-600", "dark": "slate-600" },
   "faint-fixed": { "light": "slate-300", "dark": "slate-300" },
-  "tooltip-dark-ink": { "light": "zinc-100", "dark": "zinc-100" }
+  "tooltip-dark-ink": { "light": "zinc-100", "dark": "zinc-100" },
+  "tooltip-info-ink": { "light": "white", "dark": "zinc-100" }
 }

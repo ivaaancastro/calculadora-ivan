@@ -4,10 +4,9 @@ import {
     Tooltip as RechartsTooltip, ResponsiveContainer
 } from 'recharts';
 import { Settings } from 'lucide-react';
-import { InfoTooltip } from '../common/InfoTooltip';
 import { formatInterval } from '../../hooks/useFitnessAnalytics';
 import { useChartTheme } from '../charts/useChartTheme';
-import { Card, chartTooltipStyle, Segmented } from '../ui';
+import { Card, chartTooltipStyle, InfoTooltip, Segmented } from '../ui';
 
 export const PowerProfileCard = ({
     showPowerConfig,

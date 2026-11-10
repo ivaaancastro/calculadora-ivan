@@ -1,7 +1,6 @@
 import React from 'react';
 import { TrendingUp } from 'lucide-react';
-import { InfoTooltip } from '../common/InfoTooltip';
-import { Card } from '../ui';
+import { Card, InfoTooltip } from '../ui';
 
 export const TrainingStatusCard = ({ trainingStatus }) => {
     if (!trainingStatus) return null;

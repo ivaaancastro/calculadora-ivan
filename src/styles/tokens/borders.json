@@ -94,5 +94,13 @@
   "tooltip-dark-edge-2": {
     "light": "slate-700/60",
     "dark": "zinc-800"
+  },
+  "tooltip-info-edge": {
+    "light": "white/10",
+    "dark": "white/10"
+  },
+  "tooltip-info-arrow": {
+    "light": "slate-900/95",
+    "dark": "zinc-800/95"
   }
 }
