@@ -28,14 +28,10 @@ test.describe('Gestos · el deslizamiento no cambia de pestaña', () => {
     expect(pathname(page)).toBe(`/activity/${DETAIL_ACTIVITY_ID}`);
   });
 
-  // DEFECTO CONOCIDO D-01 (no se corrige en la Capa 0): `MobileSwipePager` ignora
-  // `.recharts-wrapper`, `.leaflet-container` y `[data-no-swipe]`, pero no
-  // `.hide-scrollbar`, que sí ignora `useSwipeNavigation`. Deslizar la tira de
-  // secciones de Rendimiento (Fisiología / Potencia / VO2…) cambia de pestaña en
-  // lugar de desplazar la tira. Se marca como fallo esperado: cuando se corrija,
-  // Playwright avisará de que ya pasa y habrá que quitar `test.fail()`.
+  // D-01, cerrado en la Capa 3 (spec-rediseno-02-c3): `MobileSwipePager` ignora ahora
+  // `.hide-scrollbar` igual que `useSwipeNavigation`, así que deslizar la tira de secciones
+  // de Rendimiento (Fisiología / Potencia / VO2…) la desplaza sin cambiar de pestaña.
   test('sobre la tira de secciones de Rendimiento', async ({ page }) => {
-    test.fail(true, 'D-01: MobileSwipePager no excluye .hide-scrollbar');
     await gotoReady(page, '/stats');
     const strip = page.locator('.hide-scrollbar', { hasText: 'Fisiología' }).first();
     await expect(strip).toBeInViewport();

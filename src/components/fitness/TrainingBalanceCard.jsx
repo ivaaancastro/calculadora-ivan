@@ -68,7 +68,7 @@ export const TrainingBalanceCard = ({ balance, balanceDays, setBalanceDays }) =>
                                         <div className="relative h-4 w-full bg-slate-100 dark:bg-zinc-800/40 rounded-full overflow-visible">
                                             {/* Garmin-style Optimal Range Dotted Capsule (ON TOP) */}
                                             <div
-                                                className="absolute -top-1.5 -bottom-1.5 border-2 border-dashed border-slate-300 dark:border-zinc-500 rounded-full z-30 pointer-events-none"
+                                                className="absolute -top-1.5 -bottom-1.5 border-2 border-dashed border-slate-300 dark:border-zinc-500 rounded-full z-20 pointer-events-none"
                                                 style={{
                                                     left: `${targetLeft}%`,
                                                     width: `${targetWidth}%`
@@ -77,7 +77,7 @@ export const TrainingBalanceCard = ({ balance, balanceDays, setBalanceDays }) =>
 
                                             {/* Current value bar */}
                                             <div
-                                                className={`absolute top-0 bottom-0 ${b.color} rounded-full transition-all duration-1000 shadow-md z-20 ${status === 'Alto' ? 'brightness-110' : ''}`}
+                                                className={`absolute top-0 bottom-0 ${b.color} rounded-full transition-all duration-1000 shadow-md z-10 ${status === 'Alto' ? 'brightness-110' : ''}`}
                                                 style={{ width: `${barWidth}%` }}
                                             >
                                                 {/* Glow if optimal or higher */}

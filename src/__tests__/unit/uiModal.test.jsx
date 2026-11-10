@@ -8,12 +8,12 @@ const classes = (s) => s.split(' ').sort();
 describe('ui/Modal recetas', () => {
   it('copia el fondo y el panel de los 4 modales', () => {
     expect(classes(modalRecipe('sheet').backdrop)).toEqual(
-      classes('fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-scrim backdrop-blur-sm overscroll-contain animate-in fade-in duration-200'),
+      classes('fixed inset-0 z-sheet flex items-end sm:items-center justify-center p-0 sm:p-4 bg-scrim backdrop-blur-sm overscroll-contain animate-in fade-in duration-200'),
     );
     expect(modalRecipe('sheet').panel).toContain('rounded-t-3xl sm:rounded-2xl');
     expect(modalRecipe('auth').layer).toBe('absolute inset-0 bg-scrim-2 backdrop-blur-sm');
-    expect(modalRecipe('planner').backdrop).toContain('bg-scrim-3 backdrop-blur-sm z-50');
-    expect(modalRecipe('viewer').backdrop).toContain('bg-scrim-4 backdrop-blur-sm z-[60]');
+    expect(modalRecipe('planner').backdrop).toContain('bg-scrim-3 backdrop-blur-sm z-sheet');
+    expect(modalRecipe('viewer').backdrop).toContain('bg-scrim-4 backdrop-blur-sm z-modal');
     expect(modalRecipe('viewer').style).toEqual({ overscrollBehavior: 'contain' });
   });
 

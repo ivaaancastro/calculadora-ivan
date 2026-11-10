@@ -43,11 +43,13 @@ export const MobileSwipePager = ({ activeIndex, onChangeTab, children }) => {
       const touch = e.touches[0];
       const target = e.target;
 
-      // Ignorar componentes con su propio gesto horizontal o scrub
+      // Ignorar componentes con su propio gesto horizontal o scrub. `.hide-scrollbar` es el
+      // caso de las tiras de filtros (D-01): `useSwipeNavigation` ya la excluía.
       if (
         target.closest('.leaflet-container') ||
         target.closest('.recharts-wrapper') ||
         target.closest('input[type="range"]') ||
+        target.closest('.hide-scrollbar') ||
         target.closest('[data-no-swipe]')
       ) {
         isTrackingRef.current = false;
@@ -192,7 +194,7 @@ export const MobileSwipePager = ({ activeIndex, onChangeTab, children }) => {
         {React.Children.map(children, (child, idx) => (
           <div
             key={idx}
-            className="w-full min-w-full shrink-0 h-[calc(100dvh-56px)] overflow-y-auto overscroll-y-contain custom-scrollbar px-3 sm:px-6 pt-2 pb-32"
+            className="w-full min-w-full shrink-0 h-[calc(100dvh-var(--nav-h-total))] overflow-y-auto overscroll-y-contain custom-scrollbar px-3 sm:px-6 pt-2 pb-[var(--bottom-nav-reserve)]"
           >
             {child}
           </div>

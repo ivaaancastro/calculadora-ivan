@@ -132,7 +132,7 @@ export const ActivityDetailPage = ({ activity, settings, fetchStreams, onBack, o
     return (
         <div className={`animate-in fade-in duration-500 bg-sunken-2 ${activeTab === 'analyze' ? 'min-h-[calc(100dvh-4rem)]' : 'h-[calc(100dvh-4rem)]'} lg:h-[calc(100vh-70px)] flex flex-col font-sans pb-safe`}>
             {/* Premium Header */}
-            <header className="glass-nav px-3.5 py-2 sm:px-6 sm:py-3 shrink-0 z-50">
+            <header className="glass-nav px-3.5 py-2 sm:px-6 sm:py-3 shrink-0 z-nav">
                 {/* --- DESKTOP HEADER (lg:flex) --- */}
                 <div className="hidden lg:flex items-center justify-between gap-2 mb-2.5 sm:mb-3 border-b border-hairline pb-2">
                     <Segmented
@@ -716,7 +716,7 @@ export const ActivityDetailPage = ({ activity, settings, fetchStreams, onBack, o
                                 color={themeColor || ct.sports.fallback} 
                                 currentPosition={activePayload?.latlng} 
                             />
-                            <div className="absolute top-4 left-4 z-[400] bg-white/90 dark:bg-zinc-900/90 backdrop-blur p-3 rounded-xl border border-line-soft-2 shadow-md space-y-1 pointer-events-none max-w-[220px]">
+                            <div className="absolute top-4 left-4 z-map bg-white/90 dark:bg-zinc-900/90 backdrop-blur p-3 rounded-xl border border-line-soft-2 shadow-md space-y-1 pointer-events-none max-w-[220px]">
                                 <h3 className="text-[10px] font-bold uppercase tracking-widest text-ink-4">Ruta Detallada</h3>
                                 <div className="text-[10px] text-body-soft leading-tight">
                                     {activity.distance ? `${(activity.distance / 1000).toFixed(2)} km` : ''} 
