@@ -11,3 +11,4 @@ export { Modal } from './Modal.jsx';
 export { ChartTooltip } from './ChartTooltip.jsx';
 export { chartTooltipStyle } from './chartTooltipClasses.js';
 export { InfoTooltip } from './InfoTooltip.jsx';
+export { LoadingState } from './LoadingState.jsx';

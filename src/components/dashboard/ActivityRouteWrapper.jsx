@@ -1,15 +1,10 @@
 import React, { Suspense } from 'react';
 import { useParams } from 'react-router-dom';
 import { ErrorBoundary } from '../common/ErrorBoundary';
+import { LoadingState } from '../ui';
 
 const ActivityDetailPage = React.lazy(() =>
   import('../pages/ActivityDetailPage').then((m) => ({ default: m.ActivityDetailPage }))
-);
-
-const LazyFallback = () => (
-  <div className="flex items-center justify-center py-32">
-    <span className="animate-spin text-action-bright">Cargando...</span>
-  </div>
 );
 
 /**
@@ -26,7 +21,7 @@ export function ActivityRouteWrapper({ activities, settings, fetchActivityStream
 
   return (
     <ErrorBoundary>
-      <Suspense fallback={<LazyFallback />}>
+      <Suspense fallback={<LoadingState />}>
         <ActivityDetailPage
           activity={activity}
           settings={settings}

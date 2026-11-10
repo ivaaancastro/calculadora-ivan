@@ -24,6 +24,7 @@
     "IosCard",
     "MetricCard",
     "PillTab",
-    "tooltipStyleFor"
+    "tooltipStyleFor",
+    "LazyFallback"
   ]
 }
