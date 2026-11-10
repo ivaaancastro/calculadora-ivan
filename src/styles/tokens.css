@@ -181,6 +181,10 @@
   --fill-segmented: 226 232 240; --fill-segmented-a: 0.6; /* slate-200/60 */
   --fill-segmented-2: 226 232 240; --fill-segmented-2-a: 0.6; /* slate-200/60 */
   --fill-hover: 226 232 240; --fill-hover-a: 0.7; /* slate-200/70 */
+  --scrim: 15 23 42; --scrim-a: 0.6; /* slate-900/60 */
+  --scrim-2: 0 0 0; --scrim-2-a: 0.4; /* black/40 */
+  --scrim-3: 0 0 0; --scrim-3-a: 0.4; /* black/40 */
+  --scrim-4: 15 23 42; --scrim-4-a: 0.6; /* slate-900/60 */
   --inverse: 15 23 42; /* slate-900 */
   --inverse-2: 51 65 85; /* slate-700 */
   --glass-nav: 255 255 255; --glass-nav-a: 0.8; /* white/80 */
@@ -225,6 +229,10 @@
   --fill-segmented: 28 28 30; --fill-segmented-a: 1; /* [#1c1c1e] */
   --fill-segmented-2: 39 39 42; --fill-segmented-2-a: 0.8; /* zinc-800/80 */
   --fill-hover: 63 63 70; --fill-hover-a: 1; /* zinc-700 */
+  --scrim: 15 23 42; --scrim-a: 0.6; /* slate-900/60 */
+  --scrim-2: 0 0 0; --scrim-2-a: 0.4; /* black/40 */
+  --scrim-3: 0 0 0; --scrim-3-a: 0.7; /* black/70 */
+  --scrim-4: 0 0 0; --scrim-4-a: 0.8; /* black/80 */
   --inverse: 255 255 255; /* white */
   --inverse-2: 228 228 231; /* zinc-200 */
   --glass-nav: 0 0 0; --glass-nav-a: 0.8; /* black/80 */

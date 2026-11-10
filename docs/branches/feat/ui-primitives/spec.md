@@ -184,6 +184,7 @@ Las variantes llevan el nombre de su papel, no el de la pantalla. Si dos recetas
 - `presentation`: `sheet` (hoja inferior en móvil y diálogo desde `sm`: `AddActivityModal`) | `dialog` (centrado: planificador, visor y acceso). Cada uso conserva su fondo, su panel y su z-index (`backdrop` y `panel` con las 4 recetas actuales como variantes con nombre). Ningún modal pasa a hoja inferior en esta capa: sería un cambio visual (Capa 5).
 - Añade `role="dialog"`, `aria-modal="true"` y `aria-labelledby`. Cerrar con Escape y bloquear el desplazamiento del fondo dependen de D4.
 - Sin portal: crear uno cambiaría el DOM y el apilamiento (RF5).
+- **Cobertura (PR 6, 2026-11-10):** los 4 modales. Como cada uno tiene su propio fondo y panel, la API final es una sola `variant` por modal en lugar de `presentation` + recetas: `sheet` (añadir), `auth` (acceso, con el velo en una capa aparte), `planner` y `viewer` (Calendario, este en `z-[60]` y con su `overscrollBehavior` en línea). `closeOnBackdrop` mantiene el cierre al tocar fuera donde ya existía (acceso y visor). Los velos pasan a tokens exactos `scrim` a `scrim-4` (D2). D4 b, en commit propio: Escape cierra solo el modal de arriba y, mientras haya uno abierto, `<html>` lleva `overflow: hidden` (y `scrollbar-gutter: stable` si tenía barra, para que nada se mueva). El menú de `Navbar` no es un modal y no cambia.
 
 **ChartTooltip** (PR 7)
 ```jsx

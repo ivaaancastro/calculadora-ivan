@@ -1,11 +1,11 @@
 {
   "$comment": "Línea base de scripts/check-colors.mjs. Solo debe bajar (npm run lint:colors -- --update). Subirla a mano exige justificarlo en el PR.",
   "totals": {
-    "palette": 780,
+    "palette": 774,
     "arbitrary": 3,
     "hex": 100,
     "rgb": 10,
-    "dark": 177
+    "dark": 175
   },
   "files": {
     "src/App.jsx": {
@@ -184,7 +184,7 @@
       "dark": 0
     },
     "src/components/modals/AddActivityModal.jsx": {
-      "palette": 9,
+      "palette": 8,
       "arbitrary": 0,
       "hex": 0,
       "rgb": 0,
@@ -198,11 +198,11 @@
       "dark": 24
     },
     "src/components/pages/CalendarPage.jsx": {
-      "palette": 120,
+      "palette": 116,
       "arbitrary": 0,
       "hex": 22,
       "rgb": 0,
-      "dark": 37
+      "dark": 35
     },
     "src/components/pages/EmailConfirmedPage.jsx": {
       "palette": 6,
@@ -219,7 +219,7 @@
       "dark": 29
     },
     "src/components/pages/LandingPage.jsx": {
-      "palette": 40,
+      "palette": 39,
       "arbitrary": 0,
       "hex": 0,
       "rgb": 1,
