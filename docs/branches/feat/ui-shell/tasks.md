@@ -42,7 +42,7 @@ Rama `feat/ui-shell-header`, sale de `develop` (`e6f8456`, merge del PR 1). **Ú
 - [x] Pruebas: paridad, destructiva, tema.
 - [x] Capturas afectadas regeneradas y revisadas una a una.
 - [x] Verificación completa.
-- [ ] PR hacia `develop`.
+- [x] PR hacia `develop` (#71).
 
 ### Notas del PR 2
 
