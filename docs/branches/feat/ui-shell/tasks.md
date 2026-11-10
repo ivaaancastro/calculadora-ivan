@@ -16,7 +16,7 @@ Rama `feat/ui-shell`, sale de `develop` (`06ac9e3`). **0 diferencias** de volcad
 - [x] D-01: `.hide-scrollbar` en las exclusiones del pager y `test.fail()` fuera.
 - [x] `e2e/shell.spec.js` (3 pruebas × 3 proyectos) y `src/__tests__/unit/shellTokens.test.js` (5 pruebas).
 - [x] Verificación completa.
-- [ ] PR hacia `develop`.
+- [x] PR hacia `develop` (#70).
 
 ### Notas del PR 1
 
