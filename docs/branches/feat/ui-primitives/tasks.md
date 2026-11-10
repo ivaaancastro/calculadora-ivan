@@ -135,7 +135,17 @@ Solo se marca lo verificado. Spec y plan aprobados el 2026-11-09 ("Apruebo todo"
 - Resultados: lint ✓, lint:colors ✓, lint:ui ✓ (14 exportaciones), unit 182/182, integración 10/10 (sin tocar), build ✓, E2E macOS 87 ✓ (sin pruebas nuevas), E2E Docker 135 ✓ (48 capturas sin diferencias; el ✘ de `gestures.spec.js:37` es D-01). Volcado `full` frente a `develop`: **104 volcados, 90.548 elementos, 0 diferencias** (en serie). Informe táctil en macOS: 113, igual que en `develop`.
 
 ## Cierre
-- [ ] Cobertura final por familia, `MEMORY.md`, `CHANGELOG.md`, roadmap; spec marcada como implementada
+- [x] Cobertura final por familia, `MEMORY.md`, `CHANGELOG.md`, roadmap; spec marcada como implementada
+- [ ] PR hacia `develop`
+
+### Notas del cierre
+- **Cobertura final (14 exportaciones, 8 familias, todas con uso):** `Card` `grouped` 39 + `panel` 11 y `SectionHeader` 13; `Stat` 26 y `StatTile` 8; `Segmented` 22 opciones (`pill` 4, `card` 10, `mini` 8); `Input` y `Select` 22 de los 44 campos; `Button` 11 e `IconButton` 6 (17 botones); `Modal` 4; `ChartTooltip` en los 5 tooltips propios y `chartTooltipStyle` en 3 tarjetas, más `InfoTooltip`; `LoadingState` 4 (2 `inline`, `screen` y `boot`).
+- **Retirado:** 14 clases sin uso de `index.css` y `MetricHelp` (PR 0); `ios-card`, `ios-touch`, `ios-header` e `IosCard` (PR 1); `MetricCard` (PR 2); `PillTab` (PR 3); `tooltipStyleFor` y `fitness/fitnessConstants.js` (PR 7); `LazyFallback` ×2 (PR 8). Todo en `scripts/ui-retired.json`, que `lint:ui` vigila.
+- **Colores sueltos:** palette 865 → 760 (−105), arbitrary 9 → 3, rgb 11 → 9, dark 188 → 170 (−18); hex 100 sin cambios.
+- **Pruebas:** unitarias 130 → 182 (+52), integración 10 sin tocar, E2E macOS 79 → 87 (+4 de `modal.spec.js` y +4 de `tooltip-touch.spec.js`), E2E Docker 127 → 135.
+- **Sin cambio visual, PR a PR:** el volcado `full` frente a `develop` dio **104 volcados / 90.548 elementos / 0 diferencias** en los 9, las 48 capturas de referencia no cambiaron y el informe táctil se quedó en 113 (D5).
+- **D4 ejecutado:** (a) `role="dialog"`, `aria-modal` y `aria-labelledby` en los modales y `aria-pressed` en `Segmented`; (b) Escape y bloqueo del fondo; (d) `InfoTooltip` se abre al tocar. (c) no hizo falta: el tooltip de gráfica ya se abría al tocar, y una prueba E2E lo fija.
+- **Lo que queda para la Capa 3 y la 5:** unificar variantes que hoy son una por sitio (`screen`/`boot` de `LoadingState`, los 4 `Modal`, las filas de los 5 tooltips, las 10 recetas de la familia A del segmentado, los 86 botones y los 22 campos de receta única, y las 8 fichas de biomarcadores de Salud); tipografía, radios y sombras (sin token, ahora concentradas en `ui/`); escalas ordinales y `Badge`; D-07, D-08, D-09 y D-10; y el código sin uso (`ChartsSection`, `ZONE_COLORS`, `LoginPage`).
 
 ---
 Versión: 0.1.0 — 2026-11-09
