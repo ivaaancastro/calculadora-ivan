@@ -14,7 +14,7 @@
 
 ## 1. Estado del proyecto
 - **Nombre:** Forma — Dashboard de rendimiento deportivo y salud
-- **Rama actual:** `feat/ui-primitives-button` (Capa 2, PR 5: `Button` e `IconButton`). PR 0 a 4 (#60–#64) mergeados. Siguiente: PR 6 (`Modal`).
+- **Rama actual:** `feat/ui-primitives-modal` (Capa 2, PR 6: `Modal`). PR 0 a 5 (#60–#65) mergeados. Siguiente: PR 7 (`ChartTooltip`).
 - **Rama base:** `develop`
 - **Rama de producción:** `main` (desplegada en Vercel)
 - **Versión:** 0.1.0
@@ -44,7 +44,7 @@
 | spec-rediseno-02 | Rediseño de la webapp por capas (roadmap) | en curso | 2026-11-06 | `docs/branches/feat/webapp-redesign/` |
 | spec-rediseno-02-c0 | Capa 0: red de seguridad de UI | implementada (PR #51 mergeado en `develop`) | 2026-11-06 | test/ui-safety-net |
 | spec-rediseno-02-c1 | Capa 1: tokens y tema | implementada (PRs #52 a #58 mergeados en `develop`; cobertura y pendientes en `tasks.md`, Cierre) | 2026-11-09 | `docs/branches/feat/ui-tokens/` |
-| spec-rediseno-02-c2 | Capa 2: primitivas | en curso (aprobada el 2026-11-09; PR 0 a 4 mergeados, PR 5 en revisión) | 2026-11-09 | `docs/branches/feat/ui-primitives/` |
+| spec-rediseno-02-c2 | Capa 2: primitivas | en curso (aprobada el 2026-11-09; PR 0 a 5 mergeados, PR 6 en revisión) | 2026-11-09 | `docs/branches/feat/ui-primitives/` |
 
 > Cuando un agente implemente una spec, debe añadir una fila aquí y marcarla como `implementada`.
 

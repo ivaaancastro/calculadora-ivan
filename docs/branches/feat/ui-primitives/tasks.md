@@ -91,8 +91,17 @@ Solo se marca lo verificado. Spec y plan aprobados el 2026-11-09 ("Apruebo todo"
 - Resultados: lint ✓, lint:colors ✓, lint:ui ✓ (9 exportaciones), unit 164/164, integración 10/10 (sin tocar), build ✓, E2E macOS 79 ✓, E2E Docker 127 ✓ (48 capturas sin diferencias; el ✘ de `gestures.spec.js:37` es D-01). Volcado `full` frente a `develop`: **104 volcados, 90.548 elementos, 0 diferencias** (el de `develop` se repitió entero porque la primera ejecución se cortó). El volcado no llega a los bloques del planificador ni al formulario de contraseña olvidada: una prueba temporal sin commit abre el planificador con bloques y un circuito, el detalle de actividad y la contraseña olvidada de la landing, y compara los estilos calculados de todos los botones migrados en reposo y con `:hover`, `:focus-visible` y `:active` forzados, en claro y oscuro: **704 elementos, 0 diferencias** (sin contar las variables `--*`). Informe táctil en macOS: 113, igual que en `develop`.
 
 ## PR 6 — Modal (`feat/ui-primitives-modal`)
-- [ ] Inventario, primitiva, sustitución, ARIA (D4 a) y Escape y bloqueo de desplazamiento en commit propio (D4 b)
-- [ ] Verificación completa y PR
+- [x] Inventario, primitiva, sustitución, ARIA (D4 a) y Escape y bloqueo de desplazamiento en commit propio (D4 b)
+- [x] Verificación completa
+- [ ] PR hacia `develop`
+
+### Notas del PR 6
+- **Inventario:** 4 capas `fixed inset-0`, todas con receta propia: añadir manual (`AddActivityModal`, hoja inferior en móvil), acceso (landing, velo en una capa aparte), planificador y visor (Calendario). Solo acceso y visor se cerraban al tocar fuera. Ninguno tenía `role="dialog"` ni Escape. El menú de `Navbar` no es un modal: se queda.
+- **API:** `<Modal open onClose variant labelledBy closeOnBackdrop>`. Una `variant` por modal (`sheet`, `auth`, `planner`, `viewer`) en lugar de `presentation` + `backdrop`/`panel` de la spec: cada fondo va con su panel, así que separar los dos solo daría combinaciones que no existen. Mismo DOM: fondo, capa del velo (solo `auth`) y panel; el panel lleva `role="dialog"`, `aria-modal="true"` y `aria-labelledby` (D4 a) con el `id` nuevo del título (`add-activity-title`, `auth-modal-title`, `plan-modal-title`, `plan-viewer-title`). Sin portal.
+- **Tokens:** `scrim` (`slate-900/60`), `scrim-2` (`black/40`), `scrim-3` (`black/40`, `black/70`) y `scrim-4` (`slate-900/60`, `black/80`), uno por par.
+- **D4 b (commit propio):** Escape cierra el modal de arriba (una pila, por si se abren dos) y el documento no se desplaza mientras haya uno abierto: `overflow: hidden` en `<html>` y, si había barra, `scrollbar-gutter: stable` para que el contenido no se mueva. Prueba nueva `e2e/modal.spec.js` (4 pruebas, solo escritorio): rol y nombre, bloqueo y Escape en añadir, acceso y planificador, y en el visor Escape y tocar fuera. Las capturas no abren modales y el volcado solo recorre `body *`, así que el cambio en `<html>` no les afecta.
+- `lint:colors`: `palette` 780 → 774, `dark` 177 → 175.
+- Resultados: lint ✓, lint:colors ✓, lint:ui ✓ (10 exportaciones), unit 170/170, integración 10/10 (sin tocar), build ✓, E2E macOS 83 ✓ (79 + 4 de `modal.spec.js`), E2E Docker 131 ✓ (127 + 4; 48 capturas sin diferencias; el ✘ de `gestures.spec.js:37` es D-01). Volcado `full` frente a `develop`: **104 volcados, 90.548 elementos, 0 diferencias** (en serie, sin repeticiones). El volcado ya abre los 4 modales (`modal-anadir`, `modal-acceso`, `calendario-planificador`, `calendario-visor`), así que no hace falta prueba temporal. Informe táctil en macOS: 113, igual que en `develop`.
 
 ## PR 7 — ChartTooltip (`feat/ui-primitives-tooltip`)
 - [ ] Prueba E2E del toque actual (hoy se abre en todas las pantallas, spec 3.5), primitiva, sustitución; `InfoTooltip` al tocar (D4 d) en commit propio
