@@ -93,7 +93,7 @@ Solo se marca lo verificado. Spec y plan aprobados el 2026-11-09 ("Apruebo todo"
 ## PR 6 — Modal (`feat/ui-primitives-modal`)
 - [x] Inventario, primitiva, sustitución, ARIA (D4 a) y Escape y bloqueo de desplazamiento en commit propio (D4 b)
 - [x] Verificación completa
-- [ ] PR hacia `develop`
+- [x] PR hacia `develop`: [#66](https://github.com/ivaaancastro/calculadora-ivan/pull/66)
 
 ### Notas del PR 6
 - **Inventario:** 4 capas `fixed inset-0`, todas con receta propia: añadir manual (`AddActivityModal`, hoja inferior en móvil), acceso (landing, velo en una capa aparte), planificador y visor (Calendario). Solo acceso y visor se cerraban al tocar fuera. Ninguno tenía `role="dialog"` ni Escape. El menú de `Navbar` no es un modal: se queda.
