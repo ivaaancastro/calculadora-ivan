@@ -30,6 +30,34 @@
   --shadow-chart-tooltip: 0 8px 32px rgba(0, 0, 0, 0.12); /* ChartTooltip `card` y `chartTooltipStyle` */
 }
 
+/*
+ * Shell (spec-rediseno-02-c3, Capa 3). Un solo sitio para la altura de las barras y para el
+ * orden de capas: ninguna pantalla vuelve a escribir el número.
+ */
+:root {
+  /* Cabecera: el alto de la caja y el mismo más la safe area del móvil. 56 px es lo que ya
+     asumían el pager y el banner; el PR 2 ajusta la cabecera a este valor (D4). */
+  --nav-h: 3.5rem;
+  --nav-h-total: calc(var(--nav-h) + env(safe-area-inset-top, 0px));
+
+  /* Barra inferior flotante: cápsula, separación con el borde y hueco que reserva el contenido. */
+  --bottom-nav-h: 3.375rem;
+  --bottom-nav-gap: 0.75rem;
+  --bottom-nav-reserve: 8rem; /* el `pb-32` de hoy; el PR 2 lo recalcula con los dos anteriores */
+
+  /* Orden de capas (spec, 6.3). El orden relativo es el de hoy: los modales ganan a los
+     tooltips y el panel flotante del Calendario gana a todo. `--z-toast` es de la librería. */
+  --z-sticky: 20; /* banner de subida */
+  --z-nav: 30; /* cabecera y cabecera del detalle */
+  --z-nav-menu: 40; /* menú de la cabecera y barra inferior */
+  --z-sheet: 50; /* modales hoja, acceso y planificador */
+  --z-tooltip: 55; /* ChartTooltip e InfoTooltip */
+  --z-modal: 60; /* visor del entreno planificado */
+  --z-floating: 80; /* panel "Proyección de Forma" del Calendario */
+  --z-map: 400; /* controles de Leaflet */
+  --z-toast: 9999; /* react-hot-toast */
+}
+
 /* Hoy las gráficas usan los mismos valores en claro y oscuro. */
 .dark {
   --metric-ctl: 59 130 246;

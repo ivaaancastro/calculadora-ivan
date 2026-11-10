@@ -17,6 +17,18 @@ module.exports = {
       boxShadow: {
         card: 'var(--shadow-card)',
       },
+      // Orden de capas de la shell (spec-rediseno-02-c3). Los valores viven en tokens.css.
+      zIndex: {
+        sticky: 'var(--z-sticky)',
+        nav: 'var(--z-nav)',
+        'nav-menu': 'var(--z-nav-menu)',
+        sheet: 'var(--z-sheet)',
+        tooltip: 'var(--z-tooltip)',
+        modal: 'var(--z-modal)',
+        floating: 'var(--z-floating)',
+        map: 'var(--z-map)',
+        toast: 'var(--z-toast)',
+      },
     },
   },
   plugins: [],

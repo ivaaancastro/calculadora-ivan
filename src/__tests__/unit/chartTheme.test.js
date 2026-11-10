@@ -46,8 +46,10 @@ describe('chartTheme ↔ tokens.css', () => {
     });
   }
 
-  it('claro y oscuro declaran los mismos tokens', () => {
-    expect(Object.keys(tokens.dark).sort()).toEqual(Object.keys(tokens.light).sort());
+  it('claro y oscuro declaran los mismos tokens de color', () => {
+    // La shell (spec-rediseno-02-c3) declara alturas y capas, que no dependen del tema.
+    const colorTokens = (mode) => Object.keys(tokens[mode]).filter((k) => !/^(z-|nav-h|bottom-nav-)/.test(k));
+    expect(colorTokens('dark').sort()).toEqual(colorTokens('light').sort());
   });
 
   it('getChartTheme devuelve solo colores, con la misma forma que el tema', () => {

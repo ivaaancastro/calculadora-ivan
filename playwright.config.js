@@ -18,9 +18,9 @@ const E2E_ENV = {
   VITE_STRAVA_REDIRECT_URI: 'http://localhost:5273/strava-callback',
 };
 
-const VISUAL_SPECS = /(visual|layout|touch|gestures|style-dump)\.spec\.js/;
-// 768 px (spec-rediseno-02-c1, RF8): capturas, layout y volcado de estilos; sin pruebas táctiles.
-const TABLET_SPECS = /(visual|layout|style-dump)\.spec\.js/;
+const VISUAL_SPECS = /(visual|layout|touch|gestures|style-dump|shell)\.spec\.js/;
+// 768 px (spec-rediseno-02-c1, RF8): capturas, layout, shell y volcado de estilos; sin pruebas táctiles.
+const TABLET_SPECS = /(visual|layout|style-dump|shell)\.spec\.js/;
 
 export default defineConfig({
   testDir: './e2e',

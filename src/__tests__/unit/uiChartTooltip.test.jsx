@@ -9,7 +9,7 @@ const classes = (s) => s.split(' ').sort();
 describe('ui/ChartTooltip recetas', () => {
   it('copia los marcos de hoy', () => {
     expect(classes(chartTooltipClass('glass'))).toEqual(
-      classes('bg-surface-8 backdrop-blur-md p-2.5 sm:p-3 rounded-xl border border-line-muted-3 shadow-xl min-w-[140px] pointer-events-none select-none z-50'),
+      classes('bg-surface-8 backdrop-blur-md p-2.5 sm:p-3 rounded-xl border border-line-muted-3 shadow-xl min-w-[140px] pointer-events-none select-none z-tooltip'),
     );
     expect(classes(chartTooltipClass('dark'))).toEqual(
       classes('bg-tooltip-dark border border-tooltip-dark-edge p-2 rounded-lg shadow-2xl text-[10px] font-bold text-tooltip-dark-ink min-w-[90px] backdrop-blur-sm'),
@@ -45,7 +45,7 @@ describe('ui/ChartTooltip recetas', () => {
 describe('ui/ChartTooltip', () => {
   it('pinta solo el marco con su contenido, sin estilo en línea salvo en card', () => {
     expect(renderToStaticMarkup(<ChartTooltip variant="dark"><p>x</p></ChartTooltip>)).toBe(`<div class="${chartTooltipClass('dark')}"><p>x</p></div>`);
-    const card = renderToStaticMarkup(<ChartTooltip variant="card" className="w-48 z-[200]">x</ChartTooltip>);
-    expect(card).toMatch(/^<div style="[^"]*backdrop-filter:blur\(20px\)[^"]*" class="shadow-xl w-48 z-\[200\]">x<\/div>$/);
+    const card = renderToStaticMarkup(<ChartTooltip variant="card" className="w-48 z-tooltip">x</ChartTooltip>);
+    expect(card).toMatch(/^<div style="[^"]*backdrop-filter:blur\(20px\)[^"]*" class="shadow-xl w-48 z-tooltip">x<\/div>$/);
   });
 });

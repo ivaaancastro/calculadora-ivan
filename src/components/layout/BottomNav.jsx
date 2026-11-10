@@ -32,11 +32,11 @@ export const BottomNav = ({ activeIndex, onTabChange }) => {
   return (
     <nav
       aria-label="Navegación móvil flotante estilo Apple"
-      className="md:hidden fixed bottom-[calc(0.75rem+env(safe-area-inset-bottom,0px))] left-0 right-0 z-50 flex items-center justify-center pointer-events-none px-3 select-none"
+      className="md:hidden fixed bottom-[calc(0.75rem+env(safe-area-inset-bottom,0px))] left-0 right-0 z-nav-menu flex items-center justify-center pointer-events-none px-3 select-none"
     >
       <div className="flex items-center gap-2 pointer-events-auto max-w-full">
         {/* CÁPSULA PRINCIPAL LIQUID GLASS */}
-        <div className="liquid-glass rounded-full h-[54px] p-1 flex items-center gap-0.5 shadow-2xl transition-all duration-300">
+        <div className="liquid-glass rounded-full h-[var(--bottom-nav-h)] p-1 flex items-center gap-0.5 shadow-2xl transition-all duration-300">
           {capsuleTabs.map((tab) => {
             const isActive = activeIndex !== undefined
               ? activeIndex === tab.index
@@ -78,7 +78,7 @@ export const BottomNav = ({ activeIndex, onTabChange }) => {
           to="/history"
           aria-label="Buscar actividades"
           onClick={(e) => handleTabClick(e, '/history', 4)}
-          className={`liquid-glass w-[54px] h-[54px] rounded-full flex items-center justify-center shrink-0 shadow-2xl transition-transform active:scale-90 select-none touch-manipulation touch-callout-none ${
+          className={`liquid-glass w-[var(--bottom-nav-h)] h-[var(--bottom-nav-h)] rounded-full flex items-center justify-center shrink-0 shadow-2xl transition-transform active:scale-90 select-none touch-manipulation touch-callout-none ${
             isSearchActive
               ? 'liquid-glass-active text-action-ios'
               : 'text-ink-4 hover:text-body'

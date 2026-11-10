@@ -60,7 +60,7 @@ export const MmpAndEfCard = ({
             const data = payload[0].payload;
             const isRun = curveSport === 'run';
             return (
-                <ChartTooltip variant="card" className="w-48 z-[200]">
+                <ChartTooltip variant="card" className="w-48 z-tooltip">
                     <p className="text-xs font-semibold text-ink-3 mb-1.5 border-b border-slate-200/50 dark:border-zinc-700/50 pb-1">Factor de Eficiencia</p>
                     <div className="flex justify-between items-end mb-2">
                         <span className="text-xl font-bold text-ef leading-none">{data.ef}</span>

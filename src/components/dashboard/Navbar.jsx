@@ -70,7 +70,7 @@ export const Navbar = ({
   ];
 
   return (
-    <nav className="glass-nav px-3.5 sm:px-6 pt-[calc(0.75rem+env(safe-area-inset-top))] pb-2.5 sm:pb-3 sticky top-0 z-40 transition-all duration-300">
+    <nav className="glass-nav px-3.5 sm:px-6 pt-[calc(0.75rem+env(safe-area-inset-top))] pb-2.5 sm:pb-3 sticky top-0 z-nav transition-all duration-300">
       <div className="flex justify-between items-center max-w-[1800px] mx-auto mt-0.5 md:mt-0">
 
         {/* FOTO DE PERFIL / TRIGGER MENÚ CONFIGURACIÓN */}
@@ -118,7 +118,7 @@ export const Navbar = ({
 
           {/* LIQUID GLASS APPLE CONFIGURATION POPOVER */}
           {isMenuOpen && (
-            <div className="absolute left-0 top-full mt-2.5 w-72 sm:w-80 bg-white/95 dark:bg-[#1C1C1E]/95 backdrop-blur-2xl rounded-2xl border border-black/[0.08] dark:border-white/[0.12] shadow-2xl overflow-hidden z-50 animate-in fade-in zoom-in-95 duration-150">
+            <div className="absolute left-0 top-full mt-2.5 w-72 sm:w-80 bg-white/95 dark:bg-[#1C1C1E]/95 backdrop-blur-2xl rounded-2xl border border-black/[0.08] dark:border-white/[0.12] shadow-2xl overflow-hidden z-nav-menu animate-in fade-in zoom-in-95 duration-150">
               {/* CABECERA CON PERFIL */}
               <div className="p-3.5 border-b border-black/[0.05] dark:border-white/[0.08] flex items-center gap-3">
                 <div 

@@ -9,7 +9,7 @@ export function UploadStatusBanner({ uploadStatus }) {
   if (!uploadStatus) return null;
 
   return (
-    <div className="bg-action-4 text-white text-center py-1.5 text-[10px] font-bold uppercase tracking-widest animate-in slide-in-from-top sticky top-[52px] z-30 shadow-sm">
+    <div className="bg-action-4 text-white text-center py-1.5 text-[10px] font-bold uppercase tracking-widest animate-in slide-in-from-top sticky top-[var(--nav-h-total)] z-sticky shadow-sm">
       {uploadStatus}
     </div>
   );
