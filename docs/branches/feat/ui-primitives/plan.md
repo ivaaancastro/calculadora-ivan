@@ -46,7 +46,7 @@ Notas por familia:
 - **PR 4, Field:** las pruebas de integración de `AddActivityModal`, `HistoryList` y `ProfilePage` deben pasar sin tocarlas. Los campos de acceso con D-08 no entran. Hecho: pasan sin cambios. Los bloques del Calendario y las zonas de Ajustes no salen en el volcado y se comparan con una prueba temporal.
 - **PR 5, Button:** se respeta el `type` de cada botón original (`submit` en los formularios de acceso y de añadir). Hecho: ninguno de los botones migrados está en un formulario; los `submit` de acceso y de añadir son recetas únicas y no entran.
 - **PR 6, Modal:** el volcado ya cubre `modal-anadir` y `modal-acceso`. El PR 0 añade el planificador y el visor. El z-index de cada modal (`z-50`, `z-[60]`) se conserva. Hecho: los 4 modales usan `Modal`; D4 b va en su propio commit con `e2e/modal.spec.js`.
-- **PR 7, Tooltip:** la prueba nueva de toque fija que hoy se abren al tocar en Dashboard, Salud (Historial) y Rendimiento (spec 3.5, corregida). El estado `dashboard-punto-activo` del volcado cubre el marco `glass`.
+- **PR 7, Tooltip:** la prueba nueva de toque fija que hoy se abren al tocar en Dashboard, Salud (Historial) y Rendimiento (spec 3.5, corregida). El estado `dashboard-punto-activo` del volcado cubre el marco `glass`. Hecho, con alcance reducido (aprobado el 2026-11-10): `ChartTooltip` es solo el marco; las filas se quedan en cada tooltip hasta la Capa 3.
 
 ## Verificación de cada PR
 En este orden. Los resultados se copian en `tasks.md` y en el PR:

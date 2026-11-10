@@ -195,6 +195,7 @@ Las variantes llevan el nombre de su papel, no el de la pantalla. Si dos recetas
 - Sustituye a `CustomTooltip`, `CustomChartTooltip`, `HistoryChartTooltip` y a los dos `render…Tooltip` de `MmpAndEfCard`. `tooltipStyleFor` pasa a `ui/` y deja de estar en `chartTheme.js`.
 - **Toque:** una prueba E2E nueva fija el comportamiento actual: el tooltip se abre al tocar en todas las pantallas (3.5).
 - `InfoTooltip` entra en esta familia solo si D4 aprueba abrirlo al tocar. Si no, se queda como está.
+- **Alcance reducido (PR 7, aprobado el 2026-11-10):** `title` y `rows` genéricos no pueden reproducir el mismo DOM: los 5 tooltips propios tienen filas distintas, y los marcos oscuros del detalle y de Salud son recetas distintas. `ChartTooltip` es solo el marco, `<ChartTooltip variant className>{contenido}</ChartTooltip>`, con `glass` (Dashboard), `dark` (zonas del detalle), `dark-history` (Salud) y `card` (Rendimiento, con `chartTooltipStyle(ct)` en línea). Los 5 tooltips conservan sus filas en su archivo hasta la Capa 3 y usan el marco. `chartTooltipStyle` sustituye a `tooltipStyleFor` (estaba en `fitness/fitnessConstants.js`, que se borra), con la sombra en `--shadow-chart-tooltip`. `InfoTooltip` pasa a `ui/` con tokens exactos (`tooltip-info*`) y, en commit propio, se abre al tocar (D4 d).
 
 **LoadingState** (PR 8)
 ```jsx
