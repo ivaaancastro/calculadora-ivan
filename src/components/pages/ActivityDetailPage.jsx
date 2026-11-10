@@ -129,8 +129,11 @@ export const ActivityDetailPage = ({ activity, settings, fetchStreams, onBack, o
         }
     };
 
+    // Alto de la pantalla: la ventana menos la cabecera de la app y, desde `sm`, el relleno
+    // vertical de `main`. En Análisis la página puede crecer en móvil; en escritorio la caja
+    // queda fija y se desplazan los paneles, como antes. Sin números sueltos (RF2).
     return (
-        <div className={`animate-in fade-in duration-500 bg-sunken-2 ${activeTab === 'analyze' ? 'min-h-[calc(100dvh-4rem)]' : 'h-[calc(100dvh-4rem)]'} lg:h-[calc(100vh-70px)] flex flex-col font-sans pb-safe`}>
+        <div className={`animate-in fade-in duration-500 bg-sunken-2 ${activeTab === 'analyze' ? 'min-h-[calc(100dvh-var(--nav-h-total))] sm:min-h-[calc(100dvh-var(--nav-h-total)-1rem)] lg:h-[calc(100dvh-var(--nav-h-total)-1rem)]' : 'h-[calc(100dvh-var(--nav-h-total))] sm:h-[calc(100dvh-var(--nav-h-total)-1rem)]'} flex flex-col font-sans pb-safe`}>
             {/* Premium Header */}
             <header className="glass-nav px-3.5 py-2 sm:px-6 sm:py-3 shrink-0 z-nav">
                 {/* --- DESKTOP HEADER (lg:flex) --- */}
@@ -709,7 +712,7 @@ export const ActivityDetailPage = ({ activity, settings, fetchStreams, onBack, o
 
                     {/* --- pestaña: MAPA --- */}
                     {activeTab === 'map' && (
-                        <div className="flex-1 min-h-[480px] h-[calc(100dvh-130px)] lg:h-full w-full relative">
+                        <div className="flex-1 min-h-[480px] w-full relative">
                             <InteractiveMap 
                                 polyline={activity.map_polyline} 
                                 highResCoords={streams?.latlng?.data} 

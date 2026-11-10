@@ -42,11 +42,11 @@ Sin cambio de aspecto: el PR se acepta solo si las 48 capturas no cambian y el v
 El único PR de la capa en el que las capturas de v1 cambian a propósito (D1).
 
 - [ ] **Cabecera móvil (RF5, D2):** se queda identidad + menú, tema y Strava. Se va el icono de cerrar sesión (queda en el menú) y las utilidades.
-- [ ] **Altura real de la cabecera (D4):** recortar el relleno vertical para que mida exactamente `--nav-h` (56 px) y tokenizar lo que quedaba: `Dashboard.jsx:172` (170/250 px) y `ActivityDetailPage.jsx:133,712,791` (4rem/70px/130px/pb-32), comprobando la altura real de la cabecera del detalle.
+- [ ] **Altura real de la cabecera (D4):** altura fija de **60 px** (`--nav-h` = `3.75rem`, D4 revisado al medir 81/63,5 px) y tokenizar lo que quedaba: `Dashboard.jsx:172` (170/250 px) y `ActivityDetailPage.jsx:133,712,791` (4rem/70px/130px/pb-32), comprobando la altura real de la cabecera del detalle.
 - [ ] **Escritorio:** se retiran los 4 iconos de la derecha y el cierre de sesión duplicado; el menú conserva sus 4 secciones.
 - [ ] **Ajustes (`ProfilePage`)**: recibe
   - "Borrar DB" en Seguridad y Datos, con su `confirm` (RF6);
-  - "Importar CSV" en Cuentas Conectadas, **cableado** con `onFileUpload` para cerrar D-03 (D3).
+  - ~~"Importar CSV" en Cuentas Conectadas~~ → **retirado** (D3 revisado: nunca estuvo implementado, D-03 se documenta como acción retirada).
 - [ ] **Cerrar sesión:** se retiran los dos iconos (escritorio y móvil) y queda solo en el menú de la cabecera, que ya lo tiene.
 - [ ] Paridad: recorrer `paridad.md:23-44` y anotar en `tasks.md` dónde queda cada acción.
 - [ ] Pruebas: `e2e/shell.spec.js` gana paridad (9 acciones), destructiva con confirmación y tema persistente. `e2e/dashboard.spec.js:21` sigue igual (el menú no se mueve).

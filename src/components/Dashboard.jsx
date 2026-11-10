@@ -169,7 +169,9 @@ const Dashboard = () => {
           <span className="text-[14px]">+</span> Añadir Manual
         </button>
       </div>
-      <div className="h-[calc(100dvh-170px)] sm:h-[calc(100vh-250px)]">
+      {/* Alto de la lista: la ventana menos la cabecera y el chrome de la página (la fila del
+          botón «Añadir Manual» y los márgenes). Se conservan los 170/250 px de antes. */}
+      <div className="h-[calc(100dvh-var(--nav-h-total)-7.125rem)] sm:h-[calc(100dvh-var(--nav-h-total)-11.875rem)]">
         <ErrorBoundary>
           <HistoryList
             activities={activities}
@@ -184,11 +186,8 @@ const Dashboard = () => {
   return (
     <div className="min-h-screen bg-sunken-2 text-ink-2-soft font-sans md:pb-12 transition-colors duration-300 selection:bg-action-bright/30 overflow-x-hidden">
       <Navbar
-        activities={activities}
         settings={settings}
         uploading={uploading}
-        handleClearDb={handleClearDb}
-        onAddClick={handleOpenModal}
         isStravaConnected={isStravaConnected}
         onSync={handleStravaSync}
       />
@@ -209,6 +208,7 @@ const Dashboard = () => {
             isDeepSyncing={isDeepSyncing}
             deepSyncProgress={deepSyncProgress}
             handleDeepSync={handleDeepSync}
+            handleClearDb={handleClearDb}
             handleBackFromProfile={handleBackFromProfile}
             location={location}
           />

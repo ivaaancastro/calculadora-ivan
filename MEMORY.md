@@ -14,7 +14,7 @@
 
 ## 1. Estado del proyecto
 - **Nombre:** Forma — Dashboard de rendimiento deportivo y salud
-- **Rama actual:** `docs/ui-primitives-close` (Cierre de la Capa 2). PR 0 a 8 (#60–#68) mergeados. Siguiente: Capa 3 (`feat/ui-shell`, `feat/ui-skin-v2`).
+- **Rama actual:** `feat/ui-shell-header` (Capa 3, PR 2). Capa 2 cerrada (#60–#68) y PR 1 de la shell (#70) mergeados. Siguiente: PR 3 de la shell (cierre) y luego `feat/ui-skin-v2`.
 - **Rama base:** `develop`
 - **Rama de producción:** `main` (desplegada en Vercel)
 - **Versión:** 0.1.0
@@ -122,6 +122,13 @@
 - **Lo que la Capa 2 dejó pendiente:** variantes de un solo uso (`screen`/`boot` de `LoadingState`, 4 `Modal`, filas de los 5 tooltips, 10 recetas de la familia A del segmentado, 86 botones y 22 campos de receta única, 8 fichas de biomarcadores de Salud), escalas ordinales y `Badge`, D-07/D-08/D-09/D-10 y el código sin uso (`ChartsSection`, `ZONE_COLORS`, `LoginPage`).
 - **Herramientas que valen para cualquier capa:** `npm run lint:colors` (trinquete por archivo), `npm run lint:ui`, `node scripts/ui-inventory.mjs <familia> [--all]`, el volcado `full` y `node scripts/style-diff.mjs <antes> <después>`.
 - **Prueba temporal de estilos** (cuando el volcado no llega): spec sin commit en la rama y en el worktree de `develop`, mismo `STYLE_DUMP_DIR` distinto y `E2E_PORT` distinto; el volcado no abre más de un tooltip por pantalla ni monta la gráfica de zonas del detalle ni `PowerProfileCard` con los datos de prueba.
+
+### Cómo trabajar con la shell (Capa 3)
+- La cabecera mide **exactamente** `--nav-h` (60 px, `3.75rem`) más la safe area: `h-[calc(var(--nav-h)+env(safe-area-inset-top,0px))]` con `flex items-center`. Si algo no cabe a lo ancho, se acorta el texto del botón (Strava dice «Conectar» en móvil), **nunca** se deja que la cabecera crezca: partir una línea fue lo que la llevó a 81 px.
+- El alto de las pantallas que cuelgan de la cabecera se calcula con `--nav-h-total`; el histórico y el detalle llevan además su chrome (7.125rem y 1rem) explícito. En escritorio el detalle sigue con caja fija y paneles con scroll propio: si se cambia a `min-h`, la página entera pasa a desplazarse y las capturas del detalle crecen.
+- La cabecera no lleva utilidades: importar CSV (retirado, D-03), añadir manual, borrar actividades y cerrar sesión están en Ajustes o en el menú. Cerrar sesión, solo en el menú (`Menú de configuración y perfil`): los E2E que lo pulsan abren antes el menú.
+- `e2e/shell.spec.js` vigila lo anterior: altura de la cabecera contra `--nav-h-total`, capas, ausencia de los controles retirados, tema persistente y «Borrar Actividades» con `confirm`.
+- Las capturas de v1 están congeladas desde el PR 2: cualquier cambio visual nuevo va detrás de `data-ui="v2"`.
 
 ### Cómo trabajar con la red de seguridad (Capa 0)
 - Las capturas de referencia están en `e2e/__screenshots__/` y **solo se generan en Linux** con `npm run test:e2e:update` (Docker, imagen oficial de Playwright, `linux/amd64` como CI). Las de macOS no son comparables, por eso `visual.spec.js` se omite fuera de Linux. Para compararlas: `npm run test:e2e:docker`.

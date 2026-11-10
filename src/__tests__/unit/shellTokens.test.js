@@ -11,7 +11,7 @@ const token = (name) => css.match(new RegExp(`${name}:\\s*([^;\\n]+);`))?.[1]?.t
 
 describe('tokens de la shell', () => {
   it('declara la altura de las barras en un solo sitio', () => {
-    expect(token('--nav-h')).toBe('3.5rem');
+    expect(token('--nav-h')).toBe('3.75rem');
     expect(token('--nav-h-total')).toBe('calc(var(--nav-h) + env(safe-area-inset-top, 0px))');
     expect(token('--bottom-nav-h')).toBe('3.375rem');
     expect(token('--bottom-nav-gap')).toBe('0.75rem');

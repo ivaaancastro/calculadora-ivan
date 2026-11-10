@@ -22,6 +22,7 @@ export function ActivitySubRoutes({
   isDeepSyncing,
   deepSyncProgress,
   handleDeepSync,
+  handleClearDb,
   handleBackFromProfile,
   location,
 }) {
@@ -41,6 +42,7 @@ export function ActivitySubRoutes({
                 isDeepSyncing={isDeepSyncing}
                 deepSyncProgress={deepSyncProgress}
                 onDeepSync={handleDeepSync}
+                onClearDb={handleClearDb}
                 section={
                   new URLSearchParams(location.search).get('section') || 'general'
                 }
