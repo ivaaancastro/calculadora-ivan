@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { supabase } from '../../supabase';
+import { IconButton } from '../ui';
 import {
   Activity, Loader2, Mail, Lock, ArrowLeft, ArrowRight,
   BarChart3, Map, Calendar, Zap, Heart, Timer,
@@ -158,12 +159,14 @@ const AuthModal = ({ open, onClose }) => {
         </button>
 
         {isForgotPassword && (
-          <button
+          <IconButton
+            variant="bare"
             onClick={() => { setIsForgotPassword(false); reset(); }}
-            className="absolute top-4 left-4 p-2 text-slate-400 hover:text-slate-700 dark:hover:text-zinc-200 transition-colors"
-          >
-            <ArrowLeft size={16} />
-          </button>
+            className="absolute top-4 left-4 p-2"
+            label="Volver"
+            icon={ArrowLeft}
+            iconSize={16}
+          />
         )}
 
         {/* Logo */}

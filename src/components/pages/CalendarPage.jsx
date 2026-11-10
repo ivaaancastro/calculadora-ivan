@@ -14,7 +14,7 @@ import {
     getEffectiveTSS, computeZoneTssPerHour, estimateTssFromBlocks,
 } from '../../utils/tssEngine';
 import { useChartTheme } from '../charts/useChartTheme';
-import { Input, Segmented, Select } from '../ui';
+import { Button, IconButton, Input, Segmented, Select } from '../ui';
 
 const WEEKDAYS = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'];
 
@@ -1203,9 +1203,9 @@ export const CalendarPage = ({ activities, plannedWorkouts = [], addPlannedWorko
                         </button>
 
                         <div className="flex items-center border border-line-2 rounded-lg overflow-hidden ml-1 sm:ml-2">
-                            <button onClick={prevMonth} className="w-10 h-10 flex items-center justify-center bg-transparent hover:bg-slate-100 dark:hover:bg-zinc-800 active:scale-95 text-ink-3 transition-all touch-manipulation" title="Mes anterior"><ChevronLeft size={18} /></button>
+                            <IconButton variant="ghost" onClick={prevMonth} className="w-10 h-10" title="Mes anterior" label="Mes anterior" icon={ChevronLeft} iconSize={18} />
                             <div className="w-px h-5 bg-fill-7"></div>
-                            <button onClick={nextMonth} className="w-10 h-10 flex items-center justify-center bg-transparent hover:bg-slate-100 dark:hover:bg-zinc-800 active:scale-95 text-ink-3 transition-all touch-manipulation" title="Mes siguiente"><ChevronRight size={18} /></button>
+                            <IconButton variant="ghost" onClick={nextMonth} className="w-10 h-10" title="Mes siguiente" label="Mes siguiente" icon={ChevronRight} iconSize={18} />
                         </div>
                     </div>
                 </div>
@@ -1725,13 +1725,13 @@ export const CalendarPage = ({ activities, plannedWorkouts = [], addPlannedWorko
                                         </div>
                                         <div className="flex gap-1.5">
                                             {newPlan.type === 'WeightTraining' ? (<>
-                                                <button onClick={() => addBlock('warmup')} className="px-2.5 py-1 text-ink-3 rounded-full text-[11px] font-medium hover:bg-surface-2 transition-all">+ Calentar</button>
-                                                <button onClick={() => addBlock('main')} className="px-2.5 py-1 text-ink-3 rounded-full text-[11px] font-medium hover:bg-surface-2 transition-all">+ Ejercicio</button>
-                                                <button onClick={() => addBlock('repeat')} className="px-2.5 py-1 bg-inverse text-ink-inverse rounded-full text-[11px] font-medium hover:bg-inverse-2 transition-all shadow-sm">+ Circuito</button>
+                                                <Button variant="ghost" onClick={() => addBlock('warmup')} className="px-2.5 py-1">+ Calentar</Button>
+                                                <Button variant="ghost" onClick={() => addBlock('main')} className="px-2.5 py-1">+ Ejercicio</Button>
+                                                <Button variant="inverse" onClick={() => addBlock('repeat')} className="px-2.5 py-1">+ Circuito</Button>
                                             </>) : (<>
-                                                <button onClick={() => addBlock('warmup')} className="px-2.5 py-1 text-ink-3 rounded-full text-[11px] font-medium hover:bg-surface-2 transition-all">+ Calentar</button>
-                                                <button onClick={() => addBlock('main')} className="px-2.5 py-1 text-ink-3 rounded-full text-[11px] font-medium hover:bg-surface-2 transition-all">+ Bloque</button>
-                                                <button onClick={() => addBlock('repeat')} className="px-2.5 py-1 bg-inverse text-ink-inverse rounded-full text-[11px] font-medium hover:bg-inverse-2 transition-all shadow-sm">+ Intervalos</button>
+                                                <Button variant="ghost" onClick={() => addBlock('warmup')} className="px-2.5 py-1">+ Calentar</Button>
+                                                <Button variant="ghost" onClick={() => addBlock('main')} className="px-2.5 py-1">+ Bloque</Button>
+                                                <Button variant="inverse" onClick={() => addBlock('repeat')} className="px-2.5 py-1">+ Intervalos</Button>
                                             </>)}
                                         </div>
                                     </div>
@@ -1853,7 +1853,7 @@ export const CalendarPage = ({ activities, plannedWorkouts = [], addPlannedWorko
                                                                         active={currentZoneMode === 'power'} tone="power">W</Segmented.Option>
                                                                 </Segmented>
                                                             )}
-                                                            <button onClick={() => removeBlock(block.id)} className={`${canUsePower && !isStr ? '' : 'ml-auto'} text-slate-300 hover:text-red-500 transition-colors`}><X size={13} /></button>
+                                                            <Button variant="danger-text" onClick={() => removeBlock(block.id)} className={canUsePower && !isStr ? '' : 'ml-auto'}><X size={13} /></Button>
                                                         </div>
                                                         <div className="p-3 bg-surface-6">
                                                             <div className="space-y-3">
@@ -1917,15 +1917,15 @@ export const CalendarPage = ({ activities, plannedWorkouts = [], addPlannedWorko
                                                                             placeholder="Nota"
                                                                             className="flex-1 min-w-[60px] bg-transparent border-b border-dashed border-slate-200 dark:border-zinc-800 py-1 text-[11px] outline-none focus:border-slate-400 placeholder:text-faint" />
                                                                         
-                                                                        <button onClick={() => removeStep(block.id, step.id)} className="text-slate-300 hover:text-red-500 ml-1 shrink-0 transition-colors"><X size={13}/></button>
+                                                                        <Button variant="danger-text" onClick={() => removeStep(block.id, step.id)} className="ml-1 shrink-0"><X size={13}/></Button>
                                                                     </div>
                                                                 ))}
                                                                 
                                                                 <div className="flex gap-2 pt-2 border-t border-line-soft mt-1">
                                                                     <button onClick={() => addStepToRepeat(block.id, 'pair')} className="text-[11px] text-slate-500 hover:text-slate-800 dark:hover:text-zinc-300 font-medium transition-colors">+ Par Trabajo/Descanso</button>
                                                                     <span className="text-slate-200 dark:text-zinc-700">|</span>
-                                                                    <button onClick={() => addStepToRepeat(block.id, 'active')} className="text-[10px] text-slate-400 hover:text-slate-600 font-medium transition-colors">+ Trabajo</button>
-                                                                    <button onClick={() => addStepToRepeat(block.id, 'recovery')} className="text-[10px] text-slate-400 hover:text-slate-600 font-medium transition-colors">+ Descanso</button>
+                                                                    <Button variant="link-muted" onClick={() => addStepToRepeat(block.id, 'active')}>+ Trabajo</Button>
+                                                                    <Button variant="link-muted" onClick={() => addStepToRepeat(block.id, 'recovery')}>+ Descanso</Button>
                                                                 </div>
                                                             </div>
                                                         </div>
@@ -2014,7 +2014,7 @@ export const CalendarPage = ({ activities, plannedWorkouts = [], addPlannedWorko
                                                             className="flex-1 min-w-[80px] bg-transparent border-b border-dashed border-line py-1 text-[11px] outline-none focus:border-line-strong-2 placeholder:text-faint" />
                                                     </div>
 
-                                                    <button onClick={() => removeBlock(block.id)} className="text-slate-300 hover:text-red-500 shrink-0 transition-colors"><X size={14} /></button>
+                                                    <Button variant="danger-text" onClick={() => removeBlock(block.id)} className="shrink-0"><X size={14} /></Button>
                                                 </div>
                                             );
                                         })}

@@ -1,11 +1,11 @@
 {
   "$comment": "Línea base de scripts/check-colors.mjs. Solo debe bajar (npm run lint:colors -- --update). Subirla a mano exige justificarlo en el PR.",
   "totals": {
-    "palette": 808,
+    "palette": 780,
     "arbitrary": 3,
     "hex": 100,
     "rgb": 10,
-    "dark": 185
+    "dark": 177
   },
   "files": {
     "src/App.jsx": {
@@ -30,11 +30,11 @@
       "dark": 0
     },
     "src/components/auth/LoginPage.jsx": {
-      "palette": 14,
+      "palette": 11,
       "arbitrary": 0,
       "hex": 0,
       "rgb": 0,
-      "dark": 4
+      "dark": 3
     },
     "src/components/common/ErrorBoundary.jsx": {
       "palette": 5,
@@ -191,18 +191,18 @@
       "dark": 3
     },
     "src/components/pages/ActivityDetailPage.jsx": {
-      "palette": 130,
+      "palette": 122,
       "arbitrary": 0,
       "hex": 0,
       "rgb": 0,
-      "dark": 28
+      "dark": 24
     },
     "src/components/pages/CalendarPage.jsx": {
-      "palette": 134,
+      "palette": 120,
       "arbitrary": 0,
       "hex": 22,
       "rgb": 0,
-      "dark": 39
+      "dark": 37
     },
     "src/components/pages/EmailConfirmedPage.jsx": {
       "palette": 6,
@@ -219,11 +219,11 @@
       "dark": 29
     },
     "src/components/pages/LandingPage.jsx": {
-      "palette": 43,
+      "palette": 40,
       "arbitrary": 0,
       "hex": 0,
       "rgb": 1,
-      "dark": 11
+      "dark": 10
     },
     "src/components/pages/ProfilePage.jsx": {
       "palette": 79,

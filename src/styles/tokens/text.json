@@ -19,5 +19,6 @@
   "segmented-off": { "light": "slate-500", "dark": "slate-500" },
   "segmented-off-hover": { "light": "slate-700", "dark": "slate-700" },
   "ink-4-fixed": { "light": "slate-400", "dark": "slate-400" },
-  "segmented-mini-off-hover": { "light": "slate-600", "dark": "slate-600" }
+  "body-soft-fixed": { "light": "slate-600", "dark": "slate-600" },
+  "faint-fixed": { "light": "slate-300", "dark": "slate-300" }
 }

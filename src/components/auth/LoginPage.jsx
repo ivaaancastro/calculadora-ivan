@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { supabase } from '../../supabase'; 
 import { Activity, Loader2, Mail, Lock, ArrowLeft, User } from 'lucide-react';
+import { IconButton } from '../ui';
 
 export const LoginPage = () => {
   const [loading, setLoading] = useState(false);
@@ -75,9 +76,7 @@ export const LoginPage = () => {
         <div className="bg-surface rounded-lg border border-line p-6 sm:p-8 shadow-sm relative overflow-hidden">
           
           {isForgotPassword && (
-            <button onClick={() => {setIsForgotPassword(false); setError(null); setMessage(null);}} className="absolute top-4 left-4 p-2 text-slate-400 hover:text-slate-700 dark:hover:text-zinc-200 transition-colors">
-              <ArrowLeft size={16} />
-            </button>
+            <IconButton variant="bare" onClick={() => {setIsForgotPassword(false); setError(null); setMessage(null);}} className="absolute top-4 left-4 p-2" label="Volver" icon={ArrowLeft} iconSize={16} />
           )}
 
           <h2 className="text-sm font-bold uppercase tracking-widest text-ink-2 mb-6 text-center mt-2">
