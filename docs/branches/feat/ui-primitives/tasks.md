@@ -79,7 +79,7 @@ Solo se marca lo verificado. Spec y plan aprobados el 2026-11-09 ("Apruebo todo"
 ## PR 5 — Button e IconButton (`feat/ui-primitives-button`)
 - [x] Inventario, primitivas, sustitución
 - [x] Verificación completa
-- [ ] PR hacia `develop`
+- [x] PR hacia `develop`: [#65](https://github.com/ivaaancastro/calculadora-ivan/pull/65)
 
 ### Notas del PR 5
 - **Inventario:** 101 botones, 89 recetas, 9 con ≥ 2 usos que cubren 21. Tras la sustitución quedan 86 elementos `<button>` y 2 recetas repetidas fuera de `ui/` (4 botones, abajo); la tercera que da el inventario son los `<button>` de las propias primitivas.
