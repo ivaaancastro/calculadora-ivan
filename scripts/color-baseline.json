@@ -1,11 +1,11 @@
 {
   "$comment": "Línea base de scripts/check-colors.mjs. Solo debe bajar (npm run lint:colors -- --update). Subirla a mano exige justificarlo en el PR.",
   "totals": {
-    "palette": 774,
+    "palette": 767,
     "arbitrary": 3,
     "hex": 100,
-    "rgb": 10,
-    "dark": 175
+    "rgb": 9,
+    "dark": 173
   },
   "files": {
     "src/App.jsx": {
@@ -23,7 +23,7 @@
       "dark": 3
     },
     "src/components/activity/ActivitySharedUI.jsx": {
-      "palette": 7,
+      "palette": 4,
       "arbitrary": 0,
       "hex": 0,
       "rgb": 0,
@@ -176,13 +176,6 @@
       "rgb": 0,
       "dark": 0
     },
-    "src/components/fitness/fitnessConstants.js": {
-      "palette": 0,
-      "arbitrary": 0,
-      "hex": 0,
-      "rgb": 1,
-      "dark": 0
-    },
     "src/components/modals/AddActivityModal.jsx": {
       "palette": 8,
       "arbitrary": 0,
@@ -212,11 +205,11 @@
       "dark": 2
     },
     "src/components/pages/HealthPage.jsx": {
-      "palette": 132,
+      "palette": 128,
       "arbitrary": 0,
       "hex": 1,
       "rgb": 0,
-      "dark": 29
+      "dark": 27
     },
     "src/components/pages/LandingPage.jsx": {
       "palette": 39,
