@@ -136,7 +136,7 @@ Solo se marca lo verificado. Spec y plan aprobados el 2026-11-09 ("Apruebo todo"
 
 ## Cierre
 - [x] Cobertura final por familia, `MEMORY.md`, `CHANGELOG.md`, roadmap; spec marcada como implementada
-- [ ] PR hacia `develop`
+- [x] PR hacia `develop`: [#69](https://github.com/ivaaancastro/calculadora-ivan/pull/69)
 
 ### Notas del cierre
 - **Cobertura final (14 exportaciones, 8 familias, todas con uso):** `Card` `grouped` 39 + `panel` 11 y `SectionHeader` 13; `Stat` 26 y `StatTile` 8; `Segmented` 22 opciones (`pill` 4, `card` 10, `mini` 8); `Input` y `Select` 22 de los 44 campos; `Button` 11 e `IconButton` 6 (17 botones); `Modal` 4; `ChartTooltip` en los 5 tooltips propios y `chartTooltipStyle` en 3 tarjetas, más `InfoTooltip`; `LoadingState` 4 (2 `inline`, `screen` y `boot`).
