@@ -14,7 +14,7 @@
 
 ## 1. Estado del proyecto
 - **Nombre:** Forma — Dashboard de rendimiento deportivo y salud
-- **Rama actual:** `feat/ui-primitives-field` (Capa 2, PR 4: `Input` y `Select`). PR 0 (#60), PR 1 (#61), PR 2 (#62) y PR 3 (#63) mergeados. Siguiente: PR 5 (`Button`, `IconButton`).
+- **Rama actual:** `feat/ui-primitives-button` (Capa 2, PR 5: `Button` e `IconButton`). PR 0 a 4 (#60–#64) mergeados. Siguiente: PR 6 (`Modal`).
 - **Rama base:** `develop`
 - **Rama de producción:** `main` (desplegada en Vercel)
 - **Versión:** 0.1.0
@@ -44,7 +44,7 @@
 | spec-rediseno-02 | Rediseño de la webapp por capas (roadmap) | en curso | 2026-11-06 | `docs/branches/feat/webapp-redesign/` |
 | spec-rediseno-02-c0 | Capa 0: red de seguridad de UI | implementada (PR #51 mergeado en `develop`) | 2026-11-06 | test/ui-safety-net |
 | spec-rediseno-02-c1 | Capa 1: tokens y tema | implementada (PRs #52 a #58 mergeados en `develop`; cobertura y pendientes en `tasks.md`, Cierre) | 2026-11-09 | `docs/branches/feat/ui-tokens/` |
-| spec-rediseno-02-c2 | Capa 2: primitivas | en curso (aprobada el 2026-11-09; PR 0 a 3 mergeados, PR 4 en revisión) | 2026-11-09 | `docs/branches/feat/ui-primitives/` |
+| spec-rediseno-02-c2 | Capa 2: primitivas | en curso (aprobada el 2026-11-09; PR 0 a 4 mergeados, PR 5 en revisión) | 2026-11-09 | `docs/branches/feat/ui-primitives/` |
 
 > Cuando un agente implemente una spec, debe añadir una fila aquí y marcarla como `implementada`.
 
@@ -112,6 +112,7 @@
 - Los dos volcados `full` (develop y rama) en paralelo hacen fallar por tiempo algunos estados: repetir solos los que falten (`--project=<p> -g "<estado>"`) y comprobar que salen 104 volcados antes de dar el 0 por bueno. Con `-g`, el título es "Volcado de estilos · tema <t> <estado>" (sin `›`).
 - El volcado no cubre todo: el planificador se abre sin bloques (no hay conmutadores KM/MIN ni FC/W) y `PowerProfileCard` no se pinta con los datos de prueba. Para un control que no sale, comparar sus estilos calculados (en reposo y con `:hover` forzado por CDP) con una prueba temporal sin commit en la rama y en el worktree de `develop`.
 - Tokens: cada familia de `src/styles/tokens/*.json` admite un solo token por par claro/oscuro (lo comprueba `codemod<Familia>.test.js`). Si una primitiva necesita un par que ya existe, se reutiliza ese token (renombrándolo a un nombre neutro si hace falta, como `ink-4-fixed` en el PR 4). Las variables CSS renombradas salen como diferencia en una comparación que incluya propiedades `--*`: hay que ignorarlas y comparar los valores resueltos.
+- `LoginPage.jsx` no se renderiza en ninguna parte (el acceso real es el modal de la landing): no sale en el volcado ni en las capturas. Las pruebas temporales de estados forzados por CDP pueden fallar de forma intermitente (el DOM cambia entre lectura y forzado, o el planificador desaparece en una lectura): repetir antes de dar por buena una diferencia de número de elementos.
 - En móvil, `MobileSwipePager` monta las otras pestañas fuera de pantalla: al buscar "la primera gráfica" hay que filtrar por posición horizontal (`hoverChart` del volcado). La gráfica de Salud solo existe en la vista "Historial".
 
 ### Cómo trabajar con la red de seguridad (Capa 0)

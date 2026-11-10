@@ -44,7 +44,7 @@ Notas por familia:
 - **PR 2, Stat:** el borde de `MetricCard` pasa al token `hairline-5` (D2). `StatTile` solo cubre el Dashboard (`lg`, `sm`); las fichas de Salud se quedan con `Card pressable` (alcance acordado el 2026-11-09, ver spec 6.2).
 - **PR 3, Segmented:** antes de tocar nada, comprobar que los E2E y el volcado (estados `calendario-forma`, `detalle-mapa`) localizan las opciones por rol `button` y nombre: `aria-pressed` no cambia ni el rol ni el nombre. Hecho. `pill` solo cubre `PillTab` (alcance acordado el 2026-11-09, ver spec 6.2), y los conmutadores `mini` se comparan con una prueba temporal porque el volcado no los ve.
 - **PR 4, Field:** las pruebas de integración de `AddActivityModal`, `HistoryList` y `ProfilePage` deben pasar sin tocarlas. Los campos de acceso con D-08 no entran. Hecho: pasan sin cambios. Los bloques del Calendario y las zonas de Ajustes no salen en el volcado y se comparan con una prueba temporal.
-- **PR 5, Button:** se respeta el `type` de cada botón original (`submit` en los formularios de acceso y de añadir).
+- **PR 5, Button:** se respeta el `type` de cada botón original (`submit` en los formularios de acceso y de añadir). Hecho: ninguno de los botones migrados está en un formulario; los `submit` de acceso y de añadir son recetas únicas y no entran.
 - **PR 6, Modal:** el volcado ya cubre `modal-anadir` y `modal-acceso`. El PR 0 añade el planificador y el visor. El z-index de cada modal (`z-50`, `z-[60]`) se conserva.
 - **PR 7, Tooltip:** la prueba nueva de toque fija que hoy se abren al tocar en Dashboard, Salud (Historial) y Rendimiento (spec 3.5, corregida). El estado `dashboard-punto-activo` del volcado cubre el marco `glass`.
 

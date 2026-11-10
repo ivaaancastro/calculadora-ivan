@@ -175,6 +175,7 @@ Las variantes llevan el nombre de su papel, no el de la pantalla. Si dos recetas
 ```
 - Solo las recetas con ≥ 2 usos (unos 33 botones): `inverse` y `ghost` de los diálogos y chips del Calendario, `link-muted`, `danger-text` (borrar en texto), y en `IconButton` `soft`, `ghost-danger`, `ghost` y `close`. Los otros ~86 botones son recetas únicas y se quedan (D1).
 - `type="button"` por defecto, salvo que el original sea `submit`: el comportamiento debe ser el mismo en los formularios.
+- **Cobertura (PR 5, 2026-11-09):** tras los PR 3 y 4 quedan 9 recetas de botón con ≥ 2 usos (21 botones; muchas de las del inventario inicial eran opciones de control segmentado). Entran 7 (17 botones): `Button` `ghost` e `inverse` (chips de añadir bloque), `link-muted` (+ Trabajo, + Descanso) y `danger-text` (quitar bloque o paso), e `IconButton` `soft` (volver del detalle), `ghost` (mes anterior y siguiente) y `bare` (volver de la contraseña olvidada, acceso y landing; la spec lo llamaba `close`). No entra `ghost-danger` (borrar actividad del detalle): su color de base en oscuro gana hoy al hover rojo (D-08) y pasarlo a tokens cambiaría el hover. Tampoco las 2 opciones de la familia A de Salud (control segmentado, Capa 3). Ningún botón migrado está dentro de un `<form>`, así que `type="button"` no cambia el comportamiento. Los grises iguales en claro y oscuro pasan a tokens neutros: `faint-fixed` (nuevo) y `body-soft-fixed` (el antiguo `segmented-mini-off-hover`, renombrado).
 
 **Modal** (PR 6)
 ```jsx

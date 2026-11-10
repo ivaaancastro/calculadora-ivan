@@ -77,8 +77,18 @@ Solo se marca lo verificado. Spec y plan aprobados el 2026-11-09 ("Apruebo todo"
 - Resultados: lint ✓, lint:colors ✓, lint:ui ✓ (7 exportaciones), unit 159/159, integración 10/10 (sin tocar), build ✓, E2E macOS 79 ✓, E2E Docker 127 ✓ (48 capturas sin diferencias; el ✘ de `gestures.spec.js:37` es D-01). Volcado `full` frente a `develop`: **104 volcados, 90.548 elementos, 0 diferencias** (los dos volcados en serie, sin repeticiones). El volcado no llega a los bloques del Calendario ni a las zonas en modo manual: una prueba temporal sin commit abre el planificador con un bloque y un circuito de ciclismo (distancia en KM y objetivo de ritmo), Ajustes y las zonas manuales de carrera y ciclismo, el historial y el modal, y compara los estilos calculados de todos los campos (y el color del `::placeholder`) en reposo y con `:hover`, `:focus` y `:focus-visible` forzados, en claro y oscuro: **528 elementos, 0 diferencias** (sin contar las variables `--*`, que cambian por el renombrado). Informe táctil en macOS: 113, igual que en `develop`.
 
 ## PR 5 — Button e IconButton (`feat/ui-primitives-button`)
-- [ ] Inventario, primitivas, sustitución
-- [ ] Verificación completa y PR
+- [x] Inventario, primitivas, sustitución
+- [x] Verificación completa
+- [ ] PR hacia `develop`
+
+### Notas del PR 5
+- **Inventario:** 101 botones, 89 recetas, 9 con ≥ 2 usos que cubren 21. Tras la sustitución quedan 86 elementos `<button>` y 2 recetas repetidas fuera de `ui/` (4 botones, abajo); la tercera que da el inventario son los `<button>` de las propias primitivas.
+- **Cobertura:** 17 botones. `Button`: `ghost` 4 y `inverse` 2 (chips de añadir bloque del planificador), `link-muted` 2 (+ Trabajo, + Descanso), `danger-text` 3 (quitar bloque o paso). `IconButton`: `soft` 2 (volver del detalle, móvil y escritorio), `ghost` 2 (mes anterior y siguiente) y `bare` 2 (volver de la contraseña olvidada en la landing y en `LoginPage`, que no se renderiza en ninguna parte: código sin uso, Capa 6).
+- **Fuera de la primitiva:** borrar actividad del detalle (2, D-08: en oscuro su color de base gana al hover rojo), las 2 opciones de la familia A de Salud (control segmentado, Capa 3). El resto son recetas únicas (D1).
+- **Tokens:** `faint-fixed` (slate-300) y `fill-hover` (`slate-200/70`, `zinc-700`) nuevos. `segmented-mini-off-hover` pasa a `body-soft-fixed` (mismo valor), en un commit propio, como `ink-4-fixed` en el PR 4. El resto ya existía: `surface-2`, `fill`, `danger`, `body-2`, `ink-4-fixed`.
+- **Accesibilidad:** `IconButton` exige `label` (`aria-label`). Los que tenían `title` lo conservan con el mismo texto, así que el nombre accesible no cambia. El de volver de la landing no tenía nombre y ahora se llama "Volver". `type="button"` por defecto: ningún botón migrado está en un `<form>`.
+- `lint:colors`: `palette` 808 → 780, `dark` 185 → 177.
+- Resultados: lint ✓, lint:colors ✓, lint:ui ✓ (9 exportaciones), unit 164/164, integración 10/10 (sin tocar), build ✓, E2E macOS 79 ✓, E2E Docker 127 ✓ (48 capturas sin diferencias; el ✘ de `gestures.spec.js:37` es D-01). Volcado `full` frente a `develop`: **104 volcados, 90.548 elementos, 0 diferencias** (el de `develop` se repitió entero porque la primera ejecución se cortó). El volcado no llega a los bloques del planificador ni al formulario de contraseña olvidada: una prueba temporal sin commit abre el planificador con bloques y un circuito, el detalle de actividad y la contraseña olvidada de la landing, y compara los estilos calculados de todos los botones migrados en reposo y con `:hover`, `:focus-visible` y `:active` forzados, en claro y oscuro: **704 elementos, 0 diferencias** (sin contar las variables `--*`). Informe táctil en macOS: 113, igual que en `develop`.
 
 ## PR 6 — Modal (`feat/ui-primitives-modal`)
 - [ ] Inventario, primitiva, sustitución, ARIA (D4 a) y Escape y bloqueo de desplazamiento en commit propio (D4 b)
