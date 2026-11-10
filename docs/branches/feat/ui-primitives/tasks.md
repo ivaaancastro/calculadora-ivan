@@ -120,8 +120,19 @@ Solo se marca lo verificado. Spec y plan aprobados el 2026-11-09 ("Apruebo todo"
 - Resultados: lint ✓, lint:colors ✓, lint:ui ✓ (13 exportaciones), unit 177/177, integración 10/10 (sin tocar), build ✓, E2E macOS 87 ✓ (83 + 4 de `tooltip-touch.spec.js`), E2E Docker 135 ✓ (131 + 4; 48 capturas sin diferencias; el ✘ de `gestures.spec.js:37` es D-01). Volcado `full` frente a `develop`: **104 volcados, 90.548 elementos, 0 diferencias** (en serie). Informe táctil en macOS: 113, igual que en `develop` (actividades 21, calendario 43, detalle 16, dashboard 7, landing 2, perfil 9, rendimiento 10, salud 5).
 
 ## PR 8 — LoadingState (`feat/ui-primitives-loading`)
-- [ ] Inventario, primitiva, sustitución, retirada de `LazyFallback`
-- [ ] Verificación completa y PR
+- [x] Inventario, primitiva, sustitución, retirada de `LazyFallback`
+- [x] Verificación completa
+- [ ] PR hacia `develop`
+
+### Notas del PR 8
+- **Inventario:** 24 elementos de carga en 14 recetas. Solo 3 recetas se repiten (13 elementos): el girador con texto "Cargando..." (`span animate-spin text-action-bright`), `Loader2` con `animate-spin` y `RefreshCw` con `animate-spin`. Entran las dos pantallas de carga completas y los 2 `LazyFallback`.
+- **Cobertura (3 variantes, cada una copia una receta):** `inline` los 2 `LazyFallback` (`py-32` y girador, idénticos); `screen` la carga del Dashboard (`h-screen`, `bg-sunken-2`, `gap-4`, `transition-colors`, girador y etiqueta pulsante); `boot` el arranque de `App` (`min-h-screen`, sin girador y etiqueta con `text-ink-3-flat`). Las dos pantallas completas **no son la misma receta** (altura, girador, separación, transición y tono del texto), así que no se unifican: la Capa 3 decide una sola. Entran como variantes aunque tengan un uso cada una porque la familia ya existe (RF2, igual que los 4 modales del PR 6).
+- **Textos literales:** "Cargando..." (girador), "Cargando métricas..." y "Iniciando sistema..." se conservan tal cual: `e2e/support/ui.js` (`gotoReady`) y `e2e/dashboard.spec.js` esperan a que desaparezcan para saber que la pantalla está lista.
+- **Retirado:** `LazyFallback` (dos copias, una en `ActivityRouteWrapper.jsx` y otra en `ActivitySubRoutes.jsx`) pasa a `ui-retired.json`. `lint:ui` detectó el nombre en un comentario de `loadingStateClasses.js`: reformulado.
+- **Fuera de la primitiva (21 elementos):** los `Loader2` de `LoginPage` (no se renderiza), landing, `ProfilePage` (6), `StravaCallback`, `ActivityDetailPage` (2) y los `RefreshCw` de `Navbar` y `MmpAndEfCard`, todos con receta propia o color suelto. Quedan listados para la Capa 3 y la 5.
+- `lint:colors`: **sin cambios** (760 / 3 / 100 / 9 / 170); la receta solo usa tokens que ya existían (`action-bright`, `sunken-2`, `ink-3`, `ink-3-flat`).
+- **El volcado no cubre estos estados** (son transitorios: `gotoReady` espera a que desaparezcan). La prueba de que el marcado no cambia es la unitaria, que compara el HTML exacto de las 3 variantes, más el diff. Para probar el estado `screen`/`boot` a mano: `loading` del Dashboard y `isInitializing` de `App`.
+- Resultados: lint ✓, lint:colors ✓, lint:ui ✓ (14 exportaciones), unit 182/182, integración 10/10 (sin tocar), build ✓, E2E macOS 87 ✓ (sin pruebas nuevas), E2E Docker 135 ✓ (48 capturas sin diferencias; el ✘ de `gestures.spec.js:37` es D-01). Volcado `full` frente a `develop`: **104 volcados, 90.548 elementos, 0 diferencias** (en serie). Informe táctil en macOS: 113, igual que en `develop`.
 
 ## Cierre
 - [ ] Cobertura final por familia, `MEMORY.md`, `CHANGELOG.md`, roadmap; spec marcada como implementada
