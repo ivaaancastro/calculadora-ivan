@@ -106,7 +106,7 @@ Solo se marca lo verificado. Spec y plan aprobados el 2026-11-09 ("Apruebo todo"
 ## PR 7 — ChartTooltip (`feat/ui-primitives-tooltip`)
 - [x] Prueba E2E del toque actual (hoy se abre en todas las pantallas, spec 3.5), primitiva, sustitución; `InfoTooltip` al tocar (D4 d) en commit propio
 - [x] Verificación completa
-- [ ] PR hacia `develop`
+- [x] PR hacia `develop`: [#67](https://github.com/ivaaancastro/calculadora-ivan/pull/67)
 
 ### Notas del PR 7
 - **Alcance reducido (aprobado el 2026-11-10, "Solo el marco"):** la API de la spec (`title` y `rows` genéricos) cambiaría el DOM de los 5 tooltips propios, que tienen filas distintas. `ChartTooltip` es solo el marco y cada tooltip conserva sus filas: `EvolutionChart` (`glass`), `CustomChartTooltip` (`dark`), `HistoryChartTooltip` (`dark-history`) y los dos de `MmpAndEfCard` (`card`, con `min-w-[150px]` y `w-48 z-[200]` en `className`). Los componentes locales siguen existiendo como envoltorios del marco; sus filas, con colores sueltos, quedan para la Capa 3.
