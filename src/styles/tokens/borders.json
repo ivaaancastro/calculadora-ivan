@@ -86,5 +86,13 @@
   "hairline-5": {
     "light": "black/[0.04]",
     "dark": "white/[0.07]"
+  },
+  "tooltip-dark-edge": {
+    "light": "zinc-700/80",
+    "dark": "zinc-700/80"
+  },
+  "tooltip-dark-edge-2": {
+    "light": "slate-700/60",
+    "dark": "zinc-800"
   }
 }

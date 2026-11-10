@@ -37,6 +37,8 @@
   "scrim-2": { "light": "black/40", "dark": "black/40" },
   "scrim-3": { "light": "black/40", "dark": "black/70" },
   "scrim-4": { "light": "slate-900/60", "dark": "black/80" },
+  "tooltip-dark": { "light": "zinc-900/95", "dark": "zinc-900/95" },
+  "tooltip-dark-2": { "light": "slate-900/95", "dark": "zinc-900/95" },
   "inverse": { "light": "slate-900", "dark": "white" },
   "inverse-2": { "light": "slate-700", "dark": "zinc-200" },
   "glass-nav": { "light": "white/80", "dark": "black/80" },
