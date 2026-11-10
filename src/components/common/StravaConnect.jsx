@@ -25,12 +25,16 @@ const StravaConnect = () => {
   };
 
   return (
-    <button 
+    <button
       onClick={handleConnect}
-      className="bg-strava hover:bg-strava-hover text-white font-bold py-2 px-4 rounded-xl flex items-center gap-2 transition shadow-sm text-sm"
+      aria-label="Conectar con Strava"
+      className="bg-strava hover:bg-strava-hover text-white font-bold py-2 px-3 sm:px-4 rounded-xl flex items-center gap-2 transition shadow-sm text-sm whitespace-nowrap"
     >
       <Activity size={18} />
-      Conectar con Strava
+      {/* En la cabecera móvil el texto completo no cabe junto al perfil; la etiqueta
+          accesible no cambia. */}
+      <span className="hidden sm:inline">Conectar con Strava</span>
+      <span className="sm:hidden">Conectar</span>
     </button>
   );
 };

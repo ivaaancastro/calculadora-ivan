@@ -301,6 +301,7 @@ export const ProfilePage = ({
     activities, 
     isDeepSyncing,  
     onDeepSync, 
+    onClearDb,
     onBack,
     section: propSection
 }) => {
@@ -984,9 +985,28 @@ export const ProfilePage = ({
                                     <button 
                                         onClick={handleDeleteAccount}
                                         disabled={isDeletingAccount}
-                                        className="w-full py-2 bg-danger-solid hover:bg-danger-hover text-white rounded-xl text-xs font-semibold transition-all disabled:opacity-50 flex items-center justify-center gap-1.5 shadow-xs active:scale-95"
+                                        className="w-full min-h-[44px] py-2 bg-danger-solid hover:bg-danger-hover text-white rounded-xl text-xs font-semibold transition-all disabled:opacity-50 flex items-center justify-center gap-1.5 shadow-xs active:scale-95"
                                     >
                                         {isDeletingAccount ? <Loader2 size={13} className="animate-spin" /> : <><Trash2 size={13} /> Eliminar Cuenta</>}
+                                    </button>
+                                </Card>
+
+                                {/* Borrar actividades: vivía en la cabecera de escritorio (RF6). */}
+                                <Card className="p-3.5 sm:p-4 mt-5">
+                                    <div className="flex items-center gap-3 mb-3">
+                                        <div className="w-7 h-7 rounded-[8px] bg-danger/15 text-danger-ink flex items-center justify-center shrink-0">
+                                            <Trash2 size={15} strokeWidth={2.3} />
+                                        </div>
+                                        <div>
+                                            <h3 className="text-xs sm:text-sm font-bold text-danger-ink">Borrar todas las actividades</h3>
+                                            <p className="text-[10px] text-ink-4">Se borran tus actividades, no tu cuenta</p>
+                                        </div>
+                                    </div>
+                                    <button
+                                        onClick={onClearDb}
+                                        className="w-full min-h-[44px] py-2 bg-surface border border-danger-edge-2 text-danger-ink rounded-xl text-xs font-semibold transition-all hover:bg-danger-tint-2 flex items-center justify-center gap-1.5 active:scale-95"
+                                    >
+                                        <Trash2 size={13} /> Borrar Actividades
                                     </button>
                                 </Card>
                             </div>

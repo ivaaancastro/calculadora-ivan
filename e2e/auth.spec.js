@@ -30,6 +30,8 @@ test.describe('Autenticación y redirección', () => {
     await gotoReady(page, '/');
     await expect(page.getByRole('link', { name: 'Calendario' }).first()).toBeVisible();
 
+    // Cerrar sesión vive solo en el menú de la cabecera (RF5): antes hay que abrirlo.
+    await page.getByRole('button', { name: 'Menú de configuración y perfil' }).click();
     await page.getByRole('button', { name: 'Cerrar Sesión' }).first().click();
     await expect(page.getByRole('button', { name: 'Iniciar Sesión' }).first()).toBeVisible({ timeout: 10000 });
     await expect(page.getByRole('link', { name: 'Calendario' })).toHaveCount(0);

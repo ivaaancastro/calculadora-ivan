@@ -35,15 +35,18 @@
  * orden de capas: ninguna pantalla vuelve a escribir el número.
  */
 :root {
-  /* Cabecera: el alto de la caja y el mismo más la safe area del móvil. 56 px es lo que ya
-     asumían el pager y el banner; el PR 2 ajusta la cabecera a este valor (D4). */
-  --nav-h: 3.5rem;
+  /* Cabecera: el alto de la caja y el mismo más la safe area del móvil. La cabecera lo usa
+     como altura fija, así que este valor es la verdad y no una suposición: 60 px dejan el
+     contenido de 36 px con 12 px arriba y abajo. */
+  --nav-h: 3.75rem;
   --nav-h-total: calc(var(--nav-h) + env(safe-area-inset-top, 0px));
 
-  /* Barra inferior flotante: cápsula, separación con el borde y hueco que reserva el contenido. */
+  /* Barra inferior flotante: cápsula, separación con el borde y hueco que reserva el contenido.
+     El hueco son los 128 px del `pb-32` de siempre: 54 de barra + 12 de separación + 62 de
+     respiro para que el último elemento no quede pegado a la cápsula. */
   --bottom-nav-h: 3.375rem;
   --bottom-nav-gap: 0.75rem;
-  --bottom-nav-reserve: 8rem; /* el `pb-32` de hoy; el PR 2 lo recalcula con los dos anteriores */
+  --bottom-nav-reserve: 8rem;
 
   /* Orden de capas (spec, 6.3). El orden relativo es el de hoy: los modales ganan a los
      tooltips y el panel flotante del Calendario gana a todo. `--z-toast` es de la librería. */

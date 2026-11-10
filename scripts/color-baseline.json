@@ -1,11 +1,11 @@
 {
   "$comment": "Línea base de scripts/check-colors.mjs. Solo debe bajar (npm run lint:colors -- --update). Subirla a mano exige justificarlo en el PR.",
   "totals": {
-    "palette": 760,
+    "palette": 756,
     "arbitrary": 3,
     "hex": 100,
     "rgb": 9,
-    "dark": 170
+    "dark": 168
   },
   "files": {
     "src/App.jsx": {
@@ -86,11 +86,11 @@
       "dark": 6
     },
     "src/components/dashboard/Navbar.jsx": {
-      "palette": 23,
+      "palette": 19,
       "arbitrary": 1,
       "hex": 0,
       "rgb": 0,
-      "dark": 11
+      "dark": 9
     },
     "src/components/dashboard/UploadStatusBanner.jsx": {
       "palette": 1,

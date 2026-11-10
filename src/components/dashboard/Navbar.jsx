@@ -1,19 +1,23 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { 
-  Upload, Trash2, Plus, RefreshCw, Activity, Moon, Sun, LogOut, 
-  LayoutDashboard, Calendar, List, HeartPulse, BarChart3, 
-  Heart, Link2, Lock, ChevronDown, ChevronRight, User 
+import {
+  RefreshCw, Activity, Moon, Sun, LogOut,
+  LayoutDashboard, Calendar, List, HeartPulse, BarChart3,
+  Heart, Link2, Lock, ChevronDown, ChevronRight, User
 } from 'lucide-react';
 import StravaConnect from '../common/StravaConnect';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useTheme } from '../../hooks/useTheme';
 import { supabase } from '../../supabase';
 
-export const Navbar = ({
-   settings, uploading, handleClearDb, onFileUpload,
-   onAddClick, isStravaConnected, onSync
-}) => {
-  const fileInputRef = useRef(null);
+/**
+ * Cabecera de la aplicación (spec-rediseno-02-c3, RF5).
+ *
+ * Solo lleva la identidad con el menú, las pestañas de escritorio, el tema y Strava.
+ * Importar CSV se retiró (D3), añadir manual vive en Actividades, borrar actividades en
+ * Ajustes → Seguridad y Datos y cerrar sesión solo en el menú, el único sitio donde se ve
+ * igual en móvil y en escritorio.
+ */
+export const Navbar = ({ settings, uploading, isStravaConnected, onSync }) => {
   const menuRef = useRef(null);
   const location = useLocation();
   const navigate = useNavigate();
@@ -70,8 +74,8 @@ export const Navbar = ({
   ];
 
   return (
-    <nav className="glass-nav px-3.5 sm:px-6 pt-[calc(0.75rem+env(safe-area-inset-top))] pb-2.5 sm:pb-3 sticky top-0 z-nav transition-all duration-300">
-      <div className="flex justify-between items-center max-w-[1800px] mx-auto mt-0.5 md:mt-0">
+    <nav className="glass-nav flex items-center px-3.5 sm:px-6 sticky top-0 z-nav h-[calc(var(--nav-h)+env(safe-area-inset-top,0px))] pt-[env(safe-area-inset-top,0px)] transition-all duration-300">
+      <div className="flex justify-between items-center w-full max-w-[1800px] mx-auto">
 
         {/* FOTO DE PERFIL / TRIGGER MENÚ CONFIGURACIÓN */}
         <div className="relative" ref={menuRef}>
@@ -226,35 +230,6 @@ export const Navbar = ({
               <StravaConnect />
             </div>
           )}
-
-          {/* Desktop utility buttons */}
-          <div className="hidden md:flex items-center gap-1">
-            <div className="h-4 w-px bg-fill-2 mx-1"></div>
-
-            <input type="file" ref={fileInputRef} onChange={(e) => e.target.files[0] && onFileUpload(e.target.files[0])} accept=".csv" className="hidden" />
-            <button onClick={() => fileInputRef.current?.click()} disabled={uploading} className="p-2 text-slate-400 hover:text-slate-700 dark:text-zinc-400 dark:hover:text-zinc-100 rounded-full hover:bg-fill-8 transition-colors" title="Importar CSV">
-              <Upload size={16} />
-            </button>
-
-            <button onClick={onAddClick} className="p-2 text-ink-4-flat hover:text-action-2 rounded-full hover:bg-fill-8 transition-colors" title="Añadir Manual">
-              <Plus size={16} />
-            </button>
-
-            <button onClick={handleClearDb} className="p-2 text-ink-4-flat hover:text-danger-ink-2 rounded-full hover:bg-fill-8 transition-colors" title="Borrar DB">
-              <Trash2 size={16} />
-            </button>
-
-            <div className="h-4 w-px bg-fill-2 mx-1"></div>
-
-            <button onClick={handleLogout} className="p-2 hover:bg-danger-tint rounded-full transition-colors text-danger-light" title="Cerrar Sesión">
-              <LogOut size={16} />
-            </button>
-          </div>
-
-          {/* Mobile logout button (the settings wheel button has been removed as requested) */}
-          <button onClick={handleLogout} className="md:hidden w-9 h-9 flex items-center justify-center rounded-full text-danger/80 hover:text-danger bg-danger/10 hover:bg-danger/20 active:scale-90 transition-all" title="Cerrar sesión">
-            <LogOut size={16} />
-          </button>
         </div>
       </div>
     </nav>
