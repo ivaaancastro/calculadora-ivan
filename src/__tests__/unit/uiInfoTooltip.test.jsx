@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { InfoTooltip } from '../../components/ui/InfoTooltip.jsx';
-import { INFO_TOOLTIP } from '../../components/ui/infoTooltipClasses.js';
+import { INFO_TOOLTIP, infoBubbleClass } from '../../components/ui/infoTooltipClasses.js';
 
 describe('ui/InfoTooltip', () => {
   it('copia la receta de la burbuja con tokens exactos', () => {
@@ -16,6 +16,16 @@ describe('ui/InfoTooltip', () => {
     expect(html.startsWith(`<div class="${INFO_TOOLTIP.root}"><svg `)).toBe(true);
     expect(html).toMatch(/<svg[^>]* width="11"/);
     expect(html).toContain(` ${INFO_TOOLTIP.icon}"`);
-    expect(html).toContain(`<div class="${INFO_TOOLTIP.bubble}">Hola<div class="${INFO_TOOLTIP.arrow}"></div></div></div>`);
+    expect(html).toContain(`<div role="tooltip" class="${INFO_TOOLTIP.bubble}">Hola<div class="${INFO_TOOLTIP.arrow}"></div></div></div>`);
+  });
+
+  it('abierta por un toque cambia solo la visibilidad y la opacidad', () => {
+    expect(infoBubbleClass(false)).toBe(INFO_TOOLTIP.bubble);
+    const open = infoBubbleClass(true).split(' ');
+    expect(open).toContain('visible');
+    expect(open).toContain('opacity-100');
+    expect(open).not.toContain('invisible');
+    expect(open).not.toContain('opacity-0');
+    expect(open.length).toBe(INFO_TOOLTIP.bubble.split(' ').length);
   });
 });

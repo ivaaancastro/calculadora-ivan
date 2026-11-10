@@ -57,3 +57,24 @@ test.describe('Tooltip de gráfica al tocar', () => {
     });
   }
 });
+
+// InfoTooltip (D4 d): antes solo se abría con el ratón; ahora, también al tocarlo.
+test.describe('InfoTooltip al tocar', () => {
+  test('Rendimiento (Todos): tocar el icono abre la burbuja y tocar fuera la cierra', async ({ page }) => {
+    await setupApp(page, { authenticated: true });
+    await gotoReady(page, '/stats');
+    await visible(page.getByRole('button', { name: 'Todos', exact: true })).click();
+    const icon = visible(page.locator('div.group.cursor-help'));
+    const bubble = icon.locator('[role=tooltip]');
+    await icon.scrollIntoViewIfNeeded();
+    await expect(bubble).toHaveCSS('visibility', 'hidden');
+
+    const box = await icon.boundingBox();
+    await page.touchscreen.tap(box.x + box.width / 2, box.y + box.height / 2);
+    await expect(bubble).toHaveCSS('visibility', 'visible');
+    await expect(bubble).toHaveCSS('opacity', '1');
+
+    await page.touchscreen.tap(5, 300);
+    await expect(bubble).toHaveCSS('visibility', 'hidden');
+  });
+});
