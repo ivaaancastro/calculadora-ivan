@@ -122,7 +122,7 @@ Solo se marca lo verificado. Spec y plan aprobados el 2026-11-09 ("Apruebo todo"
 ## PR 8 — LoadingState (`feat/ui-primitives-loading`)
 - [x] Inventario, primitiva, sustitución, retirada de `LazyFallback`
 - [x] Verificación completa
-- [ ] PR hacia `develop`
+- [x] PR hacia `develop`: [#68](https://github.com/ivaaancastro/calculadora-ivan/pull/68)
 
 ### Notas del PR 8
 - **Inventario:** 24 elementos de carga en 14 recetas. Solo 3 recetas se repiten (13 elementos): el girador con texto "Cargando..." (`span animate-spin text-action-bright`), `Loader2` con `animate-spin` y `RefreshCw` con `animate-spin`. Entran las dos pantallas de carga completas y los 2 `LazyFallback`.
