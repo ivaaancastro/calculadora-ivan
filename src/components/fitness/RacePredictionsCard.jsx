@@ -1,7 +1,6 @@
 import React from 'react';
 import { Trophy, Clock } from 'lucide-react';
-import { InfoTooltip } from '../common/InfoTooltip';
-import { Card } from '../ui';
+import { Card, InfoTooltip } from '../ui';
 
 export const RacePredictionsCard = ({ racePredictions }) => {
     if (!racePredictions) return null;

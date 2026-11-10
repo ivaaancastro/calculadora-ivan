@@ -16,7 +16,6 @@ import {
 } from '../../utils/fitnessStatsEngine';
 import { SPORT_LOAD_CONFIG, getSportCategory } from '../../utils/tssEngine';
 import { EvolutionChart } from './EvolutionChart';
-import { InfoTooltip } from '../common/InfoTooltip';
 import { supabase } from '../../supabase';
 import { useTheme } from '../../hooks/useTheme';
 import { Card, SectionHeader, StatTile } from '../ui';

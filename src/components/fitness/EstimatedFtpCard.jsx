@@ -4,10 +4,8 @@ import {
     Tooltip as RechartsTooltip, ResponsiveContainer
 } from 'recharts';
 import { ArrowUp, ArrowDown, Minus } from 'lucide-react';
-import { InfoTooltip } from '../common/InfoTooltip';
-import { tooltipStyleFor } from './fitnessConstants';
 import { useChartTheme } from '../charts/useChartTheme';
-import { Card } from '../ui';
+import { Card, chartTooltipStyle, InfoTooltip } from '../ui';
 
 export const EstimatedFtpCard = ({
     ftp,
@@ -57,7 +55,7 @@ export const EstimatedFtpCard = ({
                                     <CartesianGrid strokeDasharray="3 3" stroke={ct.anatomy.grid2} opacity={0.3} vertical={false} />
                                     <XAxis dataKey="name" tick={{ fontSize: 9, fontWeight: 700, fill: ct.anatomy.tick }} axisLine={false} tickLine={false} />
                                     <YAxis hide />
-                                    <RechartsTooltip contentStyle={tooltipStyleFor(ct)} isAnimationActive={false} />
+                                    <RechartsTooltip contentStyle={chartTooltipStyle(ct)} isAnimationActive={false} />
                                     <Area type="monotone" dataKey="actual" stroke={ct.series.power} strokeWidth={3} fill="url(#ftpGradFinal)" dot={{ r: 4, fill: ct.series.power, strokeWidth: 2, stroke: ct.anatomy.dotRing }} connectNulls isAnimationActive={false} />
                                 </AreaChart>
                             </ResponsiveContainer>

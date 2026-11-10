@@ -1,6 +1,5 @@
 import React from 'react';
-import { InfoTooltip } from '../common/InfoTooltip';
-import { Card } from '../ui';
+import { Card, InfoTooltip } from '../ui';
 
 export const ThresholdsCard = ({ settings }) => {
     return (

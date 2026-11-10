@@ -3,10 +3,8 @@ import {
     ComposedChart, Bar, Line, XAxis, YAxis, CartesianGrid,
     Tooltip as RechartsTooltip, ResponsiveContainer
 } from 'recharts';
-import { InfoTooltip } from '../common/InfoTooltip';
-import { tooltipStyleFor } from './fitnessConstants';
 import { useChartTheme } from '../charts/useChartTheme';
-import { Card, Segmented } from '../ui';
+import { Card, chartTooltipStyle, InfoTooltip, Segmented } from '../ui';
 
 export const WeeklyVolumeAndFocusCard = ({
     weeklyChart,
@@ -32,7 +30,7 @@ export const WeeklyVolumeAndFocusCard = ({
                                 <CartesianGrid strokeDasharray="2 2" stroke={ct.anatomy.gridZinc} opacity={0.1} vertical={false} />
                                 <XAxis dataKey="dateLabel" tick={{ fontSize: 9, fill: ct.anatomy.tick }} minTickGap={15} axisLine={false} tickLine={false} />
                                 <YAxis yAxisId="left" tick={{ fontSize: 9, fill: ct.series.tss }} axisLine={false} tickLine={false} />
-                                <RechartsTooltip contentStyle={tooltipStyleFor(ct)} itemStyle={{ color: ct.tooltip.ink }} isAnimationActive={false} cursor={{ stroke: ct.anatomy.cursorZinc, strokeWidth: 1 }} />
+                                <RechartsTooltip contentStyle={chartTooltipStyle(ct)} itemStyle={{ color: ct.tooltip.ink }} isAnimationActive={false} cursor={{ stroke: ct.anatomy.cursorZinc, strokeWidth: 1 }} />
                                 <Bar yAxisId="left" dataKey="tss" name="TSS" fill={ct.series.tss} opacity={0.6} radius={[4, 4, 0, 0]} barSize={20} />
                                 <Line yAxisId="left" type="monotone" dataKey="hours" name="Horas" stroke={ct.series.hours} strokeWidth={3} dot={false} />
                             </ComposedChart>

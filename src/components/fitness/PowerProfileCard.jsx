@@ -4,11 +4,9 @@ import {
     Tooltip as RechartsTooltip, ResponsiveContainer
 } from 'recharts';
 import { Settings } from 'lucide-react';
-import { InfoTooltip } from '../common/InfoTooltip';
-import { tooltipStyleFor } from './fitnessConstants';
 import { formatInterval } from '../../hooks/useFitnessAnalytics';
 import { useChartTheme } from '../charts/useChartTheme';
-import { Card, Segmented } from '../ui';
+import { Card, chartTooltipStyle, InfoTooltip, Segmented } from '../ui';
 
 export const PowerProfileCard = ({
     showPowerConfig,
@@ -100,7 +98,7 @@ export const PowerProfileCard = ({
                                     <CartesianGrid strokeDasharray="3 3" stroke={ct.anatomy.grid2} opacity={0.3} vertical={false} />
                                     <XAxis dataKey="name" tick={{ fontSize: 9, fontWeight: 700, fill: ct.anatomy.tick }} axisLine={false} tickLine={false} />
                                     <YAxis tick={{ fontSize: 9, fontWeight: 700, fill: ct.anatomy.tick }} axisLine={false} tickLine={false} />
-                                    <RechartsTooltip contentStyle={tooltipStyleFor(ct)} formatter={(v, name) => [`${v} ${powerUnit === 'w' ? 'W' : 'W/kg'}`, name]} isAnimationActive={false} />
+                                    <RechartsTooltip contentStyle={chartTooltipStyle(ct)} formatter={(v, name) => [`${v} ${powerUnit === 'w' ? 'W' : 'W/kg'}`, name]} isAnimationActive={false} />
                                     {['World Class', 'Cat 1 / Elite', 'Cat 2', 'Cat 3', 'Cat 4', 'Cat 5', 'Untrained'].map((cat, idx) => (
                                         <Line key={cat} type="monotone" dataKey={cat} stroke={idx === 0 ? ct.series.profileTop : ct.series.profileOther} strokeWidth={1} dot={false} opacity={0.08} isAnimationActive={false} />
                                     ))}

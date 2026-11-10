@@ -10,7 +10,7 @@ import {
 } from 'lucide-react';
 import { useWellnessInfo } from '../../hooks/useWellnessInfo';
 import { useChartTheme } from '../charts/useChartTheme';
-import { Card, SectionHeader } from '../ui';
+import { Card, ChartTooltip, SectionHeader } from '../ui';
 
 // Componente de Tarjeta Apple iOS
 // Anillo Circular Estilo Apple Fitness / Health
@@ -70,7 +70,7 @@ const HistoryChartTooltip = ({ active, payload }) => {
     if (active && payload && payload.length) {
         const d = payload[0].payload;
         return (
-            <div className="bg-slate-900/95 dark:bg-zinc-900/95 backdrop-blur-md border border-slate-700/60 dark:border-zinc-800 p-3 rounded-xl shadow-xl text-xs space-y-1.5 min-w-[150px]">
+            <ChartTooltip variant="dark-history">
                 <p className="text-[10px] font-bold uppercase tracking-wider text-ink-4 border-b border-slate-800 dark:border-zinc-800 pb-1">
                     {d.dateLabelFull || d.dateLabel}
                 </p>
@@ -96,7 +96,7 @@ const HistoryChartTooltip = ({ active, payload }) => {
                         <span>{d.hrv} ms</span>
                     </div>
                 )}
-            </div>
+            </ChartTooltip>
         );
     }
     return null;

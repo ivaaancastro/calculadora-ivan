@@ -1,7 +1,6 @@
 import React from 'react';
 import { Activity, Brain } from 'lucide-react';
-import { InfoTooltip } from '../common/InfoTooltip';
-import { Card, Segmented } from '../ui';
+import { Card, InfoTooltip, Segmented } from '../ui';
 
 export const TrainingBalanceCard = ({ balance, balanceDays, setBalanceDays }) => {
     return (

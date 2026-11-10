@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { ComposedChart, Area, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine } from 'recharts';
 import { Activity } from 'lucide-react';
 import { useChartTheme } from '../charts/useChartTheme';
+import { ChartTooltip } from '../ui';
 
 const CustomTooltip = ({ active, payload, label }) => {
   if (active && payload && payload.length) {
@@ -11,7 +12,7 @@ const CustomTooltip = ({ active, payload, label }) => {
     const title = date.toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long' });
 
     return (
-      <div className="bg-surface-8 backdrop-blur-md p-2.5 sm:p-3 rounded-xl border border-line-muted-3 shadow-xl min-w-[140px] pointer-events-none select-none z-50">
+      <ChartTooltip variant="glass">
         <p className="text-[9px] font-medium uppercase tracking-widest text-ink-4 mb-1.5 flex justify-between items-center capitalize">
           {title}
           {diffDays > 0 && <span className="bg-surface-2 text-slate-500 px-1 py-0.5 rounded text-[8px] ml-2 font-mono font-normal">+{diffDays}d</span>}
@@ -38,7 +39,7 @@ const CustomTooltip = ({ active, payload, label }) => {
             );
           })}
         </div>
-      </div>
+      </ChartTooltip>
     );
   }
   return null;
