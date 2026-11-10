@@ -7,6 +7,20 @@ y este proyecto adhiere a [Semantic Versioning](https://semver.org/lang/es/).
 
 ## [Unreleased]
 
+### Rediseño — Capa 3: shell (`spec-rediseno-02-c3`), PR 2 de 7: cabecera y acciones
+- `refactor(ui-shell):` la cabecera mide una altura fija de **60 px** (D4 revisado tras medir 81 px en móvil y 63,5 en escritorio: el botón de Strava se partía en dos líneas) y lleva solo identidad con menú, pestañas de escritorio, tema y Strava. Desaparecen los cinco controles de utilidad de escritorio (importar CSV, añadir manual, borrar DB, sus separadores y cerrar sesión) y el cierre de sesión duplicado de móvil.
+- `feat(ui-shell):` «Borrar todas las actividades» pasa a Ajustes → Seguridad y Datos, con su `confirm` y botones de 44 px.
+- `refactor(ui-shell):` el botón de Strava no se parte (`whitespace-nowrap`) y en móvil dice «Conectar», con el mismo nombre accesible.
+- `refactor(ui-shell):` el histórico, el detalle de actividad y la cabecera del detalle calculan su alto con `--nav-h-total`; el pager móvil por fin encaja (antes asumía 56 px bajo una cabecera de 81).
+- `docs(ui-shell):` D3: «Importar CSV» se retira en vez de cablearse, porque nunca estuvo implementado (`processFile` era un `console.log`); D-03 queda como «acción retirada» en `paridad.md`.
+- Capturas de v1 regeneradas una sola vez (D1): 42 de 48 (la landing no cambia), revisadas una a una y listadas en el PR. Volcado `full` frente a `develop`: 4.038 diferencias, todas de caja y tipografía de la cabecera y del contenido que se desplaza, **ninguna de color**.
+
+### Rediseño — Capa 3: shell (`spec-rediseno-02-c3`), PR 1 de 7: tokens, z-index y D-01
+- `refactor(ui-shell):` tokens `--nav-h`, `--nav-h-total`, `--bottom-nav-h`, `--bottom-nav-gap` y `--bottom-nav-reserve`, y escala `--z-*` en `tailwind.config.js` (sticky 20, nav 30, nav-menu 40, sheet 50, tooltip 55, modal 60, floating 80, map 400, toast 9999).
+- `refactor(ui-shell):` 12 elementos pasan de números de capa sueltos a tokens, conservando quién gana; las dos marcas internas de `TrainingBalanceCard` bajan a 10/20.
+- `fix(ui-shell):` **D-01 cerrado**: `MobileSwipePager` excluye `.hide-scrollbar` y `gestures.spec.js` deja de ser un fallo esperado.
+- `test(ui-shell):` `e2e/shell.spec.js` (alturas y capas) y `src/__tests__/unit/shellTokens.test.js`. Sin cambio de aspecto: las 48 capturas quedan idénticas y el volcado solo difiere en `z-index` (excepción aprobada).
+
 ### Rediseño — Capa 2: primitivas (`spec-rediseno-02-c2`), cierre
 - `docs(ui-primitives):` Capa 2 implementada (PRs #60 a #68). 14 exportaciones en `src/components/ui/` en 8 familias, todas con uso: `Card`/`SectionHeader`, `Stat`/`StatTile`, `Segmented`, `Input`/`Select`, `Button`/`IconButton`, `Modal`, `ChartTooltip`/`chartTooltipStyle`/`InfoTooltip` y `LoadingState`. Retirados 14 clases sin uso de `index.css`, `MetricHelp`, `ios-card`, `ios-touch`, `ios-header`, `IosCard`, `MetricCard`, `PillTab`, `tooltipStyleFor` y los 2 `LazyFallback`. Colores sueltos: palette 865 → 760, arbitrary 9 → 3, rgb 11 → 9, dark 188 → 170. Unitaria 130 → 182, E2E 79 → 87. En los 9 PR el volcado ampliado frente a `develop` dio 0 diferencias y las capturas no cambiaron. Pendientes para las capas siguientes en `docs/branches/feat/ui-primitives/tasks.md`.
 

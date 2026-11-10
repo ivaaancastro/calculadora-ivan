@@ -32,19 +32,32 @@ Rama `feat/ui-shell`, sale de `develop` (`06ac9e3`). **0 diferencias** de volcad
 
 ## PR 2 — `refactor(ui-shell)`: cabecera y acciones
 
-Único PR de la capa que cambia capturas de v1 a propósito (D1). **No empezar sin releer D2 y D3.**
+Rama `feat/ui-shell-header`, sale de `develop` (`e6f8456`, merge del PR 1). **Único PR de la capa que cambia capturas de v1 a propósito (D1).**
 
-- [ ] Cabecera móvil ligera (identidad + menú, tema, Strava).
-- [ ] Escritorio sin los 4 iconos de utilidad ni el cierre de sesión duplicado.
-- [ ] Altura real: cabecera a 56 px y tokenizar `Dashboard.jsx:172` y `ActivityDetailPage`.
-- [ ] Ajustes: "Borrar DB" (con `confirm`) e "Importar CSV" cableado (cierra D-03).
-- [ ] Paridad recorrida y anotada.
-- [ ] Pruebas: paridad, destructiva, tema.
-- [ ] Capturas afectadas regeneradas y revisadas una a una.
-- [ ] Verificación completa.
+- [x] Cabecera móvil ligera (identidad + menú, tema, Strava).
+- [x] Escritorio sin los 4 iconos de utilidad ni el cierre de sesión duplicado.
+- [x] Altura real: cabecera a **60 px** (`--nav-h` = `3.75rem`, D4 revisado) y `Dashboard.jsx` / `ActivityDetailPage` a tokens.
+- [x] Ajustes: "Borrar actividades" (con `confirm`). "Importar CSV" **retirado** (D3 revisado: nunca implementado).
+- [x] Paridad recorrida y anotada.
+- [x] Pruebas: paridad, destructiva, tema.
+- [x] Capturas afectadas regeneradas y revisadas una a una.
+- [x] Verificación completa.
 - [ ] PR hacia `develop`.
 
 ### Notas del PR 2
+
+- **D3 cambia al implementar (decidido el 2026-11-10): "Importar CSV" se retira.** No había nada que cablear: `processFile` era un `console.log("Lógica de CSV pendiente", file)`, se borró en `f8114a6` y `Dashboard` nunca pasó `onFileUpload`, así que el icono solo lanzaba un error. Se documenta en `paridad.md` como **D-03 «acción retirada: nunca implementada»**; la importación, cuando se especifique su formato, será funcionalidad nueva. `e2e/export.spec.js` pierde la prueba que exigía el botón y conserva la nota y el `test.fixme` de exportación (D-05).
+- **D4 se ajusta al medir la cabecera real: 60 px, no 56.** Con Playwright antes de tocar código: **81 px en móvil y 63,5 en tablet/escritorio**. Los 81 px no eran relleno: el botón de Strava se partía en dos líneas porque el icono de cerrar sesión le quitaba 30 px justo en el límite. Sin él y con altura fija, mide 60 px en los tres tamaños (`shell.spec.js` lo comprueba contra el token).
+- **Cabecera (`Navbar.jsx`):** `h-[calc(var(--nav-h)+env(safe-area-inset-top,0px))]` + `pt-[env(safe-area-inset-top,0px)]` + `flex items-center`; fuera `pb`, `mt-0.5`, el bloque `hidden md:flex` de utilidades y el cierre de sesión móvil. Props de 7 a 4 (`settings`, `uploading`, `isStravaConnected`, `onSync`); imports de lucide de 18 a 15.
+- **Strava (`StravaConnect.jsx`):** `aria-label="Conectar con Strava"` (lo usa `strava.spec.js`), `whitespace-nowrap`, `px-3 sm:px-4` y texto «Conectar» en móvil / completo desde `sm`. Sin el `nowrap` el botón vuelve a partirse y la cabecera crece.
+- **Histórico (`Dashboard.jsx`):** `h-[calc(100dvh-var(--nav-h-total)-7.125rem)] sm:h-[…-11.875rem]`, que conserva los 674/650 px de antes. Efecto lateral bueno: el pager móvil medía 788 px bajo una cabecera de 81 (25 px de más); ahora mide 784 bajo una de 60 y encaja.
+- **Detalle (`ActivityDetailPage.jsx`):** la raíz usa `calc(100dvh-var(--nav-h-total))` (+`-1rem` desde `sm`) en lugar de `4rem`/`70px`; el mapa pasa de `h-[calc(100dvh-130px)] lg:h-full` a `flex-1 min-h-[480px]` y llena justo lo que queda. En Análisis, escritorio mantiene **caja fija y paneles con scroll propio** (`lg:h-…`): sin ese `lg:h` la página entera se desplaza y la captura del detalle crece 100 px.
+- **Ajustes (`ProfilePage.jsx`):** recibe `onClearDb` (vía `ActivitySubRoutes`) y pinta «Borrar todas las actividades» en Seguridad y Datos → ZONA DE PELIGRO, con el `confirm` de `useActivitiesData.js:59` (borra actividades, no la cuenta). Los dos botones de la zona pasan a `min-h-[44px]` (RF13).
+- **Paridad recorrida** (`paridad.md:23-44`): cerrar sesión → solo en el menú (los dos iconos fuera); tema → sigue en la cabecera; Strava → sigue en la cabecera; importar CSV → **retirado**; añadir manual → sigue en Actividades; borrar DB → Ajustes → Seguridad y Datos; eliminar cuenta, contraseña, Deep Sync e Intervals → sin cambios en Ajustes; identidad y menú → sin cambios. `BottomNav` no se toca.
+- **Pruebas:** `e2e/shell.spec.js` pasa a 6 casos × 3 proyectos (19 ✓ + 2 omitidas): altura medida contra `--nav-h-total`, pager y barra inferior, reserva inferior, cabecera sin utilidades ni acciones destructivas, cerrar sesión solo en el menú, tema que persiste tras navegar y «Borrar Actividades» con confirmación. `e2e/auth.spec.js` abre el menú antes de cerrar sesión. `shellTokens.test.js` fija `--nav-h: 3.75rem`.
+- **Capturas (D1):** 42 de 48 regeneradas en Docker (todas menos la landing, que no cambia) y revisadas una a una por tamaño y tema. Alto: −21 px en móvil y tablet (81 → 60) y −3/−4 en escritorio (63,5 → 60); 0 en las pantallas que ya medían justo la ventana (perfil, actividades en tablet/escritorio) y −16 en el detalle de escritorio (caja fija: 830 → 824 px). Las 42 pasan `npm run test:e2e:docker` contra las referencias nuevas.
+- **Volcado `full` frente a `develop` (`e6f8456`): 104 volcados, 90.640 elementos, 4.038 diferencias, ninguna de color.** Por propiedad: `size` 1.076, `white-space` 368 (`normal → nowrap` del botón), `padding-top`/`padding-bottom` 92 cada una (el relleno de la cabecera a 0), `display`/`align-items` 92 (a `flex`/`center`), `padding-left`/`padding-right` 56 (16 → 12 px del botón), `margin-top` 28 (`mt-0.5` fuera) y `transform` 6 (el encuadre del mapa se desplaza 1 px al cambiar el alto de la caja). Añadidos 92 (los dos `span` del texto de Strava) y retirados 1.988 (los 5 controles de escritorio con sus iconos y sus `:hover`, y el cierre de sesión móvil con su `svg`).
+- **Resultados:** lint ✓, lint:colors ✓ (palette 756, arbitrary 3, hex 100, rgb 9, dark 168; bajan 4/2 solo en `Navbar.jsx`), lint:ui ✓ (14 exportaciones), unit 187/187, integración 10/10, build ✓, E2E macOS **105 ✓** / 159 omitidas / 0 ✘, E2E Docker **153 ✓** / 111 omitidas / 0 ✘, informe táctil 113 (2 + 7 + 43 + 10 + 21 + 5 + 9 + 16; sin cambios: el cierre de sesión de 36 px que desaparece lo compensa el botón de Strava, que pasa de 130×45 a 100×32).
 
 ## PR 3 — `docs(ui-shell)`: cierre
 

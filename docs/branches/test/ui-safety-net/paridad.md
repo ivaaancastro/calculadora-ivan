@@ -139,7 +139,7 @@ Nota: en móvil las 5 pestañas principales viven en `MobileSwipePager` (todas m
 | ID | Defecto | Dónde queda registrado |
 |---|---|---|
 | D-01 | `MobileSwipePager` no excluye `.hide-scrollbar`: deslizar la tira de secciones de Rendimiento cambia de pestaña en vez de desplazar la tira (`useSwipeNavigation` sí la excluye). | `e2e/gestures.spec.js`, marcada `test.fail()` |
-| D-03 | `Dashboard` no pasa `onFileUpload` a `Navbar`: elegir un CSV lanza un error y no importa nada. | Esta lista |
+| D-03 | `Dashboard` no pasa `onFileUpload` a `Navbar`: elegir un CSV lanza un error y no importa nada. **Retirado, no cerrado:** al ir a cablearlo se comprobó que nunca hubo implementación (`processFile` era un `console.log("Lógica de CSV pendiente")`, borrado en `f8114a6`), así que la acción desaparece de la cabecera en el PR 2 de `feat/ui-shell` (D3) y la importación queda como funcionalidad futura. | Esta lista; `e2e/export.spec.js` (nota en la cabecera del archivo) |
 | D-04 | `Dashboard` pasa `fetchActivityStreams` a `ActivityDetailPage`, que espera `fetchStreams`; hoy el detalle solo usa la telemetría que ya viene en la actividad. Entrar al detalle por URL directa antes de que llegue la telemetría en segundo plano deja el análisis vacío. | `e2e/support/ui.js` (los tests entran desde el historial) |
 | D-05 | No existe exportación de datos, aunque el E2E original la daba por supuesta. | `e2e/export.spec.js`, `test.fixme` |
 | D-06 | Controles táctiles de menos de 44 px (decenas, sobre todo en Calendario). | Informe de `e2e/touch.spec.js` |

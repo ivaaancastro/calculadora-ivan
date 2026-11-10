@@ -102,7 +102,7 @@ Conflictos reales: la cabecera del detalle (`z-50`) y los modales (`z-50`) empat
 | Cerrar sesión | menú (`Navbar.jsx:178`), icono de escritorio (`:249`) e icono móvil (`:255`) — **tres sitios** | E2E (existencia) |
 | Cambiar tema | `Navbar.jsx:215` y `LandingPage` | — |
 | Conectar Strava / Sincronizar | `Navbar.jsx:219-228` | E2E (conexión) |
-| Importar CSV | `Navbar.jsx:235` | **D-03: roto.** `Dashboard.jsx:186-194` no pasa `onFileUpload` |
+| Importar CSV | `Navbar.jsx:235` | **D-03: roto.** `Dashboard.jsx:186-194` no pasa `onFileUpload`. **Retirado en el PR 2** (D3): nunca estuvo implementado |
 | Añadir manual | `Navbar.jsx:239` y botón en Actividades (`Dashboard.jsx:164-171`) | E2E |
 | **Borrar DB** (`confirm`) | `Navbar.jsx:243` | — |
 | Eliminar cuenta, contraseña, Deep Sync, Intervals | `pages/ProfilePage.jsx` sección `security` (`:909-996`) | — |
@@ -124,7 +124,7 @@ Conflictos reales: la cabecera del detalle (`z-50`) y los modales (`z-50`) empat
 
 ### 3.3 Defectos que esta capa puede cerrar
 - **D-01** (`paridad.md:141`): `MobileSwipePager` no excluye `.hide-scrollbar`, así que deslizar la tira de secciones de Rendimiento cambia de pestaña. Se arregla **en esta capa** porque es navegación (D6).
-- **D-03** (`paridad.md:142`): importar CSV está roto porque falta el cable. Al mover la acción a Ajustes se decide si se cablea o se retira (D3).
+- **D-03** (`paridad.md:142`): importar CSV está roto. Al mover la acción a Ajustes se decide si se cablea o se retira (D3): **se retira en el PR 2** porque nunca hubo implementación que cablear (ver D3).
 - **D-07/D-09/D-10** (colores fuera de rol y modo oscuro de las gráficas): se resuelven al definir la paleta v2 (`feat/ui-skin-v2`), no en la shell.
 
 ### 3.4 Qué vigila la red y qué no
@@ -135,7 +135,7 @@ Conflictos reales: la cabecera del detalle (`z-50`) y los modales (`z-50`) empat
 ## 4. Requisitos funcionales
 
 - [ ] **RF1. `--nav-h`:** la altura de la cabecera es un token en `src/styles/tokens.css` (`--nav-h`, alto de la caja, y `--nav-h-total`, lo mismo más `env(safe-area-inset-top)`) y **ninguna pantalla vuelve a escribir un número para la cabecera**. Lo mismo para la barra inferior (`--bottom-nav-h`, 54 px hoy) y el hueco que reserva (`--bottom-nav-gap`).
-- [ ] **RF2. Alturas derivadas:** `MobileSwipePager` y `UploadStatusBanner` usan los tokens desde el primer PR **sin mover un píxel** (`--nav-h` = 56 px y `--bottom-nav-reserve` = 128 px, que son los valores que ya aplican). `Dashboard` (historial) y `ActivityDetailPage` pasan a tokens en el PR 2, junto con la corrección de la altura real: son las que hoy asumen 64/70/130/170/250 px y cambiarlas mueve contenido, así que van con las capturas. Se comprueba con `grep`: fuera de `tokens.css` no queda ningún número de altura de barra.
+- [ ] **RF2. Alturas derivadas:** `MobileSwipePager` y `UploadStatusBanner` usan los tokens desde el primer PR **sin mover un píxel** (`--nav-h` = 56 px y `--bottom-nav-reserve` = 128 px, que son los valores que ya aplican; el PR 2 sube `--nav-h` a 60 px, D4). `Dashboard` (historial) y `ActivityDetailPage` pasan a tokens en el PR 2, junto con la corrección de la altura real: son las que hoy asumen 64/70/130/170/250 px y cambiarlas mueve contenido, así que van con las capturas. Se comprueba con `grep`: fuera de `tokens.css` no queda ningún número de altura de barra.
 - [ ] **RF3. Cero solape:** en móvil y escritorio, el contenido empieza justo debajo de la cabecera y termina justo encima de la barra inferior (más el margen actual). `layout.spec.js` sigue en verde y el volcado no detecta contenido tapado.
 - [ ] **RF4. Escala de z-index:** los valores sueltos pasan a tokens (`--z-nav`, `--z-nav-menu`, `--z-bottom-nav`, `--z-sheet`, `--z-modal`, `--z-tooltip`, `--z-map`) siguiendo la tabla de 6.3, sin cambiar qué elemento gana hoy salvo los empates documentados.
 - [ ] **RF5. Cabecera móvil ligera:** en móvil la cabecera conserva **identidad + menú**, la acción principal de sincronización y el cambio de tema; las utilidades secundarias (importar CSV, añadir manual, Borrar DB) pasan a Ajustes y el **cierre de sesión queda en un solo sitio**: el menú de la cabecera, que ya lo tiene y se ve en los dos tamaños (hoy hay tres).
@@ -181,7 +181,7 @@ Al terminar la capa:
 | `src/components/Dashboard.jsx`, `src/components/pages/ActivityDetailPage.jsx`, `FitnessStatsPage.jsx`, `HealthPage.jsx` | Alturas con tokens |
 | `src/hooks/useUiMode.js` | **Nuevo**: lee y cambia `data-ui` sin recargar |
 | `index.html` | Script en línea que aplica `data-ui` antes del primer pintado |
-| `src/components/pages/ProfilePage.jsx` | Recibe "Borrar DB", importar CSV y el conmutador de v2; controles con etiqueta |
+| `src/components/pages/ProfilePage.jsx` | Recibe "Borrar DB" y el conmutador de v2; controles con etiqueta (el importar CSV se retiró en el PR 2, D3) |
 | `e2e/shell.spec.js` | **Nuevo**: alturas, solapes, paridad de la cabecera |
 | `e2e/visual-v2.spec.js` | **Nuevo**: capturas de v2 (RF11) |
 | `e2e/gestures.spec.js` | D-01: quitar `test.fail()` |
@@ -193,14 +193,15 @@ En `:root`, junto a las sombras:
 ```css
 :root {
   /* Shell (spec-rediseno-02-c3): alto de la cabecera sin la safe area y con ella. */
-  --nav-h: 3.5rem;                                /* 56 px, el valor que ya asumen pager y banner */
+  --nav-h: 3.5rem;                                /* PR 1: 56 px, lo que ya asumían pager y banner;
+                                                     PR 2: 3.75rem = 60 px, el alto real corregido (D4) */
   --nav-h-total: calc(var(--nav-h) + env(safe-area-inset-top, 0px));
   --bottom-nav-h: 3.375rem;                       /* 54 px, la cápsula actual */
   --bottom-nav-gap: 0.75rem;                      /* separación inferior actual */
 }
 ```
 
-- La cabecera **se ajusta al token**, no al contrario: hoy mide ~59 px y el pager asume 56. Si el diseño pide 59, se sube el token y las tres pantallas que dependen de él se mueven solas; la decisión del valor va en D4.
+- La cabecera **se ajusta al token**, no al contrario: medía 81 px en móvil y 63,5 en escritorio mientras el pager asumía 56. Si el diseño pide otro alto, se cambia el token y las tres pantallas que dependen de él se mueven solas; la decisión del valor va en D4.
 - Fuera de `tokens.css` no queda ningún `56px`, `52px`, `54px`, `170px`, `250px`, `130px` ni `4rem` de cabecera. Se comprueba con:
   `grep -rn "56px\|52px\|170px\|250px\|130px\|(100dvh-4rem)\|h-\[54px\]" src/`
 
@@ -228,7 +229,7 @@ Los tokens se exponen en `theme.extend.zIndex` para poder usar `z-nav`, `z-modal
 | Cambiar tema | sí | **sí** |
 | Strava (conectar / sincronizar) | sí | **sí** (acción principal de la app) |
 | Cerrar sesión | sí (icono) + menú + escritorio | **solo en el menú** (un clic más, un icono menos en la cabecera) |
-| Importar CSV | no (solo escritorio) | **Ajustes → Cuentas Conectadas**, cableado (D3) |
+| Importar CSV | no (solo escritorio) | **retirado** (D3: nunca implementado) |
 | Añadir manual | no (solo escritorio) | se queda en Actividades, que ya lo tiene |
 | Borrar DB | no (solo escritorio) | **Ajustes → Seguridad y Datos** (RF6) |
 
@@ -268,8 +269,8 @@ En escritorio el resultado es simétrico: las pestañas siguen en el centro, tem
 
 - **D1. Las capturas de v1 cambian una vez, en el PR de estructura.** `--nav-h` corrige el desfase de 3 px y la reorganización quita iconos de la cabecera: es imposible hacerlo sin cambiar capturas. **Propuesta:** el PR 2 regenera las referencias afectadas, las reviso una a una y las listo en el PR; a partir de ahí, v1 queda congelada y la piel va solo tras `data-ui="v2"`. La alternativa es meter también la estructura detrás de v2, y entonces la cabecera seguiría sobrecargada hasta que v2 sea la vista por defecto.
 - **D2. Composición de la cabecera móvil.** La de 6.4: identidad + menú, tema y Strava se quedan; cierre de sesión e utilidades pasan a Ajustes. **Propuesta:** aceptarla. Alternativa: dejar también el cierre de sesión en la cabecera (menos limpio, pero menos clics para una acción frecuente).
-- **D3. Importar CSV.** Hoy está roto (D-03). **Propuesta:** moverlo a Ajustes → Cuentas Conectadas y cablearlo (`onFileUpload`), cerrando D-03. Alternativa: retirar el icono y dejar el import fuera de la app hasta que se especifique.
-- **D4. Valor de `--nav-h`.** **Propuesta:** 56 px (lo que ya asumen el pager y el banner) y ajustar la cabecera a 56 recortando relleno vertical, para que el contenido suba 3 px y quede alineado. Alternativa: 59 px (alto real de hoy) y que el contenido baje 3 px.
+- **D3. Importar CSV.** Hoy está roto (D-03). **Decidido el 2026-11-10 (al implementar el PR 2): se retira el icono.** No había nada que cablear: `processFile` era un `console.log("Lógica de CSV pendiente", file)` y se borró en `f8114a6`, y `Dashboard` nunca pasó `onFileUpload`, así que el icono solo lanzaba un error. D-03 se documenta como **«acción retirada: nunca implementada»**; la importación, cuando se especifique su formato (export de Strava, Garmin…), será una funcionalidad nueva y no parte de esta capa. Alternativa descartada: implementar el parser y la inserción en este PR.
+- **D4. Valor de `--nav-h`.** **Decidido el 2026-11-10: 60 px (`3.75rem`)**, medido con Playwright antes de tocar el código: la cabecera real medía **81 px en móvil** y **63,5 px en escritorio**. Los 81 px no eran relleno: el botón de Strava se partía en dos líneas al no caberle 30 px del icono de cerrar sesión. Sin ese icono y con altura fija mide 60 px en los tres tamaños, con el contenido de 36 px y 12 px arriba y abajo. Alternativas descartadas: 56 px (D4 original, más apretada) y 64 px.
 - **D5. Numeración de la escala `z-*`.** La de 6.3 (30/40/50/60/70). **Propuesta:** aceptarla; deja libres 10 y 20 para lo interno y 400/500 para mapa y toasts.
 - **D6. D-01 en esta capa.** **Propuesta:** sí, en el PR 1 (es una línea y una prueba que pasa a normal). Alternativa: dejarlo como defecto conocido.
 - **D7. Dirección visual de v2.** Se elige sobre **Dashboard y Calendario** antes de extender, como dice el roadmap. **Propuesta:** en `feat/ui-skin-v2`, PR 1, con las dos pantallas y el volcado comparativo de v1; aprobación tuya antes de seguir con el resto.
