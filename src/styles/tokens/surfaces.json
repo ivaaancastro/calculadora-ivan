@@ -11,6 +11,7 @@
   "surface-8": { "light": "white/95", "dark": "zinc-900/95" },
   "surface-9": { "light": "white/80", "dark": "zinc-950/80" },
   "surface-card": { "light": "white", "dark": "[#1c1c1e]" },
+  "control-knob": { "light": "white", "dark": "white" },
   "sunken": { "light": "slate-50", "dark": "zinc-800/50" },
   "sunken-2": { "light": "slate-50", "dark": "zinc-950" },
   "sunken-3": { "light": "slate-50/50", "dark": "zinc-800/30" },

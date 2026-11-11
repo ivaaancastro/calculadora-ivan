@@ -22,6 +22,16 @@
     }
   </script>
 
+  <!-- Piel v2 (spec-rediseno-02-c3-skin): el atributo se aplica antes del primer pintado.
+       localStorage gana a VITE_UI (M1); sin ninguno de los dos, la app arranca en v1. -->
+  <script>
+    (function () {
+      var stored = localStorage.getItem('ui');
+      var ui = stored || '%VITE_UI%';
+      if (ui === 'v2') document.documentElement.dataset.ui = 'v2';
+    })();
+  </script>
+
   <!-- Google Fonts: Inter (preloaded for faster FCP) -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
