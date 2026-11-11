@@ -62,7 +62,11 @@ Cada capa termina con la app funcionando y se puede pausar sin dejar nada a medi
 - Crear `data-ui="v2"`, activable por entorno y por `localStorage`, con la escala de texto, los radios y la paleta nuevos.
 - Elegir la dirección visual sobre dos pantallas reales, Dashboard y Calendario, antes de extenderla.
 
-**Hecho cuando:** v1 no cambia ni una captura, y v2 puede activarse y desactivarse sin recargar datos ni perder sesión.
+**Hecho cuando:** v1 no cambia ni una captura *(matizado por D1: se admite un único PR de estructura que las regenere y las revise; desde entonces quedan congeladas)*, y v2 puede activarse y desactivarse sin recargar datos ni perder sesión.
+
+**Hecho (2026-11-11), estructura:** `feat/ui-shell` cerrada con los PRs #70, #71 y #72. `--nav-h` (60 px) y `--nav-h-total` con la barra inferior tokenizada; **0 números de altura de barra y 0 `z-*` sueltos** en `src/`; cabecera con identidad, menú, tema y Strava; «Borrar todas las actividades» en Ajustes → Seguridad y Datos con `confirm`; cierre de sesión en un solo sitio (el menú); **D-01 cerrado** y **D-03 retirado** (nunca estuvo implementado). Capturas de v1 regeneradas una sola vez (D1: 42 de 48, la landing no cambia) y congeladas desde entonces; volcado del PR 1 solo en `z-index` y el del PR 2 sin ninguna diferencia de color. Cobertura y notas en `docs/branches/feat/ui-shell/tasks.md`.
+
+**Pendiente de la capa:** la piel (`feat/ui-skin-v2`, PRs 4–7): `data-ui="v2"` por entorno y `localStorage`, conmutador en Ajustes, capturas propias de v2 y la dirección visual elegida sobre Dashboard y Calendario (D7, con parada de aprobación).
 
 ## Capa 4 — Landing y acceso
 **Rama:** `feat/landing-v2`

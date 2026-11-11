@@ -7,6 +7,10 @@ y este proyecto adhiere a [Semantic Versioning](https://semver.org/lang/es/).
 
 ## [Unreleased]
 
+### Rediseño — Capa 3: shell (`spec-rediseno-02-c3`), PR 3 de 7: cierre de la estructura
+- `docs(ui-shell):` cierra la rama de estructura (PRs #70–#72): cobertura en `tasks.md`, spec con RF1–RF8 y RF12–RF14 marcados (RF9–RF11 quedan para la piel), `paridad.md` con **D-01 cerrado** y **D-03 retirado**, roadmap con «Hecho (2026-11-11), estructura» y `MEMORY.md` al día.
+- Sin cambios de código: `src/` queda idéntico a `develop`, así que no hay diferencias de volcado ni de capturas. Referencia al cerrar la shell: unit 187, integración 10, E2E macOS 105 ✓, Docker 153 ✓, táctil 113, `lint:colors` 756/3/100/9/168, `lint:ui` 14.
+
 ### Rediseño — Capa 3: shell (`spec-rediseno-02-c3`), PR 2 de 7: cabecera y acciones
 - `refactor(ui-shell):` la cabecera mide una altura fija de **60 px** (D4 revisado tras medir 81 px en móvil y 63,5 en escritorio: el botón de Strava se partía en dos líneas) y lleva solo identidad con menú, pestañas de escritorio, tema y Strava. Desaparecen los cinco controles de utilidad de escritorio (importar CSV, añadir manual, borrar DB, sus separadores y cerrar sesión) y el cierre de sesión duplicado de móvil.
 - `feat(ui-shell):` «Borrar todas las actividades» pasa a Ajustes → Seguridad y Datos, con su `confirm` y botones de 44 px.

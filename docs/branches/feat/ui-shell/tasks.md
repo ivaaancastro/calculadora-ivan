@@ -61,7 +61,23 @@ Rama `feat/ui-shell-header`, sale de `develop` (`e6f8456`, merge del PR 1). **Ú
 
 ## PR 3 — `docs(ui-shell)`: cierre
 
-- [ ] Cobertura, `MEMORY.md`, `CHANGELOG.md`, `paridad.md` (D-01 y D-03), roadmap.
-- [ ] PR hacia `develop`.
+Rama `feat/ui-shell-close`, sale de `develop` (`fadb304`, merge del PR 2). Solo documentación: **0 cambios de código y 0 diferencias** de volcado y capturas.
+
+- [x] Cobertura, `MEMORY.md`, `CHANGELOG.md`, `paridad.md` (D-01 y D-03), roadmap.
+- [x] Spec: casillas de RF y criterios de aceptación que ya se cumplen.
+- [x] PR hacia `develop` (#72).
 
 ### Notas del cierre
+
+**Qué entrega la rama `feat/ui-shell` (PRs #70 y #71), en números**
+
+- **Alturas:** `--nav-h` (60 px), `--nav-h-total`, `--bottom-nav-h`, `--bottom-nav-gap` y `--bottom-nav-reserve` en `src/styles/tokens.css`, y los usan 6 archivos: `Navbar`, `MobileSwipePager`, `UploadStatusBanner`, `BottomNav`, `Dashboard` (histórico) y `ActivityDetailPage` (raíz y mapa). El `grep` de 6.2 no devuelve ninguna altura de barra fuera de `tokens.css`; sus tres `130px` son anchos de columna del Calendario (`min-w-[130px]` y `grid-cols-[130px_…]`) y el cuarto es el propio regex de `shellTokens.test.js`.
+- **Capas:** 31 usos con token (`z-tooltip` 7, `z-sheet` 6, `z-modal` 4, `z-nav` 3, `z-nav-menu` 3, `z-map` 3, `z-floating` 3, `z-sticky` 2) y **cero `z-50`/`z-[…]` sueltos** en `src/`. La landing conserva `z-40`/`z-10` literales por ser Capa 4.
+- **Cabecera:** de 7 props a 4 y de 18 iconos de `lucide` a 15; fuera los 5 controles de escritorio (importar CSV, añadir manual, borrar DB, separador y cerrar sesión) y el cierre de sesión móvil. Cerrar sesión pasa de **3 sitios a 1** (el menú); «Borrar todas las actividades» vive en Ajustes → Seguridad y Datos con su `confirm`.
+- **Colores:** `lint:colors` cierra la Capa 3 en **756/3/100/9/168** (la Capa 2 cerró en 760/3/100/9/170: −4 palette y −2 dark, todas de `Navbar.jsx`). `lint:ui` sigue en 14 exportaciones.
+- **Pruebas:** unit 187 (182 al cerrar la Capa 2; +5 de `shellTokens`), integración 10, E2E macOS **105 ✓** (87 al cerrar la Capa 2: +18 de `shell.spec.js` y +1 al quitar el `test.fail()` de D-01), Docker **153 ✓**. Informe táctil 113, igual que en `develop`.
+- **Red de seguridad:** volcado `full` acumulado de la rama frente a `develop` (`06ac9e3`): PR 1 **538 diferencias, todas de `z-index`** (excepción D5) y PR 2 **4.038, ninguna de color**. Capturas de v1: 48 idénticas en el PR 1 y 42 regeneradas en el PR 2 (D1), revisadas una a una; desde entonces, congeladas.
+
+**Lo que este cierre NO marca como hecho:** los RF9–RF11 y los criterios "al terminar la capa" de v2 (mecanismo `data-ui`, conmutador, capturas propias de v2) pertenecen a `feat/ui-skin-v2`; la spec sigue viva para esa rama y el roadmap deja la Capa 3 a medias a propósito.
+
+**Verificación de este PR (solo docs):** lint ✓, lint:colors ✓ (756/3/100/9/168), lint:ui ✓ (14), unit 187/187, integración 10/10, build ✓, E2E macOS **105 ✓** / 159 omitidas / 0 ✘. Sin capturas ni volcado: el árbol de `src/` es idéntico a `develop`.

@@ -5,7 +5,7 @@
 - **Título:** Capa 3 del rediseño: shell de navegación (`feat/ui-shell`) y piel v2 tras `data-ui="v2"` (`feat/ui-skin-v2`)
 - **Autor:** agente Claude Code
 - **Fecha:** 2026-11-10
-- **Estado:** pendiente de aprobación
+- **Estado:** estructura implementada (`feat/ui-shell`: #70 y #71 mergeados, cierre en el PR #72); piel v2 pendiente (`feat/ui-skin-v2`, PRs 4–7 del plan). Los RF9–RF11 y los criterios de v2 siguen abiertos para esa rama.
 - **Depende de:** `spec-rediseno-02` (roadmap), `spec-rediseno-02-c0` (red de seguridad, PR #51), `spec-rediseno-02-c1` (tokens, PRs #52–#58) y `spec-rediseno-02-c2` (primitivas, PRs #60–#68), todas mergeadas en `develop`.
 - **Rama de esta carpeta:** `feat/ui-shell`. La segunda rama de la capa, `feat/ui-skin-v2`, usará este mismo documento como spec (no se duplica) y tendrá su propia carpeta con `tasks.md`.
 
@@ -134,37 +134,37 @@ Conflictos reales: la cabecera del detalle (`z-50`) y los modales (`z-50`) empat
 
 ## 4. Requisitos funcionales
 
-- [ ] **RF1. `--nav-h`:** la altura de la cabecera es un token en `src/styles/tokens.css` (`--nav-h`, alto de la caja, y `--nav-h-total`, lo mismo más `env(safe-area-inset-top)`) y **ninguna pantalla vuelve a escribir un número para la cabecera**. Lo mismo para la barra inferior (`--bottom-nav-h`, 54 px hoy) y el hueco que reserva (`--bottom-nav-gap`).
-- [ ] **RF2. Alturas derivadas:** `MobileSwipePager` y `UploadStatusBanner` usan los tokens desde el primer PR **sin mover un píxel** (`--nav-h` = 56 px y `--bottom-nav-reserve` = 128 px, que son los valores que ya aplican; el PR 2 sube `--nav-h` a 60 px, D4). `Dashboard` (historial) y `ActivityDetailPage` pasan a tokens en el PR 2, junto con la corrección de la altura real: son las que hoy asumen 64/70/130/170/250 px y cambiarlas mueve contenido, así que van con las capturas. Se comprueba con `grep`: fuera de `tokens.css` no queda ningún número de altura de barra.
-- [ ] **RF3. Cero solape:** en móvil y escritorio, el contenido empieza justo debajo de la cabecera y termina justo encima de la barra inferior (más el margen actual). `layout.spec.js` sigue en verde y el volcado no detecta contenido tapado.
-- [ ] **RF4. Escala de z-index:** los valores sueltos pasan a tokens (`--z-nav`, `--z-nav-menu`, `--z-bottom-nav`, `--z-sheet`, `--z-modal`, `--z-tooltip`, `--z-map`) siguiendo la tabla de 6.3, sin cambiar qué elemento gana hoy salvo los empates documentados.
-- [ ] **RF5. Cabecera móvil ligera:** en móvil la cabecera conserva **identidad + menú**, la acción principal de sincronización y el cambio de tema; las utilidades secundarias (importar CSV, añadir manual, Borrar DB) pasan a Ajustes y el **cierre de sesión queda en un solo sitio**: el menú de la cabecera, que ya lo tiene y se ve en los dos tamaños (hoy hay tres).
-- [ ] **RF6. Destructivas a Ajustes:** "Borrar DB" vive en Ajustes → Seguridad y Datos, junto a "Eliminar cuenta", y **mantiene su confirmación**. No queda ninguna acción destructiva en la cabecera.
-- [ ] **RF7. D-01:** `MobileSwipePager` añade `.hide-scrollbar` a sus exclusiones, igual que `useSwipeNavigation`. La prueba `gestures.spec.js:37` deja de ser `test.fail()` y pasa a verde como prueba normal.
-- [ ] **RF8. Paridad intacta:** ninguna acción de `paridad.md:23-44` desaparece ni cambia de resultado. "Cerrar sesión" sigue existiendo en el menú y las acciones que se mueven lo hacen con su prueba o con una nueva.
-- [ ] **RF9. Activación de v2:** `html[data-ui="v2"]` se activa por **entorno** (`VITE_UI=v2`) y por **`localStorage`** (`ui`), se aplica antes del primer pintado (script en línea de `index.html`, como el tema) y se puede **cambiar en caliente sin recargar ni perder datos ni sesión**.
-- [ ] **RF10. v1 congelada:** con `data-ui` ausente o distinto de `v2`, la app se ve exactamente como tras el PR de estructura: **0 diferencias** en el volcado de estilos y en las capturas de referencia.
-- [ ] **RF11. v2 con red propia:** existe un proyecto de capturas con `data-ui="v2"` (mismas 8 pantallas, 2 temas, 3 tamaños) y su volcado, para que la piel tampoco derive sin avisar.
-- [ ] **RF12. Sin cambios de lógica:** no se tocan `src/services`, `src/store`, `src/utils` ni `src/supabase.js`. Los únicos cambios de comportamiento permitidos son los de RF5–RF7 y el conmutador de RF9.
-- [ ] **RF13. Accesibilidad conservada:** se mantienen los `aria-label`, roles y `title` que usan los E2E (`Menú de configuración y perfil`, `Buscar actividades`, `Navegación móvil flotante estilo Apple`, `Cambiar tema`, `Cerrar sesión`). Los controles nuevos de Ajustes llevan etiqueta asociada y objetivo táctil ≥ 44 px.
-- [ ] **RF14. Fuera de alcance:** la landing y el modal de acceso (Capa 4), la reescritura de pantallas (Capa 5) y las escalas ordinales de color, que solo se definen si la dirección visual elegida las necesita (D7).
+- [x] **RF1. `--nav-h`:** la altura de la cabecera es un token en `src/styles/tokens.css` (`--nav-h`, alto de la caja, y `--nav-h-total`, lo mismo más `env(safe-area-inset-top)`) y **ninguna pantalla vuelve a escribir un número para la cabecera**. Lo mismo para la barra inferior (`--bottom-nav-h`, 54 px hoy) y el hueco que reserva (`--bottom-nav-gap`). *(PR 1; `--nav-h` = 60 px desde el PR 2.)*
+- [x] **RF2. Alturas derivadas:** `MobileSwipePager` y `UploadStatusBanner` usan los tokens desde el primer PR **sin mover un píxel** (`--nav-h` = 56 px y `--bottom-nav-reserve` = 128 px, que son los valores que ya aplican; el PR 2 sube `--nav-h` a 60 px, D4). `Dashboard` (historial) y `ActivityDetailPage` pasan a tokens en el PR 2, junto con la corrección de la altura real: son las que hoy asumen 64/70/130/170/250 px y cambiarlas mueve contenido, así que van con las capturas. Se comprueba con `grep`: fuera de `tokens.css` no queda ningún número de altura de barra. *(Los tres `130px` que devuelve el `grep` son anchos de columna del Calendario; el cuarto resultado es el regex de `shellTokens.test.js`.)*
+- [x] **RF3. Cero solape:** en móvil y escritorio, el contenido empieza justo debajo de la cabecera y termina justo encima de la barra inferior (más el margen actual). `layout.spec.js` sigue en verde y el volcado no detecta contenido tapado. *(PR 2; `layout.spec.js` en verde en macOS y Docker.)*
+- [x] **RF4. Escala de z-index:** los valores sueltos pasan a tokens (`--z-nav`, `--z-nav-menu`, `--z-bottom-nav`, `--z-sheet`, `--z-modal`, `--z-tooltip`, `--z-map`) siguiendo la tabla de 6.3, sin cambiar qué elemento gana hoy salvo los empates documentados. *(PR 1; la escala final es la de las notas del PR 1 —`sticky 20`, `nav 30`, `nav-menu 40`, `sheet 50`, `tooltip 55`, `modal 60`, `floating 80`, `map 400`— y `shellTokens.test.js` fija el orden por pares.)*
+- [x] **RF5. Cabecera móvil ligera:** en móvil la cabecera conserva **identidad + menú**, la acción principal de sincronización y el cambio de tema; las utilidades secundarias (importar CSV, añadir manual, Borrar DB) pasan a Ajustes y el **cierre de sesión queda en un solo sitio**: el menú de la cabecera, que ya lo tiene y se ve en los dos tamaños (hoy hay tres). *(PR 2; con D3 revisado las utilidades salen también en escritorio.)*
+- [x] **RF6. Destructivas a Ajustes:** "Borrar DB" vive en Ajustes → Seguridad y Datos, junto a "Eliminar cuenta", y **mantiene su confirmación**. No queda ninguna acción destructiva en la cabecera. *(PR 2; es «Borrar todas las actividades»: borra las actividades, no la cuenta.)*
+- [x] **RF7. D-01:** `MobileSwipePager` añade `.hide-scrollbar` a sus exclusiones, igual que `useSwipeNavigation`. La prueba `gestures.spec.js:37` deja de ser `test.fail()` y pasa a verde como prueba normal. *(PR 1.)*
+- [x] **RF8. Paridad intacta:** ninguna acción de `paridad.md:23-44` desaparece ni cambia de resultado. "Cerrar sesión" sigue existiendo en el menú y las acciones que se mueven lo hacen con su prueba o con una nueva. *(PR 2; la lista viva de `paridad.md` ya recoge las ubicaciones nuevas y D-03 como acción retirada.)*
+- [ ] **RF9. Activación de v2:** `html[data-ui="v2"]` se activa por **entorno** (`VITE_UI=v2`) y por **`localStorage`** (`ui`), se aplica antes del primer pintado (script en línea de `index.html`, como el tema) y se puede **cambiar en caliente sin recargar ni perder datos ni sesión**. *Pendiente: `feat/ui-skin-v2`, PR 4.*
+- [ ] **RF10. v1 congelada:** con `data-ui` ausente o distinto de `v2`, la app se ve exactamente como tras el PR de estructura: **0 diferencias** en el volcado de estilos y en las capturas de referencia. *v1 quedó congelada en el PR 2 (D1); el mecanismo que lo garantiza llega en el PR 4.*
+- [ ] **RF11. v2 con red propia:** existe un proyecto de capturas con `data-ui="v2"` (mismas 8 pantallas, 2 temas, 3 tamaños) y su volcado, para que la piel tampoco derive sin avisar. *Pendiente: `feat/ui-skin-v2`, PR 4+.*
+- [x] **RF12. Sin cambios de lógica:** no se tocan `src/services`, `src/store`, `src/utils` ni `src/supabase.js`. Los únicos cambios de comportamiento permitidos son los de RF5–RF7 y el conmutador de RF9. *(La rama de estructura no toca ninguna de esas carpetas.)*
+- [x] **RF13. Accesibilidad conservada:** se mantienen los `aria-label`, roles y `title` que usan los E2E (`Menú de configuración y perfil`, `Buscar actividades`, `Navegación móvil flotante estilo Apple`, `Cambiar tema`, `Cerrar sesión`). Los controles nuevos de Ajustes llevan etiqueta asociada y objetivo táctil ≥ 44 px. *(PR 2: el informe táctil sigue en 113 y los dos botones de la zona de peligro suben a 44 px.)*
+- [x] **RF14. Fuera de alcance:** la landing y el modal de acceso (Capa 4), la reescritura de pantallas (Capa 5) y las escalas ordinales de color, que solo se definen si la dirección visual elegida las necesita (D7). *(Nada de eso se ha tocado.)*
 
 ## 5. Criterios de aceptación
 
-En cada PR:
-- [ ] `npm run lint`, `npm run lint:colors`, `npm run lint:ui`, `npm run test:unit`, `npm run test:integration`, `npm run build`, E2E en macOS y en Docker en verde, con los resultados copiados en el PR.
-- [ ] **Volcado de estilos de `develop` frente a la rama: 0 diferencias** en todos los PR **menos el PR 2** (reorganización de la cabecera), donde las diferencias se revisan una a una y se justifican en el PR.
+En cada PR *(cumplido en los PRs 1–3 de `feat/ui-shell`)*:
+- [x] `npm run lint`, `npm run lint:colors`, `npm run lint:ui`, `npm run test:unit`, `npm run test:integration`, `npm run build`, E2E en macOS y en Docker en verde, con los resultados copiados en el PR.
+- [x] **Volcado de estilos de `develop` frente a la rama: 0 diferencias** en todos los PR **menos el PR 2** (reorganización de la cabecera), donde las diferencias se revisan una a una y se justifican en el PR.
   - **Excepción del PR 1 (decidida el 2026-11-10):** la renumeración de D5 cambia el valor calculado de `z-index` aunque conserve qué elemento gana. Se acepta siempre que **todas** las diferencias del volcado sean de la propiedad `z-index` (`style-diff | grep '^ *[a-z-]*:' | sort | uniq -c` debe dar solo `z-index`) y que el orden por pares se mantenga, cosa que fija `src/__tests__/unit/shellTokens.test.js`.
-- [ ] **Capturas:** en todos los PR menos el 2, las 48 referencias no cambian. En el PR 2 se regeneran **solo** las pantallas afectadas, se revisan una a una y la lista va en el PR.
-- [ ] `npm run lint:colors` no sube en ningún archivo; los tokens nuevos de `tokens.css` no cuentan como color suelto.
-- [ ] Informe táctil: se documenta el número por pantalla. Sube solo donde se añada un control en Ajustes; no se acepta un aumento en la cabecera.
-- [ ] Recorrido de `paridad.md` (RF8) anotado en `tasks.md`.
+- [x] **Capturas:** en todos los PR menos el 2, las 48 referencias no cambian. En el PR 2 se regeneran **solo** las pantallas afectadas, se revisan una a una y la lista va en el PR.
+- [x] `npm run lint:colors` no sube en ningún archivo; los tokens nuevos de `tokens.css` no cuentan como color suelto. *(Cierra en 756/3/100/9/168; la Capa 2 cerró en 760/3/100/9/170.)*
+- [x] Informe táctil: se documenta el número por pantalla. Sube solo donde se añada un control en Ajustes; no se acepta un aumento en la cabecera. *(113 en los dos lados.)*
+- [x] Recorrido de `paridad.md` (RF8) anotado en `tasks.md`.
 
-Al terminar la capa:
-- [ ] `grep` de 6.2 sin resultados: ningún número de altura de barra fuera de `tokens.css`.
+Al terminar la capa *(la parte de estructura cerró el 2026-11-11 con el PR 3; lo de v2 queda para `feat/ui-skin-v2`)*:
+- [x] `grep` de 6.2 sin resultados: ningún número de altura de barra fuera de `tokens.css`.
 - [ ] v1 y v2 tienen capturas de referencia propias y las dos comparan sin diferencias en Docker.
 - [ ] Con `VITE_UI=v2` y con el conmutador de Ajustes se llega a la misma pantalla, y apagar v2 devuelve a v1 **sin recargar** y con la sesión intacta.
-- [ ] `MEMORY.md`, `CHANGELOG.md`, `paridad.md` (D-01 y D-03 cerrados) y el roadmap actualizados.
+- [x] `MEMORY.md`, `CHANGELOG.md`, `paridad.md` (D-01 y D-03 cerrados) y el roadmap actualizados.
 
 ## 6. Diseño técnico
 
