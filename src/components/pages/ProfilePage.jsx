@@ -4,6 +4,7 @@ import { supabase } from '../../supabase';
 import toast from 'react-hot-toast';
 import { LTHR_ZONE_PCT, calcZonesFromLTHR } from '../../utils/tssEngine';
 import { useIntervalsSync } from '../../hooks/useIntervalsSync';
+import { useUiMode } from '../../hooks/useUiMode';
 import { Card, Input, SectionHeader } from '../ui';
 
 const getPeakByTime = (hrData, timeData, windowSeconds) => {
@@ -355,6 +356,7 @@ export const ProfilePage = ({
     const [syncPreview, setSyncPreview] = useState(null); // {weight, rhr, ftp} before confirming
 
     const { syncing: isSyncingIntervals, syncProgress: intervalsSyncProgress, syncAll: syncIntervals } = useIntervalsSync();
+    const { isV2, setUi } = useUiMode();
 
     const handleSyncIntervals = async () => {
         if (!formData?.intervalsId || !formData?.intervalsKey) {
@@ -763,6 +765,34 @@ export const ProfilePage = ({
                                             <span className="text-xs font-semibold text-ink-4">CTL</span>
                                         </div>
                                     </div>
+                                </Card>
+                            </div>
+
+                            {/* APARIENCIA — vista previa de la piel v2 (spec-rediseno-02-c3-skin) */}
+                            <div>
+                                <SectionHeader>Apariencia</SectionHeader>
+                                <Card divided className="overflow-hidden">
+                                    <button
+                                        type="button"
+                                        role="switch"
+                                        aria-checked={isV2}
+                                        aria-label="Vista previa v2"
+                                        onClick={() => setUi(isV2 ? 'v1' : 'v2')}
+                                        className="w-full min-h-11 p-3 sm:p-3.5 flex items-center justify-between gap-3 text-left hover:bg-surface-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-action-ios-solid"
+                                    >
+                                        <span className="min-w-0">
+                                            <span className="block text-xs sm:text-sm font-semibold text-ink">Vista previa v2</span>
+                                            <span className="block text-[10px] text-ink-4">Piel nueva, todavía en pruebas. No cambia tus datos.</span>
+                                        </span>
+                                        <span
+                                            aria-hidden="true"
+                                            className={`relative shrink-0 w-[51px] h-[31px] rounded-full transition-colors ${isV2 ? 'bg-action-ios-solid' : 'bg-line-3'}`}
+                                        >
+                                            <span
+                                                className={`absolute top-[2px] left-[2px] w-[27px] h-[27px] rounded-full bg-control-knob shadow-sm transition-transform ${isV2 ? 'translate-x-5' : 'translate-x-0'}`}
+                                            />
+                                        </span>
+                                    </button>
                                 </Card>
                             </div>
                         </div>

@@ -204,6 +204,7 @@
   --surface-8: 255 255 255; --surface-8-a: 0.95; /* white/95 */
   --surface-9: 255 255 255; --surface-9-a: 0.8; /* white/80 */
   --surface-card: 255 255 255; /* white */
+  --control-knob: 255 255 255; /* white */
   --sunken: 248 250 252; --sunken-a: 1; /* slate-50 */
   --sunken-2: 248 250 252; /* slate-50 */
   --sunken-3: 248 250 252; --sunken-3-a: 0.5; /* slate-50/50 */
@@ -255,6 +256,7 @@
   --surface-8: 24 24 27; --surface-8-a: 0.95; /* zinc-900/95 */
   --surface-9: 9 9 11; --surface-9-a: 0.8; /* zinc-950/80 */
   --surface-card: 28 28 30; /* [#1c1c1e] */
+  --control-knob: 255 255 255; /* white */
   --sunken: 39 39 42; --sunken-a: 0.5; /* zinc-800/50 */
   --sunken-2: 9 9 11; /* zinc-950 */
   --sunken-3: 39 39 42; --sunken-3-a: 0.3; /* zinc-800/30 */

@@ -1,9 +1,9 @@
 /* global process */
-import { defineConfig } from 'vite';
+import { defineConfig, loadEnv } from 'vite';
 import react from '@vitejs/plugin-react';
 import { VitePWA } from 'vite-plugin-pwa';
 
-export default defineConfig({
+const config = {
   plugins: [
     react(),
     ...(process.env.VITEST ? [] : [
@@ -68,5 +68,18 @@ export default defineConfig({
       include: ['src/**/*.{js,jsx}']
     }
   }
-});
+};
 
+export default defineConfig(({ mode }) => {
+  // `VITE_UI` (spec-rediseno-02-c3-skin): valor por defecto para que `%VITE_UI%` de
+  // index.html siempre resuelva (y Vite no avise de variable no definida). Un `.env`
+  // o el entorno pueden fijarlo a `v2`; `localStorage` sigue ganando en el navegador.
+  const env = loadEnv(mode, process.cwd(), '');
+
+  return {
+    ...config,
+    define: {
+      'import.meta.env.VITE_UI': JSON.stringify(env.VITE_UI || 'v1'),
+    },
+  };
+});
