@@ -14,7 +14,7 @@
 
 ## 1. Estado del proyecto
 - **Nombre:** Forma — Dashboard de rendimiento deportivo y salud
-- **Rama actual:** `feat/ui-shell-header` (Capa 3, PR 2). Capa 2 cerrada (#60–#68) y PR 1 de la shell (#70) mergeados. Siguiente: PR 3 de la shell (cierre) y luego `feat/ui-skin-v2`.
+- **Rama actual:** `feat/ui-shell-close` (Capa 3, PR 3, cierre de la estructura). Capa 2 cerrada (#60–#68) y estructura de la Capa 3 cerrada (#70–#72). Siguiente: `feat/ui-skin-v2` (PRs 4–7 del plan de la capa).
 - **Rama base:** `develop`
 - **Rama de producción:** `main` (desplegada en Vercel)
 - **Versión:** 0.1.0
@@ -45,6 +45,7 @@
 | spec-rediseno-02-c0 | Capa 0: red de seguridad de UI | implementada (PR #51 mergeado en `develop`) | 2026-11-06 | test/ui-safety-net |
 | spec-rediseno-02-c1 | Capa 1: tokens y tema | implementada (PRs #52 a #58 mergeados en `develop`; cobertura y pendientes en `tasks.md`, Cierre) | 2026-11-09 | `docs/branches/feat/ui-tokens/` |
 | spec-rediseno-02-c2 | Capa 2: primitivas | implementada (PRs #60 a #68 mergeados en `develop`; cobertura y pendientes en `tasks.md`, Cierre) | 2026-11-10 | `docs/branches/feat/ui-primitives/` |
+| spec-rediseno-02-c3 | Capa 3: shell (estructura) y piel v2 | estructura implementada (PRs #70 a #72; cobertura en `tasks.md`); piel pendiente en `feat/ui-skin-v2` | 2026-11-11 | `docs/branches/feat/ui-shell/` |
 
 > Cuando un agente implemente una spec, debe añadir una fila aquí y marcarla como `implementada`.
 
@@ -130,13 +131,21 @@
 - `e2e/shell.spec.js` vigila lo anterior: altura de la cabecera contra `--nav-h-total`, capas, ausencia de los controles retirados, tema persistente y «Borrar Actividades» con `confirm`.
 - Las capturas de v1 están congeladas desde el PR 2: cualquier cambio visual nuevo va detrás de `data-ui="v2"`.
 
+### Cierre de la Capa 3 — estructura (2026-11-11)
+- **Estado:** `feat/ui-shell` cerrada (#70 tokens y z-index, #71 cabecera y acciones, #72 documentación). La parte de piel **no** ha empezado: `feat/ui-skin-v2` sale de `develop` con la misma spec (`docs/branches/feat/ui-shell/spec.md`), que sigue viva para RF9–RF11.
+- **Dónde está cada número:** `--nav-h` (60 px) y `--nav-h-total` en `src/styles/tokens.css`; lo usan `Navbar`, `MobileSwipePager`, `UploadStatusBanner`, `BottomNav`, `Dashboard` y `ActivityDetailPage`. El `grep` de 6.2 no devuelve ninguna altura de barra fuera de `tokens.css` (sus `130px` son anchos de columna del Calendario). Los `z-*` están en 31 usos con token y no queda ningún `z-50`/`z-[…]` suelto salvo los dos de la landing (Capa 4).
+- **Qué se retiró:** los 5 controles de escritorio de la cabecera (importar CSV, añadir manual, borrar DB, separador y cerrar sesión) y el cierre de sesión móvil. Cerrar sesión vive solo en el menú; «Borrar todas las actividades» en Ajustes → Seguridad y Datos con su `confirm`; añadir manual, solo en Actividades. **Importar CSV no volverá** mientras no se especifique su formato: nunca estuvo implementado (D-03).
+- **Red:** unit 187, integración 10, E2E macOS 105 ✓ / 159 omitidas, Docker 153 ✓ / 111 omitidas, táctil 113, `lint:colors` 756/3/100/9/168, `lint:ui` 14. Volcado acumulado: 538 diferencias de `z-index` (PR 1, excepción aprobada) y 4.038 de caja y tipografía (PR 2), **ninguna de color**.
+- **Antes de tocar la piel:** v1 está congelada (capturas de referencia desde el PR 2); cualquier valor nuevo va detrás de `html[data-ui="v2"]` y necesita capturas propias, porque hoy no existe ninguna de v2.
+- **Decisiones cerradas en la capa:** D1 (capturas una vez), D2 (composición de la cabecera), D3 (CSV retirado), D4 (60 px), D5 (escala de capas), D6 (D-01 aquí). **Abiertas:** D7 (dirección visual, sobre Dashboard y Calendario) y D8 (dónde vive el conmutador de v2).
+
 ### Cómo trabajar con la red de seguridad (Capa 0)
 - Las capturas de referencia están en `e2e/__screenshots__/` y **solo se generan en Linux** con `npm run test:e2e:update` (Docker, imagen oficial de Playwright, `linux/amd64` como CI). Las de macOS no son comparables, por eso `visual.spec.js` se omite fuera de Linux. Para compararlas: `npm run test:e2e:docker`.
 - Revisar cada captura nueva antes de aceptarla. La tolerancia es de 100 píxeles (`maxDiffPixels`).
 - Los E2E usan su propio puerto (5273, `E2E_PORT`) y variables de Supabase fijas; no tocan un `npm run dev` en 5173.
 - Datos simulados, fecha fija (2026-06-15) y red externa bloqueada: `e2e/support/mockApp.js`. La fecha sigue avanzando (no `clock.setFixedTime`: congela las animaciones de Recharts).
 - Las capturas se hacen ajustando el viewport a la altura del documento (no `fullPage`, que reinicia las animaciones de Recharts); la landing es la excepción. En móvil se expanden los paneles internos de `MobileSwipePager`.
-- Lista de paridad y defectos conocidos (D-01, D-03 a D-06): `docs/branches/test/ui-safety-net/paridad.md`. D-01 está como `test.fail()`: cuando se corrija habrá que quitarlo.
+- Lista de paridad y defectos conocidos (D-01, D-03 a D-06): `docs/branches/test/ui-safety-net/paridad.md`. D-01 está cerrado y D-03 retirado desde la Capa 3.
 - Informe táctil (< 44 px) no bloquea hasta la Capa 2.
 - `VITE_GEMINI_API_KEY` es opcional (ningún componente usa `askGemini`).
 
@@ -153,4 +162,4 @@
 - **Informe de auditoría:** `AUDIT_REPORT.md` (rama `analysis/project-audit`) — contiene puntos débiles (P-01 a P-30), deuda técnica, hallazgos de tests/coverage y roadmap priorizado (R-01 a R-17).
 
 ---
-Última actualización: 2026-11-10
+Última actualización: 2026-11-11

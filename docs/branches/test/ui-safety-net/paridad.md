@@ -25,13 +25,13 @@ Nota: en móvil las 5 pestañas principales viven en `MobileSwipePager` (todas m
 | Acción | Dónde | Prueba |
 |---|---|---|
 | Abrir menú de perfil/ajustes (`Menú de configuración y perfil`) con las secciones General, Zonas y Umbrales, Cuentas Conectadas, Seguridad y Datos | ambos | E2E (existencia) |
-| Cerrar sesión (menú, icono de escritorio y botón móvil) | ambos | E2E |
-| Cambiar tema claro/oscuro | ambos | — |
+| Cerrar sesión (**solo en el menú** desde la Capa 3; los dos iconos de la cabecera se retiraron) | ambos | E2E |
+| Cambiar tema claro/oscuro | ambos | E2E (shell) |
 | Navegar: Dashboard, Rendimiento, Calendario, Actividades, Salud | escritorio | E2E |
 | Conectar con Strava (si no está conectado) / Sincronizar (si lo está) | ambos | E2E (conexión) |
-| Importar CSV | escritorio | E2E (existencia). **Defecto D-03:** ver abajo |
-| Añadir actividad manual (`Añadir Manual`) | escritorio (y botón en Actividades) | E2E |
-| Borrar toda la base de datos (`Borrar DB`, con `confirm`) | escritorio | — |
+| ~~Importar CSV~~ **retirada** en la Capa 3 (D-03: nunca estuvo implementada) | — | — |
+| Añadir actividad manual (`Añadir Manual`) → **solo** el botón de Actividades | escritorio (y botón en Actividades) | E2E |
+| Borrar todas las actividades → Ajustes → Seguridad y Datos (con `confirm`; antes `Borrar DB` en la cabecera) | ambos | E2E (shell) |
 
 ## Barra inferior móvil (`BottomNav`)
 
@@ -40,7 +40,7 @@ Nota: en móvil las 5 pestañas principales viven en `MobileSwipePager` (todas m
 | Ir a Inicio / Forma / Calendario / Salud | — (cubierta en escritorio por ruta) |
 | Botón satélite `Buscar actividades` → `/history` | — |
 | Se oculta en el detalle de actividad | capturas |
-| Gesto lateral entre pestañas (no sobre `.recharts-wrapper`, `.leaflet-container`, `[data-no-swipe]`, `input[type=range]`) | E2E gestos |
+| Gesto lateral entre pestañas (no sobre `.recharts-wrapper`, `.leaflet-container`, `[data-no-swipe]`, `input[type=range]`, `.hide-scrollbar` —esto último desde D-01—) | E2E gestos |
 | Gesto desde el borde izquierdo: volver en subpáginas | — |
 
 ## Landing (`/`, sin sesión)
@@ -124,7 +124,7 @@ Nota: en móvil las 5 pestañas principales viven en `MobileSwipePager` (todas m
 | General: nombre, peso, FC reposo, calibrar CTL, avatar | capturas |
 | Zonas y Umbrales: FC máx./umbral y zonas de carrera y ciclismo, ritmo umbral, FTP | — |
 | Cuentas Conectadas: Athlete ID y API Key de Intervals.icu, `Sincronizar Ahora` | — |
-| Seguridad y Datos: nueva contraseña, Deep Sync | — |
+| Seguridad y Datos: nueva contraseña, Deep Sync, **Borrar todas las actividades** (con `confirm`; llegó aquí en la Capa 3) | E2E (shell) |
 | Eliminar cuenta (`Eliminar Cuenta`, con `confirm`, RPC `delete_user`) | E2E |
 
 ## Servicio
@@ -138,8 +138,8 @@ Nota: en móvil las 5 pestañas principales viven en `MobileSwipePager` (todas m
 
 | ID | Defecto | Dónde queda registrado |
 |---|---|---|
-| D-01 | `MobileSwipePager` no excluye `.hide-scrollbar`: deslizar la tira de secciones de Rendimiento cambia de pestaña en vez de desplazar la tira (`useSwipeNavigation` sí la excluye). | `e2e/gestures.spec.js`, marcada `test.fail()` |
-| D-03 | `Dashboard` no pasa `onFileUpload` a `Navbar`: elegir un CSV lanza un error y no importa nada. **Retirado, no cerrado:** al ir a cablearlo se comprobó que nunca hubo implementación (`processFile` era un `console.log("Lógica de CSV pendiente")`, borrado en `f8114a6`), así que la acción desaparece de la cabecera en el PR 2 de `feat/ui-shell` (D3) y la importación queda como funcionalidad futura. | Esta lista; `e2e/export.spec.js` (nota en la cabecera del archivo) |
+| D-01 | `MobileSwipePager` no excluye `.hide-scrollbar`: deslizar la tira de secciones de Rendimiento cambia de pestaña en vez de desplazar la tira (`useSwipeNavigation` sí la excluye). **Cerrado** en la Capa 3, PR 1 de `feat/ui-shell` (#70): el pager excluye `.hide-scrollbar` y `gestures.spec.js` ya es una prueba normal. | `e2e/gestures.spec.js` |
+| D-03 | `Dashboard` no pasa `onFileUpload` a `Navbar`: elegir un CSV lanza un error y no importa nada. **Retirado en la Capa 3** (PR 2 de `feat/ui-shell`, #71): al ir a cablearlo se comprobó que nunca hubo implementación (`processFile` era un `console.log("Lógica de CSV pendiente")`, borrado en `f8114a6`), así que la acción desapareció de la cabecera (D3) y la importación queda como funcionalidad futura. | Esta lista; `e2e/export.spec.js` (nota en la cabecera del archivo) |
 | D-04 | `Dashboard` pasa `fetchActivityStreams` a `ActivityDetailPage`, que espera `fetchStreams`; hoy el detalle solo usa la telemetría que ya viene en la actividad. Entrar al detalle por URL directa antes de que llegue la telemetría en segundo plano deja el análisis vacío. | `e2e/support/ui.js` (los tests entran desde el historial) |
 | D-05 | No existe exportación de datos, aunque el E2E original la daba por supuesta. | `e2e/export.spec.js`, `test.fixme` |
 | D-06 | Controles táctiles de menos de 44 px (decenas, sobre todo en Calendario). | Informe de `e2e/touch.spec.js` |
