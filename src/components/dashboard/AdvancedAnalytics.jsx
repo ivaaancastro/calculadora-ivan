@@ -18,6 +18,8 @@ import { SPORT_LOAD_CONFIG, getSportCategory } from '../../utils/tssEngine';
 import { EvolutionChart } from './EvolutionChart';
 import { supabase } from '../../supabase';
 import { useTheme } from '../../hooks/useTheme';
+import { useUiMode } from '../../hooks/useUiMode';
+import { ChartSkinProvider } from '../charts/ChartSkin';
 import { Card, SectionHeader, StatTile } from '../ui';
 
 const TIME_INTERVALS = [1, 5, 15, 30, 60, 180, 300, 600, 1200, 2400, 3600, 7200];
@@ -55,6 +57,7 @@ async function fetchLatestWellnessRow() {
 export const AdvancedAnalytics = React.memo(({ activities, settings,  timeRange, setTimeRange, chartData, currentMetrics }) => {
     const [garminVo2max, setGarminVo2max] = useState(null);
     const { theme } = useTheme();
+    const { isV2 } = useUiMode();
 
     // Load Garmin VO2max from Supabase wellness_data (synced from Intervals.icu)
     useEffect(() => {
@@ -129,7 +132,8 @@ export const AdvancedAnalytics = React.memo(({ activities, settings,  timeRange,
     })();
 
     return (
-        <div className="space-y-6 sm:space-y-8 pb-8">
+        <ChartSkinProvider skin={isV2 ? 'v2' : 'v1'}>
+        <div data-skin="dashboard" className="space-y-6 sm:space-y-8 pb-8">
             {/* HERO: ESTADO DE FORMA ESTILO APPLE FITNESS */}
             <Card className="p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                 <div className="flex items-center gap-3">
@@ -218,5 +222,6 @@ export const AdvancedAnalytics = React.memo(({ activities, settings,  timeRange,
                 </Card>
             </div>
         </div>
+        </ChartSkinProvider>
     );
 });

@@ -33,5 +33,5 @@ export function cardClass({ variant = 'grouped', pressable = false, divided = fa
   );
 }
 
-/** Título de sección fuera de la tarjeta. */
-export const SECTION_HEADER = 'text-[12px] font-semibold text-ink-3 uppercase tracking-wider px-0.5 mb-2';
+/** Título de sección fuera de la tarjeta. `section-header` solo pinta en la piel v2. */
+export const SECTION_HEADER = 'section-header text-[12px] font-semibold text-ink-3 uppercase tracking-wider px-0.5 mb-2';

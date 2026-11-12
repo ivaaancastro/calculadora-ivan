@@ -123,8 +123,96 @@ const PMC = {
 
 const THEME = { series: SERIES, sports: SPORTS, distribution: DISTRIBUTION, zones: ZONES, anatomy: ANATOMY, tooltip: TOOLTIP, map: MAP, pmc: PMC };
 
+/**
+ * Piel v2 («Panel»): solo las entradas que la piel redefine (series de forma, anatomía, tooltip y PMC);
+ * el resto se hereda de v1. Mismos valores que el bloque `@tokens:skin-v2` de tokens.css (lo comprueba chartTheme.test.js).
+ */
+const V2_LIGHT = {
+  series: {
+    ctl: c('metric-ctl', '#2563eb'),
+    atl: c('metric-atl', '#be123c'),
+    tsb: c('metric-tsb', '#b45309'),
+  },
+  anatomy: {
+    grid: c('chart-grid', '#c9cfd8'),
+    gridSoft: c('chart-grid-soft', '#f1f3f6'),
+    grid2: c('chart-grid-2', '#e8ebf0'),
+    axis: c('chart-axis', '#5b6472'),
+    tick: c('chart-tick', '#626b78'),
+    cursor: c('chart-cursor', '#626b78'),
+    cursorFill: c('chart-cursor-fill', '#f4f6f8'),
+    dotRing: c('chart-dot-ring', '#ffffff'),
+  },
+  tooltip: {
+    bg: c('chart-tooltip', 'rgba(16, 19, 23, 0.94)'),
+    edge: c('chart-tooltip-edge', 'rgba(255, 255, 255, 0.12)'),
+    ink: c('chart-tooltip-ink', '#f2f4f7'),
+  },
+  pmc: {
+    ctl: c('chart-pmc-ctl', '#2563eb'),
+    atl: c('chart-pmc-atl', '#be123c'),
+    tsb: c('chart-pmc-tsb', '#b45309'),
+    ramp: c('chart-pmc-ramp', '#047857'),
+    rampProj: c('chart-pmc-ramp-proj', '#2563eb'),
+    ctlInk: c('chart-pmc-ctl-ink', '#1d4ed8'),
+    atlInk: c('chart-pmc-atl-ink', '#9f1239'),
+    tsbInk: c('chart-pmc-tsb-ink', '#92400e'),
+    rampInk: c('chart-pmc-ramp-ink', '#047857'),
+    band: c('chart-pmc-band', '#f4f6f8'),
+    bandUp: c('chart-pmc-band-up', '#047857'),
+    bandDown: c('chart-pmc-band-down', '#be123c'),
+    today: c('chart-pmc-today', '#333b47'),
+  },
+};
+
+const V2_DARK = {
+  series: {
+    ctl: c('metric-ctl', '#60a5fa'),
+    atl: c('metric-atl', '#fb7185'),
+    tsb: c('metric-tsb', '#fbbf24'),
+  },
+  anatomy: {
+    grid: c('chart-grid', '#2b3038'),
+    gridSoft: c('chart-grid-soft', '#23262c'),
+    grid2: c('chart-grid-2', '#343942'),
+    axis: c('chart-axis', '#98a1af'),
+    tick: c('chart-tick', '#8a93a1'),
+    cursor: c('chart-cursor', '#98a1af'),
+    cursorFill: c('chart-cursor-fill', '#1c1f24'),
+    dotRing: c('chart-dot-ring', '#14161a'),
+  },
+  tooltip: {
+    bg: c('chart-tooltip', 'rgba(28, 31, 36, 0.96)'),
+    edge: c('chart-tooltip-edge', 'rgba(255, 255, 255, 0.1)'),
+    ink: c('chart-tooltip-ink', '#f2f4f7'),
+  },
+  pmc: {
+    ctl: c('chart-pmc-ctl', '#60a5fa'),
+    atl: c('chart-pmc-atl', '#fb7185'),
+    tsb: c('chart-pmc-tsb', '#fbbf24'),
+    ramp: c('chart-pmc-ramp', '#34d399'),
+    rampProj: c('chart-pmc-ramp-proj', '#93c5fd'),
+    ctlInk: c('chart-pmc-ctl-ink', '#93c5fd'),
+    atlInk: c('chart-pmc-atl-ink', '#fda4af'),
+    tsbInk: c('chart-pmc-tsb-ink', '#fcd34d'),
+    rampInk: c('chart-pmc-ramp-ink', '#34d399'),
+    band: c('chart-pmc-band', '#1e2127'),
+    bandUp: c('chart-pmc-band-up', '#34d399'),
+    bandDown: c('chart-pmc-band-down', '#fb7185'),
+    today: c('chart-pmc-today', '#d4d9e0'),
+  },
+};
+
+/** Copia de `base` con las entradas de `over` (por grupo y clave) sustituidas. */
+const mergeTheme = (base, over) => Object.fromEntries(Object.entries(base).map(([g, v]) => [g, over[g] ? { ...v, ...over[g] } : v]));
+
 /** Definiciones { token, color } por modo. Hoy las gráficas usan los mismos valores en claro y oscuro. */
-export const chartTheme = { light: THEME, dark: THEME };
+export const chartTheme = {
+  light: THEME,
+  dark: THEME,
+  /** Piel v2: v1 con las entradas de V2_LIGHT / V2_DARK sustituidas. */
+  v2: { light: mergeTheme(THEME, V2_LIGHT), dark: mergeTheme(THEME, V2_DARK) },
+};
 
 /** Sustituye cada { token, color } por su color, conservando la forma (objetos y listas). */
 const colorsOf = (node) => {
@@ -134,6 +222,10 @@ const colorsOf = (node) => {
 };
 
 const COLORS = { light: colorsOf(chartTheme.light), dark: colorsOf(chartTheme.dark) };
+const COLORS_V2 = { light: colorsOf(chartTheme.v2.light), dark: colorsOf(chartTheme.v2.dark) };
 
-/** Colores de gráficas para 'light' | 'dark' (p. ej. `getChartTheme('dark').series.hr`). */
-export const getChartTheme = (theme) => (theme === 'dark' ? COLORS.dark : COLORS.light);
+/** Colores de gráficas para 'light' | 'dark' y piel 'v1' | 'v2' (p. ej. `getChartTheme('dark').series.hr`). */
+export const getChartTheme = (theme, skin = 'v1') => {
+  const set = skin === 'v2' ? COLORS_V2 : COLORS;
+  return theme === 'dark' ? set.dark : set.light;
+};

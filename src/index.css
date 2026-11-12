@@ -1,6 +1,12 @@
 /* src/index.css */
 /* Tokens de color (Capa 1): deben ir antes de las capas de Tailwind. */
 @import './styles/tokens.css';
+/*
+ * Piel v2 (Capa 3, spec-rediseno-02-c3-skin-dir). Va aquí por la regla de los `@import`,
+ * pero no necesita ir después de Tailwind: sus selectores tienen más especificidad que las
+ * utilidades a las que sustituyen. En v1 no emite ningún cambio.
+ */
+@import './styles/skin-v2.css';
 
 @tailwind base;
 @tailwind components;
