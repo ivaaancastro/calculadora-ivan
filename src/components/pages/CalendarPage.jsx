@@ -173,7 +173,7 @@ const PmcFloatingChart = ({ pmcByDate, onClose, initPos }) => {
     const isMobileScreen = typeof window !== 'undefined' && window.innerWidth < 640;
 
     return (
-        <div className={isMobileScreen ? "fixed z-floating inset-x-0 bottom-0 bg-surface border-t border-line-2 rounded-t-3xl shadow-2xl overflow-y-auto max-h-[90vh] pb-safe select-none" : "fixed z-floating bg-surface border border-line-2 rounded-xl shadow-2xl overflow-visible select-none"}
+        <div data-skin="calendar" className={isMobileScreen ? "fixed z-floating inset-x-0 bottom-0 bg-surface border-t border-line-2 rounded-t-3xl shadow-2xl overflow-y-auto max-h-[90vh] pb-safe select-none" : "fixed z-floating bg-surface border border-line-2 rounded-xl shadow-2xl overflow-visible select-none"}
             style={isMobileScreen ? {} : { left: pos.x, top: pos.y, width: Math.min(480, window.innerWidth - 32) }}>
             {/* Title / drag bar */}
             <div className="flex items-center justify-between px-3 py-2 bg-sunken-2 border-b border-line-soft-2 rounded-t-xl cursor-grab active:cursor-grabbing"
@@ -1189,8 +1189,7 @@ export const CalendarPage = ({ activities, plannedWorkouts = [], addPlannedWorko
 
     return (
         <ChartSkinProvider skin={isV2 ? 'v2' : 'v1'}>
-        <div data-skin="calendar" className="contents">
-            <div className="flex flex-col bg-surface-6 rounded-3xl border border-line-soft overflow-hidden mb-6 shadow-sm">
+            <div data-skin="calendar" className="flex flex-col bg-surface-6 rounded-3xl border border-line-soft overflow-hidden mb-6 shadow-sm">
 
                 {/* HEADER */}
                 <div className="flex items-center justify-between px-3 sm:px-5 py-3 sm:py-4 bg-transparent border-b border-line-soft-5">
@@ -2059,7 +2058,6 @@ export const CalendarPage = ({ activities, plannedWorkouts = [], addPlannedWorko
                 )
             }
 
-        </div>
         </ChartSkinProvider>
     );
 };
