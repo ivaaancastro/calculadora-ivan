@@ -1,0 +1,96 @@
+/*
+ * Capa de piel v2 (spec-rediseno-02-c3-skin-dir, RF5.3).
+ *
+ * Las clases de Tailwind ya compilan a valores literales, así que la piel no reescribe
+ * `tailwind.config.js` (eso cambiaría toda la app): reescribe **dentro del ámbito** las
+ * clases de tamaño, radio y sombra que usan las dos pantallas que estrenan v2.
+ *
+ * El ámbito son los atributos `data-ui="v2"` (en <html>) y `data-skin` (en la raíz de cada
+ * pantalla). En v1 ambos están ausentes o son inertes, de modo que este archivo no emite
+ * ningún cambio. Los valores salen de `--skin-*` en `src/styles/tokens.css`.
+ *
+ * Se importa al principio de `index.css` (los `@import` de CSS deben ir antes de las reglas).
+ * No hace falta que vaya después de Tailwind: todos los selectores de aquí tienen más
+ * especificidad que la utilidad a la que sustituyen. Las variantes responsive (`sm:…`) se
+ * repiten con la misma especificidad dentro de su `@media` para que sigan ganando a la base,
+ * como hacían antes.
+ */
+
+/* Cifras tabulares en cualquier texto de la piel. */
+html[data-ui="v2"] [data-skin] {
+  font-variant-numeric: tabular-nums;
+}
+
+/* ── Tamaños: el extremo pequeño sube 1 px, el grande 2 px ───────────────────────── */
+
+html[data-ui="v2"] [data-skin] .text-\[8px\] { font-size: var(--skin-type-8); }
+html[data-ui="v2"] [data-skin] .text-\[9px\] { font-size: var(--skin-type-9); }
+html[data-ui="v2"] [data-skin] .text-\[10px\] { font-size: var(--skin-type-10); }
+html[data-ui="v2"] [data-skin] .text-\[11px\] { font-size: var(--skin-type-11); }
+html[data-ui="v2"] [data-skin] .text-\[12px\] { font-size: var(--skin-type-12); }
+html[data-ui="v2"] [data-skin] .text-\[13px\] { font-size: var(--skin-type-13); }
+html[data-ui="v2"] [data-skin] .text-\[14px\] { font-size: var(--skin-type-14); }
+html[data-ui="v2"] [data-skin] .text-\[15px\] { font-size: var(--skin-type-15); }
+html[data-ui="v2"] [data-skin] .text-\[17px\] { font-size: var(--skin-type-17); }
+html[data-ui="v2"] [data-skin] .text-\[18px\] { font-size: var(--skin-type-18); }
+html[data-ui="v2"] [data-skin] .text-xs { font-size: var(--skin-type-xs); }
+html[data-ui="v2"] [data-skin] .text-sm { font-size: var(--skin-type-sm); }
+html[data-ui="v2"] [data-skin] .text-base { font-size: var(--skin-type-base); }
+html[data-ui="v2"] [data-skin] .text-lg { font-size: var(--skin-type-lg); }
+html[data-ui="v2"] [data-skin] .text-xl { font-size: var(--skin-type-xl); }
+html[data-ui="v2"] [data-skin] .text-2xl { font-size: var(--skin-type-2xl); }
+html[data-ui="v2"] [data-skin] .text-3xl { font-size: var(--skin-type-3xl); }
+
+/* ── Radios: 10 px en fichas, 12/14 px en tarjetas ───────────────────────────────── */
+
+html[data-ui="v2"] [data-skin] .rounded-md { border-radius: var(--skin-radius-md); }
+html[data-ui="v2"] [data-skin] .rounded-lg { border-radius: var(--skin-radius-lg); }
+html[data-ui="v2"] [data-skin] .rounded-xl { border-radius: var(--skin-radius-xl); }
+html[data-ui="v2"] [data-skin] .rounded-2xl { border-radius: var(--skin-radius-2xl); }
+html[data-ui="v2"] [data-skin] .rounded-3xl { border-radius: var(--skin-radius-3xl); }
+html[data-ui="v2"] [data-skin] .rounded-t-3xl {
+  border-top-left-radius: var(--skin-radius-3xl);
+  border-top-right-radius: var(--skin-radius-3xl);
+}
+
+/* ── Sombras: borde de 1 px en claro, anillo en oscuro ──────────────────────────── */
+
+html[data-ui="v2"] [data-skin] .shadow-xs { box-shadow: var(--skin-shadow-xs); }
+html[data-ui="v2"] [data-skin] .shadow-sm { box-shadow: var(--skin-shadow-sm); }
+html[data-ui="v2"] [data-skin] .shadow-card { box-shadow: var(--skin-shadow-card); }
+
+/* La tarjeta agrupada lleva `dark:shadow-none`; en oscuro el anillo lo pone la piel. */
+html[data-ui="v2"].dark [data-skin] .shadow-card.shadow-none {
+  box-shadow: var(--skin-shadow-card);
+}
+
+/* ── Detalles de dirección ──────────────────────────────────────────────────────── */
+
+/* Rótulo de sección: marca de cobalto de 12 × 2 px delante del texto. */
+html[data-ui="v2"] [data-skin] .section-header::before {
+  content: '';
+  display: inline-block;
+  width: 12px;
+  height: 2px;
+  margin-right: 8px;
+  vertical-align: middle;
+  border-radius: 1px;
+  background-color: rgb(var(--action));
+}
+
+/* Chips de icono de las fichas: fondo neutro; el color se queda en el icono. */
+html[data-ui="v2"] [data-skin] .chip {
+  background-color: rgb(var(--sunken));
+}
+
+/* ── Variantes responsive con la misma especificidad, para no perder la base ─────── */
+
+@media (min-width: 640px) {
+  html[data-ui="v2"] [data-skin] .sm\:text-base { font-size: var(--skin-type-base); }
+  html[data-ui="v2"] [data-skin] .sm\:text-lg { font-size: var(--skin-type-lg); }
+  html[data-ui="v2"] [data-skin] .sm\:text-xl { font-size: var(--skin-type-xl); }
+  html[data-ui="v2"] [data-skin] .sm\:text-2xl { font-size: var(--skin-type-2xl); }
+  html[data-ui="v2"] [data-skin] .sm\:text-3xl { font-size: var(--skin-type-3xl); }
+  html[data-ui="v2"] [data-skin] .sm\:rounded-2xl { border-radius: var(--skin-radius-2xl); }
+  html[data-ui="v2"] [data-skin] .sm\:rounded-3xl { border-radius: var(--skin-radius-3xl); }
+}
