@@ -1,0 +1,165 @@
+# MEMORY (archivo completo al 2026-11-12) — histórico, leer solo la sección que haga falta
+
+> Fuente de verdad compartida entre todos los agentes del sistema SDD.
+> Cada agente debe leer `AGENTS.md` y este archivo antes de actuar, y actualizarlos al finalizar su tarea.
+
+## 0. Reglas globales (obligatorio, leer primero)
+
+- **Flujo SDD obligatorio:** Especificar → Planificar → Implementar → Verificar → Registrar.
+- **Sin spec aprobada = sin código de producción.**
+- **Rama base:** todas las ramas de funcionalidad salen de `develop`.
+- **Nunca commitear a `main`:** `main` es producción, desplegado en Vercel.
+- **Merge solo vía PR** a `develop`.
+- **Convención de commits:** Conventional Commits (`feat`, `fix`, `docs`, `test`, `chore`, etc.).
+
+## 1. Estado del proyecto
+- **Nombre:** Forma — Dashboard de rendimiento deportivo y salud
+- **Rama actual:** `feat/ui-shell-close` (Capa 3, PR 3, cierre de la estructura). Capa 2 cerrada (#60–#68) y estructura de la Capa 3 cerrada (#70–#72). Siguiente: `feat/ui-skin-v2` (PRs 4–7 del plan de la capa).
+- **Rama base:** `develop`
+- **Rama de producción:** `main` (desplegada en Vercel)
+- **Versión:** 0.1.0
+- **Estado:** Sistema SDD con agentes implementado y verificado. Análisis de auditoría completado (ver `AUDIT_REPORT.md` en rama `analysis/project-audit`).
+
+## 2. Stack tecnológico
+- Frontend: React 19, Vite 7, Tailwind CSS, React Router DOM 7, Zustand, TanStack React Query
+- IA: Google Gemini (`gemini-1.5-flash`) vía `src/services/ai.js`
+- Backend/BaaS: Supabase (Auth, DB, RLS, Edge Function `intervals-proxy`)
+- Pruebas: Vitest (unit/integration), MSW, Playwright (E2E), coverage v8
+- Calidad: ESLint flat config, PWA (`vite-plugin-pwa`), TypeScript (devDep)
+
+## 3. Especificaciones (docs/specs/)
+| ID | Spec | Estado | Última actualización | Implementada en |
+|----|------|--------|----------------------|-----------------|
+| spec-001 | Servicio de IA con Gemini — respuestas estructuradas | implementada | 2026-11-05 | feat/ai-structured-responses |
+| spec-audit-01 | Seguridad: remover secretos de `.env`, validar env vars al arranque | implementada | 2026-11-05 | fix/security-env-secrets |
+| spec-audit-02 | Cobertura: tests unitarios para utils (tssEngine, parser, formatters, fitnessStatsEngine) | implementada | 2026-11-05 | feat/tests-utils-coverage |
+| spec-audit-03 | Cobertura: tests para `src/services/ai.js` y `src/store/useAppStore.js` | implementada | 2026-11-05 | feat/tests-ai-store-coverage |
+| spec-audit-04 | Refactor: `Dashboard.jsx` en componentes más pequeños (SRP) | implementada | 2026-11-05 | feat/refactor-dashboard-srp |
+| spec-fix-01 | Corregir imports faltantes en `Dashboard.jsx` tras refactor SRP | implementada | 2026-11-05 | fix/investigar-app-rota |
+| spec-audit-05 | Refactor: hooks grandes (`useActivities.js`, `useWellnessInfo.js`) | implementada | 2026-11-05 | feat/refactor-hooks-srp |
+| spec-audit-06 | TypeScript progresivo: tipado de utils, store y servicios | implementada | 2026-11-05 | feat/typescript-progreso |
+| spec-audit-07 | Consolidar migraciones SQL y añadir versionado (`schema_migrations`) | implementada | 2026-11-05 | feat/sql-migrations-versioning |
+| spec-audit-08 | Hardening Edge Function `intervals-proxy` (rate limiting, validación, timeout) | implementada | 2026-11-05 | feat/edge-function-intervals-proxy-hardening |
+| spec-e2e-01 | Pruebas E2E críticas (auth, dashboard, Strava sync, exportación de datos) | implementada | 2026-11-05 | feat/e2e-critical-flows |
+| spec-rediseno-02 | Rediseño de la webapp por capas (roadmap) | en curso | 2026-11-06 | `docs/branches/feat/webapp-redesign/` |
+| spec-rediseno-02-c0 | Capa 0: red de seguridad de UI | implementada (PR #51 mergeado en `develop`) | 2026-11-06 | test/ui-safety-net |
+| spec-rediseno-02-c1 | Capa 1: tokens y tema | implementada (PRs #52 a #58 mergeados en `develop`; cobertura y pendientes en `tasks.md`, Cierre) | 2026-11-09 | `docs/branches/feat/ui-tokens/` |
+| spec-rediseno-02-c2 | Capa 2: primitivas | implementada (PRs #60 a #68 mergeados en `develop`; cobertura y pendientes en `tasks.md`, Cierre) | 2026-11-10 | `docs/branches/feat/ui-primitives/` |
+| spec-rediseno-02-c3 | Capa 3: shell (estructura) y piel v2 | estructura implementada (PRs #70 a #72; cobertura en `tasks.md`); piel pendiente en `feat/ui-skin-v2` | 2026-11-11 | `docs/branches/feat/ui-shell/` |
+
+> Cuando un agente implemente una spec, debe añadir una fila aquí y marcarla como `implementada`.
+
+## 4. Decisiones tomadas
+- Sistema SDD basado en specs en `docs/specs/` y flujo obligatorio definido en `AGENTS.md`.
+- Las specs viven en `docs/specs/` como archivos `.md` o `.json`.
+- `MEMORY.md` es la fuente de verdad del contexto compartido.
+- `AGENTS.md` define flujos, reglas de ramas/commits y estándares.
+- `skills/` contiene las capacidades reutilizables (prompts y plantillas).
+- `docs/` aloja arquitectura, specs, guías y API.
+- CI ejecuta en `develop` y en PRs (no solo en `main`).
+- `main` es la rama de producción desplegada en Vercel; no se commitea directamente.
+- Skills instaladas en el proyecto: `git-release` (en `.opencode/skills/git-release/`).
+- MCPs obligatorios (en `.opencode/mcp.json`): `context7`, `opencode`, `supabase`.
+
+## 5. Roadmap (próximas specs pendientes — por prioridad)
+
+### Fase 1 — Seguridad (bloqueante, empezar inmediatamente)
+- [x] spec-audit-01: Seguridad — remover secretos de `.env`, agregar a `.gitignore`, crear `.env.example`, validar env vars al arranque (rama `fix/security-env-secrets`)
+
+### Fase 2 — Cobertura de pruebas (utils, IA, store)
+- [x] spec-audit-02: Tests unitarios para `tssEngine.js`, `parser.js`, `formatters.js`, `fitnessStatsEngine.js`
+- [x] spec-audit-03: Tests para `src/services/ai.js` (mockear Gemini) y `src/store/useAppStore.js` (Zustand)
+
+### Fase 3 — Refactorización core (SRP)
+- [x] spec-audit-04: Refactorizar `Dashboard.jsx` (313 líneas) en componentes más pequeños (rama `feat/refactor-dashboard-srp`)
+- [x] spec-audit-05: Refactorizar hooks grandes (`useActivities.js` → hooks enfocados; `useWellnessInfo.js` → data + analytics) (rama `feat/refactor-hooks-srp`)
+
+### Fase 4 — Estabilidad y tipo
+- [x] spec-audit-06: Migración progresiva a TypeScript (utils, store, servicios) (rama `feat/typescript-progreso`)
+- [x] spec-001: Servicio de IA con Gemini — respuestas estructuradas (rama `feat/ai-structured-responses`)
+- [x] spec-audit-07: Consolidar migraciones SQL, unificar `wellness_data`, añadir `schema_migrations` (rama `feat/sql-migrations-versioning`)
+- [x] spec-audit-08: Hardening Edge Function `intervals-proxy` (rate limiting, validación entrada, timeout) (rama `feat/edge-function-intervals-proxy-hardening`)
+
+### Pendientes anteriores (mantener)
+- [x] Migrar lógica de `scratch/*.cjs` a specs documentadas o eliminar (rama `feat/scratch-cleanup`).
+- [x] Spec de pruebas E2E críticas (auth, dashboard, Strava sync, exportación de datos) (rama `feat/e2e-critical-flows`)
+
+## 5b. Rediseño (2026-11-06)
+- Producción **no se toca** por ahora (decisión del usuario): todo va por ramas hacia `develop`. Sin rollback, promoción ni merge a `main`.
+- Capas: 0 red de seguridad → 1 tokens → 2 primitivas → 3 navegación y piel v2 tras flag → 4 landing/acceso → 5 pantallas → 6 activar v2 → 7 iOS. Roadmap en `docs/branches/feat/webapp-redesign/plan.md`.
+- `feat/webapp-redesign` en el remoto conserva el primer intento descartado: **no hacer `git pull` ahí**, ni usar `archive/webapp-redesign-v1` ni `stash@{0}` como base.
+- Antes de cualquier merge a `main`: revisar que el último despliegue de producción corresponde a `cda7df1`.
+
+### Cómo trabajar con los tokens (Capa 1)
+- Colores: `src/styles/tokens.css` (canales RGB, `:root` y `.dark`) → `src/styles/tailwindTokens.cjs` → `tailwind.config.js`. Gráficas: `src/components/charts/chartTheme.js` + `useChartTheme()` (hex, deben coincidir con `tokens.css`; lo comprueba un test).
+- **Tokens exactos:** cada token copia un par claro/oscuro existente; no se unifican valores parecidos hasta la Capa 3. Cada token llega con la familia que lo usa (orden: bordes, texto, superficies, acentos, gráficas; una rama/PR por familia).
+- Codemods: `scripts/codemods/<familia>.mjs --inventory | --tokens | --apply` (CLI común en `family.mjs`, lógica en `lib.mjs`; una familia nueva solo declara nombre, propiedades y ámbito). La tabla de cada familia es `src/styles/tokens/<familia>.json`; `--tokens` regenera su bloque en `tokens.css` (no editarlo a mano).
+- **Precedencia:** en Tailwind 3 `dark:` va después de `hover:`/`focus:` en el CSS. El codemod migra por expresión de clases y propiedad todo o nada, salvo entre ramas opuestas de un ternario (nunca coexisten); un literal que no se migra bloquea a todo lo que coexiste con él. No forzar a mano un par descartado (ver D-08). El codemod no ve una clase definida en un sitio (objeto, variable) e interpolada en otra plantilla junto a una clase suelta de la misma propiedad: lo detecta el volcado (caso de `sportColors.planned` en `CalendarPage`, PR 4). `group-hover:` no corre ese riesgo (gana por especificidad, `.group:hover .x` > `.dark .x`), pero se trata igual.
+- **Acentos:** no se migran por color sino por significado. `scripts/codemods/accents.mjs` solo toca las expresiones de su lista `ALLOW` (archivo y línea); las métricas (`metric-*-ink`, `legacy-*`) se migraron a mano (`metrics.json`). Un mismo valor puede tener varios tokens con distinto significado.
+- **Gráficas:** los componentes usan `const ct = useChartTheme()` y `ct.<grupo>.<rol>` (`ct.series.hr`, `ct.anatomy.grid`, `ct.zones.hr[i]`); un color nuevo se añade como rol en `chartTheme.js` con su token (`charts.json` + `charts.mjs --tokens`). Nunca un hex suelto en una gráfica.
+- `npm run lint:colors` es un trinquete por archivo (`scripts/color-baseline.json`): tras migrar, `npm run lint:colors -- --update` (solo baja). `--report` da totales.
+- Verificación de una migración: además de las capturas, volcado de estilos calculados (incluye `:hover`/`:focus`/`:active` forzados y `:hover` en los `.group` para `group-hover:`) en `develop` y en la rama (`STYLE_DUMP_DIR=<dir> npx playwright test e2e/tools/style-dump.spec.js`, con `E2E_PORT` distinto si se usa un worktree) y `node scripts/style-diff.mjs <antes> <después>`: debe dar 0 diferencias.
+- Fuera de alcance de la Capa 1: colores en `src/hooks` y `src/utils` (74 líneas), canvas de la landing, tipografía, radios y sombras.
+- **Lo que la Capa 1 dejó para después** (lista completa en `docs/branches/feat/ui-tokens/tasks.md`, "Pendiente para capas siguientes"): unificar D-07, D-09 y D-10, valores `.dark` propios de las gráficas, escalas ordinales, descartes por precedencia (D-08) y código sin uso (`ChartsSection`, `ZONE_COLORS` de `AdvancedAnalytics`).
+
+### Cómo trabajar con las primitivas (Capa 2)
+- Viven en `src/components/ui/` y se exportan desde `index.js`. Regla: **centralizar sin unificar**. Cada variante copia exactamente una receta actual con ≥ 2 usos; el resto se queda y se lista (spec, RF2). El `className` de una primitiva solo admite colocación y espaciado (RF3).
+- `npm run lint:ui` (`scripts/check-ui.mjs`): toda exportación de `ui/` debe tener uso fuera de `ui/`, lo de `scripts/ui-retired.json` no puede reaparecer y el `className` literal de una primitiva no puede llevar color, tipografía, radio, borde ni sombra.
+- `node scripts/ui-inventory.mjs <button|field|card|modal|tooltip|loading|any> [--all]`: recetas y usos (archivo:línea).
+- Un archivo nuevo empieza con `lint:colors` en 0: una primitiva no puede llevarse un color suelto; se crea un token exacto (D2).
+- **Volcado de la Capa 2:** `STYLE_DUMP_PROPS=full STYLE_DUMP_DIR=<dir> npx playwright test e2e/tools/style-dump.spec.js` (color + tipografía, caja, radios, disposición y efectos; 104 volcados). Solo se comparan volcados del mismo modo. El de color no ve rellenos ni radios.
+- **Clases propias de `index.css` en `@layer utilities`** (como las antiguas `ios-*`, y hoy `glass-nav` y `liquid-glass`): Tailwind las emite después de sus utilidades, así que ganan a cualquier clase del mismo atributo que se les ponga al lado. Antes de sustituir una por clases de Tailwind, mirar en el CSS compilado de `develop` (`npx tailwindcss -i src/index.css -o <archivo>`) qué clases de su lado no se veían: se retiran, no se conservan.
+- El volcado solo fuerza `:active`/`:hover`/`:focus` en los elementos con `active:`/`hover:`/`focus:` en `class`: si una clase propia escondía esa variante (p. ej. `.ios-touch`), la rama da claves nuevas. Para compararlas, repetir el volcado de `develop` añadiendo esa clase al selector del estado (solo en el worktree).
+- Los dos volcados `full` (develop y rama) en paralelo hacen fallar por tiempo algunos estados: repetir solos los que falten (`--project=<p> -g "<estado>"`) y comprobar que salen 104 volcados antes de dar el 0 por bueno. Con `-g`, el título es "Volcado de estilos · tema <t> <estado>" (sin `›`).
+- El volcado no cubre todo: el planificador se abre sin bloques (no hay conmutadores KM/MIN ni FC/W) y `PowerProfileCard` no se pinta con los datos de prueba. Para un control que no sale, comparar sus estilos calculados (en reposo y con `:hover` forzado por CDP) con una prueba temporal sin commit en la rama y en el worktree de `develop`.
+- Tokens: cada familia de `src/styles/tokens/*.json` admite un solo token por par claro/oscuro (lo comprueba `codemod<Familia>.test.js`). Si una primitiva necesita un par que ya existe, se reutiliza ese token (renombrándolo a un nombre neutro si hace falta, como `ink-4-fixed` en el PR 4). Las variables CSS renombradas salen como diferencia en una comparación que incluya propiedades `--*`: hay que ignorarlas y comparar los valores resueltos.
+- `LoginPage.jsx` no se renderiza en ninguna parte (el acceso real es el modal de la landing): no sale en el volcado ni en las capturas. Las pruebas temporales de estados forzados por CDP pueden fallar de forma intermitente (el DOM cambia entre lectura y forzado, o el planificador desaparece en una lectura): repetir antes de dar por buena una diferencia de número de elementos.
+- En móvil, `MobileSwipePager` monta las otras pestañas fuera de pantalla: al buscar "la primera gráfica" hay que filtrar por posición horizontal (`hoverChart` del volcado). La gráfica de Salud solo existe en la vista "Historial".
+
+### Cierre de la Capa 2 (2026-11-10)
+- **Estado:** cerrada. 14 exportaciones en `src/components/ui/` (8 familias) y sin las clases ni componentes de `scripts/ui-retired.json`. Detalle y pendientes: `docs/branches/feat/ui-primitives/tasks.md`, "Cierre".
+- **Antes de empezar la Capa 3:** el volcado y las capturas son la red que garantiza "sin cambio visual"; cualquier PR de piel debe correr `STYLE_DUMP_PROPS=full` en `develop` y en la rama y comparar, y las capturas solo se comparan en Docker.
+- **Lo que la Capa 2 dejó listo para la Capa 3:** la receta de cada familia en un solo sitio; tipografía, radios y sombras todavía sin token pero ya concentrados en `ui/`; ninguna primitiva con colores sueltos.
+- **Lo que la Capa 2 dejó pendiente:** variantes de un solo uso (`screen`/`boot` de `LoadingState`, 4 `Modal`, filas de los 5 tooltips, 10 recetas de la familia A del segmentado, 86 botones y 22 campos de receta única, 8 fichas de biomarcadores de Salud), escalas ordinales y `Badge`, D-07/D-08/D-09/D-10 y el código sin uso (`ChartsSection`, `ZONE_COLORS`, `LoginPage`).
+- **Herramientas que valen para cualquier capa:** `npm run lint:colors` (trinquete por archivo), `npm run lint:ui`, `node scripts/ui-inventory.mjs <familia> [--all]`, el volcado `full` y `node scripts/style-diff.mjs <antes> <después>`.
+- **Prueba temporal de estilos** (cuando el volcado no llega): spec sin commit en la rama y en el worktree de `develop`, mismo `STYLE_DUMP_DIR` distinto y `E2E_PORT` distinto; el volcado no abre más de un tooltip por pantalla ni monta la gráfica de zonas del detalle ni `PowerProfileCard` con los datos de prueba.
+
+### Cómo trabajar con la shell (Capa 3)
+- La cabecera mide **exactamente** `--nav-h` (60 px, `3.75rem`) más la safe area: `h-[calc(var(--nav-h)+env(safe-area-inset-top,0px))]` con `flex items-center`. Si algo no cabe a lo ancho, se acorta el texto del botón (Strava dice «Conectar» en móvil), **nunca** se deja que la cabecera crezca: partir una línea fue lo que la llevó a 81 px.
+- El alto de las pantallas que cuelgan de la cabecera se calcula con `--nav-h-total`; el histórico y el detalle llevan además su chrome (7.125rem y 1rem) explícito. En escritorio el detalle sigue con caja fija y paneles con scroll propio: si se cambia a `min-h`, la página entera pasa a desplazarse y las capturas del detalle crecen.
+- La cabecera no lleva utilidades: importar CSV (retirado, D-03), añadir manual, borrar actividades y cerrar sesión están en Ajustes o en el menú. Cerrar sesión, solo en el menú (`Menú de configuración y perfil`): los E2E que lo pulsan abren antes el menú.
+- `e2e/shell.spec.js` vigila lo anterior: altura de la cabecera contra `--nav-h-total`, capas, ausencia de los controles retirados, tema persistente y «Borrar Actividades» con `confirm`.
+- Las capturas de v1 están congeladas desde el PR 2: cualquier cambio visual nuevo va detrás de `data-ui="v2"`.
+
+### Cierre de la Capa 3 — estructura (2026-11-11)
+- **Estado:** `feat/ui-shell` cerrada (#70 tokens y z-index, #71 cabecera y acciones, #72 documentación). La parte de piel **no** ha empezado: `feat/ui-skin-v2` sale de `develop` con la misma spec (`docs/branches/feat/ui-shell/spec.md`), que sigue viva para RF9–RF11.
+- **Dónde está cada número:** `--nav-h` (60 px) y `--nav-h-total` en `src/styles/tokens.css`; lo usan `Navbar`, `MobileSwipePager`, `UploadStatusBanner`, `BottomNav`, `Dashboard` y `ActivityDetailPage`. El `grep` de 6.2 no devuelve ninguna altura de barra fuera de `tokens.css` (sus `130px` son anchos de columna del Calendario). Los `z-*` están en 31 usos con token y no queda ningún `z-50`/`z-[…]` suelto salvo los dos de la landing (Capa 4).
+- **Qué se retiró:** los 5 controles de escritorio de la cabecera (importar CSV, añadir manual, borrar DB, separador y cerrar sesión) y el cierre de sesión móvil. Cerrar sesión vive solo en el menú; «Borrar todas las actividades» en Ajustes → Seguridad y Datos con su `confirm`; añadir manual, solo en Actividades. **Importar CSV no volverá** mientras no se especifique su formato: nunca estuvo implementado (D-03).
+- **Red:** unit 187, integración 10, E2E macOS 105 ✓ / 159 omitidas, Docker 153 ✓ / 111 omitidas, táctil 113, `lint:colors` 756/3/100/9/168, `lint:ui` 14. Volcado acumulado: 538 diferencias de `z-index` (PR 1, excepción aprobada) y 4.038 de caja y tipografía (PR 2), **ninguna de color**.
+- **Antes de tocar la piel:** v1 está congelada (capturas de referencia desde el PR 2); cualquier valor nuevo va detrás de `html[data-ui="v2"]` y necesita capturas propias, porque hoy no existe ninguna de v2.
+- **Decisiones cerradas en la capa:** D1 (capturas una vez), D2 (composición de la cabecera), D3 (CSV retirado), D4 (60 px), D5 (escala de capas), D6 (D-01 aquí). **Abiertas:** D7 (dirección visual, sobre Dashboard y Calendario) y D8 (dónde vive el conmutador de v2).
+
+### Cómo trabajar con la red de seguridad (Capa 0)
+- Las capturas de referencia están en `e2e/__screenshots__/` y **solo se generan en Linux** con `npm run test:e2e:update` (Docker, imagen oficial de Playwright, `linux/amd64` como CI). Las de macOS no son comparables, por eso `visual.spec.js` se omite fuera de Linux. Para compararlas: `npm run test:e2e:docker`.
+- Revisar cada captura nueva antes de aceptarla. La tolerancia es de 100 píxeles (`maxDiffPixels`).
+- Los E2E usan su propio puerto (5273, `E2E_PORT`) y variables de Supabase fijas; no tocan un `npm run dev` en 5173.
+- Datos simulados, fecha fija (2026-06-15) y red externa bloqueada: `e2e/support/mockApp.js`. La fecha sigue avanzando (no `clock.setFixedTime`: congela las animaciones de Recharts).
+- Las capturas se hacen ajustando el viewport a la altura del documento (no `fullPage`, que reinicia las animaciones de Recharts); la landing es la excepción. En móvil se expanden los paneles internos de `MobileSwipePager`.
+- Lista de paridad y defectos conocidos (D-01, D-03 a D-06): `docs/branches/test/ui-safety-net/paridad.md`. D-01 está cerrado y D-03 retirado desde la Capa 3.
+- Informe táctil (< 44 px) no bloquea hasta la Capa 2.
+- `VITE_GEMINI_API_KEY` es opcional (ningún componente usa `askGemini`).
+
+## 6. Contexto compartido entre agentes
+- El punto de entrada de la app es `src/App.jsx` (router + sesión Supabase).
+- El store global es `src/store/useAppStore.js` (Zustand).
+- El cliente Supabase es `src/supabase.js`.
+- El servicio de IA es `src/services/ai.js`.
+- Los motores de cálculo están en `src/utils/` (tssEngine, fitnessStatsEngine, parser, formatters).
+- Los tests viven en `src/__tests__/unit` y `src/__tests__/integration`.
+- Los E2E viven en `e2e/`.
+- Las migraciones SQL viven en `migrations/`.
+- Los scripts sueltos (revisar/eliminar) viven en `scratch/`.
+- **Informe de auditoría:** `AUDIT_REPORT.md` (rama `analysis/project-audit`) — contiene puntos débiles (P-01 a P-30), deuda técnica, hallazgos de tests/coverage y roadmap priorizado (R-01 a R-17).
+
+---
+Última actualización: 2026-11-11

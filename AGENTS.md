@@ -182,4 +182,17 @@ Al iniciar cualquier nueva sesión, el agente debe:
 
 ---
 
-Versión: 0.1.0 — 2026-11-05
+## 8. Economía de tokens (obligatorio)
+
+El coste crece con cada turno porque se relee todo el contexto. Reglas:
+
+1. **Una sesión por fase de `tasks.md`**, no por rama. Al cerrar una sección (o pasar de ~150 turnos), registrar el estado en `tasks.md`/`MEMORY.md` y abrir sesión nueva.
+2. **Nunca leer capturas PNG en bloque.** Se comparan por píxeles (`style-diff`, Playwright). Solo se leen con `Read` las que cambian a propósito (las 12 de v2 en D7), una a una y, si se puede, reducidas.
+3. **Salida de comandos en silencio:** lint, tests y build se ejecutan filtrando (`| tail -20`, `--reporter=dot`); solo se muestra el resumen o el fallo.
+4. **`MEMORY.md` es corto.** El histórico va a `docs/memory/` y los detalles de cada rama a su `tasks.md`; leer secciones con `offset`/`limit`, no ficheros enteros de más de 20 KB.
+5. **Modelo y esfuerzo:** Sonnet por defecto; esfuerzo bajo/medio en trabajo mecánico (CSS, tokens, tests, docs); Opus solo para decisiones de diseño o depuración difícil.
+6. **Trabajo pesado cuando la tarea lo pida:** E2E Docker y capturas se ejecutan en el momento que toca según el plan, sin aplazarlos por cuota.
+
+---
+
+Versión: 0.2.0 — 2026-11-12
