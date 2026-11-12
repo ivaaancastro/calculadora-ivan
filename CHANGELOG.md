@@ -7,6 +7,10 @@ y este proyecto adhiere a [Semantic Versioning](https://semver.org/lang/es/).
 
 ## [Unreleased]
 
+### Rediseño — Capa 4 (`refactor/landing-structure`), PR 1: estructura de la landing
+- `refactor(landing):` `LandingPage.jsx` se divide (`AuthModal`, `FadeIn`, `ParticleCanvas` en `src/components/landing/`); cabecera a `z-nav`; color del canvas a token `--landing-particle`; se borra `LoginPage.jsx` (código muerto); E2E del flujo público.
+- Sin cambio visual: volcado = 12 diferencias, todas `z-index` 40 → 30 de la cabecera; capturas sin cambios. `lint:colors` baja a 743/3/100/8/165.
+
 ### Rediseño — Capa 3 (`docs/ui-capa3-cierre`), PR 7 de 7: cierre documental
 - `docs(ui-shell):` RF9–RF11 y los criterios de v2 marcados como cumplidos; cierre de la Capa 3 en `tasks.md`; roadmap y `MEMORY.md` al día. D12: v1 sigue por defecto hasta la Capa 6 (v2, opt-in).
 - Sin cambios de código: `src/` idéntico a `develop`.
