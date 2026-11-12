@@ -30,7 +30,7 @@ Rama `feat/landing-direction`, sale de `develop` (`bd7d046`).
 - [x] Volcado `full` frente a `develop` (`bd7d046`): 104 volcados, 88.718 elementos, **0 diferencias** (landing v1 y app autenticada intactas).
 - [x] Verificadores (taste-skill, sobre `vite build` con `VITE_UI=v2` + `vite preview`): `perf` solo falla «JS parsed» (995 KiB, bundle único de la SPA, preexistente y fuera de alcance); `consistency` lista fallos que son de otro tipo de página (plantilla de marketing: `main`/`.wrap`, hero a 100svh, h2 dentro del hero) y el pie «Datos de ejemplo», que se mantiene a propósito por honestidad (datos simulados); `layout/check.mjs` no es aplicable a una SPA (falla al leer secciones). Pendiente real para PR 3: skip-link, metas `og:`/`twitter:`, y el contraste de la etiqueta «FUNCIONES» (3,68:1, sección de v1).
 - [x] Lint, `lint:colors` (743/3/100/8/165, sin subir), `lint:ui`, unit 195/195.
-- [ ] PR hacia `develop` y **aprobación del usuario de la dirección visual** antes de PR 3.
+- [x] PR #79 hacia `develop`; dirección visual **aprobada por el usuario** (2026-11-12). PR 3 puede empezar.
 
 ## PR 3 — resto de secciones
 ## PR 4 — modal de acceso y `EmailConfirmedPage`
