@@ -4,7 +4,7 @@
 - **ID:** `spec-rediseno-02-c3-skin-ext` (extensión operativa de `spec-rediseno-02-c3-skin`)
 - **Título:** Extender la dirección «Panel» a las pantallas restantes y completar `chartTheme` (D-10)
 - **Fecha:** 2026-11-12
-- **Estado:** pendiente de aprobación (parada del flujo SDD antes de crear `tasks.md` o escribir código)
+- **Estado:** aprobada 2026-11-12; implementada, pendiente de revisión de capturas y merge.
 - **Spec de la capa:** `docs/branches/feat/ui-shell/spec.md` (RF9–RF11) — no se duplica.
 - **Rama anterior:** `docs/branches/feat/ui-skin-v2-visual/` (PR 5, D7 aprobada 2026-11-12, #75, `7c4ef9a`).
 - **Plan de la capa:** `docs/branches/feat/ui-skin-v2/plan.md`, PR 6.
