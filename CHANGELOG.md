@@ -7,6 +7,13 @@ y este proyecto adhiere a [Semantic Versioning](https://semver.org/lang/es/).
 
 ## [Unreleased]
 
+### Rediseño — Capa 3: piel v2 «Panel» (`feat/ui-skin-v2-visual`), PR 5 de 7: dirección visual
+- `feat(ui-skin-v2):` paleta «Panel» (bloques `@tokens:skin-v2` de `tokens.css`: superficies, rampa de texto, semáforo cobalto/carmín/ámbar, radios 12/14, sombras y escala tipográfica) validada por `scripts/check-palette.mjs` (contraste WCAG y ΔE entre series).
+- `feat(ui-skin-v2):` capa de piel `src/styles/skin-v2.css`, solo bajo `html[data-ui="v2"] [data-skin]`; `data-skin="dashboard"` en `AdvancedAnalytics` y `data-skin="calendar"` en `CalendarPage` (y en su PMC flotante). Clases `section-header` y `chip`, inertes en v1.
+- `feat(ui-skin-v2):` `chartTheme.v2`, `getChartTheme(theme, skin)` y `ChartSkinProvider`/`useChartSkin`; `useChartTheme` lee la piel del contexto. Test que valida v2 contra los bloques de `tokens.css`.
+- `refactor(calendar):` la rampa semanal usa `text-legacy-tsb-up` y `text-danger-light` (mismos valores en v1). `lint:colors` 756 → 754.
+- Verificación: volcado `full` frente a `develop` = **0 diferencias**; unit 195, integración 10, E2E macOS 109 ✓. Capturas: 48 de v1 idénticas; de v2 cambian las 12 previstas (Dashboard y Calendario) y además 6 móviles (actividades, rendimiento y salud × 2 temas) solo porque el pager móvil mide el alto de la pestaña más alta y Dashboard/Calendario crecen 34 px.
+
 ### Rediseño — Capa 3: shell (`spec-rediseno-02-c3`), PR 3 de 7: cierre de la estructura
 - `docs(ui-shell):` cierra la rama de estructura (PRs #70–#72): cobertura en `tasks.md`, spec con RF1–RF8 y RF12–RF14 marcados (RF9–RF11 quedan para la piel), `paridad.md` con **D-01 cerrado** y **D-03 retirado**, roadmap con «Hecho (2026-11-11), estructura» y `MEMORY.md` al día.
 - Sin cambios de código: `src/` queda idéntico a `develop`, así que no hay diferencias de volcado ni de capturas. Referencia al cerrar la shell: unit 187, integración 10, E2E macOS 105 ✓, Docker 153 ✓, táctil 113, `lint:colors` 756/3/100/9/168, `lint:ui` 14.

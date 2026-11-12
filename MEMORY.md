@@ -11,7 +11,7 @@
 
 ## 1. Estado actual
 - **Proyecto:** Forma — dashboard de rendimiento deportivo y salud. Stack: React 19, Vite 7, Tailwind 3, Zustand, TanStack Query, Supabase, Vitest/MSW/Playwright.
-- **Rama actual:** `feat/ui-skin-v2-visual` (Capa 3, PR 5: dirección visual «Panel», D7). Estado y checkboxes en `docs/branches/feat/ui-skin-v2-visual/tasks.md`.
+- **Rama actual:** `feat/ui-skin-v2-visual` (Capa 3, PR 5: dirección visual «Panel», D7). Código y verificación hechos; falta PR y parada D7 (12 capturas). Estado en `docs/branches/feat/ui-skin-v2-visual/tasks.md`.
 - **Hecho:** specs de auditoría 01–08, spec-001 y E2E (todas implementadas). Rediseño: Capa 0 (#51), Capa 1 (#52–#58), Capa 2 (#60–#68), estructura de Capa 3 (#70–#72) y mecanismo de la piel (#73, flag `data-ui="v2"`).
 - **Pendiente del rediseño:** PR 5 (visual, parada D7 con 12 capturas reales) → PRs 6–7 de la Capa 3 → Capas 4 (landing/acceso), 5 (pantallas), 6 (activar v2), 7 (iOS). Plan: `docs/branches/feat/webapp-redesign/plan.md`. Decisión abierta: D8 (dónde vive el conmutador de v2).
 - `feat/webapp-redesign` remoto = intento descartado: no hacer `git pull` ahí ni usar `archive/webapp-redesign-v1` ni `stash@{0}`.
