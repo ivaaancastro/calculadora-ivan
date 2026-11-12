@@ -52,4 +52,4 @@ tipografía +1/+2, semáforo cobalto/carmín/ámbar, rótulo con marca, chips ne
 ## 5. Registro
 
 - [x] `CHANGELOG.md` y `MEMORY.md` actualizados.
-- [ ] Parada **D7**: presentar las 12 capturas reales antes del PR 6.
+- [x] Parada **D7**: 12 capturas presentadas y **aprobadas por el usuario el 2026-11-12**.
