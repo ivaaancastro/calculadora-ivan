@@ -30,7 +30,7 @@ describe('ui/StatTile', () => {
   it('lg: valor en div, pie en span, icono 15/2.3', () => {
     const html = renderToStaticMarkup(<StatTile size="lg" label="Fitness (CTL)" icon={Icon} iconTone="ctl" value={62} sub="+3.1% vs 28d" />);
     expect(html).toContain('p-3.5 sm:p-4 flex flex-col justify-between');
-    expect(html).toContain(`class="w-7 h-7 rounded-xl flex items-center justify-center ${ICON_TONES.ctl}"`);
+    expect(html).toContain(`class="chip w-7 h-7 rounded-xl flex items-center justify-center ${ICON_TONES.ctl}"`);
     expect(html).toContain('data-size="15" data-stroke="2.3"');
     expect(html).toMatch(/<div class="text-2xl[^"]*">62<\/div><span class="text-\[10px\][^"]*">\+3\.1% vs 28d<\/span>/);
   });

@@ -14,6 +14,8 @@ import {
     getEffectiveTSS, computeZoneTssPerHour, estimateTssFromBlocks,
 } from '../../utils/tssEngine';
 import { useChartTheme } from '../charts/useChartTheme';
+import { ChartSkinProvider } from '../charts/ChartSkin';
+import { useUiMode } from '../../hooks/useUiMode';
 import { Button, IconButton, Input, Modal, Segmented, Select } from '../ui';
 
 const WEEKDAYS = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'];
@@ -511,6 +513,7 @@ const WORKOUT_TEMPLATES = {
 };
 
 export const CalendarPage = ({ activities, plannedWorkouts = [], addPlannedWorkout, deletePlannedWorkout, updatePlannedWorkout, currentMetrics, settings, chartData = [], onDelete, onSelectActivity }) => {
+    const { isV2 } = useUiMode();
 
     const [currentDate, setCurrentDate] = useState(() => {
         const savedDate = sessionStorage.getItem('forma_calendar_date');
@@ -1185,7 +1188,8 @@ export const CalendarPage = ({ activities, plannedWorkouts = [], addPlannedWorko
     }, [year, month]);
 
     return (
-        <>
+        <ChartSkinProvider skin={isV2 ? 'v2' : 'v1'}>
+        <div data-skin="calendar" className="contents">
             <div className="flex flex-col bg-surface-6 rounded-3xl border border-line-soft overflow-hidden mb-6 shadow-sm">
 
                 {/* HEADER */}
@@ -1353,7 +1357,7 @@ export const CalendarPage = ({ activities, plannedWorkouts = [], addPlannedWorko
                                                     {ramp != null && (
                                                         <div className="flex items-center gap-0.5">
                                                             <span className="text-[9px] text-ink-4">Ramp</span>
-                                                            <span className={`text-[10px] font-bold ${Number(ramp) > 0 ? 'text-emerald-500' : Number(ramp) < 0 ? 'text-red-400' : 'text-slate-500'}`}>
+                                                            <span className={`text-[10px] font-bold ${Number(ramp) > 0 ? 'text-legacy-tsb-up' : Number(ramp) < 0 ? 'text-danger-light' : 'text-slate-500'}`}>
                                                                 {Number(ramp) > 0 ? '+' : ''}{ramp}
                                                             </span>
                                                         </div>
@@ -2055,7 +2059,8 @@ export const CalendarPage = ({ activities, plannedWorkouts = [], addPlannedWorko
                 )
             }
 
-        </>
+        </div>
+        </ChartSkinProvider>
     );
 };
 

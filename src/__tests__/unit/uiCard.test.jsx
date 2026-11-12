@@ -45,7 +45,7 @@ describe('ui/Card', () => {
 
 describe('ui/SectionHeader', () => {
   it('copia la receta del título de sección de index.css', () => {
-    expect(classes(SECTION_HEADER)).toEqual(classes('text-[12px] font-semibold text-ink-3 uppercase tracking-wider px-0.5 mb-2'));
+    expect(classes(SECTION_HEADER)).toEqual(classes('section-header text-[12px] font-semibold text-ink-3 uppercase tracking-wider px-0.5 mb-2'));
   });
 
   it('renderiza p o div', () => {
