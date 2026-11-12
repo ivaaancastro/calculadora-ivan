@@ -1,7 +1,7 @@
 # Tareas — Capa 4, rama `feat/landing-v2`
 
 Spec: `spec.md`. Plan: `plan.md`. **Aprobada por el usuario el 2026-11-12: «Apruebo recomendadas»** → D1 = tras `data-ui="v2"`, D2 = extender «Panel», D3 = hero con UI real (datos simulados), D4 = retirar el canvas, D5 = retirar «∞», «24/7», «100% gratis» (el mensaje de precio queda fuera hasta que lo confirme), D6 = equivalentes en el repo si la skill no aparece, D7 = borrar `LoginPage.jsx`.
-Abiertas aún: D5 (mensaje de precio) y D6 (¿existe la skill/verificadores en otra ruta?).
+D5 y D6 resueltas el mismo día (ver spec.md): sin promesa de gratuidad; skill clonada en `.taste-skill/` y verificadores leídos (locales, sin red externa).
 
 ## PR 1 — `refactor(landing)`: estructura sin cambio visual
 
@@ -13,7 +13,7 @@ Rama `refactor/landing-structure`, sale de `feat/landing-v2` (docs) sobre `devel
 - [x] D7: `src/components/auth/LoginPage.jsx` borrado (sin referencias).
 - [x] `e2e/public.spec.js`: modal con sus 3 modos y retorno, Escape, `/email-confirmado` → landing.
 - [x] Línea base de `lint:colors` movida y bajada (754→743 palette, 9→8 rgb, 168→165 dark).
-- [ ] PR hacia `develop`.
+- [x] PR hacia `develop` (#78, mergeado en `bd7d046`).
 
 ### Notas del PR 1
 - **Volcado `full` frente a `develop` (`54443b5`):** 104 volcados, 88.718 elementos, **12 diferencias, todas `z-index` 40 → 30 en la cabecera de la landing** (6 volcados de landing + 6 de modal de acceso en móvil y tablet; escritorio no tiene landing). Lo previsto; la cabecera no convive con nada entre 30 y 40.
@@ -21,6 +21,13 @@ Rama `refactor/landing-structure`, sale de `feat/landing-v2` (docs) sobre `devel
 - Nota de entorno: `node_modules` de este worktree está casi vacío; los comandos resuelven al de la raíz del repo.
 
 ## PR 2 — dirección visual (hero + una sección) · parada de aprobación
+
+Rama `feat/landing-direction`, sale de `develop` (`bd7d046`).
+
+- [ ] Propuesta visual (opciones) presentada al usuario y aprobada.
+- [ ] Implementación del hero + una sección tras `data-ui="v2"`; canvas retirado en v2; copy neutro.
+- [ ] Capturas propias de v2 (390/768/1440, claro/oscuro) y verificadores.
+- [ ] PR hacia `develop`.
 ## PR 3 — resto de secciones
 ## PR 4 — modal de acceso y `EmailConfirmedPage`
 ## PR 5 — cierre documental y verificadores

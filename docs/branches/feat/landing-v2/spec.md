@@ -5,7 +5,7 @@
 - **Título:** Capa 4 del rediseño: landing, modal de acceso y página de correo confirmado
 - **Autor:** agente Claude Code
 - **Fecha:** 2026-11-12
-- **Estado:** **borrador, pendiente de aprobación del usuario** (decisiones D1–D7 abiertas, sección 4).
+- **Estado:** **aprobada el 2026-11-12** (D1–D7 resueltas; ver sección 4 y `tasks.md`).
 - **Depende de:** `spec-rediseno-02` (roadmap), Capas 0–3 mergeadas en `develop` (último PR #77, `54443b5`).
 - **Rama:** `feat/landing-v2` (nombre del roadmap).
 
@@ -27,15 +27,15 @@ Rediseñar las tres páginas públicas de Forma —`LandingPage`, su modal de ac
 - **Capas (`z-index`) sueltas de la landing:** `LandingPage.jsx:277` (`z-40` en la cabecera fija) y `:318` (`z-10` del contenido del hero), más `style={{ zIndex: 0 }}` en el canvas (`:66`). La Capa 3 dejó cero `z-*` sueltos en el resto de `src/`. (La cabecera pasaría a `z-nav`; el `z-10` y el `0` son orden interno del hero.)
 - **Canvas de partículas** (`ParticleCanvas`, `:11-69`): 80 partículas animadas con `requestAnimationFrame` y `rgba(96, 130, 255, …)` en un literal de JS; fuera de alcance de la Capa 1 (no lo ve `lint:colors`). No respeta `prefers-reduced-motion` ni el tema oscuro/claro.
 - **Valores visuales sin tokenizar de la landing:** gradientes `from-blue-500/5`, colores de icono `bg-blue-600 / indigo / emerald / orange / amber` en `FeatureCard`, `bg-slate-900 dark:bg-white` del CTA, `text-blue-500` en `StatItem`, campos del acceso con `border-slate-200 dark:border-zinc-800` (D-08 del paridad: no entran en las primitivas de campo) y textos de 10–11 px (RF8 pide ≥ 11 px).
-- **Skill de la capa:** la spec raíz (6.2) exige aplicar la skill completa y sus verificadores (`consistency.mjs`, `check.mjs`, `perf.mjs`) sobre la página pública. **No están en el repositorio** (`.taste-skill/` está ignorado y vacío). Hay que confirmar con el usuario dónde están (D6).
+- **Skill de la capa (resuelto en D6):** la spec raíz (6.2) exige aplicar la skill completa y sus verificadores (`consistency.mjs`, `check.mjs`, `perf.mjs`) sobre la página pública. **No están en el repositorio** (`.taste-skill/` está ignorado y vacío). Hay que confirmar con el usuario dónde están (D6).
 
 ### 3.3 Afirmaciones comerciales actuales a verificar
 Regla del roadmap: nada se publica sin confirmarlo. Hoy la landing dice:
 
 | Texto | Estado |
 |---|---|
-| «∞ Actividades», «24/7 Análisis», «5+ Zonas FC», «100% Gratis» (bloque de cifras) | Sin verificar; «∞» y «24/7» son adornos, «100% Gratis» es una promesa de precio. |
-| «Empezar Gratis», «Crear Cuenta Gratis», «Crea tu cuenta gratuita» | Igual que la anterior. |
+| «∞ Actividades», «24/7 Análisis», «5+ Zonas FC», «100% Gratis» (bloque de cifras) | **Se retiran** (D5): hechos comprobables del código en su lugar. |
+| «Empezar Gratis», «Crear Cuenta Gratis», «Crea tu cuenta gratuita» | **Copy neutro** (D5): no hay promesa de gratuidad. |
 | «Compatible con medidores de potencia», «NP, IF, VI, TSS» | Comprobable contra `src/utils/`. |
 | «Pasa el ratón por la gráfica y mira tu posición» (mapas) | Depende de hover; en móvil no aplica (RF10). |
 | «Sincronización Strava … automáticamente» | Comprobable contra el flujo real (¿manual o automática?). |
@@ -51,8 +51,8 @@ Cada una tiene mi recomendación; ninguna está tomada.
 - **D2 · Dirección visual.** a) **Extender «Panel»** de la Capa 3 (misma paleta, tipografía y radios; identidad única app+landing; recomendada); b) **editorial/marketing** más expresiva (tipografía y paleta propias de la landing); c) **híbrida**: «Panel» como base y un hero más expresivo. La elección se valida con un PR de hero + una sección (como el PR 5 de la Capa 3) antes de extenderla.
 - **D3 · Qué ve el visitante.** Hero con **capturas/maqueta de la UI real** de Forma (datos simulados de `e2e/support/mockApp.js`, nunca datos de nadie) en vez de iconos genéricos. ¿Se conserva la metáfora «laboratorio» en el copy?
 - **D4 · Canvas de partículas.** a) **Retirarlo (recomendada)**: la UI real lo sustituye; menos JS y sin animación continua; b) conservarlo con color por token, tema claro/oscuro y `prefers-reduced-motion`; c) sustituirlo por un fondo estático (degradado/rejilla).
-- **D5 · Bloque de cifras y afirmaciones.** Propongo retirar «∞», «24/7» y «100% Gratis» y sustituirlos por hechos comprobables del código (nº de métricas, zonas, deportes), y que tú confirmes el mensaje de precio (¿es gratis para siempre, hay plan de pago, qué pasa con Strava?). Sin tu confirmación, el texto de precio queda fuera.
-- **D6 · Skill y verificadores.** ¿Dónde están la skill de taste y `consistency.mjs`/`check.mjs`/`perf.mjs`? Si no están disponibles, propongo sustituirlos por equivalentes en el repo (tabla de la sección 6.2: contraste, tamaño mínimo, un acento, peso de página, Lighthouse en CI) y lo dejamos anotado.
+- **D5 · Bloque de cifras y afirmaciones — RESUELTA (2026-11-12).** Se retiran «∞», «24/7» y «100% Gratis» y se sustituyen por hechos comprobables del código. **Forma NO es gratis para siempre:** a futuro, con más clientes, habrá funciones de pago; por tanto **no se promete gratuidad** en la landing ni en los botones («Empezar Gratis», «Crear Cuenta Gratis», «Crea tu cuenta gratuita» pasan a copy neutro: «Empezar», «Crear cuenta»). **Strava:** sus límites de API se tratarán en otra fase; en ella se estudiará añadir **Garmin** (API nueva). **No se menciona Garmin en la landing**; queda como pendiente (ver `MEMORY.md`).
+- **D6 · Skill y verificadores — RESUELTA (2026-11-12).** La skill es `https://github.com/Leonxlnx/taste-skill`, clonada en `.taste-skill/` (ignorada por git, no se commitea). Es código de terceros: leídos antes de usar, `consistency.mjs`, `perf.mjs` y `assets/layout/check.mjs` (el «check.mjs» de la spec raíz) **no tienen dependencias npm**, abren Chrome headless (perfil en `.taste-skill/` o tmp), sirven la página en un puerto local, solo hacen `fetch` al mismo origen y escriben capturas/perfil en su carpeta; sin red externa. Chrome está instalado. Se aplican **solo a las 3 páginas públicas**, sobre el build servido (`vite preview`). Si alguno no es utilizable sobre una SPA, se usan los equivalentes del repo (contraste, tamaño mínimo, peso de página) y se anota.
 - **D7 · `LoginPage.jsx` (código muerto).** Eliminarlo (recomendado, en el PR de estructura, con `grep` que lo respalda) o mantenerlo. Aprobar su borrado cuenta como cambio de `src/` sin efecto visible.
 
 ## 5. Requisitos funcionales
