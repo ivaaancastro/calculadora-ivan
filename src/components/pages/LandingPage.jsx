@@ -2,6 +2,9 @@ import React, { useState, useCallback } from 'react';
 import { FadeIn } from '../landing/FadeIn';
 import { ParticleCanvas } from '../landing/ParticleCanvas';
 import { AuthModal } from '../landing/AuthModal';
+import { HeaderV2 } from '../landing/HeaderV2';
+import { HeroV2 } from '../landing/HeroV2';
+import { useUiMode } from '../../hooks/useUiMode';
 import {
   Activity, ArrowRight,
   BarChart3, Map, Calendar, Zap, Heart, Timer,
@@ -34,14 +37,22 @@ const StatItem = ({ icon: Icon, value, label }) => (
    ═══════════════════════════════════════════════ */
 export const LandingPage = () => {
   const [authOpen, setAuthOpen] = useState(false);
+  const { isV2 } = useUiMode();
 
   const scrollToFeatures = useCallback(() => {
     document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' });
   }, []);
 
   return (
-    <div className="min-h-screen bg-surface-6 text-ink-2-soft overflow-x-hidden selection:bg-action-bright/30">
+    <div data-skin="landing" className="min-h-screen bg-surface-6 text-ink-2-soft overflow-x-hidden selection:bg-action-bright/30">
 
+      {isV2 ? (
+        <>
+          <HeaderV2 onOpenAuth={() => setAuthOpen(true)} onFeatures={scrollToFeatures} />
+          <HeroV2 onOpenAuth={() => setAuthOpen(true)} onFeatures={scrollToFeatures} />
+        </>
+      ) : (
+        <>
       {/* ─── NAVBAR ─── */}
       <nav className="fixed top-0 left-0 right-0 z-nav bg-surface-9 backdrop-blur-xl border-b border-slate-100/80 dark:border-zinc-900/80">
         <div className="max-w-6xl mx-auto flex items-center justify-between h-16 px-6">
@@ -135,6 +146,8 @@ export const LandingPage = () => {
         </div>
       </section>
 
+        </>
+      )}
       {/* ─── FEATURES BENTO GRID ─── */}
       <section id="features" className="relative py-24 px-6">
         <div className="max-w-6xl mx-auto">
