@@ -47,6 +47,7 @@ const colors = {
     cursor: token('chart-cursor'),
     'dot-ring': token('chart-dot-ring'),
   },
+  'on-action': token('on-action'), // texto sobre fondos de acción (landing v2)
   ...familyColors,
 };
 

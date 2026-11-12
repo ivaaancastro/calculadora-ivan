@@ -7,6 +7,10 @@ y este proyecto adhiere a [Semantic Versioning](https://semver.org/lang/es/).
 
 ## [Unreleased]
 
+### Rediseño — Capa 4 (`feat/landing-direction`), PR 2: dirección visual de la landing
+- `feat(landing):` en v2 la landing usa `HeaderV2`, `HeroV2` y `DashboardPreview` (panel real con datos de ejemplo), sin canvas de partículas y con copy neutro en el hero. Token `--on-action` solo en v2. v1 intacta.
+- Volcado de estilos frente a `develop`: 0 diferencias. Capturas v2 de la landing regeneradas (6). `lint:colors` sin cambios (743/3/100/8/165).
+
 ### Rediseño — Capa 4 (`refactor/landing-structure`), PR 1: estructura de la landing
 - `refactor(landing):` `LandingPage.jsx` se divide (`AuthModal`, `FadeIn`, `ParticleCanvas` en `src/components/landing/`); cabecera a `z-nav`; color del canvas a token `--landing-particle`; se borra `LoginPage.jsx` (código muerto); E2E del flujo público.
 - Sin cambio visual: volcado = 12 diferencias, todas `z-index` 40 → 30 de la cabecera; capturas sin cambios. `lint:colors` baja a 743/3/100/8/165.
