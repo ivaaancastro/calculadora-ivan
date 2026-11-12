@@ -4,6 +4,8 @@ import { ParticleCanvas } from '../landing/ParticleCanvas';
 import { AuthModal } from '../landing/AuthModal';
 import { HeaderV2 } from '../landing/HeaderV2';
 import { HeroV2 } from '../landing/HeroV2';
+import { FeaturesV2 } from '../landing/FeaturesV2';
+import { FactsV2, CtaV2, FooterV2 } from '../landing/SectionsV2';
 import { useUiMode } from '../../hooks/useUiMode';
 import {
   Activity, ArrowRight,
@@ -48,8 +50,20 @@ export const LandingPage = () => {
 
       {isV2 ? (
         <>
+          <a
+            href="#main"
+            className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-[calc(var(--nav-h)+0.5rem)] focus:z-nav focus:rounded-xl focus:bg-action-solid focus:px-4 focus:py-3 focus:text-sm focus:font-bold focus:text-on-action"
+          >
+            Saltar al contenido
+          </a>
           <HeaderV2 onOpenAuth={() => setAuthOpen(true)} onFeatures={scrollToFeatures} />
-          <HeroV2 onOpenAuth={() => setAuthOpen(true)} onFeatures={scrollToFeatures} />
+          <main id="main" tabIndex={-1} className="outline-none">
+            <HeroV2 onOpenAuth={() => setAuthOpen(true)} onFeatures={scrollToFeatures} />
+            <FeaturesV2 />
+            <FactsV2 />
+            <CtaV2 onOpenAuth={() => setAuthOpen(true)} />
+          </main>
+          <FooterV2 onFeatures={scrollToFeatures} />
         </>
       ) : (
         <>
@@ -146,8 +160,6 @@ export const LandingPage = () => {
         </div>
       </section>
 
-        </>
-      )}
       {/* ─── FEATURES BENTO GRID ─── */}
       <section id="features" className="relative py-24 px-6">
         <div className="max-w-6xl mx-auto">
@@ -261,6 +273,8 @@ export const LandingPage = () => {
           <span>© {new Date().getFullYear()} Forma · Performance Analytics</span>
         </div>
       </footer>
+        </>
+      )}
 
       {/* ─── AUTH MODAL ─── */}
       <AuthModal open={authOpen} onClose={() => setAuthOpen(false)} />

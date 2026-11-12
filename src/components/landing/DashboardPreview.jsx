@@ -30,7 +30,7 @@ export const DashboardPreview = () => (
         <div key={t.label} className="rounded-xl border border-line-soft bg-sunken p-2.5 sm:p-3">
           <div className="flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wider text-ink-3">
             <span className={`h-2 w-2 rounded-full ${t.dot}`} aria-hidden="true" />
-            <span className="truncate">{t.label}<span className="hidden sm:inline"> ({t.code})</span></span>
+            <span className="truncate">{t.label}<span className="hidden xl:inline"> ({t.code})</span></span>
           </div>
           <div className={`mt-1 text-2xl font-bold tabular-nums tracking-tight ${t.tone}`}>{t.value}</div>
         </div>

@@ -27,6 +27,20 @@ test.describe('Páginas públicas', () => {
     await expect(page.getByRole('dialog')).toHaveCount(0);
   });
 
+  test('landing v2: skip-link, un h1 y copy sin promesas de precio', async ({ page }) => {
+    await setupApp(page, { authenticated: false, ui: 'v2' });
+    await gotoReady(page, '/');
+    await page.keyboard.press('Tab');
+    const skip = page.getByRole('link', { name: 'Saltar al contenido' });
+    await expect(skip).toBeFocused();
+    await expect(page.getByRole('heading', { level: 1 })).toHaveCount(1);
+    await expect(page.getByRole('heading', { level: 2, name: /Todo lo que necesitas/ })).toBeVisible();
+    const text = await page.locator('body').innerText();
+    for (const banned of [/gratis/i, /gratuit/i, /∞/, /24\/7/, /laboratorio/i, /garmin/i]) {
+      expect(text).not.toMatch(banned);
+    }
+  });
+
   test('/email-confirmado confirma la cuenta y vuelve a la landing', async ({ page }) => {
     await setupApp(page, { authenticated: false });
     await gotoReady(page, '/email-confirmado');
