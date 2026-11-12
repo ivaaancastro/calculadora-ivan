@@ -25,7 +25,7 @@ const readSkinV2Tokens = () => {
     const body = area.slice(area.indexOf('{', start) + 1, area.indexOf('}', start));
     return Object.fromEntries([...body.matchAll(/--([\w-]+)\s*:\s*([^;]+);/g)].map(([, k, v]) => [k, v.trim()]));
   };
-  return { light: block('html[data-ui="v2"] [data-skin="dashboard"]'), dark: block('html[data-ui="v2"].dark [data-skin="dashboard"]') };
+  return { light: block('html[data-ui="v2"] [data-skin]'), dark: block('html[data-ui="v2"].dark [data-skin]') };
 };
 
 /** '#rgb' | '#rrggbb' | 'rgba(r, g, b, a)' → { rgb: 'r g b', a }. */
@@ -83,8 +83,14 @@ describe('chartTheme ↔ tokens.css', () => {
     const v1 = getChartTheme('light');
     const v2 = getChartTheme('light', 'v2');
     expect(v2.series.ctl).not.toBe(v1.series.ctl);
-    expect(v2.series.hr).toBe(v1.series.hr);
-    expect(v2.zones).toEqual(v1.zones);
+    expect(v2.series.hr).not.toBe(v1.series.hr);
+    expect(v2.zones.hr).toHaveLength(5);
+    expect(v2.zones.all).toHaveLength(7);
+    expect(v2.zones.all[1]).not.toBe(v1.zones.all[1]);
+    // D-10: en v2 las series tienen valores propios en oscuro (más claros que en claro).
+    for (const g of ['series', 'sports', 'distribution']) {
+      expect(getChartTheme('dark', 'v2')[g]).not.toEqual(getChartTheme('light', 'v2')[g]);
+    }
     expect(getChartTheme('dark', 'v2')).not.toEqual(getChartTheme('light', 'v2'));
   });
 });

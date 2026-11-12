@@ -19,6 +19,7 @@ import { HistoryList } from './dashboard/HistoryList';
 import AddActivityModal from './modals/AddActivityModal';
 import { ErrorBoundary } from './common/ErrorBoundary';
 import { LoadingState } from './ui';
+import { AutoChartSkin } from './charts/ChartSkin';
 
 // Páginas cargadas bajo demanda (code splitting)
 const CalendarPage = React.lazy(() =>
@@ -121,6 +122,7 @@ const Dashboard = () => {
 
   const renderFitnessStats = (
     <ErrorBoundary>
+     <AutoChartSkin>
       <FitnessStatsPage
         activities={activities}
         settings={settings}
@@ -133,6 +135,7 @@ const Dashboard = () => {
         isDeepSyncing={isDeepSyncing}
         deepSyncProgress={deepSyncProgress}
       />
+     </AutoChartSkin>
     </ErrorBoundary>
   );
 
@@ -155,7 +158,7 @@ const Dashboard = () => {
 
   const renderHealth = (
     <ErrorBoundary>
-      <HealthPage activities={activities} settings={settings} chartData={chartData} />
+      <AutoChartSkin><HealthPage activities={activities} settings={settings} chartData={chartData} /></AutoChartSkin>
     </ErrorBoundary>
   );
 
