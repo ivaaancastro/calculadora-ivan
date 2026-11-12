@@ -11,7 +11,7 @@
 
 ## 1. Estado actual
 - **Proyecto:** Forma — dashboard de rendimiento deportivo y salud. Stack: React 19, Vite 7, Tailwind 3, Zustand, TanStack Query, Supabase, Vitest/MSW/Playwright.
-- **Rama actual:** `feat/landing-direction` (Capa 4, PR 2 de 5: dirección visual de la landing). Spec/plan/tasks en `docs/branches/feat/landing-v2/`; PR 1 = #78 mergeado.
+- **Rama actual:** `feat/landing-sections` (Capa 4, PR 3 de 5: secciones de la landing v2). Spec/plan/tasks en `docs/branches/feat/landing-sections/` (y `landing-v2/` para la capa); PR 1 = #78 y PR 2 = #79 mergeados.
 - **Hecho:** specs de auditoría 01–08, spec-001 y E2E (todas implementadas). Rediseño: Capa 0 (#51), Capa 1 (#52–#58), Capa 2 (#60–#68), Capa 3 completa: estructura (#70–#72), mecanismo de la piel (#73, flag `data-ui="v2"`), dirección visual (#75) y extensión a 5 pantallas y gráficas (#76).
 - **Pendiente del rediseño:** Capa 4 (landing/acceso, en curso), 5 (pantallas), 6 (activar v2), 7 (iOS). Plan: `docs/branches/feat/webapp-redesign/plan.md`. D12: **v1 sigue por defecto hasta la Capa 6**; v2 es opt-in (Ajustes → «Vista previa v2» o `VITE_UI=v2`). Shell y lienzo aún en v1 (D11).
 - `feat/webapp-redesign` remoto = intento descartado: no hacer `git pull` ahí ni usar `archive/webapp-redesign-v1` ni `stash@{0}`.
