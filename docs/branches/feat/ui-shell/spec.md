@@ -5,7 +5,7 @@
 - **Título:** Capa 3 del rediseño: shell de navegación (`feat/ui-shell`) y piel v2 tras `data-ui="v2"` (`feat/ui-skin-v2`)
 - **Autor:** agente Claude Code
 - **Fecha:** 2026-11-10
-- **Estado:** estructura implementada (`feat/ui-shell`: #70 y #71 mergeados, cierre en el PR #72); piel v2 pendiente (`feat/ui-skin-v2`, PRs 4–7 del plan). Los RF9–RF11 y los criterios de v2 siguen abiertos para esa rama.
+- **Estado:** Capa 3 implementada y cerrada: estructura (#70–#72), mecanismo de la piel (#73), dirección visual (#75) y extensión a 5 pantallas y gráficas (#76); cierre documental en `docs/ui-capa3-cierre`. RF1–RF14 cumplidos. v1 sigue siendo la vista por defecto hasta la Capa 6 (D12).
 - **Depende de:** `spec-rediseno-02` (roadmap), `spec-rediseno-02-c0` (red de seguridad, PR #51), `spec-rediseno-02-c1` (tokens, PRs #52–#58) y `spec-rediseno-02-c2` (primitivas, PRs #60–#68), todas mergeadas en `develop`.
 - **Rama de esta carpeta:** `feat/ui-shell`. La segunda rama de la capa, `feat/ui-skin-v2`, usará este mismo documento como spec (no se duplica) y tendrá su propia carpeta con `tasks.md`.
 
@@ -142,9 +142,9 @@ Conflictos reales: la cabecera del detalle (`z-50`) y los modales (`z-50`) empat
 - [x] **RF6. Destructivas a Ajustes:** "Borrar DB" vive en Ajustes → Seguridad y Datos, junto a "Eliminar cuenta", y **mantiene su confirmación**. No queda ninguna acción destructiva en la cabecera. *(PR 2; es «Borrar todas las actividades»: borra las actividades, no la cuenta.)*
 - [x] **RF7. D-01:** `MobileSwipePager` añade `.hide-scrollbar` a sus exclusiones, igual que `useSwipeNavigation`. La prueba `gestures.spec.js:37` deja de ser `test.fail()` y pasa a verde como prueba normal. *(PR 1.)*
 - [x] **RF8. Paridad intacta:** ninguna acción de `paridad.md:23-44` desaparece ni cambia de resultado. "Cerrar sesión" sigue existiendo en el menú y las acciones que se mueven lo hacen con su prueba o con una nueva. *(PR 2; la lista viva de `paridad.md` ya recoge las ubicaciones nuevas y D-03 como acción retirada.)*
-- [ ] **RF9. Activación de v2:** `html[data-ui="v2"]` se activa por **entorno** (`VITE_UI=v2`) y por **`localStorage`** (`ui`), se aplica antes del primer pintado (script en línea de `index.html`, como el tema) y se puede **cambiar en caliente sin recargar ni perder datos ni sesión**. *Pendiente: `feat/ui-skin-v2`, PR 4.*
-- [ ] **RF10. v1 congelada:** con `data-ui` ausente o distinto de `v2`, la app se ve exactamente como tras el PR de estructura: **0 diferencias** en el volcado de estilos y en las capturas de referencia. *v1 quedó congelada en el PR 2 (D1); el mecanismo que lo garantiza llega en el PR 4.*
-- [ ] **RF11. v2 con red propia:** existe un proyecto de capturas con `data-ui="v2"` (mismas 8 pantallas, 2 temas, 3 tamaños) y su volcado, para que la piel tampoco derive sin avisar. *Pendiente: `feat/ui-skin-v2`, PR 4+.*
+- [x] **RF9. Activación de v2:** `html[data-ui="v2"]` se activa por **entorno** (`VITE_UI=v2`) y por **`localStorage`** (`ui`), se aplica antes del primer pintado (script en línea de `index.html`, como el tema) y se puede **cambiar en caliente sin recargar ni perder datos ni sesión**. *(Cumplido en #73: `index.html`, `useUiMode`, conmutador en `ProfilePage`.)*
+- [x] **RF10. v1 congelada:** con `data-ui` ausente o distinto de `v2`, la app se ve exactamente como tras el PR de estructura: **0 diferencias** en el volcado de estilos y en las capturas de referencia. *(v1 congelada en el PR 2 (D1); volcado `full` = 0 diferencias en #73, #75 y #76.)*
+- [x] **RF11. v2 con red propia:** existe un proyecto de capturas con `data-ui="v2"` (mismas 8 pantallas, 2 temas, 3 tamaños) y su volcado, para que la piel tampoco derive sin avisar. *(Cumplido: `e2e/visual-v2.spec.js`, capturas de v2 por pantalla, tema y tamaño.)*
 - [x] **RF12. Sin cambios de lógica:** no se tocan `src/services`, `src/store`, `src/utils` ni `src/supabase.js`. Los únicos cambios de comportamiento permitidos son los de RF5–RF7 y el conmutador de RF9. *(La rama de estructura no toca ninguna de esas carpetas.)*
 - [x] **RF13. Accesibilidad conservada:** se mantienen los `aria-label`, roles y `title` que usan los E2E (`Menú de configuración y perfil`, `Buscar actividades`, `Navegación móvil flotante estilo Apple`, `Cambiar tema`, `Cerrar sesión`). Los controles nuevos de Ajustes llevan etiqueta asociada y objetivo táctil ≥ 44 px. *(PR 2: el informe táctil sigue en 113 y los dos botones de la zona de peligro suben a 44 px.)*
 - [x] **RF14. Fuera de alcance:** la landing y el modal de acceso (Capa 4), la reescritura de pantallas (Capa 5) y las escalas ordinales de color, que solo se definen si la dirección visual elegida las necesita (D7). *(Nada de eso se ha tocado.)*
@@ -160,10 +160,10 @@ En cada PR *(cumplido en los PRs 1–3 de `feat/ui-shell`)*:
 - [x] Informe táctil: se documenta el número por pantalla. Sube solo donde se añada un control en Ajustes; no se acepta un aumento en la cabecera. *(113 en los dos lados.)*
 - [x] Recorrido de `paridad.md` (RF8) anotado en `tasks.md`.
 
-Al terminar la capa *(la parte de estructura cerró el 2026-11-11 con el PR 3; lo de v2 queda para `feat/ui-skin-v2`)*:
+Al terminar la capa *(estructura cerrada el 2026-11-11; v2 cerrada con el PR 7)*:
 - [x] `grep` de 6.2 sin resultados: ningún número de altura de barra fuera de `tokens.css`.
-- [ ] v1 y v2 tienen capturas de referencia propias y las dos comparan sin diferencias en Docker.
-- [ ] Con `VITE_UI=v2` y con el conmutador de Ajustes se llega a la misma pantalla, y apagar v2 devuelve a v1 **sin recargar** y con la sesión intacta.
+- [x] v1 y v2 tienen capturas de referencia propias y las dos comparan sin diferencias en Docker.
+- [x] Con `VITE_UI=v2` y con el conmutador de Ajustes se llega a la misma pantalla, y apagar v2 devuelve a v1 **sin recargar** y con la sesión intacta.
 - [x] `MEMORY.md`, `CHANGELOG.md`, `paridad.md` (D-01 y D-03 cerrados) y el roadmap actualizados.
 
 ## 6. Diseño técnico
@@ -274,7 +274,7 @@ En escritorio el resultado es simétrico: las pestañas siguen en el centro, tem
 - **D5. Numeración de la escala `z-*`.** La de 6.3 (30/40/50/60/70). **Propuesta:** aceptarla; deja libres 10 y 20 para lo interno y 400/500 para mapa y toasts.
 - **D6. D-01 en esta capa.** **Propuesta:** sí, en el PR 1 (es una línea y una prueba que pasa a normal). Alternativa: dejarlo como defecto conocido.
 - **D7. Dirección visual de v2.** Se elige sobre **Dashboard y Calendario** antes de extender, como dice el roadmap. **Propuesta:** en `feat/ui-skin-v2`, PR 1, con las dos pantallas y el volcado comparativo de v1; aprobación tuya antes de seguir con el resto.
-- **D8. Dónde vive el conmutador de v2.** **Propuesta:** Ajustes → General, visible para todos hasta que v2 sea la vista por defecto. Alternativa: solo por entorno y `localStorage` (sin interruptor visible), y entonces la vista previa se prueba con `VITE_UI=v2`.
+- **D8. Dónde vive el conmutador de v2.** **Propuesta:** Ajustes → General, visible para todos hasta que v2 sea la vista por defecto. Alternativa: solo por entorno y `localStorage` (sin interruptor visible), y entonces la vista previa se prueba con `VITE_UI=v2`. **Resuelta e implementada en #73 (conmutador en Ajustes).** La vista por defecto es la decisión D12: **v1 hasta la Capa 6** (elegida por el usuario al cerrar la capa); allí se activa v2 y se retira el conmutador.
 
 ### Lo que esta capa NO hace
 - No toca la landing ni el acceso (Capa 4).

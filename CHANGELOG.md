@@ -7,6 +7,10 @@ y este proyecto adhiere a [Semantic Versioning](https://semver.org/lang/es/).
 
 ## [Unreleased]
 
+### Rediseño — Capa 3 (`docs/ui-capa3-cierre`), PR 7 de 7: cierre documental
+- `docs(ui-shell):` RF9–RF11 y los criterios de v2 marcados como cumplidos; cierre de la Capa 3 en `tasks.md`; roadmap y `MEMORY.md` al día. D12: v1 sigue por defecto hasta la Capa 6 (v2, opt-in).
+- Sin cambios de código: `src/` idéntico a `develop`.
+
 ### Rediseño — Capa 3: piel v2 «Panel» (`feat/ui-skin-v2-extension`), PR 6 de 7: extensión
 - `feat(ui-skin-v2):` la piel llega a Perfil, Actividades, Rendimiento, Salud y Detalle de actividad (`data-skin="profile|history|stats|health|detail"`). Los selectores de `tokens.css` pasan a `[data-skin]` genérico; `AutoChartSkin` activa la piel de gráficas fuera de Dashboard y Calendario. Shell y lienzo siguen en v1 (D11).
 - `feat(ui-skin-v2):` `chartTheme.v2` con valores propios en oscuro (D-10) para series, deportes, distribución, zonas y mapa; `check-palette.mjs` exige 3:1 a todas las gráficas de v2. Colores de deporte unificados (D-09).

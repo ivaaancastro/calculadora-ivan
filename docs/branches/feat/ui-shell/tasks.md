@@ -81,3 +81,23 @@ Rama `feat/ui-shell-close`, sale de `develop` (`fadb304`, merge del PR 2). Solo 
 **Lo que este cierre NO marca como hecho:** los RF9–RF11 y los criterios "al terminar la capa" de v2 (mecanismo `data-ui`, conmutador, capturas propias de v2) pertenecen a `feat/ui-skin-v2`; la spec sigue viva para esa rama y el roadmap deja la Capa 3 a medias a propósito.
 
 **Verificación de este PR (solo docs):** lint ✓, lint:colors ✓ (756/3/100/9/168), lint:ui ✓ (14), unit 187/187, integración 10/10, build ✓, E2E macOS **105 ✓** / 159 omitidas / 0 ✘. Sin capturas ni volcado: el árbol de `src/` es idéntico a `develop`.
+
+## PR 7 — `docs(ui-shell)`: cierre de la Capa 3
+
+Rama `docs/ui-capa3-cierre`, sale de `develop` (`1b6975f`, merge del PR 6). Solo documentación.
+
+- [x] RF9–RF11 y criterios «al terminar la capa» marcados en `spec.md`; `MEMORY.md`, `CHANGELOG.md` y roadmap al día.
+- [x] **D12 (vista por defecto): v1 hasta la Capa 6**, decidido por el usuario entre tres opciones (v1 / v2 ya / v2 en preview). v2 queda opt-in (Ajustes → «Vista previa v2» o `VITE_UI=v2`).
+
+### Cierre de la Capa 3
+
+| PR | Contenido |
+|---|---|
+| #70–#72 | Estructura: tokens de altura y capas, cabecera de 60 px, acciones a Ajustes, paridad (D-01, D-03) |
+| #73 | Mecanismo `data-ui="v2"` (entorno, `localStorage`, conmutador en caliente) y capturas de v2 |
+| #75 | Dirección visual «Panel» en Dashboard y Calendario, `chartTheme.v2` |
+| #76 | Piel en Perfil, Actividades, Rendimiento, Salud y Detalle; `chartTheme.v2` completo (D-10); colores de deporte unificados (D-09) |
+
+**Cifras finales (PR 6):** volcado `full` frente a `develop` = 0 diferencias (88.718 elementos); unit 195, integración 10, E2E macOS 109 ✓, Docker 205 ✓; `lint:ui` 14; `lint:colors` 754 en palette (756 al cerrar la estructura).
+
+**Pendiente para capas siguientes:** shell y lienzo siguen en v1 (D11) y se tocan en la Capa 5/6; activar v2 por defecto y retirar el conmutador (Capa 6, D12).
