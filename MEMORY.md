@@ -11,9 +11,9 @@
 
 ## 1. Estado actual
 - **Proyecto:** Forma — dashboard de rendimiento deportivo y salud. Stack: React 19, Vite 7, Tailwind 3, Zustand, TanStack Query, Supabase, Vitest/MSW/Playwright.
-- **Rama actual:** `feat/ui-skin-v2-extension` (Capa 3, PR 6: extensión de la piel v2 a 5 pantallas y `chartTheme` completo, D-10). PR 5 (#75, D7 aprobada 2026-11-12) ya en `develop`. Estado en `docs/branches/feat/ui-skin-v2-extension/tasks.md`.
-- **Hecho:** specs de auditoría 01–08, spec-001 y E2E (todas implementadas). Rediseño: Capa 0 (#51), Capa 1 (#52–#58), Capa 2 (#60–#68), estructura de Capa 3 (#70–#72), mecanismo de la piel (#73, flag `data-ui="v2"`) y dirección visual (#75).
-- **Pendiente del rediseño:** PR 6 (en curso) → PR 7 (cierre documental) de la Capa 3 → Capas 4 (landing/acceso), 5 (pantallas), 6 (activar v2), 7 (iOS). Plan: `docs/branches/feat/webapp-redesign/plan.md`. Decisión abierta: D8 (dónde vive el conmutador de v2).
+- **Rama actual:** `docs/ui-capa3-cierre` (Capa 3, PR 7: cierre documental). Estado en `docs/branches/docs/ui-capa3-cierre/` y cierre de la capa en `docs/branches/feat/ui-shell/tasks.md`.
+- **Hecho:** specs de auditoría 01–08, spec-001 y E2E (todas implementadas). Rediseño: Capa 0 (#51), Capa 1 (#52–#58), Capa 2 (#60–#68), Capa 3 completa: estructura (#70–#72), mecanismo de la piel (#73, flag `data-ui="v2"`), dirección visual (#75) y extensión a 5 pantallas y gráficas (#76).
+- **Pendiente del rediseño:** Capas 4 (landing/acceso), 5 (pantallas), 6 (activar v2), 7 (iOS). Plan: `docs/branches/feat/webapp-redesign/plan.md`. D12: **v1 sigue por defecto hasta la Capa 6**; v2 es opt-in (Ajustes → «Vista previa v2» o `VITE_UI=v2`). Shell y lienzo aún en v1 (D11).
 - `feat/webapp-redesign` remoto = intento descartado: no hacer `git pull` ahí ni usar `archive/webapp-redesign-v1` ni `stash@{0}`.
 
 ## 2. Reglas de trabajo del rediseño (resumen)

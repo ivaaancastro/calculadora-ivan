@@ -66,6 +66,8 @@ Cada capa termina con la app funcionando y se puede pausar sin dejar nada a medi
 
 **Hecho (2026-11-11), estructura:** `feat/ui-shell` cerrada con los PRs #70, #71 y #72. `--nav-h` (60 px) y `--nav-h-total` con la barra inferior tokenizada; **0 números de altura de barra y 0 `z-*` sueltos** en `src/`; cabecera con identidad, menú, tema y Strava; «Borrar todas las actividades» en Ajustes → Seguridad y Datos con `confirm`; cierre de sesión en un solo sitio (el menú); **D-01 cerrado** y **D-03 retirado** (nunca estuvo implementado). Capturas de v1 regeneradas una sola vez (D1: 42 de 48, la landing no cambia) y congeladas desde entonces; volcado del PR 1 solo en `z-index` y el del PR 2 sin ninguna diferencia de color. Cobertura y notas en `docs/branches/feat/ui-shell/tasks.md`.
 
+**Hecho (2026-11-12), piel v2:** PRs #73 (mecanismo `data-ui`, conmutador en Ajustes), #75 (dirección visual «Panel») y #76 (extensión a 5 pantallas y gráficas); cierre en `docs/ui-capa3-cierre`. v1 congelada (volcado = 0) y v2 con capturas propias. v1 sigue por defecto hasta la Capa 6 (D12). Detalle en `docs/branches/feat/ui-shell/tasks.md`.
+
 **Pendiente de la capa:** la piel (`feat/ui-skin-v2`, PRs 4–7): `data-ui="v2"` por entorno y `localStorage`, conmutador en Ajustes, capturas propias de v2 y la dirección visual elegida sobre Dashboard y Calendario (D7, con parada de aprobación).
 
 ## Capa 4 — Landing y acceso
