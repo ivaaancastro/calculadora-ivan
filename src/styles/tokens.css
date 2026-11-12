@@ -728,3 +728,234 @@
   --chart-pmc-today: 71 85 105; /* slate-600 */
 }
 /* @tokens:charts:end */
+
+/* @tokens:skin-v2:start (piel v2, spec-rediseno-02-c3-skin-dir; no lo genera ningún codemod) */
+/*
+ * Dirección «Panel» (D7, 2026-11-11). Añade valores ENCIMA de los tokens v1 sin tocarlos:
+ * los dos selectores acotan la piel a las pantallas que la estrenan (Dashboard y Calendario),
+ * así que el resto de la app sigue viendo `:root` / `.dark` tal cual.
+ *
+ * Se declaran las dos variantes completas a propósito: el bloque oscuro no hereda del claro
+ * y el orden de `.dark` en el archivo deja de importar.
+ *
+ * Los tokens `-a` (opacidad de un token en v1) se fijan aquí a 1 cuando la piel quiere un
+ * borde nítido. `--faint` no es texto: es el token de líneas y elementos deshabilitados, y
+ * queda fuera de la comprobación de contraste (scripts/check-palette.mjs).
+ */
+html[data-ui="v2"] [data-skin="dashboard"],
+html[data-ui="v2"] [data-skin="calendar"] {
+  /* Superficies: tarjeta blanca sobre gris azulado frío */
+  --surface: 255 255 255;
+  --surface-2: 238 240 244;
+  --surface-3: 255 255 255;
+  --surface-4: 255 255 255;
+  --surface-5: 255 255 255; --surface-5-a: 1;
+  --surface-6: 255 255 255;
+  --surface-7: 255 255 255;
+  --surface-card: 255 255 255;
+  --sunken: 244 246 248; --sunken-a: 1;
+  --sunken-2: 238 240 244;
+  --sunken-6: 241 243 246;
+  --fill: 238 240 244; --fill-a: 1;
+  --fill-6: 214 218 225; --fill-6-a: 0.6;
+  --fill-7: 214 218 225;
+
+  /* Bordes: un valor explícito en vez de sombra difusa */
+  --line: 214 218 225;
+  --line-2: 214 218 225;
+  --line-soft: 232 235 240; --line-soft-a: 1;
+  --line-faint: 236 238 242; --line-faint-a: 1;
+  --line-muted: 214 218 225; --line-muted-a: 1;
+  --line-strong-2: 176 183 194;
+  --hairline: 16 19 23; --hairline-a: 0.06;
+  --hairline-3: 16 19 23; --hairline-3-a: 0.06;
+  --hairline-5: 16 19 23; --hairline-5-a: 0.06;
+
+  /* Rampa de texto: todo pasa AA sobre las superficies de la piel */
+  --ink: 16 19 23;
+  --ink-2: 26 31 38;
+  --ink-2-soft: 26 31 38;
+  --body: 51 59 71;
+  --body-2: 51 59 71;
+  --body-soft: 73 84 98;
+  --body-soft-2: 73 84 98;
+  --ink-3: 75 85 99;
+  --ink-4: 98 107 120;
+  --ink-4-dim: 98 107 120;
+  --faint: 154 163 176;
+
+  /* Semáforo único: cobalto = CTL, carmín = ATL, ámbar = TSB */
+  --metric-ctl: 37 99 235;
+  --metric-atl: 190 18 60;
+  --metric-tsb: 180 83 9;
+  --metric-ctl-ink: 29 78 216;
+  --metric-atl-ink: 159 18 57;
+  --metric-tsb-ink: 146 64 14;
+  --metric-atl-tile: 190 18 60;
+  --metric-tsb-tile: 4 120 87;
+  --metric-acwr-tile: 180 83 9;
+  --metric-ramp-tile: 67 56 202;
+  --metric-monotony-tile: 126 34 206;
+  --metric-volume-tile: 14 116 144;
+
+  /* Colores con significado del Calendario (los antiguos `legacy-*`) */
+  --legacy-ctl-sky: 3 105 161;
+  --legacy-atl-red: 190 18 60;
+  --legacy-atl-purple: 190 18 60;
+  --legacy-atl-purple-ink: 159 18 57;
+  --legacy-tsb-up: 4 120 87;
+  --legacy-tsb-up-ink: 4 120 87;
+  --legacy-tsb-down: 146 64 14;
+  --legacy-tsb-down-2: 180 83 9;
+  --legacy-tsb-low: 190 18 60;
+  --danger-light: 190 18 60;
+
+  /* Gráficas: rejilla y ejes recesivos, series del semáforo */
+  --chart-grid: 201 207 216;
+  --chart-grid-soft: 241 243 246;
+  --chart-grid-2: 232 235 240;
+  --chart-axis: 91 100 114;
+  --chart-tick: 98 107 120;
+  --chart-cursor: 98 107 120;
+  --chart-cursor-fill: 244 246 248;
+  --chart-dot-ring: 255 255 255;
+  --chart-tooltip: 16 19 23; --chart-tooltip-a: 0.94;
+  --chart-tooltip-edge: 255 255 255; --chart-tooltip-edge-a: 0.12;
+  --chart-tooltip-ink: 242 244 247;
+  --chart-pmc-ctl: 37 99 235;
+  --chart-pmc-atl: 190 18 60;
+  --chart-pmc-tsb: 180 83 9;
+  --chart-pmc-ramp: 4 120 87;
+  --chart-pmc-ramp-proj: 37 99 235;
+  --chart-pmc-ctl-ink: 29 78 216;
+  --chart-pmc-atl-ink: 159 18 57;
+  --chart-pmc-tsb-ink: 146 64 14;
+  --chart-pmc-ramp-ink: 4 120 87;
+  --chart-pmc-band: 244 246 248;
+  --chart-pmc-band-up: 4 120 87;
+  --chart-pmc-band-down: 190 18 60;
+  --chart-pmc-today: 51 59 71;
+
+  /* Escala: radios contenidos, borde de 1 px, tipografía más ancha */
+  --skin-radius-md: 8px;
+  --skin-radius-lg: 10px;
+  --skin-radius-xl: 10px;
+  --skin-radius-2xl: 12px;
+  --skin-radius-3xl: 14px;
+  --skin-shadow-xs: 0 1px 1px rgba(16, 19, 23, 0.05), 0 0 0 1px rgba(16, 19, 23, 0.04);
+  --skin-shadow-sm: 0 2px 4px rgba(16, 19, 23, 0.05), 0 0 0 1px rgba(16, 19, 23, 0.05);
+  --skin-shadow-card: 0 1px 2px rgba(16, 19, 23, 0.05), 0 0 0 1px rgba(16, 19, 23, 0.04);
+  --skin-type-8: 9px;
+  --skin-type-9: 10px;
+  --skin-type-10: 11px;
+  --skin-type-11: 12px;
+  --skin-type-12: 12px;
+  --skin-type-13: 13px;
+  --skin-type-14: 14px;
+  --skin-type-15: 15px;
+  --skin-type-17: 18px;
+  --skin-type-18: 18px;
+  --skin-type-xs: 12px;
+  --skin-type-sm: 14px;
+  --skin-type-base: 16px;
+  --skin-type-lg: 19px;
+  --skin-type-xl: 22px;
+  --skin-type-2xl: 26px;
+  --skin-type-3xl: 34px;
+}
+
+html[data-ui="v2"].dark [data-skin="dashboard"],
+html[data-ui="v2"].dark [data-skin="calendar"] {
+  /* Grafito en oscuro; la tarjeta se separa del lienzo por el anillo, no por la sombra */
+  --surface: 20 22 26;
+  --surface-2: 30 33 39;
+  --surface-3: 38 42 49;
+  --surface-4: 26 29 34;
+  --surface-5: 20 22 26; --surface-5-a: 1;
+  --surface-6: 20 22 26;
+  --surface-7: 30 33 39;
+  --surface-card: 20 22 26;
+  --sunken: 30 33 39; --sunken-a: 1;
+  --sunken-2: 26 29 34;
+  --sunken-6: 30 33 39;
+  --fill: 38 42 49; --fill-a: 1;
+  --fill-6: 52 57 66; --fill-6-a: 0.7;
+  --fill-7: 52 57 66;
+
+  --line: 38 42 49;
+  --line-2: 52 57 66;
+  --line-soft: 38 42 49; --line-soft-a: 1;
+  --line-faint: 38 42 49; --line-faint-a: 1;
+  --line-muted: 38 42 49; --line-muted-a: 1;
+  --line-strong-2: 70 76 86;
+  --hairline: 255 255 255; --hairline-a: 0.08;
+  --hairline-3: 255 255 255; --hairline-3-a: 0.08;
+  --hairline-5: 255 255 255; --hairline-5-a: 0.08;
+
+  --ink: 242 244 247;
+  --ink-2: 230 233 238;
+  --ink-2-soft: 230 233 238;
+  --body: 212 217 224;
+  --body-2: 212 217 224;
+  --body-soft: 168 177 189;
+  --body-soft-2: 168 177 189;
+  --ink-3: 154 163 177;
+  --ink-4: 138 147 161;
+  --ink-4-dim: 138 147 161;
+  --faint: 75 82 92;
+
+  --metric-ctl: 96 165 250;
+  --metric-atl: 251 113 133;
+  --metric-tsb: 251 191 36;
+  --metric-ctl-ink: 147 197 253;
+  --metric-atl-ink: 253 164 175;
+  --metric-tsb-ink: 252 211 77;
+  --metric-atl-tile: 251 113 133;
+  --metric-tsb-tile: 52 211 153;
+  --metric-acwr-tile: 251 191 36;
+  --metric-ramp-tile: 129 140 248;
+  --metric-monotony-tile: 192 132 252;
+  --metric-volume-tile: 34 211 238;
+
+  --legacy-ctl-sky: 125 211 252;
+  --legacy-atl-red: 251 113 133;
+  --legacy-atl-purple: 253 164 175;
+  --legacy-atl-purple-ink: 253 164 175;
+  --legacy-tsb-up: 52 211 153;
+  --legacy-tsb-up-ink: 52 211 153;
+  --legacy-tsb-down: 251 191 36;
+  --legacy-tsb-down-2: 251 191 36;
+  --legacy-tsb-low: 251 113 133;
+  --danger-light: 251 113 133;
+
+  --chart-grid: 43 48 56;
+  --chart-grid-soft: 35 38 44;
+  --chart-grid-2: 52 57 66;
+  --chart-axis: 152 161 175;
+  --chart-tick: 138 147 161;
+  --chart-cursor: 152 161 175;
+  --chart-cursor-fill: 28 31 36;
+  --chart-dot-ring: 20 22 26;
+  --chart-tooltip: 28 31 36; --chart-tooltip-a: 0.96;
+  --chart-tooltip-edge: 255 255 255; --chart-tooltip-edge-a: 0.1;
+  --chart-tooltip-ink: 242 244 247;
+  --chart-pmc-ctl: 96 165 250;
+  --chart-pmc-atl: 251 113 133;
+  --chart-pmc-tsb: 251 191 36;
+  --chart-pmc-ramp: 52 211 153;
+  --chart-pmc-ramp-proj: 147 197 253;
+  --chart-pmc-ctl-ink: 147 197 253;
+  --chart-pmc-atl-ink: 253 164 175;
+  --chart-pmc-tsb-ink: 252 211 77;
+  --chart-pmc-ramp-ink: 52 211 153;
+  --chart-pmc-band: 30 33 39;
+  --chart-pmc-band-up: 52 211 153;
+  --chart-pmc-band-down: 251 113 133;
+  --chart-pmc-today: 212 217 224;
+
+  /* Sin sombra difusa en oscuro: anillo de 1 px que separa la tarjeta del lienzo */
+  --skin-shadow-xs: 0 0 0 1px rgba(255, 255, 255, 0.07);
+  --skin-shadow-sm: 0 0 0 1px rgba(255, 255, 255, 0.09);
+  --skin-shadow-card: 0 0 0 1px rgba(255, 255, 255, 0.08);
+}
+/* @tokens:skin-v2:end */
