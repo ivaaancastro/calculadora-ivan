@@ -742,8 +742,7 @@
  * borde nítido. `--faint` no es texto: es el token de líneas y elementos deshabilitados, y
  * queda fuera de la comprobación de contraste (scripts/check-palette.mjs).
  */
-html[data-ui="v2"] [data-skin="dashboard"],
-html[data-ui="v2"] [data-skin="calendar"] {
+html[data-ui="v2"] [data-skin] {
   /* Superficies: tarjeta blanca sobre gris azulado frío */
   --surface: 255 255 255;
   --surface-2: 238 240 244;
@@ -835,6 +834,44 @@ html[data-ui="v2"] [data-skin="calendar"] {
   --chart-pmc-band-up: 4 120 87;
   --chart-pmc-band-down: 190 18 60;
   --chart-pmc-today: 51 59 71;
+  /* Series, deportes, distribución, zonas y mapa (D-10) */
+  --hr: 225 29 72;
+  --pace: 79 70 229;
+  --power: 217 119 6;
+  --cadence: 5 150 105;
+  --chart-altitude: 100 116 139;
+  --ef: 124 58 237;
+  --sleep: 37 99 235;
+  --chart-readiness: 5 150 105;
+  --chart-strain: 225 29 72;
+  --chart-tss: 124 58 237;
+  --chart-hours: 5 150 105;
+  --chart-profile-user: 37 99 235;
+  --chart-profile-top: 217 119 6;
+  --chart-profile-other: 124 135 151;
+  --chart-sport-run: 234 88 12;
+  --chart-sport-walk: 5 150 105;
+  --chart-sport-bike: 37 99 235;
+  --chart-sport-strength: 124 58 237;
+  --chart-sport-other: 113 113 122;
+  --chart-sport-fallback: 79 70 229;
+  --sport-bike: 37 99 235;
+  --sport-run: 234 88 12;
+  --chart-dist-strength: 124 58 237;
+  --chart-dist-walk: 5 150 105;
+  --chart-dist-workout: 79 70 229;
+  --chart-dist-other: 124 135 151;
+  --chart-zone-1: 124 135 151;
+  --chart-zone-2: 37 99 235;
+  --chart-zone-3: 5 150 105;
+  --chart-zone-hr-4: 217 119 6;
+  --chart-zone-hr-5: 220 38 38;
+  --chart-zone-4: 217 119 6;
+  --chart-zone-5: 234 88 12;
+  --chart-zone-6: 220 38 38;
+  --chart-zone-7: 124 58 237;
+  --chart-map-route: 37 99 235;
+  --chart-map-start: 5 150 105;
 
   /* Escala: radios contenidos, borde de 1 px, tipografía más ancha */
   --skin-radius-md: 8px;
@@ -864,8 +901,7 @@ html[data-ui="v2"] [data-skin="calendar"] {
   --skin-type-3xl: 34px;
 }
 
-html[data-ui="v2"].dark [data-skin="dashboard"],
-html[data-ui="v2"].dark [data-skin="calendar"] {
+html[data-ui="v2"].dark [data-skin] {
   /* Grafito en oscuro; la tarjeta se separa del lienzo por el anillo, no por la sombra */
   --surface: 20 22 26;
   --surface-2: 30 33 39;
@@ -952,6 +988,44 @@ html[data-ui="v2"].dark [data-skin="calendar"] {
   --chart-pmc-band-up: 52 211 153;
   --chart-pmc-band-down: 251 113 133;
   --chart-pmc-today: 212 217 224;
+  /* Series, deportes, distribución, zonas y mapa (D-10) */
+  --hr: 251 113 133;
+  --pace: 129 140 248;
+  --power: 251 191 36;
+  --cadence: 52 211 153;
+  --chart-altitude: 148 163 184;
+  --ef: 167 139 250;
+  --sleep: 96 165 250;
+  --chart-readiness: 52 211 153;
+  --chart-strain: 251 113 133;
+  --chart-tss: 167 139 250;
+  --chart-hours: 52 211 153;
+  --chart-profile-user: 96 165 250;
+  --chart-profile-top: 251 191 36;
+  --chart-profile-other: 100 116 139;
+  --chart-sport-run: 251 146 60;
+  --chart-sport-walk: 52 211 153;
+  --chart-sport-bike: 96 165 250;
+  --chart-sport-strength: 167 139 250;
+  --chart-sport-other: 161 161 170;
+  --chart-sport-fallback: 129 140 248;
+  --sport-bike: 96 165 250;
+  --sport-run: 251 146 60;
+  --chart-dist-strength: 167 139 250;
+  --chart-dist-walk: 52 211 153;
+  --chart-dist-workout: 129 140 248;
+  --chart-dist-other: 100 116 139;
+  --chart-zone-1: 148 163 184;
+  --chart-zone-2: 96 165 250;
+  --chart-zone-3: 52 211 153;
+  --chart-zone-hr-4: 251 191 36;
+  --chart-zone-hr-5: 248 113 113;
+  --chart-zone-4: 251 191 36;
+  --chart-zone-5: 251 146 60;
+  --chart-zone-6: 248 113 113;
+  --chart-zone-7: 167 139 250;
+  --chart-map-route: 96 165 250;
+  --chart-map-start: 52 211 153;
 
   /* Sin sombra difusa en oscuro: anillo de 1 px que separa la tarjeta del lienzo */
   --skin-shadow-xs: 0 0 0 1px rgba(255, 255, 255, 0.07);

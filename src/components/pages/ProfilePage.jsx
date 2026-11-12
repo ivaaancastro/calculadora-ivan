@@ -586,7 +586,7 @@ export const ProfilePage = ({
     );
 
     return (
-        <div className="animate-in fade-in duration-300 pb-16 max-w-5xl mx-auto px-3.5 sm:px-6">
+        <div data-skin="profile" className="animate-in fade-in duration-300 pb-16 max-w-5xl mx-auto px-3.5 sm:px-6">
             {/* APPLE NAVIGATION HEADER */}
             <div className="flex items-center justify-between mb-4 sm:mb-8 border-b border-black/[0.05] dark:border-white/[0.06] pb-3 sm:pb-4">
                 <div className="flex items-center gap-2 sm:gap-4">

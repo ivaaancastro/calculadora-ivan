@@ -108,6 +108,17 @@ const STATE = [
 const SERIES = ['metric-ctl', 'metric-atl', 'metric-tsb'];
 const MIN_DELTA_E = 25;
 
+/** Resto de colores de gráficas de v2 (D-10): 3:1 contra la tarjeta. */
+const CHART_COLORS = [
+  'hr', 'pace', 'power', 'cadence', 'chart-altitude', 'ef', 'sleep', 'chart-readiness', 'chart-strain',
+  'chart-tss', 'chart-hours', 'chart-profile-user', 'chart-profile-top', 'chart-profile-other',
+  'chart-sport-run', 'chart-sport-walk', 'chart-sport-bike', 'chart-sport-strength', 'chart-sport-other',
+  'chart-sport-fallback', 'sport-bike', 'sport-run', 'chart-dist-strength', 'chart-dist-walk',
+  'chart-dist-workout', 'chart-dist-other', 'chart-zone-1', 'chart-zone-2', 'chart-zone-3', 'chart-zone-hr-4',
+  'chart-zone-hr-5', 'chart-zone-4', 'chart-zone-5', 'chart-zone-6', 'chart-zone-7', 'chart-map-route',
+  'chart-map-start',
+];
+
 const failures = [];
 const rows = [];
 
@@ -142,6 +153,11 @@ for (const mode of ['light', 'dark']) {
   for (const name of SERIES) {
     const ratio = contrast(color(name), surface);
     check(ratio >= 3, `${mode} serie --${name}`, `${ratio.toFixed(2)}:1 sobre tarjeta`);
+  }
+
+  for (const name of CHART_COLORS) {
+    const ratio = contrast(color(name), surface);
+    check(ratio >= 3, `${mode} gráfica --${name}`, `${ratio.toFixed(2)}:1 sobre tarjeta`);
   }
 
   for (let i = 0; i < SERIES.length; i += 1) {

@@ -74,7 +74,7 @@ export const FitnessStatsPage = ({
     };
 
     return (
-        <div className="animate-in fade-in duration-500 pb-16 w-full max-w-[1100px] mx-auto px-4 sm:px-8">
+        <div data-skin="stats" className="animate-in fade-in duration-500 pb-16 w-full max-w-[1100px] mx-auto px-4 sm:px-8">
             {/* Header */}
             <div className="pt-8 pb-6 sm:pb-10">
                 <h2 className="text-3xl font-bold text-ink tracking-tight">Rendimiento</h2>

@@ -7,6 +7,11 @@ y este proyecto adhiere a [Semantic Versioning](https://semver.org/lang/es/).
 
 ## [Unreleased]
 
+### Rediseño — Capa 3: piel v2 «Panel» (`feat/ui-skin-v2-extension`), PR 6 de 7: extensión
+- `feat(ui-skin-v2):` la piel llega a Perfil, Actividades, Rendimiento, Salud y Detalle de actividad (`data-skin="profile|history|stats|health|detail"`). Los selectores de `tokens.css` pasan a `[data-skin]` genérico; `AutoChartSkin` activa la piel de gráficas fuera de Dashboard y Calendario. Shell y lienzo siguen en v1 (D11).
+- `feat(ui-skin-v2):` `chartTheme.v2` con valores propios en oscuro (D-10) para series, deportes, distribución, zonas y mapa; `check-palette.mjs` exige 3:1 a todas las gráficas de v2. Colores de deporte unificados (D-09).
+- Verificación: volcado `full` frente a `develop` = **0 diferencias** (88.718 elementos); unit 195, integración 10, E2E macOS 109 ✓. Capturas: 48 de v1 idénticas; de v2 cambian las **30** previstas (5 pantallas × 2 temas × 3 tamaños).
+
 ### Rediseño — Capa 3: piel v2 «Panel» (`feat/ui-skin-v2-visual`), PR 5 de 7: dirección visual
 - `feat(ui-skin-v2):` paleta «Panel» (bloques `@tokens:skin-v2` de `tokens.css`: superficies, rampa de texto, semáforo cobalto/carmín/ámbar, radios 12/14, sombras y escala tipográfica) validada por `scripts/check-palette.mjs` (contraste WCAG y ΔE entre series).
 - `feat(ui-skin-v2):` capa de piel `src/styles/skin-v2.css`, solo bajo `html[data-ui="v2"] [data-skin]`; `data-skin="dashboard"` en `AdvancedAnalytics` y `data-skin="calendar"` en `CalendarPage` (y en su PMC flotante). Clases `section-header` y `chip`, inertes en v1.
