@@ -14,6 +14,8 @@
  */
 
 :root {
+  --landing-particle: 96 130 255; /* partículas del hero de la landing (rgb(96, 130, 255)) */
+
   /* Métricas de carga (valores del Dashboard, EvolutionChart) */
   --metric-ctl: 59 130 246;   /* #3b82f6 */
   --metric-atl: 244 63 94;    /* #f43f5e */
@@ -63,6 +65,7 @@
 
 /* Hoy las gráficas usan los mismos valores en claro y oscuro. */
 .dark {
+  --landing-particle: 96 130 255;
   --metric-ctl: 59 130 246;
   --metric-atl: 244 63 94;
   --metric-tsb: 234 179 8;
