@@ -20,7 +20,7 @@ Spec y plan **aprobados por el usuario el 2026-11-12** (D9: sin escalas ordinale
 ## 4. Verificación
 - [x] `check-palette`, lint, `lint:colors` (sin subir), `lint:ui` (14), unit, integración, build
 - [x] E2E macOS (109 ✓) y Docker (205 ✓ tras regenerar) con 0 ✘; volcado v1 = 0 (88.718 elementos); capturas v1 idénticas
-- [ ] Capturas de v2 de las 5 pantallas (30) revisadas por el usuario (parada)
+- [x] Capturas de v2 de las 5 pantallas (30) aprobadas por el usuario el 2026-11-12
 
 ## 5. Registro
 - [x] `CHANGELOG.md`, `MEMORY.md` (rama actual)
