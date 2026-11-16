@@ -16,7 +16,10 @@ Verificación común: lint, `lint:colors` (no sube), `lint:ui` (14), unit, integ
   - Ubicación: el cambio de sección móvil gana un acceso en la página; el menú de la cabecera sigue igual.
 
 ## PR 3 — `feat/screens-history-v2` (V ⏸)
-- [ ] Lista y filtros móvil, `AddActivityModal`, estados; paridad «Actividades»
+- [x] Implementación (CSS solo bajo `data-ui="v2"` + ganchos `data-history`/`data-modal` inertes en v1): lista, filtros, `AddActivityModal`, estado vacío; paridad «Actividades» marcada
+- [ ] Capturas Docker (solo Actividades v2, 6) y parada D7
+- **Primer vistazo móvil (390 px):** buscador a ancho completo + deporte y periodo en una fila, recuento y las primeras filas (nombre, fecha·deporte, duración y km/TSS); borrar a 44 px. Nada plegado.
+- **Estados:** vacío con filtros («No hay resultados») restilado; carga y error son del Dashboard/`ErrorBoundary` (compartidos, sin cambios).
 
 ## PR 4 — Dashboard
 - [ ] 4a `refactor/dashboard-routes` (R): `TAB_PATHS` único (D17)

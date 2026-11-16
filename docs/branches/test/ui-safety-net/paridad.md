@@ -96,6 +96,8 @@ Nota: en móvil las 5 pestañas principales viven en `MobileSwipePager` (todas m
 | Eliminar actividad (`Eliminar actividad`, con `confirm`) | existencia en E2E |
 | Añadir manual (modal: fecha, deporte, duración, pulso, distancia, desnivel) | E2E |
 
+> **v2 (Capa 5, PR 3):** comprobadas con `data-ui="v2"` las seis acciones; ninguna cambia de sitio. En móvil los filtros de deporte y periodo comparten fila; borrar y cerrar el modal pasan a 44 px.
+
 ## Detalle (`/activity/:id`)
 
 | Acción | Prueba |
