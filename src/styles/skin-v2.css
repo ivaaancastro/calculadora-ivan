@@ -153,3 +153,78 @@ html[data-ui="v2"] [data-skin="shell"] .liquid-glass-active {
   background: rgb(var(--sunken));
   box-shadow: none;
 }
+
+/* ── Actividades «Panel» (Capa 5, PR 3): lista, filtros y alta manual ─────────────────
+ *
+ * Los `data-history` / `data-modal` son ganchos inertes en v1. Todo lo de aquí va detrás de
+ * `html[data-ui="v2"]`: v1 no cambia. La altura de fila (64 px) no se toca: la lista está
+ * virtualizada y estima ese tamaño.
+ */
+
+/* Filtros en móvil: búsqueda a ancho completo; deporte y periodo en una sola fila de 2 columnas
+   (antes eran 3 filas apiladas que se comían el primer vistazo). */
+@media (max-width: 639px) {
+  html[data-ui="v2"] [data-skin="history"] [data-history="filters"] {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+  }
+  html[data-ui="v2"] [data-skin="history"] [data-history="search"] {
+    grid-column: 1 / -1;
+  }
+}
+
+/* Cabecera de filtros y recuento: superficie hundida, sin tintes translúcidos. */
+html[data-ui="v2"] [data-skin="history"] [data-history="filters"],
+html[data-ui="v2"] [data-skin="history"] [data-history="count"] {
+  background-color: rgb(var(--sunken));
+  border-bottom-color: rgb(var(--line));
+}
+
+/* Recuento: rótulo con la marca de cobalto de la piel. */
+html[data-ui="v2"] [data-skin="history"] [data-history="count"] > span::before {
+  content: '';
+  display: inline-block;
+  width: 12px;
+  height: 2px;
+  margin-right: 8px;
+  vertical-align: middle;
+  border-radius: 1px;
+  background-color: rgb(var(--action));
+}
+
+/* Filas: filete de 1 px del token de línea y fondo plano al tocar. */
+html[data-ui="v2"] [data-skin="history"] [data-history="row"] {
+  border-bottom-color: rgb(var(--line));
+}
+html[data-ui="v2"] [data-skin="history"] [data-history="row"]:hover,
+html[data-ui="v2"] [data-skin="history"] [data-history="row"]:active {
+  background-color: rgb(var(--sunken));
+}
+
+/* Borrar: objetivo táctil de 44 px (la fila mide 64, cabe) con el icono como estaba. */
+html[data-ui="v2"] [data-skin="history"] [data-history="delete"] {
+  width: 44px;
+  height: 44px;
+  border-radius: var(--skin-radius-lg);
+}
+
+/* Estado vacío: tarjeta centrada con el mismo rótulo de la piel. */
+html[data-ui="v2"] [data-skin="history"] [data-history="empty"] {
+  background-color: rgb(var(--surface));
+}
+
+/* Alta manual: panel con borde de 1 px del token y sombra de la piel; cerrar a 44 px. */
+html[data-ui="v2"] [role="dialog"][aria-labelledby="add-activity-title"] {
+  border-color: rgb(var(--line));
+  box-shadow: var(--skin-shadow-card);
+}
+html[data-ui="v2"] [role="dialog"][aria-labelledby="add-activity-title"] [data-modal="close"] {
+  width: 44px;
+  height: 44px;
+  border-radius: var(--skin-radius-lg);
+}
+html[data-ui="v2"] [role="dialog"][aria-labelledby="add-activity-title"] [data-modal="submit"] {
+  min-height: 48px;
+  border-radius: var(--skin-radius-xl);
+}

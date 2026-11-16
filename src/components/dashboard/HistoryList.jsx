@@ -97,13 +97,13 @@ export const HistoryList = React.memo(({ activities, onDelete, onSelectActivity 
         : filteredActivities.map((act, index) => ({ index, start: index * 64, isVirtual: false, act }));
 
     return (
-        <Card data-skin="history" className="flex flex-col h-full overflow-hidden">
+        <Card data-skin="history" data-history="root" className="flex flex-col h-full overflow-hidden">
 
             {/* BARRA DE FILTROS ESTILO APPLE */}
-            <div className="p-3 sm:p-4 border-b border-hairline bg-slate-50/50 dark:bg-zinc-900/30 flex flex-col sm:flex-row gap-2.5 sm:gap-3">
+            <div data-history="filters" className="p-3 sm:p-4 border-b border-hairline bg-slate-50/50 dark:bg-zinc-900/30 flex flex-col sm:flex-row gap-2.5 sm:gap-3">
 
                 {/* Buscador de Texto estilo iOS */}
-                <div className="relative flex-1">
+                <div data-history="search" className="relative flex-1">
                     <Search size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-ink-4" />
                     <Input
                         variant="search"
@@ -151,7 +151,7 @@ export const HistoryList = React.memo(({ activities, onDelete, onSelectActivity 
             </div>
 
             {/* RESUMEN DE RESULTADOS */}
-            <div className="px-4 py-2 border-b border-hairline bg-slate-50/40 dark:bg-zinc-900/20 flex justify-between items-center text-[11px] font-semibold text-ink-4 uppercase tracking-wider">
+            <div data-history="count" className="px-4 py-2 border-b border-hairline bg-slate-50/40 dark:bg-zinc-900/20 flex justify-between items-center text-[11px] font-semibold text-ink-4 uppercase tracking-wider">
                 <span>{filteredActivities.length} Actividades</span>
             </div>
 
@@ -178,6 +178,7 @@ export const HistoryList = React.memo(({ activities, onDelete, onSelectActivity 
                                         width: '100%',
                                         transform: `translateY(${virtualRow.start}px)`,
                                     }}
+                                    data-history="row"
                                     className="group flex items-center p-3 hover:bg-slate-50/80 dark:hover:bg-zinc-800/40 active:bg-slate-100 dark:active:bg-zinc-800/70 border-b border-black/[0.04] dark:border-white/[0.05] box-border transition-colors cursor-pointer select-none"
                                 >
                                     {/* Icono en squircle estilo Apple */}
@@ -231,6 +232,7 @@ export const HistoryList = React.memo(({ activities, onDelete, onSelectActivity 
                                     {/* Botón Borrar y Chevron */}
                                     <div className="shrink-0 flex items-center gap-1 sm:gap-2">
                                         <button
+                                            data-history="delete"
                                             onClick={(e) => { e.stopPropagation(); onDelete && onDelete(act.id); }}
                                             className="w-7 h-7 flex items-center justify-center text-slate-300 hover:text-red-500 hover:bg-danger/10 active:scale-90 rounded-full transition-all"
                                             title="Eliminar actividad"
@@ -244,7 +246,7 @@ export const HistoryList = React.memo(({ activities, onDelete, onSelectActivity 
                         })}
                     </div>
                 ) : (
-                    <div className="flex flex-col items-center justify-center h-full text-center p-8">
+                    <div data-history="empty" className="flex flex-col items-center justify-center h-full text-center p-8">
                         <Activity size={32} className="text-faint-2 mb-3" />
                         <h3 className="text-[11px] font-bold text-body-soft uppercase tracking-widest">No hay resultados</h3>
                         <p className="text-[10px] text-ink-4 mt-1">Prueba a cambiar los filtros de búsqueda.</p>

@@ -61,7 +61,7 @@ const AddActivityModal = ({ isOpen, onClose, onSave }) => {
                 <h3 id="add-activity-title" className="text-base sm:text-lg font-bold text-slate-800 dark:text-white flex items-center gap-2">
                     <Activity className="text-action-bright" size={20} /> Añadir Manual
                 </h3>
-                <button onClick={onClose} className="w-9 h-9 flex items-center justify-center rounded-xl text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-surface-2 active:scale-95 transition-all touch-manipulation" title="Cerrar">
+                <button onClick={onClose} data-modal="close" className="w-9 h-9 flex items-center justify-center rounded-xl text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-surface-2 active:scale-95 transition-all touch-manipulation" title="Cerrar">
                     <X size={20} />
                 </button>
             </div>
@@ -114,7 +114,7 @@ const AddActivityModal = ({ isOpen, onClose, onSave }) => {
                     </div>
                 </div>
 
-                <button type="submit" disabled={loading} className="w-full min-h-[46px] bg-action-solid hover:bg-action-hover text-white font-bold py-3 px-4 rounded-xl active:scale-98 transition-all flex items-center justify-center gap-2 mt-4 shadow-md touch-manipulation select-none">
+                <button type="submit" disabled={loading} data-modal="submit" className="w-full min-h-[46px] bg-action-solid hover:bg-action-hover text-white font-bold py-3 px-4 rounded-xl active:scale-98 transition-all flex items-center justify-center gap-2 mt-4 shadow-md touch-manipulation select-none">
                     {loading ? 'Guardando...' : <><Save size={18} /> Guardar Actividad</>}
                 </button>
             </form>
