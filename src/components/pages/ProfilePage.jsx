@@ -5,11 +5,19 @@ import toast from 'react-hot-toast';
 import { calcZonesFromLTHR } from '../../utils/tssEngine';
 import { useIntervalsSync } from '../../hooks/useIntervalsSync';
 import { useUiMode } from '../../hooks/useUiMode';
+import { Segmented } from '../ui';
 import { getPeakByTime, calcZonesFromFCMax, calcPaceZones } from './profile/zonesCalc';
 import { GeneralSection } from './profile/GeneralSection';
 import { ZonesSection } from './profile/ZonesSection';
 import { IntegrationsSection } from './profile/IntegrationsSection';
 import { SecuritySection } from './profile/SecuritySection';
+
+const SECTION_TABS = [
+    { value: 'general', label: 'General' },
+    { value: 'zones', label: 'Zonas' },
+    { value: 'integrations', label: 'Cuentas' },
+    { value: 'security', label: 'Seguridad' },
+];
 
 const SECTION_NAMES = {
     general: 'General',
@@ -309,9 +317,9 @@ export const ProfilePage = ({
     );
 
     return (
-        <div data-skin="profile" className="animate-in fade-in duration-300 pb-16 max-w-5xl mx-auto px-3.5 sm:px-6">
+        <div data-skin="profile" data-profile="root" className="animate-in fade-in duration-300 pb-16 max-w-5xl mx-auto px-3.5 sm:px-6">
             {/* APPLE NAVIGATION HEADER */}
-            <div className="flex items-center justify-between mb-4 sm:mb-8 border-b border-black/[0.05] dark:border-white/[0.06] pb-3 sm:pb-4">
+            <div data-profile="header" className="flex items-center justify-between mb-4 sm:mb-8 border-b border-black/[0.05] dark:border-white/[0.06] pb-3 sm:pb-4">
                 <div className="flex items-center gap-2 sm:gap-4">
                     <button 
                         onClick={onBack} 
@@ -332,11 +340,25 @@ export const ProfilePage = ({
                     const newOffset = targetCtl !== null ? (targetCtl - raw) : formData.offsetCtl;
                     onUpdate({ ...formData, offsetCtl: newOffset });
                   }} 
+                  data-profile="save"
                   className="flex items-center gap-1.5 bg-action-ios-solid hover:bg-action-solid text-white px-4 sm:px-5 py-1.5 sm:py-2 rounded-full text-xs font-semibold tracking-wide transition-all shadow-xs active:scale-95 select-none touch-manipulation"
                 >
                     <Save size={14} strokeWidth={2.5} /> <span>Guardar</span>
                 </button>
             </div>
+
+            {/* v2 móvil: selector de sección en la página (antes solo estaba en el menú de la cabecera) */}
+            {isV2 && (
+                <Segmented
+                    data-profile="section-tabs"
+                    aria-label="Secciones de Ajustes"
+                    className="md:hidden mb-4 overflow-x-auto"
+                    optionClassName="min-h-9"
+                    options={SECTION_TABS}
+                    value={activeSection}
+                    onChange={handleSectionChange}
+                />
+            )}
 
             <div className="flex flex-col md:flex-row gap-6 md:gap-8">
                 {/* DESKTOP SIDEBAR */}
