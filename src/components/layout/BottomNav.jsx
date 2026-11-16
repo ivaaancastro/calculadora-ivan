@@ -36,7 +36,7 @@ export const BottomNav = ({ activeIndex, onTabChange }) => {
     >
       <div className="flex items-center gap-2 pointer-events-auto max-w-full">
         {/* CÁPSULA PRINCIPAL LIQUID GLASS */}
-        <div className="liquid-glass rounded-full h-[var(--bottom-nav-h)] p-1 flex items-center gap-0.5 shadow-2xl transition-all duration-300">
+        <div data-shell="dock" className="liquid-glass rounded-full h-[var(--bottom-nav-h)] p-1 flex items-center gap-0.5 shadow-2xl transition-all duration-300">
           {capsuleTabs.map((tab) => {
             const isActive = activeIndex !== undefined
               ? activeIndex === tab.index
