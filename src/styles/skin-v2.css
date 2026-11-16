@@ -94,3 +94,62 @@ html[data-ui="v2"] [data-skin] .chip {
   html[data-ui="v2"] [data-skin] .sm\:rounded-2xl { border-radius: var(--skin-radius-2xl); }
   html[data-ui="v2"] [data-skin] .sm\:rounded-3xl { border-radius: var(--skin-radius-3xl); }
 }
+
+/* ── Shell «Panel» (Capa 5, PR 1, D13): barras y lienzo ──────────────────────────────
+ *
+ * `data-skin="shell"` está en la raíz de `Dashboard`: aporta los tokens de la piel (el lienzo
+ * `bg-sunken-2` pasa a gris azulado frío sin tocar la clase) y las reglas de arriba a todo el
+ * shell. Aquí solo se sustituye el material: cristal translúcido → superficie sólida con
+ * borde de 1 px. Alturas, z-index y objetivos táctiles no cambian (`--nav-h` intacto).
+ */
+
+/* Cabecera: superficie sólida, sin desenfoque, filete inferior de 1 px. */
+html[data-ui="v2"] [data-skin="shell"] .glass-nav {
+  background-color: rgb(var(--surface));
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+  border-bottom: 1px solid rgb(var(--line));
+}
+
+/* Pestañas de escritorio: carril hundido; la activa es una ficha con anillo. */
+html[data-ui="v2"] [data-skin="shell"] [data-shell="tabs"] {
+  background-color: rgb(var(--sunken));
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+  box-shadow: inset 0 0 0 1px rgb(var(--line));
+  border-radius: var(--skin-radius-xl);
+}
+html[data-ui="v2"] [data-skin="shell"] [data-shell="tabs"] > a {
+  border-radius: var(--skin-radius-lg);
+}
+
+/* Botón de tema: ficha cuadrada con anillo en vez de círculo relleno. */
+html[data-ui="v2"] [data-skin="shell"] [data-shell="icon-btn"] {
+  background-color: rgb(var(--surface));
+  box-shadow: inset 0 0 0 1px rgb(var(--line));
+  border-radius: var(--skin-radius-lg);
+}
+
+/* Barra inferior: panel plano en vez de cápsula de cristal. Sin brillo interior ni sombra
+   profunda; el contorno lo da un borde de 1 px. */
+html[data-ui="v2"] [data-skin="shell"] .liquid-glass {
+  background: rgb(var(--surface));
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+  border: 1px solid rgb(var(--line));
+  box-shadow: var(--skin-shadow-sm);
+}
+html[data-ui="v2"] [data-skin="shell"] [data-shell="dock"] {
+  border-radius: var(--skin-radius-3xl);
+}
+html[data-ui="v2"] [data-skin="shell"] [data-shell="dock"] > a {
+  border-radius: var(--skin-radius-2xl);
+}
+html[data-ui="v2"] [data-skin="shell"] a.liquid-glass {
+  border-radius: var(--skin-radius-3xl);
+}
+/* Pestaña activa: fondo hundido + color de acción, sin inset de cristal. */
+html[data-ui="v2"] [data-skin="shell"] .liquid-glass-active {
+  background: rgb(var(--sunken));
+  box-shadow: none;
+}

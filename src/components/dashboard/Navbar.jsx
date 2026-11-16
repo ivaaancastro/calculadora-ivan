@@ -195,7 +195,7 @@ export const Navbar = ({ settings, uploading, isStravaConnected, onSync }) => {
 
         {/* PAGE TABS — Desktop Segmented Control */}
         <div className="hidden md:flex items-center">
-          <div className="flex items-center gap-1 bg-slate-200/50 dark:bg-zinc-800/50 backdrop-blur-md rounded-full p-1 shadow-inner">
+          <div data-shell="tabs" className="flex items-center gap-1 bg-slate-200/50 dark:bg-zinc-800/50 backdrop-blur-md rounded-full p-1 shadow-inner">
             {tabs.map(tab => {
               const Icon = tab.icon;
               const isActive = currentPath === tab.path || (tab.path === '/' && currentPath === '');
@@ -216,7 +216,7 @@ export const Navbar = ({ settings, uploading, isStravaConnected, onSync }) => {
         {/* ACTIONS */}
         <div className="flex items-center gap-1.5 sm:gap-2">
 
-          <button onClick={toggleTheme} className="w-9 h-9 flex items-center justify-center rounded-full text-ink-3 hover:text-ink-2 bg-slate-100/70 hover:bg-slate-200/60 dark:bg-zinc-900/80 dark:hover:bg-zinc-800 active:scale-90 transition-all" title="Cambiar tema">
+          <button onClick={toggleTheme} data-shell="icon-btn" className="w-9 h-9 flex items-center justify-center rounded-full text-ink-3 hover:text-ink-2 bg-slate-100/70 hover:bg-slate-200/60 dark:bg-zinc-900/80 dark:hover:bg-zinc-800 active:scale-90 transition-all" title="Cambiar tema">
             {theme === 'dark' ? <Sun size={17} /> : <Moon size={17} />}
           </button>
 
