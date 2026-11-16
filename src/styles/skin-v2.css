@@ -227,7 +227,8 @@ html[data-ui="v2"] [role="dialog"][aria-labelledby="add-activity-title"] [data-m
 html[data-ui="v2"] [role="dialog"][aria-labelledby="add-activity-title"] [data-modal="submit"] {
   min-height: 48px;
   border-radius: var(--skin-radius-xl);
-=======
+}
+
 /* ── Ajustes «Panel» (Capa 5, PR 2b): `data-skin="profile"` ───────────────────────────
  *
  * Primer vistazo móvil (390 px): título, selector de sección, ficha de perfil compacta y las
@@ -280,5 +281,4 @@ html[data-ui="v2"] [data-skin="profile"] [data-profile="badge"] {
   background-color: rgb(var(--sunken));
   border-color: rgb(var(--line));
   color: rgb(var(--action));
->>>>>>> origin/develop
 }
