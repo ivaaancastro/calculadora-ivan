@@ -3,6 +3,7 @@
  * de hoy, con su fondo, su panel y su z-index tal cual (ninguno cambia de presentación):
  *  - `sheet`: añadir actividad manual. Hoja inferior en móvil y diálogo centrado desde `sm`.
  *  - `auth`: acceso de la landing. Diálogo centrado; el velo es una capa aparte dentro del fondo.
+ *  - `auth-v2`: acceso de la landing en la piel v2 (hoja inferior en móvil, diálogo desde `sm`).
  *  - `planner`: planificar o editar un entreno del Calendario. Diálogo centrado.
  *  - `viewer`: ver un entreno planificado del Calendario. Diálogo centrado, por encima (z-modal).
  * `backdrop` es la capa fija a pantalla completa; `layer`, el velo separado (solo `auth`);
@@ -20,6 +21,12 @@ const MODAL = {
     layer: 'absolute inset-0 bg-scrim-2 backdrop-blur-sm',
     panel:
       'relative w-full max-w-md bg-surface-8 backdrop-blur-2xl rounded-2xl border border-line-muted-3 shadow-2xl p-8 animate-[modalIn_0.3s_ease-out]',
+  },
+  'auth-v2': {
+    backdrop: 'fixed inset-0 z-sheet flex items-end sm:items-center justify-center p-0 sm:p-4',
+    layer: 'absolute inset-0 bg-scrim-2',
+    panel:
+      'relative w-full max-w-md max-h-[100dvh] overflow-y-auto bg-surface border border-line rounded-t-2xl sm:rounded-2xl shadow-2xl p-6 sm:p-8 pb-safe motion-safe:animate-[modalIn_0.2s_ease-out]',
   },
   planner: {
     backdrop: 'fixed inset-0 bg-scrim-3 backdrop-blur-sm z-sheet flex items-center justify-center p-4',

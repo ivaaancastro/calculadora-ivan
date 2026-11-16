@@ -7,6 +7,11 @@ y este proyecto adhiere a [Semantic Versioning](https://semver.org/lang/es/).
 
 ## [Unreleased]
 
+### Rediseño — Capa 4 (`feat/auth-modal-v2`), PR 4: modal de acceso y correo confirmado en v2
+- `feat(auth):` en v2, el modal de acceso (entrar, registro, recuperar) y `EmailConfirmedPage` usan primitivas (`Modal` `auth-v2`, `Input` `auth`, `Button` `primary`/`link`, `IconButton` `quiet`, `Card`). Copy neutro (sin «gratis» ni «laboratorio»). Flujo de Supabase, validaciones y mensajes intactos; v1 intacta.
+- Accesibilidad: `Modal` gana `trapFocus` (opt-in, solo acceso v2): foco inicial, Tab atrapado y foco devuelto al cerrar; `aria-label` en cerrar, `role="alert"`/`status` en mensajes.
+- Volcado de estilos frente a `develop`: 36 volcados, 22.318 elementos, 0 diferencias. 24 capturas nuevas (`e2e/access-visual-v2.spec.js`). `lint:colors` sin cambios.
+
 ### Rediseño — Capa 4 (`feat/landing-direction`), PR 2: dirección visual de la landing
 - `feat(landing):` en v2 la landing usa `HeaderV2`, `HeroV2` y `DashboardPreview` (panel real con datos de ejemplo), sin canvas de partículas y con copy neutro en el hero. Token `--on-action` solo en v2. v1 intacta.
 - Volcado de estilos frente a `develop`: 0 diferencias. Capturas v2 de la landing regeneradas (6). `lint:colors` sin cambios (743/3/100/8/165).

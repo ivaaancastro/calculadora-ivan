@@ -4,6 +4,7 @@
  * Cada variante copia exactamente una receta que ya existía:
  *  - `filled`: los campos del modal de añadir actividad (Input y Select comparten receta).
  *  - `search`: los filtros del historial (el buscador y los dos selectores, cada uno con la suya).
+ *  - `auth` (solo Input): los campos del acceso en la piel v2 (icono a la izquierda: `pl-11`).
  *  - `cell`: los campos de los bloques del Calendario. En Input, `size` `md` (13 px) y `sm` (11 px).
  *  - `cell-bare` (solo Select): el selector de objetivo de los bloques, sin fondo.
  *  - `inline` (solo Input): los valores de Ajustes. `size` `md` (fisiología: peso, FC en reposo,
@@ -21,6 +22,9 @@ const INPUT = {
   filled: { md: FILLED },
   search: {
     md: 'bg-fill-6 border-0 rounded-xl text-sm font-medium text-ink-soft placeholder-ink-4-fixed focus:outline-none focus:ring-2 focus:ring-action-bright/40 transition-all',
+  },
+  auth: {
+    md: 'w-full min-h-[48px] pl-11 pr-4 bg-sunken-2 border border-line rounded-xl text-base sm:text-sm text-ink-2-soft placeholder-ink-4 focus:border-action-bright focus:ring-2 focus:ring-action-bright/30 outline-none transition-colors',
   },
   cell: {
     md: 'bg-sunken text-[13px] rounded-lg outline-none no-spinner text-body',
