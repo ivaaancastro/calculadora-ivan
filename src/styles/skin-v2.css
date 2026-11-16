@@ -373,3 +373,58 @@ html[data-ui="v2"] [data-fueling="chips"] > div {
   box-shadow: none;
   background-color: rgb(var(--sunken));
 }
+
+/* ── Rendimiento «Panel» (Capa 5, PR 5): orden y densidad de las 10 tarjetas ──────────
+ *
+ * Los `data-stats` / `data-card` son ganchos inertes en v1. Todo va detrás de
+ * `html[data-ui="v2"]`. El orden solo cambia en móvil (lista en columna con `order`): primero
+ * lo que responde «¿cómo estoy?» (estado de entreno, VFC), luego umbrales y balance.
+ * Escritorio conserva el orden del DOM.
+ */
+
+/* Tarjetas: filete y sombra del token de la piel (la receta v1 usa tintes translúcidos). */
+html[data-ui="v2"] [data-skin="stats"] [data-stats="card"] section > div:first-child {
+  border-color: rgb(var(--line));
+  box-shadow: var(--skin-shadow-card);
+}
+
+@media (max-width: 767px) {
+  html[data-ui="v2"] [data-skin="stats"][data-stats="page"] {
+    display: flex;
+    flex-direction: column;
+    padding-bottom: 32px;
+  }
+  html[data-ui="v2"] [data-skin="stats"] [data-stats="header"] {
+    order: 0;
+    padding-top: 16px;
+    padding-bottom: 12px;
+  }
+  html[data-ui="v2"] [data-skin="stats"] [data-stats="header"] h2 {
+    font-size: 26px;
+  }
+  html[data-ui="v2"] [data-skin="stats"] [data-stats="tabs"] {
+    order: 1;
+    margin-bottom: 12px;
+  }
+  /* Pestañas de sección: objetivo táctil de 44 px. */
+  html[data-ui="v2"] [data-skin="stats"] [data-stats="tabs"] button {
+    min-height: 44px;
+  }
+
+  html[data-ui="v2"] [data-skin="stats"] [data-stats="card"] { order: 10; }
+  html[data-ui="v2"] [data-skin="stats"] [data-card="status"] { order: 2; }
+  html[data-ui="v2"] [data-skin="stats"] [data-card="hrv"] { order: 3; }
+  html[data-ui="v2"] [data-skin="stats"] [data-card="thresholds"] { order: 4; }
+  html[data-ui="v2"] [data-skin="stats"] [data-card="balance"] { order: 5; }
+
+  /* Densidad: menos aire entre tarjetas y dentro de ellas. */
+  html[data-ui="v2"] [data-skin="stats"] [data-stats="card"] section {
+    margin-bottom: 12px;
+  }
+  html[data-ui="v2"] [data-skin="stats"] [data-stats="card"] section > div:first-child {
+    padding: 16px;
+  }
+  html[data-ui="v2"] [data-skin="stats"] [data-stats="card"] section > div:first-child > div:first-child {
+    margin-bottom: 12px;
+  }
+}

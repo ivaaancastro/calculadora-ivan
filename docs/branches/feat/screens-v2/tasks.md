@@ -28,7 +28,9 @@ Verificación común: lint, `lint:colors` (no sube), `lint:ui` (14), unit, integ
   - Ubicación: la gráfica sube sobre lo plegado en móvil; ninguna acción desaparece.
 
 ## PR 5 — `feat/screens-stats-v2` (V ⏸)
-- [ ] Orden y densidad de tarjetas; paridad «Rendimiento»
+- [x] Implementación (CSS solo bajo `data-ui="v2"` + ganchos `data-stats`/`data-card` inertes en v1): orden y densidad en móvil; paridad «Rendimiento» marcada
+- [ ] Capturas Docker (solo Rendimiento v2, 6; cambian las 2 de 390 px) y parada D7
+- **Primer vistazo móvil (390 px):** Estado de entreno → VFC → Umbrales → Balance (antes Umbrales primero); tarjetas con 16 px de relleno y 12 px de separación; pestañas de sección a 44 px. 768 y 1440 px sin cambios (orden del DOM).
 
 ## PR 6 — Salud
 - [ ] 6a `refactor/health-sections` (R)

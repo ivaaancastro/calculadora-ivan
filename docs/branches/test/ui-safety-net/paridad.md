@@ -75,6 +75,8 @@ Nota: en móvil las 5 pestañas principales viven en `MobileSwipePager` (todas m
 | Tarjetas: FTP estimado, umbrales, VO2 máx., predicciones de carrera, perfil de potencia, balance de entrenamiento, carga semanal, HRV, MMP/EF | capturas |
 | Abrir actividad desde las tarjetas | — |
 
+> **v2 (Capa 5, PR 5):** comprobadas con `data-ui="v2"` las cuatro acciones; ninguna cambia de sitio ni se pliega. En móvil las tarjetas de «Fisiología» se reordenan (estado, VFC, umbrales, balance) y se compactan; las pestañas de sección pasan a 44 px.
+
 ## Calendario (`/calendar`)
 
 | Acción | Prueba |
