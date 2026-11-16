@@ -30,8 +30,15 @@ function unlockScroll() {
  * Con `closeOnBackdrop`, tocar fuera del panel llama a `onClose`, como ya hacían el acceso y el visor.
  * Abierto, Escape llama a `onClose` y el fondo no se desplaza (D4 b).
  */
-export function Modal({ open, onClose, variant, labelledBy, closeOnBackdrop = false, children }) {
+const FOCUSABLE = 'a[href],button:not([disabled]),input:not([disabled]),select:not([disabled]),textarea:not([disabled]),[tabindex]:not([tabindex="-1"])';
+
+/**
+ * Con `trapFocus` (opt-in, solo el acceso v2): al abrir, el foco pasa al primer campo; Tab y
+ * Mayús+Tab no salen del diálogo; al cerrar, el foco vuelve a quien lo abrió.
+ */
+export function Modal({ open, onClose, variant, labelledBy, closeOnBackdrop = false, trapFocus = false, children }) {
   const r = modalRecipe(variant);
+  const panelRef = useRef(null);
   const onCloseRef = useRef(onClose);
   useEffect(() => {
     onCloseRef.current = onClose;
@@ -53,11 +60,35 @@ export function Modal({ open, onClose, variant, labelledBy, closeOnBackdrop = fa
     };
   }, [open]);
 
+  useEffect(() => {
+    if (!open || !trapFocus) return undefined;
+    const panel = panelRef.current;
+    const opener = document.activeElement;
+    const items = () => [...panel.querySelectorAll(FOCUSABLE)];
+    (panel.querySelector('input, select, textarea') ?? items()[0] ?? panel).focus();
+    const onKeyDown = (e) => {
+      if (e.key !== 'Tab') return;
+      const list = items();
+      if (list.length === 0) return;
+      const first = list[0];
+      const last = list[list.length - 1];
+      if (!panel.contains(document.activeElement)) { e.preventDefault(); first.focus(); }
+      else if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+      else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+    };
+    document.addEventListener('keydown', onKeyDown);
+    return () => {
+      document.removeEventListener('keydown', onKeyDown);
+      if (opener instanceof HTMLElement && document.contains(opener)) opener.focus();
+    };
+  }, [open, trapFocus]);
+
   if (!open) return null;
   return (
     <div className={r.backdrop} style={r.style} onClick={closeOnBackdrop ? onClose : undefined}>
       {r.layer && <div className={r.layer} />}
       <div
+        ref={panelRef}
         role="dialog"
         aria-modal="true"
         aria-labelledby={labelledBy}

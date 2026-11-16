@@ -17,6 +17,13 @@ describe('ui/Modal recetas', () => {
     expect(modalRecipe('viewer').style).toEqual({ overscrollBehavior: 'contain' });
   });
 
+  it('auth-v2 es hoja inferior en móvil, lleva velo aparte y respeta el movimiento reducido', () => {
+    const r = modalRecipe('auth-v2');
+    expect(r.layer).toBe('absolute inset-0 bg-scrim-2');
+    expect(r.panel).toContain('sm:rounded-2xl');
+    expect(r.panel).toContain('motion-safe:animate-');
+  });
+
   it('rechaza variantes que no existían', () => {
     expect(() => modalRecipe('drawer')).toThrow();
   });
