@@ -301,13 +301,13 @@ html[data-ui="v2"] [data-skin="dashboard"] [data-dash="hero"] > div:first-child 
 
 @media (max-width: 767px) {
   /* Orden móvil: forma, métricas, gráfica y, al final, lo plegado. */
-  html[data-ui="v2"] [data-skin="dashboard"] [data-dash="root"] {
+  html[data-ui="v2"] [data-skin="dashboard"][data-dash="root"] {
     display: flex;
     flex-direction: column;
     gap: 12px;
     padding-bottom: 16px;
   }
-  html[data-ui="v2"] [data-skin="dashboard"] [data-dash="root"] > * { margin: 0; }
+  html[data-ui="v2"] [data-skin="dashboard"][data-dash="root"] > * { margin: 0; }
   html[data-ui="v2"] [data-skin="dashboard"] [data-dash="hero"] { order: 1; padding: 12px; gap: 8px; }
   html[data-ui="v2"] [data-skin="dashboard"] [data-dash="primary"] { order: 2; }
   html[data-ui="v2"] [data-skin="dashboard"] [data-dash="chart"] { order: 3; }
