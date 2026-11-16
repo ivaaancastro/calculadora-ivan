@@ -119,6 +119,8 @@ Nota: en móvil las 5 pestañas principales viven en `MobileSwipePager` (todas m
 
 ## Ajustes (`/profile`)
 
+> v2 (Capa 5, PR 2b): sin acciones perdidas. Nuevo en v2 móvil: selector de sección en la página (`aria-label="Secciones de Ajustes"`). Comprobado con capturas v2 (General) y E2E existentes (`account.spec.js`, `ui-mode.spec.js`); el resto, manual en el simulador al aprobar (checklist en el PR).
+
 | Acción | Prueba |
 |---|---|
 | Volver (`Volver` / `Atrás`) | — |

@@ -227,4 +227,58 @@ html[data-ui="v2"] [role="dialog"][aria-labelledby="add-activity-title"] [data-m
 html[data-ui="v2"] [role="dialog"][aria-labelledby="add-activity-title"] [data-modal="submit"] {
   min-height: 48px;
   border-radius: var(--skin-radius-xl);
+=======
+/* ── Ajustes «Panel» (Capa 5, PR 2b): `data-skin="profile"` ───────────────────────────
+ *
+ * Primer vistazo móvil (390 px): título, selector de sección, ficha de perfil compacta y las
+ * métricas clave sin scroll. Todo detrás de `html[data-ui="v2"]`; v1 no cambia. Alturas de
+ * fila y botones ≥ 44 px (RF8).
+ */
+
+/* Cabecera: filete con el token de línea y «Guardar» como ficha de 10 px, no píldora. */
+html[data-ui="v2"] [data-skin="profile"] [data-profile="header"] {
+  border-bottom-color: rgb(var(--line));
+}
+html[data-ui="v2"] [data-skin="profile"] [data-profile="save"] {
+  min-height: 44px;
+  padding-left: 16px;
+  padding-right: 16px;
+  border-radius: var(--skin-radius-lg);
+  box-shadow: none;
+}
+
+/* Selector de sección móvil: carril hundido con anillo, la activa es una ficha. */
+html[data-ui="v2"] [data-skin="profile"] [data-profile="section-tabs"] {
+  background-color: rgb(var(--sunken));
+  box-shadow: inset 0 0 0 1px rgb(var(--line));
+  border-radius: var(--skin-radius-xl);
+  padding: 3px;
+  gap: 2px;
+}
+html[data-ui="v2"] [data-skin="profile"] [data-profile="section-tabs"] > button {
+  flex: 1 0 auto;
+  min-height: 44px;
+  border-radius: var(--skin-radius-lg);
+}
+
+/* Filas de formulario: objetivo táctil de 44 px. */
+html[data-ui="v2"] [data-skin="profile"] [data-profile="row"] {
+  min-height: 44px;
+}
+
+/* Ficha de perfil: más compacta en móvil para dejar las métricas dentro del primer vistazo. */
+@media (max-width: 639px) {
+  html[data-ui="v2"] [data-skin="profile"] [data-profile="banner"] {
+    padding: 12px;
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+}
+
+/* Insignia «Atleta Forma»: neutra, el cobalto se reserva para la acción. */
+html[data-ui="v2"] [data-skin="profile"] [data-profile="badge"] {
+  background-color: rgb(var(--sunken));
+  border-color: rgb(var(--line));
+  color: rgb(var(--action));
+>>>>>>> origin/develop
 }

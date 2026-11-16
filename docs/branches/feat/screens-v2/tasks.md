@@ -11,7 +11,9 @@ Verificación común: lint, `lint:colors` (no sube), `lint:ui` (14), unit, integ
 
 ## PR 2 — Ajustes
 - [ ] 2a `refactor/profile-sections` (R)
-- [ ] 2b `feat/screens-profile-v2` (V ⏸): primer vistazo móvil, paridad «Ajustes»
+- [x] 2b `feat/screens-profile-v2` (V ⏸): primer vistazo móvil, paridad «Ajustes» — implementado; falta aprobación D7 de las 6 capturas `perfil` v2
+  - **Primer vistazo móvil (390 px), sin scroll:** título de sección + «Guardar», selector de sección en la página (General · Zonas · Cuentas · Seguridad; solo v2 y móvil, antes solo estaba en el menú de la cabecera), ficha de perfil compacta, Datos personales y Fisiología (peso, FC reposo, CTL). **Plegado/debajo:** Apariencia (conmutador D8), zonas, cuentas y seguridad en su sección.
+  - Ubicación: el cambio de sección móvil gana un acceso en la página; el menú de la cabecera sigue igual.
 
 ## PR 3 — `feat/screens-history-v2` (V ⏸)
 - [x] Implementación (CSS solo bajo `data-ui="v2"` + ganchos `data-history`/`data-modal` inertes en v1): lista, filtros, `AddActivityModal`, estado vacío; paridad «Actividades» marcada
