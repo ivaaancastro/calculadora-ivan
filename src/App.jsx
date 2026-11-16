@@ -1,7 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, lazy, Suspense } from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { supabase } from './supabase';
-import Dashboard from './components/Dashboard';
 import { LandingPage } from './components/pages/LandingPage';
 import { EmailConfirmedPage } from './components/pages/EmailConfirmedPage';
 import StravaCallback from './components/common/StravaCallback';
@@ -10,6 +9,9 @@ import { Toaster } from 'react-hot-toast';
 
 import { useQueryClient } from '@tanstack/react-query';
 import { useAppStore } from './store/useAppStore';
+
+// La app autenticada (Dashboard + gráficas) no se descarga en la landing.
+const Dashboard = lazy(() => import('./components/Dashboard'));
 
 function App() {
   const [session, setSession] = useState(null);
@@ -56,7 +58,9 @@ function App() {
           element={
             <>
               {session ? (
-                <Dashboard key={session.user.id} />
+                <Suspense fallback={<LoadingState variant="boot" />}>
+                  <Dashboard key={session.user.id} />
+                </Suspense>
               ) : (
                 <LandingPage />
               )}

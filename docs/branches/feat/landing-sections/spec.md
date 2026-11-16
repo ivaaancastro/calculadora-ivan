@@ -2,7 +2,7 @@
 
 ## 1. Identificación
 - **ID:** `spec-rediseno-02-c4-pr3` · **Rama:** `feat/landing-sections` (desde `develop` en `27f28d1`, incluye #79).
-- **Estado:** borrador, pendiente de aprobación. Amplía `docs/branches/feat/landing-v2/spec.md` (D1–D7 ya resueltas; no se reabren).
+- **Estado:** **implementada** (aprobada el 2026-11-12; PR #80). Amplía `docs/branches/feat/landing-v2/spec.md` (D1–D7 ya resueltas; no se reabren).
 - **Fecha:** 2026-11-12.
 
 ## 2. Objetivo

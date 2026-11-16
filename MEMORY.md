@@ -11,13 +11,14 @@
 
 ## 1. Estado actual
 - **Proyecto:** Forma — dashboard de rendimiento deportivo y salud. Stack: React 19, Vite 7, Tailwind 3, Zustand, TanStack Query, Supabase, Vitest/MSW/Playwright.
-- **Rama actual:** `feat/auth-modal-v2` (Capa 4, PR 4 de 5: modal de acceso y correo confirmado v2). Spec/plan/tasks en `docs/branches/feat/auth-modal-v2/` (y `landing-v2/` para la capa); PR 1–3 = #78, #79, #80 mergeados. Queda PR 5 (cierre, verificadores, peso, Lighthouse/a11y).
-- **Hecho:** specs de auditoría 01–08, spec-001 y E2E (todas implementadas). Rediseño: Capa 0 (#51), Capa 1 (#52–#58), Capa 2 (#60–#68), Capa 3 completa: estructura (#70–#72), mecanismo de la piel (#73, flag `data-ui="v2"`), dirección visual (#75) y extensión a 5 pantallas y gráficas (#76).
-- **Pendiente del rediseño:** Capa 4 (landing/acceso, en curso), 5 (pantallas), 6 (activar v2), 7 (iOS). Plan: `docs/branches/feat/webapp-redesign/plan.md`. D12: **v1 sigue por defecto hasta la Capa 6**; v2 es opt-in (Ajustes → «Vista previa v2» o `VITE_UI=v2`). Shell y lienzo aún en v1 (D11).
+- **Rama actual:** `docs/landing-cierre` (Capa 4, PR 5 de 5: cierre). **Capa 4 cerrada** (PR #78–#81 mergeados + cierre); detalle y deuda de peso/SEO en `docs/branches/feat/landing-v2/tasks.md`. Siguiente: **Capa 5 (pantallas)**; **D8 sigue abierta**.
+- **Hecho:** specs de auditoría 01–08, spec-001 y E2E (todas implementadas). Rediseño: Capa 0 (#51), Capa 1 (#52–#58), Capa 2 (#60–#68), Capa 3 completa: estructura (#70–#72), mecanismo de la piel (#73, flag `data-ui="v2"`), dirección visual (#75) y extensión a 5 pantallas y gráficas (#76). Capa 4: landing, acceso y correo confirmado en v2 (#78–#81).
+- **Pendiente del rediseño:** Capa 5 (pantallas), 6 (activar v2), 7 (iOS). Plan: `docs/branches/feat/webapp-redesign/plan.md`. D12: **v1 sigue por defecto hasta la Capa 6**; v2 es opt-in (Ajustes → «Vista previa v2» o `VITE_UI=v2`). Shell y lienzo aún en v1 (D11).
 - `feat/webapp-redesign` remoto = intento descartado: no hacer `git pull` ahí ni usar `archive/webapp-redesign-v1` ni `stash@{0}`.
 
 - **Pendientes de producto (no van en la landing):** Forma tendrá funciones de pago a futuro (no prometer gratuidad); la conexión con Strava se replantea en otra fase por sus límites de API y ahí se estudiará añadir **Garmin** (API nueva).
-- **Skill de la landing:** `.taste-skill/` (clon de Leonxlnx/taste-skill, ignorado por git) solo para las 3 páginas públicas.
+- **Skill de la landing:** `.taste-skill/` (clon de Leonxlnx/taste-skill, ignorado por git) solo para las 3 páginas públicas (pasada final hecha en el cierre de la Capa 4).
+- **Landing:** «Strava y CSV» se mantiene (decisión 2026-11-16) hasta replantear Strava/Garmin. `Dashboard` es `lazy` en `App.jsx` (la landing no descarga la app autenticada).
 
 ## 2. Reglas de trabajo del rediseño (resumen)
 - **v1 congelada:** cualquier valor visual nuevo va detrás de `html[data-ui="v2"]` y con capturas propias.
@@ -36,4 +37,4 @@
 Todas en `docs/specs/` y `docs/branches/`. Tabla completa con estados: archivo histórico, sección 3.
 
 ---
-Última actualización: 2026-11-12
+Última actualización: 2026-11-16

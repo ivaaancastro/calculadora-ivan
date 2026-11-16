@@ -5,7 +5,7 @@
 - **Título:** Capa 4 del rediseño: landing, modal de acceso y página de correo confirmado
 - **Autor:** agente Claude Code
 - **Fecha:** 2026-11-12
-- **Estado:** **aprobada el 2026-11-12** (D1–D7 resueltas; ver sección 4 y `tasks.md`).
+- **Estado:** **implementada** (aprobada el 2026-11-12; PR 1–5 = #78–#81 y el de cierre; D1–D7 resueltas; ver `tasks.md`).
 - **Depende de:** `spec-rediseno-02` (roadmap), Capas 0–3 mergeadas en `develop` (último PR #77, `54443b5`).
 - **Rama:** `feat/landing-v2` (nombre del roadmap).
 

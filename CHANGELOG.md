@@ -7,6 +7,11 @@ y este proyecto adhiere a [Semantic Versioning](https://semver.org/lang/es/).
 
 ## [Unreleased]
 
+### Rediseño — Capa 4 (`docs/landing-cierre`), PR 5 de 5: cierre
+- `perf(app):` `Dashboard` se carga con `React.lazy`; un visitante sin sesión ya no descarga la app autenticada ni `recharts`. Landing: JS parseado 1010 → 513 KiB, JS comprimido 303 → 155 KiB; `perf.mjs` sin FAIL. Sin cambio de estilos (el CSS conserva su hash) ni de capturas (E2E Docker 234 ✓).
+- `docs(landing):` verificadores de la taste-skill con hallazgos corregidos y descartados con motivo; Lighthouse (rendimiento 95–100, accesibilidad/buenas prácticas 100, SEO 91) y axe (0 violaciones en 20 escenas: landing, modal ×3 y correo confirmado, claro/oscuro, 390/1440). Deuda anotada: `robots.txt`/`og:image` y CSS bloqueante.
+- Decisión: «Strava y CSV» se mantiene en la landing hasta que se replantee Strava/Garmin. Specs de la Capa 4 marcadas como implementadas. **Capa 4 cerrada**; siguiente, Capa 5 (pantallas).
+
 ### Rediseño — Capa 4 (`feat/auth-modal-v2`), PR 4: modal de acceso y correo confirmado en v2
 - `feat(auth):` en v2, el modal de acceso (entrar, registro, recuperar) y `EmailConfirmedPage` usan primitivas (`Modal` `auth-v2`, `Input` `auth`, `Button` `primary`/`link`, `IconButton` `quiet`, `Card`). Copy neutro (sin «gratis» ni «laboratorio»). Flujo de Supabase, validaciones y mensajes intactos; v1 intacta.
 - Accesibilidad: `Modal` gana `trapFocus` (opt-in, solo acceso v2): foco inicial, Tab atrapado y foco devuelto al cerrar; `aria-label` en cerrar, `role="alert"`/`status` en mensajes.
