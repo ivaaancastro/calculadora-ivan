@@ -60,4 +60,4 @@ Reglas de ahorro: cerrar sesión al terminar cada sección o a ~150 turnos dejan
 3. Dejar escrito en `tasks.md` el primer vistazo móvil de cada pantalla al abrir su PR `V`.
 
 ---
-Versión: 0.1.0 (borrador) — 2026-11-16
+Versión: 0.2.0 (aprobada) — 2026-11-16

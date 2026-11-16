@@ -90,4 +90,4 @@ Fuente de verdad de acciones por pantalla: `docs/branches/test/ui-safety-net/par
 Activar v2 por defecto y limpiar v1 (Capa 6); app iOS/Capacitor (Capa 7); landing, acceso y `EmailConfirmedPage` (Capa 4, hecha); cambios de datos, Strava, IA, Supabase o lógica de negocio; escalas ordinales de color (D9) salvo fallo de contraste; funciones nuevas de producto.
 
 ---
-Versión: 0.1.0 (borrador) — 2026-11-16
+Versión: 0.2.0 (aprobada) — 2026-11-16
