@@ -23,7 +23,9 @@ Verificación común: lint, `lint:colors` (no sube), `lint:ui` (14), unit, integ
 
 ## PR 4 — Dashboard
 - [ ] 4a `refactor/dashboard-routes` (R): `TAB_PATHS` único (D17)
-- [ ] 4b `feat/screens-dashboard-v2` (V ⏸): primer vistazo, `FuelingPanel`
+- [x] 4b `feat/screens-dashboard-v2` (V ⏸): primer vistazo, `FuelingPanel` — implementado; falta aprobación D7 de las 6 capturas `dashboard` v2
+  - **Primer vistazo móvil (390 px), sin scroll ni desplegar:** Estado de Forma compacto, las 4 métricas de Fisiología y Carga (CTL, ATL, TSB, ratio, en 2 × 2) y la gráfica de evolución con su selector de rango. **Plegado (solo v2 y <768 px):** «Tendencia y Capacidad» (rampa, monotonía, volumen 30D, VO2 máx.) tras un botón de 44 px. Escritorio: sin cambio de estructura, todo visible.
+  - Ubicación: la gráfica sube sobre lo plegado en móvil; ninguna acción desaparece.
 
 ## PR 5 — `feat/screens-stats-v2` (V ⏸)
 - [ ] Orden y densidad de tarjetas; paridad «Rendimiento»
