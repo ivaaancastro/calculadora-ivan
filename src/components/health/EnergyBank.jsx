@@ -5,7 +5,7 @@ import {
 
 export const EnergyBank = ({ energyBankAmount }) => (
     <>
-        <div className="bg-surface-card rounded-2xl sm:rounded-3xl border border-hairline-3 shadow-card dark:shadow-none transition-all p-4 sm:p-6 flex flex-col sm:flex-row items-center gap-6 bg-gradient-to-br from-white via-slate-50/50 to-slate-100/50 dark:from-zinc-900 dark:via-zinc-900/80 dark:to-zinc-950">
+        <div data-health="energy" className="bg-surface-card rounded-2xl sm:rounded-3xl border border-hairline-3 shadow-card dark:shadow-none transition-all p-4 sm:p-6 flex flex-col sm:flex-row items-center gap-6 bg-gradient-to-br from-white via-slate-50/50 to-slate-100/50 dark:from-zinc-900 dark:via-zinc-900/80 dark:to-zinc-950">
             <div className="flex-1 space-y-2.5 w-full">
                 <div className="flex items-center gap-2">
                     <div className="w-8 h-8 rounded-xl bg-emerald-500/10 text-emerald-500 flex items-center justify-center shrink-0">

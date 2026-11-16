@@ -5,7 +5,7 @@ import {
 
 export const HealthHeader = ({ wellnessMetrics, readinessInfo, setActiveTab, activeTab, wellnessLoading, apiError }) => (
     <>
-        <div className="pt-2 sm:pt-4 space-y-4">
+        <div data-health="header" className="pt-2 sm:pt-4 space-y-4">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                 <div>
                     <div className="flex items-center gap-2">
@@ -24,7 +24,7 @@ export const HealthHeader = ({ wellnessMetrics, readinessInfo, setActiveTab, act
                 </div>
 
                 {/* Selector de Vista: Hoy vs Historial */}
-                <div className="w-full sm:w-auto grid grid-cols-2 p-1 bg-fill-4 rounded-xl gap-1 shrink-0">
+                <div data-health="view-tabs" className="w-full sm:w-auto grid grid-cols-2 p-1 bg-fill-4 rounded-xl gap-1 shrink-0">
                     <button
                         type="button"
                         onClick={() => setActiveTab('today')}

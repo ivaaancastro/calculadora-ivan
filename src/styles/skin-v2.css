@@ -282,3 +282,103 @@ html[data-ui="v2"] [data-skin="profile"] [data-profile="badge"] {
   border-color: rgb(var(--line));
   color: rgb(var(--action));
 }
+
+/* ── Salud «Panel» (Capa 5, PR 6b): `data-skin="health"` ──────────────────────────────
+ *
+ * Primer vistazo móvil (390 px), sin scroll: título y selector Hoy/Historial, los tres
+ * pilares (recuperación, carga, sueño) como filas compactas con el anillo a 96 px, y el
+ * banco de energía. Plegado/debajo: biomarcadores y aspectos destacados. Todo detrás de
+ * `html[data-ui="v2"]`; v1 no cambia. Objetivos táctiles ≥ 44 px (RF8).
+ */
+
+/* Selectores Hoy/Historial y 7D/14D/30D: carril hundido con anillo, activa como ficha. */
+html[data-ui="v2"] [data-skin="health"] [data-health="view-tabs"],
+html[data-ui="v2"] [data-skin="health"] [data-health="range"] {
+  background-color: rgb(var(--sunken));
+  box-shadow: inset 0 0 0 1px rgb(var(--line));
+  border-radius: var(--skin-radius-xl);
+}
+html[data-ui="v2"] [data-skin="health"] [data-health="view-tabs"] > button,
+html[data-ui="v2"] [data-skin="health"] [data-health="range"] > button {
+  min-height: 44px;
+  min-width: 44px;
+  border-radius: var(--skin-radius-lg);
+}
+
+/* Fichas de día del historial: objetivo táctil y radio de la piel. */
+html[data-ui="v2"] [data-skin="health"] [data-health="day"] {
+  min-height: 64px;
+  border-radius: var(--skin-radius-xl);
+}
+html[data-ui="v2"] [data-skin="health"] [data-health="log-row"] {
+  min-height: 60px;
+}
+
+/* Banco de energía: tarjeta plana sin degradado, con el filete del token. */
+html[data-ui="v2"] [data-skin="health"] [data-health="energy"] {
+  background-image: none;
+  background-color: rgb(var(--surface));
+  border-color: rgb(var(--line));
+  box-shadow: var(--skin-shadow-card);
+}
+
+@media (max-width: 639px) {
+  /* Pilares: fila por tarjeta (anillo a la izquierda, estado y pie a la derecha). */
+  html[data-ui="v2"] [data-skin="health"] [data-health="pillars"] {
+    gap: 8px;
+  }
+  html[data-ui="v2"] [data-skin="health"] [data-health="pillar"] {
+    display: grid;
+    grid-template-columns: 96px 1fr;
+    grid-template-rows: auto auto;
+    column-gap: 14px;
+    align-items: center;
+    padding: 10px 14px;
+    text-align: left;
+  }
+  html[data-ui="v2"] [data-skin="health"] [data-health="pillar"] [data-health="ring"] {
+    grid-column: 1;
+    grid-row: 1 / span 2;
+  }
+  html[data-ui="v2"] [data-skin="health"] [data-health="pillar"] [data-health="ring"] svg {
+    width: 96px;
+    height: 96px;
+  }
+  html[data-ui="v2"] [data-skin="health"] [data-health="ring-icon"] {
+    display: none;
+  }
+  html[data-ui="v2"] [data-skin="health"] [data-health="ring-value"] {
+    font-size: 24px;
+    line-height: 1;
+  }
+  html[data-ui="v2"] [data-skin="health"] [data-health="ring-title"] {
+    font-size: 8px;
+    letter-spacing: 0.04em;
+    max-width: 64px;
+    line-height: 1.1;
+  }
+  html[data-ui="v2"] [data-skin="health"] [data-health="pillar-head"] {
+    grid-column: 2;
+    grid-row: 1;
+    margin-bottom: 4px;
+    align-self: end;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+  }
+  html[data-ui="v2"] [data-skin="health"] [data-health="pillar-foot"] {
+    grid-column: 2;
+    grid-row: 2;
+    margin-top: 0;
+    padding-top: 0;
+    border-top: 0;
+    text-align: left;
+    align-self: start;
+  }
+
+  /* Banco de energía compacto. */
+  html[data-ui="v2"] [data-skin="health"] [data-health="energy"] {
+    padding: 12px 14px;
+    gap: 10px;
+  }
+}

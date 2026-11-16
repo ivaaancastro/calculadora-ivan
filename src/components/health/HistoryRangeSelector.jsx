@@ -11,7 +11,7 @@ export const HistoryRangeSelector = ({ historyRange, setHistoryRange }) => (
                 </span>
             </div>
 
-            <div className="flex items-center p-1 bg-fill-4 rounded-xl gap-1">
+            <div data-health="range" className="flex items-center p-1 bg-fill-4 rounded-xl gap-1">
                 {[
                     { days: 7, label: '7D' },
                     { days: 14, label: '14D' },

@@ -4,7 +4,7 @@ import { Card } from '../ui';
 export const DaySpotlight = ({ currentSelectedDay }) => (
     <>
         {currentSelectedDay && (
-            <Card className="p-4 sm:p-6 space-y-4">
+            <Card data-health="spotlight" className="p-4 sm:p-6 space-y-4">
                 <div className="flex items-center justify-between border-b border-line-soft-2 pb-3">
                     <div>
                         <span className="text-[10px] font-bold uppercase tracking-widest text-ink-4">

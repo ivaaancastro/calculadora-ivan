@@ -111,6 +111,8 @@ Nota: en móvil las 5 pestañas principales viven en `MobileSwipePager` (todas m
 
 ## Salud (`/health`)
 
+> v2 (Capa 5, PR 6b): sin acciones perdidas ni cambios de ubicación. Comprobado con capturas v2 y `HealthPage.test.jsx` (Hoy/Historial); selector de rango y fichas de día, manual en el simulador al aprobar (checklist en el PR).
+
 | Acción | Prueba |
 |---|---|
 | Alternar `Hoy` / `Historial` | — |

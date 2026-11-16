@@ -7,7 +7,7 @@ import { HistoryChartTooltip } from './HistoryChartTooltip';
 
 export const HistoryTrendChart = ({ historySeries, ct }) => (
     <>
-        <Card className="p-4 sm:p-6 space-y-3">
+        <Card data-health="trend" className="p-4 sm:p-6 space-y-3">
             <div className="flex items-center justify-between">
                 <div>
                     <h3 className="text-xs sm:text-sm font-bold text-ink uppercase tracking-tight">

@@ -10,6 +10,7 @@ export const HistoryDayStrip = ({ currentSelectedDay, historySeries, setSelected
                     return (
                         <button
                             key={d.date}
+                            data-health="day"
                             type="button"
                             onClick={() => setSelectedDate(d.date)}
                             className={`shrink-0 flex flex-col items-center justify-between w-14 sm:w-16 py-2.5 px-1 rounded-2xl transition-all select-none active:scale-95 ${
