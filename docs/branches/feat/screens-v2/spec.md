@@ -4,7 +4,7 @@
 - **ID:** `spec-rediseno-02-c5`
 - **Título:** Llevar las pantallas de la app autenticada a v2, de menor a mayor riesgo, con v1 congelada
 - **Fecha:** 2026-11-16
-- **Estado:** borrador, **pendiente de aprobación del usuario** (no existe `tasks.md` ni se toca código).
+- **Estado:** aprobada por el usuario el 2026-11-16 (D8 y D13–D17 con la recomendación de cada una). `tasks.md` creado.
 - **Roadmap:** `docs/branches/feat/webapp-redesign/plan.md`, Capa 5.
 - **Base:** `origin/develop` en `1616ab3` (incluye #82, cierre de la Capa 4).
 - **Precedentes:** `ui-shell/` (estructura y mecanismo), `ui-skin-v2*/` (piel «Panel», D7, D9–D11), `landing-v2/` (Capa 4), `test/ui-safety-net/paridad.md` (lista de paridad por pantalla).
