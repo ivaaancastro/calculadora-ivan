@@ -66,14 +66,4 @@ describe('HealthPage - humo', { timeout: 30000 }, () => {
         render(<HealthPage activities={[]} settings={{}} chartData={[]} />);
         expect(screen.getByText('Sin datos de salud')).toBeTruthy();
     });
-
-    it.skipIf(!process.env.HEALTH_DUMP)('volcado de HTML (verificación de equivalencia)', async () => {
-        const fs = await import('node:fs');
-        state.value = { wellnessMetrics: metrics, loading: false, error: null };
-        const { container } = render(<HealthPage activities={[]} settings={{}} chartData={[]} />);
-        let out = container.innerHTML;
-        await userEvent.click(screen.getByRole('button', { name: 'Historial' }));
-        out += '\n=====\n' + container.innerHTML;
-        fs.writeFileSync(process.env.HEALTH_DUMP, out);
-    });
 });
