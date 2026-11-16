@@ -1,5 +1,5 @@
-import React, { useState, useCallback, useMemo } from 'react';
-import { Routes, Route, useNavigate, useLocation, Navigate } from 'react-router-dom';
+import React, { useState, useCallback } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useActivities } from '../hooks/useActivities';
 import { useSwipeNavigation } from '../hooks/useSwipeNavigation';
 
@@ -11,8 +11,8 @@ import { MobileSwipePager } from './layout/MobileSwipePager';
 // Subcomponentes extraídos (SRP)
 import { UploadStatusBanner } from './dashboard/UploadStatusBanner';
 import { EmptyState } from './dashboard/EmptyState';
-import { MobileTabsView } from './dashboard/MobileTabsView';
-import { DesktopRoutesView } from './dashboard/DesktopRoutesView';
+import { MainTabsView } from './dashboard/MainTabsView';
+import { MAIN_TAB_PATHS } from './dashboard/mainTabs';
 import { ActivitySubRoutes } from './dashboard/ActivitySubRoutes';
 import { AdvancedAnalytics } from './dashboard/AdvancedAnalytics';
 import { HistoryList } from './dashboard/HistoryList';
@@ -36,7 +36,7 @@ const FitnessStatsPage = React.lazy(() =>
  * Dashboard — Shell de orquestación.
  *
  * Coordina el estado global (useActivities), la navegación y los subcomponentes
- * extraídos (SRP): Navbar, UploadStatusBanner, MobileTabsView, DesktopRoutesView,
+ * extraídos (SRP): Navbar, UploadStatusBanner, MainTabsView,
  * ActivitySubRoutes, BottomNav y AddActivityModal.
  */
 const Dashboard = () => {
@@ -83,20 +83,19 @@ const Dashboard = () => {
   const handleCloseModal = useCallback(() => setIsModalOpen(false), []);
   const handleBackFromProfile = useCallback(() => navigate('/'), [navigate]);
 
-  const TAB_PATHS = useMemo(() => ['/', '/stats', '/calendar', '/health', '/history'], []);
   const isSubPage = location.pathname.startsWith('/activity/') || location.pathname === '/profile';
-  const currentTabIndex = TAB_PATHS.indexOf(location.pathname);
+  const currentTabIndex = MAIN_TAB_PATHS.indexOf(location.pathname);
   const activeTabIndex = currentTabIndex === -1 ? 0 : currentTabIndex;
 
   const handleMobileTabChange = useCallback(
     (newIndex, customPath) => {
-      const targetPath = customPath || TAB_PATHS[newIndex] || '/';
+      const targetPath = customPath || MAIN_TAB_PATHS[newIndex] || '/';
       if (location.pathname !== targetPath) {
         navigate(targetPath);
         window.scrollTo({ top: 0, behavior: 'instant' });
       }
     },
-    [TAB_PATHS, location.pathname, navigate],
+    [location.pathname, navigate],
   );
 
   if (loading && !uploading) {
@@ -217,21 +216,16 @@ const Dashboard = () => {
           />
         ) : (
           <>
-            <MobileTabsView
+            <MainTabsView
               activeIndex={activeTabIndex}
               onChangeTab={handleMobileTabChange}
-              renderAdvancedAnalytics={renderAdvancedAnalytics}
-              renderFitnessStats={renderFitnessStats}
-              renderCalendar={renderCalendar}
-              renderHealth={renderHealth}
-              renderHistory={renderHistory}
-            />
-            <DesktopRoutesView
-              renderAdvancedAnalytics={renderAdvancedAnalytics}
-              renderFitnessStats={renderFitnessStats}
-              renderCalendar={renderCalendar}
-              renderHealth={renderHealth}
-              renderHistory={renderHistory}
+              views={{
+                analytics: renderAdvancedAnalytics,
+                stats: renderFitnessStats,
+                calendar: renderCalendar,
+                health: renderHealth,
+                history: renderHistory,
+              }}
             />
           </>
         )}
