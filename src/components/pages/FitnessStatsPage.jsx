@@ -74,15 +74,15 @@ export const FitnessStatsPage = ({
     };
 
     return (
-        <div data-skin="stats" className="animate-in fade-in duration-500 pb-16 w-full max-w-[1100px] mx-auto px-4 sm:px-8">
+        <div data-skin="stats" data-stats="page" className="animate-in fade-in duration-500 pb-16 w-full max-w-[1100px] mx-auto px-4 sm:px-8">
             {/* Header */}
-            <div className="pt-8 pb-6 sm:pb-10">
+            <div data-stats="header" className="pt-8 pb-6 sm:pb-10">
                 <h2 className="text-3xl font-bold text-ink tracking-tight">Rendimiento</h2>
                 <p className="text-sm font-medium text-ink-3-flat mt-1.5 opacity-80">Perfil fisiológico avanzado y recuperación</p>
             </div>
 
             {/* Selector por categorías SOLO en móvil (estilo Apple sobrio, sin emojis) */}
-            <div className="md:hidden flex items-center gap-2 overflow-x-auto hide-scrollbar touch-scroll -mx-4 px-4 mb-6 pb-1">
+            <div data-stats="tabs" className="md:hidden flex items-center gap-2 overflow-x-auto hide-scrollbar touch-scroll -mx-4 px-4 mb-6 pb-1">
                 {CATEGORIES.map(cat => (
                     <button
                         key={cat.id}
@@ -99,27 +99,27 @@ export const FitnessStatsPage = ({
             </div>
 
             {/* 1. Umbrales Actuales */}
-            <div className={cardVisibility('physiology')}>
+            <div data-stats="card" data-card="thresholds" className={cardVisibility('physiology')}>
                 <ThresholdsCard settings={settings} />
             </div>
 
             {/* 2. Estado de Entreno */}
-            <div className={cardVisibility('physiology')}>
+            <div data-stats="card" data-card="status" className={cardVisibility('physiology')}>
                 <TrainingStatusCard trainingStatus={stats.trainingStatus} />
             </div>
 
             {/* 3. Estado de VFC (HRV) */}
-            <div className={cardVisibility('physiology')}>
+            <div data-stats="card" data-card="hrv" className={cardVisibility('physiology')}>
                 <HrvCard hrv={stats.hrv} />
             </div>
 
             {/* 4. Pronóstico de Carrera */}
-            <div className={cardVisibility('vo2')}>
+            <div data-stats="card" data-card="race" className={cardVisibility('vo2')}>
                 <RacePredictionsCard racePredictions={stats.racePredictions} />
             </div>
 
             {/* 5. VO2 Máximo */}
-            <div className={cardVisibility('vo2')}>
+            <div data-stats="card" data-card="vo2" className={cardVisibility('vo2')}>
                 <Vo2MaxCard
                     vo2Sport={vo2Sport}
                     setVo2Sport={setVo2Sport}
@@ -130,7 +130,7 @@ export const FitnessStatsPage = ({
             </div>
 
             {/* 6. Balance de Entrenamiento */}
-            <div className={cardVisibility('physiology')}>
+            <div data-stats="card" data-card="balance" className={cardVisibility('physiology')}>
                 <TrainingBalanceCard
                     balance={stats.balance}
                     balanceDays={balanceDays}
@@ -139,7 +139,7 @@ export const FitnessStatsPage = ({
             </div>
 
             {/* 7. Distribución y Volumen */}
-            <div className={cardVisibility('volume')}>
+            <div data-stats="card" data-card="volume" className={cardVisibility('volume')}>
                 <WeeklyVolumeAndFocusCard
                     weeklyChart={analytics.weeklyChart}
                     focusChart={analytics.focusChart}
@@ -150,7 +150,7 @@ export const FitnessStatsPage = ({
             </div>
 
             {/* 8. Perfil de Potencia */}
-            <div className={cardVisibility('power')}>
+            <div data-stats="card" data-card="power-profile" className={cardVisibility('power')}>
                 <PowerProfileCard
                     showPowerConfig={showPowerConfig}
                     setShowPowerConfig={setShowPowerConfig}
@@ -167,7 +167,7 @@ export const FitnessStatsPage = ({
             </div>
 
             {/* 9. FTP Estimado (eFTP) */}
-            <div className={cardVisibility('power')}>
+            <div data-stats="card" data-card="ftp" className={cardVisibility('power')}>
                 <EstimatedFtpCard
                     ftp={stats.ftp}
                     ftpDiff={ftpDiff}
@@ -177,7 +177,7 @@ export const FitnessStatsPage = ({
             </div>
 
             {/* 10. Potencial y Récords */}
-            <div className={cardVisibility('power')}>
+            <div data-stats="card" data-card="mmp" className={cardVisibility('power')}>
                 <MmpAndEfCard
                     activities={activities}
                     onSelectActivity={onSelectActivity}
