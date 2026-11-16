@@ -5,7 +5,7 @@ import { Card, Input, SectionHeader } from '../../ui';
 export const GeneralSection = ({ formData, isUploadingAvatar, handleAvatarUpload, handleChange, targetCtl, setTargetCtl, isV2, setUi }) => (
     <div className="space-y-5 animate-in fade-in slide-in-from-right-3 duration-250">
         {/* AVATAR PROFILE BANNER — HORIZONTAL APPLE SETTINGS STYLE */}
-        <Card className="p-4 sm:p-5 flex items-center gap-4 text-left mb-5">
+        <Card data-profile="banner" className="p-4 sm:p-5 flex items-center gap-4 text-left mb-5">
             <div className="relative shrink-0">
                 <div 
                     className="rounded-full overflow-hidden bg-surface-2 border-2 border-white dark:border-zinc-700 shadow-sm flex items-center justify-center relative shrink-0"
@@ -37,7 +37,7 @@ export const GeneralSection = ({ formData, isUploadingAvatar, handleAvatarUpload
                     {formData.fullName || 'Atleta Forma'}
                 </h3>
                 <p className="text-xs text-ink-3 mt-0.5 truncate">{formData.email}</p>
-                <span className="inline-flex items-center gap-1 mt-2 text-[10px] font-semibold text-blue-600 dark:text-blue-400 bg-blue-500/10 px-2.5 py-0.5 rounded-full border border-blue-500/15">
+                <span data-profile="badge" className="inline-flex items-center gap-1 mt-2 text-[10px] font-semibold text-blue-600 dark:text-blue-400 bg-blue-500/10 px-2.5 py-0.5 rounded-full border border-blue-500/15">
                     Atleta Forma
                 </span>
             </div>
@@ -47,7 +47,7 @@ export const GeneralSection = ({ formData, isUploadingAvatar, handleAvatarUpload
         <div>
             <SectionHeader>Datos Personales</SectionHeader>
             <Card divided className="overflow-hidden mb-5">
-                <div className="p-3 sm:p-3.5 flex items-center justify-between gap-3">
+                <div data-profile="row" className="p-3 sm:p-3.5 flex items-center justify-between gap-3">
                     <span className="text-xs sm:text-sm font-medium text-body-soft">Nombre</span>
                     <input
                         type="text"
@@ -58,7 +58,7 @@ export const GeneralSection = ({ formData, isUploadingAvatar, handleAvatarUpload
                         className="flex-1 text-right bg-transparent text-xs sm:text-sm font-semibold text-slate-900 dark:text-white outline-none placeholder:text-slate-400"
                     />
                 </div>
-                <div className="p-3 sm:p-3.5 flex items-center justify-between gap-3">
+                <div data-profile="row" className="p-3 sm:p-3.5 flex items-center justify-between gap-3">
                     <span className="text-xs sm:text-sm font-medium text-body-soft">Correo</span>
                     <span className="text-xs sm:text-sm font-medium text-ink-4 truncate max-w-[220px]">{formData.email}</span>
                 </div>
@@ -70,7 +70,7 @@ export const GeneralSection = ({ formData, isUploadingAvatar, handleAvatarUpload
             <SectionHeader>Fisiología y Métricas</SectionHeader>
             <Card divided className="overflow-hidden">
                 {/* Peso */}
-                <div className="p-3 sm:p-3.5 flex items-center justify-between gap-3">
+                <div data-profile="row" className="p-3 sm:p-3.5 flex items-center justify-between gap-3">
                     <div className="flex items-center gap-3">
                         <div className="w-7 h-7 rounded-[8px] bg-blue-500 text-white flex items-center justify-center shrink-0 shadow-2xs">
                             <Weight size={15} strokeWidth={2.3} />
@@ -94,7 +94,7 @@ export const GeneralSection = ({ formData, isUploadingAvatar, handleAvatarUpload
                 </div>
 
                 {/* FC Reposo */}
-                <div className="p-3 sm:p-3.5 flex items-center justify-between gap-3">
+                <div data-profile="row" className="p-3 sm:p-3.5 flex items-center justify-between gap-3">
                     <div className="flex items-center gap-3">
                         <div className="w-7 h-7 rounded-[8px] bg-hr text-white flex items-center justify-center shrink-0 shadow-2xs">
                             <Heart size={15} strokeWidth={2.3} />
@@ -118,7 +118,7 @@ export const GeneralSection = ({ formData, isUploadingAvatar, handleAvatarUpload
                 </div>
 
                 {/* Calibrar CTL */}
-                <div className="p-3 sm:p-3.5 flex items-center justify-between gap-3">
+                <div data-profile="row" className="p-3 sm:p-3.5 flex items-center justify-between gap-3">
                     <div className="flex items-center gap-3">
                         <div className="w-7 h-7 rounded-[8px] bg-emerald-500 text-white flex items-center justify-center shrink-0 shadow-2xs">
                             <Activity size={15} strokeWidth={2.3} />
