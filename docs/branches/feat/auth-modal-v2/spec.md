@@ -3,7 +3,7 @@
 ## 1. Identificación
 - **ID:** `spec-rediseno-02-c4-pr4` · **Rama:** `feat/auth-modal-v2` (desde `develop`, `c66063f`, que incluye #80)
 - **Depende de:** `spec-rediseno-02-c4` (D1–D7 aprobadas), PR 1–3 de la Capa 4 mergeados.
-- **Estado:** borrador, pendiente de aprobación escrita.
+- **Estado:** **implementada** (aprobada el 2026-11-16; PR #81).
 
 ## 2. Objetivo
 Dar piel v2 (`html[data-ui="v2"]`) al modal de acceso (3 modos: entrar, registrarse, recuperar clave) y a `EmailConfirmedPage`, coherente con la landing v2 («Panel»), **sin cambiar el flujo de acceso**.
