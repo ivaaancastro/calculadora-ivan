@@ -205,7 +205,6 @@ const Dashboard = () => {
             activities={activities}
             settings={settings}
             fetchActivityStreams={fetchActivityStreams}
-            deleteActivity={deleteActivity}
             currentMetrics={currentMetrics}
             updateProfile={updateProfile}
             isDeepSyncing={isDeepSyncing}

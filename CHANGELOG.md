@@ -7,6 +7,11 @@ y este proyecto adhiere a [Semantic Versioning](https://semver.org/lang/es/).
 
 ## [Unreleased]
 
+### Fix — Detalle de actividad: «Volver» y mapa (`fix/detail-back-map`)
+- `fix(detalle):` «Volver» no hacía nada: `ActivityRouteWrapper` no pasaba `onBack` (regresión de `83a4a44`). Ahora vuelve a la pantalla de origen (`navigate(-1)`) o, con URL directa, a Actividades; también pasa `fetchStreams` con el nombre correcto.
+- `fix(mapa):` CARTO (`basemaps.cartocdn.com`) devuelve teselas con marca de agua «API KEY REQUIRED»; Light y Dark usan ahora Esri World Light/Dark Gray Base (sin clave).
+- `test:` integración del wrapper y `e2e/detail-back.spec.js` (Actividades, Calendario, URL directa; v1 y v2).
+
 ### Fix — objetivos táctiles ≥ 44 px en v2 (`fix/touch-targets-v2`)
 - `fix(v2):` en móvil (< 640 px) y solo con `data-ui="v2"`, el menú de perfil, el botón de tema, «Conectar», los selectores de rango (Dashboard y Rendimiento), el buscador y los selects de Actividades, «+ Añadir manual» y «Volver» (Perfil) miden ≥ 44 px. Cabecera intacta en 60 px; v1 sin cambios (`style-diff` 0).
 - `test(e2e):` `touch.spec.js` admite `TOUCH_UI=v2` y lista tamaños y desborde. 14 capturas v2 móviles regeneradas a propósito.
