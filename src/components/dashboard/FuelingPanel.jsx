@@ -210,19 +210,19 @@ const WHY_HYDRA = ({ fuel }) => (
 const Row = ({ label, value, sub, why: WhyComp, fuel }) => {
     const [open, setOpen] = useState(false);
     return (
-        <div className="border border-line-soft-2 rounded-lg overflow-hidden">
+        <div data-fueling="row" className="border border-line-soft-2 rounded-lg overflow-hidden">
             <div className="flex items-start justify-between px-3 py-2.5">
                 <div>
                     <p className="text-[10px] font-bold uppercase tracking-widest text-ink-4">{label}</p>
                     <p className="text-base font-black font-mono text-ink-2 mt-0.5">{value}</p>
                     {sub && <p className="text-[10px] text-ink-4 mt-0.5">{sub}</p>}
                 </div>
-                <button onClick={() => setOpen(o => !o)} className="mt-1 p-1 rounded text-faint hover:text-ink-3 transition-colors">
+                <button data-fueling="info" aria-expanded={open} aria-label={`Por qué: ${label}`} onClick={() => setOpen(o => !o)} className="mt-1 p-1 rounded text-faint hover:text-ink-3 transition-colors">
                     {open ? <ChevronUp size={14} /> : <Info size={14} />}
                 </button>
             </div>
             {open && (
-                <div className="px-3 pb-3 pt-1 border-t border-line-soft-2 bg-slate-50/50 dark:bg-zinc-950/50">
+                <div data-fueling="why" className="px-3 pb-3 pt-1 border-t border-line-soft-2 bg-slate-50/50 dark:bg-zinc-950/50">
                     <WhyComp fuel={fuel} />
                 </div>
             )}
@@ -235,7 +235,7 @@ export const FuelingPanel = ({ workout }) => {
     const hasBlocks = workout.descriptionObj?.blocks?.length > 0;
 
     return (
-        <div className="space-y-6">
+        <div data-fueling="root" className="space-y-6">
             {/* Header & Energy Cost Inline */}
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div className="flex items-center gap-3">
@@ -249,7 +249,7 @@ export const FuelingPanel = ({ workout }) => {
                     )}
                 </div>
 
-                <div className="flex gap-3">
+                <div data-fueling="chips" className="flex gap-3">
                     <div className="bg-surface rounded-md px-3 py-1.5 border border-line flex items-center gap-2 shadow-sm">
                         <span className="text-[10px] font-bold uppercase tracking-widest text-ink-4">Gasto Est.</span>
                         <span className="text-sm font-black font-mono text-ink-2">{fuel.estimatedKj} kcal</span>
@@ -273,7 +273,7 @@ export const FuelingPanel = ({ workout }) => {
                         <Row label="Pre-entreno (1-2h antes)" value={fuel.preCarbsVal} sub={fuel.preCarbsSub} why={WHY_PRE} fuel={fuel} />
                         {fuel.needsDuringFueling
                             ? <Row label="Durante (si >45min)" value={`${fuel.duringCarbs}g total`} sub={`${fuel.recommendedCarbRate}g/hr · Geles, isotónico`} why={WHY_DURING} fuel={fuel} />
-                            : <div className="px-4 py-3 rounded-lg border border-line text-xs text-ink-3 bg-slate-50/50 dark:bg-zinc-900/50">Sesión corta o baja intensidad — no requiere ingesta durante.</div>
+                            : <div data-fueling="note" className="px-4 py-3 rounded-lg border border-line text-xs text-ink-3 bg-slate-50/50 dark:bg-zinc-900/50">Sesión corta o baja intensidad — no requiere ingesta durante.</div>
                         }
                         <Row label="Post-entreno (ventana 30m)" value={fuel.postCarbsVal} sub={fuel.postCarbsSub} why={WHY_POST} fuel={fuel} />
                     </div>

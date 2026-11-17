@@ -283,6 +283,97 @@ html[data-ui="v2"] [data-skin="profile"] [data-profile="badge"] {
   color: rgb(var(--action));
 }
 
+/* ── Dashboard «Panel» (Capa 5, PR 4b): `data-skin="dashboard"` ───────────────────────
+ *
+ * Primer vistazo móvil (390 px), sin scroll ni desplegar: Estado de Forma (compacto), las 4
+ * métricas de Fisiología y Carga (2 × 2) y la gráfica de evolución con su selector de rango.
+ * «Tendencia y Capacidad» (rampa, monotonía, volumen, VO2) queda plegada tras un botón de 44 px
+ * (solo v2 y <768 px; en escritorio se ve todo, como antes). Los `data-dash` son inertes en v1
+ * y el botón de pliegue solo se pinta en v2. Todo detrás de `html[data-ui="v2"]`.
+ */
+
+/* Escritorio: Estado de Forma y fichas con el filete de la piel. */
+html[data-ui="v2"] [data-skin="dashboard"] [data-dash="hero"] > div:first-child > div:first-child {
+  background: rgb(var(--sunken));
+  color: rgb(var(--action));
+  box-shadow: inset 0 0 0 1px rgb(var(--line));
+}
+
+@media (max-width: 767px) {
+  /* Orden móvil: forma, métricas, gráfica y, al final, lo plegado. */
+  html[data-ui="v2"] [data-skin="dashboard"][data-dash="root"] {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding-bottom: 16px;
+  }
+  html[data-ui="v2"] [data-skin="dashboard"][data-dash="root"] > * { margin: 0; }
+  html[data-ui="v2"] [data-skin="dashboard"] [data-dash="hero"] { order: 1; padding: 12px; gap: 8px; }
+  html[data-ui="v2"] [data-skin="dashboard"] [data-dash="primary"] { order: 2; }
+  html[data-ui="v2"] [data-skin="dashboard"] [data-dash="chart"] { order: 3; }
+  html[data-ui="v2"] [data-skin="dashboard"] [data-dash="secondary"] { order: 4; }
+
+  /* Fichas primarias más bajas: la gráfica entra en la primera pantalla. */
+  html[data-ui="v2"] [data-skin="dashboard"] [data-dash="primary"] > p { margin-bottom: 6px; }
+  html[data-ui="v2"] [data-skin="dashboard"] [data-dash="primary"] > div { gap: 8px; }
+
+  /* Pliegue: el rótulo lo sustituye el botón; cerrado oculta la rejilla. */
+  html[data-ui="v2"] [data-skin="dashboard"] [data-dash="secondary-title"] { display: none; }
+  html[data-ui="v2"] [data-skin="dashboard"] [data-dash="more-toggle"] { margin-bottom: 8px; }
+  html[data-ui="v2"] [data-skin="dashboard"] [data-dash="secondary-grid"][data-open="false"] {
+    display: none;
+  }
+}
+
+/* Escritorio: el botón de pliegue no existe y la rejilla siempre se ve (md:hidden ya lo
+   oculta; esto cubre el caso de que la rejilla quedase cerrada al ensanchar la ventana). */
+@media (min-width: 768px) {
+  html[data-ui="v2"] [data-skin="dashboard"] [data-dash="secondary-grid"][data-open="false"] {
+    display: grid;
+  }
+}
+
+/* Botón de pliegue: ficha con filete de la piel; el cobalto marca el foco, no el reposo. */
+html[data-ui="v2"] [data-skin="dashboard"] [data-dash="more-toggle"] {
+  border-color: rgb(var(--line));
+  border-radius: var(--skin-radius-lg);
+}
+html[data-ui="v2"] [data-skin="dashboard"] [data-dash="more-toggle"]:active {
+  background-color: rgb(var(--sunken));
+}
+
+/* ── FuelingPanel «Panel» (Capa 5, PR 4b): `data-fueling` ─────────────────────────────
+ *
+ * Vive dentro del visor de entrenos del Calendario (no tiene `data-skin` propio), por eso los
+ * selectores son por `data-fueling`. Filas con el filete de la piel, botón de explicación de
+ * 44 px y fichas de gasto/IF que se parten en móvil en vez de desbordar.
+ */
+html[data-ui="v2"] [data-fueling="row"],
+html[data-ui="v2"] [data-fueling="note"] {
+  border-color: rgb(var(--line));
+  border-radius: var(--skin-radius-lg);
+  background-color: rgb(var(--surface));
+}
+html[data-ui="v2"] [data-fueling="why"] {
+  background-color: rgb(var(--sunken));
+  border-top-color: rgb(var(--line));
+}
+html[data-ui="v2"] [data-fueling="info"] {
+  min-width: 44px;
+  min-height: 44px;
+  margin-top: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--skin-radius-lg);
+}
+html[data-ui="v2"] [data-fueling="chips"] { flex-wrap: wrap; }
+html[data-ui="v2"] [data-fueling="chips"] > div {
+  border-radius: var(--skin-radius-lg);
+  box-shadow: none;
+  background-color: rgb(var(--sunken));
+}
+
 /* ── Rendimiento «Panel» (Capa 5, PR 5): orden y densidad de las 10 tarjetas ──────────
  *
  * Los `data-stats` / `data-card` son ganchos inertes en v1. Todo va detrás de

@@ -64,6 +64,8 @@ Nota: en móvil las 5 pestañas principales viven en `MobileSwipePager` (todas m
 | Abrir una actividad desde las listas del dashboard | — |
 | Estado vacío (sin actividades) | — |
 
+> **v2 (Capa 5, PR 4b):** comprobadas con `data-ui="v2"` las cinco acciones. Cambio de ubicación (solo móvil <768 px): «Tendencia y Capacidad» (rampa, monotonía, volumen 30D, VO2 máx.) queda plegada tras un botón de 44 px (`aria-expanded`); la gráfica de evolución sube sobre ella. En escritorio se ve todo, como en v1. El rango 7D/30D/3M/Todo sigue en la tarjeta de la gráfica (móvil) o en la cabecera (escritorio). `FuelingPanel`: filas «Por qué» con botón de 44 px y fichas de gasto/IF que se parten en móvil; ninguna acción desaparece.
+
 ## Rendimiento (`/stats`)
 
 | Acción | Prueba |

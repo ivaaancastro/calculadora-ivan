@@ -8,7 +8,7 @@ import {
 import {
     Activity, Heart, CalendarDays, BarChart2, Target, MousePointer2, TrendingUp, Trophy, AlertTriangle,
     Battery, Brain, Moon, Info, Activity as ActivityPulse, Loader2, Sparkles, Coffee, AlertOctagon,
-    ArrowUpRight, ArrowDownRight, Zap, TrendingDown, Wifi
+    ArrowUpRight, ArrowDownRight, Zap, TrendingDown, Wifi, ChevronDown
 } from 'lucide-react';
 import { 
     estimateFTP, estimateCyclingVO2max, estimateRunningVO2max, predictRaceTimes, 
@@ -56,6 +56,8 @@ async function fetchLatestWellnessRow() {
 // ─────────────────────────────────────────────────────────────────────────────
 export const AdvancedAnalytics = React.memo(({ activities, settings,  timeRange, setTimeRange, chartData, currentMetrics }) => {
     const [garminVo2max, setGarminVo2max] = useState(null);
+    // Solo v2 en móvil: las métricas secundarias van plegadas bajo el primer vistazo.
+    const [showMore, setShowMore] = useState(false);
     const { theme } = useTheme();
     const { isV2 } = useUiMode();
 
@@ -133,9 +135,9 @@ export const AdvancedAnalytics = React.memo(({ activities, settings,  timeRange,
 
     return (
         <ChartSkinProvider skin={isV2 ? 'v2' : 'v1'}>
-        <div data-skin="dashboard" className="space-y-6 sm:space-y-8 pb-8">
+        <div data-skin="dashboard" data-dash="root" className="space-y-6 sm:space-y-8 pb-8">
             {/* HERO: ESTADO DE FORMA ESTILO APPLE FITNESS */}
-            <Card className="p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <Card data-dash="hero" className="p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                 <div className="flex items-center gap-3">
                     <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-blue-500/20 to-indigo-500/20 text-blue-600 dark:text-blue-400 flex items-center justify-center shrink-0 shadow-2xs">
                         <ActivityPulse size={20} strokeWidth={2.3} />
@@ -180,7 +182,7 @@ export const AdvancedAnalytics = React.memo(({ activities, settings,  timeRange,
             </Card>
 
             {/* SECCIÓN 1: MÉTRICAS CLAVE (APPLE HEALTH CARDS) */}
-            <div>
+            <div data-dash="primary">
                 <SectionHeader as="p">Fisiología y Carga</SectionHeader>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-2.5 sm:gap-3">
                     {/* Fitness (CTL) */}
@@ -198,9 +200,25 @@ export const AdvancedAnalytics = React.memo(({ activities, settings,  timeRange,
             </div>
 
             {/* SECCIÓN 2: MÉTRICAS SECUNDARIAS */}
-            <div>
-                <SectionHeader as="p">Tendencia y Capacidad</SectionHeader>
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-2.5 sm:gap-3">
+            <div data-dash="secondary">
+                <SectionHeader as="p" data-dash="secondary-title">Tendencia y Capacidad</SectionHeader>
+                {isV2 && (
+                    <button
+                        type="button"
+                        data-dash="more-toggle"
+                        aria-expanded={showMore}
+                        aria-controls="dash-secondary-grid"
+                        onClick={() => setShowMore((v) => !v)}
+                        className="md:hidden w-full min-h-[44px] px-4 flex items-center justify-between rounded-xl border border-line bg-surface text-xs font-semibold text-ink-3 touch-manipulation"
+                    >
+                        <span>Tendencia y capacidad</span>
+                        <span className="flex items-center gap-1.5 text-[10px] font-medium text-ink-4">
+                            {showMore ? 'Ocultar' : 'Rampa, monotonía, volumen, VO2'}
+                            <ChevronDown size={14} className={showMore ? 'rotate-180' : ''} />
+                        </span>
+                    </button>
+                )}
+                <div id="dash-secondary-grid" data-dash="secondary-grid" data-open={showMore ? 'true' : 'false'} className="grid grid-cols-2 md:grid-cols-4 gap-2.5 sm:gap-3">
                     {[
                         { label: 'Rampa Semanal', value: `${model.rampRate > 0 ? '+' : ''}${model.rampRate.toFixed(1)}`, icon: model.rampRate >= 0 ? ArrowUpRight : ArrowDownRight, tone: 'ramp', sub: 'pts/sem' },
                         { label: 'Monotonía', value: model.monotony.toFixed(2), icon: Brain, tone: 'monotony', sub: 'Índice carga' },
@@ -213,7 +231,7 @@ export const AdvancedAnalytics = React.memo(({ activities, settings,  timeRange,
             </div>
 
             {/* SECCIÓN 3: GRÁFICA DE EVOLUCIÓN (PMC) */}
-            <div>
+            <div data-dash="chart">
                 <SectionHeader as="p">Evolución de Rendimiento</SectionHeader>
                 <Card className="p-3 sm:p-5">
                     <div className="h-[290px] sm:h-[330px]">
