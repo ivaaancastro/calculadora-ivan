@@ -11,6 +11,7 @@
 
 ## 1. Estado actual
 - **Proyecto:** Forma — dashboard de rendimiento deportivo y salud. Stack: React 19, Vite 7, Tailwind 3, Zustand, TanStack Query, Supabase, Vitest/MSW/Playwright.
+- **Fix en curso:** `fix/touch-targets-v2` (objetivos táctiles ≥ 44 px en v2 móvil; detalle en su `tasks.md`; 14 capturas v2 móviles pendientes de revisión D7).
 - **Rama actual:** `docs/screens-cierre` (Capa 5, PR 9 de 9: cierre documental). **Capa 5 implementada**: shell, Ajustes, Actividades, Dashboard, Rendimiento, Salud, Detalle y Calendario en v2 «Panel» (#84–#97). Detalle y paridad: `docs/branches/feat/screens-v2/tasks.md` y `docs/branches/test/ui-safety-net/paridad.md`. **Pendiente de la Capa 5:** pasada completa en iPhone real (usuario) con `docs/branches/feat/screens-v2/guion-iphone.md`. Siguiente: **Capa 6**.
 - **Hecho:** specs de auditoría 01–08, spec-001 y E2E. Rediseño: Capa 0 (#51), 1 (#52–#58), 2 (#60–#68), 3 (#70–#76: estructura, flag `data-ui="v2"`, dirección «Panel», 5 pantallas y gráficas), 4 (#78–#82: landing, acceso y correo en v2) y 5 (#83–#97).
 - **Pendiente del rediseño:** Capa 6 (activar v2 por defecto, retirar v1 y decidir el destino del interruptor) y 7 (iOS). Plan: `docs/branches/feat/webapp-redesign/plan.md`. D12: **v1 sigue por defecto hasta la Capa 6**; v2 es opt-in (Ajustes → General «Vista previa v2» o `VITE_UI=v2`). **D8 cerrada:** el interruptor se queda ahí hasta la Capa 6, donde se decide su destino.
