@@ -54,7 +54,7 @@ export const CalendarMonthView = ({
                                 };
 
                                 return (
-                                    <div key={wIdx} className="grid grid-cols-1 lg:grid-cols-[130px_repeat(7,1fr)] border-b border-line-soft-5 last:border-b-0">
+                                    <div key={wIdx} data-cal="week" className="grid grid-cols-1 lg:grid-cols-[130px_repeat(7,1fr)] border-b border-line-soft-5 last:border-b-0">
 
                                         {/* ====== PANEL SEMANAL IZQUIERDO ====== */}
                                         <div className="hidden lg:flex flex-col border-r border-line-faint bg-transparent text-[10px] relative overflow-hidden">
@@ -165,7 +165,7 @@ export const CalendarMonthView = ({
                                                     onDragOver={(e) => handleDragOver(e, dateKey)}
                                                     onDragLeave={handleDragLeave}
                                                     onDrop={(e) => handleDrop(e, day.date)}
-                                                    className={`relative p-2 lg:p-2.5 border-r border-line-faint flex flex-col min-h-[72px] lg:h-[220px] overflow-y-auto custom-scrollbar transition-colors group/daycell
+                                                    data-cal="day" data-today={isToday ? 'true' : undefined} className={`relative p-2 lg:p-2.5 border-r border-line-faint flex flex-col min-h-[72px] lg:h-[220px] overflow-y-auto custom-scrollbar transition-colors group/daycell
                                                         ${isToday ? 'bg-blue-50/10 dark:bg-blue-900/5' : 'bg-transparent'}
                                                         ${dragOverDate === dateKey ? 'bg-blue-50 dark:bg-blue-900/20 ring-2 ring-action-light ring-inset rounded-lg z-10' : ''}
                                                         ${!day.isCurrentMonth ? 'opacity-40' : 'opacity-100'}
@@ -181,7 +181,7 @@ export const CalendarMonthView = ({
                                                                 {WEEKDAYS[dIdx]}
                                                             </span>
                                                         </div>
-                                                        <button onClick={(e) => handleOpenPlanModal(e, day.date)} className="opacity-90 lg:opacity-0 group-hover/daycell:opacity-100 text-slate-400 hover:text-red-500 w-8 h-8 sm:w-7 sm:h-7 flex items-center justify-center rounded-full active:scale-90 transition-all touch-manipulation" title="Planificar sesión">
+                                                        <button onClick={(e) => handleOpenPlanModal(e, day.date)} data-cal="add" className="opacity-90 lg:opacity-0 group-hover/daycell:opacity-100 text-slate-400 hover:text-red-500 w-8 h-8 sm:w-7 sm:h-7 flex items-center justify-center rounded-full active:scale-90 transition-all touch-manipulation" title="Planificar sesión">
                                                             <Plus size={14} />
                                                         </button>
                                                     </div>
@@ -285,6 +285,7 @@ export const CalendarMonthView = ({
                                                             return (
                                                                 <div
                                                                     key={i}
+                                                                    data-cal="act" data-planned={act.isPlanned ? 'true' : undefined}
                                                                     draggable={act.isPlanned}
                                                                     onDragStart={(e) => act.isPlanned && handleDragStart(e, act)}
                                                                     onClick={(e) => {

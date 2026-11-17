@@ -79,6 +79,8 @@ Nota: en móvil las 5 pestañas principales viven en `MobileSwipePager` (todas m
 
 ## Calendario (`/calendar`)
 
+> v2 (Capa 5, PR 8c): sin acciones perdidas ni cambios de ubicación (mes, Hoy, Forma, «+», sesiones planificadas/reales, modales de plan y rutina). Comprobado con capturas v2, `CalendarPage.test.jsx` y el volcado de v1 = 0; arrastrar plan y modales, manual en el simulador al aprobar (checklist en el PR).
+
 | Acción | Prueba |
 |---|---|
 | Mes anterior / siguiente / `Hoy` | — |

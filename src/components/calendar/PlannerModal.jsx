@@ -46,7 +46,7 @@ export const PlannerModal = ({
                                 {selectedDateForPlan?.toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long' })}
                             </p>
                         </div>
-                        <button onClick={() => setIsModalOpen(false)} className="shrink-0 ml-4 w-7 h-7 flex items-center justify-center text-slate-400 hover:text-slate-700 dark:hover:text-zinc-200 hover:bg-surface-2 rounded-full transition-colors"><X size={15} /></button>
+                        <button onClick={() => setIsModalOpen(false)} data-cal="modal-close" className="shrink-0 ml-4 w-7 h-7 flex items-center justify-center text-slate-400 hover:text-slate-700 dark:hover:text-zinc-200 hover:bg-surface-2 rounded-full transition-colors"><X size={15} /></button>
                     </div>
 
                     <div className="px-6 py-5 overflow-y-auto flex-1 bg-surface custom-scrollbar">
@@ -420,7 +420,7 @@ export const PlannerModal = ({
                     {/* FOOTER */}
                     <div className="px-6 py-3.5 border-t border-line-soft flex justify-end items-center gap-2 shrink-0">
                         <button onClick={() => setIsModalOpen(false)} className="px-4 py-2 rounded-full text-xs font-medium text-ink-3 hover:bg-surface-2 transition-all">Cancelar</button>
-                        <button onClick={handleSavePlan} disabled={isSaving} className="px-5 py-2 rounded-full text-xs font-semibold text-ink-inverse bg-inverse hover:bg-inverse-2 disabled:opacity-50 transition-all shadow-sm">
+                        <button onClick={handleSavePlan} data-cal="modal-submit" disabled={isSaving} className="px-5 py-2 rounded-full text-xs font-semibold text-ink-inverse bg-inverse hover:bg-inverse-2 disabled:opacity-50 transition-all shadow-sm">
                             {isSaving ? 'Guardando...' : editingPlanId ? 'Guardar' : 'Añadir'}
                         </button>
                     </div>
