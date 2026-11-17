@@ -6,7 +6,7 @@ import { formatMinsToHMM } from '../../../utils/formatters';
 export const DetailMobileHero = ({ activity, streams, themeColor, activePayload, speedMetric, proMetrics, isPaceBased }) => (
                                     <div className="lg:hidden space-y-2.5">
                                         {(activity.map_polyline || streams?.latlng?.data) && (
-                                            <div className="h-48 sm:h-64 rounded-2xl overflow-hidden shadow-sm border border-slate-200/80 dark:border-zinc-800/80">
+                                            <div data-detail="map" className="h-48 sm:h-64 rounded-2xl overflow-hidden shadow-sm border border-slate-200/80 dark:border-zinc-800/80">
                                                 <InteractiveMap 
                                                     polyline={activity.map_polyline} 
                                                     highResCoords={streams?.latlng?.data} 
@@ -17,7 +17,7 @@ export const DetailMobileHero = ({ activity, streams, themeColor, activePayload,
                                         )}
 
                                         {/* Resumen de Métricas en varias Columnas y Filas (Estilo Apple / Strava) */}
-                                        <div className="grid grid-cols-3 gap-2 py-0.5">
+                                        <div data-detail="stats" className="grid grid-cols-3 gap-2 py-0.5">
                                             <Stat label="Distancia" value={(activity.distance / 1000).toFixed(2)} unit="km" />
                                             <Stat label="Tiempo" value={formatMinsToHMM(activity.duration)} />
                                             <Stat label="Desnivel" value={activity.elevation_gain || 0} unit="m" />

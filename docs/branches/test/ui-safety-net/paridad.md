@@ -104,6 +104,8 @@ Nota: en móvil las 5 pestañas principales viven en `MobileSwipePager` (todas m
 
 ## Detalle (`/activity/:id`)
 
+> **v2 (Capa 5, PR 7b):** sin acciones perdidas ni cambios de ubicación. En móvil Volver, Strava, Eliminar, pestañas, capas del mapa y picos pasan a 44 px. Comprobado con `ActivityDetailPage.test.jsx`, E2E de gestos y capturas v2; capas del mapa y Strava, manual en el simulador al aprobar.
+
 | Acción | Prueba |
 |---|---|
 | Volver (`Volver`) | — |

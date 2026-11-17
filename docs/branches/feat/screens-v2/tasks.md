@@ -40,7 +40,9 @@ Verificación común: lint, `lint:colors` (no sube), `lint:ui` (14), unit, integ
 
 ## PR 7 — Detalle
 - [ ] 7a `refactor/activity-detail-sections` (R)
-- [ ] 7b `feat/screens-detail-v2` (V ⏸): mapa, gráficas, +34 px
+- [x] 7b `feat/screens-detail-v2` (V ⏸): implementado; falta aprobación D7 de las capturas `detalle` v2 (6; cambian las de 390 px)
+  - **Primer vistazo móvil (390 px):** cabecera con Volver/Strava/Eliminar a 44 px y pestañas en carril a 44 px; mapa con filete de la piel (capas del mapa a 44 px); cuadrícula de métricas; picos (44 px) y gráficas con `useChartTheme()` v2. **Debajo:** panel de impacto del entrenamiento.
+  - Ubicación: sin cambios. Ganchos `data-detail` inertes en v1. Los +34 px del pager móvil no se tocan (son del pager, no del Detalle).
 
 ## PR 8 — Calendario
 - [ ] 8a `refactor/calendar-logic` (R)
