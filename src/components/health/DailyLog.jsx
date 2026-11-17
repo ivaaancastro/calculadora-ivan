@@ -14,6 +14,7 @@ export const DailyLog = ({ currentSelectedDay, historyReversed, setSelectedDate 
                     return (
                         <button
                             key={day.date}
+                            data-health="log-row"
                             type="button"
                             onClick={() => setSelectedDate(day.date)}
                             className={`w-full p-3.5 sm:p-4 text-left flex items-center justify-between transition-colors ${

@@ -174,7 +174,7 @@ export const HealthPage = ({ activities, settings, chartData }) => {
     }
 
     return (
-        <div data-skin="health" className="animate-in fade-in duration-500 pb-20 w-full max-w-[1400px] mx-auto px-3 sm:px-6 space-y-6">
+        <div data-skin="health" data-health="root" className="animate-in fade-in duration-500 pb-20 w-full max-w-[1400px] mx-auto px-3 sm:px-6 space-y-6">
 
             <HealthHeader wellnessMetrics={wellnessMetrics} readinessInfo={readinessInfo} setActiveTab={setActiveTab} activeTab={activeTab} wellnessLoading={wellnessLoading} apiError={apiError} />
 

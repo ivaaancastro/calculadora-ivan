@@ -428,3 +428,173 @@ html[data-ui="v2"] [data-skin="stats"] [data-stats="card"] section > div:first-c
     margin-bottom: 12px;
   }
 }
+
+/* ── Salud «Panel» (Capa 5, PR 6b): `data-skin="health"` ──────────────────────────────
+ *
+ * Primer vistazo móvil (390 px), sin scroll: título y selector Hoy/Historial, los tres
+ * pilares (recuperación, carga, sueño) como filas compactas con el anillo a 96 px, y el
+ * banco de energía. Plegado/debajo: biomarcadores y aspectos destacados. Todo detrás de
+ * `html[data-ui="v2"]`; v1 no cambia. Objetivos táctiles ≥ 44 px (RF8).
+ */
+
+/* Selectores Hoy/Historial y 7D/14D/30D: carril hundido con anillo, activa como ficha. */
+html[data-ui="v2"] [data-skin="health"] [data-health="view-tabs"],
+html[data-ui="v2"] [data-skin="health"] [data-health="range"] {
+  background-color: rgb(var(--sunken));
+  box-shadow: inset 0 0 0 1px rgb(var(--line));
+  border-radius: var(--skin-radius-xl);
+}
+html[data-ui="v2"] [data-skin="health"] [data-health="view-tabs"] > button,
+html[data-ui="v2"] [data-skin="health"] [data-health="range"] > button {
+  min-height: 44px;
+  min-width: 44px;
+  border-radius: var(--skin-radius-lg);
+}
+
+/* Fichas de día del historial: objetivo táctil y radio de la piel. */
+html[data-ui="v2"] [data-skin="health"] [data-health="day"] {
+  min-height: 64px;
+  border-radius: var(--skin-radius-xl);
+}
+html[data-ui="v2"] [data-skin="health"] [data-health="log-row"] {
+  min-height: 60px;
+}
+
+/* Banco de energía: tarjeta plana sin degradado, con el filete del token. */
+html[data-ui="v2"] [data-skin="health"] [data-health="energy"] {
+  background-image: none;
+  background-color: rgb(var(--surface));
+  border-color: rgb(var(--line));
+  box-shadow: var(--skin-shadow-card);
+}
+
+@media (max-width: 639px) {
+  /* Pilares: fila por tarjeta (anillo a la izquierda, estado y pie a la derecha). */
+  html[data-ui="v2"] [data-skin="health"] [data-health="pillars"] {
+    gap: 8px;
+  }
+  html[data-ui="v2"] [data-skin="health"] [data-health="pillar"] {
+    display: grid;
+    grid-template-columns: 96px 1fr;
+    grid-template-rows: auto auto;
+    column-gap: 14px;
+    align-items: center;
+    padding: 10px 14px;
+    text-align: left;
+  }
+  html[data-ui="v2"] [data-skin="health"] [data-health="pillar"] [data-health="ring"] {
+    grid-column: 1;
+    grid-row: 1 / span 2;
+  }
+  html[data-ui="v2"] [data-skin="health"] [data-health="pillar"] [data-health="ring"] svg {
+    width: 96px;
+    height: 96px;
+  }
+  html[data-ui="v2"] [data-skin="health"] [data-health="ring-icon"] {
+    display: none;
+  }
+  html[data-ui="v2"] [data-skin="health"] [data-health="ring-value"] {
+    font-size: 24px;
+    line-height: 1;
+  }
+  html[data-ui="v2"] [data-skin="health"] [data-health="ring-title"] {
+    font-size: 8px;
+    letter-spacing: 0.04em;
+    max-width: 64px;
+    line-height: 1.1;
+  }
+  html[data-ui="v2"] [data-skin="health"] [data-health="pillar-head"] {
+    grid-column: 2;
+    grid-row: 1;
+    margin-bottom: 4px;
+    align-self: end;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+  }
+  html[data-ui="v2"] [data-skin="health"] [data-health="pillar-foot"] {
+    grid-column: 2;
+    grid-row: 2;
+    margin-top: 0;
+    padding-top: 0;
+    border-top: 0;
+    text-align: left;
+    align-self: start;
+  }
+
+  /* Banco de energía compacto. */
+  html[data-ui="v2"] [data-skin="health"] [data-health="energy"] {
+    padding: 12px 14px;
+    gap: 10px;
+  }
+}
+
+/* ── Salud: movimiento y energía (estilo «medidor») ───────────────────────────────────
+ *
+ * Los anillos se dibujan al entrar, las tarjetas aparecen escalonadas, la barra de energía
+ * se llena y los pilares brillan con su propio color (solo en oscuro). Solo transform,
+ * opacity y trazo: nada que mueva la maquetación. Se apaga con `prefers-reduced-motion`.
+ */
+@keyframes health-ring-draw {
+  from { stroke-dashoffset: 459px; }
+}
+@keyframes health-rise {
+  from { opacity: 0; transform: translateY(14px); }
+  to { opacity: 1; transform: none; }
+}
+@keyframes health-fill {
+  from { transform: scaleX(0); }
+  to { transform: scaleX(1); }
+}
+@keyframes health-glow {
+  from { filter: drop-shadow(0 0 0 transparent); }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  html[data-ui="v2"] [data-skin="health"] [data-health="ring"] circle[stroke-dasharray] {
+    animation: health-ring-draw 1.3s cubic-bezier(0.22, 1, 0.36, 1) 0.15s both;
+  }
+  html[data-ui="v2"] [data-skin="health"] [data-health="pillar"],
+  html[data-ui="v2"] [data-skin="health"] [data-health="energy"],
+  html[data-ui="v2"] [data-skin="health"] [data-health="biomarker"],
+  html[data-ui="v2"] [data-skin="health"] [data-health="insight"],
+  html[data-ui="v2"] [data-skin="health"] [data-health="spotlight"],
+  html[data-ui="v2"] [data-skin="health"] [data-health="trend"],
+  html[data-ui="v2"] [data-skin="health"] [data-health="day"] {
+    animation: health-rise 0.55s cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+  html[data-ui="v2"] [data-skin="health"] [data-health="pillar"]:nth-child(2) { animation-delay: 0.08s; }
+  html[data-ui="v2"] [data-skin="health"] [data-health="pillar"]:nth-child(3) { animation-delay: 0.16s; }
+  html[data-ui="v2"] [data-skin="health"] [data-health="energy"] { animation-delay: 0.24s; }
+  html[data-ui="v2"] [data-skin="health"] [data-health="biomarker"]:nth-child(odd) { animation-delay: 0.3s; }
+  html[data-ui="v2"] [data-skin="health"] [data-health="biomarker"]:nth-child(even) { animation-delay: 0.36s; }
+  html[data-ui="v2"] [data-skin="health"] [data-health="insight"] { animation-delay: 0.4s; }
+
+  /* Barra de energía: se llena desde la izquierda. */
+  html[data-ui="v2"] [data-skin="health"] [data-health="energy"] .rounded-lg.h-full {
+    transform-origin: left center;
+    animation: health-fill 1.1s cubic-bezier(0.22, 1, 0.36, 1) 0.45s both;
+  }
+
+  /* Biomarcadores: se elevan al tocar o pasar. */
+  html[data-ui="v2"] [data-skin="health"] [data-health="biomarker"] {
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+  html[data-ui="v2"] [data-skin="health"] [data-health="biomarker"]:hover {
+    transform: translateY(-2px);
+  }
+}
+
+/* Cifras de los anillos: más grandes y en peso máximo, como un marcador. */
+html[data-ui="v2"] [data-skin="health"] [data-health="ring-value"] {
+  font-weight: 900;
+  letter-spacing: -0.04em;
+}
+
+/* Resplandor del anillo con su propio color (el trazo hereda `currentColor`). */
+html[data-ui="v2"].dark [data-skin="health"] [data-health="ring"] circle[stroke-dasharray] {
+  filter: drop-shadow(0 0 6px currentColor);
+}
+html[data-ui="v2"].dark [data-skin="health"] [data-health="pillar"] {
+  background-image: linear-gradient(180deg, rgb(var(--surface)), rgb(var(--sunken)));
+}

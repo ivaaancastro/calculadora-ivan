@@ -34,7 +34,9 @@ Verificación común: lint, `lint:colors` (no sube), `lint:ui` (14), unit, integ
 
 ## PR 6 — Salud
 - [ ] 6a `refactor/health-sections` (R)
-- [ ] 6b `feat/screens-health-v2` (V ⏸)
+- [x] 6b `feat/screens-health-v2` (V ⏸): implementado; falta aprobación D7 de las 6 capturas `salud` v2
+  - **Primer vistazo móvil (390 px), sin scroll:** título + selector Hoy/Historial (44 px), los tres pilares (recuperación, carga diaria, sueño) como filas compactas con el anillo a 96 px, y el banco de energía. **Plegado/debajo:** biomarcadores y aspectos destacados. Historial: selector 7D/14D/30D y fichas de día a 44 px.
+  - Ubicación: sin cambios; el anillo gana `viewBox` (inerte en v1, necesario para escalarlo en v2).
 
 ## PR 7 — Detalle
 - [ ] 7a `refactor/activity-detail-sections` (R)

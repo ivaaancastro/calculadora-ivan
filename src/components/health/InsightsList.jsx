@@ -14,7 +14,7 @@ export const InsightsList = ({ wellnessMetrics }) => (
                         const isDanger = insight.type === 'danger';
                         const isWarning = insight.type === 'warning';
                         return (
-                            <Card key={idx} className="p-3.5 sm:p-4 flex items-start gap-3.5">
+                            <Card key={idx} data-health="insight" className="p-3.5 sm:p-4 flex items-start gap-3.5">
                                 <div className={`p-2 rounded-xl shrink-0 mt-0.5 ${
                                     isDanger ? 'bg-rose-50 text-rose-600 dark:bg-rose-950/50 dark:text-rose-400' :
                                     isWarning ? 'bg-amber-50 text-amber-600 dark:bg-amber-950/50 dark:text-amber-400' :

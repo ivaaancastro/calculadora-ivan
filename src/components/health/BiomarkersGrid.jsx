@@ -10,7 +10,7 @@ export const BiomarkersGrid = ({ wellnessMetrics }) => (
             <SectionHeader as="p">Biomarcadores Clave</SectionHeader>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-2.5 sm:gap-3">
                 {/* FC Reposo */}
-                <Card pressable className="p-3.5 sm:p-4 flex flex-col justify-between">
+                <Card pressable data-health="biomarker" className="p-3.5 sm:p-4 flex flex-col justify-between">
                     <div className="flex items-center justify-between mb-2">
                         <span className="text-[10px] font-bold uppercase tracking-wider text-ink-4">FC Reposo</span>
                         <div className="w-6 h-6 rounded-lg bg-hr/10 text-hr flex items-center justify-center shrink-0">
@@ -31,7 +31,7 @@ export const BiomarkersGrid = ({ wellnessMetrics }) => (
                 </Card>
 
                 {/* VFC / HRV */}
-                <Card pressable className="p-3.5 sm:p-4 flex flex-col justify-between">
+                <Card pressable data-health="biomarker" className="p-3.5 sm:p-4 flex flex-col justify-between">
                     <div className="flex items-center justify-between mb-2">
                         <span className="text-[10px] font-bold uppercase tracking-wider text-ink-4">VFC Anoche</span>
                         <div className="w-6 h-6 rounded-lg bg-hrv/10 text-hrv flex items-center justify-center shrink-0">
@@ -54,7 +54,7 @@ export const BiomarkersGrid = ({ wellnessMetrics }) => (
                 </Card>
 
                 {/* Sueño Horas */}
-                <Card pressable className="p-3.5 sm:p-4 flex flex-col justify-between">
+                <Card pressable data-health="biomarker" className="p-3.5 sm:p-4 flex flex-col justify-between">
                     <div className="flex items-center justify-between mb-2">
                         <span className="text-[10px] font-bold uppercase tracking-wider text-ink-4">Sueño</span>
                         <div className="w-6 h-6 rounded-lg bg-sleep/10 text-sleep flex items-center justify-center shrink-0">
@@ -75,7 +75,7 @@ export const BiomarkersGrid = ({ wellnessMetrics }) => (
                 </Card>
 
                 {/* Forma TSB */}
-                <Card pressable className="p-3.5 sm:p-4 flex flex-col justify-between">
+                <Card pressable data-health="biomarker" className="p-3.5 sm:p-4 flex flex-col justify-between">
                     <div className="flex items-center justify-between mb-2">
                         <span className="text-[10px] font-bold uppercase tracking-wider text-ink-4">Forma TSB</span>
                         <div className="w-6 h-6 rounded-lg bg-indigo-500/10 text-indigo-500 flex items-center justify-center shrink-0">
@@ -100,7 +100,7 @@ export const BiomarkersGrid = ({ wellnessMetrics }) => (
                 </Card>
 
                 {/* Pasos */}
-                <Card pressable className="p-3.5 sm:p-4 flex flex-col justify-between">
+                <Card pressable data-health="biomarker" className="p-3.5 sm:p-4 flex flex-col justify-between">
                     <div className="flex items-center justify-between mb-2">
                         <span className="text-[10px] font-bold uppercase tracking-wider text-ink-4">Pasos</span>
                         <div className="w-6 h-6 rounded-lg bg-steps/10 text-steps flex items-center justify-center shrink-0">
@@ -127,7 +127,7 @@ export const BiomarkersGrid = ({ wellnessMetrics }) => (
                 </Card>
 
                 {/* SpO2 */}
-                <Card pressable className="p-3.5 sm:p-4 flex flex-col justify-between">
+                <Card pressable data-health="biomarker" className="p-3.5 sm:p-4 flex flex-col justify-between">
                     <div className="flex items-center justify-between mb-2">
                         <span className="text-[10px] font-bold uppercase tracking-wider text-ink-4">SpO₂ Oxígeno</span>
                         <div className="w-6 h-6 rounded-lg bg-sky-500/10 text-sky-500 flex items-center justify-center shrink-0">
@@ -151,7 +151,7 @@ export const BiomarkersGrid = ({ wellnessMetrics }) => (
                 </Card>
 
                 {/* VO2 Max */}
-                <Card pressable className="p-3.5 sm:p-4 flex flex-col justify-between">
+                <Card pressable data-health="biomarker" className="p-3.5 sm:p-4 flex flex-col justify-between">
                     <div className="flex items-center justify-between mb-2">
                         <span className="text-[10px] font-bold uppercase tracking-wider text-ink-4">VO₂ Max</span>
                         <div className="w-6 h-6 rounded-lg bg-vo2/10 text-vo2 flex items-center justify-center shrink-0">
@@ -172,7 +172,7 @@ export const BiomarkersGrid = ({ wellnessMetrics }) => (
                 </Card>
 
                 {/* Peso */}
-                <Card pressable className="p-3.5 sm:p-4 flex flex-col justify-between">
+                <Card pressable data-health="biomarker" className="p-3.5 sm:p-4 flex flex-col justify-between">
                     <div className="flex items-center justify-between mb-2">
                         <span className="text-[10px] font-bold uppercase tracking-wider text-ink-4">Peso</span>
                         <div className="w-6 h-6 rounded-lg bg-amber-500/10 text-amber-500 flex items-center justify-center shrink-0">
