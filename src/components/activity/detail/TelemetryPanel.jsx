@@ -8,7 +8,7 @@ export const TelemetryPanel = ({ chartData, peaks, activePayload, setActivePaylo
                                         <div className="space-y-2.5">
                                             {/* Accesos rápidos a los Picos del entrenamiento */}
                                             {peaks && (
-                                                <div className="flex items-center gap-1.5 overflow-x-auto hide-scrollbar py-0.5">
+                                                <div data-detail="peaks" className="flex items-center gap-1.5 overflow-x-auto hide-scrollbar py-0.5">
                                                     <span className="text-[9px] font-bold text-ink-4 uppercase tracking-widest shrink-0 mr-1">
                                                         Picos:
                                                     </span>
