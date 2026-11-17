@@ -66,7 +66,7 @@ export const WorkoutViewerModal = ({ workout, onClose, onDelete, onEdit }) => {
             
             {/* ── HEADER ── */}
             <div className="relative px-6 pt-6 pb-5 shrink-0">
-                <button onClick={onClose} className="absolute top-4 right-4 w-7 h-7 flex items-center justify-center rounded-full bg-surface-2 text-slate-400 hover:text-slate-700 dark:hover:text-zinc-200 transition-colors z-10">
+                <button onClick={onClose} data-cal="modal-close" className="absolute top-4 right-4 w-7 h-7 flex items-center justify-center rounded-full bg-surface-2 text-slate-400 hover:text-slate-700 dark:hover:text-zinc-200 transition-colors z-10">
                     <X size={14} />
                 </button>
 
@@ -267,14 +267,14 @@ export const WorkoutViewerModal = ({ workout, onClose, onDelete, onEdit }) => {
 
             {/* ── FOOTER ── */}
             <div className="px-6 py-3.5 border-t border-line-soft flex justify-between items-center shrink-0">
-                <button onClick={(e) => { onDelete(e); onClose(); }} className="text-[11px] font-medium text-danger-light-2 hover:text-danger-ink transition-colors">
+                <button onClick={(e) => { onDelete(e); onClose(); }} data-cal="modal-delete" className="text-[11px] font-medium text-danger-light-2 hover:text-danger-ink transition-colors">
                     Eliminar
                 </button>
                 <div className="flex gap-2">
-                    <button onClick={onClose} className="px-4 py-2 rounded-full text-[11px] font-medium text-ink-3 hover:bg-surface-2 transition-colors">
+                    <button onClick={onClose} data-cal="modal-secondary" className="px-4 py-2 rounded-full text-[11px] font-medium text-ink-3 hover:bg-surface-2 transition-colors">
                         Cerrar
                     </button>
-                    <button onClick={() => { onClose(); onEdit(); }} className="px-5 py-2 rounded-full text-[11px] font-semibold bg-inverse text-ink-inverse hover:bg-inverse-2 transition-colors shadow-sm">
+                    <button onClick={() => { onClose(); onEdit(); }} data-cal="modal-submit" className="px-5 py-2 rounded-full text-[11px] font-semibold bg-inverse text-ink-inverse hover:bg-inverse-2 transition-colors shadow-sm">
                         Editar
                     </button>
                 </div>

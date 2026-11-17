@@ -42,23 +42,23 @@ export const CalendarPage = ({ activities, plannedWorkouts = [], addPlannedWorko
 
     return (
         <ChartSkinProvider skin={isV2 ? 'v2' : 'v1'}>
-            <div data-skin="calendar" className="flex flex-col bg-surface-6 rounded-3xl border border-line-soft overflow-hidden mb-6 shadow-sm">
+            <div data-skin="calendar" data-cal="root" className="flex flex-col bg-surface-6 rounded-3xl border border-line-soft overflow-hidden mb-6 shadow-sm">
 
                 {/* HEADER */}
-                <div className="flex items-center justify-between px-3 sm:px-5 py-3 sm:py-4 bg-transparent border-b border-line-soft-5">
+                <div data-cal="header" className="flex items-center justify-between px-3 sm:px-5 py-3 sm:py-4 bg-transparent border-b border-line-soft-5">
                     <div className="flex items-center gap-2 sm:gap-3">
                         <h2 className="text-base sm:text-2xl font-semibold text-ink-2 capitalize tracking-tight flex items-center">
                             {new Date(year, month).toLocaleDateString('es-ES', { month: 'long', year: 'numeric' })}
                         </h2>
-                        <button onClick={goToday} className="text-[11px] font-medium text-ink-3 hover:text-danger-ink-2 active:scale-95 transition-all ml-1 sm:ml-2 bg-sunken-6 px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full">Hoy</button>
+                        <button onClick={goToday} data-cal="today-btn" className="text-[11px] font-medium text-ink-3 hover:text-danger-ink-2 active:scale-95 transition-all ml-1 sm:ml-2 bg-sunken-6 px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full">Hoy</button>
                     </div>
                     <div className="flex items-center gap-1.5 sm:gap-2">
                         {/* PMC CHART TOGGLE */}
-                        <button onClick={() => setShowPmcChart(p => !p)} className={`hidden sm:flex items-center gap-1.5 px-3 py-1.5 border rounded-lg text-[9px] font-black uppercase tracking-widest transition-colors shadow-sm ${showPmcChart ? 'bg-violet-50 dark:bg-violet-900/20 text-violet-600 dark:text-violet-400 border-violet-200 dark:border-violet-800/50' : 'bg-surface text-ink-3 border-slate-200 dark:border-zinc-700 hover:border-slate-400'}`}>
+                        <button onClick={() => setShowPmcChart(p => !p)} data-cal="pmc-toggle" className={`hidden sm:flex items-center gap-1.5 px-3 py-1.5 border rounded-lg text-[9px] font-black uppercase tracking-widest transition-colors shadow-sm ${showPmcChart ? 'bg-violet-50 dark:bg-violet-900/20 text-violet-600 dark:text-violet-400 border-violet-200 dark:border-violet-800/50' : 'bg-surface text-ink-3 border-slate-200 dark:border-zinc-700 hover:border-slate-400'}`}>
                             <Activity size={12} /> Forma
                         </button>
 
-                        <div className="flex items-center border border-line-2 rounded-lg overflow-hidden ml-1 sm:ml-2">
+                        <div data-cal="month-nav" className="flex items-center border border-line-2 rounded-lg overflow-hidden ml-1 sm:ml-2">
                             <IconButton variant="ghost" onClick={prevMonth} className="w-10 h-10" title="Mes anterior" label="Mes anterior" icon={ChevronLeft} iconSize={18} />
                             <div className="w-px h-5 bg-fill-7"></div>
                             <IconButton variant="ghost" onClick={nextMonth} className="w-10 h-10" title="Mes siguiente" label="Mes siguiente" icon={ChevronRight} iconSize={18} />

@@ -47,7 +47,9 @@ Verificación común: lint, `lint:colors` (no sube), `lint:ui` (14), unit, integ
 ## PR 8 — Calendario
 - [ ] 8a `refactor/calendar-logic` (R)
 - [ ] 8b `refactor/calendar-views` (R)
-- [ ] 8c `feat/screens-calendar-v2` (V ⏸)
+- [x] 8c `feat/screens-calendar-v2` (V ⏸): implementado; falta aprobación D7 de las 6 capturas `calendario` v2
+  - **Primer vistazo móvil (390 px), sin scroll:** mes con «Hoy» y flechas a 44 px y los primeros días con sus sesiones; días vacíos compactos (58 px; la página baja de 3.473 a 3.067 px), hoy en cobalto, «+» a 44 px. Sesiones planificadas discontinuas sobre fondo hundido; modales de plan y rutina con borde del token y controles a 44 px. Escritorio/tablet: misma rejilla, solo piel.
+  - Ubicación: sin cambios; ganchos `data-cal` inertes en v1.
 
 ## PR 9 — `docs/screens-cierre`
 - [ ] Paridad completa, prueba iPhone completa, `MEMORY.md`, `CHANGELOG.md`, roadmap, spec marcada

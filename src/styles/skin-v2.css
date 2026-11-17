@@ -599,6 +599,121 @@ html[data-ui="v2"].dark [data-skin="health"] [data-health="pillar"] {
   background-image: linear-gradient(180deg, rgb(var(--surface)), rgb(var(--sunken)));
 }
 
+/* ── Calendario «Panel» (Capa 5, PR 8c): `data-skin="calendar"` ───────────────────────
+ *
+ * Primer vistazo móvil (390 px), sin scroll: mes con «Hoy» y flechas a 44 px y los primeros
+ * días con sus sesiones; los días vacíos se compactan (antes ocupaban ~72 px cada uno).
+ * Escritorio: misma rejilla, solo piel. Datos de plan y rutinas (sesiones planificadas,
+ * `WorkoutViewerModal`, `PlannerModal`) con la misma piel. Los `data-cal` son ganchos inertes
+ * en v1. Todo detrás de `html[data-ui="v2"]`. Objetivos táctiles ≥ 44 px (RF8).
+ */
+
+/* Tarjeta del mes: borde de 1 px del token, sin sombra translúcida. */
+html[data-ui="v2"] [data-skin="calendar"][data-cal="root"] {
+  background-color: rgb(var(--surface));
+  border-color: rgb(var(--line));
+  box-shadow: var(--skin-shadow-card);
+  border-radius: var(--skin-radius-xl);
+}
+html[data-ui="v2"] [data-skin="calendar"] [data-cal="header"] {
+  border-bottom-color: rgb(var(--line));
+}
+
+/* «Hoy», conmutador de Forma y flechas: objetivo táctil de 44 px. */
+html[data-ui="v2"] [data-skin="calendar"] [data-cal="today-btn"] {
+  min-height: 44px;
+  min-width: 44px;
+  background-color: rgb(var(--sunken));
+  box-shadow: inset 0 0 0 1px rgb(var(--line));
+}
+html[data-ui="v2"] [data-skin="calendar"] [data-cal="pmc-toggle"] {
+  min-height: 44px;
+  border-radius: var(--skin-radius-lg);
+  box-shadow: none;
+}
+html[data-ui="v2"] [data-skin="calendar"] [data-cal="month-nav"] {
+  border-color: rgb(var(--line));
+  border-radius: var(--skin-radius-lg);
+}
+html[data-ui="v2"] [data-skin="calendar"] [data-cal="month-nav"] button {
+  width: 44px;
+  height: 44px;
+}
+
+/* Rejilla: filetes del token de línea. */
+html[data-ui="v2"] [data-skin="calendar"] [data-cal="week"],
+html[data-ui="v2"] [data-skin="calendar"] [data-cal="day"] {
+  border-color: rgb(var(--line));
+}
+
+/* Hoy: número en cobalto de la piel en lugar de rojo, y fondo hundido. */
+html[data-ui="v2"] [data-skin="calendar"] [data-cal="day"][data-today="true"] {
+  background-color: rgb(var(--sunken));
+}
+html[data-ui="v2"] [data-skin="calendar"] [data-cal="day"][data-today="true"] > div:first-child span:first-child {
+  background-color: rgb(var(--action));
+  box-shadow: none;
+}
+
+/* «+» de planificar: 44 px. */
+html[data-ui="v2"] [data-skin="calendar"] [data-cal="add"] {
+  width: 44px;
+  height: 44px;
+  margin: -8px -8px 0 0;
+}
+
+/* Sesiones: ficha plana con el radio de la piel; planificadas con borde discontinuo. */
+html[data-ui="v2"] [data-skin="calendar"] [data-cal="act"] {
+  background-color: rgb(var(--surface));
+  border-color: rgb(var(--line));
+  border-radius: var(--skin-radius-lg);
+  box-shadow: none;
+}
+html[data-ui="v2"] [data-skin="calendar"] [data-cal="act"][data-planned="true"] {
+  background-color: rgb(var(--sunken));
+  border-style: dashed;
+  --tw-ring-shadow: 0 0 transparent;
+}
+html[data-ui="v2"] [data-skin="calendar"] [data-cal="act"]:hover {
+  transform: none;
+  box-shadow: var(--skin-shadow-card);
+}
+
+@media (max-width: 1023px) {
+  /* Días vacíos compactos: solo cabecera del día (el «+» sigue a 44 px). */
+  html[data-ui="v2"] [data-skin="calendar"] [data-cal="day"] {
+    min-height: 58px;
+    padding: 6px 12px;
+  }
+  html[data-ui="v2"] [data-skin="calendar"] [data-cal="day"] > div:first-child {
+    margin-bottom: 4px;
+  }
+  html[data-ui="v2"] [data-skin="calendar"] [data-cal="act"] {
+    min-height: 60px;
+    padding: 10px 12px;
+  }
+}
+
+/* Modales de plan y rutina: panel con borde del token; cerrar y acciones a 44 px. */
+html[data-ui="v2"] [role="dialog"][aria-labelledby="plan-modal-title"],
+html[data-ui="v2"] [role="dialog"][aria-labelledby="plan-viewer-title"] {
+  border-color: rgb(var(--line));
+  box-shadow: var(--skin-shadow-card);
+}
+html[data-ui="v2"] [data-cal="modal-close"] {
+  width: 44px;
+  height: 44px;
+  border-radius: var(--skin-radius-lg);
+}
+html[data-ui="v2"] [data-cal="modal-secondary"],
+html[data-ui="v2"] [data-cal="modal-delete"] {
+  min-height: 44px;
+}
+html[data-ui="v2"] [data-cal="modal-submit"] {
+  min-height: 44px;
+  border-radius: var(--skin-radius-xl);
+}
+
 /* ── Detalle «Panel» (Capa 5, PR 7b): `data-skin="detail"` ─────────────────────────────
  *
  * Los `data-detail` son ganchos inertes en v1. Primer vistazo móvil (390 px): cabecera con
