@@ -2,8 +2,11 @@ import React from 'react';
 import {
     BatteryCharging
 } from 'lucide-react';
+import { useCountUp } from './useCountUp';
 
-export const EnergyBank = ({ energyBankAmount }) => (
+export const EnergyBank = ({ energyBankAmount }) => {
+    const counted = useCountUp(typeof energyBankAmount === 'number' ? energyBankAmount : null);
+    return (
     <>
         <div data-health="energy" className="bg-surface-card rounded-2xl sm:rounded-3xl border border-hairline-3 shadow-card dark:shadow-none transition-all p-4 sm:p-6 flex flex-col sm:flex-row items-center gap-6 bg-gradient-to-br from-white via-slate-50/50 to-slate-100/50 dark:from-zinc-900 dark:via-zinc-900/80 dark:to-zinc-950">
             <div className="flex-1 space-y-2.5 w-full">
@@ -41,10 +44,11 @@ export const EnergyBank = ({ energyBankAmount }) => (
                     energyBankAmount > 60 ? 'text-emerald-500' :
                     energyBankAmount > 30 ? 'text-amber-500' : 'text-rose-500'
                 }`}>
-                    {energyBankAmount !== '--' ? energyBankAmount : '--'}<span className="text-xl font-sans font-bold text-slate-400 ml-1">%</span>
+                    {energyBankAmount !== '--' ? Math.round(counted) : '--'}<span className="text-xl font-sans font-bold text-slate-400 ml-1">%</span>
                 </span>
                 <span className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">Disponible</span>
             </div>
         </div>
     </>
-);
+    );
+};
