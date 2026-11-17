@@ -77,6 +77,7 @@ export const EvolutionChart = ({ data, timeRange, setTimeRange }) => {
           ].map((t) => (
             <button
               key={t.id}
+              data-dash="range-btn"
               onClick={() => setTimeRange(t.id)}
               className={`flex-1 px-3 py-1 min-h-[30px] text-xs font-semibold transition-all rounded-full select-none touch-manipulation active:scale-95 ${
                 timeRange === t.id

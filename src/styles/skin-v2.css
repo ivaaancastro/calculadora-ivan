@@ -781,3 +781,47 @@ html[data-ui="v2"] [data-skin="detail"] [data-detail="sidebar"] {
     gap: 12px 8px;
   }
 }
+
+/* ── Objetivos táctiles ≥ 44 px en móvil (fix/touch-targets-v2; RF4/RF8) ───────────────────
+ *
+ * Solo v2 y solo < 640 px: v1 y escritorio no cambian. Se amplía el tamaño real (no un
+ * pseudo-elemento) para que `smallTouchTargets` y el dedo midan lo mismo. La cabecera sigue en
+ * `--nav-h` (60 px): sus controles de 44 px caben con margen.
+ */
+@media (max-width: 639px) {
+  /* Cabecera: menú de perfil, botón de tema y «Conectar». */
+  html[data-ui="v2"] [data-skin="shell"] .glass-nav button[aria-label="Menú de configuración y perfil"] {
+    min-height: 44px;
+  }
+  html[data-ui="v2"] [data-skin="shell"] [data-shell="icon-btn"] {
+    width: 44px;
+    height: 44px;
+  }
+  /* «Conectar» viene reducido a 0,9 con `scale-90`: se anula para que el botón mida 44 de verdad. */
+  html[data-ui="v2"] [data-skin="shell"] .glass-nav .scale-90 {
+    transform: none;
+  }
+  html[data-ui="v2"] [data-skin="shell"] .glass-nav .scale-90 > button {
+    min-height: 44px;
+  }
+
+  /* Selectores de rango: Dashboard (7D/30D/3M/Todo) y tarjetas de Rendimiento (7D/30D/90D…). */
+  html[data-ui="v2"] [data-dash="range-btn"],
+  html[data-ui="v2"] [data-skin="stats"] button[aria-pressed] {
+    min-height: 44px;
+  }
+
+  /* Actividades: buscador, filtros y alta manual. */
+  html[data-ui="v2"] [data-skin="history"] [data-history="filters"] input,
+  html[data-ui="v2"] [data-skin="history"] [data-history="filters"] select,
+  html[data-ui="v2"] [data-history="add"] {
+    min-height: 44px;
+  }
+
+  /* Perfil: «Volver» (era un icono de 18 px). */
+  html[data-ui="v2"] [data-skin="profile"] [data-profile="header"] button[aria-label="Volver"] {
+    min-width: 44px;
+    min-height: 44px;
+    justify-content: center;
+  }
+}

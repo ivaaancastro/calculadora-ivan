@@ -7,6 +7,10 @@ y este proyecto adhiere a [Semantic Versioning](https://semver.org/lang/es/).
 
 ## [Unreleased]
 
+### Fix — objetivos táctiles ≥ 44 px en v2 (`fix/touch-targets-v2`)
+- `fix(v2):` en móvil (< 640 px) y solo con `data-ui="v2"`, el menú de perfil, el botón de tema, «Conectar», los selectores de rango (Dashboard y Rendimiento), el buscador y los selects de Actividades, «+ Añadir manual» y «Volver» (Perfil) miden ≥ 44 px. Cabecera intacta en 60 px; v1 sin cambios (`style-diff` 0).
+- `test(e2e):` `touch.spec.js` admite `TOUCH_UI=v2` y lista tamaños y desborde. 14 capturas v2 móviles regeneradas a propósito.
+
 ### Rediseño — Capa 5 (`docs/screens-cierre`), PR 9 de 9: cierre documental
 - `docs(screens-v2):` paridad v1/v2 de todas las pantallas comprobada contra el código y los tests (`paridad.md`), `tasks.md` completo, spec marcada como implementada, roadmap (Capa 6, Capa 7 y fase futura) y `MEMORY.md` al día. D8 cerrada: el interruptor «Vista previa v2» sigue en Ajustes → General hasta la Capa 6.
 - `docs(screens-v2):` guion de la pasada completa en iPhone real (`guion-iphone.md`); la ejecuta el usuario y queda pendiente. v2 sigue opt-in (D12).
