@@ -2,6 +2,7 @@ import React, { useMemo, useEffect, useState } from 'react';
 import { MapContainer, TileLayer, Polyline, useMap, CircleMarker } from 'react-leaflet';
 import { MapPin } from 'lucide-react';
 import 'leaflet/dist/leaflet.css';
+import { MAP_TILES } from './mapTiles';
 import { useChartTheme } from '../charts/useChartTheme';
 
 const decodePolyline = (str, precision = 5) => {
@@ -83,8 +84,8 @@ export const InteractiveMap = ({ polyline, highResCoords, color, currentPosition
     );
 
     const mapSources = {
-        light: { url: "https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png", attribution: '&copy; CartoDB' },
-        dark: { url: "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png", attribution: '&copy; CartoDB' },
+        light: { url: MAP_TILES.light, attribution: '&copy; Esri', maxNativeZoom: 16 },
+        dark: { url: MAP_TILES.dark, attribution: '&copy; Esri', maxNativeZoom: 16 },
         satellite: { url: "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}", attribution: '&copy; Esri' }
     };
 
@@ -102,7 +103,7 @@ export const InteractiveMap = ({ polyline, highResCoords, color, currentPosition
             </div>
 
             <MapContainer center={coords[0]} zoom={13} scrollWheelZoom={true} className="w-full h-full z-0" zoomControl={false}>
-                <TileLayer key={mapType} url={mapSources[mapType].url} attribution={mapSources[mapType].attribution} />
+                <TileLayer key={mapType} url={mapSources[mapType].url} attribution={mapSources[mapType].attribution} maxNativeZoom={mapSources[mapType].maxNativeZoom} />
                 <Polyline positions={coords} pathOptions={{ color: mapType === 'light' ? ct.map.haloLight : ct.map.haloDark, weight: 6, opacity: 0.3 }} />
                 <Polyline positions={coords} pathOptions={{ color: color || ct.map.route, weight: 3, opacity: 1 }} />
                 <CircleMarker center={coords[0]} radius={5} pathOptions={{ color: ct.map.ring, fillColor: ct.map.start, fillOpacity: 1, weight: 2 }} />
