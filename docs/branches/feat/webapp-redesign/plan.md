@@ -95,13 +95,18 @@ En cada pantalla se define qué se ve en el primer vistazo en el móvil. En Dash
 
 **Hecho cuando:** cada pantalla funciona en v2, se ha probado en un iPhone real y su lista de paridad está completa.
 
+**Hecho (2026-11-17), implementada:** 14 PR de código (#84–#97: shell, Ajustes, Actividades, Dashboard, Rendimiento, Salud, Detalle y Calendario, con sus refactors previos) y cierre documental (`docs/screens-cierre`). Lista de paridad completa en `docs/branches/test/ui-safety-net/paridad.md`; D8 cerrada (el interruptor «Vista previa v2» sigue en Ajustes → General hasta la Capa 6). **Pendiente:** la pasada completa en iPhone real, con el guion `docs/branches/feat/screens-v2/guion-iphone.md` (la ejecuta el usuario). Detalle en `docs/branches/feat/screens-v2/tasks.md`.
+
 ## Capa 6 — Activación y limpieza
+**Estado:** siguiente. Requiere la pasada en iPhone real sin fallos bloqueantes.
+- **Decidir el destino del interruptor «Vista previa v2»** (propuesta de D8: al activar v2 por defecto pasa a «Volver a la vista clásica» durante el periodo acordado y se retira con v1).
 - Activar v2 primero para ti y después para todos, con v1 disponible durante un periodo acordado.
 - Tener en cuenta que la PWA usa `autoUpdate`: una marcha atrás llega cuando el cliente vuelve a cargar.
 - Retirar el flag, los valores v1, las utilidades antiguas y las fuentes sin usar.
 - Actualizar `MEMORY.md`, `CHANGELOG.md` y `README.md`.
 
 ## Capa 7 — App iOS
+**Estado:** posterior a la Capa 6. Parte de v2 como única piel.
 **Rama:** `feat/ios-app`. Tendrá su propia spec, y puede empezar con una prueba técnica breve al terminar la Capa 3.
 - **Base:** añadir Capacitor y el proyecto iOS, con URLs configurables en lugar de `window.location.origin`.
 - **Enlaces:** resolver con Universal Links los correos de confirmación, la recuperación de contraseña y el retorno de Strava.
@@ -116,6 +121,11 @@ En cada pantalla se define qué se ve en el primer vistazo en el móvil. En Dash
 - **Necesario por tu parte:** cuenta de Apple Developer, además del Mac con Xcode que ya tienes.
 
 **Hecho cuando:** la app se instala por TestFlight, los flujos de acceso y Strava funcionan en un iPhone real y pasa la revisión de Apple.
+
+## Fase futura (sin capa asignada)
+- **Strava y Garmin:** replantear la conexión con Strava por los límites de su API y estudiar añadir Garmin (API nueva). Hasta entonces «Strava y CSV» se mantiene en la landing (decisión 2026-11-16). Forma tendrá funciones de pago: no prometer gratuidad.
+- **Deuda de la Capa 4 (landing):** `robots.txt` y `og:image` ausentes (SEO 91 en Lighthouse) y CSS bloqueante en la carga inicial. Detalle en `docs/branches/feat/landing-v2/tasks.md`.
+- **Cobertura:** E2E en `data-ui="v2"` para las acciones que hoy solo se prueban a mano (ver «Huecos reconocidos» en `paridad.md`).
 
 ## Riesgos
 | Riesgo | Mitigación |

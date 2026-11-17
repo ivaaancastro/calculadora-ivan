@@ -4,6 +4,45 @@ Referencia para las capas 1–6 del rediseño: **ninguna acción de esta lista p
 
 Inventario hecho el 2026-11-06 sobre `test/ui-safety-net` leyendo el código y la app con datos simulados. Marca: **E2E** = ya cubierta por una prueba de `e2e/`; **—** = sin prueba hoy (solo vigilada por las capturas).
 
+## Paridad v1 / v2 — cierre de la Capa 5 (2026-11-17)
+
+Comprobada sobre `develop` en `196ec21` (los 14 PR de código de la Capa 5 mergeados) leyendo el código y los tests; no se ha ejecutado nada nuevo salvo unit (240 ✓), integración (24 ✓), `lint`, `lint:colors` (743/3/100/8/165, sin subir), `lint:ui` (14) y `build`. **Resultado: ninguna acción de las tablas de abajo desaparece en v2; los únicos cambios de ubicación son los dos de la tabla «Cambios de ubicación».**
+
+Cómo leer la evidencia (columna «Cobertura v2»):
+- **Capturas v2:** `e2e/visual-v2.spec.js` (8 pantallas × claro/oscuro × 390/768/1440 = 48), regeneradas solo en Docker y aprobadas por el usuario (D7) en cada PR visual. Vigilan el aspecto, no que la acción funcione.
+- **Integración / unit:** pruebas de Vitest que se ejecutan sobre el componente (la piel es solo CSS, así que la lógica de v1 y v2 es la misma).
+- **E2E:** Playwright; solo `ui-mode.spec.js`, `visual-v2.spec.js` y `public.spec.js`/`access-visual-v2.spec.js` abren la app en `data-ui="v2"` (`setupApp(..., { ui: 'v2' })`). El resto de E2E ejecuta v1, pero la lógica es idéntica porque v2 solo añade CSS y ganchos `data-*` inertes en v1.
+- **Manual (iPhone):** sin prueba automática en ninguna de las dos pieles → se comprueba en el guion de `docs/branches/feat/screens-v2/guion-iphone.md`.
+
+### Cambios de ubicación en v2 (únicos)
+
+| Pantalla | Cambio | Solo en |
+|---|---|---|
+| Dashboard | «Tendencia y Capacidad» (rampa, monotonía, volumen 30D, VO2 máx.) queda plegada tras un botón de 44 px (`aria-expanded`); la gráfica de evolución sube sobre ella | v2 y < 768 px |
+| Ajustes | El cambio de sección gana un selector en la página (`aria-label="Secciones de Ajustes"`); el menú de la cabecera sigue igual | v2 y móvil |
+
+Además, en Rendimiento (móvil v2) cambia el **orden** de las tarjetas de Fisiología (estado, VFC, umbrales, balance) sin quitar ninguna.
+
+### Matriz por pantalla
+
+| Pantalla | Acciones (de las tablas de más abajo) | v1 | v2 | Cobertura v2 |
+|---|---|---|---|---|
+| **Navbar** | Menú de perfil, cerrar sesión, tema, navegar (escritorio), Strava, borrar todo desde Ajustes | ✓ | ✓ sin cambios (solo superficie y borde, `data-shell`) | Capturas v2; E2E `shell.spec.js` (v1: misma lógica); `--nav-h` = 60 px intacto |
+| **BottomNav / pager** | Inicio/Forma/Calendario/Salud, `Buscar actividades`, ocultar en detalle, gestos | ✓ | ✓ sin cambios | Capturas v2; `mainTabs.test.jsx` (rutas únicas, D17); `gestures.spec.js` (v1); gesto de borde y satélite: **manual** |
+| **Dashboard** | Rango 7D/30D/3M/Todo, estado de forma y tarjetas, gráfica de evolución, abrir actividad, vacío | ✓ | ✓ (+ ubicación de arriba) | Capturas v2; `dashboard.spec.js` (v1); plegado y rango: **manual** |
+| **Rendimiento** | Tira de secciones, telemetría histórica/Deep Sync, tarjetas, abrir actividad | ✓ | ✓ (+ orden móvil) | Capturas v2; `gestures.spec.js` (tira); carga de telemetría: **manual** |
+| **Salud** | Hoy/Historial, pilares, banco de energía, biomarcadores, rango y fichas de día | ✓ | ✓ sin cambios | `HealthPage.test.jsx` (Hoy, Historial, error, vacío); capturas v2; rango 7D/14D/30D y fichas: **manual** |
+| **Detalle** | Volver, 4 pestañas, mapa con capas, gráficas y picos, Strava, eliminar | ✓ | ✓ sin cambios (controles a 44 px) | `ActivityDetailPage.test.jsx` (4 pestañas), `gestures.spec.js` (picos), `activities.spec.js` (abrir); capturas v2; capas del mapa, Strava y eliminar: **manual** |
+| **Calendario** | Mes ant./sig./Hoy, resumen semanal, planificar, importar texto, editar/eliminar plan, abrir realizada, Forma | ✓ | ✓ sin cambios | `CalendarPage.test.jsx` (mes, navegar, visor), `calendarEngine`/`calendarHooks` (unit), `modal.spec.js` (visor); capturas v2; planificar, importar, eliminar, arrastrar plan y Forma: **manual** |
+| **Actividades** | Buscar, filtrar deporte/periodo, lista virtualizada, abrir, eliminar, alta manual | ✓ | ✓ sin cambios | `HistoryList.test.jsx` (6), `AddActivityModal.test.jsx` (3), `activities.spec.js`; capturas v2 |
+| **Ajustes** | Volver, Guardar, General/Zonas/Cuentas/Seguridad, borrar actividades, eliminar cuenta, conmutador v2 | ✓ | ✓ (+ selector móvil) | `profileSections.test.jsx` (secciones y conmutador), `ProfilePage.test.jsx` y `account.spec.js` (eliminar cuenta), `ui-mode.spec.js` (conmutador); Guardar, Zonas y Cuentas: **manual** |
+| **Landing, acceso, correo confirmado** | Ver tabla «Landing» | ✓ | ✓ (Capa 4) | `public.spec.js` y `access-visual-v2.spec.js` en v2; alternar login/registro/recuperación: manual |
+| **Servicio** (`/strava-callback`) | Éxito, denegado, sin código | ✓ | sin cambios (sin piel propia) | `strava.spec.js` (v1) |
+
+Estados compartidos (carga `LoadingState`, error `ErrorBoundary`): sin cambios en v2; cubiertos por `uiLoadingState.test.jsx` y los estados vacío/error de `HistoryList.test.jsx` y `HealthPage.test.jsx`.
+
+**Huecos reconocidos** (acciones solo manuales, sin prueba en ninguna piel): todo lo marcado «manual» arriba. Se cubren con la pasada completa en iPhone; añadir E2E v2 para ellas queda como fase futura.
+
 ## Estructura de rutas
 
 | Ruta | Pantalla | Móvil | Escritorio |
