@@ -4,7 +4,7 @@
 - **ID:** `spec-rediseno-02-c5`
 - **Título:** Llevar las pantallas de la app autenticada a v2, de menor a mayor riesgo, con v1 congelada
 - **Fecha:** 2026-11-16
-- **Estado:** aprobada por el usuario el 2026-11-16 (D8 y D13–D17 con la recomendación de cada una). `tasks.md` creado.
+- **Estado:** **implementada** (2026-11-17): 14 PR de código (#84–#97) y cierre documental (PR 9). Aprobada por el usuario el 2026-11-16 (D8 y D13–D17 con la recomendación de cada una). Pendiente solo la pasada en iPhone real (`guion-iphone.md`), que ejecuta el usuario.
 - **Roadmap:** `docs/branches/feat/webapp-redesign/plan.md`, Capa 5.
 - **Base:** `origin/develop` en `1616ab3` (incluye #82, cierre de la Capa 4).
 - **Precedentes:** `ui-shell/` (estructura y mecanismo), `ui-skin-v2*/` (piel «Panel», D7, D9–D11), `landing-v2/` (Capa 4), `test/ui-safety-net/paridad.md` (lista de paridad por pantalla).
@@ -54,16 +54,17 @@ Fuente de verdad de acciones por pantalla: `docs/branches/test/ui-safety-net/par
 - **RF11. v2 sigue opt-in.** No se cambia el valor por defecto (`VITE_UI`, `localStorage`, Ajustes). Eso es la Capa 6.
 
 ## 6. Criterios de aceptación (por PR y de la capa)
-- [ ] `lint`, `lint:colors` (sin subir), `lint:ui` (14), `check-palette` si aplica, unit, integración, `build`: en verde, salida filtrada.
-- [ ] E2E macOS y Docker con 0 ✘; capturas solo en Docker.
-- [ ] Volcado `develop` vs rama = 0 diferencias en v1; capturas v1 idénticas.
-- [ ] PR visual: solo cambian las capturas v2 de **su** pantalla, listadas una a una; el usuario las aprueba (D7) antes de seguir.
-- [ ] PR `refactor`: capturas v1 **y** v2 idénticas.
-- [ ] Capa: las 7 pantallas + shell cumplen RF1–RF8, paridad completa y prueba en iPhone; roadmap, `MEMORY.md` y `CHANGELOG.md` actualizados; v2 sigue sin ser el valor por defecto.
+> Marcados el 2026-11-17 al cierre. Los de E2E/Docker/volcado/capturas se cumplieron en cada PR (verificación en su `tasks.md`/descripción); en el PR 9 (solo docs) se reverificaron lint, `lint:colors`, `lint:ui`, unit, integración y build. Excepción abierta: la prueba en iPhone real (RF10) está pendiente del usuario.
+- [x] `lint`, `lint:colors` (sin subir), `lint:ui` (14), `check-palette` si aplica, unit, integración, `build`: en verde, salida filtrada.
+- [x] E2E macOS y Docker con 0 ✘; capturas solo en Docker.
+- [x] Volcado `develop` vs rama = 0 diferencias en v1; capturas v1 idénticas.
+- [x] PR visual: solo cambian las capturas v2 de **su** pantalla, listadas una a una; el usuario las aprueba (D7) antes de seguir.
+- [x] PR `refactor`: capturas v1 **y** v2 idénticas.
+- [ ] Capa: las 7 pantallas + shell cumplen RF1–RF8, paridad completa y prueba en iPhone — **paridad completa ✓, prueba en iPhone pendiente del usuario**; roadmap, `MEMORY.md` y `CHANGELOG.md` actualizados ✓; v2 sigue sin ser el valor por defecto ✓.
 
 ## 7. Decisiones que necesitan tu aprobación
 
-- **D8. Dónde vive el conmutador de v2.** *Nota: `ui-shell/spec.md` y `ui-skin-v2/spec.md` la dan por resuelta e implementada en #73 (fila «Vista previa v2» en Ajustes → General), pero `MEMORY.md` la lista abierta; la dejo formalmente cerrada o reabierta con tu respuesta.* Opciones:
+- **D8 (cerrada: opción A).** Dónde vive el conmutador de v2. *Nota: `ui-shell/spec.md` y `ui-skin-v2/spec.md` la dan por resuelta e implementada en #73 (fila «Vista previa v2» en Ajustes → General), pero `MEMORY.md` la lista abierta; la dejo formalmente cerrada o reabierta con tu respuesta.* Opciones:
   - **A.** Dejarlo como está hasta la Capa 6: fila `role="switch"` en Ajustes → General, visible para todos, más `VITE_UI` y `localStorage`. Sin trabajo extra.
   - **B.** Solo entorno y `localStorage` (sin interruptor visible): se pierde la prueba por parte de quien no despliega.
   - **C.** Interruptor visible solo con un flag (p. ej. `VITE_UI_SWITCH`) o para ti/rol de prueba: menos exposición, más código y estado a limpiar luego.

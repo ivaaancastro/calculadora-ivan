@@ -7,6 +7,25 @@ y este proyecto adhiere a [Semantic Versioning](https://semver.org/lang/es/).
 
 ## [Unreleased]
 
+### Rediseño — Capa 5 (`docs/screens-cierre`), PR 9 de 9: cierre documental
+- `docs(screens-v2):` paridad v1/v2 de todas las pantallas comprobada contra el código y los tests (`paridad.md`), `tasks.md` completo, spec marcada como implementada, roadmap (Capa 6, Capa 7 y fase futura) y `MEMORY.md` al día. D8 cerrada: el interruptor «Vista previa v2» sigue en Ajustes → General hasta la Capa 6.
+- `docs(screens-v2):` guion de la pasada completa en iPhone real (`guion-iphone.md`); la ejecuta el usuario y queda pendiente. v2 sigue opt-in (D12).
+- Sin cambios en `src/`. Verificación: lint, `lint:colors` 743/3/100/8/165 (sin subir), `lint:ui` 14, unit 240, integración 24 y build en verde.
+
+### Rediseño — Capa 5 (pantallas en v2 «Panel»), PR 3–8c: pantallas
+Todo bajo `html[data-ui="v2"]` (v1 intacta, volcado de estilos = 0); capturas v2 regeneradas solo en Docker y aprobadas por pantalla (D7).
+- `feat(calendario):` Calendario en v2: días vacíos compactos, hoy en cobalto, controles a 44 px, sesiones planificadas discontinuas y modales de plan y rutina con la piel (PR 8c, #97). Antes, la lógica y las vistas salen de `CalendarPage` (2.348 → ~150 líneas) a utils, hooks y `components/calendar/` (PR 8a #88, PR 8b #89).
+- `feat(detalle):` Detalle de actividad en v2: cabecera, pestañas, capas del mapa y picos a 44 px, gráficas con el tema v2 (PR 7b, #96). Antes, `ActivityDetailPage` se parte en `activity/detail/` (PR 7a, #85).
+- `feat(salud):` Salud en v2: pilares en filas compactas, anillos a 96 px, banco de energía plano, movimiento de anillos y contador solo en v2 y con `prefers-reduced-motion` respetado (PR 6b, #95). Antes, `HealthPage` se parte en `components/health/` (PR 6a, #84).
+- `feat(rendimiento):` Rendimiento en v2: orden de tarjetas en móvil (estado, VFC, umbrales, balance), tarjetas compactas y pestañas a 44 px (PR 5, #93).
+- `feat(dashboard):` Dashboard en v2: primer vistazo móvil (forma, 4 métricas, gráfica) con «Tendencia y Capacidad» plegada y `FuelingPanel` ajustado (PR 4b, #94). Antes, `TAB_PATHS` y las vistas escritorio/móvil en una sola fuente (PR 4a, D17, #91).
+- `feat(actividades):` Actividades en v2: filtros en una fila, recuento, estado vacío, borrar y cerrar modal a 44 px y panel del alta manual (PR 3, #92).
+
+### Rediseño — Capa 5 (shell y Ajustes), PR 1–2b
+- `feat(shell):` `Navbar`, `BottomNav` y lienzo en v2 «Panel» (superficie sólida con borde de 1 px); `--nav-h` (60 px) intacto (PR 1, #87).
+- `feat(profile):` Ajustes en v2 con selector de sección en la página (solo móvil) y primer vistazo (PR 2b, #90). Antes, `ProfilePage` (1.048 → 370 líneas) se parte en `pages/profile/` (PR 2a, #86).
+- `docs(screens-v2):` spec y plan de la Capa 5 (PR 0, #83): D8 y D13–D17.
+
 ### Rediseño — Capa 4 (`docs/landing-cierre`), PR 5 de 5: cierre
 - `perf(app):` `Dashboard` se carga con `React.lazy`; un visitante sin sesión ya no descarga la app autenticada ni `recharts`. Landing: JS parseado 1010 → 513 KiB, JS comprimido 303 → 155 KiB; `perf.mjs` sin FAIL. Sin cambio de estilos (el CSS conserva su hash) ni de capturas (E2E Docker 234 ✓).
 - `docs(landing):` verificadores de la taste-skill con hallazgos corregidos y descartados con motivo; Lighthouse (rendimiento 95–100, accesibilidad/buenas prácticas 100, SEO 91) y axe (0 violaciones en 20 escenas: landing, modal ×3 y correo confirmado, claro/oscuro, 390/1440). Deuda anotada: `robots.txt`/`og:image` y CSS bloqueante.
