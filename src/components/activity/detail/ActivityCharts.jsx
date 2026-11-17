@@ -9,7 +9,7 @@ export const ActivityCharts = ({ chartData, activePayload, handleMouseMove, isPa
     return (
 <>
                                     {chartData.length > 0 ? (
-                                        <Card className="overflow-hidden">
+                                        <Card data-detail="charts" className="overflow-hidden">
                                             {/* Velocity/Pace */}
                                             <div className="h-[120px] pt-3.5 px-3.5 sm:px-6 border-b border-line-soft-3">
                                                 <div className="flex justify-between items-center mb-1">

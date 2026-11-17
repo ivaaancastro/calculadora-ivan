@@ -2,7 +2,7 @@ import React from 'react';
 import { InteractiveMap } from '../ActivityMap';
 
 export const AnalysisSidebar = ({ activity, streams, themeColor, activePayload, trainingEffect, fitnessAnalysis }) => (
-                            <aside className="w-full lg:w-[380px] border-t lg:border-t-0 lg:border-l border-line-soft-6 bg-surface-6 overflow-y-auto custom-scrollbar p-4 sm:p-5 space-y-6 shrink-0">
+                            <aside data-detail="sidebar" className="w-full lg:w-[380px] border-t lg:border-t-0 lg:border-l border-line-soft-6 bg-surface-6 overflow-y-auto custom-scrollbar p-4 sm:p-5 space-y-6 shrink-0">
                                 {/* Map - Desktop Solo (en móvil se muestra arriba estilo Strava) */}
                                 <div className="hidden lg:block h-56 rounded-xl border border-line-soft-2 overflow-hidden shadow-sm">
                                     <InteractiveMap polyline={activity.map_polyline} highResCoords={streams?.latlng?.data} color={themeColor} currentPosition={activePayload?.latlng} />
