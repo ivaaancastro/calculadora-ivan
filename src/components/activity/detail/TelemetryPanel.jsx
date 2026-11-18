@@ -81,8 +81,8 @@ export const TelemetryPanel = ({ chartData, peaks, activePayload, setActivePaylo
                                                             <div className="flex items-center gap-2 flex-wrap">
                                                                 <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-surface-2 font-mono text-[11px] font-bold tabular-nums text-body">
                                                                     <span>⏱️ {formatDuration(activePayload.rawTime)}</span>
-                                                                    <span className="text-faint-2">|</span>
-                                                                    <span>📍 {activePayload.distanceKm} km</span>
+                                                                    {activePayload.distanceKm !== null && <span className="text-faint-2">|</span>}
+                                                                    {activePayload.distanceKm !== null && <span>📍 {activePayload.distanceKm} km</span>}
                                                                 </div>
                                                                 {activePeakType && (
                                                                     <span className={`px-2 py-0.5 rounded-md text-[10px] font-black uppercase tracking-tight border animate-pulse ${activePeakType.color}`}>
@@ -101,14 +101,14 @@ export const TelemetryPanel = ({ chartData, peaks, activePayload, setActivePaylo
 
                                                         <div className="grid grid-cols-3 sm:grid-cols-5 gap-1.5 text-center">
                                                             {/* Ritmo / Velocidad */}
-                                                            <div className="bg-sunken rounded-xl p-1.5 border border-line-soft-3">
+                                                            {(isPaceBased ? activePayload.pace : activePayload.speed) !== null && <div className="bg-sunken rounded-xl p-1.5 border border-line-soft-3">
                                                                 <span className="text-[8px] font-bold uppercase tracking-wider text-ink-4 block">
                                                                     {isPaceBased ? 'Ritmo' : 'Velocidad'}
                                                                 </span>
                                                                 <span className="text-xs sm:text-sm font-black font-mono tabular-nums text-pace">
                                                                     {isPaceBased ? formatPace(activePayload.pace) : `${activePayload.speed} km/h`}
                                                                 </span>
-                                                            </div>
+                                                            </div>}
 
                                                             {/* FC */}
                                                             {activePayload.hr !== null && (

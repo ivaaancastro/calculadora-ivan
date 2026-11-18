@@ -5,7 +5,7 @@
 - **Título:** El detalle de actividad muestra resumen, pestañas y bloques distintos según el deporte
 - **Autor:** agente forma (Claude Code)
 - **Fecha:** 2026-11-18
-- **Estado:** pendiente (decisiones D1–D8 y celdas M1–M9 cerradas el 2026-11-18; a la espera de aprobación final de spec y plan)
+- **Estado:** implementada
 - **Rama:** `feat/detalle-por-deporte` (sale de `feat/tarjetas-explicativas-detalle`, PR #101; el PR de esta tarea va después de #101 o se rebasa sobre `develop` cuando se mergee)
 
 ## 2. Objetivo

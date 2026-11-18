@@ -1,13 +1,12 @@
 import { useMemo } from 'react';
 import { formatPace, formatDuration } from '../utils/formatters';
 import { calculateTrainingEffect } from '../utils/fitnessStatsEngine';
+import { detectSportType, isPaceSport } from '../utils/activityMetricsBySport';
+import { PACE_ZONES, paceToSec } from '../components/pages/profile/zonesCalc';
 
 export const useActivityMetrics = (activity, streams, settings) => {
-    const isPaceBased = useMemo(() => {
-        if (!activity) return false;
-        const t = String(activity.type).toLowerCase();
-        return t.includes('carrera') || t.includes('run') || t.includes('correr') || t.includes('andar') || t.includes('walk') || t.includes('caminata');
-    }, [activity]);
+    const sport = useMemo(() => detectSportType(activity?.type), [activity]);
+    const isPaceBased = isPaceSport(sport);
 
     const exactZoneAnalysis = useMemo(() => {
         if (!streams || !streams.heartrate || !streams.time) return null;
@@ -36,29 +35,16 @@ export const useActivityMetrics = (activity, streams, settings) => {
         });
     }, [streams, activity, settings]);
 
-    const exactPacePowerZoneAnalysis = useMemo(() => {
+    const exactPaceZoneAnalysis = useMemo(() => {
         if (!streams || !streams.time) return null;
         const timeData = streams.time.data;
 
-        if (isPaceBased && streams.velocity_smooth) {
+        if (sport === 'run' && streams.velocity_smooth) {
             const velData = streams.velocity_smooth.data;
-            const paceZones = settings.run?.paceZones;
-            if (!paceZones || paceZones.length === 0) return null;
-
-            const tpPaceStr = settings.run.thresholdPace || '4:30';
-            const [m, s] = tpPaceStr.split(':');
-            const tpSecs = (parseInt(m) || 0) * 60 + (parseInt(s) || 0);
+            // Misma fuente que Perfil: PACE_ZONES (% de la velocidad umbral) y thresholdPace.
+            const tpSecs = paceToSec(settings?.run?.thresholdPace || '4:30');
             const tpSpeedMs = 1000 / tpSecs;
-
-            const pzMs = [
-                { sMin: 0, sMax: 0.775 },
-                { sMin: 0.785, sMax: 0.877 },
-                { sMin: 0.887, sMax: 0.943 },
-                { sMin: 0.953, sMax: 1.00 },
-                { sMin: 1.01, sMax: 1.034 },
-                { sMin: 1.044, sMax: 1.115 },
-                { sMin: 1.125, sMax: 1.30 }
-            ];
+            const pzMs = PACE_ZONES;
 
             let zoneSeconds = [0, 0, 0, 0, 0, 0, 0];
             for (let i = 1; i < velData.length; i++) {
@@ -102,7 +88,14 @@ export const useActivityMetrics = (activity, streams, settings) => {
             });
         }
 
-        if (!isPaceBased && streams.watts) {
+        return null;
+    }, [streams, sport, settings]);
+
+    const exactPowerZoneAnalysis = useMemo(() => {
+        if (!streams || !streams.time) return null;
+        const timeData = streams.time.data;
+
+        if (sport === 'bike' && streams.watts) {
             const powerData = streams.watts.data;
             const ftp = settings.bike?.ftp || 200;
             const pz = [
@@ -142,7 +135,9 @@ export const useActivityMetrics = (activity, streams, settings) => {
         }
 
         return null;
-    }, [streams, isPaceBased, settings]);
+    }, [streams, sport, settings]);
+
+    const paceThresholdIsDefault = !settings?.run?.thresholdPace;
 
     const proMetrics = useMemo(() => {
         if (!streams || !streams.time) return { cadenceAvg: 0, maxSpeedObj: null, decouplingObj: null, efObj: null, autoLaps: [], avgWatts: 0, maxWatts: 0, npWatts: 0, vi: 0, ifFactor: 0, workKj: 0, powerCurve: [], climbPro: [] };
@@ -555,9 +550,12 @@ export const useActivityMetrics = (activity, streams, settings) => {
     }, [trainingEffect, proMetrics, activity]);
 
     return {
+        sport,
         isPaceBased,
         exactZoneAnalysis,
-        exactPacePowerZoneAnalysis,
+        exactPaceZoneAnalysis,
+        exactPowerZoneAnalysis,
+        paceThresholdIsDefault,
         proMetrics,
         trainingEffect,
         chartData,

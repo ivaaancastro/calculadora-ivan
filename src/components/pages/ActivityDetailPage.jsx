@@ -12,24 +12,37 @@ import { AnalysisSidebar } from '../activity/detail/AnalysisSidebar';
 import { MapTab } from '../activity/detail/MapTab';
 import { LapsTab } from '../activity/detail/LapsTab';
 import { DataTab } from '../activity/detail/DataTab';
+import { getBlocksForSport, getTabsForSport, getZoneOptions, applyChartBlocks, getMetricsForSport } from '../../utils/activityMetricsBySport';
 
 export const ActivityDetailPage = ({ activity, settings, fetchStreams, onBack, onDelete }) => {
     const ct = useChartTheme();
     const { streams, loadingStreams } = useActivityStreams(activity, fetchStreams);
     const [activePayload, setActivePayload] = useState(null);
     const [activeTab, setActiveTab] = useState('analyze');
-    const [zoneType, _setZoneType] = useState('hr'); // 'hr' or 'power'
+    const [zoneType, setZoneType] = useState('hr'); // 'hr' | 'pace' | 'power'
 
     const {
+        sport,
         isPaceBased,
         exactZoneAnalysis,
-        exactPacePowerZoneAnalysis,
+        exactPaceZoneAnalysis,
+        exactPowerZoneAnalysis,
+        paceThresholdIsDefault,
         proMetrics,
         trainingEffect,
-        chartData,
+        chartData: rawChartData,
         maxHr,
         fitnessAnalysis
     } = useActivityMetrics(activity, streams, settings);
+
+    const blocks = getBlocksForSport(sport);
+    const chartData = useMemo(() => applyChartBlocks(rawChartData, sport), [rawChartData, sport]);
+    const hasGps = !!(activity?.map_polyline || streams?.latlng?.data?.length);
+    const showMap = blocks.tabs.map && hasGps;
+    const tabs = getTabsForSport(sport, { hasGps, hasLaps: proMetrics.autoLaps?.length > 0 });
+    const zoneOptions = getZoneOptions(sport, { hasHr: !!exactZoneAnalysis, hasPace: !!exactPaceZoneAnalysis, hasPower: !!exactPowerZoneAnalysis });
+    const effectiveTab = tabs.some(t => t.id === activeTab) ? activeTab : 'analyze';
+    const effectiveZone = zoneOptions.some(z => z.value === zoneType) ? zoneType : (zoneOptions[0]?.value || 'hr');
 
     const peaks = useMemo(() => computePeaks(chartData), [chartData]);
     const activePeakType = useMemo(() => getActivePeakType(activePayload, peaks, isPaceBased), [activePayload, peaks, isPaceBased]);
@@ -38,6 +51,7 @@ export const ActivityDetailPage = ({ activity, settings, fetchStreams, onBack, o
 
     const dateStr = new Date(activity.date).toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'short', year: 'numeric' });
     const speedMetric = getSpeedOrPace(activity, isPaceBased);
+    const metrics = getMetricsForSport(sport, activity, proMetrics, speedMetric);
     const themeColor = getSportTheme(activity.type, ct);
 
     const handleMouseMove = (state) => {
@@ -54,17 +68,16 @@ export const ActivityDetailPage = ({ activity, settings, fetchStreams, onBack, o
     // vertical de `main`. En Análisis la página puede crecer en móvil; en escritorio la caja
     // queda fija y se desplazan los paneles, como antes. Sin números sueltos (RF2).
     return (
-        <div data-skin="detail" className={`animate-in fade-in duration-500 bg-sunken-2 ${activeTab === 'analyze' ? 'min-h-[calc(100dvh-var(--nav-h-total))] sm:min-h-[calc(100dvh-var(--nav-h-total)-1rem)] lg:h-[calc(100dvh-var(--nav-h-total)-1rem)]' : 'h-[calc(100dvh-var(--nav-h-total))] sm:h-[calc(100dvh-var(--nav-h-total)-1rem)]'} flex flex-col font-sans pb-safe`}>
+        <div data-skin="detail" className={`animate-in fade-in duration-500 bg-sunken-2 ${effectiveTab === 'analyze' ? 'min-h-[calc(100dvh-var(--nav-h-total))] sm:min-h-[calc(100dvh-var(--nav-h-total)-1rem)] lg:h-[calc(100dvh-var(--nav-h-total)-1rem)]' : 'h-[calc(100dvh-var(--nav-h-total))] sm:h-[calc(100dvh-var(--nav-h-total)-1rem)]'} flex flex-col font-sans pb-safe`}>
             <DetailHeader
                 activity={activity}
-                activeTab={activeTab}
+                activeTab={effectiveTab}
                 setActiveTab={setActiveTab}
+                tabs={tabs}
                 onBack={onBack}
                 onDelete={onDelete}
                 dateStr={dateStr}
-                speedMetric={speedMetric}
-                proMetrics={proMetrics}
-                isPaceBased={isPaceBased}
+                metrics={metrics}
             />
 
             {/* Tab Content */}
@@ -77,19 +90,18 @@ export const ActivityDetailPage = ({ activity, settings, fetchStreams, onBack, o
                 ) : null}
 
                 {/* --- pestaña: ANÁLISIS --- */}
-                {activeTab === 'analyze' && (
+                {effectiveTab === 'analyze' && (
                     <div className="flex-1 flex flex-col lg:flex-row overflow-y-auto lg:overflow-hidden custom-scrollbar touch-scroll min-h-0 pb-24 lg:pb-0">
                         {/* Charts Panel */}
                         <div className="flex-1 lg:overflow-y-auto custom-scrollbar p-2.5 sm:p-5 bg-surface-6 min-w-0">
                             <div className="max-w-5xl mx-auto space-y-3">
                                 <DetailMobileHero
+                                    showMap={showMap}
                                     activity={activity}
                                     streams={streams}
                                     themeColor={themeColor}
                                     activePayload={activePayload}
-                                    speedMetric={speedMetric}
-                                    proMetrics={proMetrics}
-                                    isPaceBased={isPaceBased}
+                                    metrics={metrics}
                                 />
                                 <TelemetryPanel
                                     chartData={chartData}
@@ -104,11 +116,13 @@ export const ActivityDetailPage = ({ activity, settings, fetchStreams, onBack, o
                                     activePayload={activePayload}
                                     handleMouseMove={handleMouseMove}
                                     isPaceBased={isPaceBased}
+                                    blocks={blocks}
                                 />
                             </div>
                         </div>
 
                         <AnalysisSidebar
+                            showMap={showMap}
                             activity={activity}
                             streams={streams}
                             themeColor={themeColor}
@@ -120,19 +134,24 @@ export const ActivityDetailPage = ({ activity, settings, fetchStreams, onBack, o
                 )}
 
                 {/* --- pestaña: MAPA --- */}
-                {activeTab === 'map' && (
+                {effectiveTab === 'map' && (
                     <MapTab activity={activity} streams={streams} themeColor={themeColor} activePayload={activePayload} />
                 )}
 
                 {/* --- pestaña: LAPS --- */}
-                {activeTab === 'laps' && <LapsTab proMetrics={proMetrics} isPaceBased={isPaceBased} />}
+                {effectiveTab === 'laps' && <LapsTab proMetrics={proMetrics} isPaceBased={isPaceBased} />}
 
                 {/* --- pestaña: DETALLE (Deep Analysis) --- */}
-                {activeTab === 'data' && (
+                {effectiveTab === 'data' && (
                     <DataTab
-                        zoneType={zoneType}
+                        sport={sport}
+                        zoneType={effectiveZone}
+                        zoneOptions={zoneOptions}
+                        onZoneTypeChange={setZoneType}
                         exactZoneAnalysis={exactZoneAnalysis}
-                        exactPacePowerZoneAnalysis={exactPacePowerZoneAnalysis}
+                        exactPaceZoneAnalysis={exactPaceZoneAnalysis}
+                        exactPowerZoneAnalysis={exactPowerZoneAnalysis}
+                        paceThresholdIsDefault={paceThresholdIsDefault}
                         proMetrics={proMetrics}
                         activity={activity}
                         maxHr={maxHr}
