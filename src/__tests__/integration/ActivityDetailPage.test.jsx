@@ -30,7 +30,7 @@ const activity = {
     tss: 60,
     hr_avg: 145,
     speed_avg: 3.03,
-    map_polyline: null,
+    map_polyline: 'encoded-polyline',
     streams_data: null,
 };
 
@@ -51,7 +51,7 @@ describe('ActivityDetailPage (humo)', () => {
         expect(screen.getByText('Análisis Técnico por Intervalos')).toBeTruthy();
 
         await user.click(screen.getAllByRole('button', { name: 'Detalle' })[0]);
-        expect(screen.getByText('Métricas de Eficiencia')).toBeTruthy();
+        expect(screen.getByText('Hitos de la Sesión')).toBeTruthy();
 
         await user.click(screen.getAllByTitle('Eliminar actividad')[0]);
         expect(onDelete).toHaveBeenCalledWith('a1');

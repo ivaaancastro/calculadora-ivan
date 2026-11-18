@@ -2,9 +2,14 @@ import React from 'react';
 import { BarChart, Bar, Cell, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer } from 'recharts';
 import { CustomChartTooltip } from '../ActivitySharedUI';
 import { useChartTheme } from '../../charts/useChartTheme';
+import { Segmented } from '../../ui';
+import { getBlocksForSport, getMetabolicIntensity } from '../../../utils/activityMetricsBySport';
 
-export const DataTab = ({ zoneType, exactZoneAnalysis, exactPacePowerZoneAnalysis, proMetrics, activity, maxHr }) => {
+export const DataTab = ({ sport, zoneType, zoneOptions = [], onZoneTypeChange, exactZoneAnalysis, exactPaceZoneAnalysis, exactPowerZoneAnalysis, paceThresholdIsDefault, proMetrics, activity, maxHr }) => {
     const ct = useChartTheme();
+    const blocks = getBlocksForSport(sport);
+    const zoneData = zoneType === 'pace' ? exactPaceZoneAnalysis : zoneType === 'power' ? exactPowerZoneAnalysis : exactZoneAnalysis;
+    const intensity = getMetabolicIntensity(sport, activity, proMetrics, maxHr);
     const ZONE_COLORS = ct.zones.hr;
     return (
                     <div className="h-full overflow-y-auto custom-scrollbar p-6 bg-surface-6">
@@ -14,21 +19,26 @@ export const DataTab = ({ zoneType, exactZoneAnalysis, exactPacePowerZoneAnalysi
                             <div className="lg:col-span-8 space-y-8">
                                 
                                 {/* Distribución Volumétrica (Zones - Top Priority) */}
-                                {(zoneType === 'hr' ? exactZoneAnalysis : exactPacePowerZoneAnalysis) && (
+                                {zoneData && (
                                 <div className="space-y-3">
-                                    <h3 className="text-[10px] font-bold text-ink-4 uppercase tracking-widest">Distribución Volumétrica (Zonas)</h3>
+                                    <div className="flex items-center justify-between gap-3">
+                                        <h3 className="text-[10px] font-bold text-ink-4 uppercase tracking-widest">Distribución Volumétrica (Zonas)</h3>
+                                        {zoneOptions.length > 1 && (
+                                            <Segmented data-detail="zone-type" variant="pill" value={zoneType} onChange={onZoneTypeChange} options={zoneOptions} />
+                                        )}
+                                    </div>
                                     <div className="h-[280px] bg-surface-6 rounded-2xl border border-line-soft p-6 shadow-sm">
                                         <ResponsiveContainer width="100%" height="100%">
-                                            <BarChart data={zoneType === 'hr' ? exactZoneAnalysis : exactPacePowerZoneAnalysis} margin={{ bottom: 20 }}>
+                                            <BarChart data={zoneData} margin={{ bottom: 20 }}>
                                                 <CartesianGrid vertical={false} strokeDasharray="3 3" stroke={ct.anatomy.gridSoft} opacity={0.5} />
                                                 <XAxis dataKey="label" axisLine={false} tickLine={false} tick={{ fontSize: 9, fontWeight: 700, fill: ct.anatomy.tick }} />
                                                 <YAxis hide />
                                                 <RechartsTooltip content={<CustomChartTooltip unit=" min" />} cursor={{ fill: ct.anatomy.cursorFill }} />
                                                 <Bar dataKey="minutes" radius={[4, 4, 0, 0]}>
-                                                    {(zoneType === 'hr' ? exactZoneAnalysis : exactPacePowerZoneAnalysis).map((entry, index) => (
-                                                        <Cell 
-                                                            key={`cell-${index}`} 
-                                                            fill={zoneType === 'hr' ? ZONE_COLORS[index] : ct.zones.all[index % 7]} 
+                                                    {zoneData.map((entry, index) => (
+                                                        <Cell
+                                                            key={`cell-${index}`}
+                                                            fill={zoneType === 'hr' ? ZONE_COLORS[index] : ct.zones.all[index % 7]}
                                                             fillOpacity={0.85}
                                                         />
                                                     ))}
@@ -36,10 +46,25 @@ export const DataTab = ({ zoneType, exactZoneAnalysis, exactPacePowerZoneAnalysi
                                             </BarChart>
                                         </ResponsiveContainer>
                                     </div>
+                                    {zoneType === 'pace' && (
+                                        <div data-detail="pace-zones" className="bg-white dark:bg-zinc-900/40 rounded-2xl border border-line-soft overflow-hidden shadow-sm divide-y divide-line-soft">
+                                            {zoneData.map((z) => (
+                                                <div key={z.label} className="flex items-center justify-between px-4 py-2 text-[10px] font-bold tabular-nums text-body-soft-2">
+                                                    <span>{z.label}</span>
+                                                    <span className="text-slate-400">{z.range} /km</span>
+                                                    <span>{z.minutes} min · {z.pct.toFixed(0)}%</span>
+                                                </div>
+                                            ))}
+                                            {paceThresholdIsDefault && (
+                                                <p className="px-4 py-2 text-[9px] font-medium text-ink-4">Usando el ritmo umbral por defecto (4:30/km). Ajústalo en Perfil para zonas exactas.</p>
+                                            )}
+                                        </div>
+                                    )}
                                 </div>
                                 )}
 
                                 {/* ClimbPro Section */}
+                                {blocks.detail.climbPro && (
                                 <div className="space-y-3">
                                     <div className="flex items-center justify-between">
                                         <h3 className="text-[10px] font-bold text-ink-4 uppercase tracking-widest">Análisis de Ascensiones (ClimbPro)</h3>
@@ -94,29 +119,31 @@ export const DataTab = ({ zoneType, exactZoneAnalysis, exactPacePowerZoneAnalysi
                                         )}
                                     </div>
                                 </div>
+                                )}
 
                                 {/* Metabolic Profile (Bottom) */}
+                                {intensity !== null && (
                                 <div className="bg-sunken-10 rounded-2xl p-5 border border-line-soft">
                                     <div className="flex items-center justify-between mb-4">
                                         <div className="space-y-1">
                                             <h3 className="text-xs font-bold text-ink-soft uppercase tracking-tight">Perfil Metabólico Estimado</h3>
-                                            <p className="text-[9px] text-ink-4 font-medium">Sustratos energéticos basados en intensidad</p>
+                                            <p className="text-[9px] text-ink-4 font-medium">Sustratos energéticos basados en intensidad ({blocks.metabolic === 'if' ? 'IF' : '% de FC máx.'})</p>
                                         </div>
                                         <div className="text-right">
-                                            <span className="text-base font-black text-ink-soft">{proMetrics.workKj}</span>
-                                            <span className="ml-1 text-[9px] font-bold text-slate-400 uppercase">kJ Totales</span>
+                                            <span className="text-base font-black text-ink-soft">{blocks.metabolic === 'if' ? proMetrics.workKj : (activity.calories || 0)}</span>
+                                            <span className="ml-1 text-[9px] font-bold text-slate-400 uppercase">{blocks.metabolic === 'if' ? 'kJ Totales' : 'kcal'}</span>
                                         </div>
                                     </div>
 
                                     <div className="space-y-4">
                                         <div className="space-y-1.5">
                                             <div className="flex justify-between text-[9px] font-bold uppercase tracking-tight">
-                                                <span className="text-emerald-500">Grasas ({Math.max(0, 100 - (proMetrics.ifFactor * 100)).toFixed(0)}%)</span>
-                                                <span className="text-orange-500">Carbos ({Math.min(100, (proMetrics.ifFactor * 100)).toFixed(0)}%)</span>
+                                                <span className="text-emerald-500">Grasas ({Math.max(0, 100 - (intensity * 100)).toFixed(0)}%)</span>
+                                                <span className="text-orange-500">Carbos ({Math.min(100, (intensity * 100)).toFixed(0)}%)</span>
                                             </div>
                                             <div className="h-2.5 bg-fill-2 rounded-full overflow-hidden flex">
-                                                <div className="h-full bg-emerald-500 transition-all duration-1000" style={{ width: `${Math.max(5, 100 - (proMetrics.ifFactor * 100))}%` }} />
-                                                <div className="h-full bg-orange-500 transition-all duration-1000" style={{ width: `${Math.min(95, (proMetrics.ifFactor * 100))}%` }} />
+                                                <div className="h-full bg-emerald-500 transition-all duration-1000" style={{ width: `${Math.max(5, 100 - (intensity * 100))}%` }} />
+                                                <div className="h-full bg-orange-500 transition-all duration-1000" style={{ width: `${Math.min(95, (intensity * 100))}%` }} />
                                             </div>
                                         </div>
 
@@ -124,7 +151,7 @@ export const DataTab = ({ zoneType, exactZoneAnalysis, exactPacePowerZoneAnalysi
                                             <div className="space-y-1">
                                                 <span className="text-[8px] font-bold text-slate-400 uppercase tracking-widest">Enfoque Técnico</span>
                                                 <p className="text-[10px] font-bold text-body leading-tight">
-                                                    {proMetrics.ifFactor < 0.75 
+                                                    {intensity < 0.75 
                                                         ? "Optimización de oxidación de grasas y base aeróbica." 
                                                         : "Consumo glucolítico alto. Énfasis en potencia táctica."}
                                                 </p>
@@ -138,12 +165,14 @@ export const DataTab = ({ zoneType, exactZoneAnalysis, exactPacePowerZoneAnalysi
                                         </div>
                                     </div>
                                 </div>
+                                )}
                             </div>
 
                             {/* --- BARRA LATERAL (MÉTRICAS SECUNDARIAS) --- */}
                             <div className="lg:col-span-4 space-y-6">
                                 
                                 {/* Efficiency Gauges */}
+                                {blocks.detail.efficiency && (
                                 <div className="bg-sunken-10 rounded-2xl p-6 border border-line-soft space-y-6">
                                     <h3 className="text-xs font-bold text-ink-soft uppercase tracking-tight">Métricas de Eficiencia</h3>
                                     
@@ -185,13 +214,14 @@ export const DataTab = ({ zoneType, exactZoneAnalysis, exactPacePowerZoneAnalysi
                                         </p>
                                     </div>
                                 </div>
+                                )}
 
                                 {/* Session Highlights */}
                                 <div className="space-y-3">
                                     <h3 className="text-[10px] font-bold text-ink-4 uppercase tracking-widest">Hitos de la Sesión</h3>
                                     <div className="bg-white dark:bg-zinc-900/40 rounded-2xl border border-line-soft overflow-hidden shadow-sm max-h-[450px] overflow-y-auto custom-scrollbar">
                                         <div className="divide-y divide-line-soft">
-                                            {proMetrics.powerCurve?.map((peak, idx) => (
+                                            {blocks.detail.powerHitos && proMetrics.powerCurve?.map((peak, idx) => (
                                                 <div key={idx} className="flex justify-between items-center p-3.5 hover:bg-slate-50 dark:hover:bg-zinc-800/30 transition-colors">
                                                     <div className="flex items-center gap-3">
                                                         <div className="w-8 h-8 rounded-lg bg-surface-2 flex items-center justify-center text-[10px] font-black text-slate-400">
@@ -204,23 +234,11 @@ export const DataTab = ({ zoneType, exactZoneAnalysis, exactPacePowerZoneAnalysi
                                                     </div>
                                                 </div>
                                             ))}
-                                            <div className="flex justify-between items-center p-3.5 bg-slate-50/30 dark:bg-zinc-900/10">
+                                            {maxHr > 0 && <div className="flex justify-between items-center p-3.5 bg-slate-50/30 dark:bg-zinc-900/10">
                                                 <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">FC Máxima</span>
                                                 <span className="text-xs font-black text-hr">{maxHr} <span className="text-[9px] font-bold text-slate-400">bpm</span></span>
-                                            </div>
+                                            </div>}
                                         </div>
-                                    </div>
-                                </div>
-
-                                {/* Recovery Status (Raised up) */}
-                                <div className="bg-emerald-500 dark:bg-emerald-600 p-4 rounded-2xl text-white shadow-lg shadow-emerald-500/10">
-                                    <div className="flex items-center gap-2 mb-2">
-                                        <div className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
-                                        <span className="text-[8px] font-bold uppercase tracking-widest opacity-80">Estado de Recuperación</span>
-                                    </div>
-                                    <div className="flex justify-between items-end">
-                                        <div className="text-xl font-black italic">~24H</div>
-                                        <div className="text-[8px] font-bold uppercase bg-white/20 px-1.5 py-0.5 rounded">Supercompensación OK</div>
                                     </div>
                                 </div>
                             </div>

@@ -7,6 +7,13 @@ y este proyecto adhiere a [Semantic Versioning](https://semver.org/lang/es/).
 
 ## [Unreleased]
 
+### Detalle de actividad por deporte (`feat/detalle-por-deporte`)
+- `feat(detalle):` el detalle se adapta al deporte (bici, carrera, senderismo/caminata, fuerza y genérico, detectado por `activity.type`, incluidos los tipos de Strava sin traducir): resumen, pestañas y bloques distintos; Kcal totales en todos; métricas sin dato no se muestran.
+- ClimbPro, bloque de potencia (IF/NP/Trabajo/W/EF) y zonas de potencia solo en bici; carrera con Drift y sin EF; senderismo/caminata con ritmo; fuerza sin Mapa ni Intervalos; sin GPS no hay pestaña Mapa.
+- Zonas de ritmo en carrera con selector FC / Ritmo (y FC / Potencia en bici) en la pestaña Detalle, calculadas con `calcPaceZones` y el ritmo umbral de Perfil.
+- Perfil metabólico por IF (bici) o % de FC máx. (carrera, senderismo); se oculta el bloque fijo «Estado de recuperación».
+- Matriz deporte × bloque en una tabla de datos: `src/utils/activityMetricsBySport.js`. Spec: `docs/branches/feat/detalle-por-deporte/`.
+
 ### Detalle de actividad: tarjetas explicativas de métricas (`feat/tarjetas-explicativas-detalle`)
 - `feat(detalle):` cada métrica del resumen del detalle (Carga/TSS, IF, NP, Trabajo, FC, ritmo…) se pulsa y abre una tarjeta con su explicación: popover en escritorio y bottom-sheet en móvil, con teclado, foco, Escape y zona táctil ≥ 44 px en v2. Sin ícono `?`: el área es todo el `Stat`.
 - Textos centralizados en `src/utils/activityMetricDescriptions.js` (reutilizables en Dashboard y Rendimiento); componente `MetricTooltip` en `src/components/ui/`.

@@ -4,13 +4,14 @@ import { formatPace, formatDuration } from '../../../utils/formatters';
 import { Card } from '../../ui';
 import { useChartTheme } from '../../charts/useChartTheme';
 
-export const ActivityCharts = ({ chartData, activePayload, handleMouseMove, isPaceBased }) => {
+export const ActivityCharts = ({ chartData, activePayload, handleMouseMove, isPaceBased, blocks }) => {
     const ct = useChartTheme();
     return (
 <>
                                     {chartData.length > 0 ? (
                                         <Card data-detail="charts" className="overflow-hidden">
                                             {/* Velocity/Pace */}
+                                            {blocks?.charts?.speed !== false && (
                                             <div className="h-[120px] pt-3.5 px-3.5 sm:px-6 border-b border-line-soft-3">
                                                 <div className="flex justify-between items-center mb-1">
                                                     <div className="flex items-center gap-3">
@@ -43,6 +44,7 @@ export const ActivityCharts = ({ chartData, activePayload, handleMouseMove, isPa
                                                     </AreaChart>
                                                 </ResponsiveContainer>
                                             </div>
+                                            )}
 
                                             {/* Heart Rate */}
                                             {chartData.some(d => d.hr > 0) && (

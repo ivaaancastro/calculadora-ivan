@@ -11,6 +11,11 @@
  */
 
 export const ACTIVITY_METRIC_DESCRIPTIONS = {
+  kcal: {
+    id: 'kcal',
+    label: 'Kcal totales',
+    description: 'Las kilocalorías son una estimación de la energía que has gastado en la actividad. Es un dato aproximado: en bici procede del trabajo mecánico (kJ), que equivale casi 1:1 a kcal.',
+  },
   tss: {
     id: 'tss',
     label: 'Carga (TSS)',
