@@ -24,4 +24,4 @@
 - [x] T16 CHANGELOG, MEMORY, spec implementada
 - [x] T17 Commit, push, PR (no mergear)
 
-Nota: E2E en `e2e/detail-by-sport.spec.js` (desktop y móvil, v1 y v2) en verde en local; capturas visuales Docker no regeneradas (la pestaña Detalle ya no muestra «Estado de recuperación»).
+Nota: E2E `e2e/detail-by-sport.spec.js` (v1 y v2) en verde. Capturas Docker regeneradas solo para «detalle» (12: visual y visual-v2 × desktop/mobile/tablet × light/dark): cambian el orden de métricas del resumen y la pestaña Detalle (sin «Estado de recuperación»).
