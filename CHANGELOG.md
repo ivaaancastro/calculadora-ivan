@@ -7,6 +7,12 @@ y este proyecto adhiere a [Semantic Versioning](https://semver.org/lang/es/).
 
 ## [Unreleased]
 
+### Detalle de actividad: tarjetas explicativas de métricas (`feat/tarjetas-explicativas-detalle`)
+- `feat(detalle):` cada métrica del resumen del detalle (Carga/TSS, IF, NP, Trabajo, FC, ritmo…) se pulsa y abre una tarjeta con su explicación: popover en escritorio y bottom-sheet en móvil, con teclado, foco, Escape y zona táctil ≥ 44 px en v2. Sin ícono `?`: el área es todo el `Stat`.
+- Textos centralizados en `src/utils/activityMetricDescriptions.js` (reutilizables en Dashboard y Rendimiento); componente `MetricTooltip` en `src/components/ui/`.
+- Tests: unitarios de textos y de `MetricTooltip`, e integración del detalle.
+- Spec: `docs/branches/feat/tarjetas-explicativas-detalle/`. El detalle por deporte queda fuera (rama `wip/detalle-por-deporte`).
+
 ### Fix — Detalle de actividad: «Volver» y mapa (`fix/detail-back-map`)
 - `fix(detalle):` «Volver» no hacía nada: `ActivityRouteWrapper` no pasaba `onBack` (regresión de `83a4a44`). Ahora vuelve a la pantalla de origen (`navigate(-1)`) o, con URL directa, a Actividades; también pasa `fetchStreams` con el nombre correcto.
 - `fix(mapa):` CARTO (`basemaps.cartocdn.com`) devuelve teselas con marca de agua «API KEY REQUIRED»; Light y Dark usan ahora Esri World Light/Dark Gray Base (sin clave).

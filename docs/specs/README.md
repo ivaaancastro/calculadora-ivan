@@ -18,6 +18,7 @@ de aceptación.
 | spec-audit-07 | Consolidar migraciones SQL y añadir versionado (`schema_migrations`) | implementada | 2026-11-05 |
 | spec-audit-08 | Hardening Edge Function `intervals-proxy` (rate limiting, validación, timeout) | implementada | 2026-11-05 |
 | spec-e2e-01 | Pruebas E2E críticas (auth, dashboard, Strava sync, exportación de datos) | implementada | 2026-11-05 |
+| spec-tarjetas-explicativas-detalle | Tarjetas explicativas (popover/bottom-sheet) por métrica del resumen del detalle de actividad | implementada | 2026-11-18 |
 
 ## Cómo agregar una spec nueva
 
