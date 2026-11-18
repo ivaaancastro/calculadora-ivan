@@ -1,0 +1,827 @@
+/*
+ * Capa de piel v2 (spec-rediseno-02-c3-skin-dir, RF5.3).
+ *
+ * Las clases de Tailwind ya compilan a valores literales, así que la piel no reescribe
+ * `tailwind.config.js` (eso cambiaría toda la app): reescribe **dentro del ámbito** las
+ * clases de tamaño, radio y sombra que usan las dos pantallas que estrenan v2.
+ *
+ * El ámbito son los atributos `data-ui="v2"` (en <html>) y `data-skin` (en la raíz de cada
+ * pantalla). En v1 ambos están ausentes o son inertes, de modo que este archivo no emite
+ * ningún cambio. Los valores salen de `--skin-*` en `src/styles/tokens.css`.
+ *
+ * Se importa al principio de `index.css` (los `@import` de CSS deben ir antes de las reglas).
+ * No hace falta que vaya después de Tailwind: todos los selectores de aquí tienen más
+ * especificidad que la utilidad a la que sustituyen. Las variantes responsive (`sm:…`) se
+ * repiten con la misma especificidad dentro de su `@media` para que sigan ganando a la base,
+ * como hacían antes.
+ */
+
+/* Cifras tabulares en cualquier texto de la piel. */
+html[data-ui="v2"] [data-skin] {
+  font-variant-numeric: tabular-nums;
+}
+
+/* ── Tamaños: el extremo pequeño sube 1 px, el grande 2 px ───────────────────────── */
+
+html[data-ui="v2"] [data-skin] .text-\[8px\] { font-size: var(--skin-type-8); }
+html[data-ui="v2"] [data-skin] .text-\[9px\] { font-size: var(--skin-type-9); }
+html[data-ui="v2"] [data-skin] .text-\[10px\] { font-size: var(--skin-type-10); }
+html[data-ui="v2"] [data-skin] .text-\[11px\] { font-size: var(--skin-type-11); }
+html[data-ui="v2"] [data-skin] .text-\[12px\] { font-size: var(--skin-type-12); }
+html[data-ui="v2"] [data-skin] .text-\[13px\] { font-size: var(--skin-type-13); }
+html[data-ui="v2"] [data-skin] .text-\[14px\] { font-size: var(--skin-type-14); }
+html[data-ui="v2"] [data-skin] .text-\[15px\] { font-size: var(--skin-type-15); }
+html[data-ui="v2"] [data-skin] .text-\[17px\] { font-size: var(--skin-type-17); }
+html[data-ui="v2"] [data-skin] .text-\[18px\] { font-size: var(--skin-type-18); }
+html[data-ui="v2"] [data-skin] .text-xs { font-size: var(--skin-type-xs); }
+html[data-ui="v2"] [data-skin] .text-sm { font-size: var(--skin-type-sm); }
+html[data-ui="v2"] [data-skin] .text-base { font-size: var(--skin-type-base); }
+html[data-ui="v2"] [data-skin] .text-lg { font-size: var(--skin-type-lg); }
+html[data-ui="v2"] [data-skin] .text-xl { font-size: var(--skin-type-xl); }
+html[data-ui="v2"] [data-skin] .text-2xl { font-size: var(--skin-type-2xl); }
+html[data-ui="v2"] [data-skin] .text-3xl { font-size: var(--skin-type-3xl); }
+
+/* ── Radios: 10 px en fichas, 12/14 px en tarjetas ───────────────────────────────── */
+
+html[data-ui="v2"] [data-skin] .rounded-md { border-radius: var(--skin-radius-md); }
+html[data-ui="v2"] [data-skin] .rounded-lg { border-radius: var(--skin-radius-lg); }
+html[data-ui="v2"] [data-skin] .rounded-xl { border-radius: var(--skin-radius-xl); }
+html[data-ui="v2"] [data-skin] .rounded-2xl { border-radius: var(--skin-radius-2xl); }
+html[data-ui="v2"] [data-skin] .rounded-3xl { border-radius: var(--skin-radius-3xl); }
+html[data-ui="v2"] [data-skin] .rounded-t-3xl {
+  border-top-left-radius: var(--skin-radius-3xl);
+  border-top-right-radius: var(--skin-radius-3xl);
+}
+
+/* ── Sombras: borde de 1 px en claro, anillo en oscuro ──────────────────────────── */
+
+html[data-ui="v2"] [data-skin] .shadow-xs { box-shadow: var(--skin-shadow-xs); }
+html[data-ui="v2"] [data-skin] .shadow-sm { box-shadow: var(--skin-shadow-sm); }
+html[data-ui="v2"] [data-skin] .shadow-card { box-shadow: var(--skin-shadow-card); }
+
+/* La tarjeta agrupada lleva `dark:shadow-none`; en oscuro el anillo lo pone la piel. */
+html[data-ui="v2"].dark [data-skin] .shadow-card.shadow-none {
+  box-shadow: var(--skin-shadow-card);
+}
+
+/* ── Detalles de dirección ──────────────────────────────────────────────────────── */
+
+/* Rótulo de sección: marca de cobalto de 12 × 2 px delante del texto. */
+html[data-ui="v2"] [data-skin] .section-header::before {
+  content: '';
+  display: inline-block;
+  width: 12px;
+  height: 2px;
+  margin-right: 8px;
+  vertical-align: middle;
+  border-radius: 1px;
+  background-color: rgb(var(--action));
+}
+
+/* Chips de icono de las fichas: fondo neutro; el color se queda en el icono. */
+html[data-ui="v2"] [data-skin] .chip {
+  background-color: rgb(var(--sunken));
+}
+
+/* ── Variantes responsive con la misma especificidad, para no perder la base ─────── */
+
+@media (min-width: 640px) {
+  html[data-ui="v2"] [data-skin] .sm\:text-base { font-size: var(--skin-type-base); }
+  html[data-ui="v2"] [data-skin] .sm\:text-lg { font-size: var(--skin-type-lg); }
+  html[data-ui="v2"] [data-skin] .sm\:text-xl { font-size: var(--skin-type-xl); }
+  html[data-ui="v2"] [data-skin] .sm\:text-2xl { font-size: var(--skin-type-2xl); }
+  html[data-ui="v2"] [data-skin] .sm\:text-3xl { font-size: var(--skin-type-3xl); }
+  html[data-ui="v2"] [data-skin] .sm\:rounded-2xl { border-radius: var(--skin-radius-2xl); }
+  html[data-ui="v2"] [data-skin] .sm\:rounded-3xl { border-radius: var(--skin-radius-3xl); }
+}
+
+/* ── Shell «Panel» (Capa 5, PR 1, D13): barras y lienzo ──────────────────────────────
+ *
+ * `data-skin="shell"` está en la raíz de `Dashboard`: aporta los tokens de la piel (el lienzo
+ * `bg-sunken-2` pasa a gris azulado frío sin tocar la clase) y las reglas de arriba a todo el
+ * shell. Aquí solo se sustituye el material: cristal translúcido → superficie sólida con
+ * borde de 1 px. Alturas, z-index y objetivos táctiles no cambian (`--nav-h` intacto).
+ */
+
+/* Cabecera: superficie sólida, sin desenfoque, filete inferior de 1 px. */
+html[data-ui="v2"] [data-skin="shell"] .glass-nav {
+  background-color: rgb(var(--surface));
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+  border-bottom: 1px solid rgb(var(--line));
+}
+
+/* Pestañas de escritorio: carril hundido; la activa es una ficha con anillo. */
+html[data-ui="v2"] [data-skin="shell"] [data-shell="tabs"] {
+  background-color: rgb(var(--sunken));
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+  box-shadow: inset 0 0 0 1px rgb(var(--line));
+  border-radius: var(--skin-radius-xl);
+}
+html[data-ui="v2"] [data-skin="shell"] [data-shell="tabs"] > a {
+  border-radius: var(--skin-radius-lg);
+}
+
+/* Botón de tema: ficha cuadrada con anillo en vez de círculo relleno. */
+html[data-ui="v2"] [data-skin="shell"] [data-shell="icon-btn"] {
+  background-color: rgb(var(--surface));
+  box-shadow: inset 0 0 0 1px rgb(var(--line));
+  border-radius: var(--skin-radius-lg);
+}
+
+/* Barra inferior: panel plano en vez de cápsula de cristal. Sin brillo interior ni sombra
+   profunda; el contorno lo da un borde de 1 px. */
+html[data-ui="v2"] [data-skin="shell"] .liquid-glass {
+  background: rgb(var(--surface));
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+  border: 1px solid rgb(var(--line));
+  box-shadow: var(--skin-shadow-sm);
+}
+html[data-ui="v2"] [data-skin="shell"] [data-shell="dock"] {
+  border-radius: var(--skin-radius-3xl);
+}
+html[data-ui="v2"] [data-skin="shell"] [data-shell="dock"] > a {
+  border-radius: var(--skin-radius-2xl);
+}
+html[data-ui="v2"] [data-skin="shell"] a.liquid-glass {
+  border-radius: var(--skin-radius-3xl);
+}
+/* Pestaña activa: fondo hundido + color de acción, sin inset de cristal. */
+html[data-ui="v2"] [data-skin="shell"] .liquid-glass-active {
+  background: rgb(var(--sunken));
+  box-shadow: none;
+}
+
+/* ── Actividades «Panel» (Capa 5, PR 3): lista, filtros y alta manual ─────────────────
+ *
+ * Los `data-history` / `data-modal` son ganchos inertes en v1. Todo lo de aquí va detrás de
+ * `html[data-ui="v2"]`: v1 no cambia. La altura de fila (64 px) no se toca: la lista está
+ * virtualizada y estima ese tamaño.
+ */
+
+/* Filtros en móvil: búsqueda a ancho completo; deporte y periodo en una sola fila de 2 columnas
+   (antes eran 3 filas apiladas que se comían el primer vistazo). */
+@media (max-width: 639px) {
+  html[data-ui="v2"] [data-skin="history"] [data-history="filters"] {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+  }
+  html[data-ui="v2"] [data-skin="history"] [data-history="search"] {
+    grid-column: 1 / -1;
+  }
+}
+
+/* Cabecera de filtros y recuento: superficie hundida, sin tintes translúcidos. */
+html[data-ui="v2"] [data-skin="history"] [data-history="filters"],
+html[data-ui="v2"] [data-skin="history"] [data-history="count"] {
+  background-color: rgb(var(--sunken));
+  border-bottom-color: rgb(var(--line));
+}
+
+/* Recuento: rótulo con la marca de cobalto de la piel. */
+html[data-ui="v2"] [data-skin="history"] [data-history="count"] > span::before {
+  content: '';
+  display: inline-block;
+  width: 12px;
+  height: 2px;
+  margin-right: 8px;
+  vertical-align: middle;
+  border-radius: 1px;
+  background-color: rgb(var(--action));
+}
+
+/* Filas: filete de 1 px del token de línea y fondo plano al tocar. */
+html[data-ui="v2"] [data-skin="history"] [data-history="row"] {
+  border-bottom-color: rgb(var(--line));
+}
+html[data-ui="v2"] [data-skin="history"] [data-history="row"]:hover,
+html[data-ui="v2"] [data-skin="history"] [data-history="row"]:active {
+  background-color: rgb(var(--sunken));
+}
+
+/* Borrar: objetivo táctil de 44 px (la fila mide 64, cabe) con el icono como estaba. */
+html[data-ui="v2"] [data-skin="history"] [data-history="delete"] {
+  width: 44px;
+  height: 44px;
+  border-radius: var(--skin-radius-lg);
+}
+
+/* Estado vacío: tarjeta centrada con el mismo rótulo de la piel. */
+html[data-ui="v2"] [data-skin="history"] [data-history="empty"] {
+  background-color: rgb(var(--surface));
+}
+
+/* Alta manual: panel con borde de 1 px del token y sombra de la piel; cerrar a 44 px. */
+html[data-ui="v2"] [role="dialog"][aria-labelledby="add-activity-title"] {
+  border-color: rgb(var(--line));
+  box-shadow: var(--skin-shadow-card);
+}
+html[data-ui="v2"] [role="dialog"][aria-labelledby="add-activity-title"] [data-modal="close"] {
+  width: 44px;
+  height: 44px;
+  border-radius: var(--skin-radius-lg);
+}
+html[data-ui="v2"] [role="dialog"][aria-labelledby="add-activity-title"] [data-modal="submit"] {
+  min-height: 48px;
+  border-radius: var(--skin-radius-xl);
+}
+
+/* ── Ajustes «Panel» (Capa 5, PR 2b): `data-skin="profile"` ───────────────────────────
+ *
+ * Primer vistazo móvil (390 px): título, selector de sección, ficha de perfil compacta y las
+ * métricas clave sin scroll. Todo detrás de `html[data-ui="v2"]`; v1 no cambia. Alturas de
+ * fila y botones ≥ 44 px (RF8).
+ */
+
+/* Cabecera: filete con el token de línea y «Guardar» como ficha de 10 px, no píldora. */
+html[data-ui="v2"] [data-skin="profile"] [data-profile="header"] {
+  border-bottom-color: rgb(var(--line));
+}
+html[data-ui="v2"] [data-skin="profile"] [data-profile="save"] {
+  min-height: 44px;
+  padding-left: 16px;
+  padding-right: 16px;
+  border-radius: var(--skin-radius-lg);
+  box-shadow: none;
+}
+
+/* Selector de sección móvil: carril hundido con anillo, la activa es una ficha. */
+html[data-ui="v2"] [data-skin="profile"] [data-profile="section-tabs"] {
+  background-color: rgb(var(--sunken));
+  box-shadow: inset 0 0 0 1px rgb(var(--line));
+  border-radius: var(--skin-radius-xl);
+  padding: 3px;
+  gap: 2px;
+}
+html[data-ui="v2"] [data-skin="profile"] [data-profile="section-tabs"] > button {
+  flex: 1 0 auto;
+  min-height: 44px;
+  border-radius: var(--skin-radius-lg);
+}
+
+/* Filas de formulario: objetivo táctil de 44 px. */
+html[data-ui="v2"] [data-skin="profile"] [data-profile="row"] {
+  min-height: 44px;
+}
+
+/* Ficha de perfil: más compacta en móvil para dejar las métricas dentro del primer vistazo. */
+@media (max-width: 639px) {
+  html[data-ui="v2"] [data-skin="profile"] [data-profile="banner"] {
+    padding: 12px;
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+}
+
+/* Insignia «Atleta Forma»: neutra, el cobalto se reserva para la acción. */
+html[data-ui="v2"] [data-skin="profile"] [data-profile="badge"] {
+  background-color: rgb(var(--sunken));
+  border-color: rgb(var(--line));
+  color: rgb(var(--action));
+}
+
+/* ── Dashboard «Panel» (Capa 5, PR 4b): `data-skin="dashboard"` ───────────────────────
+ *
+ * Primer vistazo móvil (390 px), sin scroll ni desplegar: Estado de Forma (compacto), las 4
+ * métricas de Fisiología y Carga (2 × 2) y la gráfica de evolución con su selector de rango.
+ * «Tendencia y Capacidad» (rampa, monotonía, volumen, VO2) queda plegada tras un botón de 44 px
+ * (solo v2 y <768 px; en escritorio se ve todo, como antes). Los `data-dash` son inertes en v1
+ * y el botón de pliegue solo se pinta en v2. Todo detrás de `html[data-ui="v2"]`.
+ */
+
+/* Escritorio: Estado de Forma y fichas con el filete de la piel. */
+html[data-ui="v2"] [data-skin="dashboard"] [data-dash="hero"] > div:first-child > div:first-child {
+  background: rgb(var(--sunken));
+  color: rgb(var(--action));
+  box-shadow: inset 0 0 0 1px rgb(var(--line));
+}
+
+@media (max-width: 767px) {
+  /* Orden móvil: forma, métricas, gráfica y, al final, lo plegado. */
+  html[data-ui="v2"] [data-skin="dashboard"][data-dash="root"] {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding-bottom: 16px;
+  }
+  html[data-ui="v2"] [data-skin="dashboard"][data-dash="root"] > * { margin: 0; }
+  html[data-ui="v2"] [data-skin="dashboard"] [data-dash="hero"] { order: 1; padding: 12px; gap: 8px; }
+  html[data-ui="v2"] [data-skin="dashboard"] [data-dash="primary"] { order: 2; }
+  html[data-ui="v2"] [data-skin="dashboard"] [data-dash="chart"] { order: 3; }
+  html[data-ui="v2"] [data-skin="dashboard"] [data-dash="secondary"] { order: 4; }
+
+  /* Fichas primarias más bajas: la gráfica entra en la primera pantalla. */
+  html[data-ui="v2"] [data-skin="dashboard"] [data-dash="primary"] > p { margin-bottom: 6px; }
+  html[data-ui="v2"] [data-skin="dashboard"] [data-dash="primary"] > div { gap: 8px; }
+
+  /* Pliegue: el rótulo lo sustituye el botón; cerrado oculta la rejilla. */
+  html[data-ui="v2"] [data-skin="dashboard"] [data-dash="secondary-title"] { display: none; }
+  html[data-ui="v2"] [data-skin="dashboard"] [data-dash="more-toggle"] { margin-bottom: 8px; }
+  html[data-ui="v2"] [data-skin="dashboard"] [data-dash="secondary-grid"][data-open="false"] {
+    display: none;
+  }
+}
+
+/* Escritorio: el botón de pliegue no existe y la rejilla siempre se ve (md:hidden ya lo
+   oculta; esto cubre el caso de que la rejilla quedase cerrada al ensanchar la ventana). */
+@media (min-width: 768px) {
+  html[data-ui="v2"] [data-skin="dashboard"] [data-dash="secondary-grid"][data-open="false"] {
+    display: grid;
+  }
+}
+
+/* Botón de pliegue: ficha con filete de la piel; el cobalto marca el foco, no el reposo. */
+html[data-ui="v2"] [data-skin="dashboard"] [data-dash="more-toggle"] {
+  border-color: rgb(var(--line));
+  border-radius: var(--skin-radius-lg);
+}
+html[data-ui="v2"] [data-skin="dashboard"] [data-dash="more-toggle"]:active {
+  background-color: rgb(var(--sunken));
+}
+
+/* ── FuelingPanel «Panel» (Capa 5, PR 4b): `data-fueling` ─────────────────────────────
+ *
+ * Vive dentro del visor de entrenos del Calendario (no tiene `data-skin` propio), por eso los
+ * selectores son por `data-fueling`. Filas con el filete de la piel, botón de explicación de
+ * 44 px y fichas de gasto/IF que se parten en móvil en vez de desbordar.
+ */
+html[data-ui="v2"] [data-fueling="row"],
+html[data-ui="v2"] [data-fueling="note"] {
+  border-color: rgb(var(--line));
+  border-radius: var(--skin-radius-lg);
+  background-color: rgb(var(--surface));
+}
+html[data-ui="v2"] [data-fueling="why"] {
+  background-color: rgb(var(--sunken));
+  border-top-color: rgb(var(--line));
+}
+html[data-ui="v2"] [data-fueling="info"] {
+  min-width: 44px;
+  min-height: 44px;
+  margin-top: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--skin-radius-lg);
+}
+html[data-ui="v2"] [data-fueling="chips"] { flex-wrap: wrap; }
+html[data-ui="v2"] [data-fueling="chips"] > div {
+  border-radius: var(--skin-radius-lg);
+  box-shadow: none;
+  background-color: rgb(var(--sunken));
+}
+
+/* ── Rendimiento «Panel» (Capa 5, PR 5): orden y densidad de las 10 tarjetas ──────────
+ *
+ * Los `data-stats` / `data-card` son ganchos inertes en v1. Todo va detrás de
+ * `html[data-ui="v2"]`. El orden solo cambia en móvil (lista en columna con `order`): primero
+ * lo que responde «¿cómo estoy?» (estado de entreno, VFC), luego umbrales y balance.
+ * Escritorio conserva el orden del DOM.
+ */
+
+/* Tarjetas: filete y sombra del token de la piel (la receta v1 usa tintes translúcidos). */
+html[data-ui="v2"] [data-skin="stats"] [data-stats="card"] section > div:first-child {
+  border-color: rgb(var(--line));
+  box-shadow: var(--skin-shadow-card);
+}
+
+@media (max-width: 767px) {
+  html[data-ui="v2"] [data-skin="stats"][data-stats="page"] {
+    display: flex;
+    flex-direction: column;
+    padding-bottom: 32px;
+  }
+  html[data-ui="v2"] [data-skin="stats"] [data-stats="header"] {
+    order: 0;
+    padding-top: 16px;
+    padding-bottom: 12px;
+  }
+  html[data-ui="v2"] [data-skin="stats"] [data-stats="header"] h2 {
+    font-size: 26px;
+  }
+  html[data-ui="v2"] [data-skin="stats"] [data-stats="tabs"] {
+    order: 1;
+    margin-bottom: 12px;
+  }
+  /* Pestañas de sección: objetivo táctil de 44 px. */
+  html[data-ui="v2"] [data-skin="stats"] [data-stats="tabs"] button {
+    min-height: 44px;
+  }
+
+  html[data-ui="v2"] [data-skin="stats"] [data-stats="card"] { order: 10; }
+  html[data-ui="v2"] [data-skin="stats"] [data-card="status"] { order: 2; }
+  html[data-ui="v2"] [data-skin="stats"] [data-card="hrv"] { order: 3; }
+  html[data-ui="v2"] [data-skin="stats"] [data-card="thresholds"] { order: 4; }
+  html[data-ui="v2"] [data-skin="stats"] [data-card="balance"] { order: 5; }
+
+  /* Densidad: menos aire entre tarjetas y dentro de ellas. */
+  html[data-ui="v2"] [data-skin="stats"] [data-stats="card"] section {
+    margin-bottom: 12px;
+  }
+  html[data-ui="v2"] [data-skin="stats"] [data-stats="card"] section > div:first-child {
+    padding: 16px;
+  }
+  html[data-ui="v2"] [data-skin="stats"] [data-stats="card"] section > div:first-child > div:first-child {
+    margin-bottom: 12px;
+  }
+}
+
+/* ── Salud «Panel» (Capa 5, PR 6b): `data-skin="health"` ──────────────────────────────
+ *
+ * Primer vistazo móvil (390 px), sin scroll: título y selector Hoy/Historial, los tres
+ * pilares (recuperación, carga, sueño) como filas compactas con el anillo a 96 px, y el
+ * banco de energía. Plegado/debajo: biomarcadores y aspectos destacados. Todo detrás de
+ * `html[data-ui="v2"]`; v1 no cambia. Objetivos táctiles ≥ 44 px (RF8).
+ */
+
+/* Selectores Hoy/Historial y 7D/14D/30D: carril hundido con anillo, activa como ficha. */
+html[data-ui="v2"] [data-skin="health"] [data-health="view-tabs"],
+html[data-ui="v2"] [data-skin="health"] [data-health="range"] {
+  background-color: rgb(var(--sunken));
+  box-shadow: inset 0 0 0 1px rgb(var(--line));
+  border-radius: var(--skin-radius-xl);
+}
+html[data-ui="v2"] [data-skin="health"] [data-health="view-tabs"] > button,
+html[data-ui="v2"] [data-skin="health"] [data-health="range"] > button {
+  min-height: 44px;
+  min-width: 44px;
+  border-radius: var(--skin-radius-lg);
+}
+
+/* Fichas de día del historial: objetivo táctil y radio de la piel. */
+html[data-ui="v2"] [data-skin="health"] [data-health="day"] {
+  min-height: 64px;
+  border-radius: var(--skin-radius-xl);
+}
+html[data-ui="v2"] [data-skin="health"] [data-health="log-row"] {
+  min-height: 60px;
+}
+
+/* Banco de energía: tarjeta plana sin degradado, con el filete del token. */
+html[data-ui="v2"] [data-skin="health"] [data-health="energy"] {
+  background-image: none;
+  background-color: rgb(var(--surface));
+  border-color: rgb(var(--line));
+  box-shadow: var(--skin-shadow-card);
+}
+
+@media (max-width: 639px) {
+  /* Pilares: fila por tarjeta (anillo a la izquierda, estado y pie a la derecha). */
+  html[data-ui="v2"] [data-skin="health"] [data-health="pillars"] {
+    gap: 8px;
+  }
+  html[data-ui="v2"] [data-skin="health"] [data-health="pillar"] {
+    display: grid;
+    grid-template-columns: 96px 1fr;
+    grid-template-rows: auto auto;
+    column-gap: 14px;
+    align-items: center;
+    padding: 10px 14px;
+    text-align: left;
+  }
+  html[data-ui="v2"] [data-skin="health"] [data-health="pillar"] [data-health="ring"] {
+    grid-column: 1;
+    grid-row: 1 / span 2;
+  }
+  html[data-ui="v2"] [data-skin="health"] [data-health="pillar"] [data-health="ring"] svg {
+    width: 96px;
+    height: 96px;
+  }
+  html[data-ui="v2"] [data-skin="health"] [data-health="ring-icon"] {
+    display: none;
+  }
+  html[data-ui="v2"] [data-skin="health"] [data-health="ring-value"] {
+    font-size: 24px;
+    line-height: 1;
+  }
+  html[data-ui="v2"] [data-skin="health"] [data-health="ring-title"] {
+    font-size: 8px;
+    letter-spacing: 0.04em;
+    max-width: 64px;
+    line-height: 1.1;
+  }
+  html[data-ui="v2"] [data-skin="health"] [data-health="pillar-head"] {
+    grid-column: 2;
+    grid-row: 1;
+    margin-bottom: 4px;
+    align-self: end;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+  }
+  html[data-ui="v2"] [data-skin="health"] [data-health="pillar-foot"] {
+    grid-column: 2;
+    grid-row: 2;
+    margin-top: 0;
+    padding-top: 0;
+    border-top: 0;
+    text-align: left;
+    align-self: start;
+  }
+
+  /* Banco de energía compacto. */
+  html[data-ui="v2"] [data-skin="health"] [data-health="energy"] {
+    padding: 12px 14px;
+    gap: 10px;
+  }
+}
+
+/* ── Salud: movimiento y energía (estilo «medidor») ───────────────────────────────────
+ *
+ * Los anillos se dibujan al entrar, las tarjetas aparecen escalonadas, la barra de energía
+ * se llena y los pilares brillan con su propio color (solo en oscuro). Solo transform,
+ * opacity y trazo: nada que mueva la maquetación. Se apaga con `prefers-reduced-motion`.
+ */
+@keyframes health-ring-draw {
+  from { stroke-dashoffset: 459px; }
+}
+@keyframes health-rise {
+  from { opacity: 0; transform: translateY(14px); }
+  to { opacity: 1; transform: none; }
+}
+@keyframes health-fill {
+  from { transform: scaleX(0); }
+  to { transform: scaleX(1); }
+}
+@keyframes health-glow {
+  from { filter: drop-shadow(0 0 0 transparent); }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  html[data-ui="v2"] [data-skin="health"] [data-health="ring"] circle[stroke-dasharray] {
+    animation: health-ring-draw 1.3s cubic-bezier(0.22, 1, 0.36, 1) 0.15s both;
+  }
+  html[data-ui="v2"] [data-skin="health"] [data-health="pillar"],
+  html[data-ui="v2"] [data-skin="health"] [data-health="energy"],
+  html[data-ui="v2"] [data-skin="health"] [data-health="biomarker"],
+  html[data-ui="v2"] [data-skin="health"] [data-health="insight"],
+  html[data-ui="v2"] [data-skin="health"] [data-health="spotlight"],
+  html[data-ui="v2"] [data-skin="health"] [data-health="trend"],
+  html[data-ui="v2"] [data-skin="health"] [data-health="day"] {
+    animation: health-rise 0.55s cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+  html[data-ui="v2"] [data-skin="health"] [data-health="pillar"]:nth-child(2) { animation-delay: 0.08s; }
+  html[data-ui="v2"] [data-skin="health"] [data-health="pillar"]:nth-child(3) { animation-delay: 0.16s; }
+  html[data-ui="v2"] [data-skin="health"] [data-health="energy"] { animation-delay: 0.24s; }
+  html[data-ui="v2"] [data-skin="health"] [data-health="biomarker"]:nth-child(odd) { animation-delay: 0.3s; }
+  html[data-ui="v2"] [data-skin="health"] [data-health="biomarker"]:nth-child(even) { animation-delay: 0.36s; }
+  html[data-ui="v2"] [data-skin="health"] [data-health="insight"] { animation-delay: 0.4s; }
+
+  /* Barra de energía: se llena desde la izquierda. */
+  html[data-ui="v2"] [data-skin="health"] [data-health="energy"] .rounded-lg.h-full {
+    transform-origin: left center;
+    animation: health-fill 1.1s cubic-bezier(0.22, 1, 0.36, 1) 0.45s both;
+  }
+
+  /* Biomarcadores: se elevan al tocar o pasar. */
+  html[data-ui="v2"] [data-skin="health"] [data-health="biomarker"] {
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+  html[data-ui="v2"] [data-skin="health"] [data-health="biomarker"]:hover {
+    transform: translateY(-2px);
+  }
+}
+
+/* Cifras de los anillos: más grandes y en peso máximo, como un marcador. */
+html[data-ui="v2"] [data-skin="health"] [data-health="ring-value"] {
+  font-weight: 900;
+  letter-spacing: -0.04em;
+}
+
+/* Resplandor del anillo con su propio color (el trazo hereda `currentColor`). */
+html[data-ui="v2"].dark [data-skin="health"] [data-health="ring"] circle[stroke-dasharray] {
+  filter: drop-shadow(0 0 6px currentColor);
+}
+html[data-ui="v2"].dark [data-skin="health"] [data-health="pillar"] {
+  background-image: linear-gradient(180deg, rgb(var(--surface)), rgb(var(--sunken)));
+}
+
+/* ── Calendario «Panel» (Capa 5, PR 8c): `data-skin="calendar"` ───────────────────────
+ *
+ * Primer vistazo móvil (390 px), sin scroll: mes con «Hoy» y flechas a 44 px y los primeros
+ * días con sus sesiones; los días vacíos se compactan (antes ocupaban ~72 px cada uno).
+ * Escritorio: misma rejilla, solo piel. Datos de plan y rutinas (sesiones planificadas,
+ * `WorkoutViewerModal`, `PlannerModal`) con la misma piel. Los `data-cal` son ganchos inertes
+ * en v1. Todo detrás de `html[data-ui="v2"]`. Objetivos táctiles ≥ 44 px (RF8).
+ */
+
+/* Tarjeta del mes: borde de 1 px del token, sin sombra translúcida. */
+html[data-ui="v2"] [data-skin="calendar"][data-cal="root"] {
+  background-color: rgb(var(--surface));
+  border-color: rgb(var(--line));
+  box-shadow: var(--skin-shadow-card);
+  border-radius: var(--skin-radius-xl);
+}
+html[data-ui="v2"] [data-skin="calendar"] [data-cal="header"] {
+  border-bottom-color: rgb(var(--line));
+}
+
+/* «Hoy», conmutador de Forma y flechas: objetivo táctil de 44 px. */
+html[data-ui="v2"] [data-skin="calendar"] [data-cal="today-btn"] {
+  min-height: 44px;
+  min-width: 44px;
+  background-color: rgb(var(--sunken));
+  box-shadow: inset 0 0 0 1px rgb(var(--line));
+}
+html[data-ui="v2"] [data-skin="calendar"] [data-cal="pmc-toggle"] {
+  min-height: 44px;
+  border-radius: var(--skin-radius-lg);
+  box-shadow: none;
+}
+html[data-ui="v2"] [data-skin="calendar"] [data-cal="month-nav"] {
+  border-color: rgb(var(--line));
+  border-radius: var(--skin-radius-lg);
+}
+html[data-ui="v2"] [data-skin="calendar"] [data-cal="month-nav"] button {
+  width: 44px;
+  height: 44px;
+}
+
+/* Rejilla: filetes del token de línea. */
+html[data-ui="v2"] [data-skin="calendar"] [data-cal="week"],
+html[data-ui="v2"] [data-skin="calendar"] [data-cal="day"] {
+  border-color: rgb(var(--line));
+}
+
+/* Hoy: número en cobalto de la piel en lugar de rojo, y fondo hundido. */
+html[data-ui="v2"] [data-skin="calendar"] [data-cal="day"][data-today="true"] {
+  background-color: rgb(var(--sunken));
+}
+html[data-ui="v2"] [data-skin="calendar"] [data-cal="day"][data-today="true"] > div:first-child span:first-child {
+  background-color: rgb(var(--action));
+  box-shadow: none;
+}
+
+/* «+» de planificar: 44 px. */
+html[data-ui="v2"] [data-skin="calendar"] [data-cal="add"] {
+  width: 44px;
+  height: 44px;
+  margin: -8px -8px 0 0;
+}
+
+/* Sesiones: ficha plana con el radio de la piel; planificadas con borde discontinuo. */
+html[data-ui="v2"] [data-skin="calendar"] [data-cal="act"] {
+  background-color: rgb(var(--surface));
+  border-color: rgb(var(--line));
+  border-radius: var(--skin-radius-lg);
+  box-shadow: none;
+}
+html[data-ui="v2"] [data-skin="calendar"] [data-cal="act"][data-planned="true"] {
+  background-color: rgb(var(--sunken));
+  border-style: dashed;
+  --tw-ring-shadow: 0 0 transparent;
+}
+html[data-ui="v2"] [data-skin="calendar"] [data-cal="act"]:hover {
+  transform: none;
+  box-shadow: var(--skin-shadow-card);
+}
+
+@media (max-width: 1023px) {
+  /* Días vacíos compactos: solo cabecera del día (el «+» sigue a 44 px). */
+  html[data-ui="v2"] [data-skin="calendar"] [data-cal="day"] {
+    min-height: 58px;
+    padding: 6px 12px;
+  }
+  html[data-ui="v2"] [data-skin="calendar"] [data-cal="day"] > div:first-child {
+    margin-bottom: 4px;
+  }
+  html[data-ui="v2"] [data-skin="calendar"] [data-cal="act"] {
+    min-height: 60px;
+    padding: 10px 12px;
+  }
+}
+
+/* Modales de plan y rutina: panel con borde del token; cerrar y acciones a 44 px. */
+html[data-ui="v2"] [role="dialog"][aria-labelledby="plan-modal-title"],
+html[data-ui="v2"] [role="dialog"][aria-labelledby="plan-viewer-title"] {
+  border-color: rgb(var(--line));
+  box-shadow: var(--skin-shadow-card);
+}
+html[data-ui="v2"] [data-cal="modal-close"] {
+  width: 44px;
+  height: 44px;
+  border-radius: var(--skin-radius-lg);
+}
+html[data-ui="v2"] [data-cal="modal-secondary"],
+html[data-ui="v2"] [data-cal="modal-delete"] {
+  min-height: 44px;
+}
+html[data-ui="v2"] [data-cal="modal-submit"] {
+  min-height: 44px;
+  border-radius: var(--skin-radius-xl);
+}
+
+/* ── Detalle «Panel» (Capa 5, PR 7b): `data-skin="detail"` ─────────────────────────────
+ *
+ * Los `data-detail` son ganchos inertes en v1. Primer vistazo móvil (390 px): cabecera con
+ * acciones y pestañas a 44 px, mapa con filete de la piel, cuadrícula de métricas y, justo
+ * debajo, picos y gráficas (sus colores salen de `useChartTheme()`, que ya sirve la variante
+ * v2). Plegado/debajo: panel lateral de impacto del entrenamiento. Todo detrás de
+ * `html[data-ui="v2"]`; v1 no cambia. Objetivos táctiles ≥ 44 px (RF8).
+ */
+
+/* Cabecera: hoja plana sobre el lienzo, con filete en vez de desenfoque. */
+html[data-ui="v2"] [data-skin="detail"] [data-detail="header"] {
+  background-color: rgb(var(--surface));
+  border-bottom: 1px solid rgb(var(--line));
+}
+
+/* Pestañas móviles: carril hundido con anillo, activa como ficha (como Salud). */
+html[data-ui="v2"] [data-skin="detail"] [data-detail="tabs"] {
+  background-color: rgb(var(--sunken));
+  box-shadow: inset 0 0 0 1px rgb(var(--line));
+  border-radius: var(--skin-radius-xl);
+}
+html[data-ui="v2"] [data-skin="detail"] [data-detail="tabs"] > button {
+  min-height: 44px;
+  border-radius: var(--skin-radius-lg);
+}
+
+/* Mapa y gráficas: filete y sombra del token de la piel. */
+html[data-ui="v2"] [data-skin="detail"] [data-detail="map"],
+html[data-ui="v2"] [data-skin="detail"] [data-detail="charts"] {
+  border-color: rgb(var(--line));
+  border-radius: var(--skin-radius-3xl);
+  box-shadow: var(--skin-shadow-card);
+}
+html[data-ui="v2"] [data-skin="detail"] [data-detail="map-types"],
+html[data-ui="v2"] [data-skin="detail"] [data-detail="map-note"] {
+  background-color: rgb(var(--surface));
+  border-color: rgb(var(--line));
+  border-radius: var(--skin-radius-lg);
+  box-shadow: var(--skin-shadow-sm);
+}
+html[data-ui="v2"] [data-skin="detail"] [data-detail="sidebar"] {
+  border-color: rgb(var(--line));
+}
+
+@media (max-width: 1023px) {
+  /* Acciones de la cabecera: objetivo táctil de 44 px (Volver, Strava, Eliminar). */
+  html[data-ui="v2"] [data-skin="detail"] [data-detail="action"] {
+    min-width: 44px;
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+  /* Selector de capas del mapa: objetivo táctil de 44 px. */
+  html[data-ui="v2"] [data-skin="detail"] [data-detail="map-types"] > button {
+    min-height: 44px;
+    min-width: 44px;
+  }
+  /* Tira de picos: chips con objetivo táctil de 44 px (siguen deslizando en horizontal). */
+  html[data-ui="v2"] [data-skin="detail"] [data-detail="peaks"] > button {
+    min-height: 44px;
+  }
+  /* Métricas: más aire entre filas. */
+  html[data-ui="v2"] [data-skin="detail"] [data-detail="stats"] {
+    gap: 12px 8px;
+  }
+}
+
+/* ── Objetivos táctiles ≥ 44 px en móvil (fix/touch-targets-v2; RF4/RF8) ───────────────────
+ *
+ * Solo v2 y solo < 640 px: v1 y escritorio no cambian. Se amplía el tamaño real (no un
+ * pseudo-elemento) para que `smallTouchTargets` y el dedo midan lo mismo. La cabecera sigue en
+ * `--nav-h` (60 px): sus controles de 44 px caben con margen.
+ */
+@media (max-width: 639px) {
+  /* Cabecera: menú de perfil, botón de tema y «Conectar». */
+  html[data-ui="v2"] [data-skin="shell"] .glass-nav button[aria-label="Menú de configuración y perfil"] {
+    min-height: 44px;
+  }
+  html[data-ui="v2"] [data-skin="shell"] [data-shell="icon-btn"] {
+    width: 44px;
+    height: 44px;
+  }
+  /* «Conectar» viene reducido a 0,9 con `scale-90`: se anula para que el botón mida 44 de verdad. */
+  html[data-ui="v2"] [data-skin="shell"] .glass-nav .scale-90 {
+    transform: none;
+  }
+  html[data-ui="v2"] [data-skin="shell"] .glass-nav .scale-90 > button {
+    min-height: 44px;
+  }
+
+  /* Selectores de rango: Dashboard (7D/30D/3M/Todo) y tarjetas de Rendimiento (7D/30D/90D…). */
+  html[data-ui="v2"] [data-dash="range-btn"],
+  html[data-ui="v2"] [data-skin="stats"] button[aria-pressed] {
+    min-height: 44px;
+  }
+
+  /* Actividades: buscador, filtros y alta manual. */
+  html[data-ui="v2"] [data-skin="history"] [data-history="filters"] input,
+  html[data-ui="v2"] [data-skin="history"] [data-history="filters"] select,
+  html[data-ui="v2"] [data-history="add"] {
+    min-height: 44px;
+  }
+
+  /* Perfil: «Volver» (era un icono de 18 px). */
+  html[data-ui="v2"] [data-skin="profile"] [data-profile="header"] button[aria-label="Volver"] {
+    min-width: 44px;
+    min-height: 44px;
+    justify-content: center;
+  }
+}

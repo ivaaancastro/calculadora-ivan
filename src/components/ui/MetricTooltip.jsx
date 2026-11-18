@@ -106,6 +106,7 @@ export function MetricTooltip({ metricId, label, description, children }) {
       <div
         ref={triggerRef}
         role="button"
+        data-metric-trigger=""
         tabIndex={0}
         aria-label={`Más información sobre ${finalLabel}`}
         aria-describedby={open ? describedById : undefined}
