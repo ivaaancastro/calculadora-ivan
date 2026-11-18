@@ -825,3 +825,9 @@ html[data-ui="v2"] [data-skin="detail"] [data-detail="sidebar"] {
     justify-content: center;
   }
 }
+
+/* Tarjetas explicativas del detalle: zona táctil ≥ 44 px solo en v2 (v1 intacta). */
+html[data-ui="v2"] [data-metric-trigger] {
+  min-height: 44px;
+  min-width: 44px;
+}
