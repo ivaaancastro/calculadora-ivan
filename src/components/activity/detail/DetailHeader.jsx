@@ -1,7 +1,7 @@
 import React from 'react';
 import { ArrowLeft, Trash2 } from 'lucide-react';
 import { formatMinsToHMM } from '../../../utils/formatters';
-import { IconButton, Segmented, Stat } from '../../ui';
+import { IconButton, Segmented, Stat, MetricTooltip } from '../../ui';
 
 export const DetailHeader = ({ activity, activeTab, setActiveTab, onBack, onDelete, dateStr, speedMetric, proMetrics, isPaceBased }) => (
             <header data-detail="header" className="glass-nav px-3.5 py-2 sm:px-6 sm:py-3 shrink-0 z-nav">
@@ -93,21 +93,21 @@ export const DetailHeader = ({ activity, activeTab, setActiveTab, onBack, onDele
 
                 {/* Expanded Compact Metric Grid - Desktop Solo (en móvil se muestra en cuadrícula bajo el Mapa) */}
                 <div className="hidden lg:flex items-center gap-2 py-1 overflow-x-auto hide-scrollbar touch-scroll overscroll-contain sm:flex-wrap -mx-3 px-3 sm:mx-0 sm:px-0 mt-2">
-                    <Stat label="Distancia" value={(activity.distance / 1000).toFixed(2)} unit="km" />
-                    <Stat label="Tiempo" value={formatMinsToHMM(activity.duration)} />
-                    <Stat label="Desnivel" value={activity.elevation_gain || 0} unit="m" />
-                    <Stat label="Carga" value={Math.round(activity.tss || 0)} unit="TSS" accent="text-load" />
-                    {proMetrics.ifFactor > 0 && <Stat label="IF" value={proMetrics.ifFactor} accent="text-power" />}
-                    {proMetrics.workKj > 0 && <Stat label="Trabajo" value={proMetrics.workKj} unit="kJ" />}
-                    {activity.hr_avg > 0 && <Stat label="FC Media" value={activity.hr_avg} unit="bpm" accent="text-hr" />}
-                    {speedMetric && <Stat label={speedMetric.label} value={speedMetric.value} unit={speedMetric.unit} accent="text-speed" />}
-                    {proMetrics.avgWatts > 0 && <Stat label="W Media" value={proMetrics.avgWatts} unit="w" accent="text-power" />}
-                    {proMetrics.npWatts > 0 && <Stat label="NP" value={proMetrics.npWatts} unit="w" accent="text-power-strong" />}
-                    {proMetrics.efObj && <Stat label="EF" value={proMetrics.efObj.value} unit={proMetrics.efObj.unit} />}
+                    <MetricTooltip metricId="distance"><Stat label="Distancia" value={(activity.distance / 1000).toFixed(2)} unit="km" /></MetricTooltip>
+                    <MetricTooltip metricId="duration"><Stat label="Tiempo" value={formatMinsToHMM(activity.duration)} /></MetricTooltip>
+                    <MetricTooltip metricId="elevation"><Stat label="Desnivel" value={activity.elevation_gain || 0} unit="m" /></MetricTooltip>
+                    <MetricTooltip metricId="tss"><Stat label="Carga" value={Math.round(activity.tss || 0)} unit="TSS" accent="text-load" /></MetricTooltip>
+                    {proMetrics.ifFactor > 0 && <MetricTooltip metricId="if"><Stat label="IF" value={proMetrics.ifFactor} accent="text-power" /></MetricTooltip>}
+                    {proMetrics.workKj > 0 && <MetricTooltip metricId="work"><Stat label="Trabajo" value={proMetrics.workKj} unit="kJ" /></MetricTooltip>}
+                    {activity.hr_avg > 0 && <MetricTooltip metricId="hrAvg"><Stat label="FC Media" value={activity.hr_avg} unit="bpm" accent="text-hr" /></MetricTooltip>}
+                    {speedMetric && <MetricTooltip metricId={speedMetric.label === 'Ritmo Medio' ? 'pace' : 'speed'}><Stat label={speedMetric.label} value={speedMetric.value} unit={speedMetric.unit} accent="text-speed" /></MetricTooltip>}
+                    {proMetrics.avgWatts > 0 && <MetricTooltip metricId="wattsAvg"><Stat label="W Media" value={proMetrics.avgWatts} unit="w" accent="text-power" /></MetricTooltip>}
+                    {proMetrics.npWatts > 0 && <MetricTooltip metricId="np"><Stat label="NP" value={proMetrics.npWatts} unit="w" accent="text-power-strong" /></MetricTooltip>}
+                    {proMetrics.efObj && <MetricTooltip metricId="ef"><Stat label="EF" value={proMetrics.efObj.value} unit={proMetrics.efObj.unit} /></MetricTooltip>}
                     {proMetrics.decouplingObj && (
-                        <Stat label="Drift" value={proMetrics.decouplingObj.value} unit="%" accent={proMetrics.decouplingObj.color} />
+                        <MetricTooltip metricId="decoupling"><Stat label="Drift" value={proMetrics.decouplingObj.value} unit="%" accent={proMetrics.decouplingObj.color} /></MetricTooltip>
                     )}
-                    {proMetrics.cadenceAvg > 0 && <Stat label="Cadencia" value={proMetrics.cadenceAvg} unit={isPaceBased ? 'ppm' : 'rpm'} />}
+                    {proMetrics.cadenceAvg > 0 && <MetricTooltip metricId="cadence"><Stat label="Cadencia" value={proMetrics.cadenceAvg} unit={isPaceBased ? 'ppm' : 'rpm'} /></MetricTooltip>}
                 </div>
             </header>
 );

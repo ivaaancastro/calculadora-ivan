@@ -10,6 +10,7 @@
 - Conventional Commits. Producción **no se toca** durante el rediseño: todo va a `develop`.
 
 ## 1. Estado actual
+- **Tarjetas explicativas del detalle** (`feat/tarjetas-explicativas-detalle`, PR #101): `MetricTooltip` + textos en `activityMetricDescriptions.js`. El detalle por deporte (tarea 2) está en borrador en `wip/detalle-por-deporte`, sin spec aprobada.
 - **Proyecto:** Forma — dashboard de rendimiento deportivo y salud. Stack: React 19, Vite 7, Tailwind 3, Zustand, TanStack Query, Supabase, Vitest/MSW/Playwright.
 - **Fix en curso:** `fix/detail-back-map` (Volver del detalle y teselas Light/Dark del mapa; CARTO exige clave → Esri; sin estilos). Anterior: `fix/touch-targets-v2` (objetivos táctiles ≥ 44 px en v2 móvil; detalle en su `tasks.md`; 14 capturas v2 móviles pendientes de revisión D7).
 - **Rama actual:** `docs/screens-cierre` (Capa 5, PR 9 de 9: cierre documental). **Capa 5 implementada**: shell, Ajustes, Actividades, Dashboard, Rendimiento, Salud, Detalle y Calendario en v2 «Panel» (#84–#97). Detalle y paridad: `docs/branches/feat/screens-v2/tasks.md` y `docs/branches/test/ui-safety-net/paridad.md`. **Pendiente de la Capa 5:** pasada completa en iPhone real (usuario) con `docs/branches/feat/screens-v2/guion-iphone.md`. Siguiente: **Capa 6**.
