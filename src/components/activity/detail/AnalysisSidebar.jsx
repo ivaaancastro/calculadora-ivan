@@ -64,7 +64,7 @@ export const AnalysisSidebar = ({ showMap, activity, streams, themeColor, active
                                         </div>
 
                                         {/* Detailed Insights Slider-like cards */}
-                                        {fitnessAnalysis && (
+                                        {fitnessAnalysis && fitnessAnalysis.insights.length > 0 && (
                                             <div className="bg-slate-50/50 dark:bg-zinc-900/40 rounded-2xl p-4 border border-slate-100 dark:border-zinc-800/40">
                                                 <h4 className="text-[9px] font-bold text-ink-4 uppercase tracking-widest mb-3 flex items-center gap-2">
                                                     <div className="w-1 h-3 bg-indigo-500 rounded-full" />
