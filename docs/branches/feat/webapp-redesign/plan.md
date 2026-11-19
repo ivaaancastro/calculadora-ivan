@@ -109,7 +109,7 @@ En cada pantalla se define qué se ve en el primer vistazo en el móvil. En Dash
 **Hecho (2026-11-17), implementada:** 14 PR de código (#84–#97: shell, Ajustes, Actividades, Dashboard, Rendimiento, Salud, Detalle y Calendario, con sus refactors previos) y cierre documental (`docs/screens-cierre`). Lista de paridad completa en `docs/branches/test/ui-safety-net/paridad.md`; D8 cerrada (el interruptor «Vista previa v2» sigue en Ajustes → General hasta la Capa 6). **Pendiente:** la pasada completa en iPhone real, con el guion `docs/branches/feat/screens-v2/guion-iphone.md` (la ejecuta el usuario). Detalle en `docs/branches/feat/screens-v2/tasks.md`.
 
 ## Fase Premium (A–D) — antes de la Capa 6
-**Estado:** spec y plan **aprobados** (2026-11-19): `docs/branches/feat/premium-design/{spec,plan}.md`. A auditoría (solo análisis), B tokens y acabado v2, C capa de gráficas Forma (lenguaje de bklit-ui sin instalarlo), D pantallas (bloqueada hasta referencias). v1 congelada y `style-diff` 0 en v1.
+**Estado:** spec y plan **aprobados** (2026-11-19; alcance = todo el diseño; v1 no se protege porque se retira en la Capa 6): `docs/branches/feat/premium-design/{spec,plan}.md`. A auditoría (solo análisis), B tokens y acabado v2, C capa de gráficas Forma (lenguaje de bklit-ui sin instalarlo), D pantallas (bloqueada hasta referencias). v1 congelada y `style-diff` 0 en v1.
 
 ## Capa 6 — Activación y limpieza
 **Estado:** posterior a la Fase Premium (A–D). Requiere la pasada en iPhone real sin fallos bloqueantes.
