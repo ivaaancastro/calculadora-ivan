@@ -11,6 +11,11 @@ y este proyecto adhiere a [Semantic Versioning](https://semver.org/lang/es/).
 - `fix(detalle):` la tarjeta «Coach Insights» ya no sale vacía: frase nueva para IF 0,70–0,85 (intensidad moderada) y para «Mantenimiento»; la tarjeta no se pinta si no hay frases.
 - Las frases de IF y de pico de 5 min solo se generan en bici (donde el detalle por deporte muestra potencia). Lógica en `src/utils/coachInsights.js`.
 
+### Borrar actividad con confirmación (`feat/detalle-borrar-actividad`)
+- `fix(detalle):` la papelera del detalle estaba desconectada (`ActivityRouteWrapper` no pasaba `onDelete`); ahora abre un diálogo de confirmación y, al borrar, vuelve al origen (Actividades, Calendario o `/history` por URL directa) sin pantalla en blanco.
+- `fix(actividades):` la papelera de la lista de Actividades también confirma antes de borrar.
+- Diálogo `ConfirmDeleteActivityModal` (`Modal` variante `confirm`, `trapFocus`, foco inicial en Cancelar, Esc, sin cierre al tocar fuera) con aviso de Strava si hay `strava_id`; si falla el borrado queda abierto para reintentar. `deleteActivity` devuelve `true`/`false`. Botones `secondary` y `danger` nuevos en `Button`. Spec: `docs/branches/feat/detalle-borrar-actividad/`.
+
 ### Detalle de actividad por deporte (`feat/detalle-por-deporte`)
 - `feat(detalle):` el detalle se adapta al deporte (bici, carrera, senderismo/caminata, fuerza y genérico, detectado por `activity.type`, incluidos los tipos de Strava sin traducir): resumen, pestañas y bloques distintos; Kcal totales en todos; métricas sin dato no se muestran.
 - ClimbPro, bloque de potencia (IF/NP/Trabajo/W/EF) y zonas de potencia solo en bici; carrera con Drift y sin EF; senderismo/caminata con ritmo; fuerza sin Mapa ni Intervalos; sin GPS no hay pestaña Mapa.

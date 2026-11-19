@@ -229,7 +229,8 @@ function respondRows(route, rows) {
  * Intercepta Supabase (REST y auth) y bloquea el resto de la red externa
  * (fuentes de Google, teselas de mapas…) para que el render sea reproducible.
  *
- * `state.activities` permite a las pruebas de escritura añadir filas.
+ * `state.activities` permite a las pruebas de escritura añadir filas; los `DELETE` las quitan
+ * y con `state.failDelete = true` responden 500.
  */
 export async function mockNetwork(page, state = {}) {
   const activities = state.activities || [...MOCK_ACTIVITIES];
@@ -282,6 +283,13 @@ export async function mockNetwork(page, state = {}) {
       }));
       activities.push(...rows);
       return json(route, rows, 201);
+    }
+    if (req.method() === 'DELETE') {
+      if (state.failDelete) return json(route, { message: 'fallo simulado' }, 500);
+      const id = (url.searchParams.get('id') || '').replace(/^eq\./, '');
+      const i = activities.findIndex((r) => String(r.id) === id);
+      if (i >= 0) activities.splice(i, 1);
+      return route.fulfill({ status: 204, body: '' });
     }
     if (req.method() !== 'GET') return json(route, []);
 

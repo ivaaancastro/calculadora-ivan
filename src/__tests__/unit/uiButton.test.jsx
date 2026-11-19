@@ -16,6 +16,11 @@ describe('ui/Button recetas', () => {
     expect(classes(buttonClass({ variant: 'danger-text' }))).toEqual(classes('text-faint-fixed hover:text-danger transition-colors'));
   });
 
+  it('incluye secundario y peligro de ≥ 44 px', () => {
+    expect(buttonClass({ variant: 'secondary' })).toContain('min-h-[44px]');
+    expect(buttonClass({ variant: 'danger' })).toContain('bg-danger-solid');
+  });
+
   it('copia los botones de icono', () => {
     expect(classes(iconButtonClass({ variant: 'soft' }))).toEqual(
       classes('flex items-center justify-center bg-fill hover:bg-fill-hover active:scale-90 rounded-full transition-all text-body-soft-2'),
