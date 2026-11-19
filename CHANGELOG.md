@@ -7,6 +7,10 @@ y este proyecto adhiere a [Semantic Versioning](https://semver.org/lang/es/).
 
 ## [Unreleased]
 
+### Detalle de actividad: Coach Insights con texto (`fix/detalle-coach-insights`)
+- `fix(detalle):` la tarjeta «Coach Insights» ya no sale vacía: frase nueva para IF 0,70–0,85 (intensidad moderada) y para «Mantenimiento»; la tarjeta no se pinta si no hay frases.
+- Las frases de IF y de pico de 5 min solo se generan en bici (donde el detalle por deporte muestra potencia). Lógica en `src/utils/coachInsights.js`.
+
 ### Detalle de actividad por deporte (`feat/detalle-por-deporte`)
 - `feat(detalle):` el detalle se adapta al deporte (bici, carrera, senderismo/caminata, fuerza y genérico, detectado por `activity.type`, incluidos los tipos de Strava sin traducir): resumen, pestañas y bloques distintos; Kcal totales en todos; métricas sin dato no se muestran.
 - ClimbPro, bloque de potencia (IF/NP/Trabajo/W/EF) y zonas de potencia solo en bici; carrera con Drift y sin EF; senderismo/caminata con ritmo; fuerza sin Mapa ni Intervalos; sin GPS no hay pestaña Mapa.

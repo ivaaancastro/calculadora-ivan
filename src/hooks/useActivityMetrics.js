@@ -1,6 +1,7 @@
 import { useMemo } from 'react';
 import { formatPace, formatDuration } from '../utils/formatters';
 import { calculateTrainingEffect } from '../utils/fitnessStatsEngine';
+import { buildCoachInsights } from '../utils/coachInsights';
 import { detectSportType, isPaceSport } from '../utils/activityMetricsBySport';
 import { PACE_ZONES, paceToSec } from '../components/pages/profile/zonesCalc';
 
@@ -479,53 +480,12 @@ export const useActivityMetrics = (activity, streams, settings) => {
 
         let title = "Análisis del Coach";
         let score = 50;
-        let insights = [];
         let nextStep = "";
 
         const { ifFactor, decouplingObj, powerCurve, npWatts } = proMetrics;
         const { primaryBenefit } = trainingEffect;
-
-        if (ifFactor >= 0.95) {
-            insights.push(`Has trabajado a una intensidad altísima (${ifFactor}), prácticamente a nivel de competición. Este estímulo es excelente para mejorar tu techo de rendimiento, pero requiere una recuperación profunda.`);
-            score += 20;
-        } else if (ifFactor >= 0.85) {
-            insights.push(`Sesión de intensidad sólida (${ifFactor}). Has pasado gran parte del tiempo en zonas exigentes, lo que fortalecerá tu resistencia específica.`);
-            score += 15;
-        } else if (ifFactor <= 0.70 && ifFactor > 0) {
-            insights.push(`Buen control de la intensidad (${ifFactor}). Te has mantenido en niveles de base o recuperación, permitiendo sumar volumen sin quemarte.`);
-            score += 10;
-        }
-
-        if (decouplingObj) {
-            const drift = parseFloat(decouplingObj.value);
-            if (drift > 10) {
-                insights.push(`He detectado un desacople aeróbico alto (${drift}%). Tu pulso ha subido significativamente para mantener la misma potencia; esto sugiere fatiga acumulada, deshidratación o falta de adaptación al calor.`);
-                score -= 15;
-            } else if (drift > 5) {
-                insights.push(`Desacople moderado (${drift}%). Hay algo de deriva cardiaca, normal en sesiones largas, pero indica que tu eficiencia aeróbica todavía tiene margen de mejora.`);
-                score += 5;
-            } else if (drift <= 5 && drift >= -5) {
-                insights.push(`Eficiencia impecable. Tu pulso se ha mantenido estable respecto a la carga (${drift}%), lo que indica que tienes esta intensidad muy bien dominada.`);
-                score += 25;
-            }
-        }
-
-        if (primaryBenefit === "Umbral") {
-            insights.push("El trabajo de hoy se ha centrado en el Umbral, clave para elevar tu potencia sostenible en esfuerzos de larga duración.");
-        } else if (primaryBenefit === "VO2 Max") {
-            insights.push("Has tocado el techo metabólico. Estas sesiones expanden tu capacidad de transporte de oxígeno y son las que más 'te hacen crecer'.");
-        } else if (primaryBenefit === "Capacidad Anaeróbica") {
-            insights.push("Sesión explosiva. Has trabajado la resistencia al lactato y la potencia neuromuscular.");
-        } else if (primaryBenefit === "Base Aeróbica") {
-            insights.push("Construcción de cimientos. Estás mejorando la capilarización y la eficiencia de las grasas como combustible.");
-        }
-
-        if (powerCurve && powerCurve.length > 0) {
-            const best5m = powerCurve.find(p => p.label === '5m')?.value;
-            if (best5m && best5m > npWatts * 1.1) {
-                insights.push(`Destacable tu pico de 5 minutos (${best5m}w). Indica una buena capacidad de esfuerzo agudo por encima de tu media de hoy.`);
-            }
-        }
+        const { insights, scoreDelta } = buildCoachInsights({ sport, ifFactor, decouplingObj, primaryBenefit, powerCurve, npWatts });
+        score += scoreDelta;
 
         const tss = activity.tss || 0;
         if (tss > 100) {
@@ -547,7 +507,7 @@ export const useActivityMetrics = (activity, streams, settings) => {
             conclusion: insights.slice(2).join(' ') + (nextStep ? `\n\nPróximo paso: ${nextStep}` : ''),
             score: Math.min(100, Math.max(0, score))
         };
-    }, [trainingEffect, proMetrics, activity]);
+    }, [trainingEffect, proMetrics, activity, sport]);
 
     return {
         sport,
