@@ -883,14 +883,9 @@ html[data-ui="v2"] [class*="active:scale-"]:active {
 /* Contorno neutro en mapas e imágenes (RAD-3): 1 px interior, nunca teñido con la marca. */
 html[data-ui="v2"] .leaflet-container,
 html[data-ui="v2"] [data-skin] :is(img.rounded-full, img.object-cover) {
-  outline: 1px solid rgb(0 0 0 / 0.1);
+  outline: 1px solid rgb(var(--ink) / 0.1);
   outline-offset: -1px;
 }
-html[data-ui="v2"].dark .leaflet-container,
-html[data-ui="v2"].dark [data-skin] :is(img.rounded-full, img.object-cover) {
-  outline-color: rgb(255 255 255 / 0.1);
-}
-
 @media (prefers-reduced-motion: reduce) {
   html[data-ui="v2"] [class*="active:scale-"]:active {
     --tw-scale-x: 1;
