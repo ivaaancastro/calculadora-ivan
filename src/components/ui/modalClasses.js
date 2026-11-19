@@ -5,6 +5,7 @@
  *  - `auth`: acceso de la landing. Diálogo centrado; el velo es una capa aparte dentro del fondo.
  *  - `auth-v2`: acceso de la landing en la piel v2 (hoja inferior en móvil, diálogo desde `sm`).
  *  - `planner`: planificar o editar un entreno del Calendario. Diálogo centrado.
+ *  - `confirm`: confirmar borrar una actividad. Diálogo centrado y estrecho.
  *  - `viewer`: ver un entreno planificado del Calendario. Diálogo centrado, por encima (z-modal).
  * `backdrop` es la capa fija a pantalla completa; `layer`, el velo separado (solo `auth`);
  * `panel`, la caja del diálogo; `style`, el estilo en línea que ya llevaba el fondo.
@@ -32,6 +33,10 @@ const MODAL = {
     backdrop: 'fixed inset-0 bg-scrim-3 backdrop-blur-sm z-sheet flex items-center justify-center p-4',
     panel:
       'bg-surface rounded-2xl max-w-3xl w-full shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200 border border-line-muted flex flex-col max-h-[90vh]',
+  },
+  confirm: {
+    backdrop: 'fixed inset-0 z-sheet flex items-center justify-center p-4 bg-scrim backdrop-blur-sm overscroll-contain',
+    panel: 'bg-surface rounded-2xl shadow-2xl w-full max-w-sm border border-line',
   },
   viewer: {
     backdrop: 'fixed inset-0 bg-scrim-4 backdrop-blur-sm z-modal flex items-center justify-center p-4 sm:p-8',

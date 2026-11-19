@@ -6,6 +6,7 @@
  *  - `link-muted`: "+ Trabajo" y "+ Descanso" de los circuitos del planificador.
  *  - `primary` y `link`: enviar y enlaces del acceso en la piel v2 (≥ 44 px).
  *  - `danger-text`: quitar un bloque o un paso del planificador (solo el icono, sin fondo).
+ *  - `secondary` y `danger`: Cancelar y Eliminar del diálogo de confirmar borrado (≥ 44 px).
  * IconButton (con `aria-label` obligatorio):
  *  - `soft`: volver del detalle de actividad (círculo con fondo).
  *  - `ghost`: mes anterior y siguiente del Calendario.
@@ -24,6 +25,8 @@ const BUTTON = {
   primary: 'w-full min-h-[48px] bg-action-solid hover:bg-action-hover text-on-action rounded-xl font-bold text-sm flex items-center justify-center gap-2 transition-colors disabled:opacity-50 active:scale-[0.98]',
   link: 'min-h-[44px] px-2 text-xs font-semibold text-ink-3 hover:text-ink underline-offset-4 hover:underline transition-colors',
   'danger-text': 'text-faint-fixed hover:text-danger transition-colors',
+  secondary: 'min-h-[44px] px-4 border border-line text-ink-3 hover:bg-surface-2 rounded-xl text-sm font-semibold transition-colors disabled:opacity-50',
+  danger: 'min-h-[44px] px-4 bg-danger-solid hover:bg-danger-hover text-on-action rounded-xl text-sm font-semibold transition-colors disabled:opacity-50',
 };
 
 const ICON = {

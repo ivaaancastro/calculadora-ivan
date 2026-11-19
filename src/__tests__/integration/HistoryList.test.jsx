@@ -1,7 +1,7 @@
 /** @vitest-environment jsdom */
 
 import React from 'react';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { describe, it, expect, vi } from 'vitest';
 import { HistoryList } from '../../components/dashboard/HistoryList';
 
@@ -86,9 +86,9 @@ describe('HistoryList Component', () => {
         expect(onSelect).toHaveBeenCalledWith(expect.objectContaining({ id: 'act-1' }));
     });
 
-    it('ejecuta onDelete sin propagar el clic a onSelectActivity', () => {
+    it('pide confirmación antes de onDelete y no propaga el clic a onSelectActivity', async () => {
         const onSelect = vi.fn();
-        const onDelete = vi.fn();
+        const onDelete = vi.fn().mockResolvedValue(true);
         render(<HistoryList activities={mockActivities} onDelete={onDelete} onSelectActivity={onSelect} />);
 
         const deleteButtons = screen.getAllByTitle('Eliminar actividad');
@@ -96,7 +96,11 @@ describe('HistoryList Component', () => {
         
         fireEvent.click(deleteButtons[0]);
 
-        expect(onDelete).toHaveBeenCalledTimes(1);
+        expect(onDelete).not.toHaveBeenCalled();
+        expect(screen.getByRole('dialog')).toBeTruthy();
+        fireEvent.click(screen.getByRole('button', { name: 'Eliminar' }));
+        await waitFor(() => expect(onDelete).toHaveBeenCalledWith('act-3'));
+        await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull());
         expect(onSelect).not.toHaveBeenCalled();
     });
 });

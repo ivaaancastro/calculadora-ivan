@@ -3,6 +3,8 @@ import { Search, Calendar, Activity, Clock, MapPin, Zap, Trash2, ChevronRight, B
 import { useVirtualizer } from '@tanstack/react-virtual';
 import { formatDuration } from '../../utils/formatDuration';
 import { Card, Input, Select } from '../ui';
+import { useConfirmDeleteActivity } from '../../hooks/useConfirmDeleteActivity';
+import { ConfirmDeleteActivityModal } from '../activity/ConfirmDeleteActivityModal';
 
 const getSportIcon = (type) => {
     const t = String(type).toLowerCase();
@@ -36,6 +38,7 @@ const getSportIcon = (type) => {
 
 export const HistoryList = React.memo(({ activities, onDelete, onSelectActivity }) => {
     const parentRef = useRef(null);
+    const del = useConfirmDeleteActivity(onDelete);
     // ESTADOS DE LOS FILTROS INTERNOS
     const [searchTerm, setSearchTerm] = useState('');
     const [sportFilter, setSportFilter] = useState('all');
@@ -97,6 +100,7 @@ export const HistoryList = React.memo(({ activities, onDelete, onSelectActivity 
         : filteredActivities.map((act, index) => ({ index, start: index * 64, isVirtual: false, act }));
 
     return (
+        <>
         <Card data-skin="history" data-history="root" className="flex flex-col h-full overflow-hidden">
 
             {/* BARRA DE FILTROS ESTILO APPLE */}
@@ -233,7 +237,7 @@ export const HistoryList = React.memo(({ activities, onDelete, onSelectActivity 
                                     <div className="shrink-0 flex items-center gap-1 sm:gap-2">
                                         <button
                                             data-history="delete"
-                                            onClick={(e) => { e.stopPropagation(); onDelete && onDelete(act.id); }}
+                                            onClick={(e) => { e.stopPropagation(); onDelete && del.request(act); }}
                                             className="w-7 h-7 flex items-center justify-center text-slate-300 hover:text-red-500 hover:bg-danger/10 active:scale-90 rounded-full transition-all"
                                             title="Eliminar actividad"
                                         >
@@ -254,5 +258,7 @@ export const HistoryList = React.memo(({ activities, onDelete, onSelectActivity 
                 )}
             </div>
         </Card>
+        <ConfirmDeleteActivityModal activity={del.pending} busy={del.busy} onConfirm={del.confirm} onCancel={del.cancel} />
+        </>
     );
 });

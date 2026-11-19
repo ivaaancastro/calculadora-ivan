@@ -50,9 +50,11 @@ export function useActivitiesData() {
     try {
       await deleteActivityMutation.mutateAsync(id);
       toast.success('Actividad borrada.');
+      return true;
     } catch (err) {
       console.error('Error borrando actividad:', err);
       toast.error('No se pudo borrar la actividad.');
+      return false;
     }
   };
 
