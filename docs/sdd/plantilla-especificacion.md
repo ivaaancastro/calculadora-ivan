@@ -44,6 +44,7 @@ Condiciones que deben cumplirse para dar la spec por terminada:
 - **Unitarias:** `src/__tests__/unit/...`
 - **Integración:** `src/__tests__/integration/...`
 - **E2E:** `e2e/...`
+- **Carril de verificación:** `fast` | `visual` (ver `AGENTS.md` §8 bis; `node scripts/changed-lane.mjs`)
 
 ## 8. Notas adicionales
 Cualquier información relevante para la implementación.

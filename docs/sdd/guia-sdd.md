@@ -15,7 +15,7 @@ se verificará. Los agentes consumen esa especificación para implementar y veri
 1. Especificar    → spec-agent escribe la spec en docs/specs/
 2. Planificar     → agente lee spec + MEMORY, genera plan de tareas
 3. Implementar    → agente escribe/modifica código siguiendo la spec
-4. Verificar      → tests, lint, build, type-check
+4. Verificar      → `npm run verify` (carriles de AGENTS §8 bis; E2E y style-diff en el CI)
 5. Registrar      → CHANGELOG, MEMORY; spec marcada como implementada
 ```
 
