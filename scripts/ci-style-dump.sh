@@ -7,6 +7,8 @@
 set -euo pipefail
 DIR="${1:?checkout}"; OUT="$(mkdir -p "${2:?salida}" && cd "$2" && pwd)"
 cd "$DIR"
-STYLE_DUMP_DIR="$OUT" E2E_WORKERS="${E2E_WORKERS:-4}" \
-  npx playwright test e2e/tools/style-dump.spec.js --retries=0 --timeout=120000 --reporter=dot
+# --workers por CLI (no por E2E_WORKERS): al regenerar el baseline se usa el playwright.config.js de la
+# base (develop), que aún no conoce esa variable y con CI=true correría con 1 worker (>20 min).
+STYLE_DUMP_DIR="$OUT" \
+  npx playwright test e2e/tools/style-dump.spec.js --workers="${E2E_WORKERS:-4}" --retries=0 --timeout=120000 --reporter=dot
 echo "volcados: $(find "$OUT" -name '*.json' | wc -l | tr -d ' ')"

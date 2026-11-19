@@ -14,8 +14,8 @@ bash scripts/fetch-style-baseline.sh "$BASE" "$WORK/before" || {
 
 echo "→ volcado «después» (nativo: los volcados comparan valores, no píxeles)"
 HEAVY_DESC="verify:layer volcado" bash scripts/heavy-lock.sh run \
-  env STYLE_DUMP_DIR="$WORK/after" E2E_WORKERS="${E2E_WORKERS:-2}" \
-  npx playwright test e2e/tools/style-dump.spec.js --retries=0 --timeout=120000 --reporter=dot
+  env STYLE_DUMP_DIR="$WORK/after" \
+  npx playwright test e2e/tools/style-dump.spec.js --workers="${E2E_WORKERS:-2}" --retries=0 --timeout=120000 --reporter=dot
 
 echo "→ style-diff completo"
 node scripts/style-diff.mjs "$WORK/before" "$WORK/after"
