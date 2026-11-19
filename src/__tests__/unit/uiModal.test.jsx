@@ -24,6 +24,12 @@ describe('ui/Modal recetas', () => {
     expect(r.panel).toContain('motion-safe:animate-');
   });
 
+  it('confirm es un diálogo centrado y estrecho', () => {
+    const r = modalRecipe('confirm');
+    expect(r.backdrop).toContain('z-sheet');
+    expect(r.panel).toContain('max-w-sm');
+  });
+
   it('rechaza variantes que no existían', () => {
     expect(() => modalRecipe('drawer')).toThrow();
   });
