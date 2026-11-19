@@ -60,7 +60,7 @@ Cobertura: el CI sigue ejecutando el E2E completo y las capturas en **cada** PR 
 
 ## 7. Diseño técnico
 - **Nuevos:** `scripts/changed-lane.mjs`, `scripts/verify.mjs`, `scripts/heavy-lock.sh`, `scripts/fetch-style-baseline.sh`, `.github/workflows/update-snapshots.yml`, tests `src/__tests__/unit/changedLane.test.js`.
-- **Modificados:** `scripts/e2e-docker.sh`, `scripts/style-diff.mjs` (`--only`), `e2e/tools/style-dump.spec.js` (filtro `STYLE_DUMP_ONLY`, sin cambiar el volcado), `playwright.config.js` (`workers` local = 2 vía `E2E_WORKERS`; CI sin cambios), `.github/workflows/ci.yml` (+`changes`, +`style-baseline`, +`style-diff`; `workflow_dispatch`), `package.json` (`verify`, `verify:visual`), `AGENTS.md`, `MEMORY.md`, `docs/sdd/*`.
+- **Modificados:** `scripts/e2e-docker.sh`, `scripts/style-diff.mjs` (`--only`), `e2e/tools/style-dump.spec.js` (filtro `STYLE_DUMP_ONLY`, sin cambiar el volcado), `playwright.config.js` (`workers` local = 2 vía `E2E_WORKERS`; CI sin cambios), `.github/workflows/ci.yml` (+`changes`, +`style-baseline`, +`style-diff`; `workflow_dispatch`), `package.json` (`verify`, `verify:layer`), `AGENTS.md`, `MEMORY.md`, `docs/sdd/*`.
 - **Sin tocar:** `src/**`, tokens, capturas existentes, `lint:*`.
 - Los volcados comparan valores calculados, no píxeles, por lo que **no dependen del SO**: pueden generarse en el runner del CI y compararse con otros generados en local si hiciera falta.
 - Versión de Playwright única: el workflow nuevo y `e2e-docker.sh` la leen de `@playwright/test/package.json`; el `container.image` de `ci.yml` ya la escribe a mano (mantener sincronizado: nota en el plan).
