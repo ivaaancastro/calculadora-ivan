@@ -7,6 +7,10 @@ y este proyecto adhiere a [Semantic Versioning](https://semver.org/lang/es/).
 
 ## [Unreleased]
 
+### Docs — Fase Premium (`docs/premium-spec`)
+- `docs(premium):` spec y plan de la Fase Premium (`docs/branches/feat/premium-design/`): A auditoría de diseño, B tokens y acabado v2, C capa de gráficas Forma (lenguaje visual de bklit-ui sin instalar el paquete), D rediseño de pantallas (bloqueada hasta referencias). Anexo con el checklist de `make-interfaces-feel-better`. Decisiones D1..D10 pendientes de aprobación.
+- `docs(premium):` roadmap reordenado (cerrar en curso → Premium → Capa 6 → Capa 7 → deudas → opcionales) con línea «Siguiente paso». Sin cambios en `src/`.
+
 ### Borrar actividad con confirmación (`feat/detalle-borrar-actividad`)
 - `fix(detalle):` la papelera del detalle estaba desconectada (`ActivityRouteWrapper` no pasaba `onDelete`); ahora abre un diálogo de confirmación y, al borrar, vuelve al origen (Actividades, Calendario o `/history` por URL directa) sin pantalla en blanco.
 - `fix(actividades):` la papelera de la lista de Actividades también confirma antes de borrar.

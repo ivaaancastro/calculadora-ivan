@@ -10,16 +10,18 @@
 - Conventional Commits. Producción **no se toca** durante el rediseño: todo va a `develop`.
 
 ## 1. Estado actual
+- **➡️ Siguiente paso:** cerrar PR #103 (Coach Insights) y #105 (verificación rápida); aprobar la spec de la **Fase Premium** (`docs/branches/feat/premium-design/`, D1..D10) y empezar la Fase A (auditoría). Roadmap vigente en `docs/branches/feat/webapp-redesign/plan.md`.
+- **Fase Premium (spec, pendiente de aprobación):** se inserta antes de la Capa 6: A auditoría, B tokens/acabado v2, C gráficas Forma (lenguaje bklit-ui sin instalar el paquete), D pantallas (bloqueada hasta referencias; empieza por el detalle).
 - **Borrar actividad con confirmación** (`feat/detalle-borrar-actividad`, spec aprobada e implementada): papelera del detalle conectada + diálogo `ConfirmDeleteActivityModal` (también en la lista). Strava puede reimportar la más reciente al sincronizar (avisado en el diálogo; tombstones = spec futura).
 - **Tarjetas explicativas del detalle** (`feat/tarjetas-explicativas-detalle`, PR #101): `MetricTooltip` + textos en `activityMetricDescriptions.js`. **Detalle por deporte** (`feat/detalle-por-deporte`, spec aprobada e implementada): matriz en `src/utils/activityMetricsBySport.js` (`SPORT_BLOCKS`); series de fuerza fuera de alcance (`series_count` no existe). Pendiente: rediseño «premium» (spec aparte).
 - **Proyecto:** Forma — dashboard de rendimiento deportivo y salud. Stack: React 19, Vite 7, Tailwind 3, Zustand, TanStack Query, Supabase, Vitest/MSW/Playwright.
 - **Fix en curso:** `fix/detail-back-map` (Volver del detalle y teselas Light/Dark del mapa; CARTO exige clave → Esri; sin estilos). Anterior: `fix/touch-targets-v2` (objetivos táctiles ≥ 44 px en v2 móvil; detalle en su `tasks.md`; 14 capturas v2 móviles pendientes de revisión D7).
 - **Rama actual:** `docs/screens-cierre` (Capa 5, PR 9 de 9: cierre documental). **Capa 5 implementada**: shell, Ajustes, Actividades, Dashboard, Rendimiento, Salud, Detalle y Calendario en v2 «Panel» (#84–#97). Detalle y paridad: `docs/branches/feat/screens-v2/tasks.md` y `docs/branches/test/ui-safety-net/paridad.md`. **Pendiente de la Capa 5:** pasada completa en iPhone real (usuario) con `docs/branches/feat/screens-v2/guion-iphone.md`. Siguiente: **Capa 6**.
 - **Hecho:** specs de auditoría 01–08, spec-001 y E2E. Rediseño: Capa 0 (#51), 1 (#52–#58), 2 (#60–#68), 3 (#70–#76: estructura, flag `data-ui="v2"`, dirección «Panel», 5 pantallas y gráficas), 4 (#78–#82: landing, acceso y correo en v2) y 5 (#83–#97).
-- **Pendiente del rediseño:** Capa 6 (activar v2 por defecto, retirar v1 y decidir el destino del interruptor) y 7 (iOS). Plan: `docs/branches/feat/webapp-redesign/plan.md`. D12: **v1 sigue por defecto hasta la Capa 6**; v2 es opt-in (Ajustes → General «Vista previa v2» o `VITE_UI=v2`). **D8 cerrada:** el interruptor se queda ahí hasta la Capa 6, donde se decide su destino.
+- **Pendiente del rediseño:** Fase Premium, Capa 6 (activar v2 por defecto, retirar v1 y decidir el destino del interruptor) y 7 (iOS). Plan: `docs/branches/feat/webapp-redesign/plan.md`. D12: **v1 sigue por defecto hasta la Capa 6**; v2 es opt-in (Ajustes → General «Vista previa v2» o `VITE_UI=v2`). **D8 cerrada:** el interruptor se queda ahí hasta la Capa 6, donde se decide su destino.
 - `feat/webapp-redesign` remoto = intento descartado: no hacer `git pull` ahí ni usar `archive/webapp-redesign-v1` ni `stash@{0}`.
 
-- **Pendientes de producto (no van en la landing):** Forma tendrá funciones de pago a futuro (no prometer gratuidad); la conexión con Strava se replantea en otra fase por sus límites de API y ahí se estudiará añadir **Garmin** (API nueva). **Deuda de la Capa 4:** `robots.txt`/`og:image` y CSS bloqueante (roadmap, «Fase futura»).
+- **Pendientes de producto (no van en la landing):** Forma tendrá funciones de pago a futuro (no prometer gratuidad); la conexión con Strava se replantea en otra fase por sus límites de API y ahí se estudiará añadir **Garmin** (API nueva). **Deuda de la Capa 4:** `robots.txt`/`og:image` y CSS bloqueante (roadmap, «Deudas y opcionales»).
 - **Skill de la landing:** `.taste-skill/` (clon de Leonxlnx/taste-skill, ignorado por git) solo para las 3 páginas públicas (pasada final hecha en el cierre de la Capa 4).
 - **Landing:** «Strava y CSV» se mantiene (decisión 2026-11-16) hasta replantear Strava/Garmin. `Dashboard` es `lazy` en `App.jsx` (la landing no descarga la app autenticada).
 
@@ -40,4 +42,4 @@
 Todas en `docs/specs/` y `docs/branches/`. Tabla completa con estados: archivo histórico, sección 3.
 
 ---
-Última actualización: 2026-11-17
+Última actualización: 2026-11-19
