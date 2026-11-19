@@ -2,6 +2,9 @@
 /**
  * Compara dos volcados de e2e/tools/style-dump.spec.js (spec-rediseno-02-c1, 6.6).
  *   node scripts/style-diff.mjs <antes> <después> [--only dashboard,detalle-mapa]
+ * `--tolerate-grid-count` (CI) no cuenta como diferencia que aparezca/desaparezca un `<line>` suelto de un
+ * <svg> (nº de marcas de la rejilla de Recharts, que depende del tamaño medido en cada runner: visto
+ * en el PR #107 entre dos runners). Los colores de los `<line>` presentes en ambos volcados SÍ se comparan.
  * `--only` limita la comparación a esas pantallas/estados (nombre sin tema ni extensión).
  * Sale con código 1 si hay cualquier diferencia de color o si falta un volcado.
  */
@@ -9,6 +12,9 @@ import { readFileSync, readdirSync, existsSync, statSync } from 'node:fs';
 import { join } from 'node:path';
 
 const args = process.argv.slice(2);
+const tolIdx = args.indexOf('--tolerate-grid-count');
+const tolerateGrid = tolIdx >= 0;
+if (tolerateGrid) args.splice(tolIdx, 1);
 const onlyAt = args.indexOf('--only');
 const only = onlyAt >= 0 ? (args[onlyAt + 1] || '').split(',').filter(Boolean) : null;
 if (onlyAt >= 0) args.splice(onlyAt, 2);
@@ -45,6 +51,7 @@ for (const f of files) {
   const local = [];
   for (const k of keys) {
     if (!A[k] || !B[k]) {
+      if (tolerateGrid && /(^|>)svg:\d+>line#\d+$/.test(k)) continue;
       local.push(`  ${A[k] ? '-' : '+'} ${k}`);
       continue;
     }

@@ -16,6 +16,9 @@ y este proyecto adhiere a [Semantic Versioning](https://semver.org/lang/es/).
 - `feat(skin-v2):` radios concéntricos 6/8/12/16/20, sombras de reposo en capas, elevación `--elev-2/3` (claro/oscuro), lienzo oscuro más profundo que la tarjeta, mínimo tipográfico 10 px, foco global, `text-wrap`, `transition-all` acotado en v2, pulsación única 0.97, contorno neutro en mapas/imágenes. Solo `html[data-ui="v2"]`.
 - `chore(lint):` `npm run lint:motion` (trinquete de `transition-all`) en `verify` y CI.
 
+### CI — style-diff en jobs paralelos (`ci/style-diff-paralelo`)
+- `ci(verify):` `style-after` y `style-before` (solo si no hay baseline publicado) corren en paralelo y `style-diff` los compara: ≈8 min en lugar de ≈15. Spec: `docs/branches/ci/style-diff-paralelo/`.
+
 ### Docs — Fase Premium A (`docs/premium-auditoria`)
 - `docs(premium):` auditoría de diseño priorizada (`docs/branches/feat/premium-design/auditoria.md`): color, bordes, sombras, tipografía, jerarquía, distribución, gráficas, estados, movimiento y accesibilidad, con prioridad, esfuerzo y fase destino. Sin cambios en `src/`.
 
