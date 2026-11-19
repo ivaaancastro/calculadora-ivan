@@ -10,6 +10,7 @@
 - Conventional Commits. Producción **no se toca** durante el rediseño: todo va a `develop`.
 
 ## 1. Estado actual
+- **Borrar actividad con confirmación** (`feat/detalle-borrar-actividad`, spec aprobada e implementada): papelera del detalle conectada + diálogo `ConfirmDeleteActivityModal` (también en la lista). Strava puede reimportar la más reciente al sincronizar (avisado en el diálogo; tombstones = spec futura).
 - **Tarjetas explicativas del detalle** (`feat/tarjetas-explicativas-detalle`, PR #101): `MetricTooltip` + textos en `activityMetricDescriptions.js`. **Detalle por deporte** (`feat/detalle-por-deporte`, spec aprobada e implementada): matriz en `src/utils/activityMetricsBySport.js` (`SPORT_BLOCKS`); series de fuerza fuera de alcance (`series_count` no existe). Pendiente: rediseño «premium» (spec aparte).
 - **Proyecto:** Forma — dashboard de rendimiento deportivo y salud. Stack: React 19, Vite 7, Tailwind 3, Zustand, TanStack Query, Supabase, Vitest/MSW/Playwright.
 - **Fix en curso:** `fix/detail-back-map` (Volver del detalle y teselas Light/Dark del mapa; CARTO exige clave → Esri; sin estilos). Anterior: `fix/touch-targets-v2` (objetivos táctiles ≥ 44 px en v2 móvil; detalle en su `tasks.md`; 14 capturas v2 móviles pendientes de revisión D7).

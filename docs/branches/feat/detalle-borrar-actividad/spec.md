@@ -5,7 +5,7 @@
 - **Título:** Conectar el botón de papelera del detalle de actividad y pedir confirmación antes de borrar
 - **Autor:** agente (sesión SDD)
 - **Fecha:** 2026-11-19
-- **Estado:** pendiente (a la espera de aprobación del usuario; decisiones D1–D7 abiertas)
+- **Estado:** implementada (aprobada con D1–D7 recomendadas, 2026-11-19)
 
 ## 2. Objetivo
 Que la papelera del detalle de actividad borre de verdad la actividad, previa confirmación explícita en un diálogo accesible (primitiva `Modal`), y que tras borrar el usuario vuelva a donde estaba con un aviso. Mismo comportamiento seguro en la lista de Actividades (D1).
