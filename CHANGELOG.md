@@ -10,6 +10,9 @@ y este proyecto adhiere a [Semantic Versioning](https://semver.org/lang/es/).
 ### CI — style-diff en jobs paralelos (`ci/style-diff-paralelo`)
 - `ci(verify):` `style-after` y `style-before` (solo si no hay baseline publicado) corren en paralelo y `style-diff` los compara: ≈8 min en lugar de ≈15. Spec: `docs/branches/ci/style-diff-paralelo/`.
 
+### Docs — Fase Premium A (`docs/premium-auditoria`)
+- `docs(premium):` auditoría de diseño priorizada (`docs/branches/feat/premium-design/auditoria.md`): color, bordes, sombras, tipografía, jerarquía, distribución, gráficas, estados, movimiento y accesibilidad, con prioridad, esfuerzo y fase destino. Sin cambios en `src/`.
+
 ### Docs — Fase Premium (`docs/premium-spec`)
 - `docs(premium):` spec y plan de la Fase Premium (`docs/branches/feat/premium-design/`): A auditoría de diseño, B tokens y acabado v2, C capa de gráficas Forma (lenguaje visual de bklit-ui sin instalar el paquete), D rediseño de pantallas (bloqueada hasta referencias). Anexo con el checklist de `make-interfaces-feel-better`. Decisiones D1..D10 pendientes de aprobación.
 - `docs(premium):` roadmap reordenado (cerrar en curso → Premium → Capa 6 → Capa 7 → deudas → opcionales) con línea «Siguiente paso». Sin cambios en `src/`.
