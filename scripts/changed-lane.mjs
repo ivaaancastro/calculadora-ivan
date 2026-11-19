@@ -27,6 +27,8 @@ const VISUAL = [
   /^e2e\/.*(visual|layout|touch|gestures|shell)(-v2)?\.spec\.js$/,
   /^scripts\/style-diff\.mjs$/,
   /^playwright\.config\.js$/,
+  /^\.github\/workflows\/ci\.yml$/, // los jobs de style-diff viven ahí: cambiarlos se prueba con el propio style-diff
+  /^scripts\/(ci-style-dump|fetch-style-baseline|verify-layer)\.sh$/,
 ];
 
 export function classify(files) {

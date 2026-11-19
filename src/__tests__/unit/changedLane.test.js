@@ -26,6 +26,11 @@ describe('changed-lane · clasificación de carril', () => {
     expect(lane('e2e/visual-v2.spec.js')).toBe('visual');
     expect(lane('e2e/auth.spec.js', 'e2e/strava.spec.js')).toBe('fast');
   });
+  it('el workflow de CI y los scripts de volcado → visual (se prueban con el propio style-diff)', () => {
+    expect(lane('.github/workflows/ci.yml')).toBe('visual');
+    expect(lane('scripts/ci-style-dump.sh')).toBe('visual');
+    expect(lane('.github/workflows/update-snapshots.yml')).toBe('fast');
+  });
   it('un test JSX o markdown dentro de src no es visual', () => {
     expect(lane('src/components/Foo.test.jsx')).toBe('fast');
     expect(lane('src/components/README.md')).toBe('fast');
