@@ -14,8 +14,10 @@ Spec aprobada (D1–D10 + ampliación, 2026-11-19). **No empezar la Fase A hasta
 - [x] A9. Registrar `MEMORY.md` y `CHANGELOG.md`.
 
 ## Fase B — Tokens y acabado (alto nivel; `feat/premium-tokens`)
-- [ ] B1. Spec de rama con tokens exactos; aprobación.
-- [ ] B2. Tokens v2 + Anexo A (concéntricos, `tabular-nums`, `text-wrap`, sin `transition: all`, hit areas 44 px, estados).
+- [x] B1. Spec de rama con tokens exactos (`docs/branches/feat/premium-tokens/spec.md`).
+- [x] B2a (PR 1, `feat/premium-tokens`). Radios concéntricos, elevación en 3 niveles, lienzo oscuro, escala tipográfica, foco, `text-wrap`, `transition-all` acotado + trinquete, pulsación única, contorno de imágenes.
+- [ ] B2b. COL-1 hex sueltos → tokens; COL-2/3 paleta Forma (`dataviz`) y color por deporte único.
+- [ ] B2c. Recetas `Skeleton`/`EmptyState`/`ErrorState` (EST-1/2/3); RAD-4; migrar `transition-all` a `transition-[…]`.
 - [ ] B3. Verificar, D7 del usuario, registrar.
 
 ## Fase C — Capa de gráficas Forma (alto nivel; `feat/premium-charts`)

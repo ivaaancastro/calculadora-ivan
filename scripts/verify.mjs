@@ -21,6 +21,7 @@ const steps = [
   ['lint', 'npm', ['run', '-s', 'lint']],
   ['lint:ui', 'npm', ['run', '-s', 'lint:ui']],
   ['lint:colors', 'npm', ['run', '-s', 'lint:colors']],
+  ['lint:motion', 'npm', ['run', '-s', 'lint:motion']],
   ['vitest', 'npx', ['vitest', 'run', '--reporter=dot']],
   ['build', 'npm', ['run', '-s', 'build']],
 ];
