@@ -5,6 +5,7 @@ on:
     branches: [ main, develop ]
   pull_request:
     branches: [ main, develop ]
+  workflow_dispatch:
 
 jobs:
   lint:
@@ -24,6 +25,11 @@ jobs:
         run: npm run lint:colors
       - name: Check UI primitives (usage, retired classes, className)
         run: npm run lint:ui
+      - name: Check Playwright image matches package version
+        run: |
+          v="$(node -p "require('@playwright/test/package.json').version")"
+          grep -q "playwright:v${v}-noble" .github/workflows/ci.yml || {
+            echo "❌ La imagen de Playwright de ci.yml no es v${v}-noble (la de package.json)"; exit 1; }
 
   validate-specs:
     runs-on: ubuntu-latest
@@ -104,3 +110,102 @@ jobs:
         run: npm ci
       - name: Run Build
         run: npm run build
+
+  # ── Verificación de estilos (spec-verificacion-rapida) ──────────────────────────────────
+  # `changes` decide si un PR toca estilos (scripts/changed-lane.mjs) y localiza el volcado
+  # «antes» ya publicado por `style-baseline` para el SHA base del PR.
+  changes:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    outputs:
+      visual: ${{ steps.lane.outputs.visual }}
+      baseline_run: ${{ steps.baseline.outputs.run_id }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - id: lane
+        run: node scripts/changed-lane.mjs --base "$BASE_REF" --github-output
+        env:
+          BASE_REF: ${{ github.base_ref }}
+      - id: baseline
+        if: steps.lane.outputs.visual == 'true'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const name = `style-dump-${context.payload.pull_request.base.sha}`;
+            const { data } = await github.rest.actions.listArtifactsForRepo({
+              owner: context.repo.owner, repo: context.repo.repo, name, per_page: 5,
+            });
+            const art = data.artifacts.find((a) => !a.expired);
+            core.setOutput('run_id', art ? String(art.workflow_run.id) : '');
+            core.info(art ? `baseline ${name} en el run ${art.workflow_run.id}` : `sin baseline ${name}: se regenerará`);
+
+  # Push a develop: calcula el volcado una sola vez y lo guarda por SHA (7 días, ~1 MB).
+  style-baseline:
+    runs-on: ubuntu-latest
+    needs: lint
+    if: github.event_name == 'push' && github.ref == 'refs/heads/develop'
+    container:
+      image: mcr.microsoft.com/playwright:v1.61.1-noble
+      options: --ipc=host
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20.x'
+          cache: 'npm'
+      - run: npm ci
+      - run: bash scripts/ci-style-dump.sh . style-dump
+      - uses: actions/upload-artifact@v4
+        with:
+          name: style-dump-${{ github.sha }}
+          path: style-dump/
+          retention-days: 7
+
+  # PR que toca estilos: «después» del merge vs «antes» de la base; v1 protegido (0 diferencias).
+  style-diff:
+    runs-on: ubuntu-latest
+    needs: [lint, changes]
+    if: github.event_name == 'pull_request' && needs.changes.outputs.visual == 'true' && github.event.pull_request.head.repo.full_name == github.repository
+    container:
+      image: mcr.microsoft.com/playwright:v1.61.1-noble
+      options: --ipc=host
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20.x'
+          cache: 'npm'
+      - run: npm ci
+      - name: Volcado «después» (merge del PR)
+        run: bash scripts/ci-style-dump.sh . style-after
+      - name: Baseline publicado por develop
+        if: needs.changes.outputs.baseline_run != ''
+        uses: actions/download-artifact@v4
+        with:
+          name: style-dump-${{ github.event.pull_request.base.sha }}
+          run-id: ${{ needs.changes.outputs.baseline_run }}
+          github-token: ${{ github.token }}
+          path: style-before
+      - name: Regenerar baseline (no hay artifact del SHA base)
+        if: needs.changes.outputs.baseline_run == ''
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.base.sha }}
+          path: base
+      - if: needs.changes.outputs.baseline_run == ''
+        run: |
+          (cd base && npm ci)
+          bash scripts/ci-style-dump.sh base style-before
+      - name: style-diff (debe dar 0 diferencias)
+        run: node scripts/style-diff.mjs style-before style-after | tee style-diff.txt; test "${PIPESTATUS[0]}" -eq 0
+        shell: bash
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: style-diff-result
+          path: |
+            style-diff.txt
+            style-after/
+          retention-days: 7

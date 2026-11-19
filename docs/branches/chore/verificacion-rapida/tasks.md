@@ -13,7 +13,7 @@ Spec y plan aprobados por el usuario el 2026-11-19; revisión v0.2 aprobada (ver
 - [x] T5 `scripts/verify.mjs` + script `verify` (carril rápido: 31 s con carga 48, `lint 11 s · vitest 12,6 s · build 7 s`). `verify:layer` se implementa en T6, junto al baseline que necesita
 
 ## Bloque C — CI
-- [ ] T6 `ci.yml`: `workflow_dispatch`, job `changes`, `style-baseline` (push a develop), `style-diff` (PR visual); `scripts/fetch-style-baseline.sh` con regeneración de respaldo. Sin quitar jobs existentes
+- [~] T6 (escrito, SIN probar en CI real; falta validar con un PR de prueba en T9) `ci.yml`: `workflow_dispatch`, job `changes`, `style-baseline` (push a develop), `style-diff` (PR visual); `scripts/fetch-style-baseline.sh` con regeneración de respaldo. Sin quitar jobs existentes
 - [ ] T7 `.github/workflows/update-snapshots.yml` + decisión D3 (PAT/deploy key)
 
 ## Bloque D — Documentación y cierre
