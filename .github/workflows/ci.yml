@@ -173,8 +173,9 @@ jobs:
           path: style-dump/
           retention-days: 7
 
-  # PR que toca estilos: «después» del merge vs «antes» de la base; v1 protegido (0 diferencias).
-  style-diff:
+  # PR que toca estilos: «después» (merge del PR) y «antes» (base real) se vuelcan EN PARALELO y un
+  # tercer job los compara. Con baseline publicado por develop (`style-baseline`) no hay job «antes».
+  style-after:
     runs-on: ubuntu-latest
     needs: [lint, changes]
     if: github.event_name == 'pull_request' && needs.changes.outputs.visual == 'true' && github.event.pull_request.head.repo.full_name == github.repository
@@ -188,8 +189,49 @@ jobs:
           node-version: '20.x'
           cache: 'npm'
       - run: npm ci
-      - name: Volcado «después» (merge del PR)
-        run: bash scripts/ci-style-dump.sh . style-after
+      - run: bash scripts/ci-style-dump.sh . style-after
+      - uses: actions/upload-artifact@v4
+        with:
+          name: style-after
+          path: style-after/
+          retention-days: 3
+
+  style-before:
+    runs-on: ubuntu-latest
+    needs: [lint, changes]
+    if: github.event_name == 'pull_request' && needs.changes.outputs.visual == 'true' && needs.changes.outputs.baseline_run == '' && github.event.pull_request.head.repo.full_name == github.repository
+    container:
+      image: mcr.microsoft.com/playwright:v1.61.1-noble
+      options: --ipc=host
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.changes.outputs.base_sha }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20.x'
+          cache: 'npm'
+      - run: npm ci
+      - run: bash scripts/ci-style-dump.sh . style-before
+      - uses: actions/upload-artifact@v4
+        with:
+          name: style-before
+          path: style-before/
+          retention-days: 3
+
+  style-diff:
+    runs-on: ubuntu-latest
+    needs: [changes, style-after, style-before]
+    if: always() && needs.style-after.result == 'success' && (needs.style-before.result == 'success' || needs.style-before.result == 'skipped')
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20.x'
+      - uses: actions/download-artifact@v4
+        with:
+          name: style-after
+          path: style-after
       - name: Baseline publicado por develop
         if: needs.changes.outputs.baseline_run != ''
         uses: actions/download-artifact@v4
@@ -198,16 +240,12 @@ jobs:
           run-id: ${{ needs.changes.outputs.baseline_run }}
           github-token: ${{ github.token }}
           path: style-before
-      - name: Regenerar baseline (no hay artifact del SHA base)
+      - name: Baseline regenerado por style-before
         if: needs.changes.outputs.baseline_run == ''
-        uses: actions/checkout@v4
+        uses: actions/download-artifact@v4
         with:
-          ref: ${{ needs.changes.outputs.base_sha }}
-          path: base
-      - if: needs.changes.outputs.baseline_run == ''
-        run: |
-          (cd base && npm ci)
-          bash scripts/ci-style-dump.sh base style-before
+          name: style-before
+          path: style-before
       - name: style-diff (debe dar 0 diferencias)
         run: node scripts/style-diff.mjs style-before style-after | tee style-diff.txt; test "${PIPESTATUS[0]}" -eq 0
         shell: bash
