@@ -85,7 +85,7 @@ Cobertura: el CI sigue ejecutando el E2E completo y las capturas en **cada** PR 
 
 ## 10. Decisiones a aprobar
 - **D1.** Clasificación automática con regla conservadora (todo `.jsx/.css` ⇒ visual).
-- **D2.** ¿El repo es público o privado (coste de minutos)? Condiciona si el job `style-diff` puede ir en matriz de 3 proyectos.
+- **D2 (resuelta).** El repo es público: minutos gratis; artifacts ≈ 1 MB, retención 7 días; matriz de 3 proyectos disponible sin coste si el job supera 10 min. Datos en `medidas.md`.
 - **D3.** Cómo se relanza el CI tras el commit del workflow de capturas: PAT/deploy key como secreto (recomendado) o relanzar a mano.
 - **D4.** El E2E del CI se mantiene completo en todo PR (no se filtra por paths) y solo se filtra `style-diff`.
 - **D5.** Reescribir AGENTS §8.6 y crear una §8 bis; confirmar que el E2E completo local deja de ser obligatorio.

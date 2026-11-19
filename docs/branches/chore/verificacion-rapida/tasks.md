@@ -3,8 +3,8 @@
 Spec y plan aprobados por el usuario el 2026-11-19; revisión v0.2 aprobada (verificación visual diferida al CI y al cierre de capa) (decisiones D1–D6 como propuestas; D2, público/privado, se resuelve en T1). Una sesión por bloque (AGENTS §8.1).
 
 ## Bloque A — Medir y decidir
-- [ ] T0 Línea base: tiempo y pico de `loadavg` del procedimiento actual (E2E Docker completo + 2 volcados) sobre un PR de referencia; tamaño del volcado (`du`, `tar czf`) → `medidas.md`
-- [ ] T1 Resolver D2 (repo público/privado), retención de artifacts y matriz del volcado en CI
+- [~] T0 Línea base → `medidas.md`: HECHO tamaño del volcado (~240 KB/archivo, ~1 MB comprimido el conjunto) y duración de CI (e2e 18 min 45 s). PENDIENTE: tiempo local del procedimiento completo, a medir con `loadavg` < 8 (la máquina estaba a ~90); se retoma junto a T9
+- [x] T1 D2 = repo público (minutos gratis); artifacts con retención 7 días; volcado en CI con workers 4 y sin matriz inicial (ver `medidas.md`)
 
 ## Bloque B — Scripts locales
 - [ ] T2 `scripts/heavy-lock.sh` + guarda de carga + prueba de concurrencia/huérfano; integrar en `e2e-docker.sh` (`--workers=2`, `E2E_WORKERS`, `--project`)
