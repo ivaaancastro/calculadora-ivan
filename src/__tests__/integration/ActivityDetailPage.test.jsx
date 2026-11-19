@@ -1,7 +1,7 @@
 /** @vitest-environment jsdom */
 
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, it, expect, vi } from 'vitest';
 import { ActivityDetailPage } from '../../components/pages/ActivityDetailPage';
@@ -38,7 +38,7 @@ describe('ActivityDetailPage (humo)', () => {
     it('renderiza cabecera y recorre las cuatro pestañas', async () => {
         const user = userEvent.setup();
         const onBack = vi.fn();
-        const onDelete = vi.fn();
+        const onDelete = vi.fn().mockResolvedValue(true);
         render(<ActivityDetailPage activity={activity} settings={{}} fetchStreams={vi.fn()} onBack={onBack} onDelete={onDelete} />);
 
         expect(screen.getAllByText('Rodaje suave').length).toBeGreaterThan(0);
@@ -54,9 +54,12 @@ describe('ActivityDetailPage (humo)', () => {
         expect(screen.getByText('Hitos de la Sesión')).toBeTruthy();
 
         await user.click(screen.getAllByTitle('Eliminar actividad')[0]);
-        expect(onDelete).toHaveBeenCalledWith('a1');
+        expect(onDelete).not.toHaveBeenCalled();
+        await user.click(screen.getByRole('button', { name: 'Eliminar' }));
+        await waitFor(() => expect(onDelete).toHaveBeenCalledWith('a1'));
+        expect(onBack).toHaveBeenCalledTimes(1);
         await user.click(screen.getAllByTitle('Volver')[0]);
-        expect(onBack).toHaveBeenCalled();
+        expect(onBack).toHaveBeenCalledTimes(2);
     });
 
     it('no renderiza nada sin actividad', () => {

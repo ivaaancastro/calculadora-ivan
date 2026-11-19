@@ -17,6 +17,7 @@ export function ActivitySubRoutes({
   activities,
   settings,
   fetchActivityStreams,
+  deleteActivity,
   currentMetrics,
   updateProfile,
   isDeepSyncing,
@@ -58,6 +59,7 @@ export function ActivitySubRoutes({
             activities={activities}
             settings={settings}
             fetchActivityStreams={fetchActivityStreams}
+            deleteActivity={deleteActivity}
           />
         }
       />

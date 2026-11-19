@@ -4,6 +4,8 @@ import { useActivityMetrics } from '../../hooks/useActivityMetrics';
 import { useChartTheme } from '../charts/useChartTheme';
 import { useActivityStreams } from '../activity/detail/useActivityStreams';
 import { computePeaks, getActivePeakType, getSpeedOrPace, getSportTheme } from '../activity/detail/detailUtils';
+import { useConfirmDeleteActivity } from '../../hooks/useConfirmDeleteActivity';
+import { ConfirmDeleteActivityModal } from '../activity/ConfirmDeleteActivityModal';
 import { DetailHeader } from '../activity/detail/DetailHeader';
 import { DetailMobileHero } from '../activity/detail/DetailMobileHero';
 import { TelemetryPanel } from '../activity/detail/TelemetryPanel';
@@ -16,6 +18,7 @@ import { getBlocksForSport, getTabsForSport, getZoneOptions, applyChartBlocks, g
 
 export const ActivityDetailPage = ({ activity, settings, fetchStreams, onBack, onDelete }) => {
     const ct = useChartTheme();
+    const del = useConfirmDeleteActivity(onDelete, onBack);
     const { streams, loadingStreams } = useActivityStreams(activity, fetchStreams);
     const [activePayload, setActivePayload] = useState(null);
     const [activeTab, setActiveTab] = useState('analyze');
@@ -75,7 +78,7 @@ export const ActivityDetailPage = ({ activity, settings, fetchStreams, onBack, o
                 setActiveTab={setActiveTab}
                 tabs={tabs}
                 onBack={onBack}
-                onDelete={onDelete}
+                onDelete={onDelete ? () => del.request(activity) : undefined}
                 dateStr={dateStr}
                 metrics={metrics}
             />
@@ -158,6 +161,7 @@ export const ActivityDetailPage = ({ activity, settings, fetchStreams, onBack, o
                     />
                 )}
             </div>
+            <ConfirmDeleteActivityModal activity={del.pending} busy={del.busy} onConfirm={del.confirm} onCancel={del.cancel} />
         </div>
     );
 };
