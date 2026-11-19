@@ -7,6 +7,10 @@ y este proyecto adhiere a [Semantic Versioning](https://semver.org/lang/es/).
 
 ## [Unreleased]
 
+### Detalle de actividad: Coach Insights con texto (`fix/detalle-coach-insights`)
+- `fix(detalle):` la tarjeta «Coach Insights» ya no sale vacía: frase nueva para IF 0,70–0,85 (intensidad moderada) y para «Mantenimiento»; la tarjeta no se pinta si no hay frases.
+- Las frases de IF y de pico de 5 min solo se generan en bici (donde el detalle por deporte muestra potencia). Lógica en `src/utils/coachInsights.js`.
+
 ### Borrar actividad con confirmación (`feat/detalle-borrar-actividad`)
 - `fix(detalle):` la papelera del detalle estaba desconectada (`ActivityRouteWrapper` no pasaba `onDelete`); ahora abre un diálogo de confirmación y, al borrar, vuelve al origen (Actividades, Calendario o `/history` por URL directa) sin pantalla en blanco.
 - `fix(actividades):` la papelera de la lista de Actividades también confirma antes de borrar.
