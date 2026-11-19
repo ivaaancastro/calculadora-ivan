@@ -7,6 +7,9 @@ y este proyecto adhiere a [Semantic Versioning](https://semver.org/lang/es/).
 
 ## [Unreleased]
 
+### CI — style-diff en jobs paralelos (`ci/style-diff-paralelo`)
+- `ci(verify):` `style-after` y `style-before` (solo si no hay baseline publicado) corren en paralelo y `style-diff` los compara: ≈8 min en lugar de ≈15. Spec: `docs/branches/ci/style-diff-paralelo/`.
+
 ### Docs — Fase Premium A (`docs/premium-auditoria`)
 - `docs(premium):` auditoría de diseño priorizada (`docs/branches/feat/premium-design/auditoria.md`): color, bordes, sombras, tipografía, jerarquía, distribución, gráficas, estados, movimiento y accesibilidad, con prioridad, esfuerzo y fase destino. Sin cambios en `src/`.
 
