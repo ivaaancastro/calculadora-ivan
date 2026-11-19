@@ -191,7 +191,26 @@ El coste crece con cada turno porque se relee todo el contexto. Reglas:
 3. **Salida de comandos en silencio:** lint, tests y build se ejecutan filtrando (`| tail -20`, `--reporter=dot`); solo se muestra el resumen o el fallo.
 4. **`MEMORY.md` es corto.** El histórico va a `docs/memory/` y los detalles de cada rama a su `tasks.md`; leer secciones con `offset`/`limit`, no ficheros enteros de más de 20 KB.
 5. **Modelo y esfuerzo:** Sonnet por defecto; esfuerzo bajo/medio en trabajo mecánico (CSS, tokens, tests, docs); Opus solo para decisiones de diseño o depuración difícil.
-6. **Trabajo pesado cuando la tarea lo pida:** E2E Docker y capturas se ejecutan en el momento que toca según el plan, sin aplazarlos por cuota.
+6. **Trabajo pesado fuera de la máquina:** el E2E completo y el `style-diff` los ejecuta el CI en cada PR (ver §8 bis); en local solo se corre lo pesado que esa sección permita, siempre bajo el mutex.
+
+
+### 8 bis. Verificación por carriles (obligatorio)
+
+Spec: `docs/branches/chore/verificacion-rapida/spec.md`. Principio: **local barato en cada feat; lo pesado, una vez y fuera de la máquina.**
+
+| Qué | Dónde | Cuándo |
+|-----|-------|--------|
+| lint, `lint:ui`, `lint:colors`, vitest, build | local: `npm run verify` | En cada feat, tanto si es carril `fast` como `visual` (`node scripts/changed-lane.mjs` lo clasifica). |
+| E2E completo, capturas, `style-diff` de PR | CI (`ci.yml`) | En todo PR (el `style-diff` solo si el diff toca estilos). **No se repiten en local.** |
+| E2E de un spec | local: `npm run verify -- --e2e <spec> [--project <p>]` | Solo si hay que regenerar capturas a propósito. |
+| Regenerar capturas | workflow `Update snapshots` (Actions, a mano sobre la rama) o `npm run test:e2e:update` | Solo las que cambian a propósito; revisar una a una (§8.2). |
+| `style-diff` completo + capturas | local: `npm run verify:layer [-- --snapshots]` | **Una vez al cerrar cada capa**, no por feat. v1 debe dar 0 diferencias. |
+
+Reglas anti-solapes:
+1. Una sola tarea pesada local a la vez: `scripts/heavy-lock.sh` (lo usan `test:e2e:docker`, `verify --e2e` y `verify:layer`) y espera si `loadavg(1m)` supera 2 × núcleos. No se salta con `HEAVY_SKIP_LOAD=1` salvo que el usuario lo pida.
+2. `E2E_PORT` distinto por sesión; no lanzar dos `verify` a la vez en el mismo worktree.
+3. Nunca commitear capturas generadas fuera de la imagen de Playwright del CI.
+4. Quien tenga duda sobre el carril usa `--lane visual`; el CI protege igualmente.
 
 ---
 

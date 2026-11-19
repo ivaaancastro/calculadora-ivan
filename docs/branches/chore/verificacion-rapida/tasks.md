@@ -13,10 +13,13 @@ Spec y plan aprobados por el usuario el 2026-11-19; revisión v0.2 aprobada (ver
 - [x] T5 `scripts/verify.mjs` + script `verify` (carril rápido: 31 s con carga 48, `lint 11 s · vitest 12,6 s · build 7 s`). `verify:layer` se implementa en T6, junto al baseline que necesita
 
 ## Bloque C — CI
-- [~] T6 (escrito, SIN probar en CI real; falta validar con un PR de prueba en T9) `ci.yml`: `workflow_dispatch`, job `changes`, `style-baseline` (push a develop), `style-diff` (PR visual); `scripts/fetch-style-baseline.sh` con regeneración de respaldo. Sin quitar jobs existentes
-- [ ] T7 `.github/workflows/update-snapshots.yml` + decisión D3 (PAT/deploy key)
+- [x] T6 escrito (caf3ab7); validación en CI real en T9 `ci.yml`: `workflow_dispatch`, job `changes`, `style-baseline` (push a develop), `style-diff` (PR visual); `scripts/fetch-style-baseline.sh` con regeneración de respaldo. Sin quitar jobs existentes
+- [x] T7 (workflow listo; el secreto `SNAPSHOT_PUSH_TOKEN` lo crea el usuario, ver abajo) · `.github/workflows/update-snapshots.yml` + decisión D3 (PAT/deploy key)
 
 ## Bloque D — Documentación y cierre
-- [ ] T8 `AGENTS.md` (§8 bis, §8.6), `MEMORY.md` §2, plantilla §7, `guia-sdd.md`
+- [x] T8 `AGENTS.md` (§8 bis, §8.6), `MEMORY.md` §2, plantilla §7, `guia-sdd.md`
 - [ ] T9 Aceptación: PR de prueba visual (falla `style-diff`) y solo-docs (lo salta); `update-snapshots` en rama de prueba; tabla antes/después
 - [ ] T10 `CHANGELOG.md`, `MEMORY.md`, spec a «implementada»; PR a `develop` (sin mergear)
+
+## D3 — secreto que debe crear el usuario (no bloquea nada)
+GitHub → Settings → Developer settings → Fine-grained tokens → repo `ivaaancastro/calculadora-ivan`, permiso **Contents: Read and write** → guardar como secreto de repositorio **`SNAPSHOT_PUSH_TOKEN`**. Sin él, `Update snapshots` funciona pero el commit no lanza el CI (hay que relanzarlo a mano).
