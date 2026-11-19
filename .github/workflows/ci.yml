@@ -128,7 +128,12 @@ jobs:
       # Base REAL del merge: primer padre del commit de merge. `pull_request.base.sha` puede estar
       # desfasado si develop avanzó tras abrir el PR (visto en el PR #105: diferencias fantasma).
       - id: base
-        run: echo "sha=$(git rev-parse HEAD^1)" >> "$GITHUB_OUTPUT"
+        run: |
+          sha="$(git rev-parse HEAD^1)"
+          git merge-base --is-ancestor "$sha" HEAD || {
+            echo "❌ El baseline ($sha) no es ancestro del commit evaluado: el style-diff compararía código distinto."; exit 1; }
+          echo "sha=$sha" >> "$GITHUB_OUTPUT"
+          echo "Baseline = $sha (primer padre del merge)"
       - id: lane
         run: node scripts/changed-lane.mjs --base "$BASE_REF" --github-output
         env:
