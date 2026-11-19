@@ -5,7 +5,7 @@
 - **Título:** Verificación local en dos carriles y delegación del trabajo pesado al CI
 - **Autor:** agente (sesión `chore/verificacion-rapida`)
 - **Fecha:** 2026-11-19
-- **Estado:** pendiente (a la espera de aprobación; sin `tasks.md` ni código)
+- **Estado:** en curso (spec aprobada; revisión v0.2 el mismo día: la verificación visual pesada se difiere al CI y al cierre de capa)
 
 ## 2. Objetivo
 Reducir el coste de verificar cada PR (tiempo y carga de la máquina) sin perder cobertura: lo barato se corre en local; el E2E completo, el volcado «antes» y la regeneración de capturas pasan al CI o a un workflow manual con la imagen idéntica a la de CI.
@@ -15,6 +15,9 @@ Reducir el coste de verificar cada PR (tiempo y carga de la máquina) sin perder
 - El CI (`.github/workflows/ci.yml`) **ya** ejecuta en cada PR y push: `lint`, `lint:colors`, `lint:ui`, `test:coverage`, `build` y **E2E completo** en `mcr.microsoft.com/playwright:v1.61.1-noble` (workers 1, retries 2). Es decir, el E2E local duplica al CI. Lo que el CI **no** hace es `style-diff`.
 - Con varias sesiones en paralelo la máquina llegó a carga ~480. El «mutex» `/tmp/forma-docker.lock` es hoy solo un fichero vacío por convención: ningún script lo toma (`scripts/e2e-docker.sh` no lo usa), y los volcados ni se enteran.
 - Afecta a: `scripts/`, `.github/workflows/`, `package.json`, `AGENTS.md`, `MEMORY.md`, `docs/sdd/`. **No toca código de producción ni estilos.**
+
+## 3 bis. Principio (v0.2)
+**Local barato en cada feat; lo pesado, una vez y fuera de la máquina.** En cada feat solo se corre en local el carril rápido (lint, `lint:ui`, `lint:colors`, vitest, build), incluso si el PR toca estilos. El E2E completo y las capturas los hace el CI en cada PR (ya lo hace). El `style-diff` completo se ejecuta (a) automáticamente en el CI cuando el PR toca rutas de estilo y (b) una pasada completa manual al **cerrar cada capa** del rediseño. Un fallo se detecta en el PR en que aparece, no 10 PR después.
 
 ## 4. Validación de la propuesta del coordinador (qué es viable y qué se corrige)
 
@@ -32,13 +35,14 @@ Cobertura: el CI sigue ejecutando el E2E completo y las capturas en **cada** PR 
 
 ## 5. Requisitos funcionales
 - [ ] **RF1 Clasificador.** `node scripts/changed-lane.mjs [--base develop]` imprime `fast` o `visual` (y la lista de pantallas/specs afectadas) a partir de `git diff --name-only <merge-base>...HEAD`. Reglas en un único módulo con tests unitarios. Salida de GitHub Actions (`visual=true|false`) con `--github-output`.
-- [ ] **RF2 `npm run verify`.** Ejecuta el carril detectado, en orden y en silencio (resumen o fallo, AGENTS §8.3): `lint`, `lint:ui`, `lint:colors`, `vitest run`, `build`; en carril visual añade `style-diff` de las pantallas tocadas. Imprime la duración de cada paso y el total. Opciones: `--lane fast|visual`, `--e2e <spec>`, `--project <p>`.
+- [ ] **RF2 `npm run verify`.** Ejecuta el carril detectado, en orden y en silencio (resumen o fallo, AGENTS §8.3): `lint`, `lint:ui`, `lint:colors`, `vitest run`, `build`; `--style-diff [pantallas]` (opcional, bajo demanda) añade el `style-diff` parcial local; por defecto **ni siquiera el carril visual lo ejecuta en local**. Imprime la duración de cada paso y el total. Opciones: `--lane fast|visual`, `--e2e <spec>`, `--project <p>`.
 - [ ] **RF3 E2E local acotado.** `scripts/e2e-docker.sh` toma el mutex, usa `--workers=2` por defecto (sobrescribible) y acepta `--project`. El E2E completo local deja de ser obligatorio; solo se corre el spec afectado y solo si hay que regenerar capturas.
 - [ ] **RF4 `style-diff` parcial.** `style-diff.mjs` admite `--only a,b` (filtra por nombre de pantalla/estado); el volcado admite el mismo filtro vía `STYLE_DUMP_ONLY` (equivale a `--grep`). El modo completo y el código de salida 1 se mantienen.
 - [ ] **RF5 Baseline de develop.** Job `style-baseline` en push a `develop`: genera el volcado con el workers de §8, lo comprime y lo sube como artifact `style-dump-<sha>`. `scripts/fetch-style-baseline.sh <sha>` lo descarga (`gh run download`) para uso local y de CI, con regeneración si falta.
 - [ ] **RF6 Job `style-diff` en CI.** En PR, solo si `changed-lane` da `visual=true`: descarga el baseline del SHA base, genera el «después», ejecuta `style-diff` completo y falla si hay diferencias (v1 protegido). Sube los JSON de diferencias como artifact si falla.
 - [ ] **RF7 Workflow `update-snapshots`.** `workflow_dispatch` con input `branch`; checkout de esa rama, imagen `mcr.microsoft.com/playwright:v1.61.1-noble` (versión leída de `package.json`, no escrita dos veces), `playwright test --update-snapshots` (opcional `--grep`/spec), commit `test(e2e): regenerar capturas` con rutas explícitas bajo `e2e/__screenshots__/`, push a esa rama. Rechaza `main`/`develop`.
 - [ ] **RF8 Mutex y guarda de carga.** `scripts/heavy-lock.sh` (`acquire`/`release`/wrapper `run`): una sola tarea pesada local a la vez (Docker, volcados, `verify --e2e`), espera con timeout y mensaje de quién la tiene; guarda de `loadavg`. Sustituye al fichero vacío `/tmp/forma-docker.lock`.
+- [ ] **RF8 bis Pasada de cierre de capa.** `npm run verify:layer` ejecuta bajo mutex el `style-diff` completo (baseline de `develop` descargado + «después» local o del artifact de la rama) y la regeneración/comparación de capturas necesarias; se corre una vez al cerrar cada capa y su resultado se anota en el `tasks.md` de cierre.
 - [ ] **RF9 Reglas anti-solapes** documentadas: puertos `E2E_PORT` distintos por sesión, una sola tarea pesada a la vez (el mutex lo impone), no lanzar dos `verify` a la vez en el mismo worktree.
 - [ ] **RF10 Documentación.** `AGENTS.md` (nueva §8 bis «Verificación por carriles»; §8.6 reescrita), `MEMORY.md` §2, plantilla (campo «Carril de verificación: fast | visual» en §7), `guia-sdd.md`.
 
@@ -47,7 +51,7 @@ Cobertura: el CI sigue ejecutando el E2E completo y las capturas en **cada** PR 
 - [ ] **v1 protegido:** un PR de prueba que cambia una clase/color en JSX hace fallar el job `style-diff`; un PR de prueba de solo docs/`utils` lo salta; en ambos casos el resultado coincide con el de correr a mano el procedimiento actual (completo) sobre el mismo diff.
 - [ ] **Medible (local, mismo equipo, misma rama de referencia):** tiempo total de verificación local y pico de `loadavg` medidos **antes** (procedimiento actual completo) y **después**:
   - carril rápido: ≤ 3 min y ≥ 85 % menos que hoy;
-  - carril visual (un par de pantallas): ≥ 60 % menos que hoy;
+  - carril visual local (sin `style-diff` ni E2E): igual que el rápido, ≥ 85 % menos que hoy; pasada `verify:layer`: una por capa, medida y anotada;
   - pico de carga con 3 sesiones lanzando `verify` a la vez: sin pasar del umbral de la guarda (el mutex serializa lo pesado).
 - [ ] **Mutex probado:** dos invocaciones simultáneas de `heavy-lock.sh run` se serializan; un bloqueo con PID muerto se recupera.
 - [ ] **Baseline:** el PR de prueba descarga el artifact del SHA base y no regenera «antes»; con el artifact borrado, regenera y pasa igualmente.
@@ -86,10 +90,11 @@ Cobertura: el CI sigue ejecutando el E2E completo y las capturas en **cada** PR 
 - **D4.** El E2E del CI se mantiene completo en todo PR (no se filtra por paths) y solo se filtra `style-diff`.
 - **D5.** Reescribir AGENTS §8.6 y crear una §8 bis; confirmar que el E2E completo local deja de ser obligatorio.
 - **D6.** Umbral de la guarda de carga (propuesta: `loadavg(1m)` > 2× núcleos).
+- **D7 (v0.2, aprobada).** Verificación visual diferida: en cada feat solo carril rápido local; `style-diff` en CI por paths y pasada completa al cerrar cada capa.
 
 ## 11. Notas adicionales
 - Fuera de alcance: partir el E2E del CI en shards, caché de Playwright, cambios en el volcado `full` de Capa 2.
 - No se tocan las ramas de las sesiones en curso (borrar actividad, coach insights).
 
 ---
-Versión: 0.1.0 — 2026-11-19
+Versión: 0.2.0 — 2026-11-19
