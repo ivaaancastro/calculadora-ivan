@@ -5,7 +5,7 @@
 - **Título:** Fase Premium: auditoría, tokens y acabado, capa de gráficas Forma y rediseño de pantallas
 - **Autor:** agente (sesión `docs/premium-spec`)
 - **Fecha:** 2026-11-19
-- **Estado:** pendiente de aprobación (solo documentación: esta spec y su plan no contienen código)
+- **Estado:** **aprobada** por el usuario (D1–D10 tal como se recomiendan, 2026-11-19). Esta rama solo documenta; la Fase A empieza cuando #106 esté mergeado.
 - **Se inserta:** después del cierre de la Capa 5 y **antes** de la Capa 6 (`docs/branches/feat/webapp-redesign/plan.md`).
 - **Base:** `origin/develop` en `c04471b`.
 
@@ -96,7 +96,7 @@ Empieza por el **Detalle de actividad** (la pantalla más rica y la que más gr�
 - **Hooks, servicios, store, rutas, BD:** sin cambios.
 - **Ramas propuestas:** `docs/premium-audit` (A), `feat/premium-tokens` (B), `feat/premium-charts` (C), `feat/premium-detail` y siguientes (D); todas desde `develop`.
 
-## 10. Decisiones a aprobar (D1..D10)
+## 10. Decisiones D1..D10 — **APROBADAS** (2026-11-19)
 | # | Decisión | Recomendación |
 |---|---|---|
 | **D1** | Colocar la Fase Premium **antes** de la Capa 6 | **Sí:** v2 llega a todos ya pulida y se retoca una sola vez |

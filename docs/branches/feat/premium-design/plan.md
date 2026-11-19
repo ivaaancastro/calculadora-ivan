@@ -1,6 +1,6 @@
 # Plan — `feat/premium-design` (Fase Premium)
 
-Deriva de `spec.md` (`spec-premium-01`) y de `MEMORY.md`. **Estado:** pendiente de aprobación; `tasks.md` solo se crea tras ella (AGENTS §2). Un PR por fase o menos.
+Deriva de `spec.md` (`spec-premium-01`) y de `MEMORY.md`. **Estado:** **aprobado** (D1–D10, 2026-11-19); `tasks.md` creado. La Fase A empieza cuando #106 esté mergeado. Un PR por fase o menos.
 
 ## Dónde encaja
 Cerrar en curso (PR #103, PR #105) → **Fase Premium A–D** → Capa 6 → Capa 7. Ver el roadmap en `docs/branches/feat/webapp-redesign/plan.md`.
@@ -35,8 +35,8 @@ Se desbloquea cuando el usuario aporte webs de referencia. Por pantalla: propues
 Ver `spec.md` §10 (tabla con recomendación). Resumen: D1 antes de Capa 6; D2 A solo análisis; D3 B solo v2; D4 lenguaje bklit sin instalar; D5 no migrar a Tailwind 4; D6 orden de piezas; D7 Fase D bloqueada y por aprobación; D8 un PR por fase; D9 sin dependencias nuevas; D10 verificación y D7.
 
 ## Primer paso tras la aprobación
-1. Crear `tasks.md` con las fases A–D (checkboxes).
-2. Abrir `docs/premium-audit` desde `develop` y empezar la Fase A.
+1. ~~Crear `tasks.md`~~ hecho.
+2. Cuando #106 esté mergeado, abrir `docs/premium-audit` desde `develop` y empezar la Fase A.
 
 ---
 Versión: 0.1.0 — 2026-11-19

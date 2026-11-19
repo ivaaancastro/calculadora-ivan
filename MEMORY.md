@@ -10,8 +10,8 @@
 - Conventional Commits. Producción **no se toca** durante el rediseño: todo va a `develop`.
 
 ## 1. Estado actual
-- **➡️ Siguiente paso:** cerrar PR #103 (Coach Insights) y #105 (verificación rápida); aprobar la spec de la **Fase Premium** (`docs/branches/feat/premium-design/`, D1..D10) y empezar la Fase A (auditoría). Roadmap vigente en `docs/branches/feat/webapp-redesign/plan.md`.
-- **Fase Premium (spec, pendiente de aprobación):** se inserta antes de la Capa 6: A auditoría, B tokens/acabado v2, C gráficas Forma (lenguaje bklit-ui sin instalar el paquete), D pantallas (bloqueada hasta referencias; empieza por el detalle).
+- **➡️ Siguiente paso:** cerrar PR #103 (Coach Insights) y #105 (verificación rápida); empezar la **Fase Premium A** (auditoría; spec D1–D10 aprobada) tras mergear #106 (`docs/branches/feat/premium-design/`). Roadmap vigente en `docs/branches/feat/webapp-redesign/plan.md`.
+- **Fase Premium (spec aprobada):** se inserta antes de la Capa 6: A auditoría, B tokens/acabado v2, C gráficas Forma (lenguaje bklit-ui sin instalar el paquete), D pantallas (bloqueada hasta referencias; empieza por el detalle).
 - **Borrar actividad con confirmación** (`feat/detalle-borrar-actividad`, spec aprobada e implementada): papelera del detalle conectada + diálogo `ConfirmDeleteActivityModal` (también en la lista). Strava puede reimportar la más reciente al sincronizar (avisado en el diálogo; tombstones = spec futura).
 - **Tarjetas explicativas del detalle** (`feat/tarjetas-explicativas-detalle`, PR #101): `MetricTooltip` + textos en `activityMetricDescriptions.js`. **Detalle por deporte** (`feat/detalle-por-deporte`, spec aprobada e implementada): matriz en `src/utils/activityMetricsBySport.js` (`SPORT_BLOCKS`); series de fuerza fuera de alcance (`series_count` no existe). Pendiente: rediseño «premium» (spec aparte).
 - **Coach Insights del detalle** (`fix/detalle-coach-insights`): frases en `src/utils/coachInsights.js` (IF solo en bici; frase para IF 0,70–0,85 y «Mantenimiento»); tarjeta oculta sin frases.
