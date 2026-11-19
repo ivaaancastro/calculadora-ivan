@@ -1,5 +1,15 @@
 # Plan — spec-rediseno-02 (Roadmap por capas)
 
+> **➡️ Siguiente paso:** cerrar lo en curso (PR #103 Coach Insights y PR #105 verificación rápida) y, con la spec de la Fase Premium aprobada (D1–D10), abrir la **Fase A (auditoría de diseño)** cuando #106 esté mergeado. Actualizar esta línea al terminar cada paso.
+
+## Orden de trabajo (roadmap vigente, actualizado 2026-11-19)
+1. **Cerrar lo en curso:** PR #103 (Coach Insights) y PR #105 (verificación rápida por carriles).
+2. **Fase Premium A–D** (`docs/branches/feat/premium-design/`): A auditoría de diseño, B tokens y acabado, C capa de gráficas Forma, D rediseño de pantallas (empieza por el detalle de actividad; bloqueada hasta tener webs de referencia).
+3. **Capa 6:** activar v2 por defecto, retirar v1 y decidir el destino del interruptor «Vista previa v2» en Ajustes → General.
+4. **Capa 7:** app iOS.
+5. **Deudas de la Capa 4:** `robots.txt`, `og:image`, CSS bloqueante y base JS del SPA desde el cliente Supabase.
+6. **Opcionales:** Series de fuerza (requiere capturar `series_count`), cálculo real del estado de recuperación, reutilizar los textos explicativos de métricas en Dashboard y Rendimiento, límites de Strava y Garmin.
+
 Cada capa termina con la app funcionando y se puede pausar sin dejar nada a medias. Cada una tendrá su spec detallada antes de implementarse.
 
 | Capa | Resultado | ¿Cambia lo que se ve? | Se puede publicar |
@@ -11,6 +21,7 @@ Cada capa termina con la app funcionando y se puede pausar sin dejar nada a medi
 | 3 | Navegación y piel v2 tras flag | Solo con flag | Sí |
 | 4 | Landing y acceso con la skill | Sí, solo páginas públicas | Sí |
 | 5 | Pantallas, de menor a mayor riesgo | Solo con flag | Sí, una a una |
+| Premium | Auditoría, tokens, gráficas Forma y pantallas (A–D), antes de la Capa 6 | Solo con flag | Sí, por fases |
 | 6 | Activar v2 y limpiar | Sí, para todos | Sí |
 | 7 | App iOS en TestFlight y App Store | App nueva | Sí |
 
@@ -97,8 +108,11 @@ En cada pantalla se define qué se ve en el primer vistazo en el móvil. En Dash
 
 **Hecho (2026-11-17), implementada:** 14 PR de código (#84–#97: shell, Ajustes, Actividades, Dashboard, Rendimiento, Salud, Detalle y Calendario, con sus refactors previos) y cierre documental (`docs/screens-cierre`). Lista de paridad completa en `docs/branches/test/ui-safety-net/paridad.md`; D8 cerrada (el interruptor «Vista previa v2» sigue en Ajustes → General hasta la Capa 6). **Pendiente:** la pasada completa en iPhone real, con el guion `docs/branches/feat/screens-v2/guion-iphone.md` (la ejecuta el usuario). Detalle en `docs/branches/feat/screens-v2/tasks.md`.
 
+## Fase Premium (A–D) — antes de la Capa 6
+**Estado:** spec y plan **aprobados** (2026-11-19; alcance = todo el diseño; v1 no se protege porque se retira en la Capa 6): `docs/branches/feat/premium-design/{spec,plan}.md`. A auditoría (solo análisis), B tokens y acabado v2, C capa de gráficas Forma (lenguaje de bklit-ui sin instalarlo), D pantallas (bloqueada hasta referencias). v1 congelada y `style-diff` 0 en v1.
+
 ## Capa 6 — Activación y limpieza
-**Estado:** siguiente. Requiere la pasada en iPhone real sin fallos bloqueantes.
+**Estado:** posterior a la Fase Premium (A–D). Requiere la pasada en iPhone real sin fallos bloqueantes.
 - **Decidir el destino del interruptor «Vista previa v2»** (propuesta de D8: al activar v2 por defecto pasa a «Volver a la vista clásica» durante el periodo acordado y se retira con v1).
 - Activar v2 primero para ti y después para todos, con v1 disponible durante un periodo acordado.
 - Tener en cuenta que la PWA usa `autoUpdate`: una marcha atrás llega cuando el cliente vuelve a cargar.
@@ -122,9 +136,10 @@ En cada pantalla se define qué se ve en el primer vistazo en el móvil. En Dash
 
 **Hecho cuando:** la app se instala por TestFlight, los flujos de acceso y Strava funcionan en un iPhone real y pasa la revisión de Apple.
 
-## Fase futura (sin capa asignada)
+## Deudas y opcionales (sin capa asignada; ver orden 5 y 6 arriba)
 - **Strava y Garmin:** replantear la conexión con Strava por los límites de su API y estudiar añadir Garmin (API nueva). Hasta entonces «Strava y CSV» se mantiene en la landing (decisión 2026-11-16). Forma tendrá funciones de pago: no prometer gratuidad.
-- **Deuda de la Capa 4 (landing):** `robots.txt` y `og:image` ausentes (SEO 91 en Lighthouse) y CSS bloqueante en la carga inicial. Detalle en `docs/branches/feat/landing-v2/tasks.md`.
+- **Deuda de la Capa 4 (landing):** `robots.txt` y `og:image` ausentes (SEO 91 en Lighthouse) CSS bloqueante en la carga inicial y base JS del SPA cargada desde el cliente Supabase. Detalle en `docs/branches/feat/landing-v2/tasks.md`.
+- **Opcionales:** Series de fuerza (requiere capturar `series_count`), cálculo real del estado de recuperación y reutilizar los textos explicativos de métricas (`activityMetricDescriptions.js`) en Dashboard y Rendimiento.
 - **Cobertura:** E2E en `data-ui="v2"` para las acciones que hoy solo se prueban a mano (ver «Huecos reconocidos» en `paridad.md`).
 
 ## Riesgos
