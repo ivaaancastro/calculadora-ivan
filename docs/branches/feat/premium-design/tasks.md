@@ -16,7 +16,7 @@ Spec aprobada (D1–D10 + ampliación, 2026-11-19). **No empezar la Fase A hasta
 ## Fase B — Tokens y acabado (alto nivel; `feat/premium-tokens`)
 - [x] B1. Spec de rama con tokens exactos (`docs/branches/feat/premium-tokens/spec.md`).
 - [x] B2a (PR 1, `feat/premium-tokens`). Radios concéntricos, elevación en 3 niveles, lienzo oscuro, escala tipográfica, foco, `text-wrap`, `transition-all` acotado + trinquete, pulsación única, contorno de imágenes.
-- [ ] B2b. COL-1 hex sueltos → tokens; COL-2/3 paleta Forma (`dataviz`) y color por deporte único.
+- [x] B2b (PR 2, `feat/premium-palette`). Paleta Forma de 7 tonos validada con `validate_palette.js` (claro/oscuro); identidad propia por serie, un solo color por deporte (run naranja, bike azul, walk esmeralda, strength violeta, resto cian); hex sueltos de calendario/zonas/predicciones → `chartTheme`. Quedan hex en utils/hooks (protegidos).
 - [ ] B2c. Recetas `Skeleton`/`EmptyState`/`ErrorState` (EST-1/2/3); RAD-4; migrar `transition-all` a `transition-[…]`.
 - [ ] B3. Verificar, D7 del usuario, registrar.
 

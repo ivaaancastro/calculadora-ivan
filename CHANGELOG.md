@@ -7,6 +7,10 @@ y este proyecto adhiere a [Semantic Versioning](https://semver.org/lang/es/).
 
 ## [Unreleased]
 
+### Changed — Fase Premium B, PR 2 (`feat/premium-palette`)
+- `feat(charts):` paleta Forma v2 (azul, naranja, esmeralda, violeta, rosa, cian, ámbar) validada con `dataviz` en claro y oscuro (ΔE CVD ≥ 10, banda de luminosidad); `pace`/`sleep` dejan de repetir tono con CTL/ATL; deporte único en `SPORTS` y `DISTRIBUTION`.
+- `refactor(colors):` zonas del calendario, Rendimiento, Perfil y predicciones leen `chartTheme`; `lint:colors` baja la base de 8 archivos; se elimina un prop `dark:stroke` inválido.
+
 ### Added/Changed — Fase Premium B, PR 1 (`feat/premium-tokens`)
 - `feat(skin-v2):` radios concéntricos 6/8/12/16/20, sombras de reposo en capas, elevación `--elev-2/3` (claro/oscuro), lienzo oscuro más profundo que la tarjeta, mínimo tipográfico 10 px, foco global, `text-wrap`, `transition-all` acotado en v2, pulsación única 0.97, contorno neutro en mapas/imágenes. Solo `html[data-ui="v2"]`.
 - `chore(lint):` `npm run lint:motion` (trinquete de `transition-all`) en `verify` y CI.

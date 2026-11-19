@@ -340,7 +340,7 @@ export const PlannerModal = ({
                                                 className={`py-2.5 px-3 flex flex-wrap items-center gap-2.5 bg-surface-6 rounded-xl border border-line-soft cursor-move transition-all ${draggedBlockIdx === idx ? 'opacity-50' : 'hover:border-line-2'}`}>
 
                                                 <div className="flex-1 min-w-0 flex flex-wrap items-center gap-2">
-                                                    <div className={`w-1 h-5 rounded-full shrink-0`} style={{ background: zoneColors[block.zone] || '#cbd5e1' }}></div>
+                                                    <div className={`w-1 h-5 rounded-full shrink-0`} style={{ background: zoneColors[block.zone] || zoneColors.Z1 }}></div>
                                                     <span className={`text-[11px] font-semibold w-14 shrink-0 ${bLabelStyle}`}>{bLabel}</span>
                                                     
                                                     {/* KM / MIN toggle */}

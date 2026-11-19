@@ -3,7 +3,7 @@
   "totals": {
     "palette": 740,
     "arbitrary": 3,
-    "hex": 100,
+    "hex": 60,
     "rgb": 8,
     "dark": 165
   },
@@ -88,14 +88,14 @@
     "src/components/calendar/CalendarMonthView.jsx": {
       "palette": 29,
       "arbitrary": 0,
-      "hex": 11,
+      "hex": 0,
       "rgb": 0,
       "dark": 9
     },
     "src/components/calendar/PlannerModal.jsx": {
       "palette": 24,
       "arbitrary": 0,
-      "hex": 1,
+      "hex": 0,
       "rgb": 0,
       "dark": 8
     },
@@ -109,14 +109,14 @@
     "src/components/calendar/WorkoutViewerModal.jsx": {
       "palette": 32,
       "arbitrary": 0,
-      "hex": 1,
+      "hex": 0,
       "rgb": 0,
       "dark": 9
     },
     "src/components/calendar/calendarHelpers.jsx": {
       "palette": 6,
       "arbitrary": 0,
-      "hex": 9,
+      "hex": 0,
       "rgb": 0,
       "dark": 3
     },
@@ -137,7 +137,7 @@
     "src/components/dashboard/AdvancedAnalytics.jsx": {
       "palette": 4,
       "arbitrary": 0,
-      "hex": 7,
+      "hex": 0,
       "rgb": 0,
       "dark": 1
     },
@@ -214,7 +214,7 @@
     "src/components/fitness/RacePredictionsCard.jsx": {
       "palette": 6,
       "arbitrary": 0,
-      "hex": 3,
+      "hex": 0,
       "rgb": 0,
       "dark": 0
     },
@@ -305,7 +305,7 @@
     "src/components/health/HistoryTrendChart.jsx": {
       "palette": 2,
       "arbitrary": 0,
-      "hex": 1,
+      "hex": 0,
       "rgb": 0,
       "dark": 0
     },
@@ -418,13 +418,6 @@
       "palette": 2,
       "arbitrary": 0,
       "hex": 0,
-      "rgb": 0,
-      "dark": 0
-    },
-    "src/components/pages/profile/zonesCalc.js": {
-      "palette": 0,
-      "arbitrary": 0,
-      "hex": 7,
       "rgb": 0,
       "dark": 0
     },
