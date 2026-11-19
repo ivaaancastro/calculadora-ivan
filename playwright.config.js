@@ -27,7 +27,8 @@ export default defineConfig({
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,
-  workers: process.env.CI ? 1 : undefined,
+  // E2E_WORKERS: tope de workers (scripts/e2e-docker.sh lo fija a 2 en local; el CI no lo define).
+  workers: process.env.E2E_WORKERS ? Number(process.env.E2E_WORKERS) : process.env.CI ? 1 : undefined,
   reporter: [['list'], ['html', { open: 'never' }]],
 
   expect: {

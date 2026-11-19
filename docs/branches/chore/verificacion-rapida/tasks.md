@@ -7,10 +7,10 @@ Spec y plan aprobados por el usuario el 2026-11-19; revisión v0.2 aprobada (ver
 - [x] T1 D2 = repo público (minutos gratis); artifacts con retención 7 días; volcado en CI con workers 4 y sin matriz inicial (ver `medidas.md`)
 
 ## Bloque B — Scripts locales
-- [ ] T2 `scripts/heavy-lock.sh` + guarda de carga + prueba de concurrencia/huérfano; integrar en `e2e-docker.sh` (`--workers=2`, `E2E_WORKERS`, `--project`)
-- [ ] T3 `scripts/changed-lane.mjs` + tests unitarios (tabla de rutas)
-- [ ] T4 `style-diff --only` y `STYLE_DUMP_ONLY` (dos volcados completos siguen dando 0)
-- [ ] T5 `scripts/verify.mjs` + scripts `verify` y `verify:layer` (pasada completa de cierre de capa, bajo mutex) en `package.json`
+- [x] T2 `scripts/heavy-lock.sh` + guarda de carga + prueba de concurrencia/huérfano; integrar en `e2e-docker.sh` (`--workers=2`, `E2E_WORKERS`, `--project`)
+- [x] T3 `scripts/changed-lane.mjs` + tests unitarios (tabla de rutas)
+- [x] T4 `style-diff --only` y `STYLE_DUMP_ONLY` (dos volcados completos siguen dando 0)
+- [x] T5 `scripts/verify.mjs` + script `verify` (carril rápido: 31 s con carga 48, `lint 11 s · vitest 12,6 s · build 7 s`). `verify:layer` se implementa en T6, junto al baseline que necesita
 
 ## Bloque C — CI
 - [ ] T6 `ci.yml`: `workflow_dispatch`, job `changes`, `style-baseline` (push a develop), `style-diff` (PR visual); `scripts/fetch-style-baseline.sh` con regeneración de respaldo. Sin quitar jobs existentes

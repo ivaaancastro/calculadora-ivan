@@ -12,6 +12,9 @@
  *   STYLE_DUMP_DIR=/ruta/antes npx playwright test e2e/tools/style-dump.spec.js
  *   node scripts/style-diff.mjs /ruta/antes /ruta/despues
  *
+ * Con STYLE_DUMP_ONLY=dashboard,detalle-mapa solo se vuelcan esas pantallas/estados (el contenido
+ * de cada volcado no cambia; sirve para `style-diff --only`).
+ *
  * Con STYLE_DUMP_PROPS=full (Capa 2, spec-rediseno-02-c2, 6.5) vuelca también tipografía,
  * caja (relleno, margen, bordes, radios, tamaño), disposición y efectos: lo que una primitiva
  * puede cambiar sin tocar un color. Solo se comparan volcados hechos en el mismo modo.
@@ -24,6 +27,8 @@ import { SCREENS, THEMES, openScreen, gotoReady, settleForScreenshot } from '../
 
 const OUT = process.env.STYLE_DUMP_DIR;
 const FULL = process.env.STYLE_DUMP_PROPS === 'full';
+const ONLY = process.env.STYLE_DUMP_ONLY ? process.env.STYLE_DUMP_ONLY.split(',').filter(Boolean) : null;
+const wanted = (name) => !ONLY || ONLY.includes(name);
 test.skip(!OUT, 'Herramienta manual: define STYLE_DUMP_DIR para volcar los estilos.');
 
 const visible = (locator) => locator.filter({ visible: true }).first();
@@ -285,7 +290,7 @@ const save = (project, name, data) => {
 
 for (const theme of THEMES) {
   test.describe(`Volcado de estilos · tema ${theme}`, () => {
-    for (const screen of SCREENS) {
+    for (const screen of SCREENS.filter((s) => wanted(s.name))) {
       test(screen.name, async ({ page }, info) => {
         await setupApp(page, { authenticated: screen.auth, theme });
         await openScreen(page, screen);
@@ -293,7 +298,7 @@ for (const theme of THEMES) {
         save(info.project.name, `${screen.name}-${theme}`, { ...(await dumpStyles(page)), ...(await dumpPseudoStates(page)) });
       });
     }
-    for (const state of EXTRA_STATES) {
+    for (const state of EXTRA_STATES.filter((s) => wanted(s.name))) {
       test(state.name, async ({ page }, info) => {
         test.skip(state.only && !state.only.includes(info.project.name), 'Control no disponible en este tamaño');
         const screen = SCREENS.find((s) => s.name === state.screen);

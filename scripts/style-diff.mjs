@@ -1,15 +1,20 @@
 #!/usr/bin/env node
 /**
  * Compara dos volcados de e2e/tools/style-dump.spec.js (spec-rediseno-02-c1, 6.6).
- *   node scripts/style-diff.mjs <antes> <después>
+ *   node scripts/style-diff.mjs <antes> <después> [--only dashboard,detalle-mapa]
+ * `--only` limita la comparación a esas pantallas/estados (nombre sin tema ni extensión).
  * Sale con código 1 si hay cualquier diferencia de color o si falta un volcado.
  */
 import { readFileSync, readdirSync, existsSync, statSync } from 'node:fs';
 import { join } from 'node:path';
 
-const [a, b] = process.argv.slice(2);
-if (!a || !b) {
-  console.error('Uso: node scripts/style-diff.mjs <antes> <después>');
+const args = process.argv.slice(2);
+const onlyAt = args.indexOf('--only');
+const only = onlyAt >= 0 ? (args[onlyAt + 1] || '').split(',').filter(Boolean) : null;
+if (onlyAt >= 0) args.splice(onlyAt, 2);
+const [a, b] = args;
+if (!a || !b || (onlyAt >= 0 && !only.length)) {
+  console.error('Uso: node scripts/style-diff.mjs <antes> <después> [--only a,b]');
   process.exit(2);
 }
 
@@ -18,7 +23,13 @@ const list = (dir) =>
     statSync(join(dir, p)).isDirectory() ? readdirSync(join(dir, p)).map((f) => `${p}/${f}`) : [],
   );
 
-const files = [...new Set([...list(a), ...list(b)])].sort();
+// `proyecto/nombre-tema.json` → nombre
+const screenOf = (f) => f.split('/').pop().replace(/-(light|dark)\.json$/, '');
+const files = [...new Set([...list(a), ...list(b)])].filter((f) => !only || only.includes(screenOf(f))).sort();
+if (only && !files.length) {
+  console.error(`--only ${only.join(',')}: ningún volcado coincide.`);
+  process.exit(2);
+}
 let diffs = 0;
 let elements = 0;
 for (const f of files) {
