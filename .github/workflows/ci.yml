@@ -120,10 +120,15 @@ jobs:
     outputs:
       visual: ${{ steps.lane.outputs.visual }}
       baseline_run: ${{ steps.baseline.outputs.run_id }}
+      base_sha: ${{ steps.base.outputs.sha }}
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
+      # Base REAL del merge: primer padre del commit de merge. `pull_request.base.sha` puede estar
+      # desfasado si develop avanzó tras abrir el PR (visto en el PR #105: diferencias fantasma).
+      - id: base
+        run: echo "sha=$(git rev-parse HEAD^1)" >> "$GITHUB_OUTPUT"
       - id: lane
         run: node scripts/changed-lane.mjs --base "$BASE_REF" --github-output
         env:
@@ -133,7 +138,7 @@ jobs:
         uses: actions/github-script@v7
         with:
           script: |
-            const name = `style-dump-${context.payload.pull_request.base.sha}`;
+            const name = `style-dump-${{ steps.base.outputs.sha }}`;
             const { data } = await github.rest.actions.listArtifactsForRepo({
               owner: context.repo.owner, repo: context.repo.repo, name, per_page: 5,
             });
@@ -184,7 +189,7 @@ jobs:
         if: needs.changes.outputs.baseline_run != ''
         uses: actions/download-artifact@v4
         with:
-          name: style-dump-${{ github.event.pull_request.base.sha }}
+          name: style-dump-${{ needs.changes.outputs.base_sha }}
           run-id: ${{ needs.changes.outputs.baseline_run }}
           github-token: ${{ github.token }}
           path: style-before
@@ -192,7 +197,7 @@ jobs:
         if: needs.changes.outputs.baseline_run == ''
         uses: actions/checkout@v4
         with:
-          ref: ${{ github.event.pull_request.base.sha }}
+          ref: ${{ needs.changes.outputs.base_sha }}
           path: base
       - if: needs.changes.outputs.baseline_run == ''
         run: |
