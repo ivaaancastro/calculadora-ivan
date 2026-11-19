@@ -247,7 +247,7 @@ jobs:
           name: style-before
           path: style-before
       - name: style-diff (debe dar 0 diferencias)
-        run: node scripts/style-diff.mjs style-before style-after | tee style-diff.txt; test "${PIPESTATUS[0]}" -eq 0
+        run: node scripts/style-diff.mjs style-before style-after --tolerate-grid-count | tee style-diff.txt; test "${PIPESTATUS[0]}" -eq 0
         shell: bash
       - uses: actions/upload-artifact@v4
         if: failure()

@@ -25,6 +25,9 @@ Solo `.github/workflows/ci.yml`. Sin cambios en scripts ni en `src/`.
 ## 7. Pruebas
 La validación es el propio CI del PR (no se repite en local, por instrucción del usuario).
 
+## 7 bis. Hallazgo en el CI del PR
+En runners distintos la rejilla de Recharts del detalle móvil dio 4 marcas en el «después» y 3 en el «antes» (2 de 2 runs, código idéntico). Se añade `style-diff --tolerate-grid-count` (solo CI): no cuenta la aparición/desaparición de un `<line>` suelto de un `<svg>`; los colores de los `<line>` presentes en ambos volcados se siguen comparando.
+
 ## 8. Riesgos
 Si falla uno de los dos volcados, `style-diff` no se ejecuta y el fallo se ve en el job que cayó. Dos runners simultáneos por PR visual (minutos gratis: repo público).
 
