@@ -1,7 +1,7 @@
 import React from 'react';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer } from 'recharts';
 import { formatPace, formatDuration } from '../../../utils/formatters';
-import { Card } from '../../ui';
+import { Card, EmptyState } from '../../ui';
 import { useChartTheme } from '../../charts/useChartTheme';
 
 export const ActivityCharts = ({ chartData, activePayload, handleMouseMove, isPaceBased, blocks }) => {
@@ -162,7 +162,7 @@ export const ActivityCharts = ({ chartData, activePayload, handleMouseMove, isPa
                                             )}
                                         </Card>
                                     ) : (
-                                        <div className="h-64 flex items-center justify-center text-faint text-sm">Sin datos de análisis</div>
+                                        <EmptyState className="h-64" title="Sin datos de análisis" />
                                     )}
 </>
     );

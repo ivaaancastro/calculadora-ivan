@@ -1,6 +1,6 @@
 import React from 'react';
 import { Activity, Brain } from 'lucide-react';
-import { Card, InfoTooltip, Segmented } from '../ui';
+import { Card, EmptyState, InfoTooltip, Segmented } from '../ui';
 
 export const TrainingBalanceCard = ({ balance, balanceDays, setBalanceDays }) => {
     return (
@@ -114,10 +114,7 @@ export const TrainingBalanceCard = ({ balance, balanceDays, setBalanceDays }) =>
                         </div>
                     </div>
                 ) : (
-                    <div className="py-16 text-center text-slate-400 font-black uppercase text-[10px] tracking-widest border-2 border-dashed border-line-soft-2 rounded-3xl">
-                        <Activity size={48} className="mx-auto text-slate-200 dark:text-zinc-800 mb-4 stroke-1" />
-                        <p>Sin datos suficientes en el periodo</p>
-                    </div>
+                    <EmptyState icon={Activity} title="Sin datos suficientes en el periodo" />
                 )}
             </Card>
         </section>

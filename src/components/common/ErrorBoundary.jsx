@@ -1,5 +1,6 @@
 import React from 'react';
 import { AlertTriangle, RefreshCw } from 'lucide-react';
+import { ErrorState } from '../ui';
 
 export class ErrorBoundary extends React.Component {
   constructor(props) {
@@ -32,19 +33,12 @@ export class ErrorBoundary extends React.Component {
     if (this.state.hasError) {
       return (
         <div className="min-h-screen flex items-center justify-center bg-sunken-2 p-4">
-          <div className="bg-surface rounded-2xl shadow-xl p-8 max-w-lg w-full border border-line text-center">
-            <div className="flex justify-center mb-6">
-              <div className="w-16 h-16 bg-danger-tint-4 rounded-full flex items-center justify-center">
-                <AlertTriangle className="text-danger-ink-3" size={32} />
-              </div>
-            </div>
-            
-            <h1 className="text-2xl font-black tracking-tight text-slate-800 dark:text-white mb-2">
-              Vaya, algo se ha roto
-            </h1>
-            <p className="text-sm font-medium text-ink-3 mb-8">
-              La aplicación ha encontrado un error crítico en la interfaz. No te preocupes, tus datos están a salvo.
-            </p>
+          <div className="bg-surface rounded-2xl shadow-xl p-8 max-w-lg w-full border border-line">
+            <ErrorState
+              icon={AlertTriangle}
+              title="Vaya, algo se ha roto"
+              description="La aplicación ha encontrado un error crítico en la interfaz. No te preocupes, tus datos están a salvo."
+            />
 
             {import.meta.env.DEV && this.state.error && (
               <div className="text-left bg-slate-100 dark:bg-zinc-950 p-4 rounded-lg overflow-auto mb-8 border border-line">
