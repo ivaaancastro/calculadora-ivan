@@ -10,6 +10,7 @@ y este proyecto adhiere a [Semantic Versioning](https://semver.org/lang/es/).
 ### Docs — Fase Premium (`docs/premium-spec`)
 - `docs(premium):` spec y plan de la Fase Premium (`docs/branches/feat/premium-design/`): A auditoría de diseño, B tokens y acabado v2, C capa de gráficas Forma (lenguaje visual de bklit-ui sin instalar el paquete), D rediseño de pantallas (bloqueada hasta referencias). Anexo con el checklist de `make-interfaces-feel-better`. Decisiones D1..D10 pendientes de aprobación.
 - `docs(premium):` roadmap reordenado (cerrar en curso → Premium → Capa 6 → Capa 7 → deudas → opcionales) con línea «Siguiente paso». Sin cambios en `src/`.
+
 ### Detalle de actividad: Coach Insights con texto (`fix/detalle-coach-insights`)
 - `fix(detalle):` la tarjeta «Coach Insights» ya no sale vacía: frase nueva para IF 0,70–0,85 (intensidad moderada) y para «Mantenimiento»; la tarjeta no se pinta si no hay frases.
 - Las frases de IF y de pico de 5 min solo se generan en bici (donde el detalle por deporte muestra potencia). Lógica en `src/utils/coachInsights.js`.
