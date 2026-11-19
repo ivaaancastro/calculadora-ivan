@@ -1,5 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { Activity } from 'lucide-react';
+import { EmptyState, Skeleton } from '../ui';
 import { useWellnessInfo } from '../../hooks/useWellnessInfo';
 import { useChartTheme } from '../charts/useChartTheme';
 import { computeDayReadiness } from '../health/readiness';
@@ -144,8 +145,10 @@ export const HealthPage = ({ activities, settings, chartData }) => {
     if (wellnessLoading && !wellnessMetrics) {
         return (
             <div className="animate-in fade-in duration-300 pb-20 w-full max-w-[1400px] mx-auto px-3 sm:px-6 py-24 flex flex-col items-center justify-center gap-4 text-center">
-                <div className="w-14 h-14 rounded-2xl bg-fill-3 flex items-center justify-center shadow-xs">
-                    <Activity size={24} className="text-emerald-500 animate-pulse" />
+                <div className="flex gap-3">
+                    <Skeleton circle className="w-16 h-16" />
+                    <Skeleton circle className="w-16 h-16" />
+                    <Skeleton circle className="w-16 h-16" />
                 </div>
                 <div>
                     <h2 className="text-lg font-bold text-ink">Salud</h2>
@@ -153,22 +156,19 @@ export const HealthPage = ({ activities, settings, chartData }) => {
                         Sincronizando métricas fisiológicas...
                     </p>
                 </div>
+                <Skeleton className="w-full max-w-md h-24" />
             </div>
         );
     }
 
     if (!wellnessMetrics) {
         return (
-            <div className="animate-in fade-in duration-300 pb-20 w-full max-w-[1400px] mx-auto px-3 sm:px-6 py-16 flex flex-col items-center justify-center gap-4 text-center">
-                <div className="w-14 h-14 rounded-2xl bg-fill-3 flex items-center justify-center text-slate-400">
-                    <Activity size={24} className="text-slate-400" />
-                </div>
-                <div className="max-w-md">
-                    <h2 className="text-lg font-bold text-ink">Sin datos de salud</h2>
-                    <p className="text-xs text-ink-3 mt-1">
-                        No se han encontrado registros biométricos. Sincroniza tus datos o carga actividades para ver tus métricas de salud.
-                    </p>
-                </div>
+            <div className="animate-in fade-in duration-300 pb-20 w-full max-w-[1400px] mx-auto px-3 sm:px-6 py-16">
+                <EmptyState
+                    icon={Activity}
+                    title="Sin datos de salud"
+                    description="No se han encontrado registros biométricos. Sincroniza tus datos o carga actividades para ver tus métricas de salud."
+                />
             </div>
         );
     }

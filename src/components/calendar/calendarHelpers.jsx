@@ -1,15 +1,17 @@
 import { MapPin, Footprints, Bike, Dumbbell, Activity } from 'lucide-react';
 import React from 'react';
+import { getChartTheme } from '../charts/chartTheme';
 
 export const WEEKDAYS = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'];
 
 
 // Shared zone styling used in both planner and viewer
+const ZONES = getChartTheme('light').zones.all;
 export const zoneColors = {
-    Z1: '#94a3b8', R12: '#60a5fa', Z2: '#3b82f6', R23: '#34d399',
-    Z3: '#22c55e', Z4: '#eab308', Z5: '#f97316', Z6: '#ef4444',
+    Z1: ZONES[0], R12: ZONES[1], Z2: ZONES[1], R23: ZONES[2],
+    Z3: ZONES[2], R34: ZONES[3], Z4: ZONES[3], Z5: ZONES[4], Z6: ZONES[5], Z7: ZONES[6],
 };
-export const getZoneColor = (z) => zoneColors[z] || '#94a3b8';
+export const getZoneColor = (z) => zoneColors[z] || ZONES[0];
 
 export const getSportColor = (type) => {
     const t = String(type).toLowerCase();

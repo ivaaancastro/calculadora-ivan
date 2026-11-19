@@ -841,30 +841,30 @@ html[data-ui="v2"] [data-skin] {
   --chart-pmc-today: 51 59 71;
   /* Series, deportes, distribución, zonas y mapa (D-10) */
   --hr: 225 29 72;
-  --pace: 79 70 229;
-  --power: 217 119 6;
+  --pace: 8 145 178;
+  --power: 180 83 9;
   --cadence: 5 150 105;
   --chart-altitude: 100 116 139;
   --ef: 124 58 237;
-  --sleep: 37 99 235;
+  --sleep: 124 58 237;
   --chart-readiness: 5 150 105;
   --chart-strain: 225 29 72;
   --chart-tss: 124 58 237;
   --chart-hours: 5 150 105;
   --chart-profile-user: 37 99 235;
-  --chart-profile-top: 217 119 6;
+  --chart-profile-top: 180 83 9;
   --chart-profile-other: 124 135 151;
   --chart-sport-run: 234 88 12;
   --chart-sport-walk: 5 150 105;
   --chart-sport-bike: 37 99 235;
   --chart-sport-strength: 124 58 237;
   --chart-sport-other: 113 113 122;
-  --chart-sport-fallback: 79 70 229;
+  --chart-sport-fallback: 8 145 178;
   --sport-bike: 37 99 235;
   --sport-run: 234 88 12;
   --chart-dist-strength: 124 58 237;
   --chart-dist-walk: 5 150 105;
-  --chart-dist-workout: 79 70 229;
+  --chart-dist-workout: 8 145 178;
   --chart-dist-other: 124 135 151;
   --chart-zone-1: 124 135 151;
   --chart-zone-2: 37 99 235;
@@ -879,15 +879,19 @@ html[data-ui="v2"] [data-skin] {
   --chart-map-start: 5 150 105;
 
   /* Escala: radios contenidos, borde de 1 px, tipografía más ancha */
-  --skin-radius-md: 8px;
-  --skin-radius-lg: 10px;
-  --skin-radius-xl: 10px;
-  --skin-radius-2xl: 12px;
-  --skin-radius-3xl: 14px;
-  --skin-shadow-xs: 0 1px 1px rgba(16, 19, 23, 0.05), 0 0 0 1px rgba(16, 19, 23, 0.04);
-  --skin-shadow-sm: 0 2px 4px rgba(16, 19, 23, 0.05), 0 0 0 1px rgba(16, 19, 23, 0.05);
-  --skin-shadow-card: 0 1px 2px rgba(16, 19, 23, 0.05), 0 0 0 1px rgba(16, 19, 23, 0.04);
-  --skin-type-8: 9px;
+  /* Radios concéntricos (Fase B): exterior = interior + padding. Escala 6/8/12/16/20:
+     tarjeta 16 → ficha 12 (padding 4) → control 8; carril 12 → pestaña 8; dock 20 → tecla 16. */
+  --skin-radius-md: 6px;
+  --skin-radius-lg: 8px;
+  --skin-radius-xl: 12px;
+  --skin-radius-2xl: 16px;
+  --skin-radius-3xl: 20px;
+  /* Sombras en capas (reposo): anillo de 1 px + contacto + difusión fría, todo transparente */
+  --skin-shadow-xs: 0 0 0 1px rgba(16, 19, 23, 0.04), 0 1px 1px rgba(16, 19, 23, 0.04);
+  --skin-shadow-sm: 0 0 0 1px rgba(16, 19, 23, 0.05), 0 1px 2px rgba(16, 19, 23, 0.05), 0 2px 6px -2px rgba(30, 41, 70, 0.06);
+  --skin-shadow-card: 0 0 0 1px rgba(16, 19, 23, 0.04), 0 1px 2px rgba(16, 19, 23, 0.04), 0 4px 12px -6px rgba(30, 41, 70, 0.08);
+  /* Tipografía: mínimo 10 px (rótulos); el contenido arranca en 11 px */
+  --skin-type-8: 10px;
   --skin-type-9: 10px;
   --skin-type-10: 11px;
   --skin-type-11: 12px;
@@ -908,16 +912,16 @@ html[data-ui="v2"] [data-skin] {
 
 html[data-ui="v2"].dark [data-skin] {
   /* Grafito en oscuro; la tarjeta se separa del lienzo por el anillo, no por la sombra */
-  --surface: 20 22 26;
+  --surface: 22 25 30;
   --surface-2: 30 33 39;
   --surface-3: 38 42 49;
   --surface-4: 26 29 34;
-  --surface-5: 20 22 26; --surface-5-a: 1;
-  --surface-6: 20 22 26;
+  --surface-5: 22 25 30; --surface-5-a: 1;
+  --surface-6: 22 25 30;
   --surface-7: 30 33 39;
-  --surface-card: 20 22 26;
+  --surface-card: 22 25 30;
   --sunken: 30 33 39; --sunken-a: 1;
-  --sunken-2: 26 29 34;
+  --sunken-2: 12 14 17;
   --sunken-6: 30 33 39;
   --fill: 38 42 49; --fill-a: 1;
   --fill-6: 52 57 66; --fill-6-a: 0.7;
@@ -994,31 +998,31 @@ html[data-ui="v2"].dark [data-skin] {
   --chart-pmc-band-down: 251 113 133;
   --chart-pmc-today: 212 217 224;
   /* Series, deportes, distribución, zonas y mapa (D-10) */
-  --hr: 251 113 133;
-  --pace: 129 140 248;
-  --power: 251 191 36;
-  --cadence: 52 211 153;
+  --hr: 244 63 94;
+  --pace: 5 165 192;
+  --power: 201 130 9;
+  --cadence: 15 174 121;
   --chart-altitude: 148 163 184;
-  --ef: 167 139 250;
-  --sleep: 96 165 250;
-  --chart-readiness: 52 211 153;
-  --chart-strain: 251 113 133;
-  --chart-tss: 167 139 250;
-  --chart-hours: 52 211 153;
-  --chart-profile-user: 96 165 250;
-  --chart-profile-top: 251 191 36;
+  --ef: 146 114 245;
+  --sleep: 146 114 245;
+  --chart-readiness: 15 174 121;
+  --chart-strain: 244 63 94;
+  --chart-tss: 146 114 245;
+  --chart-hours: 15 174 121;
+  --chart-profile-user: 78 147 246;
+  --chart-profile-top: 201 130 9;
   --chart-profile-other: 100 116 139;
-  --chart-sport-run: 251 146 60;
-  --chart-sport-walk: 52 211 153;
-  --chart-sport-bike: 96 165 250;
-  --chart-sport-strength: 167 139 250;
+  --chart-sport-run: 229 106 20;
+  --chart-sport-walk: 15 174 121;
+  --chart-sport-bike: 78 147 246;
+  --chart-sport-strength: 146 114 245;
   --chart-sport-other: 161 161 170;
-  --chart-sport-fallback: 129 140 248;
-  --sport-bike: 96 165 250;
-  --sport-run: 251 146 60;
-  --chart-dist-strength: 167 139 250;
-  --chart-dist-walk: 52 211 153;
-  --chart-dist-workout: 129 140 248;
+  --chart-sport-fallback: 5 165 192;
+  --sport-bike: 78 147 246;
+  --sport-run: 229 106 20;
+  --chart-dist-strength: 146 114 245;
+  --chart-dist-walk: 15 174 121;
+  --chart-dist-workout: 5 165 192;
   --chart-dist-other: 100 116 139;
   --chart-zone-1: 148 163 184;
   --chart-zone-2: 96 165 250;
@@ -1029,12 +1033,32 @@ html[data-ui="v2"].dark [data-skin] {
   --chart-zone-5: 251 146 60;
   --chart-zone-6: 248 113 113;
   --chart-zone-7: 167 139 250;
-  --chart-map-route: 96 165 250;
-  --chart-map-start: 52 211 153;
+  --chart-map-route: 78 147 246;
+  --chart-map-start: 15 174 121;
 
   /* Sin sombra difusa en oscuro: anillo de 1 px que separa la tarjeta del lienzo */
   --skin-shadow-xs: 0 0 0 1px rgba(255, 255, 255, 0.07);
-  --skin-shadow-sm: 0 0 0 1px rgba(255, 255, 255, 0.09);
-  --skin-shadow-card: 0 0 0 1px rgba(255, 255, 255, 0.08);
+  --skin-shadow-sm: 0 0 0 1px rgba(255, 255, 255, 0.09), inset 0 1px 0 rgba(255, 255, 255, 0.03);
+  --skin-shadow-card: 0 0 0 1px rgba(255, 255, 255, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.03);
+}
+
+/*
+ * Elevación y movimiento v2 (Fase B). Van en `html[data-ui="v2"]` (no en `[data-skin]`) porque
+ * modales, menús y tooltips viven en portales fuera de la raíz de pantalla.
+ * Niveles: 1 reposo (`--skin-shadow-*`), 2 flotante (popover, tooltip, menú), 3 modal.
+ */
+html[data-ui="v2"] {
+  --elev-2: 0 0 0 1px rgba(16, 19, 23, 0.08), 0 4px 8px -2px rgba(16, 19, 23, 0.08), 0 12px 24px -8px rgba(30, 41, 70, 0.16);
+  --elev-3: 0 0 0 1px rgba(16, 19, 23, 0.08), 0 8px 16px -4px rgba(16, 19, 23, 0.1), 0 24px 48px -12px rgba(30, 41, 70, 0.26);
+  --dur-fast: 120ms;
+  --dur-base: 200ms;
+  --dur-slow: 400ms;
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+  --press-scale: 0.97;
+}
+html[data-ui="v2"].dark {
+  /* En oscuro la sombra no se ve: el anillo claro separa y el brillo superior da el relieve */
+  --elev-2: 0 0 0 1px rgba(255, 255, 255, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.05), 0 8px 24px rgba(0, 0, 0, 0.5);
+  --elev-3: 0 0 0 1px rgba(255, 255, 255, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.06), 0 16px 48px rgba(0, 0, 0, 0.62);
 }
 /* @tokens:skin-v2:end */

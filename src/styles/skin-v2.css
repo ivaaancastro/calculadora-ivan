@@ -831,3 +831,64 @@ html[data-ui="v2"] [data-metric-trigger] {
   min-height: 44px;
   min-width: 44px;
 }
+
+/* ══ Acabado premium (Fase B, feat/premium-tokens) ══════════════════════════════════
+ *
+ * Reglas globales de v2: van detrás de `html[data-ui="v2"]` (sin `[data-skin]`) porque cubren
+ * portales (modales, menús, tooltips). En v1 no emiten nada. Tokens en `tokens.css`.
+ */
+
+/* Foco visible (ACC-1): anillo de 2 px del acento. Los campos de texto ya pintan su propio
+   anillo con `focus:ring-*`, así que se excluyen para no duplicarlo. */
+html[data-ui="v2"] :focus-visible:not(input):not(textarea):not(select) {
+  outline: 2px solid rgb(var(--action));
+  outline-offset: 2px;
+}
+
+/* Ajuste de texto (TIP-2): balanceado en títulos, `pretty` en párrafos cortos. Nunca en
+   código ni preformateado. */
+html[data-ui="v2"] :is(h1, h2, h3, h4, .section-header) {
+  text-wrap: balance;
+}
+html[data-ui="v2"] p:not(pre *, code *) {
+  text-wrap: pretty;
+}
+
+/* Rótulos menos «gritados» (TIP-3): menos tracking y peso máximo contenido. */
+html[data-ui="v2"] [data-skin] .tracking-widest { letter-spacing: 0.08em; }
+html[data-ui="v2"] [data-skin] .tracking-wider { letter-spacing: 0.05em; }
+html[data-ui="v2"] [data-skin] .font-black,
+html[data-ui="v2"] [data-skin] .font-extrabold { font-weight: 700; }
+
+/* Sombras flotantes en capas (SOM-1/2): popovers, tooltips, menús y modales pasan por los
+   tokens de elevación; antes usaban la escala de Tailwind sin tokenizar. */
+html[data-ui="v2"] .shadow-lg,
+html[data-ui="v2"] .shadow-xl { box-shadow: var(--elev-2); }
+html[data-ui="v2"] .shadow-2xl { box-shadow: var(--elev-3); }
+
+/* Sin `transition: all` (MOV-1): las 119 clases `transition-all` de v2 animan solo
+   propiedades de pintura/transformación (más ancho/alto/trazo, que usan barras y anillos),
+   nunca márgenes, rellenos ni posicionamiento. Duración y easing siguen siendo los de la clase. */
+html[data-ui="v2"] .transition-all {
+  transition-property: color, background-color, border-color, text-decoration-color, fill, stroke,
+    opacity, box-shadow, transform, filter, width, height, stroke-dashoffset, stroke-dasharray;
+}
+
+/* Pulsación única (MOV-3): todas las variantes `active:scale-*` convergen en 0.97. */
+html[data-ui="v2"] [class*="active:scale-"]:active {
+  --tw-scale-x: var(--press-scale);
+  --tw-scale-y: var(--press-scale);
+}
+
+/* Contorno neutro en mapas e imágenes (RAD-3): 1 px interior, nunca teñido con la marca. */
+html[data-ui="v2"] .leaflet-container,
+html[data-ui="v2"] [data-skin] :is(img.rounded-full, img.object-cover) {
+  outline: 1px solid rgb(var(--ink) / 0.1);
+  outline-offset: -1px;
+}
+@media (prefers-reduced-motion: reduce) {
+  html[data-ui="v2"] [class*="active:scale-"]:active {
+    --tw-scale-x: 1;
+    --tw-scale-y: 1;
+  }
+}

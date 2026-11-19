@@ -25,6 +25,8 @@ jobs:
         run: npm run lint:colors
       - name: Check UI primitives (usage, retired classes, className)
         run: npm run lint:ui
+      - name: Check transition-all ratchet
+        run: npm run lint:motion
       - name: Check Playwright image matches package version
         run: |
           v="$(node -p "require('@playwright/test/package.json').version")"

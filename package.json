@@ -9,6 +9,7 @@
     "lint": "eslint .",
     "lint:colors": "node scripts/check-colors.mjs",
     "lint:ui": "node scripts/check-ui.mjs",
+    "lint:motion": "node scripts/check-motion.mjs",
     "verify": "node scripts/verify.mjs",
     "verify:layer": "bash scripts/verify-layer.sh",
     "preview": "vite preview",

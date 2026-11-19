@@ -2,7 +2,7 @@ import React, { useState, useMemo, useRef } from 'react';
 import { Search, Calendar, Activity, Clock, MapPin, Zap, Trash2, ChevronRight, Bike, Footprints, Dumbbell, Flame } from 'lucide-react';
 import { useVirtualizer } from '@tanstack/react-virtual';
 import { formatDuration } from '../../utils/formatDuration';
-import { Card, Input, Select } from '../ui';
+import { Card, EmptyState, Input, Select } from '../ui';
 import { useConfirmDeleteActivity } from '../../hooks/useConfirmDeleteActivity';
 import { ConfirmDeleteActivityModal } from '../activity/ConfirmDeleteActivityModal';
 
@@ -250,11 +250,7 @@ export const HistoryList = React.memo(({ activities, onDelete, onSelectActivity 
                         })}
                     </div>
                 ) : (
-                    <div data-history="empty" className="flex flex-col items-center justify-center h-full text-center p-8">
-                        <Activity size={32} className="text-faint-2 mb-3" />
-                        <h3 className="text-[11px] font-bold text-body-soft uppercase tracking-widest">No hay resultados</h3>
-                        <p className="text-[10px] text-ink-4 mt-1">Prueba a cambiar los filtros de búsqueda.</p>
-                    </div>
+                    <EmptyState data-history="empty" className="h-full" icon={Activity} title="No hay resultados" description="Prueba a cambiar los filtros de búsqueda." />
                 )}
             </div>
         </Card>

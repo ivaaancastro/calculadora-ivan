@@ -1,3 +1,4 @@
+import { getChartTheme } from '../../charts/chartTheme';
 export const getPeakByTime = (hrData, timeData, windowSeconds) => {
     if (!hrData || !timeData || hrData.length < 2) return 0;
     let maxAvg = 0; let currentSum = 0; let count = 0; let left = 0;
@@ -69,5 +70,5 @@ export const POWER_ZONES = [
 ];
 export const SWEET_SPOT = { label: 'Sweet Spot', pMin: 0.84, pMax: 0.97 };
 
-export const ZONE_COLORS = ['#94a3b8', '#3b82f6', '#22c55e', '#eab308', '#f97316', '#ef4444', '#a855f7'];
+export const ZONE_COLORS = getChartTheme('light').zones.all;
 export const HR_LABELS = ['Z1', 'Z2', 'Z3', 'Z4', 'Z5', 'Z6', 'Z7'];

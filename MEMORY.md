@@ -11,6 +11,7 @@
 
 ## 1. Estado actual
 - **Fase Premium A hecha (PR `docs/premium-auditoria`):** `auditoria.md` pendiente de aprobación del usuario antes de la Fase B.
+- **Fase Premium B PR 1 (`feat/premium-tokens`):** tokens/acabado por CSS en v2 hecho; pendiente B2b (hex→tokens, paleta Forma) y B2c (estados). Ver `docs/branches/feat/premium-tokens/spec.md`.
 - **➡️ Siguiente paso:** cerrar PR #103 (Coach Insights) y #105 (verificación rápida); empezar la **Fase Premium A** (auditoría; spec D1–D10 aprobada) tras mergear #106 (`docs/branches/feat/premium-design/`). Roadmap vigente en `docs/branches/feat/webapp-redesign/plan.md`.
 - **Fase Premium (spec aprobada; alcance todo el diseño; v1 no se protege; dependencias/Tailwind con medida y OK):** se inserta antes de la Capa 6: A auditoría, B tokens/acabado v2, C gráficas Forma (lenguaje bklit-ui sin instalar el paquete), D pantallas (bloqueada hasta referencias; empieza por el detalle).
 - **Borrar actividad con confirmación** (`feat/detalle-borrar-actividad`, spec aprobada e implementada): papelera del detalle conectada + diálogo `ConfirmDeleteActivityModal` (también en la lista). Strava puede reimportar la más reciente al sincronizar (avisado en el diálogo; tombstones = spec futura).

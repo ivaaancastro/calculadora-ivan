@@ -210,7 +210,7 @@ export const WorkoutViewerModal = ({ workout, onClose, onDelete, onEdit }) => {
                                                             return (
                                                                 <div key={sIdx} className={`flex items-center justify-between px-4 py-2 border-b last:border-0 ${isWork ? 'border-slate-100/50 dark:border-zinc-800/20' : 'border-slate-50 dark:border-zinc-800/10 bg-white/50 dark:bg-zinc-900/30'}`}>
                                                                     <div className="flex items-center gap-2.5">
-                                                                        <div className="w-1 h-5 rounded-full" style={{ background: isWork ? (getZoneColor(step.zone)) : '#e2e8f0' }} />
+                                                                        <div className="w-1 h-5 rounded-full" style={{ background: isWork ? (getZoneColor(step.zone)) : 'rgb(var(--line))' }} />
                                                                         <div>
                                                                             <span className={`text-[11px] font-semibold ${isWork ? 'text-body-2' : 'text-ink-4'}`}>
                                                                                 {isWork ? 'Trabajo' : 'Descanso'}

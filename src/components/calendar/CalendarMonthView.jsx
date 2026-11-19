@@ -3,7 +3,7 @@ import { Activity, Target, Plus } from 'lucide-react';
 import React from 'react';
 import { getSportCategory } from '../../utils/tssEngine';
 import { getComplianceForDay, computeWeekStats, findWeekPmc, findPrevWeekPmc, getWeekNumber } from '../../utils/calendarEngine';
-import { getSportIcon, WEEKDAYS } from './calendarHelpers';
+import { getSportIcon, WEEKDAYS, getZoneColor } from './calendarHelpers';
 
 export const CalendarMonthView = ({
     activitiesByDate,
@@ -150,15 +150,7 @@ export const CalendarMonthView = ({
 
                                             const compliance = getComplianceForDay(dateKey, acts);
 
-                                            // Zone color helper — intervals.icu palette
-                                            const zoneBarColor = (zone) => {
-                                                const colors = {
-                                                    Z1: '#9e9e9e', Z2: '#4db8ff', Z3: '#50c878',
-                                                    Z4: '#ffd700', Z5: '#ff8c00', Z6: '#ff4444', Z7: '#cc44ff',
-                                                    R12: '#78b4e8', R23: '#6ec89b', R34: '#e8d56e'
-                                                };
-                                                return colors[zone] || '#9e9e9e';
-                                            };
+                                            const zoneBarColor = getZoneColor;
 
                                             return (
                                                 <div key={dIdx}

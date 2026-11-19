@@ -1,6 +1,9 @@
 import React from 'react';
 import { Trophy, Clock } from 'lucide-react';
 import { Card, InfoTooltip } from '../ui';
+import { getChartTheme } from '../charts/chartTheme';
+
+const CT = getChartTheme('light');
 
 export const RacePredictionsCard = ({ racePredictions }) => {
     if (!racePredictions) return null;
@@ -19,7 +22,7 @@ export const RacePredictionsCard = ({ racePredictions }) => {
                                 <div className="flex flex-col">
                                     <span className="text-[9px] font-bold uppercase tracking-[0.1em] text-slate-400">{r.name}</span>
                                     <div className="mt-1 flex items-center gap-1">
-                                        <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: r.preparation > 80 ? '#10b981' : r.preparation > 50 ? '#f59e0b' : '#ef4444' }} />
+                                        <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: r.preparation > 80 ? CT.zones.all[2] : r.preparation > 50 ? CT.zones.all[3] : CT.zones.all[5] }} />
                                         <span className="text-[8px] font-bold text-slate-400 uppercase">{r.preparation}% Prep.</span>
                                     </div>
                                 </div>

@@ -30,7 +30,7 @@ export const HistoryTrendChart = ({ historySeries, ct }) => (
             <div className="h-48 sm:h-56 w-full -ml-3 sm:ml-0">
                 <ResponsiveContainer width="100%" height="100%">
                     <ComposedChart data={historySeries} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-                        <CartesianGrid strokeDasharray="3 3" stroke={ct.anatomy.gridSoft} dark:stroke="#27272a" vertical={false} opacity={0.6} />
+                        <CartesianGrid strokeDasharray="3 3" stroke={ct.anatomy.gridSoft} vertical={false} opacity={0.6} />
                         <XAxis dataKey="dateLabel" tick={{ fontSize: 10, fill: ct.anatomy.tickZinc, fontWeight: 'bold' }} axisLine={false} tickLine={false} />
                         <YAxis yAxisId="left" domain={[0, 100]} tick={{ fontSize: 10, fill: ct.anatomy.tickZinc, fontWeight: 'bold' }} axisLine={false} tickLine={false} />
                         <YAxis yAxisId="right" orientation="right" domain={[0, 12]} hide />
