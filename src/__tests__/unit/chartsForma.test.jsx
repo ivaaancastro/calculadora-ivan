@@ -5,6 +5,7 @@ import { ChartSkeleton } from '../../components/charts/ChartSkeleton.jsx';
 import { Sparkline } from '../../components/charts/Sparkline.jsx';
 import { sparklinePoints } from '../../components/charts/sparklinePoints';
 import { buildHeatmap, heatmapLevel } from '../../components/charts/heatmapGrid';
+import { sliceByRange } from '../../components/charts/sliceRange';
 
 describe('charts/chartA11y', () => {
   it('resume inicio, fin, mínimo y máximo', () => {
@@ -24,6 +25,15 @@ describe('charts/a11y props y ChartSkeleton', () => {
   });
   it('ChartSkeleton es un estado accesible', () => {
     expect(renderToStaticMarkup(<ChartSkeleton />)).toContain('role="status"');
+  });
+});
+
+describe('charts/sliceByRange', () => {
+  const data = Array.from({ length: 100 }, (_, i) => i);
+  it('devuelve el mismo array sin zoom', () => expect(sliceByRange(data, [0, 100])).toBe(data));
+  it('recorta por porcentaje y deja al menos 2 puntos', () => {
+    expect(sliceByRange(data, [25, 50])).toHaveLength(25);
+    expect(sliceByRange(data, [50, 50]).length).toBeGreaterThanOrEqual(2);
   });
 });
 
@@ -56,7 +66,7 @@ describe('charts/heatmapGrid', () => {
     expect(cols[3][0].key).toBe('2026-11-16'); // lunes
     expect(cols[3][1].value).toBe(80);
     expect(cols[3][4].future).toBe(true);
-    expect(cols[3][4].value).toBe(0); // futuro ignorado
+    expect(cols[3][4].value).toBe(0);
     expect(max).toBe(80);
   });
 });
