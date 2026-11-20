@@ -1,15 +1,22 @@
-import React from 'react';
+import React, { useMemo, useState } from 'react';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer } from 'recharts';
 import { formatPace, formatDuration } from '../../../utils/formatters';
 import { Card, EmptyState } from '../../ui';
 import { useChartTheme } from '../../charts/useChartTheme';
+import { useChartSkin } from '../../charts/ChartSkin';
+import { ZoomRange } from '../../charts/ZoomRange';
+import { sliceByRange } from '../../charts/sliceRange';
 
-export const ActivityCharts = ({ chartData, activePayload, handleMouseMove, isPaceBased, blocks }) => {
+export const ActivityCharts = ({ chartData: fullData, activePayload, handleMouseMove, isPaceBased, blocks }) => {
     const ct = useChartTheme();
+    const isV2 = useChartSkin() === 'v2';
+    const [range, setRange] = useState([0, 100]);
+    const chartData = useMemo(() => (isV2 ? sliceByRange(fullData, range) : fullData), [isV2, fullData, range]);
     return (
 <>
                                     {chartData.length > 0 ? (
                                         <Card data-detail="charts" className="overflow-hidden">
+                                            {isV2 && fullData.length > 20 && <ZoomRange range={range} onChange={setRange} />}
                                             {/* Velocity/Pace */}
                                             {blocks?.charts?.speed !== false && (
                                             <div className="h-[120px] pt-3.5 px-3.5 sm:px-6 border-b border-line-soft-3">
