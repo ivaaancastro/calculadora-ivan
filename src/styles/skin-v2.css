@@ -912,3 +912,11 @@ html[data-ui="v2"] [data-chart-tooltip] {
 }
 html[data-ui="v2"] .recharts-text,
 html[data-ui="v2"] .recharts-cartesian-axis-tick-value { font-variant-numeric: tabular-nums; }
+
+/* Entrada de sparklines (Fase C): trazo que se dibuja y área que aparece. Se desactiva con reduced-motion. */
+@keyframes chart-draw { from { stroke-dashoffset: 1; } to { stroke-dashoffset: 0; } }
+@keyframes chart-fade { from { opacity: 0; } to { opacity: 1; } }
+@media (prefers-reduced-motion: reduce) {
+  html[data-ui="v2"] svg [style*="chart-draw"],
+  html[data-ui="v2"] svg [style*="chart-fade"] { animation: none !important; }
+}

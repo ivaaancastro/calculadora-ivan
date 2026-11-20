@@ -7,6 +7,10 @@ y este proyecto adhiere a [Semantic Versioning](https://semver.org/lang/es/).
 
 ## [Unreleased]
 
+### Added — Fase Premium C, capa de gráficas Forma (`feat/premium-charts`, PRs #111–#115)
+- `feat(charts):` lenguaje base v2: rejilla continua desvanecida, tooltip de cristal común (`[data-chart-tooltip]`), `useChartMotion` (entrada 700 ms; apagada con `prefers-reduced-motion` y en navegadores automatizados), `chartFigureProps`/`summarizeSeries` (alternativa textual), `ChartSkeleton`; aplicado a `EvolutionChart`.
+- `feat(charts):` `Sparkline` y `role="img"` en `AppleRingGauge`; banda de TSB óptimo y zona de proyección en `EvolutionChart`; `ZoomRange` sincronizado en el detalle; `ActivityHeatmap` en el Calendario. Todo solo en v2.
+
 ### Changed — Fase Premium B, PR 2 (`feat/premium-palette`)
 - `feat(charts):` paleta Forma v2 (azul, naranja, esmeralda, violeta, rosa, cian, ámbar) validada con `dataviz` en claro y oscuro (ΔE CVD ≥ 10, banda de luminosidad); `pace`/`sleep` dejan de repetir tono con CTL/ATL; deporte único en `SPORTS` y `DISTRIBUTION`.
 - `refactor(colors):` zonas del calendario, Rendimiento, Perfil y predicciones leen `chartTheme`; `lint:colors` baja la base de 8 archivos; se elimina un prop `dark:stroke` inválido.
