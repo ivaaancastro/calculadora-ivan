@@ -22,10 +22,10 @@ Spec aprobada (D1–D10 + ampliación, 2026-11-19). **No empezar la Fase A hasta
 - [ ] B3. Verificar, D7 del usuario, registrar.
 
 ## Fase C — Capa de gráficas Forma (alto nivel; `feat/premium-charts`)
-- [ ] C1. Spec de rama (piezas y orden D6; dependencias con medida y OK).
-- [ ] C2. Lenguaje base + `EvolutionChart`.
-- [ ] C3. Sparkline, gauge y anillos; banda/umbrales y proyección; brush/zoom; heatmap.
-- [ ] C4. Tests, bundle, D7, registrar.
+- [x] C1. Spec de rama (piezas y orden D6; dependencias con medida y OK).
+- [x] C2. Lenguaje base + `EvolutionChart`.
+- [x] C3. Sparkline, gauge y anillos; banda/umbrales y proyección; brush/zoom; heatmap.
+- [x] C4. Tests, bundle, D7, registrar.
 
 ## Fase D — Pantallas (alto nivel; **bloqueada** hasta referencias)
 - [ ] D0. El usuario aporta webs de referencia.
