@@ -3,6 +3,10 @@ import { ComposedChart, Area, Line, XAxis, YAxis, CartesianGrid, Tooltip, Respon
 import { Activity } from 'lucide-react';
 import { useChartTheme } from '../charts/useChartTheme';
 import { ChartTooltip } from '../ui';
+import { useChartMotion } from '../charts/useChartMotion';
+import { ChartFigure } from '../charts/ChartFigure';
+import { ChartSkeleton } from '../charts/ChartSkeleton';
+import { summarizeSeries } from '../charts/chartA11y';
 
 const CustomTooltip = ({ active, payload, label }) => {
   if (active && payload && payload.length) {
@@ -45,9 +49,12 @@ const CustomTooltip = ({ active, payload, label }) => {
   return null;
 };
 
-export const EvolutionChart = ({ data, timeRange, setTimeRange }) => {
+export const EvolutionChart = ({ data, timeRange, setTimeRange, loading = false }) => {
   const ct = useChartTheme();
+  const motion = useChartMotion();
   const [hoverPoint, setHoverPoint] = useState(null);
+
+  if (loading) return <ChartSkeleton />;
 
   if (!data || data.length === 0) {
     return (
@@ -154,6 +161,11 @@ export const EvolutionChart = ({ data, timeRange, setTimeRange }) => {
       </div>
 
       <div className="flex-1 w-full min-h-0">
+        <ChartFigure
+          label="Evolución de forma: fitness, fatiga y forma"
+          summary={summarizeSeries(data, [{ key: 'ctl', label: 'Fitness (CTL)' }, { key: 'atl', label: 'Fatiga (ATL)' }, { key: 'tsb', label: 'Forma (TSB)' }])}
+          className="h-full w-full"
+        >
         <ResponsiveContainer width="100%" height="100%">
           <ComposedChart 
             data={data} 
@@ -217,7 +229,7 @@ export const EvolutionChart = ({ data, timeRange, setTimeRange }) => {
                 fillOpacity={1} 
                 fill="url(#colorTcb)"
                 activeDot={{ r: 4, stroke: ct.anatomy.dotRing, strokeWidth: 2, fill: ct.series.tsb }} 
-                isAnimationActive={false} 
+                {...motion.props}
             />
             
             <Area 
@@ -229,7 +241,7 @@ export const EvolutionChart = ({ data, timeRange, setTimeRange }) => {
                 fillOpacity={1} 
                 fill="url(#colorCtl)"
                 activeDot={{ r: 5, stroke: ct.anatomy.dotRing, strokeWidth: 2, fill: ct.series.ctl }} 
-                isAnimationActive={false} 
+                {...motion.props}
             />
             
             <Line 
@@ -241,10 +253,11 @@ export const EvolutionChart = ({ data, timeRange, setTimeRange }) => {
                 strokeDasharray="3 3"
                 dot={false} 
                 activeDot={{ r: 4, stroke: ct.anatomy.dotRing, strokeWidth: 1.5, fill: ct.series.atl }} 
-                isAnimationActive={false} 
+                {...motion.props}
             />
           </ComposedChart>
         </ResponsiveContainer>
+        </ChartFigure>
       </div>
     </div>
   );

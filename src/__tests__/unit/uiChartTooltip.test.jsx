@@ -44,8 +44,8 @@ describe('ui/ChartTooltip recetas', () => {
 
 describe('ui/ChartTooltip', () => {
   it('pinta solo el marco con su contenido, sin estilo en línea salvo en card', () => {
-    expect(renderToStaticMarkup(<ChartTooltip variant="dark"><p>x</p></ChartTooltip>)).toBe(`<div class="${chartTooltipClass('dark')}"><p>x</p></div>`);
+    expect(renderToStaticMarkup(<ChartTooltip variant="dark"><p>x</p></ChartTooltip>)).toBe(`<div data-chart-tooltip="dark" class="${chartTooltipClass('dark')}"><p>x</p></div>`);
     const card = renderToStaticMarkup(<ChartTooltip variant="card" className="w-48 z-tooltip">x</ChartTooltip>);
-    expect(card).toMatch(/^<div style="[^"]*backdrop-filter:blur\(20px\)[^"]*" class="shadow-xl w-48 z-tooltip">x<\/div>$/);
+    expect(card).toMatch(/^<div data-chart-tooltip="card" style="[^"]*backdrop-filter:blur\(20px\)[^"]*" class="shadow-xl w-48 z-tooltip">x<\/div>$/);
   });
 });

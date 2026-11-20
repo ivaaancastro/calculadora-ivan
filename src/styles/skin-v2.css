@@ -892,3 +892,23 @@ html[data-ui="v2"] [data-skin] :is(img.rounded-full, img.object-cover) {
     --tw-scale-y: 1;
   }
 }
+
+/* Capa de gráficas Forma (Fase Premium C, GRA-3/4): rejilla continua finísima que se desvanece en
+   los bordes y tooltip «de cristal» común (desenfoque, borde, elevación y cifras tabulares). */
+html[data-ui="v2"] .recharts-cartesian-grid line {
+  stroke-dasharray: none;
+  stroke-opacity: 0.55;
+}
+html[data-ui="v2"] .recharts-cartesian-grid {
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 6%, #000 94%, transparent);
+  mask-image: linear-gradient(90deg, transparent, #000 6%, #000 94%, transparent);
+}
+html[data-ui="v2"] [data-chart-tooltip] {
+  -webkit-backdrop-filter: blur(12px) saturate(1.4);
+  backdrop-filter: blur(12px) saturate(1.4);
+  border-radius: 12px;
+  box-shadow: var(--elev-2);
+  font-variant-numeric: tabular-nums;
+}
+html[data-ui="v2"] .recharts-text,
+html[data-ui="v2"] .recharts-cartesian-axis-tick-value { font-variant-numeric: tabular-nums; }
