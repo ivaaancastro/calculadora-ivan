@@ -23,3 +23,14 @@ describe('charts/a11y props y ChartSkeleton', () => {
     expect(renderToStaticMarkup(<ChartSkeleton />)).toContain('role="status"');
   });
 });
+
+import { sliceByRange } from '../../components/charts/sliceRange';
+
+describe('charts/sliceByRange', () => {
+  const data = Array.from({ length: 100 }, (_, i) => i);
+  it('devuelve el mismo array sin zoom', () => expect(sliceByRange(data, [0, 100])).toBe(data));
+  it('recorta por porcentaje y deja al menos 2 puntos', () => {
+    expect(sliceByRange(data, [25, 50])).toHaveLength(25);
+    expect(sliceByRange(data, [50, 50]).length).toBeGreaterThanOrEqual(2);
+  });
+});
