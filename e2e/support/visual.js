@@ -31,9 +31,9 @@ export function defineVisualSuite({ ui } = {}) {
 
           // Se ocultan dos fuentes de ruido de dibujo, no de contenido: las partículas de la
           // landing (<canvas> animado) y la rejilla discontinua de las gráficas, que se
-          // desplaza 1 px entre equipos. Las series, ejes y el resto de la página siguen vigilados.
+          // desplaza 1 px entre equipos, y las celdas del heatmap del Calendario (dependen de la fecha de hoy; el bloque sigue ocupando su sitio). Las series, ejes y el resto de la página siguen vigilados.
           await page.addStyleTag({
-            content: 'canvas{visibility:hidden!important}.recharts-cartesian-grid{visibility:hidden!important}',
+            content: 'canvas{visibility:hidden!important}.recharts-cartesian-grid{visibility:hidden!important}[data-chart="heatmap"] svg{visibility:hidden!important}',
           });
 
           await settleForScreenshot(page, { resize: !screen.fullPage });

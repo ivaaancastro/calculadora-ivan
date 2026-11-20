@@ -10,6 +10,7 @@ import { useCalendarDate } from '../../hooks/useCalendarDate';
 import { useCalendarData } from '../../hooks/useCalendarData';
 import { usePlanEditor } from '../../hooks/usePlanEditor';
 import { useWorkoutDragDrop } from '../../hooks/useWorkoutDragDrop';
+import { ActivityHeatmap } from '../charts/ActivityHeatmap';
 import { PmcFloatingChart } from '../calendar/PmcFloatingChart';
 import { WorkoutViewerModal } from '../calendar/WorkoutViewerModal';
 import { CalendarMonthView } from '../calendar/CalendarMonthView';
@@ -66,9 +67,7 @@ export const CalendarPage = ({ activities, plannedWorkouts = [], addPlannedWorko
                     </div>
                 </div>
 
-
-
-
+                {isV2 && <ActivityHeatmap activities={activities} />}
 
                 <CalendarMonthView
                         activitiesByDate={activitiesByDate}

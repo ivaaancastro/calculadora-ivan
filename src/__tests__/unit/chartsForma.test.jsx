@@ -4,6 +4,7 @@ import { summarizeSeries, chartFigureProps } from '../../components/charts/chart
 import { ChartSkeleton } from '../../components/charts/ChartSkeleton.jsx';
 import { Sparkline } from '../../components/charts/Sparkline.jsx';
 import { sparklinePoints } from '../../components/charts/sparklinePoints';
+import { buildHeatmap, heatmapLevel } from '../../components/charts/heatmapGrid';
 import { sliceByRange } from '../../components/charts/sliceRange';
 
 describe('charts/chartA11y', () => {
@@ -48,5 +49,24 @@ describe('charts/Sparkline', () => {
     const html = renderToStaticMarkup(<Sparkline values={[1, 2, 3]} color="red" label="VFC" />);
     expect(html).toContain('role="img"');
     expect(html).toContain('aria-label="VFC. de 1 a 3"');
+  });
+});
+
+describe('charts/heatmapGrid', () => {
+  it('niveles 0-4 según la proporción del máximo', () => {
+    expect(heatmapLevel(0, 100)).toBe(0);
+    expect(heatmapLevel(10, 100)).toBe(1);
+    expect(heatmapLevel(100, 100)).toBe(4);
+  });
+  it('construye N columnas de 7 días terminando en la semana de hoy', () => {
+    const today = new Date(2026, 10, 18); // miércoles
+    const { cols, max } = buildHeatmap({ '2026-11-17': 80, '2026-11-20': 500 }, today, 4);
+    expect(cols).toHaveLength(4);
+    expect(cols.every((c) => c.length === 7)).toBe(true);
+    expect(cols[3][0].key).toBe('2026-11-16'); // lunes
+    expect(cols[3][1].value).toBe(80);
+    expect(cols[3][4].future).toBe(true);
+    expect(cols[3][4].value).toBe(0);
+    expect(max).toBe(80);
   });
 });
