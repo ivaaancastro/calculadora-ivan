@@ -32,5 +32,21 @@ describe('charts/sliceByRange', () => {
   it('recorta por porcentaje y deja al menos 2 puntos', () => {
     expect(sliceByRange(data, [25, 50])).toHaveLength(25);
     expect(sliceByRange(data, [50, 50]).length).toBeGreaterThanOrEqual(2);
+
+import { Sparkline } from '../../components/charts/Sparkline.jsx';
+import { sparklinePoints } from '../../components/charts/sparklinePoints';
+
+describe('charts/Sparkline', () => {
+  it('escala puntos dentro del viewBox e ignora no numéricos', () => {
+    const pts = sparklinePoints([1, null, 3, 2], 100, 20, 2);
+    expect(pts).toHaveLength(3);
+    expect(pts[0]).toEqual([2, 18]);
+    expect(pts[1][1]).toBe(2);
+  });
+  it('sin datos suficientes no pinta nada; con datos expone role="img"', () => {
+    expect(renderToStaticMarkup(<Sparkline values={[1]} color="red" />)).toBe('');
+    const html = renderToStaticMarkup(<Sparkline values={[1, 2, 3]} color="red" label="VFC" />);
+    expect(html).toContain('role="img"');
+    expect(html).toContain('aria-label="VFC. de 1 a 3"');
   });
 });

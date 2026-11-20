@@ -1,5 +1,6 @@
 import React from 'react';
 import { useCountUp } from './useCountUp';
+import { chartFigureProps } from '../charts/chartA11y';
 
 export const AppleRingGauge = ({ value, max = 100, colorClass, strokeColor, gradientId, size = 150, strokeWidth = 14, icon: Icon, title, unit = '' }) => {
     const numVal = typeof value === 'number' ? value : parseFloat(value);
@@ -12,7 +13,7 @@ export const AppleRingGauge = ({ value, max = 100, colorClass, strokeColor, grad
     const dashoffset = dasharray - (dasharray * pct) / 100;
 
     return (
-        <div data-health="ring" className="flex flex-col items-center justify-center relative select-none">
+        <div data-health="ring" className="flex flex-col items-center justify-center relative select-none" {...chartFigureProps(title, valid ? `${numVal}${unit} de ${max}${unit}` : 'sin datos')}>
             <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} className="transform -rotate-90">
                 <defs>
                     <linearGradient id={gradientId} x1="0%" y1="0%" x2="100%" y2="100%">
