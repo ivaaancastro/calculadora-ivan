@@ -17,3 +17,9 @@ export function summarizeSeries(data, series, { unit = '' } = {}) {
   }
   return parts.join('. ');
 }
+
+/**
+ * Props a esparcir sobre el contenedor de una gráfica (sin añadir nodos al DOM): `role="img"`
+ * con el nombre y el resumen como `aria-label`.
+ */
+export const chartFigureProps = (label, summary) => ({ role: 'img', 'aria-label': summary ? `${label}. ${summary}` : label });

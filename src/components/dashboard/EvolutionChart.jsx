@@ -4,9 +4,8 @@ import { Activity } from 'lucide-react';
 import { useChartTheme } from '../charts/useChartTheme';
 import { ChartTooltip } from '../ui';
 import { useChartMotion } from '../charts/useChartMotion';
-import { ChartFigure } from '../charts/ChartFigure';
 import { ChartSkeleton } from '../charts/ChartSkeleton';
-import { summarizeSeries } from '../charts/chartA11y';
+import { summarizeSeries, chartFigureProps } from '../charts/chartA11y';
 
 const CustomTooltip = ({ active, payload, label }) => {
   if (active && payload && payload.length) {
@@ -160,12 +159,13 @@ export const EvolutionChart = ({ data, timeRange, setTimeRange, loading = false 
         </div>
       </div>
 
-      <div className="flex-1 w-full min-h-0">
-        <ChartFigure
-          label="Evolución de forma: fitness, fatiga y forma"
-          summary={summarizeSeries(data, [{ key: 'ctl', label: 'Fitness (CTL)' }, { key: 'atl', label: 'Fatiga (ATL)' }, { key: 'tsb', label: 'Forma (TSB)' }])}
-          className="h-full w-full"
-        >
+      <div
+        className="flex-1 w-full min-h-0"
+        {...chartFigureProps(
+          'Evolución de forma: fitness, fatiga y forma',
+          summarizeSeries(data, [{ key: 'ctl', label: 'Fitness (CTL)' }, { key: 'atl', label: 'Fatiga (ATL)' }, { key: 'tsb', label: 'Forma (TSB)' }]),
+        )}
+      >
         <ResponsiveContainer width="100%" height="100%">
           <ComposedChart 
             data={data} 
@@ -257,7 +257,6 @@ export const EvolutionChart = ({ data, timeRange, setTimeRange, loading = false 
             />
           </ComposedChart>
         </ResponsiveContainer>
-        </ChartFigure>
       </div>
     </div>
   );

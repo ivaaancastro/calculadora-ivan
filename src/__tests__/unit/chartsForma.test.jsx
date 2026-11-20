@@ -1,7 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { renderToStaticMarkup } from 'react-dom/server';
-import { summarizeSeries } from '../../components/charts/chartA11y';
-import { ChartFigure } from '../../components/charts/ChartFigure.jsx';
+import { summarizeSeries, chartFigureProps } from '../../components/charts/chartA11y';
 import { ChartSkeleton } from '../../components/charts/ChartSkeleton.jsx';
 
 describe('charts/chartA11y', () => {
@@ -15,11 +14,10 @@ describe('charts/chartA11y', () => {
   });
 });
 
-describe('charts/ChartFigure y ChartSkeleton', () => {
-  it('ChartFigure expone role="img" con el resumen', () => {
-    const html = renderToStaticMarkup(<ChartFigure label="Título" summary="resumen">x</ChartFigure>);
-    expect(html).toContain('role="img"');
-    expect(html).toContain('aria-label="Título. resumen"');
+describe('charts/a11y props y ChartSkeleton', () => {
+  it('chartFigureProps da role="img" con el resumen', () => {
+    expect(chartFigureProps('Título', 'resumen')).toEqual({ role: 'img', 'aria-label': 'Título. resumen' });
+    expect(chartFigureProps('Título', '')['aria-label']).toBe('Título');
   });
   it('ChartSkeleton es un estado accesible', () => {
     expect(renderToStaticMarkup(<ChartSkeleton />)).toContain('role="status"');
