@@ -7,7 +7,7 @@ import { chartTooltipClass, chartTooltipStyle } from './chartTooltipClasses.js';
 export function ChartTooltip({ variant, className, children }) {
   const ct = useChartTheme();
   return (
-    <div style={variant === 'card' ? chartTooltipStyle(ct) : undefined} className={cx(chartTooltipClass(variant), className)}>
+    <div data-chart-tooltip={variant} style={variant === 'card' ? chartTooltipStyle(ct) : undefined} className={cx(chartTooltipClass(variant), className)}>
       {children}
     </div>
   );
