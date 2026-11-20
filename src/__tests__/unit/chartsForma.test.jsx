@@ -2,6 +2,9 @@ import { describe, it, expect } from 'vitest';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { summarizeSeries, chartFigureProps } from '../../components/charts/chartA11y';
 import { ChartSkeleton } from '../../components/charts/ChartSkeleton.jsx';
+import { Sparkline } from '../../components/charts/Sparkline.jsx';
+import { sparklinePoints } from '../../components/charts/sparklinePoints';
+import { buildHeatmap, heatmapLevel } from '../../components/charts/heatmapGrid';
 
 describe('charts/chartA11y', () => {
   it('resume inicio, fin, mínimo y máximo', () => {
@@ -24,7 +27,20 @@ describe('charts/a11y props y ChartSkeleton', () => {
   });
 });
 
-import { buildHeatmap, heatmapLevel } from '../../components/charts/heatmapGrid';
+describe('charts/Sparkline', () => {
+  it('escala puntos dentro del viewBox e ignora no numéricos', () => {
+    const pts = sparklinePoints([1, null, 3, 2], 100, 20, 2);
+    expect(pts).toHaveLength(3);
+    expect(pts[0]).toEqual([2, 18]);
+    expect(pts[1][1]).toBe(2);
+  });
+  it('sin datos suficientes no pinta nada; con datos expone role="img"', () => {
+    expect(renderToStaticMarkup(<Sparkline values={[1]} color="red" />)).toBe('');
+    const html = renderToStaticMarkup(<Sparkline values={[1, 2, 3]} color="red" label="VFC" />);
+    expect(html).toContain('role="img"');
+    expect(html).toContain('aria-label="VFC. de 1 a 3"');
+  });
+});
 
 describe('charts/heatmapGrid', () => {
   it('niveles 0-4 según la proporción del máximo', () => {
@@ -42,21 +58,5 @@ describe('charts/heatmapGrid', () => {
     expect(cols[3][4].future).toBe(true);
     expect(cols[3][4].value).toBe(0); // futuro ignorado
     expect(max).toBe(80);
-
-import { Sparkline } from '../../components/charts/Sparkline.jsx';
-import { sparklinePoints } from '../../components/charts/sparklinePoints';
-
-describe('charts/Sparkline', () => {
-  it('escala puntos dentro del viewBox e ignora no numéricos', () => {
-    const pts = sparklinePoints([1, null, 3, 2], 100, 20, 2);
-    expect(pts).toHaveLength(3);
-    expect(pts[0]).toEqual([2, 18]);
-    expect(pts[1][1]).toBe(2);
-  });
-  it('sin datos suficientes no pinta nada; con datos expone role="img"', () => {
-    expect(renderToStaticMarkup(<Sparkline values={[1]} color="red" />)).toBe('');
-    const html = renderToStaticMarkup(<Sparkline values={[1, 2, 3]} color="red" label="VFC" />);
-    expect(html).toContain('role="img"');
-    expect(html).toContain('aria-label="VFC. de 1 a 3"');
   });
 });
