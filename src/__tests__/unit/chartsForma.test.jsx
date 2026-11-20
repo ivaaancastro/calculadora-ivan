@@ -2,6 +2,9 @@ import { describe, it, expect } from 'vitest';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { summarizeSeries, chartFigureProps } from '../../components/charts/chartA11y';
 import { ChartSkeleton } from '../../components/charts/ChartSkeleton.jsx';
+import { Sparkline } from '../../components/charts/Sparkline.jsx';
+import { sparklinePoints } from '../../components/charts/sparklinePoints';
+import { sliceByRange } from '../../components/charts/sliceRange';
 
 describe('charts/chartA11y', () => {
   it('resume inicio, fin, mínimo y máximo', () => {
@@ -24,17 +27,14 @@ describe('charts/a11y props y ChartSkeleton', () => {
   });
 });
 
-import { sliceByRange } from '../../components/charts/sliceRange';
-
 describe('charts/sliceByRange', () => {
   const data = Array.from({ length: 100 }, (_, i) => i);
   it('devuelve el mismo array sin zoom', () => expect(sliceByRange(data, [0, 100])).toBe(data));
   it('recorta por porcentaje y deja al menos 2 puntos', () => {
     expect(sliceByRange(data, [25, 50])).toHaveLength(25);
     expect(sliceByRange(data, [50, 50]).length).toBeGreaterThanOrEqual(2);
-
-import { Sparkline } from '../../components/charts/Sparkline.jsx';
-import { sparklinePoints } from '../../components/charts/sparklinePoints';
+  });
+});
 
 describe('charts/Sparkline', () => {
   it('escala puntos dentro del viewBox e ignora no numéricos', () => {
