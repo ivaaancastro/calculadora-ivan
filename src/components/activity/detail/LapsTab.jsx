@@ -11,7 +11,7 @@ export const LapsTab = ({ proMetrics, isPaceBased }) => (
                                 </div>
                             </div>
                             
-                            <div className="bg-white dark:bg-zinc-900/20 rounded-2xl border border-line-soft-3 overflow-x-auto custom-scrollbar shadow-sm">
+                            <div data-detail="laps" className="bg-white dark:bg-zinc-900/20 rounded-2xl border border-line-soft-3 overflow-x-auto custom-scrollbar shadow-sm">
                                 <table className="w-full text-left border-collapse">
                                     <thead className="bg-sunken-10">
                                         <tr className="text-[9px] font-bold text-ink-4 uppercase tracking-widest border-b border-line-soft-2">
@@ -33,7 +33,7 @@ export const LapsTab = ({ proMetrics, isPaceBased }) => (
                                                 : lap.rawSpeed === Math.max(...proMetrics.autoLaps.map(l => l.rawSpeed));
 
                                             return (
-                                                <tr key={lap.index} className={`hover:bg-slate-50 dark:hover:bg-zinc-800/30 transition-colors group ${isFastest ? 'bg-emerald-50/30 dark:bg-emerald-900/5' : ''}`}>
+                                                <tr key={lap.index} data-detail={isFastest ? "lap-fast" : "lap"} className={`hover:bg-slate-50 dark:hover:bg-zinc-800/30 transition-colors group ${isFastest ? 'bg-emerald-50/30 dark:bg-emerald-900/5' : ''}`}>
                                                     <td className="p-4 font-black text-slate-300 dark:text-zinc-700 group-hover:text-indigo-500 transition-colors">{lap.index}</td>
                                                     <td className="p-4 text-ink-soft">{lap.timeStr}</td>
                                                     <td className="p-4 text-right opacity-60 font-medium">{lap.distanceKm}</td>
