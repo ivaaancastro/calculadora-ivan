@@ -5,7 +5,7 @@ Spec y plan aprobados (D-1 sesiones, D-2 semana, D-3 panel lateral ≥ 1280).
 ## PR 1 — Resumen
 - [x] `activityGroups.js` (`weekStartKey`, `groupByWeek`, `summarizeActivities`, `weeklyTss`) + tests.
 - [x] `ActivitiesSummary` solo v2 dentro de `HistoryList` + bloque CSS «Actividades D6».
-- [ ] `npm run verify`, CHANGELOG, MEMORY.
+- [x] `npm run verify`, CHANGELOG, MEMORY.
 - [ ] PR abierto y CI verde.
 
 ## PR 2 — Lista
