@@ -7,6 +7,9 @@ y este proyecto adhiere a [Semantic Versioning](https://semver.org/lang/es/).
 
 ## [Unreleased]
 
+### Added — Fase Premium D7, Ajustes (`feat/premium-perfil-cuentas-seguridad`, PR 3)
+- `feat(perfil):` Cuentas con estado de punto y campos apilados en móvil; Seguridad con zona de peligro diferenciada y acciones destructivas de contorno (v2).
+
 ### Added — Fase Premium D7, Ajustes (`feat/premium-perfil-secciones`, PR 2)
 - `feat(perfil):` General con héroe de identidad y Fisiología primaria; Zonas con `Segmented`, umbrales como cifra grande y barra de color por zona (v2).
 

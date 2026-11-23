@@ -14,6 +14,7 @@ Spec y plan aprobados por el usuario (2026-11-23), P-1 y P-2 según lo recomenda
 - [x] Zonas: `Segmented`, umbral como cifra, barras por zona
 
 ## PR 3 — `feat/premium-perfil-cuentas-seguridad`
-- [ ] Cuentas: estado con punto+texto, campos apilados en móvil
-- [ ] Seguridad: zona de peligro diferenciada, botones de contorno
-- [ ] Capturas v2 de Ajustes (solo las que cambian), MEMORY/CHANGELOG, marcar D7
+- [x] Cuentas: estado con punto+texto, campos apilados en móvil
+- [x] Seguridad: zona de peligro diferenciada, botones de contorno
+- [x] MEMORY/CHANGELOG
+- [ ] Capturas v2 de Ajustes: no hay spec de Ajustes en `visual-v2`; sin capturas que regenerar (revisión visual D7 del usuario)
