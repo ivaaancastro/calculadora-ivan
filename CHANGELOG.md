@@ -7,6 +7,9 @@ y este proyecto adhiere a [Semantic Versioning](https://semver.org/lang/es/).
 
 ## [Unreleased]
 
+### Added — Fase Premium D2, Dashboard (`feat/premium-dashboard`, PR 1)
+- `feat(dashboard):` `FormHero` (solo v2): resumen narrativo del estado de forma (`buildFormSummary`, reglas deterministas), CTL como cifra protagonista con variación a 28 días, chip de estado y selector de rango también en móvil. Spec y plan en `docs/branches/feat/premium-dashboard/`.
+
 ### Added — Fase Premium D3, Rendimiento (`feat/premium-rendimiento`, PR 1)
 - `feat(rendimiento):` héroe «Hoy» (solo v2) con resumen narrativo y hasta 4 KPI (carga 7d, TSB, VFC, eFTP), tarjetas agrupadas en Hoy / Potencia / Marcas / Volumen con encabezado; `buildStatsNarrative` con tests. Spec en `docs/branches/feat/premium-rendimiento/`.
 
