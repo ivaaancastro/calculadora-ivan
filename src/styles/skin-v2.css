@@ -1249,3 +1249,30 @@ html[data-ui="v2"] [data-skin="dashboard"] [data-dash="ledger-row"]:hover {
   html[data-ui="v2"] [data-skin="dashboard"] [data-kpi="card"]:nth-child(2) { animation-delay: 0.24s; }
   html[data-ui="v2"] [data-skin="dashboard"] [data-kpi="card"]:nth-child(3) { animation-delay: 0.3s; }
 }
+
+/* ── Dashboard D2, PR 3: rejilla de 12 columnas en escritorio (spec §3.2, DIS-1) ───────────────
+ * ≥ 1024 px: héroe y KPI a ancho completo; gráfica 8 col + lateral 4 col (secundarios en libro,
+ * fijo al hacer scroll). Contenido centrado a 1440 px. Por debajo, la pila de siempre. */
+@media (min-width: 1024px) {
+  html[data-ui="v2"] [data-skin="dashboard"][data-dash="root"] {
+    display: grid;
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    column-gap: 24px;
+    row-gap: 32px;
+    max-width: 1440px;
+    margin-inline: auto;
+  }
+  html[data-ui="v2"] [data-skin="dashboard"][data-dash="root"] > * { margin: 0; min-width: 0; }
+  html[data-ui="v2"] [data-skin="dashboard"] [data-dash="hero"],
+  html[data-ui="v2"] [data-skin="dashboard"] [data-dash="primary"] { grid-column: 1 / -1; }
+  html[data-ui="v2"] [data-skin="dashboard"] [data-dash="chart"] { grid-column: 1 / span 8; grid-row: 3; }
+  html[data-ui="v2"] [data-skin="dashboard"] [data-dash="secondary"] {
+    grid-column: 9 / span 4;
+    grid-row: 3;
+    align-self: start;
+    position: sticky;
+    top: calc(var(--nav-h-total) + 16px);
+  }
+  html[data-ui="v2"] [data-skin="dashboard"] [data-dash="secondary-grid"] { grid-template-columns: minmax(0, 1fr); }
+  html[data-ui="v2"] [data-skin="dashboard"] [data-dash="chart-body"] { height: 380px; }
+}

@@ -301,7 +301,7 @@ export const AdvancedAnalytics = React.memo(({ activities, settings,  timeRange,
             <div data-dash="chart">
                 <SectionHeader as="p">Evolución de Rendimiento</SectionHeader>
                 <Card className="p-3 sm:p-5">
-                    <div className="h-[290px] sm:h-[330px]">
+                    <div data-dash="chart-body" className="h-[290px] sm:h-[330px]">
                         <EvolutionChart data={chartData} timeRange={timeRange} setTimeRange={setTimeRange} />
                     </div>
                 </Card>
