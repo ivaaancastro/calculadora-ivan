@@ -8,10 +8,34 @@ import { ConfirmDeleteActivityModal } from '../activity/ConfirmDeleteActivityMod
 import { useUiMode } from '../../hooks/useUiMode';
 import { AutoChartSkin } from '../charts/ChartSkin';
 import { ActivitiesSummary } from './history/ActivitiesSummary';
-import { summarizeActivities, weeklyTss } from '../../utils/activityGroups';
+import { summarizeActivities, weeklyTss, groupByWeek } from '../../utils/activityGroups';
+import { WeekHeader } from './history/WeekHeader';
 
-const getSportIcon = (type) => {
+const ROW_H = 64;
+const WEEK_H = 36;
+
+/** Fecha corta de la fila; el año solo si difiere del de la actividad más reciente (determinista). */
+const shortDate = (date, refYear) => {
+    const d = new Date(date);
+    const opts = { weekday: 'short', day: 'numeric', month: 'short' };
+    if (d.getFullYear() !== refYear) opts.year = 'numeric';
+    return d.toLocaleDateString('es-ES', opts);
+};
+
+const getSportIcon = (type, solid = false) => {
     const t = String(type).toLowerCase();
+    if (solid) {
+        const [Icon, tone] =
+            t.includes('run') || t.includes('carrera') ? [Footprints, 'bg-sport-run text-on-action']
+            : t.includes('bike') || t.includes('bici') || t.includes('ciclismo') || t.includes('ride') ? [Bike, 'bg-sport-bike text-on-action']
+            : t.includes('gym') || t.includes('fuerza') || t.includes('weight') || t.includes('workout') ? [Dumbbell, 'bg-sport-strength text-on-action']
+            : [Activity, 'bg-fill-3 text-body-soft'];
+        return (
+            <div data-history="sport" className={`w-10 h-10 rounded-[14px] flex items-center justify-center shrink-0 ${tone}`}>
+                <Icon size={19} strokeWidth={2.2} />
+            </div>
+        );
+    }
     if (t.includes('run') || t.includes('carrera')) {
         return (
             <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-[12px] sm:rounded-[14px] bg-sport-run/15 text-sport-run flex items-center justify-center shrink-0 shadow-2xs">
@@ -95,19 +119,33 @@ export const HistoryList = React.memo(({ activities, onDelete, onSelectActivity 
         [isV2, filteredActivities],
     );
 
+    // Lista plana: en v2 se intercalan cabeceras de semana (36 px) entre filas (64 px).
+    const refYear = filteredActivities[0] ? new Date(filteredActivities[0].date).getFullYear() : 0;
+    const flat = useMemo(() => {
+        if (!isV2) return filteredActivities.map((act) => ({ kind: 'row', act }));
+        return groupByWeek(filteredActivities).flatMap((g) => [
+            { kind: 'week', group: g },
+            ...g.items.map((act) => ({ kind: 'row', act })),
+        ]);
+    }, [isV2, filteredActivities]);
+    const sizes = useMemo(() => flat.map((f) => (f.kind === 'week' ? WEEK_H : ROW_H)), [flat]);
+    const starts = useMemo(() => sizes.map((_, i) => sizes.slice(0, i).reduce((a, b) => a + b, 0)), [sizes]);
+    const totalH = sizes.reduce((a, b) => a + b, 0);
+    const maxTss = useMemo(() => Math.max(1, ...filteredActivities.map((a) => Number(a.tss) || 0)), [filteredActivities]);
+
     // eslint-disable-next-line react-hooks/incompatible-library
     const rowVirtualizer = useVirtualizer({
-        count: filteredActivities.length,
+        count: flat.length,
         getScrollElement: () => parentRef.current,
-        estimateSize: () => 64,
+        estimateSize: (i) => sizes[i] ?? ROW_H,
         overscan: 6,
         initialRect: { width: 800, height: 800 },
     });
 
     const virtualItems = rowVirtualizer.getVirtualItems();
     const itemsToRender = virtualItems.length > 0
-        ? virtualItems.map(v => ({ index: v.index, start: v.start, isVirtual: true, act: filteredActivities[v.index] }))
-        : filteredActivities.map((act, index) => ({ index, start: index * 64, isVirtual: false, act }));
+        ? virtualItems.map(v => ({ index: v.index, start: v.start, isVirtual: true, item: flat[v.index] }))
+        : flat.map((item, index) => ({ index, start: starts[index], isVirtual: false, item }));
 
     return (
         <>
@@ -178,11 +216,24 @@ export const HistoryList = React.memo(({ activities, onDelete, onSelectActivity 
                 {filteredActivities.length > 0 ? (
                     <div
                         className="w-full relative"
-                        style={{ height: `${Math.max(rowVirtualizer.getTotalSize(), itemsToRender.length * 64)}px` }}
+                        style={{ height: `${Math.max(rowVirtualizer.getTotalSize(), totalH)}px` }}
                     >
                         {itemsToRender.map((virtualRow) => {
-                            const act = virtualRow.act;
-                            if (!act) return null;
+                            const { item } = virtualRow;
+                            if (!item) return null;
+                            if (item.kind === 'week') {
+                                return (
+                                    <div
+                                        key={`w-${item.group.key}`}
+                                        data-index={virtualRow.index}
+                                        ref={virtualRow.isVirtual ? rowVirtualizer.measureElement : undefined}
+                                        style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: WEEK_H, transform: `translateY(${virtualRow.start}px)` }}
+                                    >
+                                        <WeekHeader group={item.group} refYear={refYear} />
+                                    </div>
+                                );
+                            }
+                            const act = item.act;
                             return (
                                 <div
                                     key={act.id}
@@ -201,13 +252,13 @@ export const HistoryList = React.memo(({ activities, onDelete, onSelectActivity 
                                 >
                                     {/* Icono en squircle estilo Apple */}
                                     <div className="mr-3 shrink-0">
-                                        {getSportIcon(act.type)}
+                                        {getSportIcon(act.type, isV2)}
                                     </div>
 
                                     <div className="flex-1 min-w-0 mr-2 sm:mr-4">
                                         <h4 className="text-[13px] font-semibold text-ink truncate mb-0.5" title={act.name}>{act.name}</h4>
                                         <div className="flex items-center gap-1.5 text-[11px] text-ink-3">
-                                            <span>{new Date(act.date).toLocaleDateString('es-ES', { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' })}</span>
+                                            <span>{isV2 ? shortDate(act.date, refYear) : new Date(act.date).toLocaleDateString('es-ES', { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' })}</span>
                                             <span>•</span>
                                             <span className="capitalize">{act.type}</span>
                                         </div>
@@ -244,6 +295,11 @@ export const HistoryList = React.memo(({ activities, onDelete, onSelectActivity 
                                             <span className={`text-sm font-bold tabular-nums ${act.tss > 0 ? 'text-amber-500' : 'text-slate-400'}`}>
                                                 {act.tss > 0 ? Math.round(act.tss) : '--'}
                                             </span>
+                                            {isV2 && act.tss > 0 && (
+                                                <span data-history="tss-bar" aria-hidden="true" className="mt-1 h-[3px] w-full rounded-full bg-fill-3 overflow-hidden">
+                                                    <span className="block h-full rounded-full bg-warning" style={{ width: `${Math.max(6, Math.round((act.tss / maxTss) * 100))}%` }} />
+                                                </span>
+                                            )}
                                         </div>
                                     </div>
 
