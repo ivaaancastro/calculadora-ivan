@@ -8,6 +8,7 @@ export const GeneralSection = ({ formData, isUploadingAvatar, handleAvatarUpload
         <Card data-profile="banner" className="p-4 sm:p-5 flex items-center gap-4 text-left mb-5">
             <div className="relative shrink-0">
                 <div 
+                    data-profile="avatar"
                     className="rounded-full overflow-hidden bg-surface-2 border-2 border-white dark:border-zinc-700 shadow-sm flex items-center justify-center relative shrink-0"
                     style={{ width: '76px', height: '76px', minWidth: '76px', minHeight: '76px' }}
                 >
@@ -33,7 +34,7 @@ export const GeneralSection = ({ formData, isUploadingAvatar, handleAvatarUpload
                 </label>
             </div>
             <div className="min-w-0 flex-1">
-                <h3 className="text-base sm:text-lg font-bold text-ink leading-tight truncate">
+                <h3 data-profile="name" className="text-base sm:text-lg font-bold text-ink leading-tight truncate">
                     {formData.fullName || 'Atleta Forma'}
                 </h3>
                 <p className="text-xs text-ink-3 mt-0.5 truncate">{formData.email}</p>
@@ -68,7 +69,7 @@ export const GeneralSection = ({ formData, isUploadingAvatar, handleAvatarUpload
         {/* AJUSTES FISIOLÓGICOS */}
         <div>
             <SectionHeader>Fisiología y Métricas</SectionHeader>
-            <Card divided className="overflow-hidden">
+            <Card data-profile="primary" divided className="overflow-hidden">
                 {/* Peso */}
                 <div data-profile="row" className="p-3 sm:p-3.5 flex items-center justify-between gap-3">
                     <div className="flex items-center gap-3">

@@ -17,7 +17,7 @@ export const IntegrationsSection = ({ formData, isSyncingIntervals, intervalsSyn
                         <p className="text-[10px] text-ink-4">Métricas de Garmin, Oura y Whoop</p>
                     </div>
                 </div>
-                <span className={`text-[10px] font-bold px-2.5 py-0.5 rounded-full ${
+                <span data-profile="status" className={`text-[10px] font-bold px-2.5 py-0.5 rounded-full ${
                     formData.intervalsId && formData.intervalsKey 
                         ? 'bg-positive/10 text-positive-ink border border-positive/20' 
                         : 'bg-surface-2 text-slate-400'
@@ -27,7 +27,7 @@ export const IntegrationsSection = ({ formData, isSyncingIntervals, intervalsSyn
             </div>
 
             <div className="p-3.5 sm:p-4 space-y-3">
-                <div className="flex items-center justify-between gap-3">
+                <div data-profile="field-row" className="flex items-center justify-between gap-3">
                     <span className="text-xs font-medium text-body-soft shrink-0">Athlete ID</span>
                     <input 
                         type="text" 
@@ -35,10 +35,10 @@ export const IntegrationsSection = ({ formData, isSyncingIntervals, intervalsSyn
                         value={formData.intervalsId || ''} 
                         onChange={handleChange} 
                         placeholder="i12345" 
-                        className="w-40 text-right bg-sunken-11 border border-line-3 rounded-lg px-2.5 py-1.5 text-xs font-mono text-slate-900 dark:text-zinc-200 outline-none focus:ring-1 focus:ring-section-integrations" 
+                        data-profile="field-input" className="w-40 text-right bg-sunken-11 border border-line-3 rounded-lg px-2.5 py-1.5 text-xs font-mono text-slate-900 dark:text-zinc-200 outline-none focus:ring-1 focus:ring-section-integrations" 
                     />
                 </div>
-                <div className="flex items-center justify-between gap-3">
+                <div data-profile="field-row" className="flex items-center justify-between gap-3">
                     <span className="text-xs font-medium text-body-soft shrink-0">API Key</span>
                     <input 
                         type="password" 
@@ -46,7 +46,7 @@ export const IntegrationsSection = ({ formData, isSyncingIntervals, intervalsSyn
                         value={formData.intervalsKey || ''} 
                         onChange={handleChange} 
                         placeholder="••••••••" 
-                        className="w-40 text-right bg-sunken-11 border border-line-3 rounded-lg px-2.5 py-1.5 text-xs font-mono text-slate-900 dark:text-zinc-200 outline-none focus:ring-1 focus:ring-section-integrations" 
+                        data-profile="field-input" className="w-40 text-right bg-sunken-11 border border-line-3 rounded-lg px-2.5 py-1.5 text-xs font-mono text-slate-900 dark:text-zinc-200 outline-none focus:ring-1 focus:ring-section-integrations" 
                     />
                 </div>
 

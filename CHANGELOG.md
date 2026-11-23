@@ -10,6 +10,15 @@ y este proyecto adhiere a [Semantic Versioning](https://semver.org/lang/es/).
 ### Added — Fase Premium D6, Actividades (`feat/premium-actividades-filtros`, PR 3)
 - `feat(actividades):` filtro de deporte en chips, tarjeta a 1100 px centrada, panel lateral fijo con el reparto del tiempo por deporte (≥ 1280 px) y «Quitar filtros» en el estado vacío (solo v2). `sportOf` y `breakdownBySport` con tests.
 
+### Added — Fase Premium D7, Ajustes (`feat/premium-perfil-cuentas-seguridad`, PR 3)
+- `feat(perfil):` Cuentas con estado de punto y campos apilados en móvil; Seguridad con zona de peligro diferenciada y acciones destructivas de contorno (v2).
+
+### Added — Fase Premium D7, Ajustes (`feat/premium-perfil-secciones`, PR 2)
+- `feat(perfil):` General con héroe de identidad y Fisiología primaria; Zonas con `Segmented`, umbrales como cifra grande y barra de color por zona (v2).
+
+### Added — Fase Premium D7, Ajustes (`feat/premium-perfil`, PR 1)
+- `feat(perfil):` cabecera v2 con título y subtítulo de sección, «Guardar» con estado de cambios sin guardar, menú lateral con indicador activo y columna de lectura de 720 px.
+
 ### Added — Fase Premium D6, Actividades (`feat/premium-actividades`, PR 1)
 - `feat(actividades):` cabecera de resumen del historial (solo v2): nº de sesiones como cifra protagonista, tiempo/distancia/TSS y sparkline del TSS semanal sobre los datos filtrados; utilidades `activityGroups` con tests. Spec y plan en `docs/branches/feat/premium-actividades/`.
 

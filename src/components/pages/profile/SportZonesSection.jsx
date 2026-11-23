@@ -37,7 +37,7 @@ export const SportZonesSection = ({ sport, sportLabel, icon: Icon, color, showPa
                 </div>
 
                 <div className={`grid ${showPace ? 'grid-cols-2 sm:grid-cols-3' : showPower ? 'grid-cols-2 sm:grid-cols-3' : 'grid-cols-2'} gap-2 sm:gap-3`}>
-                    <div className="bg-sunken-4 rounded-xl p-2.5 border border-hairline-2">
+                    <div data-profile="threshold" className="bg-sunken-4 rounded-xl p-2.5 border border-hairline-2">
                         <label className="text-[10px] font-semibold text-ink-3 block mb-0.5">FC Umbral</label>
                         <div className="flex items-baseline gap-1">
                             <input 
@@ -51,7 +51,7 @@ export const SportZonesSection = ({ sport, sportLabel, icon: Icon, color, showPa
                         </div>
                     </div>
 
-                    <div className="bg-sunken-4 rounded-xl p-2.5 border border-hairline-2">
+                    <div data-profile="threshold" className="bg-sunken-4 rounded-xl p-2.5 border border-hairline-2">
                         <label className="text-[10px] font-semibold text-ink-3 block mb-0.5">FC Máx.</label>
                         <div className="flex items-baseline gap-1">
                             <input 
@@ -66,7 +66,7 @@ export const SportZonesSection = ({ sport, sportLabel, icon: Icon, color, showPa
                     </div>
 
                     {showPace && (
-                        <div className="bg-sunken-4 rounded-xl p-2.5 border border-hairline-2 col-span-2 sm:col-span-1">
+                        <div data-profile="threshold" className="bg-sunken-4 rounded-xl p-2.5 border border-hairline-2 col-span-2 sm:col-span-1">
                             <label className="text-[10px] font-semibold text-ink-3 block mb-0.5">Ritmo Umbral</label>
                             <div className="flex items-baseline gap-1">
                                 <input 
@@ -82,7 +82,7 @@ export const SportZonesSection = ({ sport, sportLabel, icon: Icon, color, showPa
                     )}
 
                     {showPower && (
-                        <div className="bg-sunken-4 rounded-xl p-2.5 border border-hairline-2 col-span-2 sm:col-span-1">
+                        <div data-profile="threshold" className="bg-sunken-4 rounded-xl p-2.5 border border-hairline-2 col-span-2 sm:col-span-1">
                             <label className="text-[10px] font-semibold text-ink-3 block mb-0.5">FTP</label>
                             <div className="flex items-baseline gap-1">
                                 <input 
@@ -113,9 +113,9 @@ export const SportZonesSection = ({ sport, sportLabel, icon: Icon, color, showPa
                         const pcts = data.zonesMode === 'lthr' ? lthrPcts[i] : data.zonesMode === 'fcmax' ? fcmaxPcts[i] : null;
                         const pctStr = pcts ? `${Math.round(pcts.pMin * 100)} - ${i === 6 ? Math.round(pcts.pMax * 100) + '%+' : Math.round(pcts.pMax * 100) + '%'}` : '';
                         return (
-                            <div key={i} className="px-3.5 py-2.5 flex items-center justify-between text-xs hover:bg-sunken-3 transition-colors">
+                            <div key={i} data-profile="zone-row" data-profile="zone-row" className="px-3.5 py-2.5 flex items-center justify-between text-xs hover:bg-sunken-3 transition-colors">
                                 <div className="flex items-center gap-2.5 min-w-0">
-                                    <div className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: ZONE_COLORS[i] }} />
+                                    <div data-profile="zone-dot" className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: ZONE_COLORS[i] }} />
                                     <span className="font-bold text-ink-2-soft shrink-0">{HR_LABELS[i]}</span>
                                     <span className="text-ink-3 truncate text-[11px]">{(pcts || lthrPcts[i]).label}</span>
                                 </div>
@@ -153,9 +153,9 @@ export const SportZonesSection = ({ sport, sportLabel, icon: Icon, color, showPa
                     </div>
                     <div className="divide-y divide-hairline-2">
                         {(data?.paceZones || calcPaceZones(data?.thresholdPace) || []).map((zone, i) => (
-                            <div key={i} className="px-3.5 py-2.5 flex items-center justify-between text-xs hover:bg-sunken-3 transition-colors">
+                            <div key={i} data-profile="zone-row" data-profile="zone-row" className="px-3.5 py-2.5 flex items-center justify-between text-xs hover:bg-sunken-3 transition-colors">
                                 <div className="flex items-center gap-2.5 min-w-0">
-                                    <div className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: ZONE_COLORS[i] }} />
+                                    <div data-profile="zone-dot" className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: ZONE_COLORS[i] }} />
                                     <span className="font-bold text-ink-2-soft shrink-0">{HR_LABELS[i]}</span>
                                     <span className="text-ink-3 truncate text-[11px]">{zone.label}</span>
                                 </div>
@@ -187,9 +187,9 @@ export const SportZonesSection = ({ sport, sportLabel, icon: Icon, color, showPa
                             const minW = Math.round(data.ftp * pz.pMin);
                             const maxW = Math.round(data.ftp * pz.pMax);
                             return (
-                                <div key={i} className="px-3.5 py-2.5 flex items-center justify-between text-xs hover:bg-sunken-3 transition-colors">
+                                <div key={i} data-profile="zone-row" data-profile="zone-row" className="px-3.5 py-2.5 flex items-center justify-between text-xs hover:bg-sunken-3 transition-colors">
                                     <div className="flex items-center gap-2.5 min-w-0">
-                                        <div className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: ZONE_COLORS[i] }} />
+                                        <div data-profile="zone-dot" className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: ZONE_COLORS[i] }} />
                                         <span className="font-bold text-ink-2-soft shrink-0">Z{i + 1}</span>
                                         <span className="text-ink-3 truncate text-[11px]">{pz.label}</span>
                                     </div>
