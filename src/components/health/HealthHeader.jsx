@@ -2,8 +2,12 @@ import React from 'react';
 import {
     AlertTriangle
 } from 'lucide-react';
+import { useUiMode } from '../../hooks/useUiMode';
+import { HealthHero } from './HealthHero';
 
-export const HealthHeader = ({ wellnessMetrics, readinessInfo, setActiveTab, activeTab, wellnessLoading, apiError }) => (
+export const HealthHeader = ({ wellnessMetrics, readinessInfo, setActiveTab, activeTab, wellnessLoading, apiError }) => {
+    const { isV2 } = useUiMode();
+    return (
     <>
         <div data-health="header" className="pt-2 sm:pt-4 space-y-4">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
@@ -18,9 +22,11 @@ export const HealthHeader = ({ wellnessMetrics, readinessInfo, setActiveTab, act
                             </span>
                         )}
                     </div>
-                    <p className="text-xs sm:text-sm font-medium text-ink-3 mt-0.5 max-w-xl">
-                        {wellnessLoading ? 'Sincronizando métricas fisiológicas...' : readinessInfo.msg}
-                    </p>
+                    {(!isV2 || wellnessLoading) && (
+                        <p className="text-xs sm:text-sm font-medium text-ink-3 mt-0.5 max-w-xl">
+                            {wellnessLoading ? 'Sincronizando métricas fisiológicas...' : readinessInfo.msg}
+                        </p>
+                    )}
                 </div>
 
                 {/* Selector de Vista: Hoy vs Historial */}
@@ -50,6 +56,10 @@ export const HealthHeader = ({ wellnessMetrics, readinessInfo, setActiveTab, act
                 </div>
             </div>
 
+            {isV2 && !wellnessLoading && activeTab === 'today' && (
+                <HealthHero wellnessMetrics={wellnessMetrics} readinessInfo={readinessInfo} />
+            )}
+
             {apiError && (
                 <div className="px-3.5 py-2 rounded-xl bg-danger-tint-3 border border-danger-edge text-danger-ink text-xs font-bold flex items-center gap-2">
                     <AlertTriangle size={14} /> Error al sincronizar datos biométricos
@@ -58,3 +68,4 @@ export const HealthHeader = ({ wellnessMetrics, readinessInfo, setActiveTab, act
         </div>
     </>
 );
+};

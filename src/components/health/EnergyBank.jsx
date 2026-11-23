@@ -25,7 +25,7 @@ export const EnergyBank = ({ energyBankAmount }) => {
                 </div>
 
                 {/* Barra estilo batería de iPhone */}
-                <div className="w-full h-7 bg-fill-4 rounded-xl overflow-hidden p-1 relative shadow-inner">
+                <div data-health="energy-bar" className="w-full h-7 bg-fill-4 rounded-xl overflow-hidden p-1 relative shadow-inner">
                     <div
                         className={`h-full rounded-lg transition-all duration-1000 ${
                             energyBankAmount === '--' ? 'w-0' :
@@ -35,11 +35,13 @@ export const EnergyBank = ({ energyBankAmount }) => {
                         }`}
                         style={{ width: `${energyBankAmount !== '--' ? Math.max(4, energyBankAmount) : 0}%` }}
                     />
+                    <span data-health="energy-mark" style={{ left: '30%' }} aria-hidden="true" />
+                    <span data-health="energy-mark" style={{ left: '60%' }} aria-hidden="true" />
                 </div>
             </div>
 
             <div className="sm:border-l border-line-4 sm:pl-6 text-center sm:text-right shrink-0">
-                <span className={`text-4xl sm:text-5xl font-black font-mono tabular-nums tracking-tighter ${
+                <span data-health="energy-value" className={`text-4xl sm:text-5xl font-black font-mono tabular-nums tracking-tighter ${
                     energyBankAmount === '--' ? 'text-slate-400' :
                     energyBankAmount > 60 ? 'text-emerald-500' :
                     energyBankAmount > 30 ? 'text-amber-500' : 'text-rose-500'

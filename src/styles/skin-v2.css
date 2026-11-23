@@ -968,3 +968,53 @@ html[data-ui="v2"] .recharts-cartesian-axis-tick-value { font-variant-numeric: t
   html[data-ui="v2"] svg [style*="chart-draw"],
   html[data-ui="v2"] svg [style*="chart-fade"] { animation: none !important; }
 }
+
+/* ── Salud D4 (feat/premium-salud, PR 1): hero narrativo y banco de energía ───────────────
+ * Spec: docs/branches/feat/premium-salud/spec.md §3.1. Solo v2; el bloque es propio para no
+ * chocar con otras pantallas. */
+html[data-ui="v2"] [data-skin="health"] [data-health="hero"] {
+  position: relative;
+  font-feature-settings: "tnum" 1, "cv11" 1, "ss03" 1;
+}
+html[data-ui="v2"] [data-skin="health"] [data-health="hero"]::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 2px;
+  border-radius: 2px;
+  background: linear-gradient(90deg, var(--health-accent, rgb(var(--line))) 0%, transparent 72%);
+}
+html[data-ui="v2"] [data-skin="health"] [data-health="hero"][data-tone="positive"] { --health-accent: rgb(var(--positive)); }
+html[data-ui="v2"] [data-skin="health"] [data-health="hero"][data-tone="warning"] { --health-accent: rgb(var(--warning)); }
+html[data-ui="v2"] [data-skin="health"] [data-health="hero"][data-tone="danger"] { --health-accent: rgb(var(--danger)); }
+html[data-ui="v2"] [data-skin="health"] [data-health="hero-accent"] { color: var(--health-accent, inherit); }
+/* «Pilar 0N» es decoración: en v2 solo queda el estado, a la derecha. */
+html[data-ui="v2"] [data-skin="health"] [data-health="pillar-head"] { justify-content: flex-end; }
+html[data-ui="v2"] [data-skin="health"] [data-health="pillar-head"] > span:first-child { display: none; }
+/* Banco de energía: cifra protagonista y marcas 30/60 %. */
+html[data-ui="v2"] [data-skin="health"] [data-health="energy-value"] {
+  font-family: inherit;
+  font-weight: 600;
+  letter-spacing: -0.04em;
+  font-size: clamp(3rem, 9vw, 3.5rem);
+  line-height: 1;
+}
+html[data-ui="v2"] [data-skin="health"] [data-health="energy-bar"] { box-shadow: none; }
+html[data-ui="v2"] [data-skin="health"] [data-health="energy-mark"] {
+  position: absolute;
+  top: 6px;
+  bottom: 6px;
+  width: 1px;
+  background: rgb(var(--line-strong));
+  pointer-events: none;
+}
+@keyframes health-rise { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: no-preference) {
+  html[data-ui="v2"] [data-skin="health"] [data-health="hero-eyebrow"],
+  html[data-ui="v2"] [data-skin="health"] [data-health="hero-headline"],
+  html[data-ui="v2"] [data-skin="health"] [data-health="hero-figure"] {
+    animation: health-rise 0.45s cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+  html[data-ui="v2"] [data-skin="health"] [data-health="hero-headline"] { animation-delay: 0.05s; }
+  html[data-ui="v2"] [data-skin="health"] [data-health="hero-figure"] { animation-delay: 0.12s; }
+}
