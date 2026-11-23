@@ -10,6 +10,9 @@ y este proyecto adhiere a [Semantic Versioning](https://semver.org/lang/es/).
 ### Added — Fase Premium D5, Calendario (`feat/premium-calendario`, PR 1)
 - `feat(calendario):` cabecera narrativa del mes (solo v2): frase resumen, 4 KPI (sesiones, carga con delta vs mes anterior, tiempo, cumplimiento del plan) y heatmap de constancia plegable en móvil; `buildMonthSummary` con tests. Spec y plan en `docs/branches/feat/premium-calendario/`.
 
+### Added — Fase Premium D2, Dashboard (`feat/premium-dashboard-rejilla`, PR 3)
+- `feat(dashboard):` rejilla de 12 columnas en escritorio (≥ 1024 px, v2): héroe y KPI a ancho completo, gráfica de evolución (8 col, 380 px) con panel lateral fijo (4 col) de métricas secundarias, contenido centrado a 1440 px. Cierra JER-1 y DIS-1 del Dashboard.
+
 ### Added — Fase Premium D3, Rendimiento (`feat/premium-rendimiento`, PR 3)
 - `feat(rendimiento):` capa de gráficas Forma en Rendimiento (v2): animación de entrada (`useChartMotion`), barras de TSS sólidas y degradado más marcado en eFTP.
 
