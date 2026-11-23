@@ -311,6 +311,9 @@ export const ProfilePage = ({
         (initialRef.current.ctl != null && targetCtl !== initialRef.current.ctl)
     );
 
+    // En v1 no se añade ningún nodo (style-diff exige 0 diferencias).
+    const SaveWrap = isV2 ? 'div' : React.Fragment;
+
     const renderMenuButton = (id, label, IconComponent) => (
         <button
             data-profile="nav-item"
@@ -352,7 +355,7 @@ export const ProfilePage = ({
                         </h1>
                     )}
                 </div>
-                <div className="flex items-center gap-3">
+                <SaveWrap {...(isV2 ? { className: 'flex items-center gap-3' } : {})}>
                 {isV2 && (
                     <span data-profile="dirty" role="status" aria-live="polite" className="hidden sm:inline-flex items-center gap-1.5 text-[11px] font-medium text-ink-3">
                         {isDirty && (<><span aria-hidden="true" className="w-1.5 h-1.5 rounded-full bg-action-ios-solid" />Cambios sin guardar</>)}
@@ -370,7 +373,7 @@ export const ProfilePage = ({
                 >
                     <Save size={14} strokeWidth={2.5} /> <span>Guardar</span>
                 </button>
-                </div>
+                </SaveWrap>
             </div>
 
             {/* v2 móvil: selector de sección en la página (antes solo estaba en el menú de la cabecera) */}
