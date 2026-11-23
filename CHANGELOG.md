@@ -10,6 +10,9 @@ y este proyecto adhiere a [Semantic Versioning](https://semver.org/lang/es/).
 ### Added — Fase Premium D7, Ajustes (`feat/premium-perfil`, PR 1)
 - `feat(perfil):` cabecera v2 con título y subtítulo de sección, «Guardar» con estado de cambios sin guardar, menú lateral con indicador activo y columna de lectura de 720 px.
 
+### Added — Fase Premium D2, Dashboard (`feat/premium-dashboard-rejilla`, PR 3)
+- `feat(dashboard):` rejilla de 12 columnas en escritorio (≥ 1024 px, v2): héroe y KPI a ancho completo, gráfica de evolución (8 col, 380 px) con panel lateral fijo (4 col) de métricas secundarias, contenido centrado a 1440 px. Cierra JER-1 y DIS-1 del Dashboard.
+
 ### Added — Fase Premium D3, Rendimiento (`feat/premium-rendimiento`, PR 3)
 - `feat(rendimiento):` capa de gráficas Forma en Rendimiento (v2): animación de entrada (`useChartMotion`), barras de TSS sólidas y degradado más marcado en eFTP.
 
