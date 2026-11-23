@@ -1233,3 +1233,19 @@ html[data-ui="v2"] [data-skin="dashboard"] [data-hero="form"]::before {
   }
   html[data-ui="v2"] [data-skin="dashboard"] [data-hero="figure"] { animation-delay: 0.12s; }
 }
+
+/* ── Dashboard D2, PR 2: KPI con variación, sparkline y «libro» de secundarios ─────────────── */
+html[data-ui="v2"] [data-skin="dashboard"] [data-kpi="card"] {
+  font-feature-settings: "tnum" 1, "cv11" 1, "ss03" 1;
+}
+html[data-ui="v2"] [data-skin="dashboard"] [data-dash="ledger-row"]:hover {
+  border-color: rgb(var(--line-strong));
+}
+@media (prefers-reduced-motion: no-preference) {
+  html[data-ui="v2"] [data-skin="dashboard"] [data-kpi="card"] {
+    animation: dash-rise 0.45s cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+  html[data-ui="v2"] [data-skin="dashboard"] [data-kpi="card"]:nth-child(1) { animation-delay: 0.18s; }
+  html[data-ui="v2"] [data-skin="dashboard"] [data-kpi="card"]:nth-child(2) { animation-delay: 0.24s; }
+  html[data-ui="v2"] [data-skin="dashboard"] [data-kpi="card"]:nth-child(3) { animation-delay: 0.3s; }
+}
