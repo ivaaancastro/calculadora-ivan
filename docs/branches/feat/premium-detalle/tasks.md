@@ -13,4 +13,6 @@
 (HUD de altura estable, esqueleto de carga v2, nota de series ausentes; cursor compartido y ErrorState quedan para PR 3.)
 
 ## PR 3 — Lateral, pestañas y cierre
-- [ ] Impacto/Coach, Laps, Detalle; snapshots v2 (Docker); MEMORY/CHANGELOG; marcar D1 en `premium-design/tasks.md`.
+- [x] Impacto/Coach, Laps, Detalle; snapshots v2 (Docker); MEMORY/CHANGELOG; marcar D1 en `premium-design/tasks.md`.
+
+Diferido (fuera de este PR): cursor compartido con el mapa y ErrorState de telemetría. `--hero-accent` solo existe en el hero: el filete de la mejor vuelta usa el fallback.

@@ -13,7 +13,7 @@ export const AnalysisSidebar = ({ showMap, activity, streams, themeColor, active
                                 {/* Impact Analysis & Coach Summary (Unified Premium Section) */}
                                 {trainingEffect && (
                                     <div className="space-y-4">
-                                        <div className="bg-surface border border-line-soft-2 rounded-2xl p-6 shadow-sm space-y-6">
+                                        <div data-detail="impact" className="bg-surface border border-line-soft-2 rounded-2xl p-6 shadow-sm space-y-6">
                                             <div className="flex items-center justify-between">
                                                 <div className="space-y-1">
                                                     <h3 className="text-xs font-bold text-ink-soft uppercase tracking-tight">Impacto del Entrenamiento</h3>
@@ -35,7 +35,7 @@ export const AnalysisSidebar = ({ showMap, activity, streams, themeColor, active
                                                         <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Aeróbico</span>
                                                         <span className="text-sm font-black text-ink-soft">{trainingEffect.aerobic}</span>
                                                     </div>
-                                                    <div className="h-2 bg-surface-2 rounded-full overflow-hidden">
+                                                    <div data-detail="meter" className="h-2 bg-surface-2 rounded-full overflow-hidden">
                                                         <div className={`h-full transition-all duration-1000 ${trainingEffect.aerobic >= 3 ? 'bg-indigo-500' : 'bg-indigo-400'}`} style={{ width: `${(trainingEffect.aerobic / 5) * 100}%` }} />
                                                     </div>
                                                     <p className="text-[8px] font-bold text-slate-400 uppercase tracking-tighter">{trainingEffect.aerobicLabel}</p>
@@ -46,7 +46,7 @@ export const AnalysisSidebar = ({ showMap, activity, streams, themeColor, active
                                                         <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Anaeróbico</span>
                                                         <span className="text-sm font-black text-ink-soft">{trainingEffect.anaerobic}</span>
                                                     </div>
-                                                    <div className="h-2 bg-surface-2 rounded-full overflow-hidden">
+                                                    <div data-detail="meter" className="h-2 bg-surface-2 rounded-full overflow-hidden">
                                                         <div className={`h-full transition-all duration-1000 ${trainingEffect.anaerobic >= 3 ? 'bg-purple-600' : 'bg-purple-400'}`} style={{ width: `${(trainingEffect.anaerobic / 5) * 100}%` }} />
                                                     </div>
                                                     <p className="text-[8px] font-bold text-slate-400 uppercase tracking-tighter">{trainingEffect.anaerobicLabel}</p>
@@ -65,7 +65,7 @@ export const AnalysisSidebar = ({ showMap, activity, streams, themeColor, active
 
                                         {/* Detailed Insights Slider-like cards */}
                                         {fitnessAnalysis && fitnessAnalysis.insights.length > 0 && (
-                                            <div className="bg-slate-50/50 dark:bg-zinc-900/40 rounded-2xl p-4 border border-slate-100 dark:border-zinc-800/40">
+                                            <div data-detail="insights" className="bg-slate-50/50 dark:bg-zinc-900/40 rounded-2xl p-4 border border-slate-100 dark:border-zinc-800/40">
                                                 <h4 className="text-[9px] font-bold text-ink-4 uppercase tracking-widest mb-3 flex items-center gap-2">
                                                     <div className="w-1 h-3 bg-indigo-500 rounded-full" />
                                                     Coach Insights
