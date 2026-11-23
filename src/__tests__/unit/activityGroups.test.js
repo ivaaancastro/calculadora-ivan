@@ -38,3 +38,21 @@ describe('activityGroups', () => {
         expect(weeklyTss(list, 2)).toEqual([20, 50]);
     });
 });
+
+import { sportOf, breakdownBySport } from '../../utils/activityGroups';
+
+describe('deportes', () => {
+    it('sportOf normaliza tipos en inglés y español', () => {
+        expect(['Run', 'Carrera', 'Ride', 'Ciclismo', 'Swim', 'Natación', 'Gym', 'Fuerza', 'Yoga'].map(sportOf))
+            .toEqual(['run', 'run', 'bike', 'bike', 'swim', 'swim', 'gym', 'gym', 'other']);
+    });
+    it('breakdownBySport ordena por tiempo y calcula cuotas', () => {
+        const r = breakdownBySport([
+            { type: 'Run', duration: 30 }, { type: 'Ride', duration: 90 }, { type: 'Ride', duration: 30 },
+        ]);
+        expect(r.map((x) => x.sport)).toEqual(['bike', 'run']);
+        expect(r[0]).toMatchObject({ minutes: 120, count: 2 });
+        expect(r[0].share).toBeCloseTo(0.8);
+        expect(breakdownBySport([])).toEqual([]);
+    });
+});

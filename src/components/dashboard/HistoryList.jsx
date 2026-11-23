@@ -2,13 +2,15 @@ import React, { useState, useMemo, useRef } from 'react';
 import { Search, Calendar, Activity, Clock, MapPin, Zap, Trash2, ChevronRight, Bike, Footprints, Dumbbell, Flame } from 'lucide-react';
 import { useVirtualizer } from '@tanstack/react-virtual';
 import { formatDuration } from '../../utils/formatDuration';
-import { Card, EmptyState, Input, Select } from '../ui';
+import { Button, Card, EmptyState, Input, Select } from '../ui';
 import { useConfirmDeleteActivity } from '../../hooks/useConfirmDeleteActivity';
 import { ConfirmDeleteActivityModal } from '../activity/ConfirmDeleteActivityModal';
 import { useUiMode } from '../../hooks/useUiMode';
 import { AutoChartSkin } from '../charts/ChartSkin';
 import { ActivitiesSummary } from './history/ActivitiesSummary';
-import { summarizeActivities, weeklyTss, groupByWeek } from '../../utils/activityGroups';
+import { summarizeActivities, weeklyTss, groupByWeek, breakdownBySport } from '../../utils/activityGroups';
+import { SportChips } from './history/SportChips';
+import { SportBreakdown } from './history/SportBreakdown';
 import { WeekHeader } from './history/WeekHeader';
 
 const ROW_H = 64;
@@ -119,6 +121,10 @@ export const HistoryList = React.memo(({ activities, onDelete, onSelectActivity 
         [isV2, filteredActivities],
     );
 
+    const breakdown = useMemo(() => (isV2 ? breakdownBySport(filteredActivities) : []), [isV2, filteredActivities]);
+    const hasFilters = searchTerm !== '' || sportFilter !== 'all' || dateFilter !== 'all';
+    const clearFilters = () => { setSearchTerm(''); setSportFilter('all'); setDateFilter('all'); };
+
     // Lista plana: en v2 se intercalan cabeceras de semana (36 px) entre filas (64 px).
     const refYear = filteredActivities[0] ? new Date(filteredActivities[0].date).getFullYear() : 0;
     const flat = useMemo(() => {
@@ -149,6 +155,7 @@ export const HistoryList = React.memo(({ activities, onDelete, onSelectActivity 
 
     return (
         <>
+        <div data-history="layout" className={isV2 ? 'h-full xl:grid xl:grid-cols-[minmax(0,1fr)_300px] xl:gap-8 max-w-[1440px] mx-auto' : 'contents'}>
         <Card data-skin="history" data-history="root" className="flex flex-col h-full overflow-hidden">
 
             {summary && (
@@ -171,7 +178,9 @@ export const HistoryList = React.memo(({ activities, onDelete, onSelectActivity 
                     />
                 </div>
 
-                {/* Selector de Deporte */}
+                {isV2 ? (
+                    <div data-history="chips-row" className="sm:order-last sm:basis-full"><SportChips value={sportFilter} onChange={setSportFilter} /></div>
+                ) : (
                 <div className="sm:w-44 relative">
                     <Activity size={14} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-ink-4 pointer-events-none" />
                     <Select
@@ -187,6 +196,7 @@ export const HistoryList = React.memo(({ activities, onDelete, onSelectActivity 
                         <option value="gym">Fuerza</option>
                     </Select>
                 </div>
+                )}
 
                 {/* Selector de Fecha */}
                 <div className="sm:w-44 relative">
@@ -320,10 +330,14 @@ export const HistoryList = React.memo(({ activities, onDelete, onSelectActivity 
                         })}
                     </div>
                 ) : (
-                    <EmptyState data-history="empty" className="h-full" icon={Activity} title="No hay resultados" description="Prueba a cambiar los filtros de búsqueda." />
+                    <EmptyState data-history="empty" className="h-full" icon={Activity} title="No hay resultados" description="Prueba a cambiar los filtros de búsqueda.">
+                        {isV2 && hasFilters && <Button variant="secondary" onClick={clearFilters}>Quitar filtros</Button>}
+                    </EmptyState>
                 )}
             </div>
         </Card>
+        {isV2 && <SportBreakdown rows={breakdown} />}
+        </div>
         <ConfirmDeleteActivityModal activity={del.pending} busy={del.busy} onConfirm={del.confirm} onCancel={del.cancel} />
         </>
     );

@@ -7,6 +7,9 @@ y este proyecto adhiere a [Semantic Versioning](https://semver.org/lang/es/).
 
 ## [Unreleased]
 
+### Added — Fase Premium D6, Actividades (`feat/premium-actividades-filtros`, PR 3)
+- `feat(actividades):` filtro de deporte en chips, tarjeta a 1100 px centrada, panel lateral fijo con el reparto del tiempo por deporte (≥ 1280 px) y «Quitar filtros» en el estado vacío (solo v2). `sportOf` y `breakdownBySport` con tests.
+
 ### Added — Fase Premium D6, Actividades (`feat/premium-actividades`, PR 1)
 - `feat(actividades):` cabecera de resumen del historial (solo v2): nº de sesiones como cifra protagonista, tiempo/distancia/TSS y sparkline del TSS semanal sobre los datos filtrados; utilidades `activityGroups` con tests. Spec y plan en `docs/branches/feat/premium-actividades/`.
 
