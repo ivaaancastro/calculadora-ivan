@@ -7,6 +7,9 @@ y este proyecto adhiere a [Semantic Versioning](https://semver.org/lang/es/).
 
 ## [Unreleased]
 
+### Added — Fase Premium D4, Salud (`feat/premium-salud-historial`, PR 3)
+- `feat(salud):` historial v2: tendencia con área en degradado y banda de recuperación óptima, detalle del día con cifra protagonista, tira de días con filete.
+
 ### Added — Fase Premium D4, Salud (`feat/premium-salud-biomarcadores`, PR 2)
 - `feat(salud):` biomarcadores v2 con jerarquía por estado (`biomarkerStatus`, tarjetas en atención al principio), cifra de 28–32 px, variación verde/rojo y `Sparkline` de 7 días (FC reposo, VFC, sueño, pasos, peso).
 

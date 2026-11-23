@@ -4,8 +4,13 @@ import {
 } from 'recharts';
 import { Card } from '../ui';
 import { HistoryChartTooltip } from './HistoryChartTooltip';
+import { useUiMode } from '../../hooks/useUiMode';
+import { HistoryTrendChartV2 } from './HistoryTrendChartV2';
 
-export const HistoryTrendChart = ({ historySeries, ct }) => (
+export const HistoryTrendChart = ({ historySeries, ct }) => {
+    const { isV2 } = useUiMode();
+    if (isV2) return <HistoryTrendChartV2 historySeries={historySeries} ct={ct} />;
+    return (
     <>
         <Card data-health="trend" className="p-4 sm:p-6 space-y-3">
             <div className="flex items-center justify-between">
@@ -44,3 +49,4 @@ export const HistoryTrendChart = ({ historySeries, ct }) => (
         </Card>
     </>
 );
+};
