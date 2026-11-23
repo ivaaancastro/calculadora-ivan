@@ -10,6 +10,9 @@ y este proyecto adhiere a [Semantic Versioning](https://semver.org/lang/es/).
 ### Added — Fase Premium D2, Dashboard (`feat/premium-dashboard-rejilla`, PR 3)
 - `feat(dashboard):` rejilla de 12 columnas en escritorio (≥ 1024 px, v2): héroe y KPI a ancho completo, gráfica de evolución (8 col, 380 px) con panel lateral fijo (4 col) de métricas secundarias, contenido centrado a 1440 px. Cierra JER-1 y DIS-1 del Dashboard.
 
+### Added — Fase Premium D3, Rendimiento (`feat/premium-rendimiento`, PR 3)
+- `feat(rendimiento):` capa de gráficas Forma en Rendimiento (v2): animación de entrada (`useChartMotion`), barras de TSS sólidas y degradado más marcado en eFTP.
+
 ### Added — Fase Premium D2, Dashboard (`feat/premium-dashboard-kpis`, PR 2)
 - `feat(dashboard):` KPI primarios v2 (`KpiCard`: ATL, TSB y ratio de carga) con cifra animada, variación a 7 días en verde/ámbar/rojo, sparkline de 28 días y chip de zona para el ACWR; secundarios en «libro» sin cajas (`kpiTrend`).
 
