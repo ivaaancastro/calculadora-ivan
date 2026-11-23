@@ -12,6 +12,7 @@
 ## 1. Estado actual
 - **Fase Premium A hecha (PR `docs/premium-auditoria`):** `auditoria.md` pendiente de aprobación del usuario antes de la Fase B.
 - **Fase Premium B PR 1 (`feat/premium-tokens`):** tokens/acabado por CSS en v2 hecho; pendiente B2b (hex→tokens, paleta Forma) y B2c (estados). Ver `docs/branches/feat/premium-tokens/spec.md`.
+- **Fase Premium D1 hecha (detalle, #117, #122 y `feat/premium-detalle-lateral`):** `DetailHero`, HUD estable, esqueleto, impacto/laps v2. Pendiente D7; diferidos cursor compartido con mapa y `ErrorState`. Spec: `docs/branches/feat/premium-detalle/`. Siguiente: D2 (resto de pantallas).
 - **Fase Premium C hecha (PRs #111–#115, `feat/premium-charts`):** lenguaje de gráficas Forma (rejilla, tooltip cristal, animación, a11y), Sparkline, banda/proyección, zoom y heatmap, todo v2. Pendiente: D7 del usuario sobre cada gráfica, snapshots v2 si cambian, `Sparkline` aún sin consumidor (HRV/Vo2 no tienen serie). Detalle: `docs/branches/feat/premium-charts/spec.md`.
 - **Fase D3 Rendimiento (`feat/premium-rendimiento`):** spec/plan aprobados; PR 1 (héroe + grupos) abierto. Detalle y tareas en `docs/branches/feat/premium-rendimiento/tasks.md`.
 - **➡️ Siguiente paso:** cerrar PR #103 (Coach Insights) y #105 (verificación rápida); empezar la **Fase Premium A** (auditoría; spec D1–D10 aprobada) tras mergear #106 (`docs/branches/feat/premium-design/`). Roadmap vigente en `docs/branches/feat/webapp-redesign/plan.md`.
