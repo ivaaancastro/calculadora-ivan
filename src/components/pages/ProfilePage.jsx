@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Save, Activity, Heart, ArrowLeft, Lock, Link2 } from 'lucide-react';
 import { supabase } from '../../supabase';
 import toast from 'react-hot-toast';
@@ -79,6 +79,8 @@ export const ProfilePage = ({
         }
     };
 
+    // Estado inicial normalizado, para detectar «cambios sin guardar» (v2).
+    const initialRef = useRef(null);
     const [isScanning, setIsScanning] = useState(false);
     const [newPassword, setNewPassword] = useState('');
     const [isUpdatingPwd, setIsUpdatingPwd] = useState(false);
@@ -120,7 +122,7 @@ export const ProfilePage = ({
 
     useEffect(() => {
         if (currentSettings) {
-            setFormData({
+            const next = {
                 ...currentSettings,
                 intervalsId: currentSettings.intervalsId || '',
                 intervalsKey: currentSettings.intervalsKey || '',
@@ -141,11 +143,12 @@ export const ProfilePage = ({
                     zones: currentSettings.bike?.zones?.length === 7 ? currentSettings.bike.zones :
                         calcZonesFromLTHR(currentSettings.bike?.lthr || 168, currentSettings.bike?.max || 190),
                 },
-            });
+            };
+            setFormData(next);
             // Initialize targetCtl from the current adjusted value
-            if (currentMetrics?.ctl != null) {
-                setTargetCtl(Math.round(currentMetrics.ctl));
-            }
+            const ctl0 = currentMetrics?.ctl != null ? Math.round(currentMetrics.ctl) : null;
+            if (ctl0 != null) setTargetCtl(ctl0);
+            initialRef.current = { form: JSON.stringify(next), ctl: ctl0 };
         }
     }, [currentSettings, currentMetrics]);
 
@@ -303,8 +306,16 @@ export const ProfilePage = ({
         });
     };
 
+    const isDirty = !!initialRef.current && (
+        JSON.stringify(formData) !== initialRef.current.form ||
+        (initialRef.current.ctl != null && targetCtl !== initialRef.current.ctl)
+    );
+
     const renderMenuButton = (id, label, IconComponent) => (
         <button
+            data-profile="nav-item"
+            data-active={activeSection === id}
+            aria-current={activeSection === id ? 'page' : undefined}
             onClick={() => handleSectionChange(id)}
             className={`flex items-center gap-2.5 px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-xl transition-all text-left whitespace-nowrap select-none touch-manipulation active:scale-95 ${activeSection === id
                 ? 'bg-action-solid text-white shadow-xs font-bold'
@@ -329,11 +340,24 @@ export const ProfilePage = ({
                         <ArrowLeft size={18} strokeWidth={2.5} />
                         <span className="hidden sm:inline">Atrás</span>
                     </button>
-                    <h1 className="text-base sm:text-2xl font-bold text-ink-soft tracking-tight ml-1">
-                        <span className="hidden sm:inline">Ajustes — </span>
-                        <span>{SECTION_NAMES[activeSection] || 'Ajustes'}</span>
-                    </h1>
+                    {isV2 ? (
+                        <div className="ml-1 min-w-0">
+                            <h1 data-profile="title" className="text-lg sm:text-2xl font-semibold text-ink tracking-tight leading-tight">Ajustes</h1>
+                            <p data-profile="subtitle" className="text-[11px] sm:text-xs text-ink-3 truncate">{SECTION_NAMES[activeSection] || 'Ajustes'}</p>
+                        </div>
+                    ) : (
+                        <h1 className="text-base sm:text-2xl font-bold text-ink-soft tracking-tight ml-1">
+                            <span className="hidden sm:inline">Ajustes — </span>
+                            <span>{SECTION_NAMES[activeSection] || 'Ajustes'}</span>
+                        </h1>
+                    )}
                 </div>
+                <div className="flex items-center gap-3">
+                {isV2 && (
+                    <span data-profile="dirty" role="status" aria-live="polite" className="hidden sm:inline-flex items-center gap-1.5 text-[11px] font-medium text-ink-3">
+                        {isDirty && (<><span aria-hidden="true" className="w-1.5 h-1.5 rounded-full bg-action-ios-solid" />Cambios sin guardar</>)}
+                    </span>
+                )}
                 <button 
                   onClick={() => {
                     const raw = currentMetrics?.rawCtl || 0;
@@ -341,10 +365,12 @@ export const ProfilePage = ({
                     onUpdate({ ...formData, offsetCtl: newOffset });
                   }} 
                   data-profile="save"
+                  data-dirty={isV2 ? String(isDirty) : undefined}
                   className="flex items-center gap-1.5 bg-action-ios-solid hover:bg-action-solid text-white px-4 sm:px-5 py-1.5 sm:py-2 rounded-full text-xs font-semibold tracking-wide transition-all shadow-xs active:scale-95 select-none touch-manipulation"
                 >
                     <Save size={14} strokeWidth={2.5} /> <span>Guardar</span>
                 </button>
+                </div>
             </div>
 
             {/* v2 móvil: selector de sección en la página (antes solo estaba en el menú de la cabecera) */}
@@ -362,7 +388,7 @@ export const ProfilePage = ({
 
             <div className="flex flex-col md:flex-row gap-6 md:gap-8">
                 {/* DESKTOP SIDEBAR */}
-                <div className="hidden md:flex w-56 flex-shrink-0 flex-col gap-1">
+                <div data-profile="nav" className="hidden md:flex w-56 flex-shrink-0 flex-col gap-1">
                     {renderMenuButton('general', 'General', Activity)}
                     {renderMenuButton('zones', 'Zonas y Umbrales', Heart)}
                     {renderMenuButton('integrations', 'Integraciones', Link2)}
@@ -370,7 +396,7 @@ export const ProfilePage = ({
                 </div>
 
                 {/* CONTENT AREA */}
-                <div className="flex-1 min-w-0">
+                <div data-profile="content" className="flex-1 min-w-0">
                     {activeSection === 'general' && (
                         <GeneralSection formData={formData} isUploadingAvatar={isUploadingAvatar} handleAvatarUpload={handleAvatarUpload} handleChange={handleChange} targetCtl={targetCtl} setTargetCtl={setTargetCtl} isV2={isV2} setUi={setUi} />
                     )}
