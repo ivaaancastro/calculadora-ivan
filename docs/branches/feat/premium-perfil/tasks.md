@@ -17,4 +17,4 @@ Spec y plan aprobados por el usuario (2026-11-23), P-1 y P-2 según lo recomenda
 - [x] Cuentas: estado con punto+texto, campos apilados en móvil
 - [x] Seguridad: zona de peligro diferenciada, botones de contorno
 - [x] MEMORY/CHANGELOG
-- [ ] Capturas v2 de Ajustes: no hay spec de Ajustes en `visual-v2`; sin capturas que regenerar (revisión visual D7 del usuario)
+- [ ] Capturas `perfil-*` de `visual-v2` regeneradas por el workflow `Update snapshots` en la rama del PR 3; revisar una a una (D7)
