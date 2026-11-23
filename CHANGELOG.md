@@ -7,6 +7,9 @@ y este proyecto adhiere a [Semantic Versioning](https://semver.org/lang/es/).
 
 ## [Unreleased]
 
+### Added — Fase Premium D4, Salud (`feat/premium-salud-biomarcadores`, PR 2)
+- `feat(salud):` biomarcadores v2 con jerarquía por estado (`biomarkerStatus`, tarjetas en atención al principio), cifra de 28–32 px, variación verde/rojo y `Sparkline` de 7 días (FC reposo, VFC, sueño, pasos, peso).
+
 ### Added — Fase Premium D4, Salud (`feat/premium-salud`, PR 1)
 - `feat(salud):` `HealthHero` (solo v2): frase de estado narrativa y recuperación como cifra protagonista con filete del tono; banco de energía con cifra grande y marcas 30/60 %; «Pilar 0N» oculto. Spec y plan en `docs/branches/feat/premium-salud/`.
 

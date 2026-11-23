@@ -3,8 +3,13 @@ import {
     Moon, Activity, Zap, ActivitySquare, Scale, Footprints, Wind, TrendingDown, TrendingUp, Minus
 } from 'lucide-react';
 import { Card, SectionHeader } from '../ui';
+import { useUiMode } from '../../hooks/useUiMode';
+import { BiomarkersGridV2 } from './BiomarkersGridV2';
 
-export const BiomarkersGrid = ({ wellnessMetrics }) => (
+export const BiomarkersGrid = ({ wellnessMetrics }) => {
+    const { isV2 } = useUiMode();
+    if (isV2) return <BiomarkersGridV2 wellnessMetrics={wellnessMetrics} />;
+    return (
     <>
         <div>
             <SectionHeader as="p">Biomarcadores Clave</SectionHeader>
@@ -204,3 +209,4 @@ export const BiomarkersGrid = ({ wellnessMetrics }) => (
         </div>
     </>
 );
+};
