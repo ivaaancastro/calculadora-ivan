@@ -12,6 +12,7 @@ y este proyecto adhiere a [Semantic Versioning](https://semver.org/lang/es/).
 
 ### Added — Fase Premium D4, Salud (`feat/premium-salud-biomarcadores`, PR 2)
 - `feat(salud):` biomarcadores v2 con jerarquía por estado (`biomarkerStatus`, tarjetas en atención al principio), cifra de 28–32 px, variación verde/rojo y `Sparkline` de 7 días (FC reposo, VFC, sueño, pasos, peso).
+
 ### Added — Fase Premium D2, Dashboard (`feat/premium-dashboard`, PR 1)
 - `feat(dashboard):` `FormHero` (solo v2): resumen narrativo del estado de forma (`buildFormSummary`, reglas deterministas), CTL como cifra protagonista con variación a 28 días, chip de estado y selector de rango también en móvil. Spec y plan en `docs/branches/feat/premium-dashboard/`.
 
