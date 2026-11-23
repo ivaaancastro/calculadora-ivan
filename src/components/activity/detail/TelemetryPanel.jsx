@@ -74,7 +74,7 @@ export const TelemetryPanel = ({ chartData, peaks, activePayload, setActivePaylo
                                             )}
 
                                             {/* HUD de Telemetría Dinámico */}
-                                            <div className="bg-surface-8 backdrop-blur-md border border-line-4 rounded-2xl p-2.5 sm:p-3 shadow-sm transition-all">
+                                            <div data-detail="hud" className="bg-surface-8 backdrop-blur-md border border-line-4 rounded-2xl p-2.5 sm:p-3 shadow-sm transition-all">
                                                 {activePayload ? (
                                                     <div className="space-y-2">
                                                         <div className="flex items-center justify-between border-b border-line-soft-4 pb-1.5">
