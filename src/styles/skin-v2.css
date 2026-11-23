@@ -807,6 +807,16 @@ html[data-ui="v2"] [data-skin="detail"] [data-detail="hero"] [data-detail="stats
 html[data-ui="v2"] [data-skin="detail"] [data-detail="ledger-row"]:hover {
   border-color: rgb(var(--line-strong));
 }
+/* HUD de telemetría: lectura de altura estable (no salta al explorar) y filete del color activo. */
+html[data-ui="v2"] [data-skin="detail"] [data-detail="hud"] {
+  min-height: 92px;
+  border-radius: var(--skin-radius-2xl);
+  box-shadow: var(--skin-shadow-card);
+}
+html[data-ui="v2"] [data-skin="detail"] [data-detail="peaks"] > button {
+  letter-spacing: 0.01em;
+  font-variant-numeric: tabular-nums;
+}
 @keyframes detail-rise { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
 @media (prefers-reduced-motion: no-preference) {
   html[data-ui="v2"] [data-skin="detail"] [data-detail="eyebrow"],

@@ -8,6 +8,8 @@ import { useConfirmDeleteActivity } from '../../hooks/useConfirmDeleteActivity';
 import { ConfirmDeleteActivityModal } from '../activity/ConfirmDeleteActivityModal';
 import { DetailHeader } from '../activity/detail/DetailHeader';
 import { DetailHero } from '../activity/detail/DetailHero';
+import { Skeleton } from '../ui';
+import { ChartSkeleton } from '../charts/ChartSkeleton';
 import { useUiMode } from '../../hooks/useUiMode';
 import { DetailMobileHero } from '../activity/detail/DetailMobileHero';
 import { TelemetryPanel } from '../activity/detail/TelemetryPanel';
@@ -89,10 +91,19 @@ export const ActivityDetailPage = ({ activity, settings, fetchStreams, onBack, o
             {/* Tab Content */}
             <div className="flex-1 min-h-0 overflow-hidden relative flex flex-col w-full">
                 {loadingStreams ? (
+                    isV2 ? (
+                        <div data-detail="loading" role="status" aria-label="Procesando telemetría" className="absolute inset-0 z-20 bg-surface-9 p-2.5 sm:p-5 space-y-4 overflow-hidden">
+                            <Skeleton className="h-3 w-40" />
+                            <Skeleton className="h-8 w-2/3" />
+                            <div className="grid grid-cols-3 gap-4"><Skeleton className="h-12" /><Skeleton className="h-12" /><Skeleton className="h-12" /></div>
+                            <ChartSkeleton className="h-48" label="Procesando telemetría" />
+                        </div>
+                    ) : (
                     <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-surface-9 z-20">
                         <Loader2 size={24} className="animate-spin text-indigo-500" />
                         <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Procesando telemetría técnica...</span>
                     </div>
+                    )
                 ) : null}
 
                 {/* --- pestaña: ANÁLISIS --- */}
