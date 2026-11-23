@@ -1,7 +1,12 @@
 import React from 'react';
 import { Card } from '../ui';
+import { useUiMode } from '../../hooks/useUiMode';
+import { DaySpotlightV2 } from './DaySpotlightV2';
 
-export const DaySpotlight = ({ currentSelectedDay }) => (
+export const DaySpotlight = ({ currentSelectedDay }) => {
+    const { isV2 } = useUiMode();
+    if (isV2) return <DaySpotlightV2 currentSelectedDay={currentSelectedDay} />;
+    return (
     <>
         {currentSelectedDay && (
             <Card data-health="spotlight" className="p-4 sm:p-6 space-y-4">
@@ -73,3 +78,4 @@ export const DaySpotlight = ({ currentSelectedDay }) => (
         )}
     </>
 );
+};
