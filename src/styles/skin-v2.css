@@ -1204,3 +1204,27 @@ html[data-ui="v2"] [data-skin="dashboard"] [data-hero="form"]::before {
   }
   html[data-ui="v2"] [data-skin="dashboard"] [data-hero="figure"] { animation-delay: 0.12s; }
 }
+
+/* ── Calendario premium (Fase D5, PR 1): cabecera narrativa del mes ─────────────────────────
+ * Spec: docs/branches/feat/premium-calendario/spec.md §3.1. Bloque aislado «Calendario D5». */
+html[data-ui="v2"] [data-skin="calendar"] [data-cal="hero"] {
+  font-feature-settings: "tnum" 1, "cv11" 1;
+}
+/* El heatmap ya trae su propio relleno y filete: dentro del héroe se queda sin ellos. */
+html[data-ui="v2"] [data-skin="calendar"] [data-cal="heatmap-wrap"] [data-chart="heatmap"] {
+  padding: 0;
+  border-bottom: 0;
+}
+html[data-ui="v2"] [data-skin="calendar"] [data-cal="kpi"] {
+  background-color: rgb(var(--surface));
+}
+@keyframes cal-rise { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: no-preference) {
+  html[data-ui="v2"] [data-skin="calendar"] [data-cal="sentence"],
+  html[data-ui="v2"] [data-skin="calendar"] [data-cal="kpi"] {
+    animation: cal-rise 0.45s cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+  html[data-ui="v2"] [data-skin="calendar"] [data-cal="kpi"]:nth-child(2) { animation-delay: 0.06s; }
+  html[data-ui="v2"] [data-skin="calendar"] [data-cal="kpi"]:nth-child(3) { animation-delay: 0.12s; }
+  html[data-ui="v2"] [data-skin="calendar"] [data-cal="kpi"]:nth-child(4) { animation-delay: 0.18s; }
+}
