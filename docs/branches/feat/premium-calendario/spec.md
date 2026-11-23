@@ -1,6 +1,6 @@
 # Spec — `feat/premium-calendario` (Fase D5: Calendario premium)
 
-Estado: **pendiente de aprobación del usuario**. Todo detrás de `html[data-ui="v2"]`; v1 no cambia. Cubre `pages/CalendarPage.jsx` y `calendar/*` (`CalendarMonthView`, `PmcFloatingChart`, modales solo en piel). Resuelve **JER-5** de `../premium-design/auditoria.md`. Modelo: `../premium-dashboard/spec.md`.
+Estado: **aprobada por el usuario (2026-11-23)** con C-1…C-4 como propuestos. Todo detrás de `html[data-ui="v2"]`; v1 no cambia. Cubre `pages/CalendarPage.jsx` y `calendar/*` (`CalendarMonthView`, `PmcFloatingChart`, modales solo en piel). Resuelve **JER-5** de `../premium-design/auditoria.md`. Modelo: `../premium-dashboard/spec.md`.
 
 ## 1. Referencias
 - **Bluejack**: cabecera con resumen narrativo del mes + fila de KPI (etiqueta mínima en mayúsculas, cifra grande, línea de contexto).

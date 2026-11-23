@@ -50,7 +50,7 @@ export const MonthHero = ({ summary, heatmap, onPlan }) => {
                     {summary.sentence}
                 </p>
                 {summary.empty && onPlan && (
-                    <Button variant="primary" onClick={onPlan} className="min-h-[44px]">Planificar</Button>
+                    <div className="max-w-[220px]"><Button variant="primary" onClick={onPlan}>Planificar</Button></div>
                 )}
                 {!summary.empty && (
                     <div data-cal="kpis" className="grid grid-cols-2 xl:grid-cols-4 gap-2.5">
