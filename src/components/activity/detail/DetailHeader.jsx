@@ -1,8 +1,13 @@
 import React from 'react';
 import { ArrowLeft, Trash2 } from 'lucide-react';
 import { IconButton, Segmented, Stat, MetricTooltip } from '../../ui';
+import { useUiMode } from '../../../hooks/useUiMode';
 
-export const DetailHeader = ({ activity, activeTab, setActiveTab, onBack, onDelete, dateStr, tabs, metrics }) => (
+export const DetailHeader = ({ activity, activeTab, setActiveTab, onBack, onDelete, dateStr, tabs, metrics }) => {
+    const { isV2 } = useUiMode();
+    // v2: en Análisis el título y las cifras viven en el hero; la cabecera queda en controles.
+    const heroOwnsTitle = isV2 && activeTab === 'analyze';
+    return (
             <header data-detail="header" className="glass-nav px-3.5 py-2 sm:px-6 sm:py-3 shrink-0 z-nav">
                 {/* --- DESKTOP HEADER (lg:flex) --- */}
                 <div className="hidden lg:flex items-center justify-between gap-2 mb-2.5 sm:mb-3 border-b border-hairline pb-2">
@@ -29,12 +34,14 @@ export const DetailHeader = ({ activity, activeTab, setActiveTab, onBack, onDele
 
                 <div className="hidden lg:flex items-center gap-2.5 sm:gap-3 mb-2 sm:mb-3">
                     <IconButton variant="soft" data-detail="action" onClick={onBack} className="w-8 h-8 shrink-0" title="Volver" label="Volver" icon={ArrowLeft} iconSize={16} />
+                    {!heroOwnsTitle && (
                     <div className="min-w-0">
                         <h1 className="text-sm font-bold text-ink tracking-tight leading-tight truncate">
                             {activity.name || `${activity.type}`}
                         </h1>
                         <p className="text-[10px] font-semibold text-ink-4 capitalize">{dateStr}</p>
                     </div>
+                    )}
                 </div>
 
                 {/* --- MOBILE HEADER (lg:hidden) --- */}
@@ -42,12 +49,14 @@ export const DetailHeader = ({ activity, activeTab, setActiveTab, onBack, onDele
                 <div className="lg:hidden flex items-center justify-between gap-2 mb-2.5">
                     <div className="flex items-center gap-2 min-w-0">
                         <IconButton variant="soft" data-detail="action" onClick={onBack} className="w-8 h-8 shrink-0" title="Volver" label="Volver" icon={ArrowLeft} iconSize={16} />
+                        {!heroOwnsTitle && (
                         <div className="min-w-0">
                             <h1 className="text-sm font-bold text-ink tracking-tight leading-tight truncate">
                                 {activity.name || `${activity.type}`}
                             </h1>
                             <p className="text-[10px] font-semibold text-ink-4 capitalize truncate">{dateStr}</p>
                         </div>
+                        )}
                     </div>
 
                     <div className="flex items-center gap-1.5 shrink-0">
@@ -81,10 +90,11 @@ export const DetailHeader = ({ activity, activeTab, setActiveTab, onBack, onDele
                 </div>
 
                 {/* Expanded Compact Metric Grid - Desktop Solo (en móvil se muestra en cuadrícula bajo el Mapa) */}
-                <div className="hidden lg:flex items-center gap-2 py-1 overflow-x-auto hide-scrollbar touch-scroll overscroll-contain sm:flex-wrap -mx-3 px-3 sm:mx-0 sm:px-0 mt-2">
+                {!isV2 && <div className="hidden lg:flex items-center gap-2 py-1 overflow-x-auto hide-scrollbar touch-scroll overscroll-contain sm:flex-wrap -mx-3 px-3 sm:mx-0 sm:px-0 mt-2">
                     {metrics.map(m => (
                         <MetricTooltip key={m.id} metricId={m.metricId}><Stat label={m.label} value={m.value} unit={m.unit || undefined} accent={m.accent} /></MetricTooltip>
                     ))}
-                </div>
+                </div>}
             </header>
-);
+    );
+};

@@ -173,3 +173,27 @@ export function applyChartBlocks(chartData, sport) {
         alt: charts.altitude ? pt.alt : null,
     }));
 }
+
+/** Cifras protagonistas del hero (v2), por deporte y en orden de preferencia. */
+const HERO_KEYS = {
+    bike: ['distance', 'duration', 'speed'],
+    run: ['distance', 'duration', 'pace'],
+    hike: ['distance', 'duration', 'elevation'],
+    strength: ['duration', 'kcal', 'hrAvg'],
+    generic: ['duration', 'distance', 'kcal'],
+};
+
+/**
+ * Separa las métricas ya filtradas (`getMetricsForSport`) en 3 protagonistas y el resto.
+ * Si falta alguna preferida se completa con las siguientes disponibles; sin duplicados.
+ */
+export function pickHeroMetrics(sport, metrics) {
+    const list = metrics || [];
+    const wanted = HERO_KEYS[sport] || HERO_KEYS.generic;
+    const hero = wanted.map((id) => list.find((m) => m.id === id)).filter(Boolean);
+    for (const m of list) {
+        if (hero.length >= 3) break;
+        if (!hero.includes(m)) hero.push(m);
+    }
+    return { hero: hero.slice(0, 3), rest: list.filter((m) => !hero.includes(m)) };
+}
