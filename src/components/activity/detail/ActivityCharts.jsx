@@ -12,6 +12,10 @@ export const ActivityCharts = ({ chartData: fullData, activePayload, handleMouse
     const isV2 = useChartSkin() === 'v2';
     const [range, setRange] = useState([0, 100]);
     const chartData = useMemo(() => (isV2 ? sliceByRange(fullData, range) : fullData), [isV2, fullData, range]);
+    const missing = [
+        blocks?.charts?.power && !chartData.some(d => d.watts > 0) ? 'potencia' : null,
+        !chartData.some(d => d.hr > 0) ? 'frecuencia cardiaca' : null,
+    ].filter(Boolean);
     return (
 <>
                                     {chartData.length > 0 ? (
@@ -166,6 +170,11 @@ export const ActivityCharts = ({ chartData: fullData, activePayload, handleMouse
                                                         </AreaChart>
                                                     </ResponsiveContainer>
                                                 </div>
+                                            )}
+                                            {isV2 && missing.length > 0 && (
+                                                <p data-detail="missing" className="px-3.5 sm:px-6 py-3 text-[11px] text-ink-4">
+                                                    Sin {missing.join(' ni ')} en este registro: el dispositivo no grabó esa serie.
+                                                </p>
                                             )}
                                         </Card>
                                     ) : (
