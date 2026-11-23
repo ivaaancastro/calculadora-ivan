@@ -10,6 +10,9 @@ y este proyecto adhiere a [Semantic Versioning](https://semver.org/lang/es/).
 ### Added — Fase Premium D3, Rendimiento (`feat/premium-rendimiento`, PR 3)
 - `feat(rendimiento):` capa de gráficas Forma en Rendimiento (v2): animación de entrada (`useChartMotion`), barras de TSS sólidas y degradado más marcado en eFTP.
 
+### Added — Fase Premium D2, Dashboard (`feat/premium-dashboard-kpis`, PR 2)
+- `feat(dashboard):` KPI primarios v2 (`KpiCard`: ATL, TSB y ratio de carga) con cifra animada, variación a 7 días en verde/ámbar/rojo, sparkline de 28 días y chip de zona para el ACWR; secundarios en «libro» sin cajas (`kpiTrend`).
+
 ### Added — Fase Premium D3, Rendimiento (`feat/premium-rendimiento`, PR 2)
 - `feat(rendimiento):` receta de tarjeta única en v2 (radios concéntricos, título 13/600, rótulos ≥ 11 px, ancho 1200 px) y estados vacíos que explican qué falta (estado de entreno, VFC, pronóstico).
 
