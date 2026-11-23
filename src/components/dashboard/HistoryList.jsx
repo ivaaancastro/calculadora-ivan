@@ -5,6 +5,10 @@ import { formatDuration } from '../../utils/formatDuration';
 import { Card, EmptyState, Input, Select } from '../ui';
 import { useConfirmDeleteActivity } from '../../hooks/useConfirmDeleteActivity';
 import { ConfirmDeleteActivityModal } from '../activity/ConfirmDeleteActivityModal';
+import { useUiMode } from '../../hooks/useUiMode';
+import { AutoChartSkin } from '../charts/ChartSkin';
+import { ActivitiesSummary } from './history/ActivitiesSummary';
+import { summarizeActivities, weeklyTss } from '../../utils/activityGroups';
 
 const getSportIcon = (type) => {
     const t = String(type).toLowerCase();
@@ -39,6 +43,7 @@ const getSportIcon = (type) => {
 export const HistoryList = React.memo(({ activities, onDelete, onSelectActivity }) => {
     const parentRef = useRef(null);
     const del = useConfirmDeleteActivity(onDelete);
+    const { isV2 } = useUiMode();
     // ESTADOS DE LOS FILTROS INTERNOS
     const [searchTerm, setSearchTerm] = useState('');
     const [sportFilter, setSportFilter] = useState('all');
@@ -85,6 +90,11 @@ export const HistoryList = React.memo(({ activities, onDelete, onSelectActivity 
         return filtered;
     }, [activities, searchTerm, sportFilter, dateFilter]);
 
+    const summary = useMemo(
+        () => (isV2 ? { totals: summarizeActivities(filteredActivities), weekly: weeklyTss(filteredActivities) } : null),
+        [isV2, filteredActivities],
+    );
+
     // eslint-disable-next-line react-hooks/incompatible-library
     const rowVirtualizer = useVirtualizer({
         count: filteredActivities.length,
@@ -102,6 +112,10 @@ export const HistoryList = React.memo(({ activities, onDelete, onSelectActivity 
     return (
         <>
         <Card data-skin="history" data-history="root" className="flex flex-col h-full overflow-hidden">
+
+            {summary && (
+                <AutoChartSkin><ActivitiesSummary totals={summary.totals} weekly={summary.weekly} /></AutoChartSkin>
+            )}
 
             {/* BARRA DE FILTROS ESTILO APPLE */}
             <div data-history="filters" className="p-3 sm:p-4 border-b border-hairline bg-slate-50/50 dark:bg-zinc-900/30 flex flex-col sm:flex-row gap-2.5 sm:gap-3">
