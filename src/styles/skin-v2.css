@@ -1256,6 +1256,7 @@ html[data-ui="v2"] [data-skin="calendar"] [data-cal="kpi"] {
   html[data-ui="v2"] [data-skin="calendar"] [data-cal="kpi"]:nth-child(2) { animation-delay: 0.06s; }
   html[data-ui="v2"] [data-skin="calendar"] [data-cal="kpi"]:nth-child(3) { animation-delay: 0.12s; }
   html[data-ui="v2"] [data-skin="calendar"] [data-cal="kpi"]:nth-child(4) { animation-delay: 0.18s; }
+}
 
 /* ── Dashboard D2, PR 2: KPI con variación, sparkline y «libro» de secundarios ─────────────── */
 html[data-ui="v2"] [data-skin="dashboard"] [data-kpi="card"] {
