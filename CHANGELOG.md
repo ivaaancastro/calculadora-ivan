@@ -7,6 +7,9 @@ y este proyecto adhiere a [Semantic Versioning](https://semver.org/lang/es/).
 
 ## [Unreleased]
 
+### Added — Fase Premium D6, Actividades (`feat/premium-actividades`, PR 1)
+- `feat(actividades):` cabecera de resumen del historial (solo v2): nº de sesiones como cifra protagonista, tiempo/distancia/TSS y sparkline del TSS semanal sobre los datos filtrados; utilidades `activityGroups` con tests. Spec y plan en `docs/branches/feat/premium-actividades/`.
+
 ### Added — Fase Premium D2, Dashboard (`feat/premium-dashboard-rejilla`, PR 3)
 - `feat(dashboard):` rejilla de 12 columnas en escritorio (≥ 1024 px, v2): héroe y KPI a ancho completo, gráfica de evolución (8 col, 380 px) con panel lateral fijo (4 col) de métricas secundarias, contenido centrado a 1440 px. Cierra JER-1 y DIS-1 del Dashboard.
 
