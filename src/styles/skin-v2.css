@@ -1289,3 +1289,26 @@ html[data-ui="v2"] [data-skin="dashboard"] [data-dash="ledger-row"]:hover {
   html[data-ui="v2"] [data-skin="dashboard"] [data-dash="secondary-grid"] { grid-template-columns: minmax(0, 1fr); }
   html[data-ui="v2"] [data-skin="dashboard"] [data-dash="chart-body"] { height: 380px; }
 }
+
+/* ── Actividades D6, PR 2: semanas y fila ────────────────────────────────────────────
+ * Spec: docs/branches/feat/premium-actividades/spec.md §3.2/§3.3. Solo v2. */
+html[data-ui="v2"] [data-skin="history"] [data-history="week"] {
+  background-color: rgb(var(--sunken));
+  border-bottom: 1px solid rgb(var(--line));
+}
+html[data-ui="v2"] [data-skin="history"] [data-history="row"] h4 {
+  font-size: 14px;
+  letter-spacing: -0.01em;
+  text-wrap: balance;
+}
+/* Borrar solo al pasar el ratón o con el foco en escritorio con puntero; en táctil siempre visible. */
+@media (hover: hover) and (min-width: 768px) {
+  html[data-ui="v2"] [data-skin="history"] [data-history="row"] [data-history="delete"] {
+    opacity: 0;
+    transition: opacity 0.15s ease;
+  }
+  html[data-ui="v2"] [data-skin="history"] [data-history="row"]:hover [data-history="delete"],
+  html[data-ui="v2"] [data-skin="history"] [data-history="row"]:focus-within [data-history="delete"] {
+    opacity: 1;
+  }
+}
