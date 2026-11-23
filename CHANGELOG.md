@@ -7,6 +7,9 @@ y este proyecto adhiere a [Semantic Versioning](https://semver.org/lang/es/).
 
 ## [Unreleased]
 
+### Added — Fase Premium D7, Ajustes (`feat/premium-perfil-secciones`, PR 2)
+- `feat(perfil):` General con héroe de identidad y Fisiología primaria; Zonas con `Segmented`, umbrales como cifra grande y barra de color por zona (v2).
+
 ### Added — Fase Premium D7, Ajustes (`feat/premium-perfil`, PR 1)
 - `feat(perfil):` cabecera v2 con título y subtítulo de sección, «Guardar» con estado de cambios sin guardar, menú lateral con indicador activo y columna de lectura de 720 px.
 

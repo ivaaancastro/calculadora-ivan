@@ -1262,3 +1262,44 @@ html[data-ui="v2"] [data-skin="profile"] [data-profile="content"] {
 html[data-ui="v2"] [data-skin="profile"][data-profile="root"] {
   max-width: 72rem;
 }
+
+/* Perfil D7 (PR 2): General y Zonas. */
+html[data-ui="v2"] [data-skin="profile"] .text-\[10px\] {
+  font-size: 11px;
+}
+html[data-ui="v2"] [data-skin="profile"] [data-profile="avatar"] {
+  width: 80px !important;
+  height: 80px !important;
+  min-width: 80px !important;
+  min-height: 80px !important;
+  border-width: 0;
+  box-shadow: 0 0 0 1px rgb(var(--line)), 0 0 0 4px rgb(var(--surface));
+}
+html[data-ui="v2"] [data-skin="profile"] [data-profile="name"] {
+  font-size: 22px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  text-wrap: balance;
+}
+html[data-ui="v2"] [data-skin="profile"] [data-profile="primary"] [data-profile="row"] {
+  min-height: 3.5rem;
+}
+html[data-ui="v2"] [data-skin="profile"] [data-profile="threshold"] {
+  padding: 12px;
+  border-radius: var(--skin-radius-lg);
+}
+html[data-ui="v2"] [data-skin="profile"] [data-profile="threshold"] input {
+  font-size: 24px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+}
+html[data-ui="v2"] [data-skin="profile"] [data-profile="zone-row"] {
+  min-height: 44px;
+  font-variant-numeric: tabular-nums;
+}
+html[data-ui="v2"] [data-skin="profile"] [data-profile="zone-dot"] {
+  width: 4px;
+  height: 24px;
+  border-radius: 2px;
+}

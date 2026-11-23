@@ -10,8 +10,8 @@ Spec y plan aprobados por el usuario (2026-11-23), P-1 y P-2 según lo recomenda
 - [x] `npm run verify` verde; CHANGELOG
 
 ## PR 2 — `feat/premium-perfil-secciones` (General y Zonas)
-- [ ] General: héroe de identidad, Fisiología primaria, bloque secundario
-- [ ] Zonas: `Segmented`, umbral como cifra, barras por zona
+- [x] General: héroe de identidad, Fisiología primaria, bloque secundario
+- [x] Zonas: `Segmented`, umbral como cifra, barras por zona
 
 ## PR 3 — `feat/premium-perfil-cuentas-seguridad`
 - [ ] Cuentas: estado con punto+texto, campos apilados en móvil
