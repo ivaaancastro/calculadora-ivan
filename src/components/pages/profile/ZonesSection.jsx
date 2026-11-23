@@ -1,9 +1,12 @@
 import React from 'react';
 import { Footprints, Bike, RefreshCw, Loader2 } from 'lucide-react';
-import { Card } from '../../ui';
+import { Card, Segmented } from '../../ui';
+import { useUiMode } from '../../../hooks/useUiMode';
 import { SportZonesSection } from './SportZonesSection';
 
-export const ZonesSection = ({ formData, activeTab, setActiveTab, isScanning, pureActs, handleAutoDetectLTHR, handleChange, handleZoneChange, handleZonesMode }) => (
+export const ZonesSection = ({ formData, activeTab, setActiveTab, isScanning, pureActs, handleAutoDetectLTHR, handleChange, handleZoneChange, handleZonesMode }) => {
+    const { isV2 } = useUiMode();
+    return (
     <div className="space-y-4 animate-in fade-in slide-in-from-right-3 duration-250">
         {/* AUTO-DETECT LTHR BANNER */}
         <Card className="p-3.5 sm:p-4 flex items-center justify-between gap-3">
@@ -26,6 +29,16 @@ export const ZonesSection = ({ formData, activeTab, setActiveTab, isScanning, pu
         </Card>
 
         {/* SPORT SELECTOR SEGMENTED */}
+        {isV2 ? (
+            <Segmented
+                data-profile="sport-tabs"
+                aria-label="Deporte"
+                optionClassName="min-h-11"
+                options={[{ value: 'run', label: 'Correr' }, { value: 'bike', label: 'Ciclismo' }]}
+                value={activeTab}
+                onChange={setActiveTab}
+            />
+        ) : (
         <div className="flex p-1 bg-fill-segmented rounded-full backdrop-blur-md gap-0.5 select-none">
             <button 
                 onClick={() => setActiveTab('run')} 
@@ -44,8 +57,10 @@ export const ZonesSection = ({ formData, activeTab, setActiveTab, isScanning, pu
                 <Bike size={14} strokeWidth={2.3} /> Ciclismo
             </button>
         </div>
+        )}
 
         {activeTab === 'run' && <SportZonesSection sport="run" sportLabel="Zonas de Carrera" icon={Footprints} color="orange" showPace showPower={false} data={formData.run} onChange={handleChange} onZoneChange={handleZoneChange} onZonesMode={handleZonesMode} />}
         {activeTab === 'bike' && <SportZonesSection sport="bike" sportLabel="Zonas de Ciclismo" icon={Bike} color="blue" showPace={false} showPower data={formData.bike} onChange={handleChange} onZoneChange={handleZoneChange} onZonesMode={handleZonesMode} />}
     </div>
-);
+    );
+};

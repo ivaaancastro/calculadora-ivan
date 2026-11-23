@@ -7,7 +7,7 @@ export const SecuritySection = ({ newPassword, setNewPassword, isUpdatingPwd, ha
         {/* CONTRASEÑA */}
         <div>
             <SectionHeader>SEGURIDAD</SectionHeader>
-            <Card className="p-3.5 sm:p-4 mb-5">
+            <Card data-profile="plain-card" className="p-3.5 sm:p-4 mb-5">
                 <div className="flex items-center gap-3 mb-3">
                     <div className="w-7 h-7 rounded-[8px] bg-slate-500/15 text-body flex items-center justify-center shrink-0">
                         <Key size={15} strokeWidth={2.3} />
@@ -39,7 +39,7 @@ export const SecuritySection = ({ newPassword, setNewPassword, isUpdatingPwd, ha
         {/* DEEP SYNC */}
         <div>
             <SectionHeader>GESTIÓN DE DATOS</SectionHeader>
-            <Card className="p-3.5 sm:p-4 mb-5">
+            <Card data-profile="plain-card" className="p-3.5 sm:p-4 mb-5">
                 <div className="flex items-center gap-3 mb-3">
                     <div className="w-7 h-7 rounded-[8px] bg-blue-500/15 text-blue-600 dark:text-blue-400 flex items-center justify-center shrink-0">
                         <Database size={15} strokeWidth={2.3} />
@@ -65,9 +65,9 @@ export const SecuritySection = ({ newPassword, setNewPassword, isUpdatingPwd, ha
         </div>
 
         {/* DANGER ZONE */}
-        <div>
+        <div data-profile="danger-zone">
             <SectionHeader>ZONA DE PELIGRO</SectionHeader>
-            <Card className="p-3.5 sm:p-4">
+            <Card data-profile="danger-card" className="p-3.5 sm:p-4">
                 <div className="flex items-center gap-3 mb-3">
                     <div className="w-7 h-7 rounded-[8px] bg-danger/15 text-danger-ink flex items-center justify-center shrink-0">
                         <AlertTriangle size={15} strokeWidth={2.3} />
@@ -78,6 +78,7 @@ export const SecuritySection = ({ newPassword, setNewPassword, isUpdatingPwd, ha
                     </div>
                 </div>
                 <button 
+                    data-profile="danger-action"
                     onClick={handleDeleteAccount}
                     disabled={isDeletingAccount}
                     className="w-full min-h-[44px] py-2 bg-danger-solid hover:bg-danger-hover text-white rounded-xl text-xs font-semibold transition-all disabled:opacity-50 flex items-center justify-center gap-1.5 shadow-xs active:scale-95"
@@ -87,7 +88,7 @@ export const SecuritySection = ({ newPassword, setNewPassword, isUpdatingPwd, ha
             </Card>
 
             {/* Borrar actividades: vivía en la cabecera de escritorio (RF6). */}
-            <Card className="p-3.5 sm:p-4 mt-5">
+            <Card data-profile="danger-card" className="p-3.5 sm:p-4 mt-5">
                 <div className="flex items-center gap-3 mb-3">
                     <div className="w-7 h-7 rounded-[8px] bg-danger/15 text-danger-ink flex items-center justify-center shrink-0">
                         <Trash2 size={15} strokeWidth={2.3} />
@@ -98,6 +99,7 @@ export const SecuritySection = ({ newPassword, setNewPassword, isUpdatingPwd, ha
                     </div>
                 </div>
                 <button
+                    data-profile="danger-action"
                     onClick={onClearDb}
                     className="w-full min-h-[44px] py-2 bg-surface border border-danger-edge-2 text-danger-ink rounded-xl text-xs font-semibold transition-all hover:bg-danger-tint-2 flex items-center justify-center gap-1.5 active:scale-95"
                 >

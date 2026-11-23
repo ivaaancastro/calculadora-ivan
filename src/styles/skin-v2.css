@@ -1258,6 +1258,154 @@ html[data-ui="v2"] [data-skin="calendar"] [data-cal="kpi"] {
   html[data-ui="v2"] [data-skin="calendar"] [data-cal="kpi"]:nth-child(4) { animation-delay: 0.18s; }
 }
 
+
+/* ── Perfil D7 (Fase Premium, PR 1): cabecera, guardado y menú de Ajustes ───────────────
+ * Solo v2. Bloque propio y acotado; los atributos `data-profile` los pone ProfilePage.jsx.
+ */
+html[data-ui="v2"] [data-skin="profile"] [data-profile="title"],
+html[data-ui="v2"] [data-skin="profile"] [data-profile="subtitle"] {
+  text-wrap: balance;
+}
+
+/* «Guardar»: neutro sin cambios, cobalto con cambios pendientes. */
+html[data-ui="v2"] [data-skin="profile"] [data-profile="save"][data-dirty="false"] {
+  background-color: rgb(var(--sunken));
+  color: rgb(var(--ink-3));
+  box-shadow: inset 0 0 0 1px rgb(var(--line));
+}
+
+/* Menú lateral: filete activo a la izquierda, objetivo de 44 px, pegado bajo la cabecera. */
+@media (min-width: 768px) {
+  html[data-ui="v2"] [data-skin="profile"] [data-profile="nav"] {
+    position: sticky;
+    top: calc(var(--nav-h) + 16px);
+    align-self: flex-start;
+  }
+  html[data-ui="v2"] [data-skin="profile"] [data-profile="nav-item"] {
+    position: relative;
+    min-height: 44px;
+    border-radius: var(--skin-radius-lg);
+    box-shadow: none;
+  }
+  html[data-ui="v2"] [data-skin="profile"] [data-profile="nav-item"][data-active="true"] {
+    background-color: rgb(var(--sunken));
+    color: rgb(var(--ink));
+  }
+  html[data-ui="v2"] [data-skin="profile"] [data-profile="nav-item"][data-active="true"] svg {
+    color: rgb(var(--action));
+  }
+  html[data-ui="v2"] [data-skin="profile"] [data-profile="nav-item"][data-active="true"]::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 10px;
+    bottom: 10px;
+    width: 3px;
+    border-radius: 2px;
+    background-color: rgb(var(--action));
+  }
+  html[data-ui="v2"] [data-skin="profile"] [data-profile="nav-item"] span {
+    font-size: 14px;
+  }
+}
+
+/* Columna de lectura: los formularios no se estiran en escritorio ancho. */
+html[data-ui="v2"] [data-skin="profile"] [data-profile="content"] {
+  max-width: 720px;
+}
+html[data-ui="v2"] [data-skin="profile"][data-profile="root"] {
+  max-width: 72rem;
+}
+
+/* Perfil D7 (PR 2): General y Zonas. */
+html[data-ui="v2"] [data-skin="profile"] .text-\[10px\] {
+  font-size: 11px;
+}
+html[data-ui="v2"] [data-skin="profile"] [data-profile="avatar"] {
+  width: 80px !important;
+  height: 80px !important;
+  min-width: 80px !important;
+  min-height: 80px !important;
+  border-width: 0;
+  box-shadow: 0 0 0 1px rgb(var(--line)), 0 0 0 4px rgb(var(--surface));
+}
+html[data-ui="v2"] [data-skin="profile"] [data-profile="name"] {
+  font-size: 22px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  text-wrap: balance;
+}
+html[data-ui="v2"] [data-skin="profile"] [data-profile="primary"] [data-profile="row"] {
+  min-height: 3.5rem;
+}
+html[data-ui="v2"] [data-skin="profile"] [data-profile="threshold"] {
+  padding: 12px;
+  border-radius: var(--skin-radius-lg);
+}
+html[data-ui="v2"] [data-skin="profile"] [data-profile="threshold"] input {
+  font-size: 24px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+}
+html[data-ui="v2"] [data-skin="profile"] [data-profile="zone-row"] {
+  min-height: 44px;
+  font-variant-numeric: tabular-nums;
+}
+html[data-ui="v2"] [data-skin="profile"] [data-profile="zone-dot"] {
+  width: 4px;
+  height: 24px;
+  border-radius: 2px;
+}
+
+/* Perfil D7 (PR 3): Cuentas y Seguridad. */
+html[data-ui="v2"] [data-skin="profile"] [data-profile="status"]::before {
+  content: "";
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  margin-right: 6px;
+  border-radius: 9999px;
+  background-color: currentColor;
+  vertical-align: 1px;
+}
+@media (max-width: 639px) {
+  html[data-ui="v2"] [data-skin="profile"] [data-profile="field-row"] {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 6px;
+  }
+  html[data-ui="v2"] [data-skin="profile"] [data-profile="field-input"] {
+    width: 100%;
+    min-height: 44px;
+    text-align: left;
+  }
+}
+
+/* Zona de peligro: bloque propio con borde y fondo rojo suave; acciones de contorno. */
+html[data-ui="v2"] [data-skin="profile"] [data-profile="danger-zone"] {
+  margin-top: 8px;
+  padding: 16px;
+  border-radius: var(--skin-radius-xl);
+  border: 1px solid rgb(var(--danger) / 0.3);
+  background-color: rgb(var(--danger) / 0.05);
+}
+html[data-ui="v2"] [data-skin="profile"] [data-profile="danger-card"] {
+  background-color: transparent;
+  box-shadow: none;
+  border-color: rgb(var(--danger) / 0.2);
+}
+html[data-ui="v2"] [data-skin="profile"] [data-profile="danger-action"] {
+  background-color: transparent;
+  color: rgb(var(--danger-ink));
+  box-shadow: inset 0 0 0 1px rgb(var(--danger) / 0.55);
+  border-radius: var(--skin-radius-lg);
+}
+html[data-ui="v2"] [data-skin="profile"] [data-profile="danger-action"]:hover:not(:disabled) {
+  background-color: rgb(var(--danger) / 0.1);
+}
+
+
 /* ── Actividades D6 (feat/premium-actividades, PR 1): cabecera de resumen ───────────────
  * Spec: docs/branches/feat/premium-actividades/spec.md §3.1. Bloque aislado; solo v2. */
 html[data-ui="v2"] [data-skin="history"] [data-history="summary"] {
