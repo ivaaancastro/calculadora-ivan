@@ -5,6 +5,8 @@ import {
 } from 'recharts';
 import { ArrowUp, ArrowDown, Minus } from 'lucide-react';
 import { useChartTheme } from '../charts/useChartTheme';
+import { useChartMotion } from '../charts/useChartMotion';
+import { useChartSkin } from '../charts/ChartSkin';
 import { Card, chartTooltipStyle, InfoTooltip } from '../ui';
 
 export const EstimatedFtpCard = ({
@@ -14,6 +16,9 @@ export const EstimatedFtpCard = ({
     curveChartData
 }) => {
     const ct = useChartTheme();
+    const motion = useChartMotion();
+    const isV2 = useChartSkin() === 'v2';
+    const enter = motion.active ? motion.props : {};
     return (
         <section className="mb-12">
             <Card variant="panel" className="p-6 sm:p-8">
@@ -48,7 +53,7 @@ export const EstimatedFtpCard = ({
                                 <AreaChart data={curveChartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                                     <defs>
                                         <linearGradient id="ftpGradFinal" x1="0" y1="0" x2="0" y2="1">
-                                            <stop offset="5%" stopColor={ct.series.power} stopOpacity={0.15} />
+                                            <stop offset="5%" stopColor={ct.series.power} stopOpacity={isV2 ? 0.3 : 0.15} />
                                             <stop offset="95%" stopColor={ct.series.power} stopOpacity={0} />
                                         </linearGradient>
                                     </defs>
@@ -56,7 +61,7 @@ export const EstimatedFtpCard = ({
                                     <XAxis dataKey="name" tick={{ fontSize: 9, fontWeight: 700, fill: ct.anatomy.tick }} axisLine={false} tickLine={false} />
                                     <YAxis hide />
                                     <RechartsTooltip contentStyle={chartTooltipStyle(ct)} isAnimationActive={false} />
-                                    <Area type="monotone" dataKey="actual" stroke={ct.series.power} strokeWidth={3} fill="url(#ftpGradFinal)" dot={{ r: 4, fill: ct.series.power, strokeWidth: 2, stroke: ct.anatomy.dotRing }} connectNulls isAnimationActive={false} />
+                                    <Area type="monotone" dataKey="actual" stroke={ct.series.power} strokeWidth={3} fill="url(#ftpGradFinal)" dot={{ r: 4, fill: ct.series.power, strokeWidth: 2, stroke: ct.anatomy.dotRing }} connectNulls isAnimationActive={false} {...enter} />
                                 </AreaChart>
                             </ResponsiveContainer>
                         ) : (
