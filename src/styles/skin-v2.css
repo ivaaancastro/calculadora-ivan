@@ -1258,6 +1258,19 @@ html[data-ui="v2"] [data-skin="calendar"] [data-cal="kpi"] {
   html[data-ui="v2"] [data-skin="calendar"] [data-cal="kpi"]:nth-child(4) { animation-delay: 0.18s; }
 }
 
+/* ── Actividades D6 (feat/premium-actividades, PR 1): cabecera de resumen ───────────────
+ * Spec: docs/branches/feat/premium-actividades/spec.md §3.1. Bloque aislado; solo v2. */
+html[data-ui="v2"] [data-skin="history"] [data-history="summary"] {
+  background-color: rgb(var(--surface));
+  border-bottom-color: rgb(var(--line));
+}
+@keyframes hist-rise { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: no-preference) {
+  html[data-ui="v2"] [data-skin="history"] [data-history="summary"] {
+    animation: hist-rise 0.45s cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+}
+
 /* ── Dashboard D2, PR 2: KPI con variación, sparkline y «libro» de secundarios ─────────────── */
 html[data-ui="v2"] [data-skin="dashboard"] [data-kpi="card"] {
   font-feature-settings: "tnum" 1, "cv11" 1, "ss03" 1;

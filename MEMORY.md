@@ -20,6 +20,8 @@
 - **Fase Premium D4 Salud hecha (#120, #121, #123, `feat/premium-salud`):** `HealthHero`, banco de energía v2, biomarcadores por estado con `Sparkline` (`biomarkerStatus.js`), historial v2 (tendencia en área, banda óptima, detalle del día). Pendiente D7. Descartado por v1 congelada: píldoras por tokens e insights numerados. Detalle: `docs/branches/feat/premium-salud/tasks.md`.
 - **Fase D5 Calendario (`feat/premium-calendario`):** spec/plan aprobados; PR 1 (cabecera del mes) abierto; las capturas v2 del Calendario cambian a propósito (workflow `Update snapshots`). Tareas en `docs/branches/feat/premium-calendario/tasks.md`.
 
+
+- **Fase D6 Actividades (`feat/premium-actividades`):** spec/plan aprobados; PR 1 (resumen) abierto. Tareas en `docs/branches/feat/premium-actividades/tasks.md`.
 - **➡️ Siguiente paso:** cerrar PR #103 (Coach Insights) y #105 (verificación rápida); empezar la **Fase Premium A** (auditoría; spec D1–D10 aprobada) tras mergear #106 (`docs/branches/feat/premium-design/`). Roadmap vigente en `docs/branches/feat/webapp-redesign/plan.md`.
 - **Fase Premium (spec aprobada; alcance todo el diseño; v1 no se protege; dependencias/Tailwind con medida y OK):** se inserta antes de la Capa 6: A auditoría, B tokens/acabado v2, C gráficas Forma (lenguaje bklit-ui sin instalar el paquete), D pantallas (bloqueada hasta referencias; empieza por el detalle).
 - **Borrar actividad con confirmación** (`feat/detalle-borrar-actividad`, spec aprobada e implementada): papelera del detalle conectada + diálogo `ConfirmDeleteActivityModal` (también en la lista). Strava puede reimportar la más reciente al sincronizar (avisado en el diálogo; tombstones = spec futura).
