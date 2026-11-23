@@ -16,5 +16,8 @@ Spec y plan aprobados (2026-11-23). Nota: «Umbrales» queda en el grupo Hoy (co
 - [x] Estados vacíos (esqueleto: sin carga diferida en la pantalla)
 
 ## PR 3 — Gráficas y cierre
-- [ ] Capa Forma en gráficas de Rendimiento
-- [ ] Snapshots v2 (Docker), CHANGELOG, MEMORY
+- [x] Capa Forma en gráficas de Rendimiento (animación de entrada, barras sólidas, degradado eFTP; `Sparkline` no: sin serie)
+- [x] Snapshots v2 (Docker), CHANGELOG, MEMORY
+
+## Estado
+Spec implementada (PRs 1–3). Pendiente de D7 del usuario: revisión visual de las 6 capturas v2 de Rendimiento.
