@@ -11,9 +11,9 @@ Spec y plan aprobados (2026-11-23). Nota: «Umbrales» queda en el grupo Hoy (co
 - [x] `npm run verify` y PR a `develop`
 
 ## PR 2 — Tarjetas
-- [ ] Receta de tarjeta única v2, rótulos ≥ 11 px
-- [ ] Rejilla de escritorio (1200 px)
-- [ ] Estados vacíos y esqueleto
+- [x] Receta de tarjeta única v2, rótulos ≥ 11 px
+- [x] Ancho de escritorio 1200 px (rejilla 2 col descartada: Marcas y Predicciones quedan estrechas)
+- [x] Estados vacíos (esqueleto: sin carga diferida en la pantalla)
 
 ## PR 3 — Gráficas y cierre
 - [x] Capa Forma en gráficas de Rendimiento (animación de entrada, barras sólidas, degradado eFTP; `Sparkline` no: sin serie)
