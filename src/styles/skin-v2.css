@@ -536,6 +536,35 @@ html[data-ui="v2"] [data-skin="stats"] [data-stats="group-title"]::after {
   html[data-ui="v2"] [data-skin="stats"] [data-stats="kpi"]:nth-child(4) { animation-delay: 180ms; }
 }
 
+/* ── Rendimiento premium (Fase D3, PR 2): receta de tarjeta única ───────────────────────
+ * Spec §3.3/§3.6. Radios concéntricos (tarjeta 20 → ficha interior 12), título de tarjeta
+ * 13/600 sin mayúsculas, rótulos mínimos de 11 px, ancho de escritorio 1200 px. */
+html[data-ui="v2"] [data-skin="stats"][data-stats="page"] { max-width: 1200px; }
+html[data-ui="v2"] [data-skin="stats"] [data-stats="card"] section > div:first-child { border-radius: 20px; }
+html[data-ui="v2"] [data-skin="stats"] [data-stats="card"] section [class*="rounded-xl"],
+html[data-ui="v2"] [data-skin="stats"] [data-stats="card"] section [class*="rounded-2xl"] { border-radius: 12px; }
+html[data-ui="v2"] [data-skin="stats"] [data-stats="card"] h3 {
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: -0.005em;
+  text-transform: none;
+  color: rgb(var(--ink));
+}
+html[data-ui="v2"] [data-skin="stats"] [data-stats="card"] [class*="text-[8px]"],
+html[data-ui="v2"] [data-skin="stats"] [data-stats="card"] [class*="text-[9px]"],
+html[data-ui="v2"] [data-skin="stats"] [data-stats="card"] [class*="text-[10px]"] {
+  font-size: 11px;
+}
+html[data-ui="v2"] [data-skin="stats"] [data-stats="card"] [class*="tracking-tighter"] { letter-spacing: 0; }
+html[data-ui="v2"] [data-skin="stats"] [data-stats="card"] :is(p, span)[class*="text-xl"],
+html[data-ui="v2"] [data-skin="stats"] [data-stats="card"] :is(p, h4)[class*="text-2xl"] {
+  font-feature-settings: "tnum" 1, "cv11" 1;
+}
+html[data-ui="v2"] [data-skin="stats"] [data-stats="card"][data-empty="true"] section {
+  border: 1px dashed rgb(var(--line));
+  border-radius: 20px;
+}
+
 /* ── Salud «Panel» (Capa 5, PR 6b): `data-skin="health"` ──────────────────────────────
  *
  * Primer vistazo móvil (390 px), sin scroll: título y selector Hoy/Historial, los tres
