@@ -16,6 +16,8 @@ import {
 } from '../../utils/fitnessStatsEngine';
 import { SPORT_LOAD_CONFIG, getSportCategory } from '../../utils/tssEngine';
 import { EvolutionChart } from './EvolutionChart';
+import { FormHero } from './FormHero';
+import { buildFormSummary } from '../../utils/formSummary';
 import { supabase } from '../../supabase';
 import { useTheme } from '../../hooks/useTheme';
 import { useUiMode } from '../../hooks/useUiMode';
@@ -138,6 +140,15 @@ export const AdvancedAnalytics = React.memo(({ activities, settings,  timeRange,
         <ChartSkinProvider skin={isV2 ? 'v2' : 'v1'}>
         <div data-skin="dashboard" data-dash="root" className="space-y-6 sm:space-y-8 pb-8">
             {/* HERO: ESTADO DE FORMA ESTILO APPLE FITNESS */}
+            {isV2 ? (
+                <FormHero
+                    summary={buildFormSummary(model)}
+                    ctl={model.ctl}
+                    loadTrend={model.loadTrend}
+                    timeRange={timeRange}
+                    setTimeRange={setTimeRange}
+                />
+            ) : (
             <Card data-dash="hero" className="p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                 <div className="flex items-center gap-3">
                     <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-blue-500/20 to-indigo-500/20 text-blue-600 dark:text-blue-400 flex items-center justify-center shrink-0 shadow-2xs">
@@ -181,6 +192,7 @@ export const AdvancedAnalytics = React.memo(({ activities, settings,  timeRange,
                     </div>
                 </div>
             </Card>
+            )}
 
             {/* SECCIÓN 1: MÉTRICAS CLAVE (APPLE HEALTH CARDS) */}
             <div data-dash="primary">

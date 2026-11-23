@@ -1,6 +1,6 @@
 # Spec — `feat/premium-dashboard` (Fase D2: Dashboard premium)
 
-Estado: **pendiente de aprobación del usuario**. Todo detrás de `html[data-ui="v2"]`; v1 no cambia. Cubre la pestaña principal (`Dashboard.jsx` shell y `dashboard/AdvancedAnalytics.jsx`, `EvolutionChart.jsx`). Resuelve **JER-1**, **DIS-1**, GRA-6 (sparkline + delta en KPI) y MOV-5 (count-up en KPI) de `../premium-design/auditoria.md`. Modelo: `../premium-detalle/spec.md`.
+Estado: **aprobada por el usuario (2026-11-23)** con un cambio en D-1: la cifra protagonista es **CTL** (no TSB). D-2 y D-3 aprobadas tal cual. Todo detrás de `html[data-ui="v2"]`; v1 no cambia. Cubre la pestaña principal (`Dashboard.jsx` shell y `dashboard/AdvancedAnalytics.jsx`, `EvolutionChart.jsx`). Resuelve **JER-1**, **DIS-1**, GRA-6 (sparkline + delta en KPI) y MOV-5 (count-up en KPI) de `../premium-design/auditoria.md`. Modelo: `../premium-detalle/spec.md`.
 
 ## 1. Referencias y principios
 - **Bluejack** (memoria `reference-design-inspiration`): cabecera con **resumen narrativo** en lenguaje natural + fila de KPI con etiqueta pequeña en mayúsculas, cifra muy grande y una línea de contexto; mucho aire, casi sin bordes.
@@ -15,8 +15,8 @@ Estado: **pendiente de aprobación del usuario**. Todo detrás de `html[data-ui=
 ## 3. Propuesta
 
 ### 3.1 Jerarquía: 1 héroe + 2 secundarios + resto plegable
-1. **Héroe «Estado de forma»** (nuevo `FormHero`, solo v2): eyebrow «Estado de forma · {rango}»; **frase narrativa** de 1–2 líneas (p. ej. «Estás en zona productiva: tu fitness sube un 4,2 % en 28 días y la fatiga está controlada. Buen momento para sumar carga.»); a la derecha la **cifra protagonista** TSB (44–56 px, 600, tabular, color del estado) con el estado como chip. Selector de rango (7D/30D/3M/Todo) en el héroe, ya en móvil (hoy solo escritorio). Filete degradado superior del color del estado.
-2. **KPI primarios** (Fitness CTL, Fatiga ATL, Ratio de carga ACWR; TSB vive en el héroe): tarjeta de borde fino con etiqueta 11/600 mayúsculas, **cifra 32–36 px**, **delta** con icono y verde/rojo según el sentido útil (CTL ↑ = verde; ATL ↑ y ACWR fuera de 0,8–1,3 = ámbar/rojo), **Sparkline** de los últimos 28 días con el color de la métrica y **count-up** de la cifra.
+1. **Héroe «Estado de forma»** (nuevo `FormHero`, solo v2): eyebrow «Estado de forma · {rango}»; **frase narrativa** de 1–2 líneas (p. ej. «Estás en zona productiva: tu fitness sube un 4,2 % en 28 días y la fatiga está controlada. Buen momento para sumar carga.»); a la derecha la **cifra protagonista** CTL (Fitness; 44–56 px, 600, tabular) con su variación a 28 días y el estado de forma (derivado del TSB) como chip de color. Selector de rango (7D/30D/3M/Todo) en el héroe, ya en móvil (hoy solo escritorio). Filete degradado superior del color del estado.
+2. **KPI primarios** (Fatiga ATL, Forma TSB, Ratio de carga ACWR; CTL vive en el héroe): tarjeta de borde fino con etiqueta 11/600 mayúsculas, **cifra 32–36 px**, **delta** con icono y verde/rojo según el sentido útil (CTL ↑ = verde; ATL ↑ y ACWR fuera de 0,8–1,3 = ámbar/rojo), **Sparkline** de los últimos 28 días con el color de la métrica y **count-up** de la cifra.
 3. **Secundarios** (Rampa, Monotonía, Volumen 30D, VO2 Max): «libro» sin caja (fila etiqueta · valor con filete), plegado en móvil (ya existe el toggle) y fijo en escritorio.
 
 ### 3.2 Distribución
@@ -37,16 +37,16 @@ Se mantiene `EvolutionChart` v2 de Fase C (banda óptima, proyección, zoom). Ca
 
 ## 4. Criterios de aceptación
 - v1 sin cambios (todo lo nuevo solo se monta con `isV2`; los `data-dash` existentes se conservan para e2e).
-- Un solo elemento domina la pantalla (la cifra TSB + frase); KPI con delta y sparkline; secundarios sin caja.
+- Un solo elemento domina la pantalla (la cifra CTL + frase); KPI con delta y sparkline; secundarios sin caja.
 - Escritorio 1280 y 1440 px: sin vacío lateral > 5 % del ancho de contenido; móvil 390 px sin scroll horizontal.
 - Objetivos táctiles ≥ 44 px, `lint:ui`, `lint:colors` (no sube; colores por tokens/`useChartTheme`), tests verdes (`buildFormSummary` con casos por estado).
 - Snapshots v2 del Dashboard (móvil y escritorio, claro/oscuro) regenerados en Docker; fecha/datos deterministas.
 - Contraste AA en cifras y etiquetas, claro y oscuro.
 
 ## 5. Decisiones abiertas (confirmar al aprobar)
-- **D-1** TSB como cifra protagonista del héroe (propuesta) frente a CTL. TSB es «cómo estás hoy»; CTL es el fitness acumulado.
-- **D-2** Frase narrativa por reglas (propuesta) vs IA Gemini. Reglas: gratis, determinista, testeable.
-- **D-3** El selector de rango pasa al héroe también en móvil (hoy oculto en móvil).
+- **D-1 (resuelta)** Protagonista = **CTL**; el TSB pasa a KPI primario y a chip de estado.
+- **D-2 (aprobada)** Frase narrativa por reglas (propuesta) vs IA Gemini. Reglas: gratis, determinista, testeable.
+- **D-3 (aprobada)** El selector de rango pasa al héroe también en móvil (hoy oculto en móvil).
 
 ## 6. Fuera de alcance
 Rendimiento (`FitnessStatsPage`), Salud, Calendario, Actividades y Perfil (D3–D7); cambios de motores (`tssEngine`, `fitnessStatsEngine`); barra de navegación; datos nuevos (VO2/HRV con serie → Sparkline pendiente).

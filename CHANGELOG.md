@@ -7,6 +7,9 @@ y este proyecto adhiere a [Semantic Versioning](https://semver.org/lang/es/).
 
 ## [Unreleased]
 
+### Added — Fase Premium D2, Dashboard (`feat/premium-dashboard`, PR 1)
+- `feat(dashboard):` `FormHero` (solo v2): resumen narrativo del estado de forma (`buildFormSummary`, reglas deterministas), CTL como cifra protagonista con variación a 28 días, chip de estado y selector de rango también en móvil. Spec y plan en `docs/branches/feat/premium-dashboard/`.
+
 ### Added — Fase Premium D1, detalle de actividad (`feat/premium-detalle`, PR 1)
 - `feat(detalle):` `DetailHero` (solo v2): título grande, tres cifras protagonistas por deporte (`pickHeroMetrics`), «ledger» de métricas sin cajas, filete del color del deporte y entrada en cascada; la cabecera pasa a una fila de controles. Spec y plan en `docs/branches/feat/premium-detalle/`.
 
