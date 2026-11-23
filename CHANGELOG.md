@@ -9,6 +9,7 @@ y este proyecto adhiere a [Semantic Versioning](https://semver.org/lang/es/).
 
 ### Added — Fase Premium D1, detalle de actividad (`feat/premium-detalle`, PR 1)
 - `feat(detalle):` `DetailHero` (solo v2): título grande, tres cifras protagonistas por deporte (`pickHeroMetrics`), «ledger» de métricas sin cajas, filete del color del deporte y entrada en cascada; la cabecera pasa a una fila de controles. Spec y plan en `docs/branches/feat/premium-detalle/`.
+- `feat(detalle):` PR 2: HUD de telemetría de altura estable, esqueleto de carga v2 en lugar del spinner y nota de series ausentes (potencia/FC) en las gráficas.
 
 ### Added — Fase Premium C, capa de gráficas Forma (`feat/premium-charts`, PRs #111–#115)
 - `feat(charts):` lenguaje base v2: rejilla continua desvanecida, tooltip de cristal común (`[data-chart-tooltip]`), `useChartMotion` (entrada 700 ms; apagada con `prefers-reduced-motion` y en navegadores automatizados), `chartFigureProps`/`summarizeSeries` (alternativa textual), `ChartSkeleton`; aplicado a `EvolutionChart`.
