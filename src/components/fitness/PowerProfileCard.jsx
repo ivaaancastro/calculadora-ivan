@@ -6,6 +6,7 @@ import {
 import { Settings } from 'lucide-react';
 import { formatInterval } from '../../hooks/useFitnessAnalytics';
 import { useChartTheme } from '../charts/useChartTheme';
+import { useChartMotion } from '../charts/useChartMotion';
 import { Card, chartTooltipStyle, InfoTooltip, Segmented } from '../ui';
 
 export const PowerProfileCard = ({
@@ -22,6 +23,8 @@ export const PowerProfileCard = ({
     powerProfile
 }) => {
     const ct = useChartTheme();
+    const motion = useChartMotion();
+    const enter = motion.active ? motion.props : {};
     return (
         <section className="mb-8">
             <Card variant="panel" className="p-6 sm:p-8">
@@ -100,9 +103,9 @@ export const PowerProfileCard = ({
                                     <YAxis tick={{ fontSize: 9, fontWeight: 700, fill: ct.anatomy.tick }} axisLine={false} tickLine={false} />
                                     <RechartsTooltip contentStyle={chartTooltipStyle(ct)} formatter={(v, name) => [`${v} ${powerUnit === 'w' ? 'W' : 'W/kg'}`, name]} isAnimationActive={false} />
                                     {['World Class', 'Cat 1 / Elite', 'Cat 2', 'Cat 3', 'Cat 4', 'Cat 5', 'Untrained'].map((cat, idx) => (
-                                        <Line key={cat} type="monotone" dataKey={cat} stroke={idx === 0 ? ct.series.profileTop : ct.series.profileOther} strokeWidth={1} dot={false} opacity={0.08} isAnimationActive={false} />
+                                        <Line key={cat} type="monotone" dataKey={cat} stroke={idx === 0 ? ct.series.profileTop : ct.series.profileOther} strokeWidth={1} dot={false} opacity={0.08} isAnimationActive={false} {...enter} />
                                     ))}
-                                    <Line type="monotone" dataKey="Usuario" stroke={ct.series.profileUser} strokeWidth={3} dot={{ r: 4, fill: ct.series.profileUser, strokeWidth: 2, stroke: ct.anatomy.dotRing }} isAnimationActive={false} />
+                                    <Line type="monotone" dataKey="Usuario" stroke={ct.series.profileUser} strokeWidth={3} dot={{ r: 4, fill: ct.series.profileUser, strokeWidth: 2, stroke: ct.anatomy.dotRing }} isAnimationActive={false} {...enter} />
                                 </LineChart>
                             </ResponsiveContainer>
                         </div>
