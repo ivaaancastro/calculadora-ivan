@@ -10,6 +10,8 @@ import { WeeklyVolumeAndFocusCard } from '../fitness/WeeklyVolumeAndFocusCard';
 import { PowerProfileCard } from '../fitness/PowerProfileCard';
 import { EstimatedFtpCard } from '../fitness/EstimatedFtpCard';
 import { MmpAndEfCard } from '../fitness/MmpAndEfCard';
+import { Activity, HeartPulse, Trophy } from 'lucide-react';
+import { EmptyState } from '../ui';
 import { StatsHero } from '../fitness/StatsHero';
 import { useUiMode } from '../../hooks/useUiMode';
 
@@ -183,13 +185,28 @@ export const FitnessStatsPage = ({
         ),
     };
 
+    const CARD_CATEGORY = { thresholds: 'physiology', status: 'physiology', hrv: 'physiology', balance: 'physiology', race: 'vo2', vo2: 'vo2', volume: 'volume', 'power-profile': 'power', ftp: 'power', mmp: 'power' };
+
+    // v2: una tarjeta sin datos explica qué falta en lugar de desaparecer (EST-4).
+    const emptyCard = (id, Icon, title, description) => (
+        <div data-stats="card" data-card={id} data-empty="true" className={cardVisibility(CARD_CATEGORY[id])}>
+            <section className="mb-8">
+                <EmptyState icon={Icon} title={title} description={description} />
+            </section>
+        </div>
+    );
+    if (isV2) {
+        if (!stats.trainingStatus) cardNodes.status = emptyCard('status', Activity, 'Sin estado de entreno', 'Registra actividades con carga (TSS) de las últimas semanas para calcularlo.');
+        if (!stats.hrv) cardNodes.hrv = emptyCard('hrv', HeartPulse, 'Sin datos de VFC', 'Conecta un dispositivo que registre la variabilidad cardiaca para ver tu recuperación.');
+        if (!stats.racePredictions) cardNodes.race = emptyCard('race', Trophy, 'Sin pronóstico de carrera', 'Hace falta un VO2 máx. estimado: corre al menos una vez con pulsómetro.');
+    }
+
     const GROUPS = [
         { id: 'today', label: 'Hoy', cards: ['status', 'hrv', 'balance', 'thresholds'] },
         { id: 'power', label: 'Potencia', cards: ['power-profile', 'ftp', 'mmp'] },
         { id: 'marks', label: 'Marcas', cards: ['race', 'vo2'] },
         { id: 'volume', label: 'Volumen', cards: ['volume'] },
     ];
-    const CARD_CATEGORY = { thresholds: 'physiology', status: 'physiology', hrv: 'physiology', balance: 'physiology', race: 'vo2', vo2: 'vo2', volume: 'volume', 'power-profile': 'power', ftp: 'power', mmp: 'power' };
     const isShown = (id) => mobileCategory === 'all' || mobileCategory === CARD_CATEGORY[id];
 
     return (

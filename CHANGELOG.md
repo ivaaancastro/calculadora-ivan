@@ -10,6 +10,9 @@ y este proyecto adhiere a [Semantic Versioning](https://semver.org/lang/es/).
 ### Added — Fase Premium D2, Dashboard (`feat/premium-dashboard-kpis`, PR 2)
 - `feat(dashboard):` KPI primarios v2 (`KpiCard`: ATL, TSB y ratio de carga) con cifra animada, variación a 7 días en verde/ámbar/rojo, sparkline de 28 días y chip de zona para el ACWR; secundarios en «libro» sin cajas (`kpiTrend`).
 
+### Added — Fase Premium D3, Rendimiento (`feat/premium-rendimiento`, PR 2)
+- `feat(rendimiento):` receta de tarjeta única en v2 (radios concéntricos, título 13/600, rótulos ≥ 11 px, ancho 1200 px) y estados vacíos que explican qué falta (estado de entreno, VFC, pronóstico).
+
 ### Added — Fase Premium D4, Salud (`feat/premium-salud-historial`, PR 3)
 - `feat(salud):` historial v2: tendencia con área en degradado y banda de recuperación óptima, detalle del día con cifra protagonista, tira de días con filete.
 
