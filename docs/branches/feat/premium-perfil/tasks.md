@@ -17,4 +17,4 @@ Spec y plan aprobados por el usuario (2026-11-23), P-1 y P-2 según lo recomenda
 - [x] Cuentas: estado con punto+texto, campos apilados en móvil
 - [x] Seguridad: zona de peligro diferenciada, botones de contorno
 - [x] MEMORY/CHANGELOG
-- [ ] Capturas `perfil-*` de `visual-v2` regeneradas por el workflow `Update snapshots` en la rama del PR 3; revisar una a una (D7)
+- [x] Capturas `perfil-*` de `visual-v2` (6) regeneradas en Docker bajo mutex en la rama del PR 3; revisada la móvil clara, resto pendiente de D7 del usuario
