@@ -6,6 +6,7 @@ import {
 import { MousePointer2, RefreshCw } from 'lucide-react';
 import { formatInterval, formatPace } from '../../hooks/useFitnessAnalytics';
 import { useChartTheme } from '../charts/useChartTheme';
+import { useChartMotion } from '../charts/useChartMotion';
 import { Card, ChartTooltip, InfoTooltip, Segmented } from '../ui';
 
 export const MmpAndEfCard = ({
@@ -31,6 +32,8 @@ export const MmpAndEfCard = ({
     deepSyncProgress
 }) => {
     const ct = useChartTheme();
+    const motion = useChartMotion();
+    const enter = motion.active ? motion.props : {};
     const renderCustomCurveTooltip = ({ active, payload, label }) => {
         if (active && payload && payload.length) {
             const data = payload[0].payload;
@@ -178,7 +181,7 @@ export const MmpAndEfCard = ({
                                     <XAxis dataKey="dateLabel" hide />
                                     <YAxis hide domain={['dataMin - 0.1', 'dataMax + 0.1']} />
                                     <RechartsTooltip content={renderCustomEfTooltip} isAnimationActive={false} />
-                                    <Area type="monotone" dataKey="ef" stroke={ct.series.ef} strokeWidth={3} fill="url(#efGrad)" activeDot={{ r: 5, fill: ct.series.ef, strokeWidth: 2, stroke: ct.anatomy.dotRing }} isAnimationActive={false} />
+                                    <Area type="monotone" dataKey="ef" stroke={ct.series.ef} strokeWidth={3} fill="url(#efGrad)" activeDot={{ r: 5, fill: ct.series.ef, strokeWidth: 2, stroke: ct.anatomy.dotRing }} isAnimationActive={false} {...enter} />
                                     <Scatter
                                         dataKey="ef"
                                         fill="transparent"
@@ -206,7 +209,7 @@ export const MmpAndEfCard = ({
                                     <XAxis dataKey="name" tick={{ fontSize: 9, fontWeight: 700, fill: ct.anatomy.tick }} axisLine={false} tickLine={false} />
                                     <YAxis hide reversed={isPace} domain={['auto', 'auto']} />
                                     <RechartsTooltip content={renderCustomCurveTooltip} isAnimationActive={false} />
-                                    <Area type="stepAfter" dataKey="value" stroke={curveColor} strokeWidth={3} fill={curveColor} fillOpacity={0.05} dot={false} isAnimationActive={false} />
+                                    <Area type="stepAfter" dataKey="value" stroke={curveColor} strokeWidth={3} fill={curveColor} fillOpacity={0.05} dot={false} isAnimationActive={false} {...enter} />
                                     <Scatter
                                         dataKey="value"
                                         fill="transparent"

@@ -7,6 +7,9 @@ y este proyecto adhiere a [Semantic Versioning](https://semver.org/lang/es/).
 
 ## [Unreleased]
 
+### Added — Fase Premium D3, Rendimiento (`feat/premium-rendimiento`, PR 3)
+- `feat(rendimiento):` capa de gráficas Forma en Rendimiento (v2): animación de entrada (`useChartMotion`), barras de TSS sólidas y degradado más marcado en eFTP.
+
 ### Added — Fase Premium D4, Salud (`feat/premium-salud-historial`, PR 3)
 - `feat(salud):` historial v2: tendencia con área en degradado y banda de recuperación óptima, detalle del día con cifra protagonista, tira de días con filete.
 
