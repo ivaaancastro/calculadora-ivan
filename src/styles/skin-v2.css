@@ -817,6 +817,27 @@ html[data-ui="v2"] [data-skin="detail"] [data-detail="peaks"] > button {
   letter-spacing: 0.01em;
   font-variant-numeric: tabular-nums;
 }
+/* Impacto del entrenamiento: medidores 0–5 con marcas cada punto y tarjeta única (spec §3.7). */
+html[data-ui="v2"] [data-skin="detail"] [data-detail="impact"],
+html[data-ui="v2"] [data-skin="detail"] [data-detail="insights"] {
+  background-color: rgb(var(--surface));
+  border: 1px solid rgb(var(--line));
+  border-radius: var(--skin-radius-3xl);
+  box-shadow: var(--skin-shadow-card);
+}
+html[data-ui="v2"] [data-skin="detail"] [data-detail="meter"] {
+  height: 8px;
+  background-image: repeating-linear-gradient(90deg, transparent 0, transparent calc(20% - 1px), rgb(var(--surface)) calc(20% - 1px), rgb(var(--surface)) 20%);
+}
+html[data-ui="v2"] [data-skin="detail"] [data-detail="insights"] p { font-size: 12px; line-height: 1.45; }
+/* Laps: cabecera pegada, filas con numerales tabulares y mejor vuelta con filete. */
+html[data-ui="v2"] [data-skin="detail"] [data-detail="laps"] {
+  border-color: rgb(var(--line));
+  border-radius: var(--skin-radius-3xl);
+  box-shadow: var(--skin-shadow-card);
+}
+html[data-ui="v2"] [data-skin="detail"] [data-detail="laps"] thead th { position: sticky; top: 0; }
+html[data-ui="v2"] [data-skin="detail"] [data-detail="lap-fast"] { box-shadow: inset 3px 0 0 var(--hero-accent, rgb(var(--line-strong))); }
 @keyframes detail-rise { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
 @media (prefers-reduced-motion: no-preference) {
   html[data-ui="v2"] [data-skin="detail"] [data-detail="eyebrow"],

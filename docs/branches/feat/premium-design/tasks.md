@@ -29,5 +29,5 @@ Spec aprobada (D1–D10 + ampliación, 2026-11-19). **No empezar la Fase A hasta
 
 ## Fase D — Pantallas (alto nivel; **bloqueada** hasta referencias)
 - [ ] D0. El usuario aporta webs de referencia.
-- [ ] D1. Detalle de actividad: propuesta → aprobación → implementación → D7.
+- [x] D1. Detalle de actividad (PRs #117, #122 y PR 3 de `feat/premium-detalle-lateral`); pendiente D7 del usuario. Diferidos: cursor compartido con el mapa y `ErrorState` de telemetría.
 - [ ] D2. Resto de pantallas y landing, cada una con aprobación y D7.
