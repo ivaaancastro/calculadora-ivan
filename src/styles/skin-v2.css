@@ -1177,4 +1177,28 @@ html[data-ui="v2"] [data-skin="health"] [data-health="day"] > span:nth-child(2) 
 html[data-ui="v2"] [data-skin="health"] [data-health="day"] > div > span {
   width: 6px;
   height: 6px;
+/* ── Dashboard premium (Fase D2): héroe narrativo con CTL protagonista ─────────────────────
+ * Spec: docs/branches/feat/premium-dashboard/spec.md §3.1/§3.4. Bloque aislado «Dashboard D2». */
+html[data-ui="v2"] [data-skin="dashboard"] [data-hero="form"] {
+  padding: 22px 0 4px;
+  font-feature-settings: "tnum" 1, "cv11" 1, "ss03" 1;
+}
+html[data-ui="v2"] [data-skin="dashboard"] [data-hero="form"]::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 2px;
+  border-radius: 2px;
+  background: linear-gradient(90deg, var(--hero-accent, rgb(var(--line))) 0%, transparent 72%);
+}
+@media (max-width: 767px) {
+  html[data-ui="v2"] [data-skin="dashboard"] [data-dash="hero"][data-hero="form"] { padding: 18px 12px 0; gap: 12px; }
+}
+@keyframes dash-rise { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: no-preference) {
+  html[data-ui="v2"] [data-skin="dashboard"] [data-hero="sentence"],
+  html[data-ui="v2"] [data-skin="dashboard"] [data-hero="figure"] {
+    animation: dash-rise 0.45s cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+  html[data-ui="v2"] [data-skin="dashboard"] [data-hero="figure"] { animation-delay: 0.12s; }
 }
