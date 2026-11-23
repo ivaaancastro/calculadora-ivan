@@ -87,3 +87,23 @@ describe('pestañas, zonas y bloques', () => {
         expect(applyChartBlocks(d, 'bike')).toBe(d);
     });
 });
+
+import { pickHeroMetrics as _pick } from '../../utils/activityMetricsBySport';
+describe('pickHeroMetrics', () => {
+    const mk = (...ids) => ids.map((id) => ({ id }));
+    it('elige distancia, tiempo y velocidad en bici', () => {
+        const r = _pick('bike', mk('kcal', 'speed', 'duration', 'distance', 'hrAvg'));
+        expect(r.hero.map((m) => m.id)).toEqual(['distance', 'duration', 'speed']);
+        expect(r.rest.map((m) => m.id)).toEqual(['kcal', 'hrAvg']);
+    });
+    it('completa con las siguientes si falta una preferida', () => {
+        const r = _pick('strength', mk('duration', 'kcal'));
+        expect(r.hero.map((m) => m.id)).toEqual(['duration', 'kcal']);
+        const r2 = _pick('run', mk('duration', 'hrAvg', 'kcal', 'cadence'));
+        expect(r2.hero.map((m) => m.id)).toEqual(['duration', 'hrAvg', 'kcal']);
+        expect(r2.rest.map((m) => m.id)).toEqual(['cadence']);
+    });
+    it('tolera lista vacía', () => {
+        expect(_pick('generic', undefined)).toEqual({ hero: [], rest: [] });
+    });
+});

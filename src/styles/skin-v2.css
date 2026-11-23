@@ -782,6 +782,44 @@ html[data-ui="v2"] [data-skin="detail"] [data-detail="sidebar"] {
   }
 }
 
+/* ── Detalle premium (Fase D1): hero con cifras protagonistas ─────────────────────────────
+ * Spec: docs/branches/feat/premium-detalle/spec.md §3.1/§3.4/§3.5. Sin cajas: jerarquía por
+ * tamaño y peso; filete degradado del color del deporte; cifras con numerales tabulares. */
+html[data-ui="v2"] [data-skin="detail"] [data-detail="hero"] {
+  position: relative;
+  padding-top: 20px;
+  font-feature-settings: "tnum" 1, "cv11" 1, "ss03" 1;
+}
+html[data-ui="v2"] [data-skin="detail"] [data-detail="hero"]::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 2px;
+  border-radius: 2px;
+  background: linear-gradient(90deg, var(--hero-accent, rgb(var(--line))) 0%, transparent 72%);
+}
+html[data-ui="v2"] [data-skin="detail"] [data-detail="figures"] > * + * {
+  border-left: 1px solid rgb(var(--line));
+}
+html[data-ui="v2"] [data-skin="detail"] [data-detail="hero"] [data-detail="stats"] {
+  gap: 0 24px;
+}
+html[data-ui="v2"] [data-skin="detail"] [data-detail="ledger-row"]:hover {
+  border-color: rgb(var(--line-strong));
+}
+@keyframes detail-rise { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: no-preference) {
+  html[data-ui="v2"] [data-skin="detail"] [data-detail="eyebrow"],
+  html[data-ui="v2"] [data-skin="detail"] [data-detail="title"],
+  html[data-ui="v2"] [data-skin="detail"] [data-detail="figure"] {
+    animation: detail-rise 0.45s cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+  html[data-ui="v2"] [data-skin="detail"] [data-detail="title"] { animation-delay: 0.05s; }
+  html[data-ui="v2"] [data-skin="detail"] [data-detail="figure"]:nth-child(1) { animation-delay: 0.12s; }
+  html[data-ui="v2"] [data-skin="detail"] [data-detail="figure"]:nth-child(2) { animation-delay: 0.18s; }
+  html[data-ui="v2"] [data-skin="detail"] [data-detail="figure"]:nth-child(3) { animation-delay: 0.24s; }
+}
+
 /* ── Objetivos táctiles ≥ 44 px en móvil (fix/touch-targets-v2; RF4/RF8) ───────────────────
  *
  * Solo v2 y solo < 640 px: v1 y escritorio no cambian. Se amplía el tamaño real (no un

@@ -7,6 +7,8 @@ import { computePeaks, getActivePeakType, getSpeedOrPace, getSportTheme } from '
 import { useConfirmDeleteActivity } from '../../hooks/useConfirmDeleteActivity';
 import { ConfirmDeleteActivityModal } from '../activity/ConfirmDeleteActivityModal';
 import { DetailHeader } from '../activity/detail/DetailHeader';
+import { DetailHero } from '../activity/detail/DetailHero';
+import { useUiMode } from '../../hooks/useUiMode';
 import { DetailMobileHero } from '../activity/detail/DetailMobileHero';
 import { TelemetryPanel } from '../activity/detail/TelemetryPanel';
 import { ActivityCharts } from '../activity/detail/ActivityCharts';
@@ -18,6 +20,7 @@ import { getBlocksForSport, getTabsForSport, getZoneOptions, applyChartBlocks, g
 
 export const ActivityDetailPage = ({ activity, settings, fetchStreams, onBack, onDelete }) => {
     const ct = useChartTheme();
+    const { isV2 } = useUiMode();
     const del = useConfirmDeleteActivity(onDelete, onBack);
     const { streams, loadingStreams } = useActivityStreams(activity, fetchStreams);
     const [activePayload, setActivePayload] = useState(null);
@@ -98,6 +101,7 @@ export const ActivityDetailPage = ({ activity, settings, fetchStreams, onBack, o
                         {/* Charts Panel */}
                         <div className="flex-1 lg:overflow-y-auto custom-scrollbar p-2.5 sm:p-5 bg-surface-6 min-w-0">
                             <div className="max-w-5xl mx-auto space-y-3">
+                                {isV2 && <DetailHero activity={activity} dateStr={dateStr} metrics={metrics} themeColor={themeColor} />}
                                 <DetailMobileHero
                                     showMap={showMap}
                                     activity={activity}
