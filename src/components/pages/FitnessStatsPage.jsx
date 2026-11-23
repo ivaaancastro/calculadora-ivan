@@ -10,6 +10,8 @@ import { WeeklyVolumeAndFocusCard } from '../fitness/WeeklyVolumeAndFocusCard';
 import { PowerProfileCard } from '../fitness/PowerProfileCard';
 import { EstimatedFtpCard } from '../fitness/EstimatedFtpCard';
 import { MmpAndEfCard } from '../fitness/MmpAndEfCard';
+import { StatsHero } from '../fitness/StatsHero';
+import { useUiMode } from '../../hooks/useUiMode';
 
 const CATEGORIES = [
     { id: 'physiology', label: 'Fisiología' },
@@ -30,6 +32,7 @@ export const FitnessStatsPage = ({
     isDeepSyncing,
     deepSyncProgress
 }) => {
+    const { isV2 } = useUiMode();
     const [mobileCategory, setMobileCategory] = useState('physiology');
 
     const {
@@ -73,6 +76,122 @@ export const FitnessStatsPage = ({
             : 'hidden md:block';
     };
 
+    const cardNodes = {
+        'thresholds': (
+    <div data-stats="card" data-card="thresholds" className={cardVisibility('physiology')}>
+        <ThresholdsCard settings={settings} />
+    </div>
+        ),
+        'status': (
+    <div data-stats="card" data-card="status" className={cardVisibility('physiology')}>
+        <TrainingStatusCard trainingStatus={stats.trainingStatus} />
+    </div>
+        ),
+        'hrv': (
+    <div data-stats="card" data-card="hrv" className={cardVisibility('physiology')}>
+        <HrvCard hrv={stats.hrv} />
+    </div>
+        ),
+        'race': (
+    <div data-stats="card" data-card="race" className={cardVisibility('vo2')}>
+        <RacePredictionsCard racePredictions={stats.racePredictions} />
+    </div>
+        ),
+        'vo2': (
+    <div data-stats="card" data-card="vo2" className={cardVisibility('vo2')}>
+        <Vo2MaxCard
+            vo2Sport={vo2Sport}
+            setVo2Sport={setVo2Sport}
+            currentVo2={currentVo2}
+            vo2Level={vo2Level}
+            vo2Stats={stats.vo2}
+        />
+    </div>
+        ),
+        'balance': (
+    <div data-stats="card" data-card="balance" className={cardVisibility('physiology')}>
+        <TrainingBalanceCard
+            balance={stats.balance}
+            balanceDays={balanceDays}
+            setBalanceDays={setBalanceDays}
+        />
+    </div>
+        ),
+        'volume': (
+    <div data-stats="card" data-card="volume" className={cardVisibility('volume')}>
+        <WeeklyVolumeAndFocusCard
+            weeklyChart={analytics.weeklyChart}
+            focusChart={analytics.focusChart}
+            zonesChart={analytics.zonesChart}
+            intensityTimeframe={intensityTimeframe}
+            setIntensityTimeframe={setIntensityTimeframe}
+        />
+    </div>
+        ),
+        'power-profile': (
+    <div data-stats="card" data-card="power-profile" className={cardVisibility('power')}>
+        <PowerProfileCard
+            showPowerConfig={showPowerConfig}
+            setShowPowerConfig={setShowPowerConfig}
+            powerUnit={powerUnit}
+            setPowerUnit={setPowerUnit}
+            powerProfileTimeframe={powerProfileTimeframe}
+            setPowerProfileTimeframe={setPowerProfileTimeframe}
+            selectedDurs={selectedDurs}
+            toggleDur={toggleDur}
+            ppChartData={ppChartData}
+            profile={stats.profile}
+            powerProfile={stats.powerProfile}
+        />
+    </div>
+        ),
+        'ftp': (
+    <div data-stats="card" data-card="ftp" className={cardVisibility('power')}>
+        <EstimatedFtpCard
+            ftp={stats.ftp}
+            ftpDiff={ftpDiff}
+            configFTP={configFTP}
+            curveChartData={curveChartData}
+        />
+    </div>
+        ),
+        'mmp': (
+    <div data-stats="card" data-card="mmp" className={cardVisibility('power')}>
+        <MmpAndEfCard
+            activities={activities}
+            onSelectActivity={onSelectActivity}
+            curveSport={curveSport}
+            setCurveSport={setCurveSport}
+            mmpTimeframe={mmpTimeframe}
+            setMmpTimeframe={setMmpTimeframe}
+            curveType={curveType}
+            setCurveType={setCurveType}
+            currentCurve={currentCurve}
+            curveColor={curveColor}
+            curveUnit={curveUnit}
+            isPace={isPace}
+            analytics={analytics}
+            peaksViewMode={peaksViewMode}
+            setPeaksViewMode={setPeaksViewMode}
+            telemetryStats={telemetryStats}
+            isLoadingHistoricalStreams={isLoadingHistoricalStreams}
+            handleDeepSync={handleDeepSync}
+            isDeepSyncing={isDeepSyncing}
+            deepSyncProgress={deepSyncProgress}
+        />
+    </div>
+        ),
+    };
+
+    const GROUPS = [
+        { id: 'today', label: 'Hoy', cards: ['status', 'hrv', 'balance', 'thresholds'] },
+        { id: 'power', label: 'Potencia', cards: ['power-profile', 'ftp', 'mmp'] },
+        { id: 'marks', label: 'Marcas', cards: ['race', 'vo2'] },
+        { id: 'volume', label: 'Volumen', cards: ['volume'] },
+    ];
+    const CARD_CATEGORY = { thresholds: 'physiology', status: 'physiology', hrv: 'physiology', balance: 'physiology', race: 'vo2', vo2: 'vo2', volume: 'volume', 'power-profile': 'power', ftp: 'power', mmp: 'power' };
+    const isShown = (id) => mobileCategory === 'all' || mobileCategory === CARD_CATEGORY[id];
+
     return (
         <div data-skin="stats" data-stats="page" className="animate-in fade-in duration-500 pb-16 w-full max-w-[1100px] mx-auto px-4 sm:px-8">
             {/* Header */}
@@ -98,109 +217,25 @@ export const FitnessStatsPage = ({
                 ))}
             </div>
 
-            {/* 1. Umbrales Actuales */}
-            <div data-stats="card" data-card="thresholds" className={cardVisibility('physiology')}>
-                <ThresholdsCard settings={settings} />
-            </div>
-
-            {/* 2. Estado de Entreno */}
-            <div data-stats="card" data-card="status" className={cardVisibility('physiology')}>
-                <TrainingStatusCard trainingStatus={stats.trainingStatus} />
-            </div>
-
-            {/* 3. Estado de VFC (HRV) */}
-            <div data-stats="card" data-card="hrv" className={cardVisibility('physiology')}>
-                <HrvCard hrv={stats.hrv} />
-            </div>
-
-            {/* 4. Pronóstico de Carrera */}
-            <div data-stats="card" data-card="race" className={cardVisibility('vo2')}>
-                <RacePredictionsCard racePredictions={stats.racePredictions} />
-            </div>
-
-            {/* 5. VO2 Máximo */}
-            <div data-stats="card" data-card="vo2" className={cardVisibility('vo2')}>
-                <Vo2MaxCard
-                    vo2Sport={vo2Sport}
-                    setVo2Sport={setVo2Sport}
-                    currentVo2={currentVo2}
-                    vo2Level={vo2Level}
-                    vo2Stats={stats.vo2}
-                />
-            </div>
-
-            {/* 6. Balance de Entrenamiento */}
-            <div data-stats="card" data-card="balance" className={cardVisibility('physiology')}>
-                <TrainingBalanceCard
-                    balance={stats.balance}
-                    balanceDays={balanceDays}
-                    setBalanceDays={setBalanceDays}
-                />
-            </div>
-
-            {/* 7. Distribución y Volumen */}
-            <div data-stats="card" data-card="volume" className={cardVisibility('volume')}>
-                <WeeklyVolumeAndFocusCard
-                    weeklyChart={analytics.weeklyChart}
-                    focusChart={analytics.focusChart}
-                    zonesChart={analytics.zonesChart}
-                    intensityTimeframe={intensityTimeframe}
-                    setIntensityTimeframe={setIntensityTimeframe}
-                />
-            </div>
-
-            {/* 8. Perfil de Potencia */}
-            <div data-stats="card" data-card="power-profile" className={cardVisibility('power')}>
-                <PowerProfileCard
-                    showPowerConfig={showPowerConfig}
-                    setShowPowerConfig={setShowPowerConfig}
-                    powerUnit={powerUnit}
-                    setPowerUnit={setPowerUnit}
-                    powerProfileTimeframe={powerProfileTimeframe}
-                    setPowerProfileTimeframe={setPowerProfileTimeframe}
-                    selectedDurs={selectedDurs}
-                    toggleDur={toggleDur}
-                    ppChartData={ppChartData}
-                    profile={stats.profile}
-                    powerProfile={stats.powerProfile}
-                />
-            </div>
-
-            {/* 9. FTP Estimado (eFTP) */}
-            <div data-stats="card" data-card="ftp" className={cardVisibility('power')}>
-                <EstimatedFtpCard
-                    ftp={stats.ftp}
-                    ftpDiff={ftpDiff}
-                    configFTP={configFTP}
-                    curveChartData={curveChartData}
-                />
-            </div>
-
-            {/* 10. Potencial y Récords */}
-            <div data-stats="card" data-card="mmp" className={cardVisibility('power')}>
-                <MmpAndEfCard
-                    activities={activities}
-                    onSelectActivity={onSelectActivity}
-                    curveSport={curveSport}
-                    setCurveSport={setCurveSport}
-                    mmpTimeframe={mmpTimeframe}
-                    setMmpTimeframe={setMmpTimeframe}
-                    curveType={curveType}
-                    setCurveType={setCurveType}
-                    currentCurve={currentCurve}
-                    curveColor={curveColor}
-                    curveUnit={curveUnit}
-                    isPace={isPace}
-                    analytics={analytics}
-                    peaksViewMode={peaksViewMode}
-                    setPeaksViewMode={setPeaksViewMode}
-                    telemetryStats={telemetryStats}
-                    isLoadingHistoricalStreams={isLoadingHistoricalStreams}
-                    handleDeepSync={handleDeepSync}
-                    isDeepSyncing={isDeepSyncing}
-                    deepSyncProgress={deepSyncProgress}
-                />
-            </div>
+            {isV2 ? (
+                <>
+                    {(mobileCategory === 'all' || mobileCategory === 'physiology') && (
+                        <StatsHero trainingStatus={stats.trainingStatus} hrv={stats.hrv} ftpDiff={ftpDiff} eFTP={stats.ftp?.eFTP} />
+                    )}
+                    {GROUPS.map(g => (
+                        <div key={g.id} data-stats="group" data-group={g.id} className={g.cards.some(isShown) ? 'block' : 'hidden md:block'}>
+                            <h3 data-stats="group-title">{g.label}</h3>
+                            {g.cards.map(id => <React.Fragment key={id}>{cardNodes[id]}</React.Fragment>)}
+                        </div>
+                    ))}
+                </>
+            ) : (
+                <>
+                    {['thresholds', 'status', 'hrv', 'race', 'vo2', 'balance', 'volume', 'power-profile', 'ftp', 'mmp'].map(id => (
+                        <React.Fragment key={id}>{cardNodes[id]}</React.Fragment>
+                    ))}
+                </>
+            )}
         </div>
     );
 };

@@ -429,6 +429,113 @@ html[data-ui="v2"] [data-skin="stats"] [data-stats="card"] section > div:first-c
   }
 }
 
+/* ── Rendimiento premium (Fase D3, PR 1): héroe «Hoy» y grupos ─────────────────────────
+ * Spec: docs/branches/feat/premium-rendimiento/spec.md §3.1/§3.2. Narrativa + KPI con cifra
+ * protagonista; filete degradado del color del estado de entreno; grupos con encabezado. */
+html[data-ui="v2"] [data-skin="stats"] [data-stats="hero"] {
+  position: relative;
+  margin-bottom: 32px;
+  padding-top: 20px;
+  font-feature-settings: "tnum" 1, "cv11" 1;
+}
+html[data-ui="v2"] [data-skin="stats"] [data-stats="hero"]::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 2px;
+  border-radius: 2px;
+  background: linear-gradient(90deg, var(--hero-accent, rgb(var(--line))) 0%, transparent 72%);
+}
+html[data-ui="v2"] [data-skin="stats"] [data-stats="narrative"] {
+  max-width: 62ch;
+  margin: 0 0 24px;
+  font-size: 18px;
+  line-height: 1.45;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  color: rgb(var(--ink));
+  text-wrap: pretty;
+}
+html[data-ui="v2"] [data-skin="stats"] [data-stats="kpis"] {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 20px 0;
+  margin: 0;
+}
+html[data-ui="v2"] [data-skin="stats"] [data-stats="kpi"] {
+  padding: 0 16px;
+  border-left: 1px solid rgb(var(--line));
+}
+html[data-ui="v2"] [data-skin="stats"] [data-stats="kpi"]:nth-child(odd) { padding-left: 0; border-left: 0; }
+html[data-ui="v2"] [data-skin="stats"] [data-stats="kpi"] dt {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgb(var(--ink-4, var(--ink)));
+}
+html[data-ui="v2"] [data-skin="stats"] [data-stats="kpi"] dd { margin: 0; }
+html[data-ui="v2"] [data-skin="stats"] [data-stats="kpi-value"] {
+  font-size: 36px;
+  font-weight: 600;
+  line-height: 1.1;
+  letter-spacing: -0.04em;
+}
+html[data-ui="v2"] [data-skin="stats"] [data-stats="kpi-unit"] {
+  margin-left: 4px;
+  font-size: 13px;
+  font-weight: 500;
+  opacity: 0.6;
+}
+html[data-ui="v2"] [data-skin="stats"] [data-stats="kpi-context"] {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  margin-top: 4px;
+  font-size: 12px;
+  font-weight: 500;
+  opacity: 0.75;
+}
+html[data-ui="v2"] [data-skin="stats"] [data-tone="up"] [data-stats="kpi-context"] { color: rgb(var(--positive-ink)); opacity: 1; }
+html[data-ui="v2"] [data-skin="stats"] [data-tone="down"] [data-stats="kpi-context"] { color: rgb(var(--danger-ink)); opacity: 1; }
+html[data-ui="v2"] [data-skin="stats"] [data-stats="group"] { margin-bottom: 16px; }
+html[data-ui="v2"] [data-skin="stats"] [data-stats="group-title"] {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 0 0 16px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgb(var(--ink-4, var(--ink)));
+}
+html[data-ui="v2"] [data-skin="stats"] [data-stats="group-title"]::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: rgb(var(--line));
+}
+@media (min-width: 768px) {
+  html[data-ui="v2"] [data-skin="stats"] [data-stats="kpis"] { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  html[data-ui="v2"] [data-skin="stats"] [data-stats="kpi"]:nth-child(odd) { padding-left: 16px; border-left: 1px solid rgb(var(--line)); }
+  html[data-ui="v2"] [data-skin="stats"] [data-stats="kpi"]:first-child { padding-left: 0; border-left: 0; }
+  html[data-ui="v2"] [data-skin="stats"] [data-stats="kpi-value"] { font-size: 44px; }
+}
+@media (max-width: 767px) {
+  html[data-ui="v2"] [data-skin="stats"] [data-stats="hero"] { order: 2; margin-bottom: 24px; }
+  html[data-ui="v2"] [data-skin="stats"] [data-stats="group"] { order: 3; }
+  html[data-ui="v2"] [data-skin="stats"] [data-stats="narrative"] { font-size: 16px; margin-bottom: 20px; }
+}
+@media (prefers-reduced-motion: no-preference) {
+  html[data-ui="v2"] [data-skin="stats"] [data-stats="kpi"] {
+    animation: detail-rise 450ms cubic-bezier(.22, 1, .36, 1) both;
+  }
+  html[data-ui="v2"] [data-skin="stats"] [data-stats="kpi"]:nth-child(2) { animation-delay: 60ms; }
+  html[data-ui="v2"] [data-skin="stats"] [data-stats="kpi"]:nth-child(3) { animation-delay: 120ms; }
+  html[data-ui="v2"] [data-skin="stats"] [data-stats="kpi"]:nth-child(4) { animation-delay: 180ms; }
+}
+
 /* ── Salud «Panel» (Capa 5, PR 6b): `data-skin="health"` ──────────────────────────────
  *
  * Primer vistazo móvil (390 px), sin scroll: título y selector Hoy/Historial, los tres
