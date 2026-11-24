@@ -1,5 +1,5 @@
 /* eslint-disable no-unused-vars */
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { ChevronLeft, ChevronRight, Activity } from 'lucide-react';
 
 import { useChartTheme } from '../charts/useChartTheme';
@@ -15,6 +15,8 @@ import { PmcFloatingChart } from '../calendar/PmcFloatingChart';
 import { WorkoutViewerModal } from '../calendar/WorkoutViewerModal';
 import { CalendarMonthView } from '../calendar/CalendarMonthView';
 import { PlannerModal } from '../calendar/PlannerModal';
+import { MonthHero } from '../calendar/MonthHero';
+import { buildMonthSummary } from '../../utils/monthSummary';
 
 export const CalendarPage = ({ activities, plannedWorkouts = [], addPlannedWorkout, deletePlannedWorkout, updatePlannedWorkout, currentMetrics, settings, chartData = [], onDelete, onSelectActivity }) => {
     const { isV2 } = useUiMode();
@@ -40,6 +42,11 @@ export const CalendarPage = ({ activities, plannedWorkouts = [], addPlannedWorko
     const { activitiesByDate, fullPmcByDate, calendarGrid } = useCalendarData({
         activities, plannedWorkouts, chartData, year, month,
     });
+
+    const monthSummary = useMemo(
+        () => (isV2 ? buildMonthSummary({ activities, plannedWorkouts, year, month }) : null),
+        [isV2, activities, plannedWorkouts, year, month],
+    );
 
     return (
         <ChartSkinProvider skin={isV2 ? 'v2' : 'v1'}>
@@ -67,7 +74,13 @@ export const CalendarPage = ({ activities, plannedWorkouts = [], addPlannedWorko
                     </div>
                 </div>
 
-                {isV2 && <ActivityHeatmap activities={activities} />}
+                {isV2 && (
+                    <MonthHero
+                        summary={monthSummary}
+                        heatmap={<ActivityHeatmap activities={activities} />}
+                        onPlan={() => handleOpenPlanModal({ stopPropagation() {} }, new Date())}
+                    />
+                )}
 
                 <CalendarMonthView
                         activitiesByDate={activitiesByDate}

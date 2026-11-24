@@ -7,6 +7,9 @@ y este proyecto adhiere a [Semantic Versioning](https://semver.org/lang/es/).
 
 ## [Unreleased]
 
+### Added — Fase Premium D5, Calendario (`feat/premium-calendario`, PR 1)
+- `feat(calendario):` cabecera narrativa del mes (solo v2): frase resumen, 4 KPI (sesiones, carga con delta vs mes anterior, tiempo, cumplimiento del plan) y heatmap de constancia plegable en móvil; `buildMonthSummary` con tests. Spec y plan en `docs/branches/feat/premium-calendario/`.
+
 ### Added — Fase Premium D7, Ajustes (`feat/premium-perfil-cuentas-seguridad`, PR 3)
 - `feat(perfil):` Cuentas con estado de punto y campos apilados en móvil; Seguridad con zona de peligro diferenciada y acciones destructivas de contorno (v2).
 
