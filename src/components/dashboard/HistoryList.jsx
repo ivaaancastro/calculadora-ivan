@@ -109,7 +109,15 @@ export const HistoryList = React.memo(({ activities, onDelete, onSelectActivity 
         ]);
     }, [filteredActivities]);
     const sizes = useMemo(() => flat.map((f) => (f.kind === 'week' ? WEEK_H : ROW_H)), [flat]);
-    const starts = useMemo(() => sizes.map((_, i) => sizes.slice(0, i).reduce((a, b) => a + b, 0)), [sizes]);
+    // Suma acumulada en O(n) (BUG-5): antes se recalculaba el prefijo de cada fila.
+    const starts = useMemo(() => {
+        let acc = 0;
+        return sizes.map((h) => {
+            const start = acc;
+            acc += h;
+            return start;
+        });
+    }, [sizes]);
     const totalH = sizes.reduce((a, b) => a + b, 0);
     const maxTss = useMemo(() => Math.max(1, ...filteredActivities.map((a) => Number(a.tss) || 0)), [filteredActivities]);
 
