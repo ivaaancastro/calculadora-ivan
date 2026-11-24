@@ -11,14 +11,13 @@ describe('ui/Modal recetas', () => {
       classes('fixed inset-0 z-sheet flex items-end sm:items-center justify-center p-0 sm:p-4 bg-scrim backdrop-blur-sm overscroll-contain animate-in fade-in duration-200'),
     );
     expect(modalRecipe('sheet').panel).toContain('rounded-t-3xl sm:rounded-2xl');
-    expect(modalRecipe('auth').layer).toBe('absolute inset-0 bg-scrim-2 backdrop-blur-sm');
     expect(modalRecipe('planner').backdrop).toContain('bg-scrim-3 backdrop-blur-sm z-sheet');
     expect(modalRecipe('viewer').backdrop).toContain('bg-scrim-4 backdrop-blur-sm z-modal');
     expect(modalRecipe('viewer').style).toEqual({ overscrollBehavior: 'contain' });
   });
 
-  it('auth-v2 es hoja inferior en móvil, lleva velo aparte y respeta el movimiento reducido', () => {
-    const r = modalRecipe('auth-v2');
+  it('auth es hoja inferior en móvil, lleva velo aparte y respeta el movimiento reducido', () => {
+    const r = modalRecipe('auth');
     expect(r.layer).toBe('absolute inset-0 bg-scrim-2');
     expect(r.panel).toContain('sm:rounded-2xl');
     expect(r.panel).toContain('motion-safe:animate-');

@@ -4,14 +4,13 @@
  * Button:
  *  - `ghost` e `inverse`: los chips para añadir bloques del planificador del Calendario.
  *  - `link-muted`: "+ Trabajo" y "+ Descanso" de los circuitos del planificador.
- *  - `primary` y `link`: enviar y enlaces del acceso en la piel v2 (≥ 44 px).
+ *  - `primary` y `link`: enviar y enlaces del acceso (≥ 44 px).
  *  - `danger-text`: quitar un bloque o un paso del planificador (solo el icono, sin fondo).
  *  - `secondary` y `danger`: Cancelar y Eliminar del diálogo de confirmar borrado (≥ 44 px).
  * IconButton (con `aria-label` obligatorio):
  *  - `soft`: volver del detalle de actividad (círculo con fondo).
  *  - `ghost`: mes anterior y siguiente del Calendario.
- *  - `quiet`: cerrar y volver del acceso en la piel v2 (≥ 44 px).
- *  - `bare`: volver del formulario de contraseña olvidada (acceso y landing).
+ *  - `quiet`: cerrar y volver del acceso (≥ 44 px).
  * Borrar actividad del detalle no entra: en oscuro, su color de base gana hoy al rojo del hover
  * (D-08) y pasarlo a tokens haría aparecer ese hover.
  * El tamaño y el relleno van en `className`.
@@ -33,7 +32,6 @@ const ICON = {
   soft: 'flex items-center justify-center bg-fill hover:bg-fill-hover active:scale-90 rounded-full transition-all text-body-soft-2',
   ghost: 'flex items-center justify-center bg-transparent hover:bg-surface-2 active:scale-95 text-ink-3 transition-all touch-manipulation',
   quiet: 'flex items-center justify-center min-h-[44px] min-w-[44px] rounded-full text-ink-3 hover:text-ink hover:bg-surface-2 transition-colors',
-  bare: 'text-ink-4-fixed hover:text-body-2 transition-colors',
 };
 
 function pick(kind, table, variant) {
