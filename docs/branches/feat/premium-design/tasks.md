@@ -31,4 +31,5 @@ Spec aprobada (D1–D10 + ampliación, 2026-11-19). **No empezar la Fase A hasta
 - [ ] D0. El usuario aporta webs de referencia.
 - [x] D1. Detalle de actividad (PRs #117, #122 y PR 3 de `feat/premium-detalle-lateral`); pendiente D7 del usuario. Diferidos: cursor compartido con el mapa y `ErrorState` de telemetría.
 - [x] D4. Salud (PRs #120, #121 y #123, `feat/premium-salud`): hero narrativo, banco de energía, biomarcadores por estado con sparklines, historial v2; pendiente D7 del usuario. Detalle en `docs/branches/feat/premium-salud/tasks.md`.
+- [x] D7-Ajustes. Ajustes/Perfil (PRs #126, #129 y #130, mergeados como #130; `feat/premium-perfil*`): cabecera con guardado de cambios pendientes, menú con indicador, General/Zonas/Cuentas/Seguridad con zona de peligro diferenciada; pendiente D7 visual del usuario (6 capturas `perfil-*`). Detalle en `docs/branches/feat/premium-perfil/tasks.md`.
 - [ ] D2. Resto de pantallas y landing, cada una con aprobación y D7.
