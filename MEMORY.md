@@ -47,7 +47,7 @@
 - **Colores:** tokens en `src/styles/tokens.css` → `tailwindTokens.cjs` → Tailwind. Gráficas: `chartTheme.js` + `useChartTheme()`; nunca un hex suelto. `npm run lint:colors` es trinquete (solo baja).
 - **Primitivas:** `src/components/ui/` (`npm run lint:ui`, 14). «Centralizar sin unificar»; `className` solo para colocación y espaciado.
 - **Cabecera:** mide exactamente `--nav-h` (60 px); nunca debe crecer.
-- **Verificación visual:** carriles de `AGENTS.md` §8 bis: `npm run verify` por feat; E2E completo y `style-diff` en el CI; `npm run verify:layer` (style-diff completo `develop` vs rama = 0 en v1) al cerrar capa; capturas solo con la imagen del CI (workflow `Update snapshots` o `npm run test:e2e:update`).
+- **Verificación (Capa 6, `AGENTS.md` §8 bis):** `npm run verify` en local; el CI rápido (< 5 min: `check` + `e2e` funcional y DOM, sin capturas ni `style-diff`); revisión visual del agente en el navegador integrado (puerto 5180) con capturas antes/después en los PR de diseño.
 - Detalle de codemods, volcados, precedencia de `dark:` y trampas conocidas: archivo histórico, secciones «Cómo trabajar con…».
 
 ## 3. Contexto técnico

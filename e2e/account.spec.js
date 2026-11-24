@@ -24,9 +24,14 @@ test.describe('Eliminación de cuenta', () => {
     page.on('request', (r) => {
       if (r.url().includes('/rpc/delete_user')) rpcCalls += 1;
     });
-    page.once('dialog', (dialog) => dialog.dismiss());
+    let dismissed = false;
+    page.once('dialog', async (dialog) => {
+      await dialog.dismiss();
+      dismissed = true;
+    });
     await page.getByRole('button', { name: 'Eliminar Cuenta' }).click();
-    await page.waitForTimeout(300);
+    await expect.poll(() => dismissed).toBe(true);
+    await page.waitForLoadState('networkidle');
 
     expect(rpcCalls).toBe(0);
     await expect(page.getByRole('button', { name: 'Eliminar Cuenta' })).toBeVisible();
