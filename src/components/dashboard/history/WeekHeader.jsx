@@ -1,7 +1,7 @@
 import React from 'react';
 import { formatDuration } from '../../../utils/formatDuration';
 
-/** Cabecera de semana del historial (solo v2): «Semana del 17 nov» y totales de la semana. */
+/** Cabecera de semana del historial: «Semana del 17 nov» y totales de la semana. */
 export const WeekHeader = ({ group, refYear }) => {
     const start = new Date(`${group.key}T00:00:00`);
     const opts = { day: 'numeric', month: 'short' };

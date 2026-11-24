@@ -12,7 +12,7 @@ const TONE_TEXT = {
 };
 
 /**
- * KPI primario del Dashboard (solo v2, spec premium-dashboard §3.1): etiqueta en mayúsculas,
+ * KPI primario del Dashboard (spec premium-dashboard §3.1): etiqueta en mayúsculas,
  * cifra grande con cuenta animada, variación con icono y color, y sparkline de 28 días.
  * `delta` = { value, text, tone } o null; `format(n)` da el texto de la cifra animada.
  */

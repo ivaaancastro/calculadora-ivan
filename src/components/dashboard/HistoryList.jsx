@@ -12,10 +12,10 @@ import { SportChips } from './history/SportChips';
 import { SportBreakdown } from './history/SportBreakdown';
 import { WeekHeader } from './history/WeekHeader';
 
-// v1: sin envoltorio (el árbol del DOM no cambia, lo vigila style-diff); v2: rejilla con panel lateral.
-const Layout = ({ v2, children }) => (v2
-    ? <div data-history="layout" className="h-full xl:grid xl:grid-cols-[minmax(0,1fr)_300px] xl:gap-8 max-w-[1440px] mx-auto">{children}</div>
-    : <>{children}</>);
+// Rejilla con panel lateral.
+const Layout = ({ children }) => (
+    <div data-history="layout" className="h-full xl:grid xl:grid-cols-[minmax(0,1fr)_300px] xl:gap-8 max-w-[1440px] mx-auto">{children}</div>
+);
 
 const ROW_H = 64;
 const WEEK_H = 36;
@@ -28,44 +28,16 @@ const shortDate = (date, refYear) => {
     return d.toLocaleDateString('es-ES', opts);
 };
 
-const getSportIcon = (type, solid = false) => {
+const getSportIcon = (type) => {
     const t = String(type).toLowerCase();
-    if (solid) {
-        const [Icon, tone] =
-            t.includes('run') || t.includes('carrera') ? [Footprints, 'bg-sport-run text-on-action']
-            : t.includes('bike') || t.includes('bici') || t.includes('ciclismo') || t.includes('ride') ? [Bike, 'bg-sport-bike text-on-action']
-            : t.includes('gym') || t.includes('fuerza') || t.includes('weight') || t.includes('workout') ? [Dumbbell, 'bg-sport-strength text-on-action']
-            : [Activity, 'bg-fill-3 text-body-soft'];
-        return (
-            <div data-history="sport" className={`w-10 h-10 rounded-[14px] flex items-center justify-center shrink-0 ${tone}`}>
-                <Icon size={19} strokeWidth={2.2} />
-            </div>
-        );
-    }
-    if (t.includes('run') || t.includes('carrera')) {
-        return (
-            <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-[12px] sm:rounded-[14px] bg-sport-run/15 text-sport-run flex items-center justify-center shrink-0 shadow-2xs">
-                <Footprints size={17} strokeWidth={2.3} />
-            </div>
-        );
-    }
-    if (t.includes('bike') || t.includes('bici') || t.includes('ciclismo') || t.includes('ride')) {
-        return (
-            <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-[12px] sm:rounded-[14px] bg-sport-bike/15 text-sport-bike-ios flex items-center justify-center shrink-0 shadow-2xs">
-                <Bike size={17} strokeWidth={2.3} />
-            </div>
-        );
-    }
-    if (t.includes('gym') || t.includes('fuerza') || t.includes('weight') || t.includes('workout')) {
-        return (
-            <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-[12px] sm:rounded-[14px] bg-sport-strength/15 text-sport-strength flex items-center justify-center shrink-0 shadow-2xs">
-                <Dumbbell size={17} strokeWidth={2.3} />
-            </div>
-        );
-    }
+    const [Icon, tone] =
+        t.includes('run') || t.includes('carrera') ? [Footprints, 'bg-sport-run text-on-action']
+        : t.includes('bike') || t.includes('bici') || t.includes('ciclismo') || t.includes('ride') ? [Bike, 'bg-sport-bike text-on-action']
+        : t.includes('gym') || t.includes('fuerza') || t.includes('weight') || t.includes('workout') ? [Dumbbell, 'bg-sport-strength text-on-action']
+        : [Activity, 'bg-fill-3 text-body-soft'];
     return (
-        <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-[12px] sm:rounded-[14px] bg-slate-200/60 dark:bg-zinc-800 text-body-soft flex items-center justify-center shrink-0 shadow-2xs">
-            <Activity size={17} strokeWidth={2.3} />
+        <div data-history="sport" className={`w-10 h-10 rounded-[14px] flex items-center justify-center shrink-0 ${tone}`}>
+            <Icon size={19} strokeWidth={2.2} />
         </div>
     );
 };
@@ -73,7 +45,6 @@ const getSportIcon = (type, solid = false) => {
 export const HistoryList = React.memo(({ activities, onDelete, onSelectActivity }) => {
     const parentRef = useRef(null);
     const del = useConfirmDeleteActivity(onDelete);
-    const isV2 = true; // v2 por defecto (Capa 6); las ramas v1 se retiran en los PR 5a–c
     // ESTADOS DE LOS FILTROS INTERNOS
     const [searchTerm, setSearchTerm] = useState('');
     const [sportFilter, setSportFilter] = useState('all');
@@ -121,23 +92,22 @@ export const HistoryList = React.memo(({ activities, onDelete, onSelectActivity 
     }, [activities, searchTerm, sportFilter, dateFilter]);
 
     const summary = useMemo(
-        () => (isV2 ? { totals: summarizeActivities(filteredActivities), weekly: weeklyTss(filteredActivities) } : null),
-        [isV2, filteredActivities],
+        () => ({ totals: summarizeActivities(filteredActivities), weekly: weeklyTss(filteredActivities) }),
+        [filteredActivities],
     );
 
-    const breakdown = useMemo(() => (isV2 ? breakdownBySport(filteredActivities) : []), [isV2, filteredActivities]);
+    const breakdown = useMemo(() => breakdownBySport(filteredActivities), [filteredActivities]);
     const hasFilters = searchTerm !== '' || sportFilter !== 'all' || dateFilter !== 'all';
     const clearFilters = () => { setSearchTerm(''); setSportFilter('all'); setDateFilter('all'); };
 
-    // Lista plana: en v2 se intercalan cabeceras de semana (36 px) entre filas (64 px).
+    // Lista plana: se intercalan cabeceras de semana (36 px) entre filas (64 px).
     const refYear = filteredActivities[0] ? new Date(filteredActivities[0].date).getFullYear() : 0;
     const flat = useMemo(() => {
-        if (!isV2) return filteredActivities.map((act) => ({ kind: 'row', act }));
         return groupByWeek(filteredActivities).flatMap((g) => [
             { kind: 'week', group: g },
             ...g.items.map((act) => ({ kind: 'row', act })),
         ]);
-    }, [isV2, filteredActivities]);
+    }, [filteredActivities]);
     const sizes = useMemo(() => flat.map((f) => (f.kind === 'week' ? WEEK_H : ROW_H)), [flat]);
     const starts = useMemo(() => sizes.map((_, i) => sizes.slice(0, i).reduce((a, b) => a + b, 0)), [sizes]);
     const totalH = sizes.reduce((a, b) => a + b, 0);
@@ -159,12 +129,10 @@ export const HistoryList = React.memo(({ activities, onDelete, onSelectActivity 
 
     return (
         <>
-        <Layout v2={isV2}>
+        <Layout>
         <Card data-skin="history" data-history="root" className="flex flex-col h-full overflow-hidden">
 
-            {summary && (
-                <AutoChartSkin><ActivitiesSummary totals={summary.totals} weekly={summary.weekly} /></AutoChartSkin>
-            )}
+            <AutoChartSkin><ActivitiesSummary totals={summary.totals} weekly={summary.weekly} /></AutoChartSkin>
 
             {/* BARRA DE FILTROS ESTILO APPLE */}
             <div data-history="filters" className="p-3 sm:p-4 border-b border-hairline bg-slate-50/50 dark:bg-zinc-900/30 flex flex-col sm:flex-row gap-2.5 sm:gap-3">
@@ -182,25 +150,7 @@ export const HistoryList = React.memo(({ activities, onDelete, onSelectActivity 
                     />
                 </div>
 
-                {isV2 ? (
-                    <div data-history="chips-row" className="sm:order-last sm:basis-full"><SportChips value={sportFilter} onChange={setSportFilter} /></div>
-                ) : (
-                <div className="sm:w-44 relative">
-                    <Activity size={14} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-ink-4 pointer-events-none" />
-                    <Select
-                        variant="search"
-                        value={sportFilter}
-                        onChange={(e) => setSportFilter(e.target.value)}
-                        className="w-full pl-9 pr-3 py-2"
-                    >
-                        <option value="all">Todos los Deportes</option>
-                        <option value="run">Carrera</option>
-                        <option value="bike">Ciclismo</option>
-                        <option value="swim">Natación</option>
-                        <option value="gym">Fuerza</option>
-                    </Select>
-                </div>
-                )}
+                <div data-history="chips-row" className="sm:order-last sm:basis-full"><SportChips value={sportFilter} onChange={setSportFilter} /></div>
 
                 {/* Selector de Fecha */}
                 <div className="sm:w-44 relative">
@@ -266,13 +216,13 @@ export const HistoryList = React.memo(({ activities, onDelete, onSelectActivity 
                                 >
                                     {/* Icono en squircle estilo Apple */}
                                     <div className="mr-3 shrink-0">
-                                        {getSportIcon(act.type, isV2)}
+                                        {getSportIcon(act.type)}
                                     </div>
 
                                     <div className="flex-1 min-w-0 mr-2 sm:mr-4">
                                         <h4 className="text-[13px] font-semibold text-ink truncate mb-0.5" title={act.name}>{act.name}</h4>
                                         <div className="flex items-center gap-1.5 text-[11px] text-ink-3">
-                                            <span>{isV2 ? shortDate(act.date, refYear) : new Date(act.date).toLocaleDateString('es-ES', { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' })}</span>
+                                            <span>{shortDate(act.date, refYear)}</span>
                                             <span>•</span>
                                             <span className="capitalize">{act.type}</span>
                                         </div>
@@ -309,7 +259,7 @@ export const HistoryList = React.memo(({ activities, onDelete, onSelectActivity 
                                             <span className={`text-sm font-bold tabular-nums ${act.tss > 0 ? 'text-amber-500' : 'text-slate-400'}`}>
                                                 {act.tss > 0 ? Math.round(act.tss) : '--'}
                                             </span>
-                                            {isV2 && act.tss > 0 && (
+                                            {act.tss > 0 && (
                                                 <span data-history="tss-bar" aria-hidden="true" className="mt-1 h-[3px] w-full rounded-full bg-fill-3 overflow-hidden">
                                                     <span className="block h-full rounded-full bg-warning" style={{ width: `${Math.max(6, Math.round((act.tss / maxTss) * 100))}%` }} />
                                                 </span>
@@ -335,12 +285,12 @@ export const HistoryList = React.memo(({ activities, onDelete, onSelectActivity 
                     </div>
                 ) : (
                     <EmptyState data-history="empty" className="h-full" icon={Activity} title="No hay resultados" description="Prueba a cambiar los filtros de búsqueda.">
-                        {isV2 && hasFilters && <Button variant="secondary" onClick={clearFilters}>Quitar filtros</Button>}
+                        {hasFilters && <Button variant="secondary" onClick={clearFilters}>Quitar filtros</Button>}
                     </EmptyState>
                 )}
             </div>
         </Card>
-        {isV2 && <SportBreakdown rows={breakdown} />}
+        <SportBreakdown rows={breakdown} />
         </Layout>
         <ConfirmDeleteActivityModal activity={del.pending} busy={del.busy} onConfirm={del.confirm} onCancel={del.cancel} />
         </>
