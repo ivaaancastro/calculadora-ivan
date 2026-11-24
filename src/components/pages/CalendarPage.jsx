@@ -17,6 +17,7 @@ import { CalendarMonthView } from '../calendar/CalendarMonthView';
 import { PlannerModal } from '../calendar/PlannerModal';
 import { MonthHero } from '../calendar/MonthHero';
 import { buildMonthSummary } from '../../utils/monthSummary';
+import { buildDayLoadLevels } from '../../utils/calendarLoad';
 
 export const CalendarPage = ({ activities, plannedWorkouts = [], addPlannedWorkout, deletePlannedWorkout, updatePlannedWorkout, currentMetrics, settings, chartData = [], onDelete, onSelectActivity }) => {
     const { isV2 } = useUiMode();
@@ -42,6 +43,8 @@ export const CalendarPage = ({ activities, plannedWorkouts = [], addPlannedWorko
     const { activitiesByDate, fullPmcByDate, calendarGrid } = useCalendarData({
         activities, plannedWorkouts, chartData, year, month,
     });
+
+    const loadLevels = useMemo(() => buildDayLoadLevels(activitiesByDate, calendarGrid), [activitiesByDate, calendarGrid]);
 
     const monthSummary = useMemo(
         () => (isV2 ? buildMonthSummary({ activities, plannedWorkouts, year, month }) : null),
@@ -85,6 +88,7 @@ export const CalendarPage = ({ activities, plannedWorkouts = [], addPlannedWorko
                 <CalendarMonthView
                         activitiesByDate={activitiesByDate}
                         calendarGrid={calendarGrid}
+                        loadLevels={loadLevels}
                         dragOverDate={dragOverDate}
                         fullPmcByDate={fullPmcByDate}
                         handleDragLeave={handleDragLeave}

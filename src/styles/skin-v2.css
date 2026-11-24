@@ -1485,6 +1485,76 @@ html[data-ui="v2"] [data-skin="history"] [data-history="row"] h4 {
   }
 }
 
+/* ── Calendario premium (Fase D5, PR 2): tinte de carga, estados de sesión, panel semanal ──
+ * Spec: docs/branches/feat/premium-calendario/spec.md §3.2. Bloque aislado «Calendario D5, PR 2».
+ * Lo que cambia tamaño va solo en ≥ 1024 px: en móvil el pager mide la pestaña más alta y
+ * cualquier cambio de altura del Calendario mueve las capturas de las demás pantallas. */
+
+/* Tinte de carga por día: color de la serie TSS, 4 niveles. */
+html[data-ui="v2"] [data-skin="calendar"] [data-cal="day"][data-load="1"] { background-color: rgb(var(--chart-tss) / 0.05); }
+html[data-ui="v2"] [data-skin="calendar"] [data-cal="day"][data-load="2"] { background-color: rgb(var(--chart-tss) / 0.09); }
+html[data-ui="v2"] [data-skin="calendar"] [data-cal="day"][data-load="3"] { background-color: rgb(var(--chart-tss) / 0.14); }
+html[data-ui="v2"] [data-skin="calendar"] [data-cal="day"][data-load="4"] { background-color: rgb(var(--chart-tss) / 0.2); }
+/* Hoy conserva su fondo hundido por encima del tinte. */
+html[data-ui="v2"] [data-skin="calendar"] [data-cal="day"][data-today="true"] { background-color: rgb(var(--sunken)); }
+
+/* Estados de ficha: cada uno se distingue por color, no solo por el borde discontinuo. */
+html[data-ui="v2"] [data-skin="calendar"] [data-cal="act"][data-state="planned"] {
+  border-color: rgb(var(--action) / 0.55);
+}
+html[data-ui="v2"] [data-skin="calendar"] [data-cal="act"][data-state="omitted"] {
+  border-color: rgb(var(--form-overload) / 0.55);
+  background-color: rgb(var(--form-overload) / 0.07);
+}
+html[data-ui="v2"] [data-skin="calendar"] [data-cal="act"][data-state="fulfilled"] {
+  border-color: rgb(var(--form-peak) / 0.45);
+}
+html[data-ui="v2"] [data-skin="calendar"] [data-cal="check"] {
+  color: rgb(var(--form-peak));
+  background-color: rgb(var(--form-peak) / 0.14);
+  border-radius: 9999px;
+  padding: 1px 6px;
+}
+
+@media (min-width: 1024px) {
+  /* Panel semanal más ancho y con texto ≥ 11 px. */
+  html[data-ui="v2"] [data-skin="calendar"] [data-cal="weekdays"],
+  html[data-ui="v2"] [data-skin="calendar"] [data-cal="week"] {
+    grid-template-columns: 156px repeat(7, minmax(0, 1fr));
+  }
+  html[data-ui="v2"] [data-skin="calendar"] [data-cal="week-panel"],
+  html[data-ui="v2"] [data-skin="calendar"] [data-cal="week-panel"] span,
+  html[data-ui="v2"] [data-skin="calendar"] [data-cal="week-panel"] div {
+    font-size: 11px;
+    font-variant-numeric: tabular-nums;
+  }
+  /* Fichas: texto ≥ 11 px y etiqueta de estado. */
+  html[data-ui="v2"] [data-skin="calendar"] [data-cal="act"] span {
+    font-size: 11px;
+  }
+  html[data-ui="v2"] [data-skin="calendar"] [data-cal="act"][data-state="planned"],
+  html[data-ui="v2"] [data-skin="calendar"] [data-cal="act"][data-state="omitted"] {
+    padding-bottom: 24px;
+  }
+  html[data-ui="v2"] [data-skin="calendar"] [data-cal="act"][data-state="planned"]::after,
+  html[data-ui="v2"] [data-skin="calendar"] [data-cal="act"][data-state="omitted"]::after {
+    position: absolute;
+    right: 10px;
+    bottom: 6px;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+  }
+  html[data-ui="v2"] [data-skin="calendar"] [data-cal="act"][data-state="planned"]::after {
+    content: "Plan";
+    color: rgb(var(--action));
+  }
+  html[data-ui="v2"] [data-skin="calendar"] [data-cal="act"][data-state="omitted"]::after {
+    content: "Omitida";
+    color: rgb(var(--form-overload));
+  }
+}
+
 /* ── Actividades D6, PR 3: chips, ancho y panel lateral ──────────────────────────────
  * Spec: docs/branches/feat/premium-actividades/spec.md §3.4/§3.5. Solo v2. */
 html[data-ui="v2"] [data-history="chips"] { scrollbar-width: none; }
