@@ -112,7 +112,11 @@ export function smallTouchTargets(page, min = 44) {
     for (const el of document.querySelectorAll(sel)) {
       const style = getComputedStyle(el);
       if (style.visibility === 'hidden' || style.display === 'none' || el.closest('[aria-hidden=true]')) continue;
-      const r = el.getBoundingClientRect();
+      // Enlaces solo para lectores de pantalla (1×1 hasta recibir el foco) y la atribución de Leaflet.
+      if (el.closest('.sr-only, .leaflet-control-attribution')) continue;
+      if (style.clip === 'rect(0px, 0px, 0px, 0px)' || style.clipPath === 'inset(50%)') continue;
+      // Un campo dentro de su <label> se toca en toda la etiqueta.
+      const r = (el.closest('label') || el).getBoundingClientRect();
       if (r.width === 0 || r.height === 0) continue;
       if (r.right < 0 || r.left > window.innerWidth) continue; // pestañas fuera de pantalla
       if (r.width < minSize || r.height < minSize) {
