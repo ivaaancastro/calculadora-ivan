@@ -7,6 +7,9 @@ y este proyecto adhiere a [Semantic Versioning](https://semver.org/lang/es/).
 
 ## [Unreleased]
 
+### Added — Fase Premium D5, Calendario (`feat/premium-calendario-rejilla`, PR 2)
+- `feat(calendario):` tinte de carga por día (4 niveles, serie TSS), estados de sesión realizado / cumplido / planificado / omitido con etiqueta y color propios, chip del cumplimiento y panel semanal con texto ≥ 11 px en escritorio; `buildDayLoadLevels` y `getSessionState` con tests.
+
 ### Added — Fase Premium D5, Calendario (`feat/premium-calendario`, PR 1)
 - `feat(calendario):` cabecera narrativa del mes (solo v2): frase resumen, 4 KPI (sesiones, carga con delta vs mes anterior, tiempo, cumplimiento del plan) y heatmap de constancia plegable en móvil; `buildMonthSummary` con tests. Spec y plan en `docs/branches/feat/premium-calendario/`.
 

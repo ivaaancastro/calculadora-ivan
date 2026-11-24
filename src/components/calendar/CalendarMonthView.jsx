@@ -4,10 +4,12 @@ import React from 'react';
 import { getSportCategory } from '../../utils/tssEngine';
 import { getComplianceForDay, computeWeekStats, findWeekPmc, findPrevWeekPmc, getWeekNumber } from '../../utils/calendarEngine';
 import { getSportIcon, WEEKDAYS, getZoneColor } from './calendarHelpers';
+import { getSessionState } from '../../utils/calendarLoad';
 
 export const CalendarMonthView = ({
     activitiesByDate,
     calendarGrid,
+    loadLevels = {},
     dragOverDate,
     fullPmcByDate,
     handleDragLeave,
@@ -22,7 +24,7 @@ export const CalendarMonthView = ({
                     <div className="w-full relative">
 
                         {/* CABECERA DÍAS DE LA SEMANA */}
-                        <div className="hidden lg:grid grid-cols-[130px_repeat(7,1fr)] bg-surface-9 backdrop-blur-md border-b border-line-soft-5 sticky top-0 z-20">
+                        <div data-cal="weekdays" className="hidden lg:grid grid-cols-[130px_repeat(7,1fr)] bg-surface-9 backdrop-blur-md border-b border-line-soft-5 sticky top-0 z-20">
                             <div className="py-2.5 border-r border-line-faint"></div>
                             {WEEKDAYS.map((day, i) => (
                                 <div key={day} className={`py-2 text-center text-[10px] font-medium tracking-widest uppercase border-r border-line-faint last:border-r-0
@@ -57,7 +59,7 @@ export const CalendarMonthView = ({
                                     <div key={wIdx} data-cal="week" className="grid grid-cols-1 lg:grid-cols-[130px_repeat(7,1fr)] border-b border-line-soft-5 last:border-b-0">
 
                                         {/* ====== PANEL SEMANAL IZQUIERDO ====== */}
-                                        <div className="hidden lg:flex flex-col border-r border-line-faint bg-transparent text-[10px] relative overflow-hidden">
+                                        <div data-cal="week-panel" className="hidden lg:flex flex-col border-r border-line-faint bg-transparent text-[10px] relative overflow-hidden">
                                             {/* Header with week number */}
                                             <div className="px-3 py-2.5 flex items-center justify-between">
                                                 <span className="text-[11px] font-medium text-ink-4 flex items-center gap-1">
@@ -157,7 +159,7 @@ export const CalendarMonthView = ({
                                                     onDragOver={(e) => handleDragOver(e, dateKey)}
                                                     onDragLeave={handleDragLeave}
                                                     onDrop={(e) => handleDrop(e, day.date)}
-                                                    data-cal="day" data-today={isToday ? 'true' : undefined} className={`relative p-2 lg:p-2.5 border-r border-line-faint flex flex-col min-h-[72px] lg:h-[220px] overflow-y-auto custom-scrollbar transition-colors group/daycell
+                                                    data-cal="day" data-today={isToday ? 'true' : undefined} data-load={loadLevels[dateKey]} className={`relative p-2 lg:p-2.5 border-r border-line-faint flex flex-col min-h-[72px] lg:h-[220px] overflow-y-auto custom-scrollbar transition-colors group/daycell
                                                         ${isToday ? 'bg-blue-50/10 dark:bg-blue-900/5' : 'bg-transparent'}
                                                         ${dragOverDate === dateKey ? 'bg-blue-50 dark:bg-blue-900/20 ring-2 ring-action-light ring-inset rounded-lg z-10' : ''}
                                                         ${!day.isCurrentMonth ? 'opacity-40' : 'opacity-100'}
@@ -277,7 +279,7 @@ export const CalendarMonthView = ({
                                                             return (
                                                                 <div
                                                                     key={i}
-                                                                    data-cal="act" data-planned={act.isPlanned ? 'true' : undefined}
+                                                                    data-cal="act" data-planned={act.isPlanned ? 'true' : undefined} data-state={getSessionState(act, { fulfilled: isFulfilled, dateKey })}
                                                                     draggable={act.isPlanned}
                                                                     onDragStart={(e) => act.isPlanned && handleDragStart(e, act)}
                                                                     onClick={(e) => {
@@ -348,7 +350,7 @@ export const CalendarMonthView = ({
                                                                                 <span className={`shrink-0 ${sportColors.accent}`}>{getSportIcon(act.type, 13)}</span>
                                                                                 <span className="text-[11px] font-semibold tracking-tight leading-none text-ink-2-soft">{formatActDuration(act.duration || 0)}</span>
                                                                                 {act.tss > 0 && <span className="ml-auto text-[9px] font-bold text-ink-3">{Math.round(act.tss)} TSS</span>}
-                                                                                {isFulfilled && <span className="ml-1 text-[9px] font-bold text-emerald-500" title="Plan completado">✓</span>}
+                                                                                {isFulfilled && <span data-cal="check" className="ml-1 text-[9px] font-bold text-emerald-500" title="Plan completado">✓</span>}
                                                                             </div>
                                                                             <div className="flex flex-col gap-0.5">
                                                                                 <span className="text-[11px] font-medium leading-tight truncate text-body">

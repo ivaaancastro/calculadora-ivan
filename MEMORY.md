@@ -18,7 +18,7 @@
 
 - **Fase D3 Rendimiento hecha (`feat/premium-rendimiento*`, PRs #119, #131 y gráficas):** héroe «Hoy» con narrativa/KPI, grupos, receta de tarjeta, estados vacíos y capa Forma en gráficas, todo v2. Pendiente D7 de las 6 capturas. Detalle: `docs/branches/feat/premium-rendimiento/tasks.md`.
 - **Fase Premium D4 Salud hecha (#120, #121, #123, `feat/premium-salud`):** `HealthHero`, banco de energía v2, biomarcadores por estado con `Sparkline` (`biomarkerStatus.js`), historial v2 (tendencia en área, banda óptima, detalle del día). Pendiente D7. Descartado por v1 congelada: píldoras por tokens e insights numerados. Detalle: `docs/branches/feat/premium-salud/tasks.md`.
-- **Fase D5 Calendario (`feat/premium-calendario`):** spec/plan aprobados; PR 1 (cabecera del mes) abierto; las capturas v2 del Calendario cambian a propósito (workflow `Update snapshots`). Tareas en `docs/branches/feat/premium-calendario/tasks.md`.
+- **Fase D5 Calendario (`feat/premium-calendario*`, #128 y PR 2):** cabecera narrativa del mes + KPI hecha; PR 2 (tinte de carga, estados, panel semanal) abierto. Ojo: en móvil el pager mide la pestaña más alta, así que cambiar la altura del Calendario mueve las capturas móviles de las demás pantallas. Tareas en `docs/branches/feat/premium-calendario/tasks.md`.
 
 
 - **Fase D7 Ajustes/Perfil (`feat/premium-perfil*`, #126, #129 y PR 3):** spec/plan aprobados; cabecera/guardado/menú, General/Zonas y Cuentas/Seguridad en v2. Tareas en `docs/branches/feat/premium-perfil/tasks.md`.
