@@ -11,7 +11,7 @@
 
 ## 1. Estado actual
 - **Capa 6 en curso** (`docs/branches/feat/capa6-v2-premium/`: spec v0.3, plan de 21 PR, auditoría y `tasks.md` con el progreso). v2 es la única interfaz; v1 retirada (PR 4 y 5a–c). Siguiente: tema y piel aplanada (7a/7b), bugs y utils (8–11), paleta elegida por el usuario (12–13) y pantallas premium (14–19).
-- **Hecho antes (resumen en `CHANGELOG.md`, detalle en el historial de git):** Capas 0–5 del rediseño y Fase Premium A–D (PR #50–#139). Las carpetas de `docs/branches/` de esas ramas se borraron en la Capa 6 (D12).
+- **Hecho antes (resumen en `CHANGELOG.md`, detalle en el historial de git):** Capas 0–5 del rediseño y Fase Premium A–D (PR #50–#139). Cada rama conserva su carpeta en `docs/branches/` (D12: se quedan en el repositorio, visibles en GitHub).
 - **Pendiente después:** Capa 7 (iOS). Roadmap: `docs/branches/feat/webapp-redesign/plan.md`.
 - **Pendientes de producto:** funciones de pago a futuro (no prometer gratuidad); Strava se replantea por sus límites de API y se estudiará **Garmin**. Deuda de la Capa 4: `robots.txt`/`og:image` y CSS bloqueante.
 - `feat/webapp-redesign` remoto = intento descartado: no hacer `git pull` ahí ni usar `archive/webapp-redesign-v1` ni `stash@{0}`.
@@ -30,7 +30,7 @@
 - Auditoría vigente: `docs/branches/feat/capa6-v2-premium/auditoria.md`.
 
 ## 4. Specs
-Specs vivas en `docs/specs/` y `docs/branches/`. Las cerradas, en el historial de git y en `docs/memory/` (archivo histórico, sección 3).
+Todas en `docs/specs/` y `docs/branches/`. Tabla completa con estados: `docs/memory/` (archivo histórico, sección 3).
 
 ---
 Última actualización: 2026-11-19
