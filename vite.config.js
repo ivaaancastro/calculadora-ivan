@@ -9,7 +9,7 @@ const config = {
     ...(process.env.VITEST ? [] : [
       VitePWA({
         registerType: 'autoUpdate',
-        includeAssets: ['favicon.svg', 'favicon-32x32.png', 'favicon-64x64.png', 'apple-touch-icon.png', 'apple-touch-icon-precomposed.png'],
+        includeAssets: ['favicon.svg', 'favicon-32x32.png', 'favicon-64x64.png', 'apple-touch-icon.png'],
         manifest: {
           name: 'Forma - Rendimiento Deportivo',
           short_name: 'Forma',

@@ -28,6 +28,7 @@ jobs:
       - run: npm run lint:colors
       - run: npm run lint:ui
       - run: npm run lint:motion
+      - run: npm run lint:orphans
       - name: La imagen de Playwright del job e2e coincide con package.json
         run: |
           v="$(node -p "require('@playwright/test/package.json').version")"
