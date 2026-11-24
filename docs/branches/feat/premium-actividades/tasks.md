@@ -12,4 +12,5 @@ Spec y plan aprobados (D-1 sesiones, D-2 semana, D-3 panel lateral ≥ 1280).
 - [ ] Lista aplanada con cabeceras de semana sticky (virtualizador heterogéneo), fila v2, barra TSS, borrar en hover; tests.
 
 ## PR 3 — Filtros y cierre
-- [ ] Chips de deporte, `max-w` 1100, panel lateral ≥ 1280, vacío con «Quitar filtros»; snapshots v2 de `/history` (workflow); MEMORY/CHANGELOG; marcar D6 en `premium-design/tasks.md`.
+- [x] Chips de deporte (`SportChips`), `max-w` 1100, panel lateral ≥ 1280 (`SportBreakdown`), vacío con «Quitar filtros». Desvío: el panel lateral solo trae el reparto por deporte; el resumen (cifra + sparkline) se queda en la cabecera de la tarjeta en todos los anchos.
+- [ ] Snapshots v2 de `/history` (Docker); MEMORY/CHANGELOG; marcar D6 en `premium-design/tasks.md`; PR abierto y CI verde.
