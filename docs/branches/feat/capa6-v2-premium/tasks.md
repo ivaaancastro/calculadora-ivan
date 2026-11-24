@@ -1,0 +1,44 @@
+# Tareas: Capa 6, v2 por defecto, CI rápido y acabado premium
+
+Spec: `spec.md` v0.3 (aprobada 2026-11-24). Plan: `plan.md`. Hallazgos: `auditoria.md`.
+
+**Decisiones aprobadas:** D1–D10 y D12 según la recomendación en negrita de la spec §8.
+**D11:** se conservan `.opencode/` y `skills/README.md` (pendiente de confirmar con el usuario junto con la paleta).
+
+**Forma de trabajar:** una rama por PR. Si hay dependencia, la rama sale de la anterior y su PR apunta a `develop` indicando de qué rama depende. Merges agrupados por hitos y siempre con autorización del usuario.
+
+## PR
+
+- [ ] **PR 0** `feat/capa6-v2-premium`: spec, plan, auditoría y este `tasks.md`.
+- [ ] **PR 1** `ci/rapido`: CI de < 5 min, sin capturas ni style-diff; E2E funcional; `layout` en DOM; AGENTS §8 y MEMORY §2.
+- [ ] **PR 2** `fix/mapa-detalle`: `map_polyline` en `LIGHT_COLS`, streams tardíos, streams por id; E2E por URL directa.
+- [ ] **PR 3** `fix/strava-token-edge`: Edge Function `strava-token`; sin `VITE_STRAVA_CLIENT_SECRET`. **Acción del usuario:** rotar secreto, `supabase secrets set`, `supabase functions deploy strava-token`.
+- [ ] **PR 4** `feat/v2-por-defecto`: v2 siempre activa; sin interruptor, `useUiMode`, `VITE_UI` ni script de `index.html`.
+- [ ] **PR 5a** `refactor/retirar-v1-publico`.
+- [ ] **PR 5b** `refactor/retirar-v1-panel`.
+- [ ] **PR 5c** `refactor/retirar-v1-analisis`.
+- [ ] **PR 6** `chore/limpieza`: huérfanos, raíz, icono, codemods, `docs/branches` cerradas, `lint:orphans`.
+- [ ] **PR 7a** `refactor/tema-base`: tipografía ≥ 11 px, mono, `lint:type`, `axisProps`, espaciado y ancho máximo.
+- [ ] **PR 7b** `refactor/piel-aplanada`: sin `data-ui`, `skin-v2.css` < 300 líneas, `dark:` a tokens.
+- [ ] **PR 8** `fix/bugs-auditoria`: BUG-3, 4, 5, 8, 11.
+- [ ] **PR 9** `refactor/utils-comunes`: DUP-1..6, `dates`, `formatNumber`.
+- [ ] **PR 10** `fix/estado-forma-y-calendario`: BUG-1, 2, 6, 7, 9, 10, 12.
+- [ ] **PR 11** `fix/copy-y-a11y`: COP-1, COP-2, A11Y-1..5.
+- [ ] **PR 12** `docs/paleta-propuestas`: 2–3 direcciones en capturas reales. **Parada: el usuario elige.**
+- [ ] **PR 13** `feat/paleta`: paleta elegida en tokens y `chartTheme`, contraste AA.
+- [ ] **PR 14** `feat/premium-sistema`: `docs/design/forma.md`, `Hero`/`Stat`, `EmptyState` con `tone`, helper `data-metric`.
+- [ ] **PR 15** `feat/premium-dashboard`.
+- [ ] **PR 16** `feat/premium-detalle`.
+- [ ] **PR 17** `feat/premium-salud`.
+- [ ] **PR 18** `feat/premium-rendimiento`.
+- [ ] **PR 19** `feat/premium-resto`.
+- [ ] **PR 20** `chore/cierre`: PWA, CHANGELOG, MEMORY, estados de specs, `lint:orphans` = 0.
+
+## Tiempos de CI (mediana de los 3 primeros PR tras el PR 1)
+
+| PR | Duración del CI | Notas |
+|---|---|---|
+| antes | 20–30 min | E2E con 1 worker y capturas 3 × 2 + style-dump 9,5 min |
+
+## Registro
+- 2026-11-24: spec y plan aprobados; creado este `tasks.md`.
