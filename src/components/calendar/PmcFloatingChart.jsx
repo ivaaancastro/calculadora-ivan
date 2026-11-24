@@ -119,41 +119,41 @@ export const PmcFloatingChart = ({ pmcByDate, onClose, initPos }) => {
     const isMobileScreen = typeof window !== 'undefined' && window.innerWidth < 640;
 
     return (
-        <div data-skin="calendar" className={isMobileScreen ? "fixed z-floating inset-x-0 bottom-0 bg-surface border-t border-line-2 rounded-t-3xl shadow-2xl overflow-y-auto max-h-[90vh] pb-safe select-none" : "fixed z-floating bg-surface border border-line-2 rounded-xl shadow-2xl overflow-visible select-none"}
+        <div data-skin="calendar" data-cal="pmc" className={isMobileScreen ? "fixed z-floating inset-x-0 bottom-0 bg-surface border-t border-line-2 rounded-t-3xl shadow-2xl overflow-y-auto max-h-[90vh] pb-safe select-none" : "fixed z-floating bg-surface border border-line-2 rounded-xl shadow-2xl overflow-visible select-none"}
             style={isMobileScreen ? {} : { left: pos.x, top: pos.y, width: Math.min(480, window.innerWidth - 32) }}>
             {/* Title / drag bar */}
             <div className="flex items-center justify-between px-3 py-2 bg-sunken-2 border-b border-line-soft-2 rounded-t-xl cursor-grab active:cursor-grabbing"
                 onPointerDown={handleDragDown} onPointerMove={handleDragMove} onPointerUp={handleDragUp}>
                 <div className="flex items-center gap-2">
-                    <Activity size={12} className="text-violet-500" />
+                    <Activity size={12} data-cal="pmc-icon" className="text-violet-500" />
                     <span className="text-[10px] font-black text-body-soft-2 uppercase tracking-widest">Proyección de Forma</span>
                 </div>
                 {lastReal && (
                     <div className="flex items-center gap-3 mr-2">
-                        <span className="text-[9px] font-bold text-metric-ctl">CTL {Math.round(lastReal.ctl)}</span>
-                        <span className="text-[9px] font-bold text-legacy-atl-red">ATL {Math.round(lastReal.atl)}</span>
-                        <span className={`text-[9px] font-bold ${lastReal.tcb >= 0 ? 'text-legacy-tsb-up' : 'text-legacy-tsb-down'}`}>
+                        <span data-cal="pmc-stat" className="text-[9px] font-bold text-metric-ctl">CTL {Math.round(lastReal.ctl)}</span>
+                        <span data-cal="pmc-stat" className="text-[9px] font-bold text-legacy-atl-red">ATL {Math.round(lastReal.atl)}</span>
+                        <span data-cal="pmc-stat" className={`text-[9px] font-bold ${lastReal.tcb >= 0 ? 'text-legacy-tsb-up' : 'text-legacy-tsb-down'}`}>
                             TSB {lastReal.tcb >= 0 ? '+' : ''}{Math.round(lastReal.tcb)}
                         </span>
                     </div>
                 )}
-                <button onClick={onClose} className="p-0.5 text-slate-400 hover:text-slate-700 dark:hover:text-zinc-200 rounded transition-colors">
+                <button onClick={onClose} data-cal="modal-close" className="p-0.5 text-slate-400 hover:text-slate-700 dark:hover:text-zinc-200 rounded transition-colors">
                     <X size={13} />
                 </button>
             </div>
 
             {/* Legend / Toolbar */}
-            <div className="flex items-center gap-4 px-4 pt-2.5 text-[10px] font-bold text-ink-3">
+            <div data-cal="pmc-legend" className="flex items-center gap-4 px-4 pt-2.5 text-[10px] font-bold text-ink-3">
                 <label className="flex items-center gap-1.5 cursor-pointer hover:text-blue-500 transition-colors">
-                    <input type="checkbox" checked={viewOpts.top} onChange={e => setViewOpts(v => ({ ...v, top: e.target.checked }))} className="accent-blue-500 rounded-sm w-3 h-3" />
+                    <input type="checkbox" checked={viewOpts.top} onChange={e => setViewOpts(v => ({ ...v, top: e.target.checked }))} data-series="ctl" className="accent-blue-500 rounded-sm w-3 h-3" />
                     <span>Aptitud / Fatiga</span>
                 </label>
                 <label className="flex items-center gap-1.5 cursor-pointer hover:text-emerald-500 transition-colors">
-                    <input type="checkbox" checked={viewOpts.mid} onChange={e => setViewOpts(v => ({ ...v, mid: e.target.checked }))} className="accent-emerald-500 rounded-sm w-3 h-3" />
+                    <input type="checkbox" checked={viewOpts.mid} onChange={e => setViewOpts(v => ({ ...v, mid: e.target.checked }))} data-series="tsb" className="accent-emerald-500 rounded-sm w-3 h-3" />
                     <span>Forma</span>
                 </label>
                 <label className="flex items-center gap-1.5 cursor-pointer hover:text-amber-500 transition-colors">
-                    <input type="checkbox" checked={viewOpts.bot} onChange={e => setViewOpts(v => ({ ...v, bot: e.target.checked }))} className="accent-amber-500 rounded-sm w-3 h-3" />
+                    <input type="checkbox" checked={viewOpts.bot} onChange={e => setViewOpts(v => ({ ...v, bot: e.target.checked }))} data-series="ramp" className="accent-amber-500 rounded-sm w-3 h-3" />
                     <span>Rampa</span>
                 </label>
             </div>
@@ -255,7 +255,7 @@ export const PmcFloatingChart = ({ pmcByDate, onClose, initPos }) => {
             {hoverEntry && (() => {
                 const tooltipLeft = hover.x > W * 0.65;
                 return (
-                    <div className="absolute top-3 pointer-events-none bg-surface-7 border border-line-2 rounded-lg shadow-lg px-3 py-2 text-[10px] z-10 min-w-[130px]"
+                    <div data-cal="pmc-tooltip" className="absolute top-3 pointer-events-none bg-surface-7 border border-line-2 rounded-lg shadow-lg px-3 py-2 text-[10px] z-10 min-w-[130px]"
                         style={{ [tooltipLeft ? 'right' : 'left']: tooltipLeft ? 16 : 50 }}>
                         <p className="font-bold text-body-soft-2 mb-1.5">
                             {new Date(hoverEntry.date + 'T00:00:00').toLocaleDateString('es-ES', { weekday: 'short', day: 'numeric', month: 'short' })}
@@ -277,7 +277,7 @@ export const PmcFloatingChart = ({ pmcByDate, onClose, initPos }) => {
                                 </span>
                             </div>
                             <div className="flex justify-between gap-4 pt-1 border-t border-slate-100 dark:border-zinc-700 mt-1">
-                                <span className="text-emerald-600 font-semibold">Rampa (est)</span>
+                                <span data-cal="pmc-ramp" className="text-emerald-600 font-semibold">Rampa (est)</span>
                                 <span className="font-mono font-bold text-body-2">{hoverEntry.ramp.toFixed(1)}</span>
                             </div>
                         </div>

@@ -10,6 +10,7 @@ export const CalendarMonthView = ({
     activitiesByDate,
     calendarGrid,
     loadLevels = {},
+    isV2 = false,
     dragOverDate,
     fullPmcByDate,
     handleDragLeave,
@@ -57,6 +58,15 @@ export const CalendarMonthView = ({
 
                                 return (
                                     <div key={wIdx} data-cal="week" className="grid grid-cols-1 lg:grid-cols-[130px_repeat(7,1fr)] border-b border-line-soft-5 last:border-b-0">
+
+                                        {/* Resumen semanal compacto: solo existe en v2 y por debajo de 1024 px (en v1 no se monta). */}
+                                        {isV2 && (
+                                            <div data-cal="week-chip" className="lg:hidden">
+                                                <span>S{weekNum}{isProjected ? ' · proy.' : ''}</span>
+                                                <span>{Math.round(weekRealizedTSS)}/{Math.round(weekPlannedTSS)} TSS</span>
+                                                <span>{formatDuration(weekDuration)}</span>
+                                            </div>
+                                        )}
 
                                         {/* ====== PANEL SEMANAL IZQUIERDO ====== */}
                                         <div data-cal="week-panel" className="hidden lg:flex flex-col border-r border-line-faint bg-transparent text-[10px] relative overflow-hidden">

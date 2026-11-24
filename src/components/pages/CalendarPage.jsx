@@ -89,6 +89,7 @@ export const CalendarPage = ({ activities, plannedWorkouts = [], addPlannedWorko
                         activitiesByDate={activitiesByDate}
                         calendarGrid={calendarGrid}
                         loadLevels={loadLevels}
+                        isV2={isV2}
                         dragOverDate={dragOverDate}
                         fullPmcByDate={fullPmcByDate}
                         handleDragLeave={handleDragLeave}
