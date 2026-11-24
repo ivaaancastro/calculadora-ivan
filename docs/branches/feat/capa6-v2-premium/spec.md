@@ -5,7 +5,7 @@
 - **Título:** Activar v2 para todos, retirar v1, aligerar el CI, limpiar el repositorio y dejar v2 al nivel premium, cómoda de usar y sin bugs.
 - **Autor:** agente Claude Code
 - **Fecha:** 2026-11-24
-- **Estado:** pendiente de aprobación del usuario (versión 0.3, con el feedback del usuario del 2026-11-24)
+- **Estado:** aprobada por el usuario el 2026-11-24 (versión 0.3), en ejecución
 - **Sustituye a:** `spec-auditoria-rediseno-01`. Esta spec es la Capa 6 del `plan.md` de `webapp-redesign`.
 
 ## 2. Objetivo
