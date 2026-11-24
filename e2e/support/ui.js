@@ -1,5 +1,5 @@
 /**
- * Utilidades compartidas por las pruebas de interfaz (visual, layout, táctil, gestos).
+ * Utilidades compartidas por las pruebas de interfaz (layout, móvil y funcionales).
  * Los datos simulados viven en mockApp.js; aquí solo hay rutas y sondas del DOM.
  */
 import { expect } from '@playwright/test';
@@ -10,8 +10,7 @@ export const openScreen = (page, screen) => gotoReady(page, screen.path, screen.
 
 /** Pantallas cubiertas por la red de seguridad. `auth: false` = sin sesión. */
 export const SCREENS = [
-  // La landing no tiene gráficas y su hero mide 100vh: se captura con `fullPage` sin redimensionar.
-  { name: 'landing', path: '/', auth: false, fullPage: true },
+  { name: 'landing', path: '/', auth: false },
   { name: 'dashboard', path: '/', auth: true },
   { name: 'rendimiento', path: '/stats', auth: true },
   { name: 'calendario', path: '/calendar', auth: true },
@@ -22,8 +21,6 @@ export const SCREENS = [
   { name: 'salud', path: '/health', auth: true },
   { name: 'perfil', path: '/profile', auth: true },
 ];
-
-export const THEMES = ['light', 'dark'];
 
 /** Navega a `path` y espera a que la pantalla esté estable (sin cargas ni esqueletos). */
 export async function gotoReady(page, path, via) {
@@ -150,59 +147,47 @@ export async function swipeHorizontally(page, locator, dx = -220) {
   const steps = 8;
   for (let i = 1; i <= steps; i++) {
     await touch('touchMove', startX + (dx * i) / steps);
-    await page.waitForTimeout(16);
+    // Ritmo del gesto (~60 Hz), no una espera de estado: sin él, el navegador lo ve como un salto.
+    await new Promise((r) => setTimeout(r, 16));
   }
   await touch('touchEnd', startX + dx);
   await cdp.detach();
-  await page.waitForTimeout(500);
 }
 
 /**
- * Deja la página lista para capturarla entera SIN usar `fullPage`: cada captura de
- * página completa redimensiona el viewport y las gráficas responsivas de Recharts
- * reinician su animación, lo que hace las capturas inestables. En su lugar se ajusta
- * el viewport a la altura del documento una vez, se espera a que todo se asiente y
- * después se captura solo el viewport.
+ * Bloques hermanos que se solapan (PRO-1): dentro de `main`, dos hijos en flujo normal del mismo
+ * padre no deberían ocupar el mismo sitio. Ignora capas posicionadas, gráficas, mapas e iconos.
  */
-export async function settleForScreenshot(page, { resize = true } = {}) {
-  const { width, height: originalHeight } = page.viewportSize();
-  // La landing revela sus secciones con IntersectionObserver al hacer scroll: se recorre la
-  // página entera para que todo el contenido esté visible en la captura.
-  await page.evaluate(async () => {
-    const step = Math.max(window.innerHeight * 0.7, 200);
-    for (let y = 0; y < document.documentElement.scrollHeight; y += step) {
-      window.scrollTo(0, y);
-      await new Promise((r) => setTimeout(r, 120));
+export function overlappingBlocks(page, tolerance = 4) {
+  return page.evaluate((tol) => {
+    const root = document.querySelector('main') || document.body;
+    const SKIP = '.recharts-wrapper, .leaflet-container, svg, [aria-hidden=true]';
+    const inFlow = (el) => {
+      const s = getComputedStyle(el);
+      if (s.display === 'none' || s.display === 'contents' || s.visibility === 'hidden') return false;
+      if (s.position === 'absolute' || s.position === 'fixed' || s.position === 'sticky') return false;
+      if (s.display.startsWith('inline') && s.display !== 'inline-flex' && s.display !== 'inline-grid') return false;
+      const r = el.getBoundingClientRect();
+      return r.width > tol && r.height > tol && r.right > 0 && r.left < window.innerWidth;
+    };
+    const label = (el) =>
+      `${el.tagName.toLowerCase()}${el.className && typeof el.className === 'string' ? '.' + el.className.trim().split(/\s+/).slice(0, 2).join('.') : ''} "${(el.innerText || '').trim().replace(/\s+/g, ' ').slice(0, 30)}"`;
+    const out = [];
+    for (const parent of root.querySelectorAll('*')) {
+      if (parent.closest(SKIP)) continue;
+      const kids = [...parent.children].filter((k) => !k.matches(SKIP) && inFlow(k));
+      if (kids.length < 2) continue;
+      const rects = kids.map((k) => k.getBoundingClientRect());
+      for (let i = 0; i < kids.length; i++) {
+        for (let j = i + 1; j < kids.length; j++) {
+          const a = rects[i];
+          const b = rects[j];
+          const w = Math.min(a.right, b.right) - Math.max(a.left, b.left);
+          const h = Math.min(a.bottom, b.bottom) - Math.max(a.top, b.top);
+          if (w > tol && h > tol) out.push(`${label(kids[i])} ⨯ ${label(kids[j])}`);
+        }
+      }
     }
-    window.scrollTo(0, 0);
-  });
-  // 1) Altura natural del documento con el viewport original, esperando a que no cambie.
-  let last = -1;
-  let stable = 0;
-  for (let i = 0; i < 40 && stable < 4; i++) {
-    const h = await page.evaluate(() => document.documentElement.scrollHeight);
-    stable = h === last ? stable + 1 : 0;
-    last = h;
-    await page.waitForTimeout(250);
-  }
-  if (!resize) {
-    await page.waitForTimeout(500);
-    return;
-  }
-  // 2) Un único ajuste (sin iterar: los elementos con alto en `vh` crecerían en cada vuelta).
-  await page.setViewportSize({ width, height: Math.max(last, originalHeight) });
-  await page.waitForTimeout(600);
-  // Las gráficas de Recharts se animan por JS (no por CSS): se espera a que terminen.
-  await page.waitForTimeout(3000);
-  await page
-    .waitForFunction(
-      () => {
-        const bars = [...document.querySelectorAll('.recharts-bar')].filter((b) => b.getBoundingClientRect().width > 0);
-        return bars.every((b) => b.querySelectorAll('.recharts-bar-rectangle').length > 0);
-      },
-      null,
-      { timeout: 6000 },
-    )
-    .catch(() => {});
-  await page.waitForTimeout(500);
+    return out;
+  }, tolerance);
 }

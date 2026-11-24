@@ -1,5 +1,7 @@
 name: CI
 
+# CI rápido (spec-capa6-v2-premium, RF-A1): dos jobs en paralelo y sin capturas.
+# Objetivo: menos de 5 minutos por PR.
 on:
   push:
     branches: [ main, develop ]
@@ -7,255 +9,53 @@ on:
     branches: [ main, develop ]
   workflow_dispatch:
 
+concurrency:
+  group: ci-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
 jobs:
-  lint:
+  check:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
-      - name: Use Node.js
-        uses: actions/setup-node@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: '20.x'
           cache: 'npm'
-      - name: Install dependencies
-        run: npm ci
-      - name: Run Linter
-        run: npm run lint
-      - name: Check loose colors (tokens ratchet)
-        run: npm run lint:colors
-      - name: Check UI primitives (usage, retired classes, className)
-        run: npm run lint:ui
-      - name: Check transition-all ratchet
-        run: npm run lint:motion
-      - name: Check Playwright image matches package version
+      - run: npm ci --no-audit --no-fund
+      - run: npm run lint
+      - run: npm run lint:colors
+      - run: npm run lint:ui
+      - run: npm run lint:motion
+      - name: La imagen de Playwright del job e2e coincide con package.json
         run: |
           v="$(node -p "require('@playwright/test/package.json').version")"
           grep -q "playwright:v${v}-noble" .github/workflows/ci.yml || {
             echo "❌ La imagen de Playwright de ci.yml no es v${v}-noble (la de package.json)"; exit 1; }
-
-  validate-specs:
-    runs-on: ubuntu-latest
-    needs: lint
-    steps:
-      - uses: actions/checkout@v4
-      - name: Validate specs exist and are well-formed
-        run: |
-          if [ ! -d docs/specs ]; then
-            echo "❌ Falta carpeta docs/specs"
-            exit 1
-          fi
-          if [ ! -f MEMORY ]; then
-            echo "❌ Falta archivo MEMORY"
-            exit 1
-          fi
-          if [ ! -f AGENTS ]; then
-            echo "❌ Falta archivo AGENTS"
-            exit 1
-          fi
-          echo "✅ Estructura SDD validada"
-
-  test:
-    runs-on: ubuntu-latest
-    needs: [lint, validate-specs]
-    steps:
-      - uses: actions/checkout@v4
-      - name: Use Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20.x'
-          cache: 'npm'
-      - name: Install dependencies
-        run: npm ci
-      - name: Run Unit & Integration Tests with Coverage
-        run: npm run test:coverage
+      - run: npx vitest run --reporter=dot
+      - run: npm run build
 
   e2e:
     runs-on: ubuntu-latest
-    needs: test
-    if: github.event_name == 'push' || github.event.pull_request.head.repo.full_name == github.repository
-    # Imagen oficial de Playwright (Ubuntu): las capturas de referencia se generan
-    # con la misma imagen (npm run test:e2e:update), así que son comparables.
+    timeout-minutes: 10
+    if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
     container:
       image: mcr.microsoft.com/playwright:v1.61.1-noble
       options: --ipc=host
     steps:
       - uses: actions/checkout@v4
-      - name: Use Node.js
-        uses: actions/setup-node@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: '20.x'
           cache: 'npm'
-      - name: Install dependencies
-        run: npm ci
-      - name: Run Playwright E2E Tests
-        run: npm run test:e2e
+      - run: npm ci --no-audit --no-fund
+      - run: npx playwright test
       - uses: actions/upload-artifact@v4
-        if: always()
+        if: failure()
         with:
           name: playwright-report
           path: |
             playwright-report/
             test-results/
-          retention-days: 30
-
-  build:
-    runs-on: ubuntu-latest
-    needs: test
-    steps:
-      - uses: actions/checkout@v4
-      - name: Use Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20.x'
-          cache: 'npm'
-      - name: Install dependencies
-        run: npm ci
-      - name: Run Build
-        run: npm run build
-
-  # ── Verificación de estilos (spec-verificacion-rapida) ──────────────────────────────────
-  # `changes` decide si un PR toca estilos (scripts/changed-lane.mjs) y localiza el volcado
-  # «antes» ya publicado por `style-baseline` para el SHA base del PR.
-  changes:
-    runs-on: ubuntu-latest
-    if: github.event_name == 'pull_request'
-    outputs:
-      visual: ${{ steps.lane.outputs.visual }}
-      baseline_run: ${{ steps.baseline.outputs.run_id }}
-      base_sha: ${{ steps.base.outputs.sha }}
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-      # Base REAL del merge: primer padre del commit de merge. `pull_request.base.sha` puede estar
-      # desfasado si develop avanzó tras abrir el PR (visto en el PR #105: diferencias fantasma).
-      - id: base
-        run: |
-          sha="$(git rev-parse HEAD^1)"
-          git merge-base --is-ancestor "$sha" HEAD || {
-            echo "❌ El baseline ($sha) no es ancestro del commit evaluado: el style-diff compararía código distinto."; exit 1; }
-          echo "sha=$sha" >> "$GITHUB_OUTPUT"
-          echo "Baseline = $sha (primer padre del merge)"
-      - id: lane
-        run: node scripts/changed-lane.mjs --base "$BASE_REF" --github-output
-        env:
-          BASE_REF: ${{ github.base_ref }}
-      - id: baseline
-        if: steps.lane.outputs.visual == 'true'
-        uses: actions/github-script@v7
-        with:
-          script: |
-            const name = `style-dump-${{ steps.base.outputs.sha }}`;
-            const { data } = await github.rest.actions.listArtifactsForRepo({
-              owner: context.repo.owner, repo: context.repo.repo, name, per_page: 5,
-            });
-            const art = data.artifacts.find((a) => !a.expired);
-            core.setOutput('run_id', art ? String(art.workflow_run.id) : '');
-            core.info(art ? `baseline ${name} en el run ${art.workflow_run.id}` : `sin baseline ${name}: se regenerará`);
-
-  # Push a develop: calcula el volcado una sola vez y lo guarda por SHA (7 días, ~1 MB).
-  style-baseline:
-    runs-on: ubuntu-latest
-    needs: lint
-    if: github.event_name == 'push' && github.ref == 'refs/heads/develop'
-    container:
-      image: mcr.microsoft.com/playwright:v1.61.1-noble
-      options: --ipc=host
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: '20.x'
-          cache: 'npm'
-      - run: npm ci
-      - run: bash scripts/ci-style-dump.sh . style-dump
-      - uses: actions/upload-artifact@v4
-        with:
-          name: style-dump-${{ github.sha }}
-          path: style-dump/
-          retention-days: 7
-
-  # PR que toca estilos: «después» (merge del PR) y «antes» (base real) se vuelcan EN PARALELO y un
-  # tercer job los compara. Con baseline publicado por develop (`style-baseline`) no hay job «antes».
-  style-after:
-    runs-on: ubuntu-latest
-    needs: [lint, changes]
-    if: github.event_name == 'pull_request' && needs.changes.outputs.visual == 'true' && github.event.pull_request.head.repo.full_name == github.repository
-    container:
-      image: mcr.microsoft.com/playwright:v1.61.1-noble
-      options: --ipc=host
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: '20.x'
-          cache: 'npm'
-      - run: npm ci
-      - run: bash scripts/ci-style-dump.sh . style-after
-      - uses: actions/upload-artifact@v4
-        with:
-          name: style-after
-          path: style-after/
-          retention-days: 3
-
-  style-before:
-    runs-on: ubuntu-latest
-    needs: [lint, changes]
-    if: github.event_name == 'pull_request' && needs.changes.outputs.visual == 'true' && needs.changes.outputs.baseline_run == '' && github.event.pull_request.head.repo.full_name == github.repository
-    container:
-      image: mcr.microsoft.com/playwright:v1.61.1-noble
-      options: --ipc=host
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          ref: ${{ needs.changes.outputs.base_sha }}
-      - uses: actions/setup-node@v4
-        with:
-          node-version: '20.x'
-          cache: 'npm'
-      - run: npm ci
-      - run: bash scripts/ci-style-dump.sh . style-before
-      - uses: actions/upload-artifact@v4
-        with:
-          name: style-before
-          path: style-before/
-          retention-days: 3
-
-  style-diff:
-    runs-on: ubuntu-latest
-    needs: [changes, style-after, style-before]
-    if: always() && needs.style-after.result == 'success' && (needs.style-before.result == 'success' || needs.style-before.result == 'skipped')
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: '20.x'
-      - uses: actions/download-artifact@v4
-        with:
-          name: style-after
-          path: style-after
-      - name: Baseline publicado por develop
-        if: needs.changes.outputs.baseline_run != ''
-        uses: actions/download-artifact@v4
-        with:
-          name: style-dump-${{ needs.changes.outputs.base_sha }}
-          run-id: ${{ needs.changes.outputs.baseline_run }}
-          github-token: ${{ github.token }}
-          path: style-before
-      - name: Baseline regenerado por style-before
-        if: needs.changes.outputs.baseline_run == ''
-        uses: actions/download-artifact@v4
-        with:
-          name: style-before
-          path: style-before
-      - name: style-diff (debe dar 0 diferencias)
-        run: node scripts/style-diff.mjs style-before style-after --tolerate-grid-count | tee style-diff.txt; test "${PIPESTATUS[0]}" -eq 0
-        shell: bash
-      - uses: actions/upload-artifact@v4
-        if: failure()
-        with:
-          name: style-diff-result
-          path: |
-            style-diff.txt
-            style-after/
           retention-days: 7

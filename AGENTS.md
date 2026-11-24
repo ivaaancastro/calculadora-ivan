@@ -187,31 +187,28 @@ Al iniciar cualquier nueva sesión, el agente debe:
 El coste crece con cada turno porque se relee todo el contexto. Reglas:
 
 1. **Una sesión por fase de `tasks.md`**, no por rama. Al cerrar una sección (o pasar de ~150 turnos), registrar el estado en `tasks.md`/`MEMORY.md` y abrir sesión nueva.
-2. **Nunca leer capturas PNG en bloque.** Se comparan por píxeles (`style-diff`, Playwright). Solo se leen con `Read` las que cambian a propósito (las 12 de v2 en D7), una a una y, si se puede, reducidas.
+2. **Capturas, solo las necesarias:** el repositorio no guarda capturas de referencia. Las de revisión se hacen en el navegador integrado y se leen una a una, reducidas si se puede.
 3. **Salida de comandos en silencio:** lint, tests y build se ejecutan filtrando (`| tail -20`, `--reporter=dot`); solo se muestra el resumen o el fallo.
 4. **`MEMORY.md` es corto.** El histórico va a `docs/memory/` y los detalles de cada rama a su `tasks.md`; leer secciones con `offset`/`limit`, no ficheros enteros de más de 20 KB.
 5. **Modelo y esfuerzo:** Sonnet por defecto; esfuerzo bajo/medio en trabajo mecánico (CSS, tokens, tests, docs); Opus solo para decisiones de diseño o depuración difícil.
-6. **Trabajo pesado fuera de la máquina:** el E2E completo y el `style-diff` los ejecuta el CI en cada PR (ver §8 bis); en local solo se corre lo pesado que esa sección permita, siempre bajo el mutex.
+6. **Lo pesado, en el CI:** el E2E completo lo ejecuta el CI en cada PR; en local no se repite.
 
+### 8 bis. Verificación (obligatorio)
 
-### 8 bis. Verificación por carriles (obligatorio)
-
-Spec: `docs/branches/chore/verificacion-rapida/spec.md`. Principio: **local barato en cada feat; lo pesado, una vez y fuera de la máquina.**
+Spec: `docs/branches/feat/capa6-v2-premium/spec.md` (RF-A1–A4). Principio: **local barato en cada cambio; el E2E, en el CI; la revisión visual, a ojo del agente.**
 
 | Qué | Dónde | Cuándo |
 |-----|-------|--------|
-| lint, `lint:ui`, `lint:colors`, vitest, build | local: `npm run verify` | En cada feat, tanto si es carril `fast` como `visual` (`node scripts/changed-lane.mjs` lo clasifica). |
-| E2E completo, capturas, `style-diff` de PR | CI (`ci.yml`) | En todo PR (el `style-diff` solo si el diff toca estilos). **No se repiten en local.** |
-| E2E de un spec | local: `npm run verify -- --e2e <spec> [--project <p>]` | Solo si hay que regenerar capturas a propósito. |
-| Regenerar capturas | workflow `Update snapshots` (Actions, a mano sobre la rama) o `npm run test:e2e:update` | Solo las que cambian a propósito; revisar una a una (§8.2). |
-| `style-diff` completo + capturas | local: `npm run verify:layer [-- --snapshots]` | **Una vez al cerrar cada capa**, no por feat. v1 debe dar 0 diferencias. |
+| lint, `lint:ui`, `lint:colors`, `lint:motion`, vitest, build | local: `npm run verify` | En cada cambio, antes de commitear. |
+| E2E funcional (escritorio) + `layout`/`mobile` en DOM (390 y 1440 px) | CI (`ci.yml`, job `e2e`, 4 workers) | En todo PR y push a `develop`/`main`. Objetivo del CI: < 5 min. |
+| Un E2E concreto | local: `npm run verify -- --e2e <spec> [--project <p>]` | Solo al escribir o depurar ese spec. |
+| Revisión visual | navegador integrado del agente (`.claude/launch.json`), con datos reales o con `e2e/support/mockApp.js` | En cada PR de diseño: capturas antes y después a 390 y 1440 px, en claro y oscuro, adjuntas al PR. |
 
-Reglas anti-solapes:
-1. Una sola tarea pesada local a la vez: `scripts/heavy-lock.sh` (lo usan `test:e2e:docker`, `verify --e2e` y `verify:layer`) y espera si `loadavg(1m)` supera 2 × núcleos. No se salta con `HEAVY_SKIP_LOAD=1` salvo que el usuario lo pida.
-2. `E2E_PORT` distinto por sesión; no lanzar dos `verify` a la vez en el mismo worktree.
-3. Nunca commitear capturas generadas fuera de la imagen de Playwright del CI.
-4. Quien tenga duda sobre el carril usa `--lane visual`; el CI protege igualmente.
+Reglas:
+1. **No hay comparaciones visuales automáticas** (sin `toHaveScreenshot`, sin `style-diff`). Las pruebas de interfaz son de DOM: desbordamiento, barras fijas, solapes y objetivos táctiles ≥ 44 px.
+2. **Esperas por estado**, nunca `waitForTimeout`.
+3. `E2E_PORT` distinto por sesión si se corre E2E en local.
 
 ---
 
-Versión: 0.2.0 — 2026-11-12
+Versión: 0.3.0 — 2026-11-24
