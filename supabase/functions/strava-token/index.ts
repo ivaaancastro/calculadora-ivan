@@ -18,7 +18,7 @@ const FETCH_TIMEOUT_MS = 10_000;
 const MAX_VALUE_LENGTH = 512; // los códigos y refresh tokens de Strava son cortos
 
 // Orígenes CORS. ALLOWED_ORIGIN admite uno o varios separados por comas.
-const DEFAULT_ALLOWED_ORIGINS = ["http://localhost:5173", "https://localhost:5173"];
+const DEFAULT_ALLOWED_ORIGINS = ["http://localhost:5173", "https://localhost:5173", "http://localhost:5180"];
 
 function getAllowedOrigin(requestOrigin: string | null): string {
   const envOrigins = (Deno.env.get("ALLOWED_ORIGIN") ?? "")
