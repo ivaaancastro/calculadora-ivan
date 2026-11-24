@@ -13,7 +13,6 @@ import { MmpAndEfCard } from '../fitness/MmpAndEfCard';
 import { Activity, HeartPulse, Trophy } from 'lucide-react';
 import { EmptyState } from '../ui';
 import { StatsHero } from '../fitness/StatsHero';
-import { useUiMode } from '../../hooks/useUiMode';
 
 const CATEGORIES = [
     { id: 'physiology', label: 'Fisiología' },
@@ -34,7 +33,7 @@ export const FitnessStatsPage = ({
     isDeepSyncing,
     deepSyncProgress
 }) => {
-    const { isV2 } = useUiMode();
+    const isV2 = true; // v2 por defecto (Capa 6); las ramas v1 se retiran en los PR 5a–c
     const [mobileCategory, setMobileCategory] = useState('physiology');
 
     const {

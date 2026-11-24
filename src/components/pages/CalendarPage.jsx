@@ -4,7 +4,6 @@ import { ChevronLeft, ChevronRight, Activity } from 'lucide-react';
 
 import { useChartTheme } from '../charts/useChartTheme';
 import { ChartSkinProvider } from '../charts/ChartSkin';
-import { useUiMode } from '../../hooks/useUiMode';
 import { IconButton, Modal } from '../ui';
 import { useCalendarDate } from '../../hooks/useCalendarDate';
 import { useCalendarData } from '../../hooks/useCalendarData';
@@ -20,7 +19,7 @@ import { buildMonthSummary } from '../../utils/monthSummary';
 import { buildDayLoadLevels } from '../../utils/calendarLoad';
 
 export const CalendarPage = ({ activities, plannedWorkouts = [], addPlannedWorkout, deletePlannedWorkout, updatePlannedWorkout, currentMetrics, settings, chartData = [], onDelete, onSelectActivity }) => {
-    const { isV2 } = useUiMode();
+    const isV2 = true; // v2 por defecto (Capa 6); las ramas v1 se retiran en los PR 5a–c
     const { year, month, prevMonth, nextMonth, goToday } = useCalendarDate();
 
     const [showPmcChart, setShowPmcChart] = useState(false);

@@ -4,7 +4,6 @@ import { supabase } from '../../supabase';
 import toast from 'react-hot-toast';
 import { calcZonesFromLTHR } from '../../utils/tssEngine';
 import { useIntervalsSync } from '../../hooks/useIntervalsSync';
-import { useUiMode } from '../../hooks/useUiMode';
 import { Segmented } from '../ui';
 import { getPeakByTime, calcZonesFromFCMax, calcPaceZones } from './profile/zonesCalc';
 import { GeneralSection } from './profile/GeneralSection';
@@ -89,7 +88,7 @@ export const ProfilePage = ({
     const [syncPreview, setSyncPreview] = useState(null); // {weight, rhr, ftp} before confirming
 
     const { syncing: isSyncingIntervals, syncProgress: intervalsSyncProgress, syncAll: syncIntervals } = useIntervalsSync();
-    const { isV2, setUi } = useUiMode();
+    const isV2 = true; // v2 por defecto (Capa 6); las ramas v1 se retiran en los PR 5a–c
 
     const handleSyncIntervals = async () => {
         if (!formData?.intervalsId || !formData?.intervalsKey) {
@@ -401,7 +400,7 @@ export const ProfilePage = ({
                 {/* CONTENT AREA */}
                 <div data-profile="content" className="flex-1 min-w-0">
                     {activeSection === 'general' && (
-                        <GeneralSection formData={formData} isUploadingAvatar={isUploadingAvatar} handleAvatarUpload={handleAvatarUpload} handleChange={handleChange} targetCtl={targetCtl} setTargetCtl={setTargetCtl} isV2={isV2} setUi={setUi} />
+                        <GeneralSection formData={formData} isUploadingAvatar={isUploadingAvatar} handleAvatarUpload={handleAvatarUpload} handleChange={handleChange} targetCtl={targetCtl} setTargetCtl={setTargetCtl} />
                     )}
 
                     {activeSection === 'zones' && (

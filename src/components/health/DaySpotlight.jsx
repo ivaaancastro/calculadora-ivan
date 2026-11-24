@@ -1,10 +1,9 @@
 import React from 'react';
 import { Card } from '../ui';
-import { useUiMode } from '../../hooks/useUiMode';
 import { DaySpotlightV2 } from './DaySpotlightV2';
 
 export const DaySpotlight = ({ currentSelectedDay }) => {
-    const { isV2 } = useUiMode();
+    const isV2 = true; // v2 por defecto (Capa 6); las ramas v1 se retiran en los PR 5a–c
     if (isV2) return <DaySpotlightV2 currentSelectedDay={currentSelectedDay} />;
     return (
     <>

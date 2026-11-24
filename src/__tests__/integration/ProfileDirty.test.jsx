@@ -7,7 +7,6 @@ import { ProfilePage } from '../../components/pages/ProfilePage';
 
 vi.mock('../../supabase', () => ({ supabase: { auth: {}, from: vi.fn(), rpc: vi.fn() } }));
 
-vi.mock('../../hooks/useUiMode', () => ({ useUiMode: () => ({ isV2: true, setUi: () => {} }) }));
 
 const settings = { fcReposo: 50, weight: 70, run: { lthr: 170, max: 190 }, bike: { lthr: 160, max: 185 } };
 

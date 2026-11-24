@@ -7,7 +7,7 @@ const pathname = (page) => new URL(page.url()).pathname;
 const visible = (locator) => locator.filter({ visible: true }).first();
 
 test.beforeEach(async ({ page }) => {
-  await setupApp(page, { authenticated: true, ui: 'v2' });
+  await setupApp(page, { authenticated: true });
 });
 
 test.describe('Gestos: deslizar sobre contenido desplazable no cambia de pestaña', () => {

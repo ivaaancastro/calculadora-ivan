@@ -2,10 +2,9 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { CheckCircle2, Activity, ArrowRight } from 'lucide-react';
 import { Card } from '../ui';
-import { useUiMode } from '../../hooks/useUiMode';
 
 export const EmailConfirmedPage = () => {
-  const { isV2 } = useUiMode();
+  const isV2 = true; // v2 por defecto (Capa 6); las ramas v1 se retiran en los PR 5a–c
   if (isV2) {
     return (
       <div data-skin="email" className="min-h-screen bg-surface-6 flex flex-col items-center justify-center p-4 sm:p-6 selection:bg-action-bright/30">

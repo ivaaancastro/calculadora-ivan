@@ -1,10 +1,9 @@
 import React from 'react';
 import { ArrowLeft, Trash2 } from 'lucide-react';
 import { IconButton, Segmented, Stat, MetricTooltip } from '../../ui';
-import { useUiMode } from '../../../hooks/useUiMode';
 
 export const DetailHeader = ({ activity, activeTab, setActiveTab, onBack, onDelete, dateStr, tabs, metrics }) => {
-    const { isV2 } = useUiMode();
+    const isV2 = true; // v2 por defecto (Capa 6); las ramas v1 se retiran en los PR 5a–c
     // v2: en Análisis el título y las cifras viven en el hero; la cabecera queda en controles.
     const heroOwnsTitle = isV2 && activeTab === 'analyze';
     return (

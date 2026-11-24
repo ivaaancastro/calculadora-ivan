@@ -2,7 +2,7 @@ import React from 'react';
 import { Activity, Heart, Weight, User, Camera, Loader2 } from 'lucide-react';
 import { Card, Input, SectionHeader } from '../../ui';
 
-export const GeneralSection = ({ formData, isUploadingAvatar, handleAvatarUpload, handleChange, targetCtl, setTargetCtl, isV2, setUi }) => (
+export const GeneralSection = ({ formData, isUploadingAvatar, handleAvatarUpload, handleChange, targetCtl, setTargetCtl }) => (
     <div className="space-y-5 animate-in fade-in slide-in-from-right-3 duration-250">
         {/* AVATAR PROFILE BANNER — HORIZONTAL APPLE SETTINGS STYLE */}
         <Card data-profile="banner" className="p-4 sm:p-5 flex items-center gap-4 text-left mb-5">
@@ -142,34 +142,6 @@ export const GeneralSection = ({ formData, isUploadingAvatar, handleAvatarUpload
                         <span className="text-xs font-semibold text-ink-4">CTL</span>
                     </div>
                 </div>
-            </Card>
-        </div>
-
-        {/* APARIENCIA — vista previa de la piel v2 (spec-rediseno-02-c3-skin) */}
-        <div>
-            <SectionHeader>Apariencia</SectionHeader>
-            <Card divided className="overflow-hidden">
-                <button
-                    type="button"
-                    role="switch"
-                    aria-checked={isV2}
-                    aria-label="Vista previa v2"
-                    onClick={() => setUi(isV2 ? 'v1' : 'v2')}
-                    className="w-full min-h-11 p-3 sm:p-3.5 flex items-center justify-between gap-3 text-left hover:bg-surface-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-action-ios-solid"
-                >
-                    <span className="min-w-0">
-                        <span className="block text-xs sm:text-sm font-semibold text-ink">Vista previa v2</span>
-                        <span className="block text-[10px] text-ink-4">Piel nueva, todavía en pruebas. No cambia tus datos.</span>
-                    </span>
-                    <span
-                        aria-hidden="true"
-                        className={`relative shrink-0 w-[51px] h-[31px] rounded-full transition-colors ${isV2 ? 'bg-action-ios-solid' : 'bg-line-3'}`}
-                    >
-                        <span
-                            className={`absolute top-[2px] left-[2px] w-[27px] h-[27px] rounded-full bg-control-knob shadow-sm transition-transform ${isV2 ? 'translate-x-5' : 'translate-x-0'}`}
-                        />
-                    </span>
-                </button>
             </Card>
         </div>
     </div>

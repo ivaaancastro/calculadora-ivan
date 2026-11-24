@@ -5,7 +5,6 @@ import { formatDuration } from '../../utils/formatDuration';
 import { Button, Card, EmptyState, Input, Select } from '../ui';
 import { useConfirmDeleteActivity } from '../../hooks/useConfirmDeleteActivity';
 import { ConfirmDeleteActivityModal } from '../activity/ConfirmDeleteActivityModal';
-import { useUiMode } from '../../hooks/useUiMode';
 import { AutoChartSkin } from '../charts/ChartSkin';
 import { ActivitiesSummary } from './history/ActivitiesSummary';
 import { summarizeActivities, weeklyTss, groupByWeek, breakdownBySport } from '../../utils/activityGroups';
@@ -74,7 +73,7 @@ const getSportIcon = (type, solid = false) => {
 export const HistoryList = React.memo(({ activities, onDelete, onSelectActivity }) => {
     const parentRef = useRef(null);
     const del = useConfirmDeleteActivity(onDelete);
-    const { isV2 } = useUiMode();
+    const isV2 = true; // v2 por defecto (Capa 6); las ramas v1 se retiran en los PR 5a–c
     // ESTADOS DE LOS FILTROS INTERNOS
     const [searchTerm, setSearchTerm] = useState('');
     const [sportFilter, setSportFilter] = useState('all');

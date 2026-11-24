@@ -1,11 +1,10 @@
 import React from 'react';
 import { Footprints, Bike, RefreshCw, Loader2 } from 'lucide-react';
 import { Card, Segmented } from '../../ui';
-import { useUiMode } from '../../../hooks/useUiMode';
 import { SportZonesSection } from './SportZonesSection';
 
 export const ZonesSection = ({ formData, activeTab, setActiveTab, isScanning, pureActs, handleAutoDetectLTHR, handleChange, handleZoneChange, handleZonesMode }) => {
-    const { isV2 } = useUiMode();
+    const isV2 = true; // v2 por defecto (Capa 6); las ramas v1 se retiran en los PR 5a–c
     return (
     <div className="space-y-4 animate-in fade-in slide-in-from-right-3 duration-250">
         {/* AUTO-DETECT LTHR BANNER */}

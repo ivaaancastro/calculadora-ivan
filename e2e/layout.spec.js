@@ -25,7 +25,7 @@ const PENDING_SMALL = {
 for (const screen of SCREENS) {
   test.describe(`Layout · ${screen.name}`, () => {
     test.beforeEach(async ({ page }) => {
-      await setupApp(page, { authenticated: screen.auth, ui: 'v2' });
+      await setupApp(page, { authenticated: screen.auth });
       await openScreen(page, screen);
     });
 
@@ -80,7 +80,7 @@ const BOTTOM_NAV = 'nav[aria-label="Navegación móvil flotante estilo Apple"]';
 
 test.describe('Shell', () => {
   test.beforeEach(async ({ page }) => {
-    await setupApp(page, { authenticated: true, ui: 'v2' });
+    await setupApp(page, { authenticated: true });
     await gotoReady(page, '/');
   });
 

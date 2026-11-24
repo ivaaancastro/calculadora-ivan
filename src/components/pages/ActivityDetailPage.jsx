@@ -10,7 +10,6 @@ import { DetailHeader } from '../activity/detail/DetailHeader';
 import { DetailHero } from '../activity/detail/DetailHero';
 import { Skeleton } from '../ui';
 import { ChartSkeleton } from '../charts/ChartSkeleton';
-import { useUiMode } from '../../hooks/useUiMode';
 import { DetailMobileHero } from '../activity/detail/DetailMobileHero';
 import { TelemetryPanel } from '../activity/detail/TelemetryPanel';
 import { ActivityCharts } from '../activity/detail/ActivityCharts';
@@ -22,7 +21,7 @@ import { getBlocksForSport, getTabsForSport, getZoneOptions, applyChartBlocks, g
 
 export const ActivityDetailPage = ({ activity, settings, fetchStreams, onBack, onDelete }) => {
     const ct = useChartTheme();
-    const { isV2 } = useUiMode();
+    const isV2 = true; // v2 por defecto (Capa 6); las ramas v1 se retiran en los PR 5a–c
     const del = useConfirmDeleteActivity(onDelete, onBack);
     const { streams, loadingStreams } = useActivityStreams(activity, fetchStreams);
     const [activePayload, setActivePayload] = useState(null);

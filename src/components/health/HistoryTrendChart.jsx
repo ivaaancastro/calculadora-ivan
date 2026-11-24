@@ -4,11 +4,10 @@ import {
 } from 'recharts';
 import { Card } from '../ui';
 import { HistoryChartTooltip } from './HistoryChartTooltip';
-import { useUiMode } from '../../hooks/useUiMode';
 import { HistoryTrendChartV2 } from './HistoryTrendChartV2';
 
 export const HistoryTrendChart = ({ historySeries, ct }) => {
-    const { isV2 } = useUiMode();
+    const isV2 = true; // v2 por defecto (Capa 6); las ramas v1 se retiran en los PR 5a–c
     if (isV2) return <HistoryTrendChartV2 historySeries={historySeries} ct={ct} />;
     return (
     <>

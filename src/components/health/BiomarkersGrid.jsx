@@ -3,11 +3,10 @@ import {
     Moon, Activity, Zap, ActivitySquare, Scale, Footprints, Wind, TrendingDown, TrendingUp, Minus
 } from 'lucide-react';
 import { Card, SectionHeader } from '../ui';
-import { useUiMode } from '../../hooks/useUiMode';
 import { BiomarkersGridV2 } from './BiomarkersGridV2';
 
 export const BiomarkersGrid = ({ wellnessMetrics }) => {
-    const { isV2 } = useUiMode();
+    const isV2 = true; // v2 por defecto (Capa 6); las ramas v1 se retiran en los PR 5a–c
     if (isV2) return <BiomarkersGridV2 wellnessMetrics={wellnessMetrics} />;
     return (
     <>
