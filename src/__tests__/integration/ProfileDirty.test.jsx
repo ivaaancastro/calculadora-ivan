@@ -10,7 +10,7 @@ vi.mock('../../supabase', () => ({ supabase: { auth: {}, from: vi.fn(), rpc: vi.
 
 const settings = { fcReposo: 50, weight: 70, run: { lthr: 170, max: 190 }, bike: { lthr: 160, max: 185 } };
 
-describe('ProfilePage v2 — cambios sin guardar', () => {
+describe('ProfilePage — cambios sin guardar', () => {
     
     it('avisa al editar un campo y no antes', async () => {
         const user = userEvent.setup();

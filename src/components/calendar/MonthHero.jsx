@@ -36,7 +36,7 @@ const Delta = ({ pct }) => {
 };
 
 /**
- * Cabecera narrativa del mes (solo v2, spec premium-calendario §3.1): frase + 4 KPI y, al lado,
+ * Cabecera narrativa del mes (spec premium-calendario §3.1): frase + 4 KPI y, al lado,
  * el heatmap de constancia (plegable en móvil). `heatmap` es el nodo ya montado por la página.
  */
 export const MonthHero = ({ summary, heatmap, onPlan }) => {

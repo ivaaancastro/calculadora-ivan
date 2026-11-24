@@ -8,7 +8,7 @@ const CHIPS = [
     { value: 'gym', label: 'Fuerza' },
 ];
 
-/** Filtro de deporte como chips (solo v2): todas las opciones visibles, con scroll horizontal en móvil. */
+/** Filtro de deporte como chips: todas las opciones visibles, con scroll horizontal en móvil. */
 export const SportChips = ({ value, onChange }) => (
     <div data-history="chips" role="group" aria-label="Deporte" className="flex gap-1.5 overflow-x-auto no-scrollbar -mx-1 px-1">
         {CHIPS.map((c) => (

@@ -14,7 +14,7 @@ const Secondary = ({ label, value, unit }) => (
 );
 
 /**
- * Cabecera de resumen del historial (solo v2, spec premium-actividades §3.1): nº de sesiones como
+ * Cabecera de resumen del historial (spec premium-actividades §3.1): nº de sesiones como
  * cifra protagonista, tiempo/distancia/TSS como secundarias y sparkline del TSS semanal.
  * `totals` viene de `summarizeActivities` sobre los datos filtrados.
  */
