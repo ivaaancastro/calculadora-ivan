@@ -257,6 +257,25 @@ export async function mockNetwork(page, state = {}) {
 
   await page.route(`${SUPABASE_URL}/rest/v1/rpc/**`, (route) => json(route, null));
 
+  // Edge Function `strava-token` (canje y refresco del token OAuth en el servidor).
+  // Guarda los cuerpos en `state.stravaTokenRequests` para que las pruebas los comprueben.
+  await page.route(`${SUPABASE_URL}/functions/v1/strava-token`, (route) => {
+    const req = route.request();
+    if (req.method() === 'OPTIONS') return route.fulfill({ status: 204, body: '' });
+    const body = req.postDataJSON() || {};
+    if (state.stravaTokenRequests) state.stravaTokenRequests.push(body);
+    if (body.grant_type !== 'authorization_code' && body.grant_type !== 'refresh_token') {
+      return json(route, { error: "'grant_type' no permitido" }, 400);
+    }
+    return json(route, {
+      access_token: 'e2e-strava-access',
+      refresh_token: 'e2e-strava-refresh',
+      expires_at: Math.floor(FIXED_NOW.getTime() / 1000) + 6 * 3600,
+      expires_in: 6 * 3600,
+      token_type: 'Bearer',
+    });
+  });
+
   await page.route(`${SUPABASE_URL}/rest/v1/profiles*`, (route) => {
     const method = route.request().method();
     if (method !== 'GET') return json(route, [MOCK_PROFILE], 200);
