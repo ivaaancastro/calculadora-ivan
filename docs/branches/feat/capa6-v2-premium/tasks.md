@@ -15,12 +15,12 @@ Spec: `spec.md` v0.3 (aprobada 2026-11-24). Plan: `plan.md`. Hallazgos: `auditor
 - [x] **PR 3** (#143) `fix/strava-token-edge`: Edge Function `strava-token`; sin `VITE_STRAVA_CLIENT_SECRET`. **Acción del usuario:** rotar secreto, `supabase secrets set`, `supabase functions deploy strava-token`.
 - [x] **PR 4** (#144) `feat/v2-por-defecto`: v2 siempre activa; sin interruptor, `useUiMode`, `VITE_UI` ni script de `index.html`.
 - [x] **PR 5a** (#145) `refactor/retirar-v1-publico`.
-- [ ] **PR 5b** `refactor/retirar-v1-panel`.
-- [ ] **PR 5c** `refactor/retirar-v1-analisis`.
-- [ ] **PR 6** `chore/limpieza`: huérfanos, raíz, icono, codemods, `docs/branches` cerradas, `lint:orphans`.
+- [x] **PR 5b** (#146) `refactor/retirar-v1-panel`.
+- [x] **PR 5c** (#148) `refactor/retirar-v1-analisis`.
+- [x] **PR 6** (#149) `chore/limpieza`: huérfanos, raíz, icono, codemods, `docs/branches` cerradas, `lint:orphans`.
 - [ ] **PR 7a** `refactor/tema-base`: tipografía ≥ 11 px, mono, `lint:type`, `axisProps`, espaciado y ancho máximo.
 - [ ] **PR 7b** `refactor/piel-aplanada`: sin `data-ui`, `skin-v2.css` < 300 líneas, `dark:` a tokens.
-- [ ] **PR 8** `fix/bugs-auditoria`: BUG-3, 4, 5, 8, 11.
+- [x] **PR 8** (#147; BUG-11 de `AdvancedAnalytics` pasa al PR 10) `fix/bugs-auditoria`: BUG-3, 4, 5, 8, 11.
 - [ ] **PR 9** `refactor/utils-comunes`: DUP-1..6, `dates`, `formatNumber`.
 - [ ] **PR 10** `fix/estado-forma-y-calendario`: BUG-1, 2, 6, 7, 9, 10, 12.
 - [ ] **PR 11** `fix/copy-y-a11y`: COP-1, COP-2, A11Y-1..5.
@@ -49,3 +49,4 @@ Spec: `spec.md` v0.3 (aprobada 2026-11-24). Plan: `plan.md`. Hallazgos: `auditor
 - 2026-11-24: spec y plan aprobados; creado este `tasks.md`.
 - 2026-11-24: PR 0–5a abiertos. Ramas encadenadas: 1 → (2, 3, 4); 4 → (5a, 5b, 5c). Propuestas de paleta publicadas (https://claude.ai/artifact/2MyXJ8pxjjuYPbUrG1NYvS); a la espera de la elección del usuario.
 - Nota para el PR 13: `chartTheme.js` duplica en hex los colores de `tokens.css`; la paleta nueva debe tener una sola fuente.
+- 2026-11-24: PR 5b, 5c, 6 y 8 abiertos (CI de 2–3,5 min). `lint:orphans` = 0. En curso: 7a → 7b (tema y piel) y 9 → 10 → 11 (utils, bugs y accesibilidad), en paralelo. Mapa del PR 2 comprobado en vivo con una actividad de dic 2025.
