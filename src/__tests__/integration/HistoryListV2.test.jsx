@@ -1,6 +1,6 @@
 /** @vitest-environment jsdom */
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 import { describe, it, expect, vi } from 'vitest';
 
 vi.mock('../../hooks/useUiMode', () => ({ useUiMode: () => ({ isV2: true }) }));
@@ -28,5 +28,21 @@ describe('HistoryList v2', () => {
         const { container } = render(<HistoryList activities={acts} onDelete={vi.fn()} onSelectActivity={vi.fn()} />);
         expect(container.querySelectorAll('[data-history="tss-bar"]')).toHaveLength(2);
         expect(screen.getByTitle('Fuerza')).toBeTruthy();
+    });
+
+    it('los chips filtran por deporte y el panel reparte el tiempo', () => {
+        const { container } = render(<HistoryList activities={acts} onDelete={vi.fn()} onSelectActivity={vi.fn()} />);
+        expect(container.querySelector('[data-history="breakdown"]').textContent).toContain('Ciclismo');
+        fireEvent.click(screen.getByRole('button', { name: 'Carrera' }));
+        expect(container.querySelectorAll('[data-history="row"]')).toHaveLength(1);
+        expect(screen.getByRole('button', { name: 'Carrera' }).getAttribute('aria-pressed')).toBe('true');
+    });
+
+    it('sin resultados ofrece quitar filtros', () => {
+        render(<HistoryList activities={acts} onDelete={vi.fn()} onSelectActivity={vi.fn()} />);
+        fireEvent.click(screen.getByRole('button', { name: 'Natación' }));
+        expect(screen.getByText('No hay resultados')).toBeTruthy();
+        fireEvent.click(screen.getByRole('button', { name: 'Quitar filtros' }));
+        expect(screen.queryByText('No hay resultados')).toBeNull();
     });
 });

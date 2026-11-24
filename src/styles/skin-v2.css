@@ -1554,3 +1554,28 @@ html[data-ui="v2"] [data-skin="calendar"] [data-cal="check"] {
     color: rgb(var(--form-overload));
   }
 }
+
+/* ── Actividades D6, PR 3: chips, ancho y panel lateral ──────────────────────────────
+ * Spec: docs/branches/feat/premium-actividades/spec.md §3.4/§3.5. Solo v2. */
+html[data-ui="v2"] [data-history="chips"] { scrollbar-width: none; }
+html[data-ui="v2"] [data-history="chips"]::-webkit-scrollbar { display: none; }
+html[data-ui="v2"] [data-history="chip"] {
+  background-color: rgb(var(--surface));
+  border-color: rgb(var(--line));
+  color: rgb(var(--ink-3));
+}
+html[data-ui="v2"] [data-history="chip"][aria-pressed="true"] {
+  background-color: rgb(var(--ink));
+  border-color: rgb(var(--ink));
+  color: rgb(var(--surface));
+}
+/* Ancho de lectura: la tarjeta se centra a 1100 px; con panel lateral (≥ 1280) ocupa su columna. */
+html[data-ui="v2"] [data-skin="history"][data-history="root"] {
+  max-width: 1100px;
+  margin-inline: auto;
+}
+@media (min-width: 1280px) {
+  html[data-ui="v2"] [data-skin="history"][data-history="root"] { max-width: none; margin-inline: 0; }
+}
+html[data-ui="v2"] [data-skin="history"] [data-history="filters"] { flex-wrap: wrap; }
+html[data-ui="v2"] [data-skin="history"] [data-history="chips-row"] { grid-column: 1 / -1; min-width: 0; }

@@ -10,6 +10,9 @@ y este proyecto adhiere a [Semantic Versioning](https://semver.org/lang/es/).
 ### Added — Fase Premium D5, Calendario (`feat/premium-calendario-rejilla`, PR 2)
 - `feat(calendario):` tinte de carga por día (4 niveles, serie TSS), estados de sesión realizado / cumplido / planificado / omitido con etiqueta y color propios, chip del cumplimiento y panel semanal con texto ≥ 11 px en escritorio; `buildDayLoadLevels` y `getSessionState` con tests.
 
+### Added — Fase Premium D6, Actividades (`feat/premium-actividades-filtros`, PR 3)
+- `feat(actividades):` filtro de deporte en chips, tarjeta a 1100 px centrada, panel lateral fijo con el reparto del tiempo por deporte (≥ 1280 px) y «Quitar filtros» en el estado vacío (solo v2). `sportOf` y `breakdownBySport` con tests.
+
 ### Added — Fase Premium D5, Calendario (`feat/premium-calendario`, PR 1)
 - `feat(calendario):` cabecera narrativa del mes (solo v2): frase resumen, 4 KPI (sesiones, carga con delta vs mes anterior, tiempo, cumplimiento del plan) y heatmap de constancia plegable en móvil; `buildMonthSummary` con tests. Spec y plan en `docs/branches/feat/premium-calendario/`.
 
