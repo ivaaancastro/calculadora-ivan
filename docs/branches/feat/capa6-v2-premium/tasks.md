@@ -2,8 +2,11 @@
 
 Spec: `spec.md` v0.3 (aprobada 2026-11-24). Plan: `plan.md`. Hallazgos: `auditoria.md`.
 
-**Decisiones aprobadas:** D1–D10 y D12 según la recomendación en negrita de la spec §8.
-**D11:** se conservan `.opencode/` y `skills/README.md` (pendiente de confirmar con el usuario junto con la paleta).
+**Decisiones aprobadas:** D1–D9 según la recomendación en negrita de la spec §8.
+**D10 (paleta):** el usuario elige la **A · Neón profundo** (CTL azul eléctrico, ATL fucsia, TSB lima). Propuestas: https://claude.ai/artifact/2MyXJ8pxjjuYPbUrG1NYvS
+**D11:** el usuario usa OpenCode: se conservan `.opencode/`, `skills/README.md` y las referencias de `AGENTS.md`.
+**D12 (revisada por el usuario):** `docs/branches/` **se queda en el repositorio**, visible en GitHub. RF-E2 queda anulado; ningún PR de limpieza toca esas carpetas.
+**Merges:** el usuario autoriza mergear en `develop` (nunca en `main`) tras revisar el diff y con el CI en verde. #143 espera a que rote el secreto de Strava.
 
 **Forma de trabajar:** una rama por PR. Si hay dependencia, la rama sale de la anterior y su PR apunta a `develop` indicando de qué rama depende. Merges agrupados por hitos y siempre con autorización del usuario.
 
@@ -24,7 +27,7 @@ Spec: `spec.md` v0.3 (aprobada 2026-11-24). Plan: `plan.md`. Hallazgos: `auditor
 - [ ] **PR 9** `refactor/utils-comunes`: DUP-1..6, `dates`, `formatNumber`.
 - [ ] **PR 10** `fix/estado-forma-y-calendario`: BUG-1, 2, 6, 7, 9, 10, 12.
 - [ ] **PR 11** `fix/copy-y-a11y`: COP-1, COP-2, A11Y-1..5.
-- [ ] **PR 12** `docs/paleta-propuestas`: 2–3 direcciones en capturas reales. **Parada: el usuario elige.**
+- [x] **PR 12** `docs/paleta-propuestas` (artefacto con capturas; elegida la A): 2–3 direcciones en capturas reales. **Parada: el usuario elige.**
 - [ ] **PR 13** `feat/paleta`: paleta elegida en tokens y `chartTheme`, contraste AA.
 - [ ] **PR 14** `feat/premium-sistema`: `docs/design/forma.md`, `Hero`/`Stat`, `EmptyState` con `tone`, helper `data-metric`.
 - [ ] **PR 15** `feat/premium-dashboard`.
@@ -50,3 +53,4 @@ Spec: `spec.md` v0.3 (aprobada 2026-11-24). Plan: `plan.md`. Hallazgos: `auditor
 - 2026-11-24: PR 0–5a abiertos. Ramas encadenadas: 1 → (2, 3, 4); 4 → (5a, 5b, 5c). Propuestas de paleta publicadas (https://claude.ai/artifact/2MyXJ8pxjjuYPbUrG1NYvS); a la espera de la elección del usuario.
 - Nota para el PR 13: `chartTheme.js` duplica en hex los colores de `tokens.css`; la paleta nueva debe tener una sola fuente.
 - 2026-11-24: PR 5b, 5c, 6 y 8 abiertos (CI de 2–3,5 min). `lint:orphans` = 0. En curso: 7a → 7b (tema y piel) y 9 → 10 → 11 (utils, bugs y accesibilidad), en paralelo. Mapa del PR 2 comprobado en vivo con una actividad de dic 2025.
+- 2026-11-24: paleta A elegida; D11 y D12 revisadas por el usuario (se conservan `.opencode/` y `docs/branches/`; el #149 restaura las carpetas).
