@@ -13,6 +13,11 @@ import { SportChips } from './history/SportChips';
 import { SportBreakdown } from './history/SportBreakdown';
 import { WeekHeader } from './history/WeekHeader';
 
+// v1: sin envoltorio (el árbol del DOM no cambia, lo vigila style-diff); v2: rejilla con panel lateral.
+const Layout = ({ v2, children }) => (v2
+    ? <div data-history="layout" className="h-full xl:grid xl:grid-cols-[minmax(0,1fr)_300px] xl:gap-8 max-w-[1440px] mx-auto">{children}</div>
+    : <>{children}</>);
+
 const ROW_H = 64;
 const WEEK_H = 36;
 
@@ -155,7 +160,7 @@ export const HistoryList = React.memo(({ activities, onDelete, onSelectActivity 
 
     return (
         <>
-        <div data-history="layout" className={isV2 ? 'h-full xl:grid xl:grid-cols-[minmax(0,1fr)_300px] xl:gap-8 max-w-[1440px] mx-auto' : 'contents'}>
+        <Layout v2={isV2}>
         <Card data-skin="history" data-history="root" className="flex flex-col h-full overflow-hidden">
 
             {summary && (
@@ -337,7 +342,7 @@ export const HistoryList = React.memo(({ activities, onDelete, onSelectActivity 
             </div>
         </Card>
         {isV2 && <SportBreakdown rows={breakdown} />}
-        </div>
+        </Layout>
         <ConfirmDeleteActivityModal activity={del.pending} busy={del.busy} onConfirm={del.confirm} onCancel={del.cancel} />
         </>
     );
