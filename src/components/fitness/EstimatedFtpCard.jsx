@@ -6,7 +6,6 @@ import {
 import { ArrowUp, ArrowDown, Minus } from 'lucide-react';
 import { useChartTheme } from '../charts/useChartTheme';
 import { useChartMotion } from '../charts/useChartMotion';
-import { useChartSkin } from '../charts/ChartSkin';
 import { Card, chartTooltipStyle, InfoTooltip } from '../ui';
 
 export const EstimatedFtpCard = ({
@@ -17,7 +16,6 @@ export const EstimatedFtpCard = ({
 }) => {
     const ct = useChartTheme();
     const motion = useChartMotion();
-    const isV2 = useChartSkin() === 'v2';
     const enter = motion.active ? motion.props : {};
     return (
         <section className="mb-12">
@@ -53,7 +51,7 @@ export const EstimatedFtpCard = ({
                                 <AreaChart data={curveChartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                                     <defs>
                                         <linearGradient id="ftpGradFinal" x1="0" y1="0" x2="0" y2="1">
-                                            <stop offset="5%" stopColor={ct.series.power} stopOpacity={isV2 ? 0.3 : 0.15} />
+                                            <stop offset="5%" stopColor={ct.series.power} stopOpacity={0.3} />
                                             <stop offset="95%" stopColor={ct.series.power} stopOpacity={0} />
                                         </linearGradient>
                                     </defs>

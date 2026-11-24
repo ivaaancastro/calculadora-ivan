@@ -1,16 +1,14 @@
 import { useEffect, useState } from 'react';
 
 /**
- * Contador animado de cifras, solo en la piel v2 (Capa 5, PR 6b).
- * En v1, con `prefers-reduced-motion` o sin valor numérico devuelve el valor tal cual y no
- * programa nada: el comportamiento de v1 no cambia.
+ * Contador animado de cifras (Capa 5, PR 6b).
+ * Con `prefers-reduced-motion` o sin valor numérico devuelve el valor tal cual y no programa nada.
  */
 const DURATION_MS = 1200;
 const DELAY_MS = 150;
 
 const canAnimate = () =>
     typeof document !== 'undefined'
-    && document.documentElement.dataset.ui === 'v2'
     && !(typeof window.matchMedia === 'function' && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
 
 export function useCountUp(target) {
