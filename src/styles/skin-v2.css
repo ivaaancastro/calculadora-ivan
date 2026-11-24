@@ -1579,3 +1579,56 @@ html[data-ui="v2"] [data-skin="history"][data-history="root"] {
 }
 html[data-ui="v2"] [data-skin="history"] [data-history="filters"] { flex-wrap: wrap; }
 html[data-ui="v2"] [data-skin="history"] [data-history="chips-row"] { grid-column: 1 / -1; min-width: 0; }
+
+/* ── Calendario premium (Fase D5, PR 3): PMC flotante y resumen semanal móvil ─────────────
+ * Spec: docs/branches/feat/premium-calendario/spec.md §3.3/§3.4. Bloque aislado «Calendario D5, PR 3». */
+
+/* PMC flotante: cromo con tokens de la serie y texto ≥ 11 px (la gráfica ya usa `useChartTheme`). */
+html[data-ui="v2"] [data-cal="pmc"] {
+  background-color: rgb(var(--surface));
+  border-color: rgb(var(--line));
+  box-shadow: var(--skin-shadow-card);
+}
+html[data-ui="v2"] [data-cal="pmc"] [data-cal="pmc-icon"] { color: rgb(var(--chart-pmc-atl)); }
+html[data-ui="v2"] [data-cal="pmc"] [data-cal="pmc-stat"] {
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+}
+html[data-ui="v2"] [data-cal="pmc"] [data-cal="pmc-legend"] { font-size: 11px; }
+html[data-ui="v2"] [data-cal="pmc"] [data-cal="pmc-legend"] label { min-height: 44px; }
+html[data-ui="v2"] [data-cal="pmc"] [data-series="ctl"] { accent-color: rgb(var(--chart-pmc-ctl)); }
+html[data-ui="v2"] [data-cal="pmc"] [data-series="tsb"] { accent-color: rgb(var(--chart-pmc-tsb)); }
+html[data-ui="v2"] [data-cal="pmc"] [data-series="ramp"] { accent-color: rgb(var(--chart-pmc-ramp)); }
+/* Tooltip de cristal, como el resto de gráficas Forma. */
+html[data-ui="v2"] [data-cal="pmc-tooltip"] {
+  background-color: rgb(var(--surface) / 0.88);
+  border-color: rgb(var(--line));
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+}
+html[data-ui="v2"] [data-cal="pmc-tooltip"] span { font-size: 11px; }
+html[data-ui="v2"] [data-cal="pmc-ramp"] { color: rgb(var(--chart-pmc-ramp-ink)); }
+
+/* Resumen semanal en móvil/tableta: la fila de la semana se identifica con una cinta fija. */
+@media (max-width: 1023px) {
+  html[data-ui="v2"] [data-skin="calendar"] [data-cal="week-chip"] {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    position: sticky;
+    top: var(--nav-h);
+    z-index: 5;
+    min-height: 32px;
+    padding: 0 12px;
+    background-color: rgb(var(--sunken));
+    border-bottom: 1px solid rgb(var(--line));
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    color: rgb(var(--ink-3));
+    font-variant-numeric: tabular-nums;
+  }
+}

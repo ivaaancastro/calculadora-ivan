@@ -7,6 +7,9 @@ y este proyecto adhiere a [Semantic Versioning](https://semver.org/lang/es/).
 
 ## [Unreleased]
 
+### Added — Fase Premium D5, Calendario (`feat/premium-calendario-cierre`, PR 3)
+- `feat(calendario):` cinta semanal compacta y fija en móvil/tableta, PMC flotante con cromo en tokens (tooltip de cristal, texto ≥ 11 px, leyenda a 44 px). Cierra la Fase D5.
+
 ### Added — Fase Premium D5, Calendario (`feat/premium-calendario-rejilla`, PR 2)
 - `feat(calendario):` tinte de carga por día (4 niveles, serie TSS), estados de sesión realizado / cumplido / planificado / omitido con etiqueta y color propios, chip del cumplimiento y panel semanal con texto ≥ 11 px en escritorio; `buildDayLoadLevels` y `getSessionState` con tests.
 

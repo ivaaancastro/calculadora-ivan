@@ -58,6 +58,13 @@ export const CalendarMonthView = ({
                                 return (
                                     <div key={wIdx} data-cal="week" className="grid grid-cols-1 lg:grid-cols-[130px_repeat(7,1fr)] border-b border-line-soft-5 last:border-b-0">
 
+                                        {/* Resumen semanal compacto: solo lo muestra v2 por debajo de 1024 px. */}
+                                        <div data-cal="week-chip" className="hidden">
+                                            <span>S{weekNum}{isProjected ? ' · proy.' : ''}</span>
+                                            <span>{Math.round(weekRealizedTSS)}/{Math.round(weekPlannedTSS)} TSS</span>
+                                            <span>{formatDuration(weekDuration)}</span>
+                                        </div>
+
                                         {/* ====== PANEL SEMANAL IZQUIERDO ====== */}
                                         <div data-cal="week-panel" className="hidden lg:flex flex-col border-r border-line-faint bg-transparent text-[10px] relative overflow-hidden">
                                             {/* Header with week number */}

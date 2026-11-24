@@ -13,7 +13,11 @@
 - [x] Lo que cambia tamaño va solo en ≥ 1024 px: la altura móvil/tableta no cambia (el pager mide la pestaña más alta) y no mueve las capturas de otras pantallas.
 - [x] Capturas v2 del Calendario regeneradas (6, Docker bajo mutex).
 - [ ] **Diferido:** extraer `DayCell`/`SessionCard` de `CalendarMonthView`; los ganchos `data-*` (inertes en v1) hicieron innecesaria la extracción y evitan riesgo en el DOM de v1.
-- [ ] PR abierto y CI verde.
+- [x] PR #138 mergeado.
 
-## PR 3 — Cierre
-- [ ] Móvil 390, PMC flotante en tokens, capturas v2, MEMORY/CHANGELOG, marcar D5.
+## PR 3 — Cierre (`feat/premium-calendario-cierre`)
+- [x] PMC flotante: ganchos `data-cal="pmc*"` (inertes en v1) + bloque CSS v2: cromo con tokens de la serie, tooltip de cristal, texto ≥ 11 px, leyenda a 44 px; la gráfica ya usaba `useChartTheme`.
+- [x] Móvil/tableta: cinta semanal compacta y fija «S23 · realizado/plan TSS · tiempo» (oculta en v1).
+- [x] Capturas v2: Calendario móvil/tableta (+160 px) y, por el pager, las 8 móviles de dashboard/rendimiento/actividades/salud (solo cambian la altura y la barra inferior flotante; comprobado píxel a píxel). Descartadas dos PNG de rendimiento (escritorio y tableta, oscuro) que cambiaron sin relación.
+- [x] D5 marcada en `premium-design/tasks.md`, CHANGELOG y MEMORY.
+- [ ] PR abierto y CI verde. Queda D7 del usuario sobre el Calendario.
