@@ -3,8 +3,22 @@ import { Activity, Target, Plus } from 'lucide-react';
 import React from 'react';
 import { getSportCategory } from '../../utils/tssEngine';
 import { getComplianceForDay, computeWeekStats, findWeekPmc, findPrevWeekPmc, getWeekNumber } from '../../utils/calendarEngine';
-import { getSportIcon, WEEKDAYS, getZoneColor } from './calendarHelpers';
+import { WEEKDAYS, getZoneColor } from './calendarHelpers';
+import { SportIcon } from '../common/SportIcon';
+import { formatMinutes } from '../../utils/formatters';
+import { toDateKey } from '../../utils/dates';
 import { getSessionState } from '../../utils/calendarLoad';
+
+// Acento y punto de cada deporte en las fichas del mes (categoría de `getSportCategory`).
+const SPORT_ACCENT = {
+    run: { accent: 'text-legacy-sport-run-emerald', dot: 'bg-legacy-sport-run-emerald' },
+    ride: { accent: 'text-sport-bike', dot: 'bg-sport-bike' },
+    strength: { accent: 'text-legacy-sport-strength-orange', dot: 'bg-legacy-sport-strength-orange' },
+    swim: { accent: 'text-sport-swim', dot: 'bg-sport-swim' },
+    yoga: { accent: 'text-sport-yoga', dot: 'bg-sport-yoga' },
+    walk: { accent: 'text-sport-walk', dot: 'bg-sport-walk' },
+    other: { accent: 'text-ink-3-flat', dot: 'bg-slate-400 dark:bg-zinc-600' },
+};
 
 export const CalendarMonthView = ({
     activitiesByDate,
@@ -36,10 +50,10 @@ export const CalendarMonthView = ({
                         <div className="pb-2">
                             {calendarGrid.map((week, wIdx) => {
                                 const { weekRealizedTSS, weekPlannedTSS, weekDuration, weekDist } = computeWeekStats(week, activitiesByDate);
-                                const weekKey = week[0].date.toLocaleDateString('en-CA');
+                                const weekKey = toDateKey(week[0].date);
 
                                 // Get PMC values — actual or projected
-                                const lastDayKey = week[6].date.toLocaleDateString('en-CA');
+                                const lastDayKey = toDateKey(week[6].date);
                                 const weekPmc = findWeekPmc(week, fullPmcByDate);
                                 const prevWeekPmc = findPrevWeekPmc(week, fullPmcByDate);
                                 const ramp = weekPmc.ctl && prevWeekPmc.ctl ? (weekPmc.ctl - prevWeekPmc.ctl).toFixed(1) : null;
@@ -49,12 +63,6 @@ export const CalendarMonthView = ({
                                 const weekNum = getWeekNumber(week);
 
 
-                                const formatDuration = (mins) => {
-                                    const h = Math.floor(mins / 60);
-                                    const m = mins % 60;
-                                    return h > 0 ? `${h}h${m > 0 ? m + 'm' : ''}` : `${m}m`;
-                                };
-
                                 return (
                                     <div key={wIdx} data-cal="week" className="grid grid-cols-1 lg:grid-cols-[130px_repeat(7,1fr)] border-b border-line-soft-5 last:border-b-0">
 
@@ -62,7 +70,7 @@ export const CalendarMonthView = ({
                                         <div data-cal="week-chip" className="lg:hidden">
                                             <span>S{weekNum}{isProjected ? ' · proy.' : ''}</span>
                                             <span>{Math.round(weekRealizedTSS)}/{Math.round(weekPlannedTSS)} TSS</span>
-                                            <span>{formatDuration(weekDuration)}</span>
+                                            <span>{formatMinutes(weekDuration, { compact: true })}</span>
                                         </div>
 
                                         {/* ====== PANEL SEMANAL IZQUIERDO ====== */}
@@ -83,7 +91,7 @@ export const CalendarMonthView = ({
                                                         <span className="text-[10px] text-ink-3 w-9">Aptitud</span>
                                                         <span className="text-[11px] font-bold text-metric-ctl">{weekPmc.ctl != null ? Math.round(weekPmc.ctl) : '-'}</span>
                                                     </div>
-                                                    <span className="text-[11px] font-bold text-ink-2-soft">{formatDuration(weekDuration)}</span>
+                                                    <span className="text-[11px] font-bold text-ink-2-soft">{formatMinutes(weekDuration, { compact: true })}</span>
                                                 </div>
 
                                                 {/* Row 2: Fatiga & Carga */}
@@ -152,9 +160,9 @@ export const CalendarMonthView = ({
 
                                         {/* ====== 7 DÍAS ====== */}
                                         {week.map((day, dIdx) => {
-                                            const dateKey = day.date.toLocaleDateString('en-CA');
+                                            const dateKey = toDateKey(day.date);
                                             const acts = activitiesByDate[dateKey] || [];
-                                            const isToday = new Date().toLocaleDateString('en-CA') === dateKey;
+                                            const isToday = toDateKey(new Date()) === dateKey;
                                             const isWeekend = dIdx >= 5;
 
                                             const compliance = getComplianceForDay(dateKey, acts);
@@ -238,16 +246,7 @@ export const CalendarMonthView = ({
 
                                                             // Color mapping (Minimalist Apple style)
                                                             const sportColors = (() => {
-                                                                const t = String(act.type).toLowerCase();
-                                                                let accent = 'text-ink-3-flat';
-                                                                let dot = 'bg-slate-400 dark:bg-zinc-600';
-                                                                if (t.includes('run') || t.includes('carrera') || t.includes('correr')) { accent = 'text-legacy-sport-run-emerald'; dot = 'bg-legacy-sport-run-emerald'; }
-                                                                if (t.includes('ride') || t.includes('bici') || t.includes('ciclismo')) { accent = 'text-sport-bike'; dot = 'bg-sport-bike'; }
-                                                                if (t.includes('weight') || t.includes('fuerza') || t.includes('crossfit') || t.includes('workout')) { accent = 'text-legacy-sport-strength-orange'; dot = 'bg-legacy-sport-strength-orange'; }
-                                                                if (t.includes('swim') || t.includes('nadar') || t.includes('natacion')) { accent = 'text-sport-swim'; dot = 'bg-sport-swim'; }
-                                                                if (t.includes('yoga') || t.includes('stretch')) { accent = 'text-sport-yoga'; dot = 'bg-sport-yoga'; }
-                                                                if (t.includes('walk') || t.includes('hike') || t.includes('caminata')) { accent = 'text-sport-walk'; dot = 'bg-sport-walk'; }
-                                                                
+                                                                const { accent, dot } = SPORT_ACCENT[getSportCategory(act.type || '')] || SPORT_ACCENT.other;
                                                                 return {
                                                                     accent, dot,
                                                                     // Sin token: se combina con `bg-white` más abajo y hoy gana `dark:` (ver tasks.md, PR 4).
@@ -256,11 +255,6 @@ export const CalendarMonthView = ({
                                                                 };
                                                             })();
 
-                                                            const formatActDuration = (mins) => {
-                                                                const h = Math.floor(mins / 60);
-                                                                const m = mins % 60;
-                                                                return h > 0 ? `${h}h${m > 0 ? String(m).padStart(2, '0') + 'm' : ''}` : `${m}m`;
-                                                            };
 
                                                             // Gather extra info
                                                             let extraInfo = [];
@@ -310,8 +304,8 @@ export const CalendarMonthView = ({
                                                                     {act.isPlanned ? (
                                                                         <>
                                                                             <div className="flex items-center gap-1.5 mb-1">
-                                                                                <span className={`shrink-0 ${sportColors.accent}`}>{getSportIcon(act.type, 13)}</span>
-                                                                                <span className="text-[11px] font-semibold tracking-tight leading-none text-body">{formatActDuration(act.duration || 0)}</span>
+                                                                                <span className={`shrink-0 ${sportColors.accent}`}><SportIcon type={act.type} size={13} /></span>
+                                                                                <span className="text-[11px] font-semibold tracking-tight leading-none text-body">{formatMinutes(act.duration, { compact: true })}</span>
                                                                                 {act.tss > 0 && <span className="ml-auto text-[9px] font-medium text-ink-4">{Math.round(act.tss)} TSS</span>}
                                                                             </div>
                                                                             <div className="flex flex-col gap-0.5">
@@ -354,8 +348,8 @@ export const CalendarMonthView = ({
                                                                     ) : (
                                                                         <>
                                                                             <div className="flex items-center gap-1.5 mb-1">
-                                                                                <span className={`shrink-0 ${sportColors.accent}`}>{getSportIcon(act.type, 13)}</span>
-                                                                                <span className="text-[11px] font-semibold tracking-tight leading-none text-ink-2-soft">{formatActDuration(act.duration || 0)}</span>
+                                                                                <span className={`shrink-0 ${sportColors.accent}`}><SportIcon type={act.type} size={13} /></span>
+                                                                                <span className="text-[11px] font-semibold tracking-tight leading-none text-ink-2-soft">{formatMinutes(act.duration, { compact: true })}</span>
                                                                                 {act.tss > 0 && <span className="ml-auto text-[9px] font-bold text-ink-3">{Math.round(act.tss)} TSS</span>}
                                                                                 {isFulfilled && <span data-cal="check" className="ml-1 text-[9px] font-bold text-emerald-500" title="Plan completado">✓</span>}
                                                                             </div>

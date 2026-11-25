@@ -1,8 +1,8 @@
 import React from 'react';
-import { useCountUp } from '../../health/useCountUp';
+import { useCountUp } from '../../../hooks/useCountUp';
 import { Sparkline } from '../../charts/Sparkline';
 import { useChartTheme } from '../../charts/useChartTheme';
-import { formatDuration } from '../../../utils/formatDuration';
+import { formatMinutes } from '../../../utils/formatters';
 
 const Secondary = ({ label, value, unit }) => (
     <div data-history="summary-stat" className="min-w-0">
@@ -36,7 +36,7 @@ export const ActivitiesSummary = ({ totals, weekly = [] }) => {
                     </p>
                 </div>
                 <div className="grid grid-cols-3 gap-x-5 sm:gap-x-8">
-                    <Secondary label="Tiempo" value={formatDuration(totals.minutes)} />
+                    <Secondary label="Tiempo" value={formatMinutes(totals.minutes)} />
                     <Secondary label="Distancia" value={km >= 100 ? Math.round(km).toLocaleString('es-ES') : km.toFixed(1).replace('.', ',')} unit="km" />
                     <Secondary label="TSS" value={Math.round(totals.tss).toLocaleString('es-ES')} />
                 </div>

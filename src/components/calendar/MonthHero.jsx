@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { ArrowUpRight, ArrowDownRight, Minus, ChevronDown } from 'lucide-react';
 import { Button } from '../ui';
-import { useCountUp } from '../health/useCountUp';
-import { formatMinutes } from '../../utils/monthSummary';
+import { useCountUp } from '../../hooks/useCountUp';
+import { formatMinutes } from '../../utils/formatters';
 
 const Kpi = ({ label, value, context, delta, bar }) => (
     <div data-cal="kpi" className="min-w-0 rounded-xl border border-line px-3.5 py-3">

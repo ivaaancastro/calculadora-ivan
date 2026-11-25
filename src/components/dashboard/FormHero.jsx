@@ -1,6 +1,6 @@
 import React from 'react';
 import { ArrowUpRight, ArrowDownRight, Minus } from 'lucide-react';
-import { useCountUp } from '../health/useCountUp';
+import { useCountUp } from '../../hooks/useCountUp';
 
 const RANGES = [
     { id: '7d', label: '7D' },

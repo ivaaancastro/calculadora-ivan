@@ -1,7 +1,7 @@
 import React from 'react';
 import { Routes, Route } from 'react-router-dom';
 import { MobileSwipePager } from '../layout/MobileSwipePager';
-import { MAIN_TABS } from './mainTabs';
+import { MAIN_TABS } from '../../utils/mainTabs';
 
 /**
  * Las 5 pestañas principales: carrusel táctil en móvil y rutas estándar en escritorio,

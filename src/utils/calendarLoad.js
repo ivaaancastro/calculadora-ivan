@@ -1,7 +1,6 @@
 // Carga por día y estado de las sesiones del Calendario (Fase Premium D5, PR 2). Sin React.
-import { heatmapLevel } from '../components/charts/heatmapGrid';
-
-const key = (d) => new Date(d).toLocaleDateString('en-CA');
+import { heatmapLevel } from './heatmapGrid';
+import { toDateKey as key } from './dates';
 
 /** TSS realizado por día (solo reales). */
 const realTssByDate = (activitiesByDate) => {

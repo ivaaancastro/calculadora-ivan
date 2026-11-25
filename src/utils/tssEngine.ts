@@ -203,7 +203,7 @@ export const SPORT_LOAD_CONFIG: SportLoadConfig = {
 export function getSportCategory(typeStr: string): SportCategory {
   const t = String(typeStr).toLowerCase();
   if (
-    t.includes('weighttraining') ||
+    t.includes('weight') ||
     t.includes('fuerza') ||
     t.includes('crossfit') ||
     t.includes('workout') ||
@@ -214,10 +214,13 @@ export function getSportCategory(typeStr: string): SportCategory {
     t.includes('walk') ||
     t.includes('hike') ||
     t.includes('caminata') ||
-    t.includes('senderismo')
+    t.includes('senderismo') ||
+    t.includes('trekking') ||
+    t.includes('andar')
   ) return 'walk';
   if (
     t.includes('swim') ||
+    t.includes('nadar') ||
     t.includes('natación') ||
     t.includes('natacion')
   ) return 'swim';

@@ -1,7 +1,9 @@
 import React, { useState, useMemo, useRef } from 'react';
-import { Search, Calendar, Activity, Clock, MapPin, Zap, Trash2, ChevronRight, Bike, Footprints, Dumbbell, Flame } from 'lucide-react';
+import { Search, Calendar, Activity, Clock, MapPin, Zap, Trash2, ChevronRight, Flame } from 'lucide-react';
 import { useVirtualizer } from '@tanstack/react-virtual';
-import { formatDuration } from '../../utils/formatDuration';
+import { formatMinutes } from '../../utils/formatters';
+import { sportOf } from '../../utils/sport';
+import { SportIcon } from '../common/SportIcon';
 import { Button, Card, EmptyState, Input, Select } from '../ui';
 import { useConfirmDeleteActivity } from '../../hooks/useConfirmDeleteActivity';
 import { ConfirmDeleteActivityModal } from '../activity/ConfirmDeleteActivityModal';
@@ -28,19 +30,17 @@ const shortDate = (date, refYear) => {
     return d.toLocaleDateString('es-ES', opts);
 };
 
-const getSportIcon = (type) => {
-    const t = String(type).toLowerCase();
-    const [Icon, tone] =
-        t.includes('run') || t.includes('carrera') ? [Footprints, 'bg-sport-run text-on-action']
-        : t.includes('bike') || t.includes('bici') || t.includes('ciclismo') || t.includes('ride') ? [Bike, 'bg-sport-bike text-on-action']
-        : t.includes('gym') || t.includes('fuerza') || t.includes('weight') || t.includes('workout') ? [Dumbbell, 'bg-sport-strength text-on-action']
-        : [Activity, 'bg-fill-3 text-body-soft'];
-    return (
-        <div data-history="sport" className={`w-10 h-10 rounded-[14px] flex items-center justify-center shrink-0 ${tone}`}>
-            <Icon size={19} strokeWidth={2.2} />
-        </div>
-    );
+const SPORT_TONE = {
+    run: 'bg-sport-run text-on-action',
+    bike: 'bg-sport-bike text-on-action',
+    strength: 'bg-sport-strength text-on-action',
 };
+
+const SportTile = ({ type }) => (
+    <div data-history="sport" className={`w-10 h-10 rounded-[14px] flex items-center justify-center shrink-0 ${SPORT_TONE[sportOf(type)] || 'bg-fill-3 text-body-soft'}`}>
+        <SportIcon type={type} size={19} strokeWidth={2.2} />
+    </div>
+);
 
 export const HistoryList = React.memo(({ activities, onDelete, onSelectActivity }) => {
     const parentRef = useRef(null);
@@ -67,14 +67,7 @@ export const HistoryList = React.memo(({ activities, onDelete, onSelectActivity 
 
         // 2. Filtro de Deporte
         if (sportFilter !== 'all') {
-            filtered = filtered.filter(act => {
-                const t = String(act.type).toLowerCase();
-                if (sportFilter === 'run') return t.includes('run') || t.includes('carrera');
-                if (sportFilter === 'bike') return t.includes('bike') || t.includes('bici') || t.includes('ciclismo') || t.includes('ride');
-                if (sportFilter === 'swim') return t.includes('swim') || t.includes('nadar') || t.includes('natación') || t.includes('natacion');
-                if (sportFilter === 'gym') return t.includes('gym') || t.includes('fuerza') || t.includes('weight') || t.includes('workout');
-                return true;
-            });
+            filtered = filtered.filter((act) => sportOf(act.type) === sportFilter);
         }
 
         // 3. Filtro de Fecha
@@ -224,7 +217,7 @@ export const HistoryList = React.memo(({ activities, onDelete, onSelectActivity 
                                 >
                                     {/* Icono en squircle estilo Apple */}
                                     <div className="mr-3 shrink-0">
-                                        {getSportIcon(act.type)}
+                                        <SportTile type={act.type} />
                                     </div>
 
                                     <div className="flex-1 min-w-0 mr-2 sm:mr-4">
@@ -239,7 +232,7 @@ export const HistoryList = React.memo(({ activities, onDelete, onSelectActivity 
                                     {/* Compact Mobile Metrics (< md) */}
                                     <div className="flex md:hidden flex-col items-end shrink-0 mr-1 text-right">
                                         <span className="text-xs font-bold text-ink-soft tabular-nums">
-                                            {formatDuration(act.duration)}
+                                            {formatMinutes(act.duration)}
                                         </span>
                                         <span className="text-[10px] text-ink-4 font-medium tabular-nums">
                                             {act.distance > 0 
@@ -252,7 +245,7 @@ export const HistoryList = React.memo(({ activities, onDelete, onSelectActivity 
                                     <div className="hidden md:flex items-center gap-6 mr-6">
                                         <div className="flex flex-col items-end">
                                             <span className="text-[10px] font-medium text-slate-400 mb-0.5">Tiempo</span>
-                                            <span className="text-sm font-semibold text-ink-2-soft tabular-nums">{formatDuration(act.duration)}</span>
+                                            <span className="text-sm font-semibold text-ink-2-soft tabular-nums">{formatMinutes(act.duration)}</span>
                                         </div>
                                         <div className="flex flex-col items-end w-16">
                                             <span className="text-[10px] font-medium text-slate-400 mb-0.5">Dist</span>

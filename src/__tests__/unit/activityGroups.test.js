@@ -43,8 +43,8 @@ import { sportOf, breakdownBySport } from '../../utils/activityGroups';
 
 describe('deportes', () => {
     it('sportOf normaliza tipos en inglés y español', () => {
-        expect(['Run', 'Carrera', 'Ride', 'Ciclismo', 'Swim', 'Natación', 'Gym', 'Fuerza', 'Yoga'].map(sportOf))
-            .toEqual(['run', 'run', 'bike', 'bike', 'swim', 'swim', 'gym', 'gym', 'other']);
+        expect(['Run', 'Carrera', 'Ride', 'Ciclismo', 'Swim', 'Natación', 'Gym', 'Fuerza', 'Walk', 'Yoga'].map(sportOf))
+            .toEqual(['run', 'run', 'bike', 'bike', 'swim', 'swim', 'strength', 'strength', 'walk', 'other']);
     });
     it('breakdownBySport ordena por tiempo y calcula cuotas', () => {
         const r = breakdownBySport([

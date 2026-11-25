@@ -2,7 +2,7 @@ import React from 'react';
 import { ArrowUpRight, ArrowDownRight, Minus } from 'lucide-react';
 import { Card } from '../ui';
 import { Sparkline } from '../charts/Sparkline';
-import { useCountUp } from '../health/useCountUp';
+import { useCountUp } from '../../hooks/useCountUp';
 
 const TONE_TEXT = {
     good: 'text-form-peak',

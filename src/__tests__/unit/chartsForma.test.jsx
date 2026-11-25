@@ -4,7 +4,7 @@ import { summarizeSeries, chartFigureProps } from '../../components/charts/chart
 import { ChartSkeleton } from '../../components/charts/ChartSkeleton.jsx';
 import { Sparkline } from '../../components/charts/Sparkline.jsx';
 import { sparklinePoints } from '../../components/charts/sparklinePoints';
-import { buildHeatmap, heatmapLevel } from '../../components/charts/heatmapGrid';
+import { buildHeatmap, heatmapLevel } from '../../utils/heatmapGrid';
 import { sliceByRange } from '../../components/charts/sliceRange';
 
 describe('charts/chartA11y', () => {

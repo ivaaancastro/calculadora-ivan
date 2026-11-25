@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { toDateKey } from '../utils/dates';
 
 /** Arrastrar un entreno planificado a otro día de la cuadrícula. */
 export function useWorkoutDragDrop(updatePlannedWorkout) {
@@ -24,8 +25,8 @@ export function useWorkoutDragDrop(updatePlannedWorkout) {
         setDragOverDate(null);
         if (!draggedWorkout || !updatePlannedWorkout) return;
         const newDateStr = targetDate.toISOString();
-        const oldDateKey = new Date(draggedWorkout.date).toLocaleDateString('en-CA');
-        const newDateKey = targetDate.toLocaleDateString('en-CA');
+        const oldDateKey = toDateKey(draggedWorkout.date);
+        const newDateKey = toDateKey(targetDate);
         if (oldDateKey === newDateKey) { setDraggedWorkout(null); return; }
         try {
             await updatePlannedWorkout(draggedWorkout.id, { date: newDateStr });

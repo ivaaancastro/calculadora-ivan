@@ -1,4 +1,5 @@
 import { useEffect, useState, useRef } from 'react';
+import { sportOf } from '../../../utils/sport';
 
 /** Carga los streams de la actividad (de `streams_data` o vía `fetchStreams`). */
 export const useActivityStreams = (activity, fetchStreams) => {
@@ -13,7 +14,7 @@ export const useActivityStreams = (activity, fetchStreams) => {
 
             const hasEssentialStreams = activity.streams_data &&
                 activity.streams_data.latlng &&
-                (activity.type.toLowerCase().includes('bici') || activity.type.toLowerCase().includes('bike') ? activity.streams_data.watts : true) &&
+                (sportOf(activity.type) === 'bike' ? activity.streams_data.watts : true) &&
                 activity.streams_data.cadence;
 
             if (activity.streams_data && hasEssentialStreams) {

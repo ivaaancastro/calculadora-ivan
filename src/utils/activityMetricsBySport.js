@@ -6,7 +6,7 @@
  * Sin React ni estilos.
  */
 
-import { formatMinsToHMM } from './formatters';
+import { formatMinutes } from './formatters';
 
 /** Deportes reconocidos. La caminata se agrupa con el senderismo (`hike`). */
 export const SPORTS = ['bike', 'run', 'hike', 'strength', 'generic'];
@@ -134,7 +134,7 @@ export function buildMetricDefs(activity, proMetrics, sport, speedMetric) {
     return {
         kcal: { id: 'kcal', metricId: 'kcal', label: 'Kcal totales', value: Math.round(activity.calories || 0), unit: 'kcal', show: positive(activity.calories) },
         distance: { id: 'distance', metricId: 'distance', label: 'Distancia', value: ((activity.distance || 0) / 1000).toFixed(2), unit: 'km', show: positive(activity.distance) },
-        duration: { id: 'duration', metricId: 'duration', label: 'Tiempo', value: formatMinsToHMM(activity.duration || 0), unit: null, show: positive(activity.duration) },
+        duration: { id: 'duration', metricId: 'duration', label: 'Tiempo', value: formatMinutes(activity.duration || 0), unit: null, show: positive(activity.duration) },
         elevation: { id: 'elevation', metricId: 'elevation', label: 'Desnivel', value: activity.elevation_gain || 0, unit: 'm', show: positive(activity.elevation_gain) },
         hrAvg: { id: 'hrAvg', metricId: 'hrAvg', label: 'FC Media', value: activity.hr_avg, unit: 'bpm', accent: 'text-hr', show: positive(activity.hr_avg) },
         speedPace: speedMetric

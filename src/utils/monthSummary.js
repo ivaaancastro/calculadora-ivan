@@ -1,19 +1,13 @@
 // Resumen del mes del Calendario (Fase Premium D5). Sin React ni red: reglas deterministas.
 import { getSportCategory } from './tssEngine';
+import { toDateKey as key } from './dates';
 
-const key = (d) => new Date(d).toLocaleDateString('en-CA');
 const inMonth = (d, year, month) => {
     const x = new Date(d);
     return x.getFullYear() === year && x.getMonth() === month;
 };
 const tssOf = (list) => Math.round(list.reduce((s, a) => s + (a.tss > 0 ? a.tss : 0), 0));
 const minutesOf = (list) => Math.round(list.reduce((s, a) => s + (a.duration > 0 ? a.duration : 0), 0));
-
-export const formatMinutes = (mins) => {
-    const h = Math.floor(mins / 60);
-    const m = mins % 60;
-    return h > 0 ? `${h}h${m > 0 ? String(m).padStart(2, '0') + 'm' : ''}` : `${m}m`;
-};
 
 /**
  * @returns {{sessions:number, planned:number, pending:number, done:number, tss:number, tssPrev:number,

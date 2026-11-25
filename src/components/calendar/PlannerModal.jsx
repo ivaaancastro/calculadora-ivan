@@ -1,7 +1,7 @@
 /* eslint-disable no-unused-vars */
 import { Footprints, Bike, Dumbbell, Activity, Target, X } from 'lucide-react';
 import React from 'react';
-import { formatDuration } from '../../utils/formatDuration';
+import { formatMinutes } from '../../utils/formatters';
 import { Button, Input, Modal, Segmented, Select } from '../ui';
 import { WORKOUT_TEMPLATES } from '../../utils/calendarTemplates';
 import { DurationInput } from './DurationInput';
@@ -102,7 +102,7 @@ export const PlannerModal = ({
                                     </div>
                                     <div className="text-center">
                                         <span className="text-[10px] font-medium text-ink-4 uppercase tracking-wider block mb-0.5">Duración</span>
-                                        <span className="text-lg font-semibold text-ink-2-soft font-mono">{formatDuration(newPlan.duration)}</span>
+                                        <span className="text-lg font-semibold text-ink-2-soft font-mono">{formatMinutes(newPlan.duration)}</span>
                                     </div>
                                 </div>
                             </div>
