@@ -46,7 +46,7 @@ export const PlannerModal = ({
                                 {selectedDateForPlan?.toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long' })}
                             </p>
                         </div>
-                        <button onClick={() => setIsModalOpen(false)} data-cal="modal-close" className="shrink-0 ml-4 w-7 h-7 flex items-center justify-center text-slate-400 hover:text-slate-700 dark:hover:text-zinc-200 hover:bg-surface-2 rounded-full transition-colors"><X size={15} /></button>
+                        <button type="button" aria-label="Cerrar" onClick={() => setIsModalOpen(false)} data-cal="modal-close" className="shrink-0 ml-4 w-7 h-7 flex items-center justify-center text-slate-400 hover:text-slate-700 dark:hover:text-zinc-200 hover:bg-surface-2 rounded-full transition-colors"><X size={15} /></button>
                     </div>
 
                     <div className="px-6 py-5 overflow-y-auto flex-1 bg-surface custom-scrollbar">

@@ -1,4 +1,4 @@
-import { formatPace } from '../../../utils/formatters';
+import { formatPace, formatNumber } from '../../../utils/formatters';
 import { sportOf } from '../../../utils/sport';
 
 /** Picos (FC, potencia, velocidad, ritmo, altitud) de la serie de la gráfica. */
@@ -45,7 +45,7 @@ export const getActivePeakType = (activePayload, peaks, isPaceBased) => {
 /** Velocidad media (km/h) o ritmo medio (/km) según el deporte. */
 export const getSpeedOrPace = (activity, isPaceBased) => {
     const speedMs = activity.speed_avg || 0; if (speedMs === 0) return null;
-    if (!isPaceBased) return { value: (speedMs * 3.6).toFixed(1), unit: 'km/h', label: 'Vel. Media' };
+    if (!isPaceBased) return { value: formatNumber(speedMs * 3.6, 1), unit: 'km/h', label: 'Vel. Media' };
     const minPerKm = 16.666666666667 / speedMs;
     return { value: formatPace(minPerKm), unit: '/km', label: 'Ritmo Medio' };
 };

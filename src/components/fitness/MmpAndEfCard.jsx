@@ -8,6 +8,8 @@ import { formatInterval, formatPace } from '../../hooks/useFitnessAnalytics';
 import { useChartTheme } from '../charts/useChartTheme';
 import { useChartMotion } from '../charts/useChartMotion';
 import { Card, ChartTooltip, InfoTooltip, Segmented } from '../ui';
+import { formatNumber } from '../../utils/formatters';
+import { chartFigureProps, summarizeSeries, summarizeCategories } from '../charts/chartA11y';
 
 export const MmpAndEfCard = ({
     activities,
@@ -168,7 +170,7 @@ export const MmpAndEfCard = ({
                             </div>
                             <InfoTooltip text={curveSport === 'bike' ? "Relación entre vatios medios y pulso medio. Un EF al alza indica que eres más eficiente (generas más vatios a menos pulso)." : "Relación entre velocidad (m/min) y pulso medio. Un EF al alza indica que eres más eficiente (corres más rápido a menos pulso)."} />
                         </div>
-                        <div className="h-[220px] w-full">
+                        <div className="h-[220px] w-full" {...chartFigureProps('Factor de eficiencia (EF)', summarizeSeries(analytics?.efData?.[curveSport] || [], [{ key: 'ef', label: 'EF' }]))}>
                             <ResponsiveContainer width="100%" height="100%">
                                 <ComposedChart data={analytics?.efData?.[curveSport] || []}>
                                     <defs>
@@ -202,7 +204,7 @@ export const MmpAndEfCard = ({
                             <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Curva MMP</span>
                             <InfoTooltip text="Tu mejor potencia/ritmo para cada duración. Refleja tu perfil de capacidades y récords históricos." />
                         </div>
-                        <div className="h-[220px] w-full">
+                        <div className="h-[220px] w-full" {...chartFigureProps(curveType === 'power' ? 'Curva de potencia máxima' : curveType === 'speed' ? 'Curva de velocidad máxima' : 'Curva de FC máxima', summarizeCategories(currentCurve, 'name', 'value'))}>
                             <ResponsiveContainer width="100%" height="100%">
                                 <ComposedChart data={currentCurve}>
                                     <CartesianGrid strokeDasharray="3 3" stroke={ct.anatomy.grid2} opacity={0.3} vertical={false} />
@@ -254,7 +256,7 @@ export const MmpAndEfCard = ({
                                 let displayVal = pk.value;
                                 if (curveType === 'speed') {
                                     if (curveSport === 'run') displayVal = formatPace(16.6666667 / pk.value);
-                                    else displayVal = (pk.value * 3.6).toFixed(1);
+                                    else displayVal = formatNumber(pk.value * 3.6, 1);
                                 } else {
                                     displayVal = Math.round(pk.value);
                                 }

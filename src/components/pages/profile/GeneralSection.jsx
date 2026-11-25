@@ -56,7 +56,8 @@ export const GeneralSection = ({ formData, isUploadingAvatar, handleAvatarUpload
                         value={formData.fullName || ''}
                         onChange={handleChange}
                         placeholder="Tu nombre"
-                        className="flex-1 text-right bg-transparent text-xs sm:text-sm font-semibold text-slate-900 dark:text-white outline-none placeholder:text-slate-400"
+                        aria-label="Nombre"
+                        className="flex-1 min-h-11 sm:min-h-0 px-2 -mx-2 rounded-lg text-right bg-transparent text-xs sm:text-sm font-semibold text-slate-900 dark:text-white outline-none focus-visible:ring-2 focus-visible:ring-action-bright placeholder:text-slate-400"
                     />
                 </div>
                 <div data-profile="row" className="p-3 sm:p-3.5 flex items-center justify-between gap-3">
@@ -86,9 +87,10 @@ export const GeneralSection = ({ formData, isUploadingAvatar, handleAvatarUpload
                             type="number"
                             inputMode="decimal"
                             name="weight"
+                            aria-label="Peso corporal (kg)"
                             value={formData.weight}
                             onChange={handleChange}
-                            variant="inline" mono ringTone="action-bright" className="w-16 text-right px-2 py-1"
+                            variant="inline" mono ringTone="action-bright" className="w-16 min-h-11 sm:min-h-0 text-right px-2 py-1"
                         />
                         <span className="text-xs font-semibold text-ink-4">kg</span>
                     </div>
@@ -110,9 +112,10 @@ export const GeneralSection = ({ formData, isUploadingAvatar, handleAvatarUpload
                             type="number"
                             inputMode="numeric"
                             name="fcReposo"
+                            aria-label="FC en reposo (bpm)"
                             value={formData.fcReposo}
                             onChange={handleChange}
-                            variant="inline" mono ringTone="hr" className="w-16 text-right px-2 py-1"
+                            variant="inline" mono ringTone="hr" className="w-16 min-h-11 sm:min-h-0 text-right px-2 py-1"
                         />
                         <span className="text-xs font-semibold text-ink-4">bpm</span>
                     </div>
@@ -137,7 +140,8 @@ export const GeneralSection = ({ formData, isUploadingAvatar, handleAvatarUpload
                             value={targetCtl ?? ''}
                             onChange={(e) => setTargetCtl(e.target.value ? parseInt(e.target.value) : null)}
                             placeholder="Auto"
-                            variant="inline" mono ringTone="positive" className="w-16 text-right px-2 py-1"
+                            aria-label="Calibrar Fitness (CTL)"
+                            variant="inline" mono ringTone="positive" className="w-16 min-h-11 sm:min-h-0 text-right px-2 py-1"
                         />
                         <span className="text-xs font-semibold text-ink-4">CTL</span>
                     </div>

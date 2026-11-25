@@ -6,6 +6,7 @@ import {
 import { useChartTheme } from '../charts/useChartTheme';
 import { useChartMotion } from '../charts/useChartMotion';
 import { Card, chartTooltipStyle, InfoTooltip, Segmented } from '../ui';
+import { chartFigureProps, summarizeSeries } from '../charts/chartA11y';
 
 export const WeeklyVolumeAndFocusCard = ({
     weeklyChart,
@@ -27,7 +28,7 @@ export const WeeklyVolumeAndFocusCard = ({
                             <InfoTooltip text="Carga de entrenamiento (TSS) y horas totales acumuladas cada semana. Las barras indican el estrés (TSS) y la línea el tiempo." />
                         </div>
                     </div>
-                    <div className="h-[240px]">
+                    <div className="h-[240px]" {...chartFigureProps('Volumen semanal', summarizeSeries(weeklyChart, [{ key: 'tss', label: 'TSS' }, { key: 'hours', label: 'Horas' }]))}>
                         <ResponsiveContainer width="100%" height="100%">
                             <ComposedChart data={weeklyChart}>
                                 <CartesianGrid strokeDasharray="2 2" stroke={ct.anatomy.gridZinc} opacity={0.1} vertical={false} />
