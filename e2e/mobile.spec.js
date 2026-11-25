@@ -65,3 +65,18 @@ test.describe('Tooltip de gráfica al tocar', () => {
     });
   }
 });
+
+test.describe('Evolución de forma en móvil (BUG-10)', () => {
+  test('las etiquetas HOY y de proyección no se solapan', async ({ page }) => {
+    await gotoReady(page, '/');
+    const today = visible(page.locator('svg text', { hasText: /^HOY$/ }));
+    await today.scrollIntoViewIfNeeded();
+    await expect(today).toBeVisible();
+    const projection = page.locator('svg [data-dash="projection-label"]').filter({ visible: true });
+    if ((await projection.count()) === 0) return; // banda estrecha: la etiqueta se oculta
+    const a = await today.boundingBox();
+    const b = await projection.first().boundingBox();
+    const overlap = a.x < b.x + b.width && b.x < a.x + a.width && a.y < b.y + b.height && b.y < a.y + a.height;
+    expect(overlap).toBe(false);
+  });
+});

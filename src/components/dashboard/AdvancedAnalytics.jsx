@@ -207,8 +207,8 @@ export const AdvancedAnalytics = React.memo(({ activities, settings,  timeRange,
                         { label: 'Monotonía', value: model.monotony.toFixed(2), sub: 'Índice carga' },
                         { label: 'Volumen 30D', value: `${Math.round(model.totalVolume / 60)}h`, sub: `${model.totalActivities} sesiones` },
                         { label: 'VO2 Max', value: globalMaxVo2 || '--', sub: vo2IsGarmin ? 'Sincronizado' : 'Estimado' }
-                    ].map((kpi, i) => (
-                        <div key={i} data-dash="ledger-row" className="flex items-baseline justify-between gap-3 py-3 border-b border-hairline min-w-0">
+                    ].map((kpi) => (
+                        <div key={kpi.label} data-dash="ledger-row" className="flex items-baseline justify-between gap-3 py-3 border-b border-hairline min-w-0">
                             <span className="text-[11px] font-medium text-ink-4 truncate">{kpi.label}<span className="ml-1.5 text-ink-4/70">{kpi.sub}</span></span>
                             <span className="text-[15px] font-semibold tabular-nums text-ink shrink-0">{kpi.value}</span>
                         </div>
