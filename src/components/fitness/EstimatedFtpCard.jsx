@@ -7,6 +7,7 @@ import { ArrowUp, ArrowDown, Minus } from 'lucide-react';
 import { useChartTheme } from '../charts/useChartTheme';
 import { useChartMotion } from '../charts/useChartMotion';
 import { Card, chartTooltipStyle, InfoTooltip } from '../ui';
+import { chartFigureProps, summarizeCategories } from '../charts/chartA11y';
 
 export const EstimatedFtpCard = ({
     ftp,
@@ -45,7 +46,7 @@ export const EstimatedFtpCard = ({
                             </div>
                         )}
                     </div>
-                    <div className="h-[240px] w-full bg-sunken-7 rounded-3xl p-4 border border-line-faint-2">
+                    <div className="h-[240px] w-full bg-sunken-7 rounded-3xl p-4 border border-line-faint-2" {...chartFigureProps('Curva de potencia para el eFTP', summarizeCategories(curveChartData, 'name', 'actual', 'W'))}>
                         {curveChartData.length > 0 ? (
                             <ResponsiveContainer width="100%" height="100%">
                                 <AreaChart data={curveChartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>

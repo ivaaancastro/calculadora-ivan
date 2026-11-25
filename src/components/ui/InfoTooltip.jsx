@@ -1,15 +1,18 @@
-/** InfoTooltip (spec-rediseno-02-c2, 6.2; PR 7). La receta está en infoTooltipClasses.js. */
-import { useEffect, useRef, useState } from 'react';
+/** InfoTooltip (spec-rediseno-02-c2, 6.2; PR 7; A11Y-2 en Capa 6). La receta está en infoTooltipClasses.js. */
+import { useEffect, useId, useRef, useState } from 'react';
 import { HelpCircle } from 'lucide-react';
 import { INFO_TOOLTIP as C, infoBubbleClass } from './infoTooltipClasses.js';
 
 /**
- * Icono de ayuda con una burbuja de texto encima. Se abre al pasar el ratón y, en un teléfono,
- * al tocarlo (D4 d); otro toque, tocar fuera o Escape la cierran.
+ * Botón de ayuda con una burbuja de texto encima (A11Y-2). Es un `<button>` con nombre accesible
+ * y `aria-describedby` hacia la burbuja. Se abre al pasar el ratón, al tocarlo o al llegar con el
+ * teclado; otro toque, tocar fuera, salir con Tab o Escape la cierran.
  */
-export function InfoTooltip({ text }) {
+export function InfoTooltip({ text, label = 'Más información' }) {
   const [open, setOpen] = useState(false);
   const ref = useRef(null);
+  const pointerRef = useRef(false);
+  const id = useId();
 
   useEffect(() => {
     if (!open) return undefined;
@@ -28,12 +31,25 @@ export function InfoTooltip({ text }) {
   }, [open]);
 
   return (
-    <div ref={ref} className={C.root} onClick={() => setOpen((o) => !o)}>
-      <HelpCircle size={11} className={C.icon} />
-      <div role="tooltip" className={infoBubbleClass(open)}>
+    <span ref={ref} className={C.root}>
+      <button
+        type="button"
+        className={C.trigger}
+        aria-label={label}
+        aria-describedby={id}
+        aria-expanded={open}
+        onPointerDown={() => { pointerRef.current = true; }}
+        // Con teclado el foco abre la burbuja; con puntero decide el clic (si no, abriría y cerraría a la vez).
+        onFocus={() => { if (!pointerRef.current) setOpen(true); }}
+        onBlur={(e) => { if (!ref.current?.contains(e.relatedTarget)) setOpen(false); }}
+        onClick={() => { pointerRef.current = false; setOpen((o) => !o); }}
+      >
+        <HelpCircle size={14} className={C.icon} aria-hidden="true" />
+      </button>
+      <span role="tooltip" id={id} className={infoBubbleClass(open)}>
         {text}
-        <div className={C.arrow}></div>
-      </div>
-    </div>
+        <span className={C.arrow}></span>
+      </span>
+    </span>
   );
 }

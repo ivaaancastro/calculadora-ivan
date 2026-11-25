@@ -8,6 +8,7 @@ import { ChartSkeleton } from '../charts/ChartSkeleton';
 import { summarizeSeries, chartFigureProps } from '../charts/chartA11y';
 import { pickTodayPoint, pmcTodayKey, projectionLabelText } from '../../utils/pmcPoints';
 import { toLocalDate } from '../../utils/dates';
+import { formatNumber } from '../../utils/formatters';
 
 const CustomTooltip = ({ active, payload, label }) => {
   if (active && payload && payload.length) {
@@ -39,7 +40,7 @@ const CustomTooltip = ({ active, payload, label }) => {
             return (
               <div key={index} className="flex items-center justify-between gap-3">
                 <span className="text-[10px] font-medium text-ink-3">{labels[entry.dataKey]}</span>
-                <span className={`text-[11px] font-mono font-bold ${colors[entry.dataKey] || 'text-slate-700'}`}>{entry.value.toFixed(1)}</span>
+                <span className={`text-[11px] font-mono font-bold ${colors[entry.dataKey] || 'text-slate-700'}`}>{formatNumber(entry.value, 1)}</span>
               </div>
             );
           })}

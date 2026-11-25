@@ -1,5 +1,6 @@
 import React from 'react';
 import { Card, InfoTooltip } from '../ui';
+import { formatNumber } from '../../utils/formatters';
 
 export const ThresholdsCard = ({ settings }) => {
     return (
@@ -20,7 +21,7 @@ export const ThresholdsCard = ({ settings }) => {
                     </div>
                     <div className="bg-sunken-8 p-4 rounded-xl">
                         <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1">W/Kg</p>
-                        <p className="text-xl font-black text-ink-2">{(settings?.bike?.ftp ? (settings.bike.ftp / (settings?.weight || 70)).toFixed(2) : '--')}</p>
+                        <p className="text-xl font-black text-ink-2">{(settings?.bike?.ftp ? formatNumber(settings.bike.ftp / (settings?.weight || 70), 2) : '--')}</p>
                     </div>
                     <div className="bg-sunken-8 p-4 rounded-xl">
                         <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1">Peso</p>

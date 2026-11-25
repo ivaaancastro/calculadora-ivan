@@ -21,3 +21,13 @@ export const SPORT_LABELS = {
 
 /** Nombre en español del deporte de un tipo de actividad. */
 export const sportLabel = (type) => SPORT_LABELS[sportOf(type)];
+
+/**
+ * Tipo de actividad para mostrar (COP-1): el deporte en español («Ride» → «Ciclismo»); si no es un
+ * deporte conocido se deja el tipo tal cual para no perder información («Kayaking»).
+ */
+export const activityTypeLabel = (type) => {
+    const sport = sportOf(type);
+    if (sport !== 'other') return SPORT_LABELS[sport];
+    return type ? String(type) : SPORT_LABELS.other;
+};

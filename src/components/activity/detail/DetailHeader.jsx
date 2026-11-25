@@ -1,6 +1,7 @@
 import React from 'react';
 import { ArrowLeft, Trash2 } from 'lucide-react';
 import { IconButton, Segmented } from '../../ui';
+import { activityTypeLabel } from '../../../utils/sport';
 
 export const DetailHeader = ({ activity, activeTab, setActiveTab, onBack, onDelete, dateStr, tabs }) => {
     // En Análisis el título y las cifras viven en el hero; la cabecera queda en controles.
@@ -24,7 +25,7 @@ export const DetailHeader = ({ activity, activeTab, setActiveTab, onBack, onDele
                                 Strava
                             </a>
                         )}
-                        <button data-detail="action" onClick={() => onDelete && onDelete(activity.id)} className="w-8 h-8 flex items-center justify-center text-slate-400 dark:text-zinc-500 hover:text-red-500 hover:bg-danger/10 rounded-full active:scale-90 transition-all shrink-0" title="Eliminar actividad">
+                        <button type="button" aria-label="Eliminar actividad" data-detail="action" onClick={() => onDelete && onDelete(activity.id)} className="w-8 h-8 flex items-center justify-center text-slate-400 dark:text-zinc-500 hover:text-red-500 hover:bg-danger/10 rounded-full active:scale-90 transition-all shrink-0" title="Eliminar actividad">
                             <Trash2 size={14} />
                         </button>
                     </div>
@@ -35,7 +36,7 @@ export const DetailHeader = ({ activity, activeTab, setActiveTab, onBack, onDele
                     {!heroOwnsTitle && (
                     <div className="min-w-0">
                         <h1 className="text-sm font-bold text-ink tracking-tight leading-tight truncate">
-                            {activity.name || `${activity.type}`}
+                            {activity.name || activityTypeLabel(activity.type)}
                         </h1>
                         <p className="text-[10px] font-semibold text-ink-4 capitalize">{dateStr}</p>
                     </div>
@@ -50,7 +51,7 @@ export const DetailHeader = ({ activity, activeTab, setActiveTab, onBack, onDele
                         {!heroOwnsTitle && (
                         <div className="min-w-0">
                             <h1 className="text-sm font-bold text-ink tracking-tight leading-tight truncate">
-                                {activity.name || `${activity.type}`}
+                                {activity.name || activityTypeLabel(activity.type)}
                             </h1>
                             <p className="text-[10px] font-semibold text-ink-4 capitalize truncate">{dateStr}</p>
                         </div>
@@ -64,7 +65,7 @@ export const DetailHeader = ({ activity, activeTab, setActiveTab, onBack, onDele
                                 Strava
                             </a>
                         )}
-                        <button data-detail="action" onClick={() => onDelete && onDelete(activity.id)} className="w-8 h-8 flex items-center justify-center text-slate-400 dark:text-zinc-500 hover:text-red-500 hover:bg-danger/10 rounded-full active:scale-90 transition-all shrink-0" title="Eliminar actividad">
+                        <button type="button" aria-label="Eliminar actividad" data-detail="action" onClick={() => onDelete && onDelete(activity.id)} className="w-8 h-8 flex items-center justify-center text-slate-400 dark:text-zinc-500 hover:text-red-500 hover:bg-danger/10 rounded-full active:scale-90 transition-all shrink-0" title="Eliminar actividad">
                             <Trash2 size={14} />
                         </button>
                     </div>

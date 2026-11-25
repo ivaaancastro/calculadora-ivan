@@ -4,8 +4,9 @@ import { Card, SectionHeader } from '../ui';
 import { Sparkline } from '../charts/Sparkline';
 import { useChartTheme } from '../charts/useChartTheme';
 import { biomarkerStatus, orderByAttention, lastSeries, BIOMARKER_KEYS } from './biomarkerStatus';
+import { formatNumber } from '../../utils/formatters';
 
-const fmt = (v, d = 0) => (typeof v === 'number' ? v.toFixed(d) : '--');
+const fmt = (v, d = 0) => (typeof v === 'number' ? formatNumber(v, d) : '--');
 const numOrDash = (v) => (v === undefined || v === null || v === '--' ? '--' : v);
 
 /** Biomarcadores (spec §3.1.4): jerarquía por estado, variación y sparkline de 7 días. */
@@ -22,7 +23,7 @@ export const BiomarkersGrid = ({ wellnessMetrics: wm }) => {
         tsb: { label: 'Forma TSB', icon: ActivitySquare, value: typeof wm?.currentTsb === 'number' ? (wm.currentTsb > 0 ? '+' : '') + Math.round(wm.currentTsb) : '--', unit: '', sub: 'Equilibrio de fatiga', spark: [], color: ct.series.tsb },
         steps: { label: 'Pasos', icon: Footprints, value: typeof wm?.latestSteps === 'number' ? wm.latestSteps.toLocaleString('es-ES') : numOrDash(wm?.latestSteps), unit: '', sub: 'Objetivo 10.000', spark: sparkOf('steps'), color: ct.series.cadence },
         spo2: { label: 'SpO₂', icon: Wind, value: fmt(wm?.latestSpo2), unit: '%', sub: 'Saturación', spark: [], color: ct.series.ef },
-        vo2: { label: 'VO₂ Max', icon: TrendingUp, value: fmt(wm?.latestVo2max, 1), unit: 'ml/kg', sub: 'Capacidad aeróbica', spark: [], color: ct.series.ef },
+        vo2: { label: 'VO₂max', icon: TrendingUp, value: fmt(wm?.latestVo2max, 1), unit: 'ml/kg', sub: 'Del dispositivo (Intervals.icu)', spark: [], color: ct.series.ef },
         weight: { label: 'Peso', icon: Scale, value: numOrDash(wm?.latestWeight), unit: 'kg', sub: wm?.weightTrend != null ? '7 días' : 'Estable', spark: sparkOf('weight'), color: ct.series.power },
     };
 

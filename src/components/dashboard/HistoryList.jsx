@@ -1,8 +1,8 @@
 import React, { useState, useMemo, useRef } from 'react';
 import { Search, Calendar, Activity, Clock, MapPin, Zap, Trash2, ChevronRight, Flame } from 'lucide-react';
 import { useVirtualizer } from '@tanstack/react-virtual';
-import { formatMinutes } from '../../utils/formatters';
-import { sportOf } from '../../utils/sport';
+import { formatMinutes, formatNumber } from '../../utils/formatters';
+import { sportOf, activityTypeLabel } from '../../utils/sport';
 import { SportIcon } from '../common/SportIcon';
 import { Button, Card, EmptyState, Input, Select } from '../ui';
 import { useConfirmDeleteActivity } from '../../hooks/useConfirmDeleteActivity';
@@ -205,6 +205,15 @@ export const HistoryList = React.memo(({ activities, onDelete, onSelectActivity 
                                     data-index={virtualRow.index}
                                     ref={virtualRow.isVirtual ? rowVirtualizer.measureElement : undefined}
                                     onClick={() => onSelectActivity && onSelectActivity(act)}
+                                    // A11Y-4: la fila se abre también con Enter o Espacio.
+                                    role="button"
+                                    tabIndex={0}
+                                    aria-label={`Abrir ${act.name || activityTypeLabel(act.type)}, ${shortDate(act.date, refYear)}`}
+                                    onKeyDown={(e) => {
+                                        if (e.target !== e.currentTarget || (e.key !== 'Enter' && e.key !== ' ')) return;
+                                        e.preventDefault();
+                                        if (onSelectActivity) onSelectActivity(act);
+                                    }}
                                     style={{
                                         position: 'absolute',
                                         top: 0,
@@ -213,7 +222,7 @@ export const HistoryList = React.memo(({ activities, onDelete, onSelectActivity 
                                         transform: `translateY(${virtualRow.start}px)`,
                                     }}
                                     data-history="row"
-                                    className="group flex items-center p-3 hover:bg-slate-50/80 dark:hover:bg-zinc-800/40 active:bg-slate-100 dark:active:bg-zinc-800/70 border-b border-black/[0.04] dark:border-white/[0.05] box-border transition-colors cursor-pointer select-none"
+                                    className="group flex items-center p-3 hover:bg-slate-50/80 dark:hover:bg-zinc-800/40 active:bg-slate-100 dark:active:bg-zinc-800/70 border-b border-black/[0.04] dark:border-white/[0.05] box-border transition-colors cursor-pointer select-none outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-action-bright"
                                 >
                                     {/* Icono en squircle estilo Apple */}
                                     <div className="mr-3 shrink-0">
@@ -225,7 +234,7 @@ export const HistoryList = React.memo(({ activities, onDelete, onSelectActivity 
                                         <div className="flex items-center gap-1.5 text-[11px] text-ink-3">
                                             <span>{shortDate(act.date, refYear)}</span>
                                             <span>•</span>
-                                            <span className="capitalize">{act.type}</span>
+                                            <span>{activityTypeLabel(act.type)}</span>
                                         </div>
                                     </div>
 
@@ -236,7 +245,7 @@ export const HistoryList = React.memo(({ activities, onDelete, onSelectActivity 
                                         </span>
                                         <span className="text-[10px] text-ink-4 font-medium tabular-nums">
                                             {act.distance > 0 
-                                                ? `${(act.distance / 1000).toFixed(1)} km` 
+                                                ? `${formatNumber(act.distance / 1000, 1)} km` 
                                                 : (act.tss > 0 ? `${Math.round(act.tss)} TSS` : '')}
                                         </span>
                                     </div>
@@ -249,7 +258,7 @@ export const HistoryList = React.memo(({ activities, onDelete, onSelectActivity 
                                         </div>
                                         <div className="flex flex-col items-end w-16">
                                             <span className="text-[10px] font-medium text-slate-400 mb-0.5">Dist</span>
-                                            <span className="text-sm font-semibold text-ink-2-soft tabular-nums">{act.distance > 0 ? (act.distance / 1000).toFixed(1) + 'km' : '--'}</span>
+                                            <span className="text-sm font-semibold text-ink-2-soft tabular-nums">{act.distance > 0 ? formatNumber(act.distance / 1000, 1) + 'km' : '--'}</span>
                                         </div>
                                         <div className="flex flex-col items-end w-12">
                                             <span className="text-[10px] font-medium text-slate-400 mb-0.5">Kcal</span>
@@ -270,7 +279,7 @@ export const HistoryList = React.memo(({ activities, onDelete, onSelectActivity 
 
                                     {/* Botón Borrar y Chevron */}
                                     <div className="shrink-0 flex items-center gap-1 sm:gap-2">
-                                        <button
+                                        <button type="button" aria-label="Eliminar actividad"
                                             data-history="delete"
                                             onClick={(e) => { e.stopPropagation(); onDelete && del.request(act); }}
                                             className="w-7 h-7 flex items-center justify-center text-slate-300 hover:text-red-500 hover:bg-danger/10 active:scale-90 rounded-full transition-all"

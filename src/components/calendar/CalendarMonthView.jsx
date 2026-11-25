@@ -5,9 +5,10 @@ import { getSportCategory } from '../../utils/tssEngine';
 import { getComplianceForDay, computeWeekStats, findWeekPmc, findPrevWeekPmc, getWeekNumber } from '../../utils/calendarEngine';
 import { WEEKDAYS, getZoneColor } from './calendarHelpers';
 import { SportIcon } from '../common/SportIcon';
-import { formatMinutes } from '../../utils/formatters';
+import { formatMinutes, formatNumber } from '../../utils/formatters';
 import { toDateKey } from '../../utils/dates';
 import { getSessionState, planProgress } from '../../utils/calendarLoad';
+import { activityTypeLabel } from '../../utils/sport';
 
 // Acento y punto de cada deporte en las fichas del mes (categoría de `getSportCategory`).
 const PLAN_BAR = { high: 'bg-emerald-500', mid: 'bg-blue-500', low: 'bg-amber-500' };
@@ -88,10 +89,10 @@ export const CalendarMonthView = ({
 
                                             {/* Intervals.icu style PMC layout */}
                                             <div className="px-1.5 py-2 flex flex-col gap-0.5 flex-1 select-none">
-                                                {/* Row 1: Aptitud & Duration */}
+                                                {/* Row 1: Fitness & Duration */}
                                                 <div className="flex items-center justify-between">
                                                     <div className="flex items-center gap-1.5">
-                                                        <span className="text-[10px] text-ink-3 w-9">Aptitud</span>
+                                                        <span className="text-[10px] text-ink-3 w-9" title="Fitness (CTL)">Fitness</span>
                                                         <span className="text-[11px] font-bold text-metric-ctl">{weekPmc.ctl != null ? Math.round(weekPmc.ctl) : '-'}</span>
                                                     </div>
                                                     <span className="text-[11px] font-bold text-ink-2-soft">{formatMinutes(weekDuration, { compact: true })}</span>
@@ -100,7 +101,7 @@ export const CalendarMonthView = ({
                                                 {/* Row 2: Fatiga & Carga */}
                                                 <div className="flex items-center justify-between">
                                                     <div className="flex items-center gap-1.5">
-                                                        <span className="text-[10px] text-ink-3 w-9">Fatiga</span>
+                                                        <span className="text-[10px] text-ink-3 w-9" title="Fatiga (ATL)">Fatiga</span>
                                                         <span className="text-[11px] font-bold text-legacy-atl-purple-ink">{weekPmc.atl != null ? Math.round(weekPmc.atl) : '-'}</span>
                                                     </div>
                                                     <div className="flex items-center gap-1">
@@ -109,10 +110,10 @@ export const CalendarMonthView = ({
                                                     </div>
                                                 </div>
 
-                                                {/* Row 3: Forma & Ramp */}
+                                                {/* Row 3: Forma & Rampa */}
                                                 <div className="flex items-center justify-between">
                                                     <div className="flex items-center gap-1.5">
-                                                        <span className="text-[10px] text-ink-3 w-9">Forma</span>
+                                                        <span className="text-[10px] text-ink-3 w-9" title="Forma (TSB)">Forma</span>
                                                         {weekPmc.tcb != null ? (
                                                             <span className={`text-[11px] font-semibold ${weekPmc.tcb > 5 ? 'text-legacy-tsb-up' : weekPmc.tcb < -15 ? 'text-legacy-tsb-low' : 'text-body-soft-2'}`}>
                                                                 {Math.round(weekPmc.tcb)}
@@ -123,7 +124,7 @@ export const CalendarMonthView = ({
                                                     </div>
                                                     {ramp != null && (
                                                         <div className="flex items-center gap-0.5">
-                                                            <span className="text-[9px] text-ink-4">Ramp</span>
+                                                            <span className="text-[9px] text-ink-4">Rampa</span>
                                                             <span className={`text-[10px] font-bold ${Number(ramp) > 0 ? 'text-legacy-tsb-up' : Number(ramp) < 0 ? 'text-danger-light' : 'text-slate-500'}`}>
                                                                 {Number(ramp) > 0 ? '+' : ''}{ramp}
                                                             </span>
@@ -136,7 +137,7 @@ export const CalendarMonthView = ({
                                                     <div className="flex items-center justify-between pt-0.5 border-t border-line-faint">
                                                         <div className="flex items-center gap-1.5">
                                                             <span className="text-[10px] text-ink-3 w-9">Dist.</span>
-                                                            <span className="text-[11px] font-bold text-body">{(weekDist / 1000).toFixed(1)} km</span>
+                                                            <span className="text-[11px] font-bold text-body">{formatNumber(weekDist / 1000, 1)} km</span>
                                                         </div>
                                                     </div>
                                                 )}
@@ -193,7 +194,7 @@ export const CalendarMonthView = ({
                                                                 {WEEKDAYS[dIdx]}
                                                             </span>
                                                         </div>
-                                                        <button onClick={(e) => handleOpenPlanModal(e, day.date)} data-cal="add" className="opacity-90 lg:opacity-0 group-hover/daycell:opacity-100 text-slate-400 hover:text-red-500 w-8 h-8 sm:w-7 sm:h-7 flex items-center justify-center rounded-full active:scale-90 transition-all touch-manipulation" title="Planificar sesión">
+                                                        <button type="button" aria-label="Planificar sesión" onClick={(e) => handleOpenPlanModal(e, day.date)} data-cal="add" className="opacity-90 lg:opacity-0 group-hover/daycell:opacity-100 text-slate-400 hover:text-red-500 w-8 h-8 sm:w-7 sm:h-7 flex items-center justify-center rounded-full active:scale-90 transition-all touch-manipulation" title="Planificar sesión">
                                                             <Plus size={14} />
                                                         </button>
                                                     </div>
@@ -262,7 +263,7 @@ export const CalendarMonthView = ({
                                                             // Gather extra info
                                                             let extraInfo = [];
                                                             if (!act.isPlanned) {
-                                                                if (act.distance > 0) extraInfo.push(`${(act.distance / 1000).toFixed(1)}km`);
+                                                                if (act.distance > 0) extraInfo.push(`${formatNumber(act.distance / 1000, 1)}km`);
                                                                 if (act.np > 0) extraInfo.push(`${Math.round(act.np)}W NP`);
                                                                 else if (act.averagePower > 0) extraInfo.push(`${Math.round(act.averagePower)}W`);
                                                                 if (extraInfo.length < 3 && act.averageHeartRate > 0) extraInfo.push(`${Math.round(act.averageHeartRate)}bpm`);
@@ -277,7 +278,7 @@ export const CalendarMonthView = ({
                                                                         planDist += Number(b.duration) || 0;
                                                                     }
                                                                 });
-                                                                if (planDist > 0) extraInfo.push(`${planDist.toFixed(1)}km`);
+                                                                if (planDist > 0) extraInfo.push(`${formatNumber(planDist, 1)}km`);
                                                             }
 
                                                             return (
@@ -313,7 +314,7 @@ export const CalendarMonthView = ({
                                                                             </div>
                                                                             <div className="flex flex-col gap-0.5">
                                                                                 <span className="text-[11px] font-medium leading-tight truncate text-body-soft">
-                                                                                    {act.name || act.type}
+                                                                                    {act.name || activityTypeLabel(act.type)}
                                                                                 </span>
                                                                                 {extraInfo.length > 0 && (
                                                                                     <span className="text-[9px] font-semibold text-ink-4 flex gap-1.5">
@@ -358,7 +359,7 @@ export const CalendarMonthView = ({
                                                                             </div>
                                                                             <div className="flex flex-col gap-0.5">
                                                                                 <span className="text-[11px] font-medium leading-tight truncate text-body">
-                                                                                    {act.name || act.type}
+                                                                                    {act.name || activityTypeLabel(act.type)}
                                                                                 </span>
                                                                                 {extraInfo.length > 0 && (
                                                                                     <span className="text-[9px] font-semibold text-ink-3 flex gap-1.5">

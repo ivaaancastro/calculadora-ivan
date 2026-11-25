@@ -19,7 +19,6 @@ const isMobile = (page) => (page.viewportSize()?.width ?? 0) < 768;
 const PENDING_SMALL = {
   dashboard: ['button "7D"', 'button "3M"'], // PR 15: el selector pasa a la cabecera de la gráfica
   detalle: ['input "Zoom del recorrido: inicio"', 'input "Zoom del recorrido: fin"'], // PR 16
-  perfil: ['input "Tu nombre"', 'input ""', 'input "Auto"'], // PR 11 (A11Y-3, campos)
 };
 
 for (const screen of SCREENS) {
