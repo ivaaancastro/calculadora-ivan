@@ -285,7 +285,7 @@ export const CalendarMonthView = ({
 
                                                             return (
                                                                 <div
-                                                                    key={i}
+                                                                    key={`${act.isPlanned ? 'plan' : 'act'}-${act.id ?? i}`}
                                                                     data-cal="act" data-planned={act.isPlanned ? 'true' : undefined} data-state={getSessionState(act, { fulfilled: isFulfilled, dateKey })}
                                                                     draggable={act.isPlanned}
                                                                     onDragStart={(e) => act.isPlanned && handleDragStart(e, act)}

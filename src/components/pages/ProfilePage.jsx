@@ -91,7 +91,7 @@ export const ProfilePage = ({
 
     const handleSyncIntervals = async () => {
         if (!formData?.intervalsId || !formData?.intervalsKey) {
-            toast._or('Introduce tu Athlete ID y API Key de Intervals.icu primero');
+            toast.error('Introduce tu Athlete ID y API Key de Intervals.icu primero');
             return;
         }
         const result = await syncIntervals(formData);
