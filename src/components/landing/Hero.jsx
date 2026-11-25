@@ -3,7 +3,7 @@ import { ArrowRight, CalendarDays, Gauge, TrendingUp } from 'lucide-react';
 import { DashboardPreview } from './DashboardPreview';
 
 /**
- * Hero y fichas de la landing v2, composición «A: panel real» (spec-rediseno-02-c4, D2/D3).
+ * Hero y fichas de la landing, composición «A: panel real» (spec-rediseno-02-c4, D2/D3).
  * Sin canvas (D4) y sin promesas de precio (D5): copy neutro.
  */
 const SIGNALS = [
@@ -12,7 +12,7 @@ const SIGNALS = [
   { icon: CalendarDays, title: 'Tu calendario', text: 'Vista mensual con la carga diaria, entrenos planificados y ejecutados.' },
 ];
 
-export const HeroV2 = ({ onOpenAuth, onFeatures }) => (
+export const Hero = ({ onOpenAuth, onFeatures }) => (
   <>
     <section className="mx-auto grid max-w-6xl items-center gap-10 px-4 pb-16 pt-[calc(var(--nav-h)+2.5rem)] sm:px-6 lg:grid-cols-2 lg:gap-14 lg:pb-24 lg:pt-[calc(var(--nav-h)+4rem)]">
       <div>

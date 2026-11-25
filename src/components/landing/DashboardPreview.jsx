@@ -1,7 +1,7 @@
 import React from 'react';
 
 /**
- * Maqueta del Dashboard para el hero de la landing v2 (spec-rediseno-02-c4, D3).
+ * Maqueta del Dashboard para el hero de la landing (spec-rediseno-02-c4, D3).
  * Datos de ejemplo escritos aquí a propósito: nunca datos de una persona real. Usa los
  * mismos tokens de métrica que la app (CTL cobalto, ATL carmín, TSB ámbar).
  */

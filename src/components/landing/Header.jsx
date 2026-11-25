@@ -1,8 +1,8 @@
 import React from 'react';
 import { Activity } from 'lucide-react';
 
-/** Cabecera de la landing v2: la misma altura que la de la app (--nav-h) y capa `z-nav`. */
-export const HeaderV2 = ({ onOpenAuth, onFeatures }) => (
+/** Cabecera de la landing: la misma altura que la de la app (--nav-h) y capa `z-nav`. */
+export const Header = ({ onOpenAuth, onFeatures }) => (
   <nav className="fixed inset-x-0 top-0 z-nav border-b border-line bg-surface-card/95 backdrop-blur">
     <div className="mx-auto flex h-[var(--nav-h)] max-w-6xl items-center justify-between px-4 sm:px-6">
       <div className="flex items-center gap-2.5">

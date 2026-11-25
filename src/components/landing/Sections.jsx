@@ -10,7 +10,7 @@ const FACTS = [
   { value: 'Strava y CSV', label: 'tus actividades' },
 ];
 
-export const FactsV2 = () => (
+export const Facts = () => (
   <section aria-label="Datos clave" className="border-y border-line bg-sunken">
     <dl className="mx-auto grid max-w-6xl grid-cols-2 gap-6 px-4 py-10 sm:px-6 lg:grid-cols-4">
       {FACTS.map(({ value, label }) => (
@@ -23,7 +23,7 @@ export const FactsV2 = () => (
   </section>
 );
 
-export const CtaV2 = ({ onOpenAuth }) => (
+export const Cta = ({ onOpenAuth }) => (
   <section className="mx-auto max-w-3xl px-4 py-16 text-center sm:px-6 lg:py-24">
     <Reveal>
       <h2 className="text-3xl font-bold tracking-tight text-ink sm:text-4xl">¿Listo para analizar tu rendimiento?</h2>
@@ -41,7 +41,7 @@ export const CtaV2 = ({ onOpenAuth }) => (
   </section>
 );
 
-export const FooterV2 = ({ onFeatures }) => (
+export const Footer = ({ onFeatures }) => (
   <footer className="border-t border-line">
     <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-3 px-4 py-8 text-xs font-medium text-ink-3 sm:flex-row sm:px-6">
       <span className="flex items-center gap-2">
