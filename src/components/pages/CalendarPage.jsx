@@ -19,7 +19,6 @@ import { buildMonthSummary } from '../../utils/monthSummary';
 import { buildDayLoadLevels } from '../../utils/calendarLoad';
 
 export const CalendarPage = ({ activities, plannedWorkouts = [], addPlannedWorkout, deletePlannedWorkout, updatePlannedWorkout, currentMetrics, settings, chartData = [], onDelete, onSelectActivity }) => {
-    const isV2 = true; // v2 por defecto (Capa 6); las ramas v1 se retiran en los PR 5a–c
     const { year, month, prevMonth, nextMonth, goToday } = useCalendarDate();
 
     const [showPmcChart, setShowPmcChart] = useState(false);
@@ -46,12 +45,12 @@ export const CalendarPage = ({ activities, plannedWorkouts = [], addPlannedWorko
     const loadLevels = useMemo(() => buildDayLoadLevels(activitiesByDate, calendarGrid), [activitiesByDate, calendarGrid]);
 
     const monthSummary = useMemo(
-        () => (isV2 ? buildMonthSummary({ activities, plannedWorkouts, year, month }) : null),
-        [isV2, activities, plannedWorkouts, year, month],
+        () => buildMonthSummary({ activities, plannedWorkouts, year, month }),
+        [activities, plannedWorkouts, year, month],
     );
 
     return (
-        <ChartSkinProvider skin={isV2 ? 'v2' : 'v1'}>
+        <ChartSkinProvider skin="v2">
             <div data-skin="calendar" data-cal="root" className="flex flex-col bg-surface-6 rounded-3xl border border-line-soft overflow-hidden mb-6 shadow-sm">
 
                 {/* HEADER */}
@@ -76,19 +75,16 @@ export const CalendarPage = ({ activities, plannedWorkouts = [], addPlannedWorko
                     </div>
                 </div>
 
-                {isV2 && (
-                    <MonthHero
-                        summary={monthSummary}
-                        heatmap={<ActivityHeatmap activities={activities} />}
-                        onPlan={() => handleOpenPlanModal({ stopPropagation() {} }, new Date())}
-                    />
-                )}
+                <MonthHero
+                    summary={monthSummary}
+                    heatmap={<ActivityHeatmap activities={activities} />}
+                    onPlan={() => handleOpenPlanModal({ stopPropagation() {} }, new Date())}
+                />
 
                 <CalendarMonthView
                         activitiesByDate={activitiesByDate}
                         calendarGrid={calendarGrid}
                         loadLevels={loadLevels}
-                        isV2={isV2}
                         dragOverDate={dragOverDate}
                         fullPmcByDate={fullPmcByDate}
                         handleDragLeave={handleDragLeave}
