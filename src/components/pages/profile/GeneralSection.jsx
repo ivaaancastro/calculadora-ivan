@@ -2,7 +2,7 @@ import React from 'react';
 import { Activity, Heart, Weight, User, Camera, Loader2 } from 'lucide-react';
 import { Card, Input, SectionHeader } from '../../ui';
 
-export const GeneralSection = ({ formData, isUploadingAvatar, handleAvatarUpload, handleChange, targetCtl, setTargetCtl, isV2, setUi }) => (
+export const GeneralSection = ({ formData, isUploadingAvatar, handleAvatarUpload, handleChange, targetCtl, setTargetCtl }) => (
     <div className="space-y-5 animate-in fade-in slide-in-from-right-3 duration-250">
         {/* AVATAR PROFILE BANNER — HORIZONTAL APPLE SETTINGS STYLE */}
         <Card data-profile="banner" className="p-4 sm:p-5 flex items-center gap-4 text-left mb-5">
@@ -56,7 +56,8 @@ export const GeneralSection = ({ formData, isUploadingAvatar, handleAvatarUpload
                         value={formData.fullName || ''}
                         onChange={handleChange}
                         placeholder="Tu nombre"
-                        className="flex-1 text-right bg-transparent text-xs sm:text-sm font-semibold text-slate-900 dark:text-white outline-none placeholder:text-slate-400"
+                        aria-label="Nombre"
+                        className="flex-1 min-h-11 sm:min-h-0 px-2 -mx-2 rounded-lg text-right bg-transparent text-xs sm:text-sm font-semibold text-slate-900 dark:text-white outline-none focus-visible:ring-2 focus-visible:ring-action-bright placeholder:text-slate-400"
                     />
                 </div>
                 <div data-profile="row" className="p-3 sm:p-3.5 flex items-center justify-between gap-3">
@@ -86,9 +87,10 @@ export const GeneralSection = ({ formData, isUploadingAvatar, handleAvatarUpload
                             type="number"
                             inputMode="decimal"
                             name="weight"
+                            aria-label="Peso corporal (kg)"
                             value={formData.weight}
                             onChange={handleChange}
-                            variant="inline" mono ringTone="action-bright" className="w-16 text-right px-2 py-1"
+                            variant="inline" mono ringTone="action-bright" className="w-16 min-h-11 sm:min-h-0 text-right px-2 py-1"
                         />
                         <span className="text-xs font-semibold text-ink-4">kg</span>
                     </div>
@@ -110,9 +112,10 @@ export const GeneralSection = ({ formData, isUploadingAvatar, handleAvatarUpload
                             type="number"
                             inputMode="numeric"
                             name="fcReposo"
+                            aria-label="FC en reposo (bpm)"
                             value={formData.fcReposo}
                             onChange={handleChange}
-                            variant="inline" mono ringTone="hr" className="w-16 text-right px-2 py-1"
+                            variant="inline" mono ringTone="hr" className="w-16 min-h-11 sm:min-h-0 text-right px-2 py-1"
                         />
                         <span className="text-xs font-semibold text-ink-4">bpm</span>
                     </div>
@@ -137,39 +140,12 @@ export const GeneralSection = ({ formData, isUploadingAvatar, handleAvatarUpload
                             value={targetCtl ?? ''}
                             onChange={(e) => setTargetCtl(e.target.value ? parseInt(e.target.value) : null)}
                             placeholder="Auto"
-                            variant="inline" mono ringTone="positive" className="w-16 text-right px-2 py-1"
+                            aria-label="Calibrar Fitness (CTL)"
+                            variant="inline" mono ringTone="positive" className="w-16 min-h-11 sm:min-h-0 text-right px-2 py-1"
                         />
                         <span className="text-xs font-semibold text-ink-4">CTL</span>
                     </div>
                 </div>
-            </Card>
-        </div>
-
-        {/* APARIENCIA — vista previa de la piel v2 (spec-rediseno-02-c3-skin) */}
-        <div>
-            <SectionHeader>Apariencia</SectionHeader>
-            <Card divided className="overflow-hidden">
-                <button
-                    type="button"
-                    role="switch"
-                    aria-checked={isV2}
-                    aria-label="Vista previa v2"
-                    onClick={() => setUi(isV2 ? 'v1' : 'v2')}
-                    className="w-full min-h-11 p-3 sm:p-3.5 flex items-center justify-between gap-3 text-left hover:bg-surface-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-action-ios-solid"
-                >
-                    <span className="min-w-0">
-                        <span className="block text-xs sm:text-sm font-semibold text-ink">Vista previa v2</span>
-                        <span className="block text-[10px] text-ink-4">Piel nueva, todavía en pruebas. No cambia tus datos.</span>
-                    </span>
-                    <span
-                        aria-hidden="true"
-                        className={`relative shrink-0 w-[51px] h-[31px] rounded-full transition-colors ${isV2 ? 'bg-action-ios-solid' : 'bg-line-3'}`}
-                    >
-                        <span
-                            className={`absolute top-[2px] left-[2px] w-[27px] h-[27px] rounded-full bg-control-knob shadow-sm transition-transform ${isV2 ? 'translate-x-5' : 'translate-x-0'}`}
-                        />
-                    </span>
-                </button>
             </Card>
         </div>
     </div>

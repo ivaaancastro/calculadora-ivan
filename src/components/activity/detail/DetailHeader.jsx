@@ -1,12 +1,11 @@
 import React from 'react';
 import { ArrowLeft, Trash2 } from 'lucide-react';
-import { IconButton, Segmented, Stat, MetricTooltip } from '../../ui';
-import { useUiMode } from '../../../hooks/useUiMode';
+import { IconButton, Segmented } from '../../ui';
+import { activityTypeLabel } from '../../../utils/sport';
 
-export const DetailHeader = ({ activity, activeTab, setActiveTab, onBack, onDelete, dateStr, tabs, metrics }) => {
-    const { isV2 } = useUiMode();
-    // v2: en Análisis el título y las cifras viven en el hero; la cabecera queda en controles.
-    const heroOwnsTitle = isV2 && activeTab === 'analyze';
+export const DetailHeader = ({ activity, activeTab, setActiveTab, onBack, onDelete, dateStr, tabs }) => {
+    // En Análisis el título y las cifras viven en el hero; la cabecera queda en controles.
+    const heroOwnsTitle = activeTab === 'analyze';
     return (
             <header data-detail="header" className="glass-nav px-3.5 py-2 sm:px-6 sm:py-3 shrink-0 z-nav">
                 {/* --- DESKTOP HEADER (lg:flex) --- */}
@@ -26,7 +25,7 @@ export const DetailHeader = ({ activity, activeTab, setActiveTab, onBack, onDele
                                 Strava
                             </a>
                         )}
-                        <button data-detail="action" onClick={() => onDelete && onDelete(activity.id)} className="w-8 h-8 flex items-center justify-center text-slate-400 dark:text-zinc-500 hover:text-red-500 hover:bg-danger/10 rounded-full active:scale-90 transition-all shrink-0" title="Eliminar actividad">
+                        <button type="button" aria-label="Eliminar actividad" data-detail="action" onClick={() => onDelete && onDelete(activity.id)} className="w-8 h-8 flex items-center justify-center text-slate-400 dark:text-zinc-500 hover:text-red-500 hover:bg-danger/10 rounded-full active:scale-90 transition-all shrink-0" title="Eliminar actividad">
                             <Trash2 size={14} />
                         </button>
                     </div>
@@ -37,7 +36,7 @@ export const DetailHeader = ({ activity, activeTab, setActiveTab, onBack, onDele
                     {!heroOwnsTitle && (
                     <div className="min-w-0">
                         <h1 className="text-sm font-bold text-ink tracking-tight leading-tight truncate">
-                            {activity.name || `${activity.type}`}
+                            {activity.name || activityTypeLabel(activity.type)}
                         </h1>
                         <p className="text-[10px] font-semibold text-ink-4 capitalize">{dateStr}</p>
                     </div>
@@ -52,7 +51,7 @@ export const DetailHeader = ({ activity, activeTab, setActiveTab, onBack, onDele
                         {!heroOwnsTitle && (
                         <div className="min-w-0">
                             <h1 className="text-sm font-bold text-ink tracking-tight leading-tight truncate">
-                                {activity.name || `${activity.type}`}
+                                {activity.name || activityTypeLabel(activity.type)}
                             </h1>
                             <p className="text-[10px] font-semibold text-ink-4 capitalize truncate">{dateStr}</p>
                         </div>
@@ -66,7 +65,7 @@ export const DetailHeader = ({ activity, activeTab, setActiveTab, onBack, onDele
                                 Strava
                             </a>
                         )}
-                        <button data-detail="action" onClick={() => onDelete && onDelete(activity.id)} className="w-8 h-8 flex items-center justify-center text-slate-400 dark:text-zinc-500 hover:text-red-500 hover:bg-danger/10 rounded-full active:scale-90 transition-all shrink-0" title="Eliminar actividad">
+                        <button type="button" aria-label="Eliminar actividad" data-detail="action" onClick={() => onDelete && onDelete(activity.id)} className="w-8 h-8 flex items-center justify-center text-slate-400 dark:text-zinc-500 hover:text-red-500 hover:bg-danger/10 rounded-full active:scale-90 transition-all shrink-0" title="Eliminar actividad">
                             <Trash2 size={14} />
                         </button>
                     </div>
@@ -88,13 +87,6 @@ export const DetailHeader = ({ activity, activeTab, setActiveTab, onBack, onDele
                         </button>
                     ))}
                 </div>
-
-                {/* Expanded Compact Metric Grid - Desktop Solo (en móvil se muestra en cuadrícula bajo el Mapa) */}
-                {!isV2 && <div className="hidden lg:flex items-center gap-2 py-1 overflow-x-auto hide-scrollbar touch-scroll overscroll-contain sm:flex-wrap -mx-3 px-3 sm:mx-0 sm:px-0 mt-2">
-                    {metrics.map(m => (
-                        <MetricTooltip key={m.id} metricId={m.metricId}><Stat label={m.label} value={m.value} unit={m.unit || undefined} accent={m.accent} /></MetricTooltip>
-                    ))}
-                </div>}
             </header>
     );
 };

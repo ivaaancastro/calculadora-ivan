@@ -1,21 +1,11 @@
-import { createContext, useContext } from 'react';
-import { useUiMode } from '../../hooks/useUiMode';
-
 /**
- * Piel de las gráficas (spec-rediseno-02-c3-skin-dir): 'v1' (por defecto) o 'v2'.
- * Las pantallas con `data-skin` la activan (Dashboard y Calendario con ChartSkinProvider, el resto con AutoChartSkin).
+ * Piel de las gráficas (spec-rediseno-02-c3-skin-dir). Desde la Capa 6 solo existe la piel 'v2':
+ * los proveedores se conservan como envoltorios neutros para no cambiar la API de las pantallas.
  */
-const ChartSkinContext = createContext('v1');
-
-export const ChartSkinProvider = ({ skin = 'v1', children }) => (
-  <ChartSkinContext.Provider value={skin}>{children}</ChartSkinContext.Provider>
-);
+export const ChartSkinProvider = ({ children }) => children;
 
 // eslint-disable-next-line react-refresh/only-export-components
-export const useChartSkin = () => useContext(ChartSkinContext);
+export const useChartSkin = () => 'v2';
 
-/** Activa la piel de gráficas v2 cuando `data-ui="v2"` está activo (sin añadir nodos al DOM). */
-export const AutoChartSkin = ({ children }) => {
-  const { isV2 } = useUiMode();
-  return <ChartSkinProvider skin={isV2 ? 'v2' : 'v1'}>{children}</ChartSkinProvider>;
-};
+/** Envoltorio neutro (antes activaba la piel v2 según `data-ui`). */
+export const AutoChartSkin = ({ children }) => children;

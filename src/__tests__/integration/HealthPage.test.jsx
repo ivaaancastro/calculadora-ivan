@@ -31,10 +31,8 @@ vi.mock('../../hooks/useWellnessInfo', () => ({ useWellnessInfo: () => state.val
 vi.mock('recharts', async () => {
     const R = await import('react');
     const Stub = ({ children }) => R.createElement('div', { 'data-chart': true }, children);
-    return {
-        ComposedChart: Stub, Bar: Stub, Line: Stub, XAxis: Stub, YAxis: Stub,
-        Tooltip: Stub, ResponsiveContainer: Stub, CartesianGrid: Stub,
-    };
+    const actual = await vi.importActual('recharts');
+    return Object.fromEntries(Object.keys(actual).map((name) => [name, Stub]));
 });
 
 describe('HealthPage - humo', { timeout: 30000 }, () => {

@@ -2,11 +2,9 @@ import React from 'react';
 import {
     AlertTriangle
 } from 'lucide-react';
-import { useUiMode } from '../../hooks/useUiMode';
 import { HealthHero } from './HealthHero';
 
 export const HealthHeader = ({ wellnessMetrics, readinessInfo, setActiveTab, activeTab, wellnessLoading, apiError }) => {
-    const { isV2 } = useUiMode();
     return (
     <>
         <div data-health="header" className="pt-2 sm:pt-4 space-y-4">
@@ -22,9 +20,9 @@ export const HealthHeader = ({ wellnessMetrics, readinessInfo, setActiveTab, act
                             </span>
                         )}
                     </div>
-                    {(!isV2 || wellnessLoading) && (
+                    {wellnessLoading && (
                         <p className="text-xs sm:text-sm font-medium text-ink-3 mt-0.5 max-w-xl">
-                            {wellnessLoading ? 'Sincronizando métricas fisiológicas...' : readinessInfo.msg}
+                            Sincronizando métricas fisiológicas...
                         </p>
                     )}
                 </div>
@@ -56,7 +54,7 @@ export const HealthHeader = ({ wellnessMetrics, readinessInfo, setActiveTab, act
                 </div>
             </div>
 
-            {isV2 && !wellnessLoading && activeTab === 'today' && (
+            {!wellnessLoading && activeTab === 'today' && (
                 <HealthHero wellnessMetrics={wellnessMetrics} readinessInfo={readinessInfo} />
             )}
 

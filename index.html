@@ -1,12 +1,11 @@
 <!doctype html>
-<html lang="es">
+<html lang="es" data-ui="v2">
 
 <head>
   <meta charset="UTF-8" />
   <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
   <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
   <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
-  <link rel="apple-touch-icon-precomposed" href="/apple-touch-icon-precomposed.png" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <meta name="description"
     content="Dashboard de rendimiento deportivo: métricas de entrenamiento, PMC, zonas de potencia, calendario y salud." />
@@ -33,15 +32,6 @@
     }
   </script>
 
-  <!-- Piel v2 (spec-rediseno-02-c3-skin): el atributo se aplica antes del primer pintado.
-       localStorage gana a VITE_UI (M1); sin ninguno de los dos, la app arranca en v1. -->
-  <script>
-    (function () {
-      var stored = localStorage.getItem('ui');
-      var ui = stored || '%VITE_UI%';
-      if (ui === 'v2') document.documentElement.dataset.ui = 'v2';
-    })();
-  </script>
 
   <!-- Google Fonts: Inter (preloaded for faster FCP) -->
   <link rel="preconnect" href="https://fonts.googleapis.com">

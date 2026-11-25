@@ -2,7 +2,7 @@ import React from 'react';
 import { ArrowUpRight, ArrowDownRight } from 'lucide-react';
 import { buildStatsNarrative } from '../../utils/statsNarrative';
 
-/** Héroe «Hoy» de Rendimiento (solo v2): narrativa + KPI protagonistas. */
+/** Héroe «Hoy» de Rendimiento: narrativa + KPI protagonistas. */
 export const StatsHero = ({ trainingStatus, hrv, ftpDiff, eFTP }) => {
     const { text, kpis } = buildStatsNarrative({ trainingStatus, hrv, ftpDiff, eFTP });
     if (kpis.length === 0) return null;

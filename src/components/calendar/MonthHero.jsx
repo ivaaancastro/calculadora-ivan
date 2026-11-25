@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { ArrowUpRight, ArrowDownRight, Minus, ChevronDown } from 'lucide-react';
 import { Button } from '../ui';
-import { useCountUp } from '../health/useCountUp';
-import { formatMinutes } from '../../utils/monthSummary';
+import { useCountUp } from '../../hooks/useCountUp';
+import { formatMinutes, formatNumber } from '../../utils/formatters';
 
 const Kpi = ({ label, value, context, delta, bar }) => (
     <div data-cal="kpi" className="min-w-0 rounded-xl border border-line px-3.5 py-3">
@@ -29,14 +29,14 @@ const Delta = ({ pct }) => {
     return (
         <span className={`flex items-center gap-0.5 text-xs font-semibold tabular-nums ${tone}`}>
             <Icon size={14} strokeWidth={2.5} aria-hidden="true" />
-            {pct > 0 ? '+' : ''}{pct.toLocaleString('es-ES')}%
+            {pct > 0 ? '+' : ''}{formatNumber(pct, Number.isInteger(pct) ? 0 : 1)}%
             <span className="sr-only"> frente al mes anterior</span>
         </span>
     );
 };
 
 /**
- * Cabecera narrativa del mes (solo v2, spec premium-calendario §3.1): frase + 4 KPI y, al lado,
+ * Cabecera narrativa del mes (spec premium-calendario §3.1): frase + 4 KPI y, al lado,
  * el heatmap de constancia (plegable en móvil). `heatmap` es el nodo ya montado por la página.
  */
 export const MonthHero = ({ summary, heatmap, onPlan }) => {
@@ -60,7 +60,9 @@ export const MonthHero = ({ summary, heatmap, onPlan }) => {
                             context={summary.pending > 0 ? `${summary.pending} por venir` : summary.planned > 0 ? `${summary.done}/${summary.planned} planificadas` : 'sin plan'}
                         />
                         <Kpi label="Carga (TSS)" value={Math.round(tss)} delta={<Delta pct={summary.deltaPct} />}
-                            context={summary.tssPrev > 0 ? `mes anterior: ${summary.tssPrev}` : 'sin mes anterior'} />
+                            context={summary.tssPrev > 0
+                                ? `${summary.comparedDays ? `días 1–${summary.comparedDays} del mes anterior` : 'mes anterior'}: ${summary.tssPrev}`
+                                : 'sin mes anterior'} />
                         <Kpi label="Tiempo" value={formatMinutes(summary.minutes)} context="entrenado este mes" />
                         <Kpi label="Cumplimiento" value={summary.compliance != null ? `${summary.compliance}%` : '--'}
                             bar={summary.compliance} context={summary.planned > 0 ? `${summary.done} de ${summary.planned} hechas` : 'sin plan vencido'} />

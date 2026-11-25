@@ -7,7 +7,7 @@ const pathname = (page) => new URL(page.url()).pathname;
 const visible = (locator) => locator.filter({ visible: true }).first();
 
 test.beforeEach(async ({ page }) => {
-  await setupApp(page, { authenticated: true, ui: 'v2' });
+  await setupApp(page, { authenticated: true });
 });
 
 test.describe('Gestos: deslizar sobre contenido desplazable no cambia de pestaña', () => {
@@ -64,4 +64,19 @@ test.describe('Tooltip de gráfica al tocar', () => {
       await expect(chart.locator('.recharts-tooltip-wrapper')).toHaveCSS('visibility', 'visible');
     });
   }
+});
+
+test.describe('Evolución de forma en móvil (BUG-10)', () => {
+  test('las etiquetas HOY y de proyección no se solapan', async ({ page }) => {
+    await gotoReady(page, '/');
+    const today = visible(page.locator('svg text', { hasText: /^HOY$/ }));
+    await today.scrollIntoViewIfNeeded();
+    await expect(today).toBeVisible();
+    const projection = page.locator('svg [data-dash="projection-label"]').filter({ visible: true });
+    if ((await projection.count()) === 0) return; // banda estrecha: la etiqueta se oculta
+    const a = await today.boundingBox();
+    const b = await projection.first().boundingBox();
+    const overlap = a.x < b.x + b.width && b.x < a.x + a.width && a.y < b.y + b.height && b.y < a.y + a.height;
+    expect(overlap).toBe(false);
+  });
 });

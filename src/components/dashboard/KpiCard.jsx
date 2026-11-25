@@ -2,7 +2,7 @@ import React from 'react';
 import { ArrowUpRight, ArrowDownRight, Minus } from 'lucide-react';
 import { Card } from '../ui';
 import { Sparkline } from '../charts/Sparkline';
-import { useCountUp } from '../health/useCountUp';
+import { useCountUp } from '../../hooks/useCountUp';
 
 const TONE_TEXT = {
     good: 'text-form-peak',
@@ -12,7 +12,7 @@ const TONE_TEXT = {
 };
 
 /**
- * KPI primario del Dashboard (solo v2, spec premium-dashboard §3.1): etiqueta en mayúsculas,
+ * KPI primario del Dashboard (spec premium-dashboard §3.1): etiqueta en mayúsculas,
  * cifra grande con cuenta animada, variación con icono y color, y sparkline de 28 días.
  * `delta` = { value, text, tone } o null; `format(n)` da el texto de la cifra animada.
  */

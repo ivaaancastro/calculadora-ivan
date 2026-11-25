@@ -13,7 +13,7 @@ export const RacePredictionsCard = ({ racePredictions }) => {
             <Card variant="panel" className="p-6 sm:p-8">
                 <div className="flex items-center gap-2 mb-8">
                     <h3 className="text-[10px] font-bold text-ink-4 uppercase tracking-[0.1em]">Pronóstico de Carrera</h3>
-                    <InfoTooltip text="Predicción teórica basada en tu VO2max actual." />
+                    <InfoTooltip text="Predicción teórica basada en tu VO₂max de carrera (estimado de ritmo y FC)." />
                 </div>
                 <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
                     {racePredictions.map(r => (

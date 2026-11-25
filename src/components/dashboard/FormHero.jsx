@@ -1,6 +1,7 @@
 import React from 'react';
 import { ArrowUpRight, ArrowDownRight, Minus } from 'lucide-react';
-import { useCountUp } from '../health/useCountUp';
+import { useCountUp } from '../../hooks/useCountUp';
+import { formatNumber } from '../../utils/formatters';
 
 const RANGES = [
     { id: '7d', label: '7D' },
@@ -25,7 +26,7 @@ const TONE_ACCENT = {
 };
 
 /**
- * Héroe del Dashboard (solo v2, spec premium-dashboard §3.1): resumen narrativo + CTL como cifra
+ * Héroe del Dashboard (spec premium-dashboard §3.1): resumen narrativo + CTL como cifra
  * protagonista con su variación a 28 días y el estado de forma (TSB) como chip. Sin cajas.
  */
 export const FormHero = ({ summary, ctl, loadTrend, timeRange, setTimeRange }) => {
@@ -63,7 +64,7 @@ export const FormHero = ({ summary, ctl, loadTrend, timeRange, setTimeRange }) =
                         {hasData && (
                             <span className={`flex items-center gap-0.5 text-xs font-semibold tabular-nums ${trendTone}`}>
                                 <TrendIcon size={14} strokeWidth={2.5} aria-hidden="true" />
-                                {loadTrend > 0 ? '+' : ''}{loadTrend.toFixed(1)}%
+                                {loadTrend > 0 ? '+' : ''}{formatNumber(loadTrend, 1)}%
                                 <span className="sr-only"> en 28 días</span>
                             </span>
                         )}

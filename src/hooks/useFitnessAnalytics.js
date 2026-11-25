@@ -5,6 +5,7 @@ import {
     getTrainingBalance, getTrainingStatus, getHRVAnalysis, predictRaceTimes
 } from '../utils/fitnessStatsEngine';
 import { useWellnessInfo } from './useWellnessInfo';
+import { sportOf } from '../utils/sport';
 
 export const formatInterval = (secs) => {
     if (secs < 60) return `${secs}s`;
@@ -213,9 +214,9 @@ export const useFitnessAnalytics = (activities, settings, options = {}) => {
                 wData.hours += (act.duration || 0) / 60;
             }
 
-            const typeLower = String(act.type).toLowerCase();
-            const isBike = typeLower.includes('bici') || typeLower.includes('ciclismo') || typeLower.includes('ride');
-            const isRun = typeLower.includes('run') || typeLower.includes('carrera');
+            const sport = sportOf(act.type);
+            const isBike = sport === 'bike';
+            const isRun = sport === 'run';
 
             if (actDate >= date90DaysAgo && (isBike || isRun) && act.hr_avg > 80 && act.duration >= 20) {
                 const speedMs = act.speed_avg || 0;

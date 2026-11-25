@@ -13,12 +13,11 @@ import { MmpAndEfCard } from '../fitness/MmpAndEfCard';
 import { Activity, HeartPulse, Trophy } from 'lucide-react';
 import { EmptyState } from '../ui';
 import { StatsHero } from '../fitness/StatsHero';
-import { useUiMode } from '../../hooks/useUiMode';
 
 const CATEGORIES = [
     { id: 'physiology', label: 'Fisiología' },
     { id: 'power', label: 'Potencia' },
-    { id: 'vo2', label: 'VO2 y Marcas' },
+    { id: 'vo2', label: 'VO₂max y marcas' },
     { id: 'volume', label: 'Volumen' },
     { id: 'all', label: 'Todos' },
 ];
@@ -34,7 +33,6 @@ export const FitnessStatsPage = ({
     isDeepSyncing,
     deepSyncProgress
 }) => {
-    const { isV2 } = useUiMode();
     const [mobileCategory, setMobileCategory] = useState('physiology');
 
     const {
@@ -187,7 +185,7 @@ export const FitnessStatsPage = ({
 
     const CARD_CATEGORY = { thresholds: 'physiology', status: 'physiology', hrv: 'physiology', balance: 'physiology', race: 'vo2', vo2: 'vo2', volume: 'volume', 'power-profile': 'power', ftp: 'power', mmp: 'power' };
 
-    // v2: una tarjeta sin datos explica qué falta en lugar de desaparecer (EST-4).
+    // Una tarjeta sin datos explica qué falta en lugar de desaparecer (EST-4).
     const emptyCard = (id, Icon, title, description) => (
         <div data-stats="card" data-card={id} data-empty="true" className={cardVisibility(CARD_CATEGORY[id])}>
             <section className="mb-8">
@@ -195,11 +193,9 @@ export const FitnessStatsPage = ({
             </section>
         </div>
     );
-    if (isV2) {
-        if (!stats.trainingStatus) cardNodes.status = emptyCard('status', Activity, 'Sin estado de entreno', 'Registra actividades con carga (TSS) de las últimas semanas para calcularlo.');
-        if (!stats.hrv) cardNodes.hrv = emptyCard('hrv', HeartPulse, 'Sin datos de VFC', 'Conecta un dispositivo que registre la variabilidad cardiaca para ver tu recuperación.');
-        if (!stats.racePredictions) cardNodes.race = emptyCard('race', Trophy, 'Sin pronóstico de carrera', 'Hace falta un VO2 máx. estimado: corre al menos una vez con pulsómetro.');
-    }
+    if (!stats.trainingStatus) cardNodes.status = emptyCard('status', Activity, 'Sin estado de entreno', 'Registra actividades con carga (TSS) de las últimas semanas para calcularlo.');
+    if (!stats.hrv) cardNodes.hrv = emptyCard('hrv', HeartPulse, 'Sin datos de VFC', 'Conecta un dispositivo que registre la variabilidad cardiaca para ver tu recuperación.');
+    if (!stats.racePredictions) cardNodes.race = emptyCard('race', Trophy, 'Sin pronóstico de carrera', 'Hace falta un VO2 máx. estimado: corre al menos una vez con pulsómetro.');
 
     const GROUPS = [
         { id: 'today', label: 'Hoy', cards: ['status', 'hrv', 'balance', 'thresholds'] },
@@ -234,25 +230,15 @@ export const FitnessStatsPage = ({
                 ))}
             </div>
 
-            {isV2 ? (
-                <>
-                    {(mobileCategory === 'all' || mobileCategory === 'physiology') && (
-                        <StatsHero trainingStatus={stats.trainingStatus} hrv={stats.hrv} ftpDiff={ftpDiff} eFTP={stats.ftp?.eFTP} />
-                    )}
-                    {GROUPS.map(g => (
-                        <div key={g.id} data-stats="group" data-group={g.id} className={g.cards.some(isShown) ? 'block' : 'hidden md:block'}>
-                            <h3 data-stats="group-title">{g.label}</h3>
-                            {g.cards.map(id => <React.Fragment key={id}>{cardNodes[id]}</React.Fragment>)}
-                        </div>
-                    ))}
-                </>
-            ) : (
-                <>
-                    {['thresholds', 'status', 'hrv', 'race', 'vo2', 'balance', 'volume', 'power-profile', 'ftp', 'mmp'].map(id => (
-                        <React.Fragment key={id}>{cardNodes[id]}</React.Fragment>
-                    ))}
-                </>
+            {(mobileCategory === 'all' || mobileCategory === 'physiology') && (
+                <StatsHero trainingStatus={stats.trainingStatus} hrv={stats.hrv} ftpDiff={ftpDiff} eFTP={stats.ftp?.eFTP} />
             )}
+            {GROUPS.map(g => (
+                <div key={g.id} data-stats="group" data-group={g.id} className={g.cards.some(isShown) ? 'block' : 'hidden md:block'}>
+                    <h3 data-stats="group-title">{g.label}</h3>
+                    {g.cards.map(id => <React.Fragment key={id}>{cardNodes[id]}</React.Fragment>)}
+                </div>
+            ))}
         </div>
     );
 };

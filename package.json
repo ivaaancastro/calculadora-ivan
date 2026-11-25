@@ -10,6 +10,7 @@
     "lint:colors": "node scripts/check-colors.mjs",
     "lint:ui": "node scripts/check-ui.mjs",
     "lint:motion": "node scripts/check-motion.mjs",
+    "lint:orphans": "node scripts/check-orphans.mjs",
     "verify": "node scripts/verify.mjs",
     "preview": "vite preview",
     "test:unit": "vitest run src/__tests__/unit",

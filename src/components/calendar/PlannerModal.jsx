@@ -1,7 +1,7 @@
 /* eslint-disable no-unused-vars */
 import { Footprints, Bike, Dumbbell, Activity, Target, X } from 'lucide-react';
 import React from 'react';
-import { formatDuration } from '../../utils/formatDuration';
+import { formatMinutes } from '../../utils/formatters';
 import { Button, Input, Modal, Segmented, Select } from '../ui';
 import { WORKOUT_TEMPLATES } from '../../utils/calendarTemplates';
 import { DurationInput } from './DurationInput';
@@ -46,7 +46,7 @@ export const PlannerModal = ({
                                 {selectedDateForPlan?.toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long' })}
                             </p>
                         </div>
-                        <button onClick={() => setIsModalOpen(false)} data-cal="modal-close" className="shrink-0 ml-4 w-7 h-7 flex items-center justify-center text-slate-400 hover:text-slate-700 dark:hover:text-zinc-200 hover:bg-surface-2 rounded-full transition-colors"><X size={15} /></button>
+                        <button type="button" aria-label="Cerrar" onClick={() => setIsModalOpen(false)} data-cal="modal-close" className="shrink-0 ml-4 w-7 h-7 flex items-center justify-center text-slate-400 hover:text-slate-700 dark:hover:text-zinc-200 hover:bg-surface-2 rounded-full transition-colors"><X size={15} /></button>
                     </div>
 
                     <div className="px-6 py-5 overflow-y-auto flex-1 bg-surface custom-scrollbar">
@@ -102,7 +102,7 @@ export const PlannerModal = ({
                                     </div>
                                     <div className="text-center">
                                         <span className="text-[10px] font-medium text-ink-4 uppercase tracking-wider block mb-0.5">Duración</span>
-                                        <span className="text-lg font-semibold text-ink-2-soft font-mono">{formatDuration(newPlan.duration)}</span>
+                                        <span className="text-lg font-semibold text-ink-2-soft font-mono">{formatMinutes(newPlan.duration)}</span>
                                     </div>
                                 </div>
                             </div>

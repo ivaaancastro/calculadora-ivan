@@ -3,10 +3,12 @@ import { ComposedChart, Area, Line, XAxis, YAxis, CartesianGrid, Tooltip, Respon
 import { Activity } from 'lucide-react';
 import { useChartTheme } from '../charts/useChartTheme';
 import { ChartTooltip } from '../ui';
-import { useChartSkin } from '../charts/ChartSkin';
 import { useChartMotion } from '../charts/useChartMotion';
 import { ChartSkeleton } from '../charts/ChartSkeleton';
 import { summarizeSeries, chartFigureProps } from '../charts/chartA11y';
+import { pickTodayPoint, pmcTodayKey, projectionLabelText } from '../../utils/pmcPoints';
+import { toLocalDate } from '../../utils/dates';
+import { formatNumber } from '../../utils/formatters';
 
 const CustomTooltip = ({ active, payload, label }) => {
   if (active && payload && payload.length) {
@@ -38,7 +40,7 @@ const CustomTooltip = ({ active, payload, label }) => {
             return (
               <div key={index} className="flex items-center justify-between gap-3">
                 <span className="text-[10px] font-medium text-ink-3">{labels[entry.dataKey]}</span>
-                <span className={`text-[11px] font-mono font-bold ${colors[entry.dataKey] || 'text-slate-700'}`}>{entry.value.toFixed(1)}</span>
+                <span className={`text-[11px] font-mono font-bold ${colors[entry.dataKey] || 'text-slate-700'}`}>{formatNumber(entry.value, 1)}</span>
               </div>
             );
           })}
@@ -49,13 +51,28 @@ const CustomTooltip = ({ active, payload, label }) => {
   return null;
 };
 
-/** Banda de «forma óptima» del TSB (v2): zona de frescura para competir. */
+/**
+ * Etiquetas de «HOY» y «PROYECCIÓN» (BUG-10): cada una a un lado de la línea de hoy, así no se
+ * pisan nunca. «PROYECCIÓN» se abrevia o se oculta si la banda proyectada es estrecha (móvil, rango largo).
+ */
+const LABEL_STYLE = { fontSize: 9, fontWeight: 600, letterSpacing: '0.05em' };
+
+const TodayLabel = ({ viewBox, fill }) => (viewBox ? (
+  <text x={viewBox.x - 4} y={viewBox.y + 12} textAnchor="end" fill={fill} {...LABEL_STYLE}>HOY</text>
+) : null);
+
+const ProjectionLabel = ({ viewBox, fill }) => {
+  const text = viewBox ? projectionLabelText(viewBox.width) : null;
+  if (!text) return null;
+  return <text data-dash="projection-label" x={viewBox.x + 4} y={viewBox.y + 12} textAnchor="start" fill={fill} {...LABEL_STYLE}>{text}</text>;
+};
+
+/** Banda de «forma óptima» del TSB: zona de frescura para competir. */
 const TSB_OPTIMAL = [5, 25];
 
 export const EvolutionChart = ({ data, timeRange, setTimeRange, loading = false }) => {
   const ct = useChartTheme();
   const motion = useChartMotion();
-  const isV2 = useChartSkin() === 'v2';
   const [hoverPoint, setHoverPoint] = useState(null);
 
   if (loading) return <ChartSkeleton />;
@@ -71,10 +88,11 @@ export const EvolutionChart = ({ data, timeRange, setTimeRange, loading = false 
     );
   }
 
-  const todayStr = new Date().toISOString().split('T')[0];
+  const todayStr = pmcTodayKey();
   const latestPoint = data[data.length - 1];
-  const hasProjection = isV2 && data.some((d) => d.date > todayStr);
-  const activePoint = hoverPoint || latestPoint;
+  const hasProjection = data.some((d) => d.date > todayStr);
+  // Sin hover, el readout muestra HOY (como el héroe), no el último punto proyectado (BUG-1).
+  const activePoint = hoverPoint || pickTodayPoint(data, todayStr);
 
   return (
     <div className="h-full w-full flex flex-col font-sans touch-manipulation select-none">
@@ -107,7 +125,7 @@ export const EvolutionChart = ({ data, timeRange, setTimeRange, loading = false 
       <div className="flex flex-wrap items-center justify-between gap-2 p-2 sm:p-2.5 rounded-xl bg-slate-100/70 dark:bg-zinc-800/50 border border-slate-200/50 dark:border-zinc-700/40 mb-3">
         <div className="flex items-center gap-2">
           <span className="text-[11px] font-bold text-body capitalize">
-            {activePoint ? new Date(activePoint.date).toLocaleDateString('es-ES', { weekday: 'short', day: 'numeric', month: 'short' }) : 'Hoy'}
+            {activePoint ? toLocalDate(activePoint.date).toLocaleDateString('es-ES', { weekday: 'short', day: 'numeric', month: 'short' }) : 'Hoy'}
           </span>
           {hoverPoint ? (
             <span className="text-[9px] font-semibold text-metric-ctl-ink bg-metric-ctl/10 px-1.5 py-0.2 rounded-full">
@@ -217,9 +235,7 @@ export const EvolutionChart = ({ data, timeRange, setTimeRange, loading = false 
               isAnimationActive={false}
             />
 
-            {isV2 && (
-              <ReferenceArea yAxisId="right" y1={TSB_OPTIMAL[0]} y2={TSB_OPTIMAL[1]} fill={ct.series.tsb} fillOpacity={0.07} stroke="none" ifOverflow="hidden" />
-            )}
+            <ReferenceArea yAxisId="right" y1={TSB_OPTIMAL[0]} y2={TSB_OPTIMAL[1]} fill={ct.series.tsb} fillOpacity={0.07} stroke="none" ifOverflow="hidden" />
             {hasProjection && (
               <ReferenceArea
                 yAxisId="left"
@@ -228,7 +244,7 @@ export const EvolutionChart = ({ data, timeRange, setTimeRange, loading = false 
                 fill={ct.anatomy.cursor}
                 fillOpacity={0.06}
                 stroke="none"
-                label={{ position: 'insideTopRight', value: 'PROYECCIÓN', fill: ct.anatomy.axis, fontSize: 9, fontWeight: '600' }}
+                label={<ProjectionLabel fill={ct.anatomy.axis} />}
               />
             )}
             <ReferenceLine
@@ -237,7 +253,7 @@ export const EvolutionChart = ({ data, timeRange, setTimeRange, loading = false 
               stroke={ct.anatomy.cursor}
               strokeWidth={1}
               strokeDasharray="4 4"
-              label={{ position: 'insideTopLeft', value: 'HOY', fill: ct.anatomy.axis, fontSize: 9, fontWeight: '600', letterSpacing: '0.05em' }}
+              label={<TodayLabel fill={ct.anatomy.axis} />}
             />
             
             <Area 

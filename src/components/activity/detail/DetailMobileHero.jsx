@@ -1,11 +1,8 @@
 import React from 'react';
-import { Stat, MetricTooltip } from '../../ui';
 import { InteractiveMap } from '../ActivityMap';
-import { useUiMode } from '../../../hooks/useUiMode';
 
-export const DetailMobileHero = ({ activity, streams, themeColor, activePayload, metrics, showMap }) => {
-    const { isV2 } = useUiMode();
-    if (isV2 && !showMap) return null; // v2: las cifras viven en `DetailHero`
+export const DetailMobileHero = ({ activity, streams, themeColor, activePayload, showMap }) => {
+    if (!showMap) return null; // las cifras viven en `DetailHero`
     return (
                                     <div className="lg:hidden space-y-2.5">
                                         {showMap && (
@@ -18,13 +15,6 @@ export const DetailMobileHero = ({ activity, streams, themeColor, activePayload,
                                                 />
                                             </div>
                                         )}
-
-                                        {/* Resumen de Métricas en varias Columnas y Filas (Estilo Apple / Strava) */}
-                                        {!isV2 && <div data-detail="stats" className="grid grid-cols-3 gap-2 py-0.5">
-                                            {metrics.map(m => (
-                                                <MetricTooltip key={m.id} metricId={m.metricId}><Stat label={m.label} value={m.value} unit={m.unit || undefined} accent={m.accent} /></MetricTooltip>
-                                            ))}
-                                        </div>}
                                     </div>
     );
 };

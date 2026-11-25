@@ -1,10 +1,10 @@
 import React from 'react';
 import { healthHeadline } from './healthHeadline';
-import { useCountUp } from './useCountUp';
+import { useCountUp } from '../../hooks/useCountUp';
 
 const TONE = { 'Óptima': 'positive', 'Adaptándose': 'warning', 'Fatiga Alta': 'danger' };
 
-/** Hero de Salud (solo v2): frase de estado grande y recuperación como cifra protagonista (spec §3.1). */
+/** Hero de Salud: frase de estado grande y recuperación como cifra protagonista (spec §3.1). */
 export const HealthHero = ({ wellnessMetrics, readinessInfo }) => {
     const value = wellnessMetrics?.todayReadiness;
     const valid = typeof value === 'number';

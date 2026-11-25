@@ -199,7 +199,7 @@ Spec: `docs/branches/feat/capa6-v2-premium/spec.md` (RF-A1–A4). Principio: **l
 
 | Qué | Dónde | Cuándo |
 |-----|-------|--------|
-| lint, `lint:ui`, `lint:colors`, `lint:motion`, vitest, build | local: `npm run verify` | En cada cambio, antes de commitear. |
+| lint, `lint:ui`, `lint:colors`, `lint:motion`, `lint:orphans`, vitest, build | local: `npm run verify` | En cada cambio, antes de commitear. |
 | E2E funcional (escritorio) + `layout`/`mobile` en DOM (390 y 1440 px) | CI (`ci.yml`, job `e2e`, 4 workers) | En todo PR y push a `develop`/`main`. Objetivo del CI: < 5 min. |
 | Un E2E concreto | local: `npm run verify -- --e2e <spec> [--project <p>]` | Solo al escribir o depurar ese spec. |
 | Revisión visual | navegador integrado del agente (`.claude/launch.json`), con datos reales o con `e2e/support/mockApp.js` | En cada PR de diseño: capturas antes y después a 390 y 1440 px, en claro y oscuro, adjuntas al PR. |

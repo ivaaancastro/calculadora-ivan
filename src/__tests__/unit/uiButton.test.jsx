@@ -26,7 +26,6 @@ describe('ui/Button recetas', () => {
       classes('flex items-center justify-center bg-fill hover:bg-fill-hover active:scale-90 rounded-full transition-all text-body-soft-2'),
     );
     expect(iconButtonClass({ variant: 'ghost' })).toContain('hover:bg-surface-2 active:scale-95');
-    expect(classes(iconButtonClass({ variant: 'bare' }))).toEqual(classes('text-ink-4-fixed hover:text-body-2 transition-colors'));
   });
 
   it('rechaza variantes que no existían', () => {

@@ -1,8 +1,8 @@
 import React from 'react';
-import { useCountUp } from '../../health/useCountUp';
+import { useCountUp } from '../../../hooks/useCountUp';
 import { Sparkline } from '../../charts/Sparkline';
 import { useChartTheme } from '../../charts/useChartTheme';
-import { formatDuration } from '../../../utils/formatDuration';
+import { formatMinutes, formatNumber } from '../../../utils/formatters';
 
 const Secondary = ({ label, value, unit }) => (
     <div data-history="summary-stat" className="min-w-0">
@@ -14,7 +14,7 @@ const Secondary = ({ label, value, unit }) => (
 );
 
 /**
- * Cabecera de resumen del historial (solo v2, spec premium-actividades §3.1): nº de sesiones como
+ * Cabecera de resumen del historial (spec premium-actividades §3.1): nº de sesiones como
  * cifra protagonista, tiempo/distancia/TSS como secundarias y sparkline del TSS semanal.
  * `totals` viene de `summarizeActivities` sobre los datos filtrados.
  */
@@ -36,8 +36,8 @@ export const ActivitiesSummary = ({ totals, weekly = [] }) => {
                     </p>
                 </div>
                 <div className="grid grid-cols-3 gap-x-5 sm:gap-x-8">
-                    <Secondary label="Tiempo" value={formatDuration(totals.minutes)} />
-                    <Secondary label="Distancia" value={km >= 100 ? Math.round(km).toLocaleString('es-ES') : km.toFixed(1).replace('.', ',')} unit="km" />
+                    <Secondary label="Tiempo" value={formatMinutes(totals.minutes)} />
+                    <Secondary label="Distancia" value={km >= 100 ? Math.round(km).toLocaleString('es-ES') : formatNumber(km, 1)} unit="km" />
                     <Secondary label="TSS" value={Math.round(totals.tss).toLocaleString('es-ES')} />
                 </div>
             </div>

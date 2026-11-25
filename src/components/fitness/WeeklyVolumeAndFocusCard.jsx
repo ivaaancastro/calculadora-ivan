@@ -5,8 +5,8 @@ import {
 } from 'recharts';
 import { useChartTheme } from '../charts/useChartTheme';
 import { useChartMotion } from '../charts/useChartMotion';
-import { useChartSkin } from '../charts/ChartSkin';
 import { Card, chartTooltipStyle, InfoTooltip, Segmented } from '../ui';
+import { chartFigureProps, summarizeSeries } from '../charts/chartA11y';
 
 export const WeeklyVolumeAndFocusCard = ({
     weeklyChart,
@@ -17,7 +17,6 @@ export const WeeklyVolumeAndFocusCard = ({
 }) => {
     const ct = useChartTheme();
     const motion = useChartMotion();
-    const isV2 = useChartSkin() === 'v2';
     const enter = motion.active ? motion.props : {};
     return (
         <section className="mb-8">
@@ -29,14 +28,14 @@ export const WeeklyVolumeAndFocusCard = ({
                             <InfoTooltip text="Carga de entrenamiento (TSS) y horas totales acumuladas cada semana. Las barras indican el estrés (TSS) y la línea el tiempo." />
                         </div>
                     </div>
-                    <div className="h-[240px]">
+                    <div className="h-[240px]" {...chartFigureProps('Volumen semanal', summarizeSeries(weeklyChart, [{ key: 'tss', label: 'TSS' }, { key: 'hours', label: 'Horas' }]))}>
                         <ResponsiveContainer width="100%" height="100%">
                             <ComposedChart data={weeklyChart}>
                                 <CartesianGrid strokeDasharray="2 2" stroke={ct.anatomy.gridZinc} opacity={0.1} vertical={false} />
                                 <XAxis dataKey="dateLabel" tick={{ fontSize: 9, fill: ct.anatomy.tick }} minTickGap={15} axisLine={false} tickLine={false} />
                                 <YAxis yAxisId="left" tick={{ fontSize: 9, fill: ct.series.tss }} axisLine={false} tickLine={false} />
                                 <RechartsTooltip contentStyle={chartTooltipStyle(ct)} itemStyle={{ color: ct.tooltip.ink }} isAnimationActive={false} cursor={{ stroke: ct.anatomy.cursorZinc, strokeWidth: 1 }} />
-                                <Bar yAxisId="left" dataKey="tss" name="TSS" fill={ct.series.tss} opacity={isV2 ? 1 : 0.6} radius={[4, 4, 0, 0]} barSize={20} {...enter} />
+                                <Bar yAxisId="left" dataKey="tss" name="TSS" fill={ct.series.tss} opacity={1} radius={[4, 4, 0, 0]} barSize={20} {...enter} />
                                 <Line yAxisId="left" type="monotone" dataKey="hours" name="Horas" stroke={ct.series.hours} strokeWidth={3} dot={false} {...enter} />
                             </ComposedChart>
                         </ResponsiveContainer>

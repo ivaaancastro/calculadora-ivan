@@ -1,5 +1,5 @@
 /* global process */
-import { defineConfig, loadEnv } from 'vite';
+import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import { VitePWA } from 'vite-plugin-pwa';
 
@@ -9,7 +9,7 @@ const config = {
     ...(process.env.VITEST ? [] : [
       VitePWA({
         registerType: 'autoUpdate',
-        includeAssets: ['favicon.svg', 'favicon-32x32.png', 'favicon-64x64.png', 'apple-touch-icon.png', 'apple-touch-icon-precomposed.png'],
+        includeAssets: ['favicon.svg', 'favicon-32x32.png', 'favicon-64x64.png', 'apple-touch-icon.png'],
         manifest: {
           name: 'Forma - Rendimiento Deportivo',
           short_name: 'Forma',
@@ -70,16 +70,4 @@ const config = {
   }
 };
 
-export default defineConfig(({ mode }) => {
-  // `VITE_UI` (spec-rediseno-02-c3-skin): valor por defecto para que `%VITE_UI%` de
-  // index.html siempre resuelva (y Vite no avise de variable no definida). Un `.env`
-  // o el entorno pueden fijarlo a `v2`; `localStorage` sigue ganando en el navegador.
-  const env = loadEnv(mode, process.cwd(), '');
-
-  return {
-    ...config,
-    define: {
-      'import.meta.env.VITE_UI': JSON.stringify(env.VITE_UI || 'v1'),
-    },
-  };
-});
+export default defineConfig(config);

@@ -152,8 +152,39 @@ export const MOCK_ACTIVITIES = (() => {
 /** Actividad usada por las pruebas de detalle (la más reciente, con telemetría). */
 export const DETAIL_ACTIVITY_ID = MOCK_ACTIVITIES[MOCK_ACTIVITIES.length - 1].id;
 
+/** Codifica [lat, lng] en el formato «encoded polyline» de Google/Strava (`map_polyline`). */
+function encodePolyline(coords) {
+  let out = '';
+  let prev = [0, 0];
+  const enc = (v) => {
+    let n = v < 0 ? ~(v << 1) : v << 1;
+    let s = '';
+    while (n >= 0x20) {
+      s += String.fromCharCode((0x20 | (n & 0x1f)) + 63);
+      n >>= 5;
+    }
+    return s + String.fromCharCode(n + 63);
+  };
+  for (const [lat, lng] of coords) {
+    const cur = [Math.round(lat * 1e5), Math.round(lng * 1e5)];
+    out += enc(cur[0] - prev[0]) + enc(cur[1] - prev[1]);
+    prev = cur;
+  }
+  return out;
+}
+
+// BUG-13: actividades de hace más de 95 días (fuera de la carga en segundo plano).
+// Una solo trae la ruta resumida (`map_polyline`); la otra tiene streams en Supabase,
+// que el detalle pide por id.
+const OLD = MOCK_ACTIVITIES.filter((a) => a.date < isoDay(100));
+export const OLD_POLYLINE_ACTIVITY_ID = OLD[0].id;
+export const OLD_STREAMS_ACTIVITY_ID = OLD[1].id;
+OLD[0].map_polyline = encodePolyline(
+  Array.from({ length: 40 }, (_, i) => [40.4168 + i * 0.0004, -3.7038 + Math.sin(i / 8) * 0.003]),
+);
+
 const STREAMS_BY_ID = Object.fromEntries(
-  MOCK_ACTIVITIES.slice(-6).map((a, i) => [
+  [...MOCK_ACTIVITIES.slice(-6), OLD[1]].map((a, i) => [
     a.id,
     buildStreams(100 + i, a.type === 'Ride' ? 'ride' : 'run'),
   ]),
@@ -314,9 +345,18 @@ export async function mockNetwork(page, state = {}) {
 
     const select = url.searchParams.get('select') || '';
     if (select.startsWith('id,streams_data')) {
-      const rows = Object.entries(STREAMS_BY_ID).map(([id, streams_data]) => ({ id, streams_data }));
-      // Solo la fase de segundo plano (últimos 95 días); la histórica queda vacía.
-      return json(route, url.searchParams.get('date')?.startsWith('lt.') ? [] : rows);
+      // Solo la fase de segundo plano (`date=gte.<corte>`); la histórica queda vacía.
+      const since = (url.searchParams.get('date') || '').replace(/^gte\./, '');
+      if (!since || since.startsWith('lt.')) return json(route, []);
+      const rows = Object.entries(STREAMS_BY_ID)
+        .filter(([id]) => activities.find((a) => a.id === id)?.date >= since)
+        .map(([id, streams_data]) => ({ id, streams_data }));
+      return json(route, rows);
+    }
+    if (select === 'streams_data') {
+      // Streams de una sola actividad (`fetchActivityStreams`, detalle por URL directa).
+      const id = (url.searchParams.get('id') || '').replace(/^eq\./, '');
+      return respondRows(route, [{ streams_data: STREAMS_BY_ID[id] ?? null }]);
     }
     return respondRows(route, activities);
   });
@@ -326,7 +366,7 @@ export async function mockNetwork(page, state = {}) {
  * Prepara la página: fecha fija, sin aleatoriedad, sin animaciones y, si se
  * pide, con la sesión ya guardada en localStorage (como tras iniciar sesión).
  */
-export async function setupApp(page, { authenticated = false, theme = 'light', state, ui } = {}) {
+export async function setupApp(page, { authenticated = false, theme = 'light', state } = {}) {
   // Fecha base fija pero el reloj sigue avanzando: con `clock.setFixedTime` las
   // animaciones de Recharts (basadas en Date.now) se quedan congeladas al inicio.
   await page.addInitScript((fixedMs) => {
@@ -347,7 +387,7 @@ export async function setupApp(page, { authenticated = false, theme = 'light', s
   await mockNetwork(page, state);
 
   await page.addInitScript(
-    ({ authenticated: auth, theme: th, ui: uiMode, key, session }) => {
+    ({ authenticated: auth, theme: th, key, session }) => {
       // Aleatoriedad reproducible (el simulador de bienestar usa Math.random).
       let seed = 42;
       Math.random = () => {
@@ -360,16 +400,13 @@ export async function setupApp(page, { authenticated = false, theme = 'light', s
         if (!sessionStorage.getItem('e2e-seeded')) {
           sessionStorage.setItem('e2e-seeded', '1');
           localStorage.setItem('theme', th);
-          // Piel v2: se siembra antes de cualquier script de la página, igual que
-          // un usuario que ya eligió el modo en Ajustes (RF9.1).
-          if (uiMode) localStorage.setItem('ui', uiMode);
           if (auth) localStorage.setItem(key, JSON.stringify(session));
         }
       } catch {
         /* storage no disponible */
       }
     },
-    { authenticated, theme, ui, key: AUTH_STORAGE_KEY, session: MOCK_SESSION },
+    { authenticated, theme, key: AUTH_STORAGE_KEY, session: MOCK_SESSION },
   );
 
   // Animaciones y transiciones desactivadas, y cursor oculto.

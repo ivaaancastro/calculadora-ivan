@@ -23,10 +23,10 @@ import { seriesValues, deltaOver, acwrZone } from '../../utils/kpiTrend';
 import { buildFormSummary } from '../../utils/formSummary';
 import { supabase } from '../../supabase';
 import { useTheme } from '../../hooks/useTheme';
-import { useUiMode } from '../../hooks/useUiMode';
-import { ChartSkinProvider } from '../charts/ChartSkin';
 import { getChartTheme } from '../charts/chartTheme';
-import { Card, SectionHeader, StatTile } from '../ui';
+import { Card, SectionHeader } from '../ui';
+import { formatNumber } from '../../utils/formatters';
+import { pickPrimaryVo2, VO2_SOURCES } from '../../utils/vo2Source';
 
 const TIME_INTERVALS = [1, 5, 15, 30, 60, 180, 300, 600, 1200, 2400, 3600, 7200];
 // const formatInterval = (secs) => { if (secs < 60) return `${secs}s`; if (secs < 3600) return `${secs / 60}m`; return `${secs / 3600}h`; };
@@ -62,10 +62,9 @@ async function fetchLatestWellnessRow() {
 // ─────────────────────────────────────────────────────────────────────────────
 export const AdvancedAnalytics = React.memo(({ activities, settings,  timeRange, setTimeRange, chartData, currentMetrics }) => {
     const [garminVo2max, setGarminVo2max] = useState(null);
-    // Solo v2 en móvil: las métricas secundarias van plegadas bajo el primer vistazo.
+    // En móvil, las métricas secundarias van plegadas bajo el primer vistazo.
     const [showMore, setShowMore] = useState(false);
     const { theme } = useTheme();
-    const { isV2 } = useUiMode();
     const ct = useChartTheme();
 
     // Load Garmin VO2max from Supabase wellness_data (synced from Intervals.icu)
@@ -123,28 +122,16 @@ export const AdvancedAnalytics = React.memo(({ activities, settings,  timeRange,
         };
     }, [currentMetrics, analytics]);
 
-    // Primary VO2max: Priority Bike > Garmin > Run
-    const globalMaxVo2 = analytics.vo2Max.bike.vo2max 
-        ? analytics.vo2Max.bike.vo2max
-        : (garminVo2max || analytics.vo2Max.run.vo2max || 0);
-    const vo2IsGarmin = !!garminVo2max;
+    // VO₂max principal con su origen (COP-2): ciclismo estimado > dispositivo > carrera estimada.
+    const primaryVo2 = pickPrimaryVo2({ bike: analytics.vo2Max.bike.vo2max, device: garminVo2max, run: analytics.vo2Max.run.vo2max });
 
     if (!activities || activities.length === 0) return null;
-
-    const fitnessStatus = (() => {
-        const tsb = model.tsb;
-        if (tsb > 25) return { label: 'Transición', desc: 'Pérdida de forma por descanso', badge: 'text-body-soft bg-fill-3 border-line-muted-2' };
-        if (tsb >= 5) return { label: 'Pico de Forma', desc: 'Fresco y listo para competir al máximo', badge: 'text-form-peak bg-form-peak-tint border-form-peak/25' };
-        if (tsb >= -10) return { label: 'Zona Productiva', desc: 'Balance óptimo entre carga y adaptación', badge: 'text-form-productive bg-form-productive-tint border-form-productive/25' };
-        if (tsb >= -30) return { label: 'Sobrecarga', desc: 'Fatiga alta, programa recuperación', badge: 'text-form-overload bg-form-overload-tint border-form-overload/25' };
-        return { label: 'Fatiga Crítica', desc: 'Riesgo de sobreentrenamiento', badge: 'text-form-critical bg-form-critical-tint border-form-critical/25' };
-    })();
 
     const atlVals = seriesValues(chartData, 'atl');
     const tsbVals = seriesValues(chartData, 'tcb');
     const atlSpark = atlVals;
     const tsbSpark = tsbVals;
-    const fmtDelta = (d, digits = 0) => `${d > 0 ? '+' : ''}${d.toFixed(digits)}`;
+    const fmtDelta = (d, digits = 0) => `${d > 0 ? '+' : ''}${formatNumber(d, digits)}`;
     const mkDelta = (vals, upTone, downTone) => {
         const d = deltaOver(vals, 7);
         if (d === null) return null;
@@ -162,137 +149,68 @@ export const AdvancedAnalytics = React.memo(({ activities, settings,  timeRange,
     };
 
     return (
-        <ChartSkinProvider skin={isV2 ? 'v2' : 'v1'}>
         <div data-skin="dashboard" data-dash="root" className="space-y-6 sm:space-y-8 pb-8">
             {/* HERO: ESTADO DE FORMA ESTILO APPLE FITNESS */}
-            {isV2 ? (
-                <FormHero
-                    summary={buildFormSummary(model)}
-                    ctl={model.ctl}
-                    loadTrend={model.loadTrend}
-                    timeRange={timeRange}
-                    setTimeRange={setTimeRange}
-                />
-            ) : (
-            <Card data-dash="hero" className="p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-blue-500/20 to-indigo-500/20 text-blue-600 dark:text-blue-400 flex items-center justify-center shrink-0 shadow-2xs">
-                        <ActivityPulse size={20} strokeWidth={2.3} />
-                    </div>
-                    <div>
-                        <div className="flex items-center gap-2">
-                            <h2 className="text-base sm:text-lg font-bold text-ink tracking-tight">
-                                Estado de Forma
-                            </h2>
-                            <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${fitnessStatus.badge} uppercase tracking-wider`}>
-                                {fitnessStatus.label}
-                            </span>
-                        </div>
-                        <p className="text-xs text-ink-3 mt-0.5">
-                            {fitnessStatus.desc}
-                        </p>
-                    </div>
-                </div>
-
-                {/* Apple Segmented Control para Rango de Tiempo - En Desktop permanece en la cabecera */}
-                <div className="hidden md:flex items-center self-end sm:self-center w-auto">
-                    <div className="flex bg-fill-6 p-1 rounded-full backdrop-blur-md w-auto justify-start shadow-xs">
-                        {[
-                            { id: "7d", label: "7D" },
-                            { id: "30d", label: "30D" },
-                            { id: "90d", label: "3M" },
-                            { id: "all", label: "Todo" },
-                        ].map((t) => (
-                            <button
-                                key={t.id}
-                                onClick={() => setTimeRange(t.id)}
-                                className={`px-3.5 py-1 min-h-[30px] text-xs font-semibold transition-all rounded-full select-none touch-manipulation active:scale-95 ${timeRange === t.id
-                                    ? "bg-surface-4 text-ink shadow-xs font-bold"
-                                    : "text-ink-3 hover:text-ink-2-soft"
-                                    }`}
-                            >
-                                {t.label}
-                            </button>
-                        ))}
-                    </div>
-                </div>
-            </Card>
-            )}
+            <FormHero
+                summary={buildFormSummary(model)}
+                ctl={model.ctl}
+                loadTrend={model.loadTrend}
+                timeRange={timeRange}
+                setTimeRange={setTimeRange}
+            />
 
             {/* SECCIÓN 1: MÉTRICAS CLAVE (APPLE HEALTH CARDS) */}
             <div data-dash="primary">
                 <SectionHeader as="p">Fisiología y Carga</SectionHeader>
-                {isV2 ? (
-                    <div className="grid grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4">
-                        <KpiCard
-                            label="Fatiga (ATL)" icon={Battery} color={ct.series.atl}
-                            value={Math.round(model.atl)} format={(n) => String(Math.round(n))}
-                            delta={atlDelta} spark={atlSpark} sub="Carga últ. 7 días"
-                        />
-                        <KpiCard
-                            label="Forma (TSB)" icon={Zap} color={ct.series.tsb}
-                            value={Math.round(model.tsb)} format={(n) => (Math.round(n) > 0 ? '+' : '') + Math.round(n)}
-                            delta={tsbDelta} spark={tsbSpark} sub="Balance CTL / ATL"
-                        />
-                        <KpiCard
-                            className="col-span-2 md:col-span-1"
-                            label="Ratio Carga" icon={Target} color={ct.series.tsb}
-                            value={model.acwr} format={(n) => n.toFixed(2)}
-                            sub={`Aguda vs Crónica · óptimo 0,8–1,3`}
-                            chip={<span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border uppercase tracking-wider ${ACWR_CHIP[acwrInfo.tone]}`}>{acwrInfo.label}</span>}
-                        />
-                    </div>
-                ) : (
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-2.5 sm:gap-3">
-                    {/* Fitness (CTL) */}
-                    <StatTile size="lg" label="Fitness (CTL)" icon={Activity} iconTone="ctl" value={Math.round(model.ctl)} sub={`${model.loadTrend >= 0 ? '+' : ''}${model.loadTrend.toFixed(1)}% vs 28d`} />
-
-                    {/* Fatiga (ATL) */}
-                    <StatTile size="lg" label="Fatiga (ATL)" icon={Battery} iconTone="atl" value={Math.round(model.atl)} sub="Carga últ. 7 días" />
-
-                    {/* Forma (TSB) */}
-                    <StatTile size="lg" label="Forma (TSB)" icon={Zap} iconTone="tsb" value={(model.tsb > 0 ? '+' : '') + Math.round(model.tsb)} sub="Balance CTL / ATL" />
-
-                    {/* Ratio Carga (ACWR) */}
-                    <StatTile size="lg" label="Ratio Carga" icon={Target} iconTone="acwr" value={model.acwr.toFixed(2)} sub="Aguda vs Crónica" />
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4">
+                    <KpiCard
+                        label="Fatiga (ATL)" icon={Battery} color={ct.series.atl}
+                        value={Math.round(model.atl)} format={(n) => String(Math.round(n))}
+                        delta={atlDelta} spark={atlSpark} sub="Carga últ. 7 días"
+                    />
+                    <KpiCard
+                        label="Forma (TSB)" icon={Zap} color={ct.series.tsb}
+                        value={Math.round(model.tsb)} format={(n) => (Math.round(n) > 0 ? '+' : '') + Math.round(n)}
+                        delta={tsbDelta} spark={tsbSpark} sub="Balance CTL / ATL"
+                    />
+                    <KpiCard
+                        className="col-span-2 md:col-span-1"
+                        label="Ratio Carga" icon={Target} color={ct.series.tsb}
+                        value={model.acwr} format={(n) => formatNumber(n, 2)}
+                        sub={`Aguda vs Crónica · óptimo 0,8–1,3`}
+                        chip={<span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border uppercase tracking-wider ${ACWR_CHIP[acwrInfo.tone]}`}>{acwrInfo.label}</span>}
+                    />
                 </div>
-                )}
             </div>
 
             {/* SECCIÓN 2: MÉTRICAS SECUNDARIAS */}
             <div data-dash="secondary">
                 <SectionHeader as="p" data-dash="secondary-title">Tendencia y Capacidad</SectionHeader>
-                {isV2 && (
-                    <button
-                        type="button"
-                        data-dash="more-toggle"
-                        aria-expanded={showMore}
-                        aria-controls="dash-secondary-grid"
-                        onClick={() => setShowMore((v) => !v)}
-                        className="md:hidden w-full min-h-[44px] px-4 flex items-center justify-between rounded-xl border border-line bg-surface text-xs font-semibold text-ink-3 touch-manipulation"
-                    >
-                        <span>Tendencia y capacidad</span>
-                        <span className="flex items-center gap-1.5 text-[10px] font-medium text-ink-4">
-                            {showMore ? 'Ocultar' : 'Rampa, monotonía, volumen, VO2'}
-                            <ChevronDown size={14} className={showMore ? 'rotate-180' : ''} />
-                        </span>
-                    </button>
-                )}
-                <div id="dash-secondary-grid" data-dash="secondary-grid" data-open={showMore ? 'true' : 'false'} className={isV2 ? 'grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-x-8' : 'grid grid-cols-2 md:grid-cols-4 gap-2.5 sm:gap-3'}>
+                <button
+                    type="button"
+                    data-dash="more-toggle"
+                    aria-expanded={showMore}
+                    aria-controls="dash-secondary-grid"
+                    onClick={() => setShowMore((v) => !v)}
+                    className="md:hidden w-full min-h-[44px] px-4 flex items-center justify-between rounded-xl border border-line bg-surface text-xs font-semibold text-ink-3 touch-manipulation"
+                >
+                    <span>Tendencia y capacidad</span>
+                    <span className="flex items-center gap-1.5 text-[10px] font-medium text-ink-4">
+                        {showMore ? 'Ocultar' : 'Rampa, monotonía, volumen, VO₂max'}
+                        <ChevronDown size={14} className={showMore ? 'rotate-180' : ''} />
+                    </span>
+                </button>
+                <div id="dash-secondary-grid" data-dash="secondary-grid" data-open={showMore ? 'true' : 'false'} className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-x-8">
                     {[
-                        { label: 'Rampa Semanal', value: `${model.rampRate > 0 ? '+' : ''}${model.rampRate.toFixed(1)}`, icon: model.rampRate >= 0 ? ArrowUpRight : ArrowDownRight, tone: 'ramp', sub: 'pts/sem' },
-                        { label: 'Monotonía', value: model.monotony.toFixed(2), icon: Brain, tone: 'monotony', sub: 'Índice carga' },
-                        { label: 'Volumen 30D', value: `${Math.round(model.totalVolume / 60)}h`, icon: CalendarDays, tone: 'volume', sub: `${model.totalActivities} sesiones` },
-                        { label: 'VO2 Max', value: globalMaxVo2 || '--', icon: TrendingUp, tone: 'vo2', sub: vo2IsGarmin ? 'Sincronizado' : 'Estimado' }
-                    ].map((kpi, i) => (
-                        isV2 ? (
-                            <div key={i} data-dash="ledger-row" className="flex items-baseline justify-between gap-3 py-3 border-b border-hairline min-w-0">
-                                <span className="text-[11px] font-medium text-ink-4 truncate">{kpi.label}<span className="ml-1.5 text-ink-4/70">{kpi.sub}</span></span>
-                                <span className="text-[15px] font-semibold tabular-nums text-ink shrink-0">{kpi.value}</span>
-                            </div>
-                        ) : (
-                            <StatTile key={i} size="sm" label={kpi.label} icon={kpi.icon} iconTone={kpi.tone} value={kpi.value} sub={kpi.sub} />
-                        )
+                        { label: 'Rampa', value: `${model.rampRate > 0 ? '+' : ''}${formatNumber(model.rampRate, 1)}`, sub: 'pts/sem' },
+                        { label: 'Monotonía', value: formatNumber(model.monotony, 2), sub: 'Índice carga' },
+                        { label: 'Volumen 30D', value: `${Math.round(model.totalVolume / 60)}h`, sub: `${model.totalActivities} sesiones` },
+                        { label: primaryVo2.source ? VO2_SOURCES[primaryVo2.source].label : 'VO₂max', value: primaryVo2.value ? formatNumber(primaryVo2.value, 1) : '--', sub: primaryVo2.source ? VO2_SOURCES[primaryVo2.source].source : '' }
+                    ].map((kpi) => (
+                        <div key={kpi.label} data-dash="ledger-row" className="flex items-baseline justify-between gap-3 py-3 border-b border-hairline min-w-0">
+                            <span className="text-[11px] font-medium text-ink-4 truncate">{kpi.label}<span className="ml-1.5 text-ink-4/70">{kpi.sub}</span></span>
+                            <span className="text-[15px] font-semibold tabular-nums text-ink shrink-0">{kpi.value}</span>
+                        </div>
                     ))}
                 </div>
             </div>
@@ -307,6 +225,5 @@ export const AdvancedAnalytics = React.memo(({ activities, settings,  timeRange,
                 </Card>
             </div>
         </div>
-        </ChartSkinProvider>
     );
 });

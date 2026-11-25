@@ -1,81 +1,37 @@
 import React from 'react';
 import { Card } from '../ui';
-import { useUiMode } from '../../hooks/useUiMode';
-import { DaySpotlightV2 } from './DaySpotlightV2';
 
-export const DaySpotlight = ({ currentSelectedDay }) => {
-    const { isV2 } = useUiMode();
-    if (isV2) return <DaySpotlightV2 currentSelectedDay={currentSelectedDay} />;
-    return (
-    <>
-        {currentSelectedDay && (
-            <Card data-health="spotlight" className="p-4 sm:p-6 space-y-4">
-                <div className="flex items-center justify-between border-b border-line-soft-2 pb-3">
-                    <div>
-                        <span className="text-[10px] font-bold uppercase tracking-widest text-ink-4">
-                            Detalle del Día
-                        </span>
-                        <h3 className="text-base sm:text-lg font-bold text-ink capitalize">
-                            {currentSelectedDay.dateLabelFull}
-                        </h3>
-                    </div>
-                    <span className={`px-3 py-1 rounded-full text-xs font-black uppercase tracking-wider ${currentSelectedDay.recoveryInfo.badge}`}>
-                        Recuperación {currentSelectedDay.readinessScore}% • {currentSelectedDay.recoveryInfo.label}
-                    </span>
-                </div>
-
-                {/* Cuadrícula de Métricas de ese día */}
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 sm:gap-3">
-                    <div className="p-3 bg-sunken-4 rounded-xl border border-line-soft-3">
-                        <span className="text-[10px] font-bold uppercase tracking-wider text-ink-4 block">
-                            Sueño
-                        </span>
-                        <span className="text-lg font-black font-mono tabular-nums text-sleep">
-                            {currentSelectedDay.sleep ? `${currentSelectedDay.sleep} h` : '--'}
-                        </span>
-                        <span className="text-[10px] text-slate-400 block mt-0.5">
-                            Score: {currentSelectedDay.sleepScore ? `${currentSelectedDay.sleepScore}%` : '--'}
-                        </span>
-                    </div>
-
-                    <div className="p-3 bg-sunken-4 rounded-xl border border-line-soft-3">
-                        <span className="text-[10px] font-bold uppercase tracking-wider text-ink-4 block">
-                            VFC
-                        </span>
-                        <span className="text-lg font-black font-mono tabular-nums text-hrv">
-                            {currentSelectedDay.hrv ? `${currentSelectedDay.hrv} ms` : '--'}
-                        </span>
-                        <span className="text-[10px] text-slate-400 block mt-0.5">
-                            Media 7d: {currentSelectedDay.hrv7dAvg || '--'} ms
-                        </span>
-                    </div>
-
-                    <div className="p-3 bg-sunken-4 rounded-xl border border-line-soft-3">
-                        <span className="text-[10px] font-bold uppercase tracking-wider text-ink-4 block">
-                            FC Reposo
-                        </span>
-                        <span className="text-lg font-black font-mono tabular-nums text-hr">
-                            {currentSelectedDay.rhr ? `${currentSelectedDay.rhr} lpm` : '--'}
-                        </span>
-                        <span className="text-[10px] text-slate-400 block mt-0.5">
-                            Media 7d: {currentSelectedDay.rhr7dAvg || '--'} lpm
-                        </span>
-                    </div>
-
-                    <div className="p-3 bg-sunken-4 rounded-xl border border-line-soft-3">
-                        <span className="text-[10px] font-bold uppercase tracking-wider text-ink-4 block">
-                            Estrés / Pasos
-                        </span>
-                        <span className="text-lg font-black font-mono tabular-nums text-steps">
-                            {currentSelectedDay.stress != null ? `${currentSelectedDay.stress}%` : (currentSelectedDay.steps ? `${Math.round(currentSelectedDay.steps / 1000)}k` : '--')}
-                        </span>
-                        <span className="text-[10px] text-slate-400 block mt-0.5">
-                            {currentSelectedDay.steps ? `${Number(currentSelectedDay.steps).toLocaleString('es-ES')} pasos` : 'Nivel estrés'}
-                        </span>
-                    </div>
-                </div>
-            </Card>
-        )}
-    </>
+const Figure = ({ label, value, unit, sub }) => (
+    <div data-health="spot-figure" className="min-w-0">
+        <span className="text-[11px] font-semibold uppercase tracking-[0.08em] text-ink-4 block">{label}</span>
+        <span className="text-[28px] leading-tight font-semibold tabular-nums tracking-[-0.03em] text-ink">
+            {value ?? '--'}{value != null && unit && <span className="text-[11px] font-medium text-ink-4 ml-1">{unit}</span>}
+        </span>
+        <span className="text-[11px] text-ink-4 block">{sub}</span>
+    </div>
 );
+
+/** Detalle del día (spec §3.2): recuperación protagonista y tres cifras secundarias. */
+export const DaySpotlight = ({ currentSelectedDay: d }) => {
+    if (!d) return null;
+    return (
+        <Card data-health="spotlight" className="p-4 sm:p-6">
+            <div className="flex items-end justify-between gap-4 pb-4 border-b border-line-soft-2">
+                <div className="min-w-0">
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-ink-4">Detalle del día</p>
+                    <h3 className="mt-1 text-xl font-bold tracking-[-0.02em] text-ink capitalize [text-wrap:balance]">{d.dateLabelFull}</h3>
+                    <span className={`inline-block mt-2 px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider ${d.recoveryInfo.badge}`}>{d.recoveryInfo.label}</span>
+                </div>
+                <div className="text-right shrink-0">
+                    <span className="text-5xl leading-none font-semibold tabular-nums tracking-[-0.04em] text-ink">{d.readinessScore}<span className="text-xl font-medium text-ink-4 ml-0.5">%</span></span>
+                    <span className="block text-[11px] font-semibold uppercase tracking-[0.08em] text-ink-4 mt-1">Recuperación</span>
+                </div>
+            </div>
+            <div className="grid grid-cols-3 gap-4 pt-4">
+                <Figure label="Sueño" value={d.sleep || null} unit="h" sub={`Score: ${d.sleepScore ? `${d.sleepScore}%` : '--'}`} />
+                <Figure label="VFC" value={d.hrv || null} unit="ms" sub={`Media 7d: ${d.hrv7dAvg || '--'}`} />
+                <Figure label="FC reposo" value={d.rhr || null} unit="lpm" sub={`Media 7d: ${d.rhr7dAvg || '--'}`} />
+            </div>
+        </Card>
+    );
 };

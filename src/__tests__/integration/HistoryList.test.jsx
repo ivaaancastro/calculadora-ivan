@@ -61,19 +61,6 @@ describe('HistoryList Component', () => {
         expect(screen.queryByText('Rodaje Suave Bici')).toBeNull();
     });
 
-    it('filtra por deporte mediante el selector', () => {
-        render(<HistoryList activities={mockActivities} onDelete={vi.fn()} onSelectActivity={vi.fn()} />);
-        
-        const selectInputs = screen.getAllByRole('combobox');
-        const sportSelect = selectInputs[0]; // Primer selector es el deporte
-        
-        fireEvent.change(sportSelect, { target: { value: 'bike' } });
-
-        expect(screen.getByText('1 Actividades')).toBeTruthy();
-        expect(screen.getByText('Rodaje Suave Bici')).toBeTruthy();
-        expect(screen.queryByText('Series en Pista')).toBeNull();
-    });
-
     it('ejecuta onSelectActivity al hacer clic en una actividad', () => {
         const onSelect = vi.fn();
         render(<HistoryList activities={mockActivities} onDelete={vi.fn()} onSelectActivity={onSelect} />);
@@ -84,6 +71,26 @@ describe('HistoryList Component', () => {
 
         expect(onSelect).toHaveBeenCalledTimes(1);
         expect(onSelect).toHaveBeenCalledWith(expect.objectContaining({ id: 'act-1' }));
+    });
+
+    it('A11Y-4: la fila es un botón enfocable que se abre con Enter o Espacio', () => {
+        const onSelect = vi.fn();
+        render(<HistoryList activities={mockActivities} onDelete={vi.fn()} onSelectActivity={onSelect} />);
+        const row = screen.getByRole('button', { name: /^Abrir Rodaje Suave Bici/ });
+        expect(row).toHaveAttribute('tabindex', '0');
+        fireEvent.keyDown(row, { key: 'Enter' });
+        fireEvent.keyDown(row, { key: ' ' });
+        expect(onSelect).toHaveBeenCalledTimes(2);
+        // Las teclas sobre el botón de borrar no abren la actividad.
+        fireEvent.keyDown(row.querySelector('[data-history="delete"]'), { key: 'Enter' });
+        expect(onSelect).toHaveBeenCalledTimes(2);
+        expect(row.querySelector('[data-history="delete"]')).toHaveAttribute('aria-label', 'Eliminar actividad');
+    });
+
+    it('COP-1: el deporte se muestra en español', () => {
+        render(<HistoryList activities={mockActivities} onDelete={vi.fn()} onSelectActivity={vi.fn()} />);
+        expect(screen.getAllByText('Ciclismo').length).toBeGreaterThan(0);
+        expect(screen.queryByText('Ride')).toBeNull();
     });
 
     it('pide confirmación antes de onDelete y no propaga el clic a onSelectActivity', async () => {
@@ -102,5 +109,46 @@ describe('HistoryList Component', () => {
         await waitFor(() => expect(onDelete).toHaveBeenCalledWith('act-3'));
         await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull());
         expect(onSelect).not.toHaveBeenCalled();
+    });
+});
+
+const weekActs = [
+    { id: 'a', name: 'Salida larga', type: 'Ride', date: '2026-03-11T10:00:00', duration: 120, distance: 60000, calories: 900, tss: 80 },
+    { id: 'b', name: 'Rodaje', type: 'Run', date: '2026-03-10T10:00:00', duration: 45, distance: 8000, calories: 400, tss: 40 },
+    { id: 'c', name: 'Fuerza', type: 'Gym', date: '2026-03-02T10:00:00', duration: 60, distance: 0, calories: 300, tss: 0 },
+];
+
+describe('HistoryList: semanas, chips y panel', () => {
+    it('intercala una cabecera por semana con sus totales', () => {
+        const { container } = render(<HistoryList activities={weekActs} onDelete={vi.fn()} onSelectActivity={vi.fn()} />);
+        const weeks = container.querySelectorAll('[data-history="week"]');
+        expect(weeks).toHaveLength(2);
+        expect(weeks[0].textContent).toContain('Semana del 9 mar');
+        expect(weeks[0].textContent).toContain('2 act');
+        expect(weeks[0].textContent).toContain('120 TSS');
+        expect(weeks[1].textContent).toContain('Semana del 2 mar');
+        expect(container.querySelectorAll('[data-history="row"]')).toHaveLength(3);
+    });
+
+    it('barra de carga solo en filas con TSS', () => {
+        const { container } = render(<HistoryList activities={weekActs} onDelete={vi.fn()} onSelectActivity={vi.fn()} />);
+        expect(container.querySelectorAll('[data-history="tss-bar"]')).toHaveLength(2);
+        expect(screen.getByTitle('Fuerza')).toBeTruthy();
+    });
+
+    it('los chips filtran por deporte y el panel reparte el tiempo', () => {
+        const { container } = render(<HistoryList activities={weekActs} onDelete={vi.fn()} onSelectActivity={vi.fn()} />);
+        expect(container.querySelector('[data-history="breakdown"]').textContent).toContain('Ciclismo');
+        fireEvent.click(screen.getByRole('button', { name: 'Carrera' }));
+        expect(container.querySelectorAll('[data-history="row"]')).toHaveLength(1);
+        expect(screen.getByRole('button', { name: 'Carrera' }).getAttribute('aria-pressed')).toBe('true');
+    });
+
+    it('sin resultados ofrece quitar filtros', () => {
+        render(<HistoryList activities={weekActs} onDelete={vi.fn()} onSelectActivity={vi.fn()} />);
+        fireEvent.click(screen.getByRole('button', { name: 'Natación' }));
+        expect(screen.getByText('No hay resultados')).toBeTruthy();
+        fireEvent.click(screen.getByRole('button', { name: 'Quitar filtros' }));
+        expect(screen.queryByText('No hay resultados')).toBeNull();
     });
 });

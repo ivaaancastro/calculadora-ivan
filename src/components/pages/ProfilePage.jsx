@@ -4,13 +4,13 @@ import { supabase } from '../../supabase';
 import toast from 'react-hot-toast';
 import { calcZonesFromLTHR } from '../../utils/tssEngine';
 import { useIntervalsSync } from '../../hooks/useIntervalsSync';
-import { useUiMode } from '../../hooks/useUiMode';
 import { Segmented } from '../ui';
 import { getPeakByTime, calcZonesFromFCMax, calcPaceZones } from './profile/zonesCalc';
 import { GeneralSection } from './profile/GeneralSection';
 import { ZonesSection } from './profile/ZonesSection';
 import { IntegrationsSection } from './profile/IntegrationsSection';
 import { SecuritySection } from './profile/SecuritySection';
+import { sportOf } from '../../utils/sport';
 
 const SECTION_TABS = [
     { value: 'general', label: 'General' },
@@ -79,7 +79,7 @@ export const ProfilePage = ({
         }
     };
 
-    // Estado inicial normalizado, para detectar «cambios sin guardar» (v2).
+    // Estado inicial normalizado, para detectar «cambios sin guardar».
     const initialRef = useRef(null);
     const [isScanning, setIsScanning] = useState(false);
     const [newPassword, setNewPassword] = useState('');
@@ -89,11 +89,10 @@ export const ProfilePage = ({
     const [syncPreview, setSyncPreview] = useState(null); // {weight, rhr, ftp} before confirming
 
     const { syncing: isSyncingIntervals, syncProgress: intervalsSyncProgress, syncAll: syncIntervals } = useIntervalsSync();
-    const { isV2, setUi } = useUiMode();
 
     const handleSyncIntervals = async () => {
         if (!formData?.intervalsId || !formData?.intervalsKey) {
-            toast._or('Introduce tu Athlete ID y API Key de Intervals.icu primero');
+            toast.error('Introduce tu Athlete ID y API Key de Intervals.icu primero');
             return;
         }
         const result = await syncIntervals(formData);
@@ -247,9 +246,9 @@ export const ProfilePage = ({
             let maxBikeLthr = 0, maxRunLthr = 0;
             activities.forEach(act => {
                 if (!act.streams_data?.heartrate?.data || !act.streams_data?.time?.data) return;
-                const t = act.type.toLowerCase();
-                const isBike = t.includes('bici') || t.includes('ciclismo');
-                const isRun = t.includes('run') || t.includes('carrera');
+                const sport = sportOf(act.type);
+                const isBike = sport === 'bike';
+                const isRun = sport === 'run';
                 if (!isBike && !isRun) return;
                 const hr = act.streams_data.heartrate.data, tm = act.streams_data.time.data;
                 const p60 = getPeakByTime(hr, tm, 3600), p20 = getPeakByTime(hr, tm, 1200);
@@ -311,9 +310,6 @@ export const ProfilePage = ({
         (initialRef.current.ctl != null && targetCtl !== initialRef.current.ctl)
     );
 
-    // En v1 no se añade ningún nodo (style-diff exige 0 diferencias).
-    const SaveWrap = isV2 ? 'div' : React.Fragment;
-
     const renderMenuButton = (id, label, IconComponent) => (
         <button
             data-profile="nav-item"
@@ -343,24 +339,15 @@ export const ProfilePage = ({
                         <ArrowLeft size={18} strokeWidth={2.5} />
                         <span className="hidden sm:inline">Atrás</span>
                     </button>
-                    {isV2 ? (
-                        <div className="ml-1 min-w-0">
-                            <h1 data-profile="title" className="text-lg sm:text-2xl font-semibold text-ink tracking-tight leading-tight">Ajustes</h1>
-                            <p data-profile="subtitle" className="text-[11px] sm:text-xs text-ink-3 truncate">{SECTION_NAMES[activeSection] || 'Ajustes'}</p>
-                        </div>
-                    ) : (
-                        <h1 className="text-base sm:text-2xl font-bold text-ink-soft tracking-tight ml-1">
-                            <span className="hidden sm:inline">Ajustes — </span>
-                            <span>{SECTION_NAMES[activeSection] || 'Ajustes'}</span>
-                        </h1>
-                    )}
+                    <div className="ml-1 min-w-0">
+                        <h1 data-profile="title" className="text-lg sm:text-2xl font-semibold text-ink tracking-tight leading-tight">Ajustes</h1>
+                        <p data-profile="subtitle" className="text-[11px] sm:text-xs text-ink-3 truncate">{SECTION_NAMES[activeSection] || 'Ajustes'}</p>
+                    </div>
                 </div>
-                <SaveWrap {...(isV2 ? { className: 'flex items-center gap-3' } : {})}>
-                {isV2 && (
-                    <span data-profile="dirty" role="status" aria-live="polite" className="hidden sm:inline-flex items-center gap-1.5 text-[11px] font-medium text-ink-3">
-                        {isDirty && (<><span aria-hidden="true" className="w-1.5 h-1.5 rounded-full bg-action-ios-solid" />Cambios sin guardar</>)}
-                    </span>
-                )}
+                <div className="flex items-center gap-3">
+                <span data-profile="dirty" role="status" aria-live="polite" className="hidden sm:inline-flex items-center gap-1.5 text-[11px] font-medium text-ink-3">
+                    {isDirty && (<><span aria-hidden="true" className="w-1.5 h-1.5 rounded-full bg-action-ios-solid" />Cambios sin guardar</>)}
+                </span>
                 <button 
                   onClick={() => {
                     const raw = currentMetrics?.rawCtl || 0;
@@ -368,26 +355,24 @@ export const ProfilePage = ({
                     onUpdate({ ...formData, offsetCtl: newOffset });
                   }} 
                   data-profile="save"
-                  data-dirty={isV2 ? String(isDirty) : undefined}
+                  data-dirty={String(isDirty)}
                   className="flex items-center gap-1.5 bg-action-ios-solid hover:bg-action-solid text-white px-4 sm:px-5 py-1.5 sm:py-2 rounded-full text-xs font-semibold tracking-wide transition-all shadow-xs active:scale-95 select-none touch-manipulation"
                 >
                     <Save size={14} strokeWidth={2.5} /> <span>Guardar</span>
                 </button>
-                </SaveWrap>
+                </div>
             </div>
 
-            {/* v2 móvil: selector de sección en la página (antes solo estaba en el menú de la cabecera) */}
-            {isV2 && (
-                <Segmented
-                    data-profile="section-tabs"
-                    aria-label="Secciones de Ajustes"
-                    className="md:hidden mb-4 overflow-x-auto"
-                    optionClassName="min-h-9"
-                    options={SECTION_TABS}
-                    value={activeSection}
-                    onChange={handleSectionChange}
-                />
-            )}
+            {/* Móvil: selector de sección en la página (antes solo estaba en el menú de la cabecera) */}
+            <Segmented
+                data-profile="section-tabs"
+                aria-label="Secciones de Ajustes"
+                className="md:hidden mb-4 overflow-x-auto"
+                optionClassName="min-h-9"
+                options={SECTION_TABS}
+                value={activeSection}
+                onChange={handleSectionChange}
+            />
 
             <div className="flex flex-col md:flex-row gap-6 md:gap-8">
                 {/* DESKTOP SIDEBAR */}
@@ -401,7 +386,7 @@ export const ProfilePage = ({
                 {/* CONTENT AREA */}
                 <div data-profile="content" className="flex-1 min-w-0">
                     {activeSection === 'general' && (
-                        <GeneralSection formData={formData} isUploadingAvatar={isUploadingAvatar} handleAvatarUpload={handleAvatarUpload} handleChange={handleChange} targetCtl={targetCtl} setTargetCtl={setTargetCtl} isV2={isV2} setUi={setUi} />
+                        <GeneralSection formData={formData} isUploadingAvatar={isUploadingAvatar} handleAvatarUpload={handleAvatarUpload} handleChange={handleChange} targetCtl={targetCtl} setTargetCtl={setTargetCtl} />
                     )}
 
                     {activeSection === 'zones' && (

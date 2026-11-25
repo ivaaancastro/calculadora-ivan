@@ -1,10 +1,10 @@
 import { describe, it, expect } from 'vitest';
 import { renderToStaticMarkup } from 'react-dom/server';
-import { summarizeSeries, chartFigureProps } from '../../components/charts/chartA11y';
+import { summarizeSeries, summarizeCategories, chartFigureProps } from '../../components/charts/chartA11y';
 import { ChartSkeleton } from '../../components/charts/ChartSkeleton.jsx';
 import { Sparkline } from '../../components/charts/Sparkline.jsx';
 import { sparklinePoints } from '../../components/charts/sparklinePoints';
-import { buildHeatmap, heatmapLevel } from '../../components/charts/heatmapGrid';
+import { buildHeatmap, heatmapLevel } from '../../utils/heatmapGrid';
 import { sliceByRange } from '../../components/charts/sliceRange';
 
 describe('charts/chartA11y', () => {
@@ -15,6 +15,15 @@ describe('charts/chartA11y', () => {
   it('devuelve vacío sin datos o sin valores numéricos', () => {
     expect(summarizeSeries([], [{ key: 'a', label: 'A' }])).toBe('');
     expect(summarizeSeries([{ a: null }], [{ key: 'a', label: 'A' }])).toBe('');
+  });
+  it('series largas sin desbordar la pila', () => {
+    const big = Array.from({ length: 200000 }, (_, i) => ({ v: i % 100 }));
+    expect(summarizeSeries(big, [{ key: 'v', label: 'V' }])).toBe('V: de 0 a 99, mín 0, máx 99');
+  });
+  it('A11Y-5: summarizeCategories resume por categoría con coma decimal', () => {
+    const data = [{ n: '5 s', w: 900 }, { n: '1 min', w: 42.5 }, { n: '5 min', w: null }];
+    expect(summarizeCategories(data, 'n', 'w', 'W')).toBe('5 s: 900 W, 1 min: 42,5 W');
+    expect(summarizeCategories(null, 'n', 'w')).toBe('');
   });
 });
 

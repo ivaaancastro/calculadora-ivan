@@ -1,7 +1,7 @@
 /**
  * Sparkline Forma (Fase Premium C, PR 2): línea mínima con degradado bajo el área y punto final.
  * SVG propio, sin dependencias. Lenguaje visual inspirado en bklit-ui (MIT). Colores por props
- * (de `useChartTheme()`); entrada con `useChartMotion` (trazo animado solo en v2).
+ * (de `useChartTheme()`); entrada con `useChartMotion` (trazo animado).
  */
 import { useId } from 'react';
 import { useChartMotion, CHART_ENTER_MS } from './useChartMotion';

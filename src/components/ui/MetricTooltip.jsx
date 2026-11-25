@@ -1,7 +1,7 @@
 /** MetricTooltip (spec-tarjetas-explicativas-detalle).
  *
  * Tarjeta explicativa de una métrica. Envuelve su elemento hijo (por ejemplo
- * un `Stat`) y lo vuelve pulsable con zona táctil ≥ 44 px en v2. Al pulsarlo
+ * un `Stat`) y lo vuelve pulsable con zona táctil ≥ 44 px. Al pulsarlo
  * se abre una tarjeta explicativa: popover anclado en escritorio, bottom-sheet
  * en móvil (< sm) mediante `Modal` (variante `sheet`). Accesible por teclado:
  * foco al abrir, Escape para cerrar, clic fuera para cerrar, Enter/Space para

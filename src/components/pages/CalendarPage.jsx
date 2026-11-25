@@ -4,7 +4,6 @@ import { ChevronLeft, ChevronRight, Activity } from 'lucide-react';
 
 import { useChartTheme } from '../charts/useChartTheme';
 import { ChartSkinProvider } from '../charts/ChartSkin';
-import { useUiMode } from '../../hooks/useUiMode';
 import { IconButton, Modal } from '../ui';
 import { useCalendarDate } from '../../hooks/useCalendarDate';
 import { useCalendarData } from '../../hooks/useCalendarData';
@@ -17,10 +16,10 @@ import { CalendarMonthView } from '../calendar/CalendarMonthView';
 import { PlannerModal } from '../calendar/PlannerModal';
 import { MonthHero } from '../calendar/MonthHero';
 import { buildMonthSummary } from '../../utils/monthSummary';
+import { monthTitle } from '../../utils/monthTitle';
 import { buildDayLoadLevels } from '../../utils/calendarLoad';
 
 export const CalendarPage = ({ activities, plannedWorkouts = [], addPlannedWorkout, deletePlannedWorkout, updatePlannedWorkout, currentMetrics, settings, chartData = [], onDelete, onSelectActivity }) => {
-    const { isV2 } = useUiMode();
     const { year, month, prevMonth, nextMonth, goToday } = useCalendarDate();
 
     const [showPmcChart, setShowPmcChart] = useState(false);
@@ -47,19 +46,19 @@ export const CalendarPage = ({ activities, plannedWorkouts = [], addPlannedWorko
     const loadLevels = useMemo(() => buildDayLoadLevels(activitiesByDate, calendarGrid), [activitiesByDate, calendarGrid]);
 
     const monthSummary = useMemo(
-        () => (isV2 ? buildMonthSummary({ activities, plannedWorkouts, year, month }) : null),
-        [isV2, activities, plannedWorkouts, year, month],
+        () => buildMonthSummary({ activities, plannedWorkouts, year, month }),
+        [activities, plannedWorkouts, year, month],
     );
 
     return (
-        <ChartSkinProvider skin={isV2 ? 'v2' : 'v1'}>
+        <ChartSkinProvider skin="v2">
             <div data-skin="calendar" data-cal="root" className="flex flex-col bg-surface-6 rounded-3xl border border-line-soft overflow-hidden mb-6 shadow-sm">
 
                 {/* HEADER */}
                 <div data-cal="header" className="flex items-center justify-between px-3 sm:px-5 py-3 sm:py-4 bg-transparent border-b border-line-soft-5">
                     <div className="flex items-center gap-2 sm:gap-3">
-                        <h2 className="text-base sm:text-2xl font-semibold text-ink-2 capitalize tracking-tight flex items-center">
-                            {new Date(year, month).toLocaleDateString('es-ES', { month: 'long', year: 'numeric' })}
+                        <h2 className="text-base sm:text-2xl font-semibold text-ink-2 tracking-tight flex items-center">
+                            {monthTitle(year, month)}
                         </h2>
                         <button onClick={goToday} data-cal="today-btn" className="text-[11px] font-medium text-ink-3 hover:text-danger-ink-2 active:scale-95 transition-all ml-1 sm:ml-2 bg-sunken-6 px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full">Hoy</button>
                     </div>
@@ -77,19 +76,16 @@ export const CalendarPage = ({ activities, plannedWorkouts = [], addPlannedWorko
                     </div>
                 </div>
 
-                {isV2 && (
-                    <MonthHero
-                        summary={monthSummary}
-                        heatmap={<ActivityHeatmap activities={activities} />}
-                        onPlan={() => handleOpenPlanModal({ stopPropagation() {} }, new Date())}
-                    />
-                )}
+                <MonthHero
+                    summary={monthSummary}
+                    heatmap={<ActivityHeatmap activities={activities} />}
+                    onPlan={() => handleOpenPlanModal({ stopPropagation() {} }, new Date())}
+                />
 
                 <CalendarMonthView
                         activitiesByDate={activitiesByDate}
                         calendarGrid={calendarGrid}
                         loadLevels={loadLevels}
-                        isV2={isV2}
                         dragOverDate={dragOverDate}
                         fullPmcByDate={fullPmcByDate}
                         handleDragLeave={handleDragLeave}

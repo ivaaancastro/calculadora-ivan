@@ -19,6 +19,8 @@ const LIGHT_COLS = [
     'id', 'created_at', 'date', 'type', 'duration', 'distance',
     'hr_avg', 'calories', 'effort_perceived', 'notes', 'user_id',
     'strava_id', 'elevation_gain', 'watts_avg', 'name', 'description', 'speed_avg',
+    // Ruta resumida de Strava: el detalle pinta el mapa sin esperar a los streams (BUG-13).
+    'map_polyline',
 ].join(',');
 
 /** Días hacia atrás a considerar para la carga de streams en segundo plano. */
