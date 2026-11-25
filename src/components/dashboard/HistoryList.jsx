@@ -233,7 +233,7 @@ export const HistoryList = React.memo(({ activities, onDelete, onSelectActivity 
                                         <span className="text-xs font-bold text-ink-soft tabular-nums">
                                             {formatDuration(act.duration)}
                                         </span>
-                                        <span className="text-[10px] text-ink-4 font-medium tabular-nums">
+                                        <span className="text-2xs text-ink-4 font-medium tabular-nums">
                                             {act.distance > 0 
                                                 ? `${(act.distance / 1000).toFixed(1)} km` 
                                                 : (act.tss > 0 ? `${Math.round(act.tss)} TSS` : '')}
@@ -243,19 +243,19 @@ export const HistoryList = React.memo(({ activities, onDelete, onSelectActivity 
                                     {/* Métricas Clínicas (>= md) */}
                                     <div className="hidden md:flex items-center gap-6 mr-6">
                                         <div className="flex flex-col items-end">
-                                            <span className="text-[10px] font-medium text-slate-400 mb-0.5">Tiempo</span>
+                                            <span className="text-2xs font-medium text-slate-400 mb-0.5">Tiempo</span>
                                             <span className="text-sm font-semibold text-ink-2-soft tabular-nums">{formatDuration(act.duration)}</span>
                                         </div>
                                         <div className="flex flex-col items-end w-16">
-                                            <span className="text-[10px] font-medium text-slate-400 mb-0.5">Dist</span>
+                                            <span className="text-2xs font-medium text-slate-400 mb-0.5">Dist</span>
                                             <span className="text-sm font-semibold text-ink-2-soft tabular-nums">{act.distance > 0 ? (act.distance / 1000).toFixed(1) + 'km' : '--'}</span>
                                         </div>
                                         <div className="flex flex-col items-end w-12">
-                                            <span className="text-[10px] font-medium text-slate-400 mb-0.5">Kcal</span>
+                                            <span className="text-2xs font-medium text-slate-400 mb-0.5">Kcal</span>
                                             <span className="text-sm font-semibold text-ink-2-soft tabular-nums">{act.calories || '--'}</span>
                                         </div>
                                         <div className="flex flex-col items-end w-12">
-                                            <span className="text-[10px] font-medium text-slate-400 mb-0.5">TSS</span>
+                                            <span className="text-2xs font-medium text-slate-400 mb-0.5">TSS</span>
                                             <span className={`text-sm font-bold tabular-nums ${act.tss > 0 ? 'text-amber-500' : 'text-slate-400'}`}>
                                                 {act.tss > 0 ? Math.round(act.tss) : '--'}
                                             </span>

@@ -17,7 +17,7 @@ export const METRIC_TOOLTIP = {
   /** Título de la métrica dentro del popover. */
   title: 'text-xs font-bold text-ink mb-1 uppercase tracking-wider',
   /** Texto explicativo. */
-  description: 'text-[10px] text-ink-4 leading-snug',
+  description: 'text-2xs text-ink-4 leading-snug',
   /** Flecha del popover. */
   arrow: 'absolute -top-2 left-1/2 -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-b-4 border-t-transparent border-b-line-soft',
 };

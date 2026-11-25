@@ -14,10 +14,10 @@ export const IntegrationsSection = ({ formData, isSyncingIntervals, intervalsSyn
                     </div>
                     <div>
                         <h3 className="text-xs sm:text-sm font-bold text-ink">Intervals.icu</h3>
-                        <p className="text-[10px] text-ink-4">Métricas de Garmin, Oura y Whoop</p>
+                        <p className="text-2xs text-ink-4">Métricas de Garmin, Oura y Whoop</p>
                     </div>
                 </div>
-                <span data-profile="status" className={`text-[10px] font-bold px-2.5 py-0.5 rounded-full ${
+                <span data-profile="status" className={`text-2xs font-bold px-2.5 py-0.5 rounded-full ${
                     formData.intervalsId && formData.intervalsKey 
                         ? 'bg-positive/10 text-positive-ink border border-positive/20' 
                         : 'bg-surface-2 text-slate-400'

@@ -19,7 +19,7 @@ export const HistoryDayStrip = ({ currentSelectedDay, historySeries, setSelected
                                     : 'bg-slate-100/80 dark:bg-zinc-800/60 hover:bg-slate-200/80 dark:hover:bg-zinc-700/60 text-body'
                             }`}
                         >
-                            <span className={`text-[10px] font-bold uppercase tracking-wider ${isSelected ? 'text-blue-100' : 'text-ink-4'}`}>
+                            <span className={`text-2xs font-bold uppercase tracking-wider ${isSelected ? 'text-blue-100' : 'text-ink-4'}`}>
                                 {d.weekday}
                             </span>
                             <span className="text-base sm:text-lg font-black font-mono tabular-nums my-0.5">

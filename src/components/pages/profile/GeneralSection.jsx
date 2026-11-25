@@ -38,7 +38,7 @@ export const GeneralSection = ({ formData, isUploadingAvatar, handleAvatarUpload
                     {formData.fullName || 'Atleta Forma'}
                 </h3>
                 <p className="text-xs text-ink-3 mt-0.5 truncate">{formData.email}</p>
-                <span data-profile="badge" className="inline-flex items-center gap-1 mt-2 text-[10px] font-semibold text-blue-600 dark:text-blue-400 bg-blue-500/10 px-2.5 py-0.5 rounded-full border border-blue-500/15">
+                <span data-profile="badge" className="inline-flex items-center gap-1 mt-2 text-2xs font-semibold text-blue-600 dark:text-blue-400 bg-blue-500/10 px-2.5 py-0.5 rounded-full border border-blue-500/15">
                     Atleta Forma
                 </span>
             </div>
@@ -78,7 +78,7 @@ export const GeneralSection = ({ formData, isUploadingAvatar, handleAvatarUpload
                         </div>
                         <div>
                             <p className="text-xs sm:text-sm font-semibold text-ink">Peso Corporal</p>
-                            <p className="text-[10px] text-ink-4">Para cálculos de W/kg</p>
+                            <p className="text-2xs text-ink-4">Para cálculos de W/kg</p>
                         </div>
                     </div>
                     <div className="flex items-center gap-1.5">
@@ -102,7 +102,7 @@ export const GeneralSection = ({ formData, isUploadingAvatar, handleAvatarUpload
                         </div>
                         <div>
                             <p className="text-xs sm:text-sm font-semibold text-ink">FC Reposo</p>
-                            <p className="text-[10px] text-ink-4">Pulsaciones basales mínimas</p>
+                            <p className="text-2xs text-ink-4">Pulsaciones basales mínimas</p>
                         </div>
                     </div>
                     <div className="flex items-center gap-1.5">
@@ -126,7 +126,7 @@ export const GeneralSection = ({ formData, isUploadingAvatar, handleAvatarUpload
                         </div>
                         <div>
                             <p className="text-xs sm:text-sm font-semibold text-ink">Calibrar Fitness (CTL)</p>
-                            <p className="text-[10px] text-ink-4">Ajuste de base histórica</p>
+                            <p className="text-2xs text-ink-4">Ajuste de base histórica</p>
                         </div>
                     </div>
                     <div className="flex items-center gap-1.5">

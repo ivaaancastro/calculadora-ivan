@@ -43,7 +43,7 @@ export const FormHero = ({ summary, ctl, loadTrend, timeRange, setTimeRange }) =
             <div className="space-y-3 min-w-0">
                 <p className="flex flex-wrap items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.08em] text-ink-3">
                     <span>Estado de forma</span>
-                    <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border uppercase tracking-wider ${TONE_CHIP[summary.tone]}`}>
+                    <span className={`text-2xs font-bold px-2 py-0.5 rounded-full border uppercase tracking-wider ${TONE_CHIP[summary.tone]}`}>
                         {summary.label}
                     </span>
                 </p>
@@ -55,7 +55,7 @@ export const FormHero = ({ summary, ctl, loadTrend, timeRange, setTimeRange }) =
 
             <div className="flex items-end justify-between gap-4 md:flex-col md:items-end">
                 <div data-hero="figure" className="min-w-0">
-                    <div className="text-[10px] font-semibold uppercase tracking-[0.08em] text-ink-4">Fitness (CTL)</div>
+                    <div className="text-2xs font-semibold uppercase tracking-[0.08em] text-ink-4">Fitness (CTL)</div>
                     <div className="mt-1 flex items-baseline gap-2">
                         <span className="text-[48px] sm:text-[3.5rem] leading-none font-semibold tracking-[-0.04em] tabular-nums text-ink">
                             {hasData ? Math.round(shown) : '--'}

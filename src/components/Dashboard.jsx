@@ -167,7 +167,7 @@ const Dashboard = () => {
         <button
           onClick={handleOpenModal}
           data-history="add"
-          className="py-1.5 px-3 bg-surface text-ink-2-soft border border-line-2 rounded-full text-[10px] font-bold uppercase flex items-center gap-1.5 hover:bg-sunken-9 transition-colors shadow-2xs active:scale-95"
+          className="py-1.5 px-3 bg-surface text-ink-2-soft border border-line-2 rounded-full text-2xs font-bold uppercase flex items-center gap-1.5 hover:bg-sunken-9 transition-colors shadow-2xs active:scale-95"
         >
           <span className="text-[14px]">+</span> Añadir Manual
         </button>

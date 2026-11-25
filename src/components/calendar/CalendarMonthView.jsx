@@ -27,7 +27,7 @@ export const CalendarMonthView = ({
                         <div data-cal="weekdays" className="hidden lg:grid grid-cols-[130px_repeat(7,1fr)] bg-surface-9 backdrop-blur-md border-b border-line-soft-5 sticky top-0 z-20">
                             <div className="py-2.5 border-r border-line-faint"></div>
                             {WEEKDAYS.map((day, i) => (
-                                <div key={day} className={`py-2 text-center text-[10px] font-medium tracking-widest uppercase border-r border-line-faint last:border-r-0
+                                <div key={day} className={`py-2 text-center text-2xs font-medium tracking-widest uppercase border-r border-line-faint last:border-r-0
                                     ${i >= 5 ? 'text-slate-400/80 dark:text-zinc-600' : 'text-ink-3-flat'}`}>{day}</div>
                             ))}
                         </div>
@@ -66,12 +66,12 @@ export const CalendarMonthView = ({
                                         </div>
 
                                         {/* ====== PANEL SEMANAL IZQUIERDO ====== */}
-                                        <div data-cal="week-panel" className="hidden lg:flex flex-col border-r border-line-faint bg-transparent text-[10px] relative overflow-hidden">
+                                        <div data-cal="week-panel" className="hidden lg:flex flex-col border-r border-line-faint bg-transparent text-2xs relative overflow-hidden">
                                             {/* Header with week number */}
                                             <div className="px-3 py-2.5 flex items-center justify-between">
                                                 <span className="text-[11px] font-medium text-ink-4 flex items-center gap-1">
                                                     Semana {weekNum}
-                                                    {isProjected && <span className="text-[8px] font-semibold text-blue-500 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/30 px-1 py-px rounded">PROY</span>}
+                                                    {isProjected && <span className="text-2xs font-semibold text-blue-500 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/30 px-1 py-px rounded">PROY</span>}
                                                 </span>
                                             </div>
 
@@ -80,7 +80,7 @@ export const CalendarMonthView = ({
                                                 {/* Row 1: Aptitud & Duration */}
                                                 <div className="flex items-center justify-between">
                                                     <div className="flex items-center gap-1.5">
-                                                        <span className="text-[10px] text-ink-3 w-9">Aptitud</span>
+                                                        <span className="text-2xs text-ink-3 w-9">Aptitud</span>
                                                         <span className="text-[11px] font-bold text-metric-ctl">{weekPmc.ctl != null ? Math.round(weekPmc.ctl) : '-'}</span>
                                                     </div>
                                                     <span className="text-[11px] font-bold text-ink-2-soft">{formatDuration(weekDuration)}</span>
@@ -89,11 +89,11 @@ export const CalendarMonthView = ({
                                                 {/* Row 2: Fatiga & Carga */}
                                                 <div className="flex items-center justify-between">
                                                     <div className="flex items-center gap-1.5">
-                                                        <span className="text-[10px] text-ink-3 w-9">Fatiga</span>
+                                                        <span className="text-2xs text-ink-3 w-9">Fatiga</span>
                                                         <span className="text-[11px] font-bold text-legacy-atl-purple-ink">{weekPmc.atl != null ? Math.round(weekPmc.atl) : '-'}</span>
                                                     </div>
                                                     <div className="flex items-center gap-1">
-                                                        <span className="text-[9px] text-ink-4">Carga</span>
+                                                        <span className="text-2xs text-ink-4">Carga</span>
                                                         <span className="text-[11px] font-bold text-ink-2-soft">{Math.round(weekRealizedTSS)}</span>
                                                     </div>
                                                 </div>
@@ -101,7 +101,7 @@ export const CalendarMonthView = ({
                                                 {/* Row 3: Forma & Ramp */}
                                                 <div className="flex items-center justify-between">
                                                     <div className="flex items-center gap-1.5">
-                                                        <span className="text-[10px] text-ink-3 w-9">Forma</span>
+                                                        <span className="text-2xs text-ink-3 w-9">Forma</span>
                                                         {weekPmc.tcb != null ? (
                                                             <span className={`text-[11px] font-semibold ${weekPmc.tcb > 5 ? 'text-legacy-tsb-up' : weekPmc.tcb < -15 ? 'text-legacy-tsb-low' : 'text-body-soft-2'}`}>
                                                                 {Math.round(weekPmc.tcb)}
@@ -112,8 +112,8 @@ export const CalendarMonthView = ({
                                                     </div>
                                                     {ramp != null && (
                                                         <div className="flex items-center gap-0.5">
-                                                            <span className="text-[9px] text-ink-4">Ramp</span>
-                                                            <span className={`text-[10px] font-bold ${Number(ramp) > 0 ? 'text-legacy-tsb-up' : Number(ramp) < 0 ? 'text-danger-light' : 'text-slate-500'}`}>
+                                                            <span className="text-2xs text-ink-4">Ramp</span>
+                                                            <span className={`text-2xs font-bold ${Number(ramp) > 0 ? 'text-legacy-tsb-up' : Number(ramp) < 0 ? 'text-danger-light' : 'text-slate-500'}`}>
                                                                 {Number(ramp) > 0 ? '+' : ''}{ramp}
                                                             </span>
                                                         </div>
@@ -124,7 +124,7 @@ export const CalendarMonthView = ({
                                                 {weekDist > 0 && (
                                                     <div className="flex items-center justify-between pt-0.5 border-t border-line-faint">
                                                         <div className="flex items-center gap-1.5">
-                                                            <span className="text-[10px] text-ink-3 w-9">Dist.</span>
+                                                            <span className="text-2xs text-ink-3 w-9">Dist.</span>
                                                             <span className="text-[11px] font-bold text-body">{(weekDist / 1000).toFixed(1)} km</span>
                                                         </div>
                                                     </div>
@@ -135,7 +135,7 @@ export const CalendarMonthView = ({
                                             <div
                                                 className="mt-auto px-2.5 py-1 transition-colors border-t border-line-muted"
                                             >
-                                                <div className="flex justify-between text-[9px]">
+                                                <div className="flex justify-between text-2xs">
                                                     <span className="text-ink-4 font-semibold">Progreso Plan</span>
                                                     <span className="font-mono font-bold text-body-soft-2">
                                                         {Math.round(weekRealizedTSS)}/{Math.round(weekPlannedTSS)}
@@ -312,14 +312,14 @@ export const CalendarMonthView = ({
                                                                             <div className="flex items-center gap-1.5 mb-1">
                                                                                 <span className={`shrink-0 ${sportColors.accent}`}>{getSportIcon(act.type, 13)}</span>
                                                                                 <span className="text-[11px] font-semibold tracking-tight leading-none text-body">{formatActDuration(act.duration || 0)}</span>
-                                                                                {act.tss > 0 && <span className="ml-auto text-[9px] font-medium text-ink-4">{Math.round(act.tss)} TSS</span>}
+                                                                                {act.tss > 0 && <span className="ml-auto text-2xs font-medium text-ink-4">{Math.round(act.tss)} TSS</span>}
                                                                             </div>
                                                                             <div className="flex flex-col gap-0.5">
                                                                                 <span className="text-[11px] font-medium leading-tight truncate text-body-soft">
                                                                                     {act.name || act.type}
                                                                                 </span>
                                                                                 {extraInfo.length > 0 && (
-                                                                                    <span className="text-[9px] font-semibold text-ink-4 flex gap-1.5">
+                                                                                    <span className="text-2xs font-semibold text-ink-4 flex gap-1.5">
                                                                                         {extraInfo.map((info, idx) => (
                                                                                             <span key={idx} className="bg-surface-2 px-1 py-0.5 rounded">{info}</span>
                                                                                         ))}
@@ -356,15 +356,15 @@ export const CalendarMonthView = ({
                                                                             <div className="flex items-center gap-1.5 mb-1">
                                                                                 <span className={`shrink-0 ${sportColors.accent}`}>{getSportIcon(act.type, 13)}</span>
                                                                                 <span className="text-[11px] font-semibold tracking-tight leading-none text-ink-2-soft">{formatActDuration(act.duration || 0)}</span>
-                                                                                {act.tss > 0 && <span className="ml-auto text-[9px] font-bold text-ink-3">{Math.round(act.tss)} TSS</span>}
-                                                                                {isFulfilled && <span data-cal="check" className="ml-1 text-[9px] font-bold text-emerald-500" title="Plan completado">✓</span>}
+                                                                                {act.tss > 0 && <span className="ml-auto text-2xs font-bold text-ink-3">{Math.round(act.tss)} TSS</span>}
+                                                                                {isFulfilled && <span data-cal="check" className="ml-1 text-2xs font-bold text-emerald-500" title="Plan completado">✓</span>}
                                                                             </div>
                                                                             <div className="flex flex-col gap-0.5">
                                                                                 <span className="text-[11px] font-medium leading-tight truncate text-body">
                                                                                     {act.name || act.type}
                                                                                 </span>
                                                                                 {extraInfo.length > 0 && (
-                                                                                    <span className="text-[9px] font-semibold text-ink-3 flex gap-1.5">
+                                                                                    <span className="text-2xs font-semibold text-ink-3 flex gap-1.5">
                                                                                         {extraInfo.map((info, idx) => (
                                                                                             <span key={idx} className="bg-slate-200/50 dark:bg-zinc-700/50 px-1 py-0.5 rounded">{info}</span>
                                                                                         ))}

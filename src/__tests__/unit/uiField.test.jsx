@@ -29,7 +29,7 @@ describe('ui/Field recetas', () => {
     expect(classes(inputClass({ variant: 'cell', mono: true }))).toEqual(classes('bg-sunken text-[13px] font-mono rounded-lg outline-none no-spinner text-body'));
     expect(classes(inputClass({ variant: 'cell', size: 'sm' }))).toEqual(classes('bg-sunken rounded-lg text-[11px] outline-none no-spinner text-body'));
     expect(classes(selectClass({ variant: 'cell' }))).toEqual(classes('bg-sunken text-[11px] font-medium text-body rounded-lg outline-none cursor-pointer'));
-    expect(classes(selectClass({ variant: 'cell-bare' }))).toEqual(classes('bg-transparent text-[10px] text-ink-4 outline-none cursor-pointer'));
+    expect(classes(selectClass({ variant: 'cell-bare' }))).toEqual(classes('bg-transparent text-2xs text-ink-4 outline-none cursor-pointer'));
   });
 
   it('inline copia los valores de Ajustes y elige el anillo con ringTone', () => {

@@ -179,7 +179,7 @@ export const AdvancedAnalytics = React.memo(({ activities, settings,  timeRange,
                         label="Ratio Carga" icon={Target} color={ct.series.tsb}
                         value={model.acwr} format={(n) => n.toFixed(2)}
                         sub={`Aguda vs Crónica · óptimo 0,8–1,3`}
-                        chip={<span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border uppercase tracking-wider ${ACWR_CHIP[acwrInfo.tone]}`}>{acwrInfo.label}</span>}
+                        chip={<span className={`text-2xs font-bold px-2 py-0.5 rounded-full border uppercase tracking-wider ${ACWR_CHIP[acwrInfo.tone]}`}>{acwrInfo.label}</span>}
                     />
                 </div>
             </div>
@@ -196,7 +196,7 @@ export const AdvancedAnalytics = React.memo(({ activities, settings,  timeRange,
                     className="md:hidden w-full min-h-[44px] px-4 flex items-center justify-between rounded-xl border border-line bg-surface text-xs font-semibold text-ink-3 touch-manipulation"
                 >
                     <span>Tendencia y capacidad</span>
-                    <span className="flex items-center gap-1.5 text-[10px] font-medium text-ink-4">
+                    <span className="flex items-center gap-1.5 text-2xs font-medium text-ink-4">
                         {showMore ? 'Ocultar' : 'Rampa, monotonía, volumen, VO2'}
                         <ChevronDown size={14} className={showMore ? 'rotate-180' : ''} />
                     </span>

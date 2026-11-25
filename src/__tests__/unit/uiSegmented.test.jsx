@@ -18,19 +18,19 @@ describe('ui/Segmented recetas', () => {
 
   it('card copia las recetas de las tarjetas de Rendimiento por tamaño', () => {
     expect(classes(segmentedOptionClass({ variant: 'card', size: 'md-wide', active: true }))).toEqual(
-      classes('text-[9px] font-bold uppercase tracking-widest rounded-lg transition-all bg-surface-3 text-ink-soft shadow-sm'),
+      classes('text-2xs font-bold uppercase tracking-widest rounded-lg transition-all bg-surface-3 text-ink-soft shadow-sm'),
     );
     expect(classes(segmentedOptionClass({ variant: 'card', size: 'sm' }))).toEqual(
-      classes('text-[8px] font-bold uppercase rounded-lg transition-all text-segmented-off hover:text-segmented-off-hover'),
+      classes('text-2xs font-bold uppercase rounded-lg transition-all text-segmented-off hover:text-segmented-off-hover'),
     );
     expect(segmentedOptionClass({ variant: 'card', active: true, tone: 'run' })).toContain('text-sport-run-ink');
-    expect(classes(segmentedClass({ variant: 'card', size: 'xs' }))).toEqual(classes('flex bg-surface-2 p-0.5 rounded-lg text-[8px] font-bold uppercase'));
+    expect(classes(segmentedClass({ variant: 'card', size: 'xs' }))).toEqual(classes('flex bg-surface-2 p-0.5 rounded-lg text-2xs font-bold uppercase'));
     expect(segmentedOptionClass({ variant: 'card', size: 'xs', active: true })).toMatch(/shadow-xs/);
   });
 
   it('mini copia la receta de los conmutadores del Calendario', () => {
     expect(classes(segmentedOptionClass({ variant: 'mini', active: true, tone: 'hr' }))).toEqual(
-      classes('px-2 py-0.5 text-[10px] font-semibold rounded-full transition-all duration-200 bg-surface-3 text-legacy-hr-red shadow-sm'),
+      classes('px-2 py-0.5 text-2xs font-semibold rounded-full transition-all duration-200 bg-surface-3 text-legacy-hr-red shadow-sm'),
     );
     expect(segmentedOptionClass({ variant: 'mini' })).toMatch(/text-ink-4-fixed hover:text-body-soft-fixed$/);
     expect(segmentedClass({ variant: 'mini' })).toBe('flex bg-fill-5 rounded-full p-0.5');

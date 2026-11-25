@@ -60,7 +60,7 @@ export const BottomNav = ({ activeIndex, onTabChange }) => {
                   className={`transition-transform duration-200 ${isActive ? 'scale-105' : ''}`}
                 />
                 <span
-                  className={`text-[9.5px] tracking-tight leading-none mt-1 transition-all ${
+                  className={`text-2xs tracking-tight leading-none mt-1 transition-all ${
                     isActive
                       ? 'font-bold text-action-ios'
                       : 'font-medium'

@@ -7,7 +7,7 @@ export function ZoomRange({ range, onChange, label = 'Zoom del recorrido' }) {
   const zoomed = lo > 0 || hi < 100;
   return (
     <div data-chart="zoom" className="flex items-center gap-3 px-3.5 sm:px-6 py-2 border-b border-line-soft-3">
-      <span className="text-[9px] font-bold text-ink-4 uppercase tracking-widest shrink-0">Zoom</span>
+      <span className="text-2xs font-bold text-ink-4 uppercase tracking-widest shrink-0">Zoom</span>
       <input
         type="range" min={0} max={100} step={1} value={lo}
         aria-label={`${label}: inicio`}
@@ -26,7 +26,7 @@ export function ZoomRange({ range, onChange, label = 'Zoom del recorrido' }) {
         type="button"
         disabled={!zoomed}
         onClick={() => onChange([0, 100])}
-        className="shrink-0 min-h-[44px] px-2 text-[10px] font-semibold text-ink-3 disabled:opacity-40"
+        className="shrink-0 min-h-[44px] px-2 text-2xs font-semibold text-ink-3 disabled:opacity-40"
       >
         Restablecer
       </button>

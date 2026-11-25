@@ -15,7 +15,7 @@ export const HealthHeader = ({ wellnessMetrics, readinessInfo, setActiveTab, act
                             Salud
                         </h1>
                         {wellnessMetrics && (
-                            <span className="text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-fill-4 text-body-soft uppercase tracking-wider">
+                            <span className="text-2xs font-bold px-2.5 py-0.5 rounded-full bg-fill-4 text-body-soft uppercase tracking-wider">
                                 {wellnessMetrics.isSimulated ? 'Modo Demo' : 'Biometría Diaria'}
                             </span>
                         )}

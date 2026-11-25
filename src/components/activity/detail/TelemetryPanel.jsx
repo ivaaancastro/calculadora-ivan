@@ -9,14 +9,14 @@ export const TelemetryPanel = ({ chartData, peaks, activePayload, setActivePaylo
                                             {/* Accesos rápidos a los Picos del entrenamiento */}
                                             {peaks && (
                                                 <div data-detail="peaks" className="flex items-center gap-1.5 overflow-x-auto hide-scrollbar py-0.5">
-                                                    <span className="text-[9px] font-bold text-ink-4 uppercase tracking-widest shrink-0 mr-1">
+                                                    <span className="text-2xs font-bold text-ink-4 uppercase tracking-widest shrink-0 mr-1">
                                                         Picos:
                                                     </span>
                                                     {peaks.maxHrPt && (
                                                         <button
                                                             type="button"
                                                             onClick={() => setActivePayload(peaks.maxHrPt)}
-                                                            className={`px-2.5 py-1 rounded-full text-[10px] font-bold shrink-0 border transition-all active:scale-95 flex items-center gap-1.5 ${
+                                                            className={`px-2.5 py-1 rounded-full text-2xs font-bold shrink-0 border transition-all active:scale-95 flex items-center gap-1.5 ${
                                                                 activePayload?.rawTime === peaks.maxHrPt.rawTime
                                                                     ? 'bg-hr text-white border-hr-strong shadow-xs'
                                                                     : 'bg-ink-inverse text-hr-ink border-hr-edge hover:bg-hr-tint'
@@ -30,7 +30,7 @@ export const TelemetryPanel = ({ chartData, peaks, activePayload, setActivePaylo
                                                         <button
                                                             type="button"
                                                             onClick={() => setActivePayload(peaks.maxWattsPt)}
-                                                            className={`px-2.5 py-1 rounded-full text-[10px] font-bold shrink-0 border transition-all active:scale-95 flex items-center gap-1.5 ${
+                                                            className={`px-2.5 py-1 rounded-full text-2xs font-bold shrink-0 border transition-all active:scale-95 flex items-center gap-1.5 ${
                                                                 activePayload?.rawTime === peaks.maxWattsPt.rawTime
                                                                     ? 'bg-power text-white border-power-strong shadow-xs'
                                                                     : 'bg-ink-inverse text-power-ink border-power-edge hover:bg-power-tint-2'
@@ -44,7 +44,7 @@ export const TelemetryPanel = ({ chartData, peaks, activePayload, setActivePaylo
                                                         <button
                                                             type="button"
                                                             onClick={() => setActivePayload(isPaceBased ? peaks.bestPacePt : peaks.maxSpeedPt)}
-                                                            className={`px-2.5 py-1 rounded-full text-[10px] font-bold shrink-0 border transition-all active:scale-95 flex items-center gap-1.5 ${
+                                                            className={`px-2.5 py-1 rounded-full text-2xs font-bold shrink-0 border transition-all active:scale-95 flex items-center gap-1.5 ${
                                                                 activePayload?.rawTime === (isPaceBased ? peaks.bestPacePt?.rawTime : peaks.maxSpeedPt?.rawTime)
                                                                     ? 'bg-speed text-white border-speed-strong shadow-xs'
                                                                     : 'bg-ink-inverse text-speed-ink border-speed-edge hover:bg-speed-tint'
@@ -60,7 +60,7 @@ export const TelemetryPanel = ({ chartData, peaks, activePayload, setActivePaylo
                                                         <button
                                                             type="button"
                                                             onClick={() => setActivePayload(peaks.maxAltPt)}
-                                                            className={`px-2.5 py-1 rounded-full text-[10px] font-bold shrink-0 border transition-all active:scale-95 flex items-center gap-1.5 ${
+                                                            className={`px-2.5 py-1 rounded-full text-2xs font-bold shrink-0 border transition-all active:scale-95 flex items-center gap-1.5 ${
                                                                 activePayload?.rawTime === peaks.maxAltPt.rawTime
                                                                     ? 'bg-inverse-2 text-ink-inverse border-slate-800 shadow-xs'
                                                                     : 'bg-surface text-body-soft-2 border-slate-200 dark:border-zinc-800 hover:bg-sunken-9'
@@ -85,7 +85,7 @@ export const TelemetryPanel = ({ chartData, peaks, activePayload, setActivePaylo
                                                                     {activePayload.distanceKm !== null && <span>📍 {activePayload.distanceKm} km</span>}
                                                                 </div>
                                                                 {activePeakType && (
-                                                                    <span className={`px-2 py-0.5 rounded-md text-[10px] font-black uppercase tracking-tight border animate-pulse ${activePeakType.color}`}>
+                                                                    <span className={`px-2 py-0.5 rounded-md text-2xs font-black uppercase tracking-tight border animate-pulse ${activePeakType.color}`}>
                                                                         {activePeakType.label}: {activePeakType.value}
                                                                     </span>
                                                                 )}
@@ -93,7 +93,7 @@ export const TelemetryPanel = ({ chartData, peaks, activePayload, setActivePaylo
                                                             <button
                                                                 type="button"
                                                                 onClick={() => setActivePayload(null)}
-                                                                className="text-[10px] font-bold text-ink-4 hover:text-body-soft-2 px-1.5 py-0.5 rounded hover:bg-surface-2 transition-colors"
+                                                                className="text-2xs font-bold text-ink-4 hover:text-body-soft-2 px-1.5 py-0.5 rounded hover:bg-surface-2 transition-colors"
                                                             >
                                                                 Resetear
                                                             </button>
@@ -102,7 +102,7 @@ export const TelemetryPanel = ({ chartData, peaks, activePayload, setActivePaylo
                                                         <div className="grid grid-cols-3 sm:grid-cols-5 gap-1.5 text-center">
                                                             {/* Ritmo / Velocidad */}
                                                             {(isPaceBased ? activePayload.pace : activePayload.speed) !== null && <div className="bg-sunken rounded-xl p-1.5 border border-line-soft-3">
-                                                                <span className="text-[8px] font-bold uppercase tracking-wider text-ink-4 block">
+                                                                <span className="text-2xs font-bold uppercase tracking-wider text-ink-4 block">
                                                                     {isPaceBased ? 'Ritmo' : 'Velocidad'}
                                                                 </span>
                                                                 <span className="text-xs sm:text-sm font-black font-mono tabular-nums text-pace">
@@ -113,11 +113,11 @@ export const TelemetryPanel = ({ chartData, peaks, activePayload, setActivePaylo
                                                             {/* FC */}
                                                             {activePayload.hr !== null && (
                                                                 <div className="bg-sunken rounded-xl p-1.5 border border-line-soft-3">
-                                                                    <span className="text-[8px] font-bold uppercase tracking-wider text-ink-4 block">
+                                                                    <span className="text-2xs font-bold uppercase tracking-wider text-ink-4 block">
                                                                         FC
                                                                     </span>
                                                                     <span className="text-xs sm:text-sm font-black font-mono tabular-nums text-hr">
-                                                                        {activePayload.hr} <span className="text-[9px] font-normal">bpm</span>
+                                                                        {activePayload.hr} <span className="text-2xs font-normal">bpm</span>
                                                                     </span>
                                                                 </div>
                                                             )}
@@ -125,11 +125,11 @@ export const TelemetryPanel = ({ chartData, peaks, activePayload, setActivePaylo
                                                             {/* Potencia */}
                                                             {activePayload.watts !== null && (
                                                                 <div className="bg-sunken rounded-xl p-1.5 border border-line-soft-3">
-                                                                    <span className="text-[8px] font-bold uppercase tracking-wider text-ink-4 block">
+                                                                    <span className="text-2xs font-bold uppercase tracking-wider text-ink-4 block">
                                                                         Potencia
                                                                     </span>
                                                                     <span className="text-xs sm:text-sm font-black font-mono tabular-nums text-power">
-                                                                        {activePayload.watts} <span className="text-[9px] font-normal">W</span>
+                                                                        {activePayload.watts} <span className="text-2xs font-normal">W</span>
                                                                     </span>
                                                                 </div>
                                                             )}
@@ -137,13 +137,13 @@ export const TelemetryPanel = ({ chartData, peaks, activePayload, setActivePaylo
                                                             {/* Altitud y Pendiente */}
                                                             {activePayload.alt !== null && (
                                                                 <div className="bg-sunken rounded-xl p-1.5 border border-line-soft-3">
-                                                                    <span className="text-[8px] font-bold uppercase tracking-wider text-ink-4 block">
+                                                                    <span className="text-2xs font-bold uppercase tracking-wider text-ink-4 block">
                                                                         Altitud
                                                                     </span>
                                                                     <div className="flex items-center justify-center gap-1 text-xs sm:text-sm font-black font-mono tabular-nums text-body">
                                                                         <span>{activePayload.alt}m</span>
                                                                         {activePayload.grade !== undefined && (
-                                                                            <span className={`text-[9px] font-bold ${activePayload.grade > 3 ? 'text-rose-500' : activePayload.grade < -3 ? 'text-emerald-500' : 'text-slate-400'}`}>
+                                                                            <span className={`text-2xs font-bold ${activePayload.grade > 3 ? 'text-rose-500' : activePayload.grade < -3 ? 'text-emerald-500' : 'text-slate-400'}`}>
                                                                                 {activePayload.grade > 0 ? '+' : ''}{activePayload.grade.toFixed(0)}%
                                                                             </span>
                                                                         )}
@@ -154,11 +154,11 @@ export const TelemetryPanel = ({ chartData, peaks, activePayload, setActivePaylo
                                                             {/* Cadencia */}
                                                             {activePayload.cadence !== null && (
                                                                 <div className="bg-sunken rounded-xl p-1.5 border border-line-soft-3">
-                                                                    <span className="text-[8px] font-bold uppercase tracking-wider text-ink-4 block">
+                                                                    <span className="text-2xs font-bold uppercase tracking-wider text-ink-4 block">
                                                                         Cadencia
                                                                     </span>
                                                                     <span className="text-xs sm:text-sm font-black font-mono tabular-nums text-cadence">
-                                                                        {activePayload.cadence} <span className="text-[9px] font-normal">{isPaceBased ? 'ppm' : 'rpm'}</span>
+                                                                        {activePayload.cadence} <span className="text-2xs font-normal">{isPaceBased ? 'ppm' : 'rpm'}</span>
                                                                     </span>
                                                                 </div>
                                                             )}
@@ -172,7 +172,7 @@ export const TelemetryPanel = ({ chartData, peaks, activePayload, setActivePaylo
                                                                 Desliza el dedo por los gráficos para explorar cada punto y pico
                                                             </span>
                                                         </div>
-                                                        <span className="text-[10px] font-semibold text-indigo-500 uppercase tracking-wider hidden sm:inline">
+                                                        <span className="text-2xs font-semibold text-indigo-500 uppercase tracking-wider hidden sm:inline">
                                                             Telemetría
                                                         </span>
                                                     </div>

@@ -4,6 +4,7 @@ import { CustomChartTooltip } from '../ActivitySharedUI';
 import { useChartTheme } from '../../charts/useChartTheme';
 import { Segmented } from '../../ui';
 import { getBlocksForSport, getMetabolicIntensity } from '../../../utils/activityMetricsBySport';
+import { axisProps } from '../../charts/axisProps.js';
 
 export const DataTab = ({ sport, zoneType, zoneOptions = [], onZoneTypeChange, exactZoneAnalysis, exactPaceZoneAnalysis, exactPowerZoneAnalysis, paceThresholdIsDefault, proMetrics, activity, maxHr }) => {
     const ct = useChartTheme();
@@ -22,7 +23,7 @@ export const DataTab = ({ sport, zoneType, zoneOptions = [], onZoneTypeChange, e
                                 {zoneData && (
                                 <div className="space-y-3">
                                     <div className="flex items-center justify-between gap-3">
-                                        <h3 className="text-[10px] font-bold text-ink-4 uppercase tracking-widest">Distribución Volumétrica (Zonas)</h3>
+                                        <h3 className="text-2xs font-bold text-ink-4 uppercase tracking-widest">Distribución Volumétrica (Zonas)</h3>
                                         {zoneOptions.length > 1 && (
                                             <Segmented data-detail="zone-type" variant="pill" value={zoneType} onChange={onZoneTypeChange} options={zoneOptions} />
                                         )}
@@ -31,7 +32,7 @@ export const DataTab = ({ sport, zoneType, zoneOptions = [], onZoneTypeChange, e
                                         <ResponsiveContainer width="100%" height="100%">
                                             <BarChart data={zoneData} margin={{ bottom: 20 }}>
                                                 <CartesianGrid vertical={false} strokeDasharray="3 3" stroke={ct.anatomy.gridSoft} opacity={0.5} />
-                                                <XAxis dataKey="label" axisLine={false} tickLine={false} tick={{ fontSize: 9, fontWeight: 700, fill: ct.anatomy.tick }} />
+                                                <XAxis dataKey="label" {...axisProps(ct, { fill: ct.anatomy.tick, fontWeight: 700 })} />
                                                 <YAxis hide />
                                                 <RechartsTooltip content={<CustomChartTooltip unit=" min" />} cursor={{ fill: ct.anatomy.cursorFill }} />
                                                 <Bar dataKey="minutes" radius={[4, 4, 0, 0]}>
@@ -49,14 +50,14 @@ export const DataTab = ({ sport, zoneType, zoneOptions = [], onZoneTypeChange, e
                                     {zoneType === 'pace' && (
                                         <div data-detail="pace-zones" className="bg-white dark:bg-zinc-900/40 rounded-2xl border border-line-soft overflow-hidden shadow-sm divide-y divide-line-soft">
                                             {zoneData.map((z) => (
-                                                <div key={z.label} className="flex items-center justify-between px-4 py-2 text-[10px] font-bold tabular-nums text-body-soft-2">
+                                                <div key={z.label} className="flex items-center justify-between px-4 py-2 text-2xs font-bold tabular-nums text-body-soft-2">
                                                     <span>{z.label}</span>
                                                     <span className="text-slate-400">{z.range} /km</span>
                                                     <span>{z.minutes} min · {z.pct.toFixed(0)}%</span>
                                                 </div>
                                             ))}
                                             {paceThresholdIsDefault && (
-                                                <p className="px-4 py-2 text-[9px] font-medium text-ink-4">Usando el ritmo umbral por defecto (4:30/km). Ajústalo en Perfil para zonas exactas.</p>
+                                                <p className="px-4 py-2 text-2xs font-medium text-ink-4">Usando el ritmo umbral por defecto (4:30/km). Ajústalo en Perfil para zonas exactas.</p>
                                             )}
                                         </div>
                                     )}
@@ -67,8 +68,8 @@ export const DataTab = ({ sport, zoneType, zoneOptions = [], onZoneTypeChange, e
                                 {blocks.detail.climbPro && (
                                 <div className="space-y-3">
                                     <div className="flex items-center justify-between">
-                                        <h3 className="text-[10px] font-bold text-ink-4 uppercase tracking-widest">Análisis de Ascensiones (ClimbPro)</h3>
-                                        <span className="text-[9px] font-bold text-indigo-500 px-2 py-0.5 bg-indigo-50 dark:bg-indigo-900/20 rounded-full uppercase tracking-tighter">
+                                        <h3 className="text-2xs font-bold text-ink-4 uppercase tracking-widest">Análisis de Ascensiones (ClimbPro)</h3>
+                                        <span className="text-2xs font-bold text-indigo-500 px-2 py-0.5 bg-indigo-50 dark:bg-indigo-900/20 rounded-full uppercase tracking-tighter">
                                             {proMetrics.climbPro?.length || 0} Subidas
                                         </span>
                                     </div>
@@ -77,7 +78,7 @@ export const DataTab = ({ sport, zoneType, zoneOptions = [], onZoneTypeChange, e
                                         {proMetrics.climbPro?.length > 0 ? (
                                             <table className="w-full text-left border-collapse">
                                                 <thead className="bg-slate-50/50 dark:bg-zinc-900/30">
-                                                    <tr className="text-[8px] font-bold text-ink-4 uppercase tracking-widest border-b border-line-soft">
+                                                    <tr className="text-2xs font-bold text-ink-4 uppercase tracking-widest border-b border-line-soft">
                                                         <th className="p-4">CAT</th>
                                                         <th className="p-4">Subida</th>
                                                         <th className="p-4 text-right">DIST (km)</th>
@@ -87,11 +88,11 @@ export const DataTab = ({ sport, zoneType, zoneOptions = [], onZoneTypeChange, e
                                                         <th className="p-4 text-right">TIEMPO</th>
                                                     </tr>
                                                 </thead>
-                                                <tbody className="text-[10px] font-bold tabular-nums text-body-soft-2 divide-y divide-line-soft-5">
+                                                <tbody className="text-2xs font-bold tabular-nums text-body-soft-2 divide-y divide-line-soft-5">
                                                     {proMetrics.climbPro.map((climb) => (
                                                         <tr key={climb.index} className="hover:bg-sunken-4 transition-colors group">
                                                             <td className="p-4">
-                                                                <span className={`px-2 py-0.5 rounded-md text-[9px] font-black ${
+                                                                <span className={`px-2 py-0.5 rounded-md text-2xs font-black ${
                                                                     climb.category === 'HC' ? 'bg-zinc-900 text-white dark:bg-zinc-100 dark:text-black shadow-lg shadow-black/10' :
                                                                     climb.category === '1' ? 'bg-rose-500 text-white' :
                                                                     climb.category === '2' ? 'bg-orange-500 text-white' :
@@ -114,7 +115,7 @@ export const DataTab = ({ sport, zoneType, zoneOptions = [], onZoneTypeChange, e
                                         ) : (
                                             <div className="flex flex-col items-center justify-center p-12 text-center space-y-2 opacity-40">
                                                 <div className="w-12 h-12 rounded-full border-2 border-dashed border-line-strong" />
-                                                <p className="text-[9px] font-bold uppercase tracking-widest">Sin ascensiones notables</p>
+                                                <p className="text-2xs font-bold uppercase tracking-widest">Sin ascensiones notables</p>
                                             </div>
                                         )}
                                     </div>
@@ -127,17 +128,17 @@ export const DataTab = ({ sport, zoneType, zoneOptions = [], onZoneTypeChange, e
                                     <div className="flex items-center justify-between mb-4">
                                         <div className="space-y-1">
                                             <h3 className="text-xs font-bold text-ink-soft uppercase tracking-tight">Perfil Metabólico Estimado</h3>
-                                            <p className="text-[9px] text-ink-4 font-medium">Sustratos energéticos basados en intensidad ({blocks.metabolic === 'if' ? 'IF' : '% de FC máx.'})</p>
+                                            <p className="text-2xs text-ink-4 font-medium">Sustratos energéticos basados en intensidad ({blocks.metabolic === 'if' ? 'IF' : '% de FC máx.'})</p>
                                         </div>
                                         <div className="text-right">
                                             <span className="text-base font-black text-ink-soft">{blocks.metabolic === 'if' ? proMetrics.workKj : (activity.calories || 0)}</span>
-                                            <span className="ml-1 text-[9px] font-bold text-slate-400 uppercase">{blocks.metabolic === 'if' ? 'kJ Totales' : 'kcal'}</span>
+                                            <span className="ml-1 text-2xs font-bold text-slate-400 uppercase">{blocks.metabolic === 'if' ? 'kJ Totales' : 'kcal'}</span>
                                         </div>
                                     </div>
 
                                     <div className="space-y-4">
                                         <div className="space-y-1.5">
-                                            <div className="flex justify-between text-[9px] font-bold uppercase tracking-tight">
+                                            <div className="flex justify-between text-2xs font-bold uppercase tracking-tight">
                                                 <span className="text-emerald-500">Grasas ({Math.max(0, 100 - (intensity * 100)).toFixed(0)}%)</span>
                                                 <span className="text-orange-500">Carbos ({Math.min(100, (intensity * 100)).toFixed(0)}%)</span>
                                             </div>
@@ -149,16 +150,16 @@ export const DataTab = ({ sport, zoneType, zoneOptions = [], onZoneTypeChange, e
 
                                         <div className="grid grid-cols-2 gap-6 pt-1">
                                             <div className="space-y-1">
-                                                <span className="text-[8px] font-bold text-slate-400 uppercase tracking-widest">Enfoque Técnico</span>
-                                                <p className="text-[10px] font-bold text-body leading-tight">
+                                                <span className="text-2xs font-bold text-slate-400 uppercase tracking-widest">Enfoque Técnico</span>
+                                                <p className="text-2xs font-bold text-body leading-tight">
                                                     {intensity < 0.75 
                                                         ? "Optimización de oxidación de grasas y base aeróbica." 
                                                         : "Consumo glucolítico alto. Énfasis en potencia táctica."}
                                                 </p>
                                             </div>
                                             <div className="space-y-1">
-                                                <span className="text-[8px] font-bold text-slate-400 uppercase tracking-widest">Recuperación Hist.</span>
-                                                <p className="text-[10px] font-bold text-body leading-tight">
+                                                <span className="text-2xs font-bold text-slate-400 uppercase tracking-widest">Recuperación Hist.</span>
+                                                <p className="text-2xs font-bold text-body leading-tight">
                                                     {activity.tss > 100 ? "36-48 horas para supercompensación." : "12-24 horas para estar al 100%."}
                                                 </p>
                                             </div>
@@ -178,7 +179,7 @@ export const DataTab = ({ sport, zoneType, zoneOptions = [], onZoneTypeChange, e
                                     
                                     <div className="space-y-4">
                                         <div className="space-y-1.5">
-                                            <div className="flex justify-between text-[9px] font-bold text-slate-400 uppercase tracking-widest">
+                                            <div className="flex justify-between text-2xs font-bold text-slate-400 uppercase tracking-widest">
                                                 <span>Intensidad (IF)</span>
                                                 <span className="text-power font-black">{proMetrics.ifFactor}</span>
                                             </div>
@@ -188,7 +189,7 @@ export const DataTab = ({ sport, zoneType, zoneOptions = [], onZoneTypeChange, e
                                         </div>
 
                                         <div className="space-y-1.5">
-                                            <div className="flex justify-between text-[9px] font-bold text-slate-400 uppercase tracking-widest">
+                                            <div className="flex justify-between text-2xs font-bold text-slate-400 uppercase tracking-widest">
                                                 <span>Variabilidad (VI)</span>
                                                 <span className="text-indigo-500 font-black">{proMetrics.vi}</span>
                                             </div>
@@ -198,7 +199,7 @@ export const DataTab = ({ sport, zoneType, zoneOptions = [], onZoneTypeChange, e
                                         </div>
 
                                         <div className="space-y-1.5">
-                                            <div className="flex justify-between text-[9px] font-bold text-slate-400 uppercase tracking-widest">
+                                            <div className="flex justify-between text-2xs font-bold text-slate-400 uppercase tracking-widest">
                                                 <span>Eficiencia (EF)</span>
                                                 <span className="text-rose-500 font-black">{proMetrics.efObj?.value}</span>
                                             </div>
@@ -209,7 +210,7 @@ export const DataTab = ({ sport, zoneType, zoneOptions = [], onZoneTypeChange, e
                                     </div>
 
                                     <div className="pt-2 border-t border-slate-200 dark:border-zinc-800/40">
-                                        <p className="text-[9px] text-ink-3 leading-relaxed font-bold uppercase italic">
+                                        <p className="text-2xs text-ink-3 leading-relaxed font-bold uppercase italic">
                                             Entrenamiento {parseFloat(proMetrics.vi) > 1.1 ? "Variable (MTB/Crit)" : "Constante (TT/Ritmo)"}
                                         </p>
                                     </div>
@@ -218,25 +219,25 @@ export const DataTab = ({ sport, zoneType, zoneOptions = [], onZoneTypeChange, e
 
                                 {/* Session Highlights */}
                                 <div className="space-y-3">
-                                    <h3 className="text-[10px] font-bold text-ink-4 uppercase tracking-widest">Hitos de la Sesión</h3>
+                                    <h3 className="text-2xs font-bold text-ink-4 uppercase tracking-widest">Hitos de la Sesión</h3>
                                     <div className="bg-white dark:bg-zinc-900/40 rounded-2xl border border-line-soft overflow-hidden shadow-sm max-h-[450px] overflow-y-auto custom-scrollbar">
                                         <div className="divide-y divide-line-soft">
                                             {blocks.detail.powerHitos && proMetrics.powerCurve?.map((peak, idx) => (
                                                 <div key={idx} className="flex justify-between items-center p-3.5 hover:bg-slate-50 dark:hover:bg-zinc-800/30 transition-colors">
                                                     <div className="flex items-center gap-3">
-                                                        <div className="w-8 h-8 rounded-lg bg-surface-2 flex items-center justify-center text-[10px] font-black text-slate-400">
+                                                        <div className="w-8 h-8 rounded-lg bg-surface-2 flex items-center justify-center text-2xs font-black text-slate-400">
                                                             {peak.label}
                                                         </div>
-                                                        <span className="text-[10px] font-bold text-body-soft uppercase">Pico {peak.label}</span>
+                                                        <span className="text-2xs font-bold text-body-soft uppercase">Pico {peak.label}</span>
                                                     </div>
                                                     <div className="text-right">
-                                                        <div className="text-xs font-black text-ink-soft">{peak.value}<span className="text-[9px] ml-0.5 opacity-50">w</span></div>
+                                                        <div className="text-xs font-black text-ink-soft">{peak.value}<span className="text-2xs ml-0.5 opacity-50">w</span></div>
                                                     </div>
                                                 </div>
                                             ))}
                                             {maxHr > 0 && <div className="flex justify-between items-center p-3.5 bg-slate-50/30 dark:bg-zinc-900/10">
-                                                <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">FC Máxima</span>
-                                                <span className="text-xs font-black text-hr">{maxHr} <span className="text-[9px] font-bold text-slate-400">bpm</span></span>
+                                                <span className="text-2xs font-bold text-slate-400 uppercase tracking-widest">FC Máxima</span>
+                                                <span className="text-xs font-black text-hr">{maxHr} <span className="text-2xs font-bold text-slate-400">bpm</span></span>
                                             </div>}
                                         </div>
                                     </div>

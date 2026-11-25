@@ -20,7 +20,7 @@ export const DetailHeader = ({ activity, activeTab, setActiveTab, onBack, onDele
                     <div className="flex items-center gap-1.5 shrink-0">
                         {activity.strava_id && (
                             <a data-detail="action" href={`https://www.strava.com/activities/${activity.strava_id}`} target="_blank" rel="noreferrer" 
-                               className="px-2.5 py-1 text-[10px] font-bold text-orange-500 hover:bg-orange-500/10 active:scale-95 rounded-full transition-all uppercase tracking-wider shrink-0">
+                               className="px-2.5 py-1 text-2xs font-bold text-orange-500 hover:bg-orange-500/10 active:scale-95 rounded-full transition-all uppercase tracking-wider shrink-0">
                                 Strava
                             </a>
                         )}
@@ -37,7 +37,7 @@ export const DetailHeader = ({ activity, activeTab, setActiveTab, onBack, onDele
                         <h1 className="text-sm font-bold text-ink tracking-tight leading-tight truncate">
                             {activity.name || `${activity.type}`}
                         </h1>
-                        <p className="text-[10px] font-semibold text-ink-4 capitalize">{dateStr}</p>
+                        <p className="text-2xs font-semibold text-ink-4 capitalize">{dateStr}</p>
                     </div>
                     )}
                 </div>
@@ -52,7 +52,7 @@ export const DetailHeader = ({ activity, activeTab, setActiveTab, onBack, onDele
                             <h1 className="text-sm font-bold text-ink tracking-tight leading-tight truncate">
                                 {activity.name || `${activity.type}`}
                             </h1>
-                            <p className="text-[10px] font-semibold text-ink-4 capitalize truncate">{dateStr}</p>
+                            <p className="text-2xs font-semibold text-ink-4 capitalize truncate">{dateStr}</p>
                         </div>
                         )}
                     </div>
@@ -60,7 +60,7 @@ export const DetailHeader = ({ activity, activeTab, setActiveTab, onBack, onDele
                     <div className="flex items-center gap-1.5 shrink-0">
                         {activity.strava_id && (
                             <a data-detail="action" href={`https://www.strava.com/activities/${activity.strava_id}`} target="_blank" rel="noreferrer" 
-                               className="px-2.5 py-1 text-[10px] font-bold text-orange-500 hover:bg-orange-500/10 active:scale-95 rounded-full transition-all uppercase tracking-wider shrink-0">
+                               className="px-2.5 py-1 text-2xs font-bold text-orange-500 hover:bg-orange-500/10 active:scale-95 rounded-full transition-all uppercase tracking-wider shrink-0">
                                 Strava
                             </a>
                         )}

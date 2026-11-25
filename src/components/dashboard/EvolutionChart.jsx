@@ -6,6 +6,7 @@ import { ChartTooltip } from '../ui';
 import { useChartMotion } from '../charts/useChartMotion';
 import { ChartSkeleton } from '../charts/ChartSkeleton';
 import { summarizeSeries, chartFigureProps } from '../charts/chartA11y';
+import { axisProps, axisTick } from '../charts/axisProps.js';
 
 const CustomTooltip = ({ active, payload, label }) => {
   if (active && payload && payload.length) {
@@ -16,9 +17,9 @@ const CustomTooltip = ({ active, payload, label }) => {
 
     return (
       <ChartTooltip variant="glass">
-        <p className="text-[9px] font-medium uppercase tracking-widest text-ink-4 mb-1.5 flex justify-between items-center capitalize">
+        <p className="text-2xs font-medium uppercase tracking-widest text-ink-4 mb-1.5 flex justify-between items-center capitalize">
           {title}
-          {diffDays > 0 && <span className="bg-surface-2 text-slate-500 px-1 py-0.5 rounded text-[8px] ml-2 font-mono font-normal">+{diffDays}d</span>}
+          {diffDays > 0 && <span className="bg-surface-2 text-slate-500 px-1 py-0.5 rounded text-2xs ml-2 font-mono font-normal">+{diffDays}d</span>}
         </p>
         <div className="space-y-1">
           {payload.map((entry, index) => {
@@ -36,7 +37,7 @@ const CustomTooltip = ({ active, payload, label }) => {
             };
             return (
               <div key={index} className="flex items-center justify-between gap-3">
-                <span className="text-[10px] font-medium text-ink-3">{labels[entry.dataKey]}</span>
+                <span className="text-2xs font-medium text-ink-3">{labels[entry.dataKey]}</span>
                 <span className={`text-[11px] font-mono font-bold ${colors[entry.dataKey] || 'text-slate-700'}`}>{entry.value.toFixed(1)}</span>
               </div>
             );
@@ -63,7 +64,7 @@ export const EvolutionChart = ({ data, timeRange, setTimeRange, loading = false 
       <div className="bg-transparent rounded-xl border border-dashed border-line p-8 h-full w-full flex items-center justify-center text-center">
         <div>
            <Activity size={16} className="mx-auto text-slate-300 mb-2" />
-           <p className="text-[9px] text-ink-4-dim uppercase tracking-widest font-medium">Sin Datos</p>
+           <p className="text-2xs text-ink-4-dim uppercase tracking-widest font-medium">Sin Datos</p>
         </div>
       </div>
     );
@@ -108,11 +109,11 @@ export const EvolutionChart = ({ data, timeRange, setTimeRange, loading = false 
             {activePoint ? new Date(activePoint.date).toLocaleDateString('es-ES', { weekday: 'short', day: 'numeric', month: 'short' }) : 'Hoy'}
           </span>
           {hoverPoint ? (
-            <span className="text-[9px] font-semibold text-metric-ctl-ink bg-metric-ctl/10 px-1.5 py-0.2 rounded-full">
+            <span className="text-2xs font-semibold text-metric-ctl-ink bg-metric-ctl/10 px-1.5 py-0.2 rounded-full">
               Punto
             </span>
           ) : (
-            <span className="text-[9px] font-medium text-ink-4 bg-slate-200/60 dark:bg-zinc-700/40 px-1.5 py-0.2 rounded-full">
+            <span className="text-2xs font-medium text-ink-4 bg-slate-200/60 dark:bg-zinc-700/40 px-1.5 py-0.2 rounded-full">
               Actual
             </span>
           )}
@@ -121,21 +122,21 @@ export const EvolutionChart = ({ data, timeRange, setTimeRange, loading = false 
         <div className="flex items-center gap-3 sm:gap-4 shrink-0 text-xs">
           <div className="flex items-center gap-1">
             <span className="w-2 h-2 rounded-full bg-metric-ctl"></span>
-            <span className="text-[10px] text-ink-4 font-medium">CTL</span>
+            <span className="text-2xs text-ink-4 font-medium">CTL</span>
             <span className="font-mono font-bold text-metric-ctl text-xs">
               {activePoint?.ctl !== undefined ? Math.round(activePoint.ctl) : '--'}
             </span>
           </div>
           <div className="flex items-center gap-1">
             <span className="w-2 h-2 rounded-full bg-metric-atl"></span>
-            <span className="text-[10px] text-ink-4 font-medium">ATL</span>
+            <span className="text-2xs text-ink-4 font-medium">ATL</span>
             <span className="font-mono font-bold text-metric-atl text-xs">
               {activePoint?.atl !== undefined ? Math.round(activePoint.atl) : '--'}
             </span>
           </div>
           <div className="flex items-center gap-1">
             <span className="w-2 h-2 rounded-full bg-metric-tsb"></span>
-            <span className="text-[10px] text-ink-4 font-medium">TSB</span>
+            <span className="text-2xs text-ink-4 font-medium">TSB</span>
             <span className={`font-mono font-bold text-xs ${
               (activePoint?.tsb ?? 0) >= 0 ? 'text-legacy-tsb-ios-up' : 'text-legacy-tsb-ios-down'
             }`}>
@@ -150,15 +151,15 @@ export const EvolutionChart = ({ data, timeRange, setTimeRange, loading = false 
         <div className="flex gap-3 sm:gap-5">
           <div className="flex items-center gap-1.5">
             <div className="w-2 h-2 rounded-full bg-metric-ctl"></div>
-            <span className="text-[9px] font-semibold text-ink-3 uppercase tracking-wider">Fitness</span>
+            <span className="text-2xs font-semibold text-ink-3 uppercase tracking-wider">Fitness</span>
           </div>
           <div className="flex items-center gap-1.5">
             <div className="w-2 h-2 rounded-full bg-metric-atl"></div>
-            <span className="text-[9px] font-semibold text-ink-3 uppercase tracking-wider">Fatiga</span>
+            <span className="text-2xs font-semibold text-ink-3 uppercase tracking-wider">Fatiga</span>
           </div>
           <div className="flex items-center gap-1.5">
             <div className="w-2 h-2 rounded-full bg-metric-tsb"></div>
-            <span className="text-[9px] font-semibold text-ink-3 uppercase tracking-wider">Forma</span>
+            <span className="text-2xs font-semibold text-ink-3 uppercase tracking-wider">Forma</span>
           </div>
         </div>
       </div>
@@ -197,16 +198,14 @@ export const EvolutionChart = ({ data, timeRange, setTimeRange, loading = false 
 
             <XAxis
               dataKey="date"
-              tick={{ fontSize: 10, fill: ct.anatomy.axis, fontWeight: '500' }}
+              {...axisProps(ct)}
               tickFormatter={(val) => new Date(val).toLocaleDateString('es-ES', { day: 'numeric', month: 'short' })}
               minTickGap={40}
-              axisLine={false}
-              tickLine={false}
               padding={{ left: 10, right: 10 }}
               dy={10}
             />
 
-            <YAxis yAxisId="left" tick={{ fontSize: 10, fill: ct.anatomy.axis, fontWeight: '500' }} axisLine={false} tickLine={false} dx={-10} />
+            <YAxis yAxisId="left" {...axisProps(ct)} dx={-10} />
             <YAxis yAxisId="right" orientation="right" hide domain={['dataMin - 30', 'dataMax + 30']} />
 
             <Tooltip
@@ -224,7 +223,7 @@ export const EvolutionChart = ({ data, timeRange, setTimeRange, loading = false 
                 fill={ct.anatomy.cursor}
                 fillOpacity={0.06}
                 stroke="none"
-                label={{ position: 'insideTopRight', value: 'PROYECCIÓN', fill: ct.anatomy.axis, fontSize: 9, fontWeight: '600' }}
+                label={{ position: 'insideTopRight', value: 'PROYECCIÓN', ...axisTick(ct, { fontWeight: 600 }) }}
               />
             )}
             <ReferenceLine
@@ -233,7 +232,7 @@ export const EvolutionChart = ({ data, timeRange, setTimeRange, loading = false 
               stroke={ct.anatomy.cursor}
               strokeWidth={1}
               strokeDasharray="4 4"
-              label={{ position: 'insideTopLeft', value: 'HOY', fill: ct.anatomy.axis, fontSize: 9, fontWeight: '600', letterSpacing: '0.05em' }}
+              label={{ position: 'insideTopLeft', value: 'HOY', ...axisTick(ct, { fontWeight: 600 }), letterSpacing: '0.05em' }}
             />
             
             <Area 

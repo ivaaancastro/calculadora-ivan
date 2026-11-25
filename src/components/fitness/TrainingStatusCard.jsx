@@ -10,7 +10,7 @@ export const TrainingStatusCard = ({ trainingStatus }) => {
             <Card variant="panel" className="p-6 sm:p-8">
                 <div className="flex items-center justify-between mb-6">
                     <div className="flex items-center gap-2">
-                        <h3 className="text-[10px] font-bold text-ink-4 uppercase tracking-[0.1em]">Estado de Entreno</h3>
+                        <h3 className="text-2xs font-bold text-ink-4 uppercase tracking-[0.1em]">Estado de Entreno</h3>
                         <InfoTooltip text="Basado en tu carga acumulada (CTL) y fatiga (ATL) de los últimos 28 días." />
                     </div>
                 </div>
@@ -28,11 +28,11 @@ export const TrainingStatusCard = ({ trainingStatus }) => {
                     </div>
                     <div className="flex gap-12 md:pl-10 md:border-l border-line-soft-2">
                         <div className="space-y-1">
-                            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Carga (7d)</p>
+                            <p className="text-2xs font-bold text-slate-400 uppercase tracking-wider">Carga (7d)</p>
                             <p className="text-xl font-bold text-ink-soft">{trainingStatus.load7}</p>
                         </div>
                         <div className="space-y-1">
-                            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">TSB</p>
+                            <p className="text-2xs font-bold text-slate-400 uppercase tracking-wider">TSB</p>
                             <p className={`text-xl font-bold ${trainingStatus.tsb > 10 ? 'text-legacy-tsb-up' : trainingStatus.tsb < -10 ? 'text-legacy-tsb-down-2' : 'text-slate-400'}`}>
                                 {trainingStatus.tsb > 0 ? '+' : ''}{trainingStatus.tsb}
                             </p>

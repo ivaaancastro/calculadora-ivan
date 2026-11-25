@@ -83,8 +83,8 @@ export const WorkoutViewerModal = ({ workout, onClose, onDelete, onEdit }) => {
                             <span className="text-[11px] font-medium text-ink-4">
                                 {workout.date ? new Date(workout.date).toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'short' }) : ''}
                             </span>
-                            <span className="text-[8px] text-faint">•</span>
-                            <span className={`text-[10px] font-semibold uppercase tracking-wider ${sport.accent}`}>{sport.label}</span>
+                            <span className="text-2xs text-faint">•</span>
+                            <span className={`text-2xs font-semibold uppercase tracking-wider ${sport.accent}`}>{sport.label}</span>
                         </div>
                     </div>
                 </div>
@@ -92,24 +92,24 @@ export const WorkoutViewerModal = ({ workout, onClose, onDelete, onEdit }) => {
                 {/* ── METRICS GRID ── */}
                 <div className="grid grid-cols-4 gap-2 mt-5">
                     <div className="bg-sunken rounded-xl px-3 py-2.5 text-center">
-                        <div className="text-[9px] font-semibold text-ink-4 uppercase tracking-wider mb-0.5">TSS</div>
+                        <div className="text-2xs font-semibold text-ink-4 uppercase tracking-wider mb-0.5">TSS</div>
                         <div className="text-[18px] font-black text-ink-2 leading-none font-mono">{workout.tss || '—'}</div>
                     </div>
                     <div className="bg-sunken rounded-xl px-3 py-2.5 text-center">
-                        <div className="text-[9px] font-semibold text-ink-4 uppercase tracking-wider mb-0.5">Duración</div>
+                        <div className="text-2xs font-semibold text-ink-4 uppercase tracking-wider mb-0.5">Duración</div>
                         <div className="text-[18px] font-black text-ink-2 leading-none font-mono">{fmtDur(workout.duration || 0)}</div>
                     </div>
                     <div className="bg-sunken rounded-xl px-3 py-2.5 text-center">
-                        <div className="text-[9px] font-semibold text-ink-4 uppercase tracking-wider mb-0.5">IF</div>
+                        <div className="text-2xs font-semibold text-ink-4 uppercase tracking-wider mb-0.5">IF</div>
                         <div className={`text-[18px] font-black leading-none font-mono ${weightedIF >= 0.85 ? 'text-red-500' : weightedIF >= 0.7 ? 'text-amber-500' : 'text-emerald-500'}`}>
                             {weightedIF > 0 ? weightedIF.toFixed(2) : '—'}
                         </div>
                     </div>
                     <div className="bg-sunken rounded-xl px-3 py-2.5 text-center">
-                        <div className="text-[9px] font-semibold text-ink-4 uppercase tracking-wider mb-0.5">Bloques</div>
+                        <div className="text-2xs font-semibold text-ink-4 uppercase tracking-wider mb-0.5">Bloques</div>
                         <div className="text-[18px] font-black text-ink-2 leading-none font-mono">
                             {totalBlocks}
-                            {intervalBlocks > 0 && <span className="text-[10px] font-semibold text-ink-4 ml-0.5">({intervalBlocks}x)</span>}
+                            {intervalBlocks > 0 && <span className="text-2xs font-semibold text-ink-4 ml-0.5">({intervalBlocks}x)</span>}
                         </div>
                     </div>
                 </div>
@@ -138,8 +138,8 @@ export const WorkoutViewerModal = ({ workout, onClose, onDelete, onEdit }) => {
                     </div>
                     {/* Time markers */}
                     <div className="flex justify-between mt-1.5 px-0.5">
-                        <span className="text-[9px] font-mono text-ink-4-dim">0:00</span>
-                        <span className="text-[9px] font-mono text-ink-4-dim">{fmtDur(totalMin)}</span>
+                        <span className="text-2xs font-mono text-ink-4-dim">0:00</span>
+                        <span className="text-2xs font-mono text-ink-4-dim">{fmtDur(totalMin)}</span>
                     </div>
                 </div>
             )}
@@ -151,7 +151,7 @@ export const WorkoutViewerModal = ({ workout, onClose, onDelete, onEdit }) => {
 
                         {/* LEFT — Zone Distribution */}
                         <div className="p-5">
-                            <h4 className="text-[10px] font-bold text-ink-4 uppercase tracking-widest mb-4">Zonas</h4>
+                            <h4 className="text-2xs font-bold text-ink-4 uppercase tracking-widest mb-4">Zonas</h4>
                             {sortedZones.length > 0 ? (
                                 <div className="space-y-2.5">
                                     {sortedZones.map(([zone, min]) => {
@@ -164,8 +164,8 @@ export const WorkoutViewerModal = ({ workout, onClose, onDelete, onEdit }) => {
                                                         <span className="text-[11px] font-bold text-body">{zone}</span>
                                                     </div>
                                                     <div className="flex items-center gap-2">
-                                                        <span className="text-[10px] font-mono font-semibold text-ink-3">{Math.round(min)}m</span>
-                                                        <span className="text-[9px] font-semibold text-ink-4 tabular-nums w-7 text-right">{pct}%</span>
+                                                        <span className="text-2xs font-mono font-semibold text-ink-3">{Math.round(min)}m</span>
+                                                        <span className="text-2xs font-semibold text-ink-4 tabular-nums w-7 text-right">{pct}%</span>
                                                     </div>
                                                 </div>
                                                 <div className="h-1.5 bg-surface-2 rounded-full overflow-hidden">
@@ -182,7 +182,7 @@ export const WorkoutViewerModal = ({ workout, onClose, onDelete, onEdit }) => {
 
                         {/* RIGHT — Structure */}
                         <div className="p-5">
-                            <h4 className="text-[10px] font-bold text-ink-4 uppercase tracking-widest mb-4">Estructura</h4>
+                            <h4 className="text-2xs font-bold text-ink-4 uppercase tracking-widest mb-4">Estructura</h4>
                             {blocks.length === 0 ? (
                                 <div className="flex items-center justify-center py-10">
                                     <p className="text-[12px] text-ink-4 italic">Sin estructura detallada</p>
@@ -200,9 +200,9 @@ export const WorkoutViewerModal = ({ workout, onClose, onDelete, onEdit }) => {
                                                         <div className="flex items-center gap-2">
                                                             <span className="text-[11px] text-slate-400">{bl.icon}</span>
                                                             <span className="text-[11px] font-bold text-body">{bl.text}</span>
-                                                            <span className="text-[10px] font-bold text-ink-3 bg-slate-200/70 dark:bg-zinc-700/50 px-1.5 py-0.5 rounded-md">x{block.repeats}</span>
+                                                            <span className="text-2xs font-bold text-ink-3 bg-slate-200/70 dark:bg-zinc-700/50 px-1.5 py-0.5 rounded-md">x{block.repeats}</span>
                                                         </div>
-                                                        <span className="text-[10px] font-mono font-semibold text-slate-400">{stepTotal > 0 ? fmtDur(stepTotal) : ''}</span>
+                                                        <span className="text-2xs font-mono font-semibold text-slate-400">{stepTotal > 0 ? fmtDur(stepTotal) : ''}</span>
                                                     </div>
                                                     <div className="border-t border-line-soft">
                                                         {(block.steps || []).map((step, sIdx) => {
@@ -215,17 +215,17 @@ export const WorkoutViewerModal = ({ workout, onClose, onDelete, onEdit }) => {
                                                                             <span className={`text-[11px] font-semibold ${isWork ? 'text-body-2' : 'text-ink-4'}`}>
                                                                                 {isWork ? 'Trabajo' : 'Descanso'}
                                                                             </span>
-                                                                            {step.details && <span className="text-[9px] text-slate-400 ml-1.5">· {step.details}</span>}
+                                                                            {step.details && <span className="text-2xs text-slate-400 ml-1.5">· {step.details}</span>}
                                                                         </div>
                                                                     </div>
                                                                     <div className="flex items-center gap-2.5 shrink-0">
                                                                         <span className="text-[12px] font-bold font-mono text-body-2">
-                                                                            {step.duration}<span className="text-[9px] text-slate-400 ml-0.5">{step.unit === 'dist' ? 'km' : "'"}</span>
+                                                                            {step.duration}<span className="text-2xs text-slate-400 ml-0.5">{step.unit === 'dist' ? 'km' : "'"}</span>
                                                                         </span>
                                                                         {step.targetType === 'power' && step.targetValue ? (
-                                                                            <span className="text-[10px] font-mono font-bold text-power-ink bg-power-tint-3 px-2 py-0.5 rounded-full">{step.targetValue}w</span>
+                                                                            <span className="text-2xs font-mono font-bold text-power-ink bg-power-tint-3 px-2 py-0.5 rounded-full">{step.targetValue}w</span>
                                                                         ) : (
-                                                                            <span className="text-[10px] font-bold px-2 py-0.5 rounded-full" style={{ background: getZoneColor(step.zone) + '20', color: getZoneColor(step.zone) }}>{step.zone}</span>
+                                                                            <span className="text-2xs font-bold px-2 py-0.5 rounded-full" style={{ background: getZoneColor(step.zone) + '20', color: getZoneColor(step.zone) }}>{step.zone}</span>
                                                                         )}
                                                                     </div>
                                                                 </div>
@@ -242,17 +242,17 @@ export const WorkoutViewerModal = ({ workout, onClose, onDelete, onEdit }) => {
                                                     <div className="w-1 h-5 rounded-full" style={{ background: getZoneColor(block.zone) }} />
                                                     <div>
                                                         <span className="text-[11px] font-bold text-body-2">{bl.text}</span>
-                                                        {block.details && <span className="text-[9px] text-slate-400 ml-1.5">· {block.details}</span>}
+                                                        {block.details && <span className="text-2xs text-slate-400 ml-1.5">· {block.details}</span>}
                                                     </div>
                                                 </div>
                                                 <div className="flex items-center gap-2.5 shrink-0">
                                                     <span className="text-[14px] font-black font-mono text-body-2">
-                                                        {block.duration}<span className="text-[10px] font-semibold text-slate-400 ml-0.5">{block.unit === 'dist' ? 'km' : "'"}</span>
+                                                        {block.duration}<span className="text-2xs font-semibold text-slate-400 ml-0.5">{block.unit === 'dist' ? 'km' : "'"}</span>
                                                     </span>
                                                     {block.targetType === 'power' && block.targetValue ? (
-                                                        <span className="text-[10px] font-mono font-bold text-power-ink bg-power-tint-3 px-2 py-0.5 rounded-full">{block.targetValue}w</span>
+                                                        <span className="text-2xs font-mono font-bold text-power-ink bg-power-tint-3 px-2 py-0.5 rounded-full">{block.targetValue}w</span>
                                                     ) : (
-                                                        <span className="text-[10px] font-bold px-2 py-0.5 rounded-full" style={{ background: getZoneColor(block.zone) + '20', color: getZoneColor(block.zone) }}>{block.zone}</span>
+                                                        <span className="text-2xs font-bold px-2 py-0.5 rounded-full" style={{ background: getZoneColor(block.zone) + '20', color: getZoneColor(block.zone) }}>{block.zone}</span>
                                                     )}
                                                 </div>
                                             </div>

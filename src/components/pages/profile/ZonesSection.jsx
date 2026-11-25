@@ -14,7 +14,7 @@ export const ZonesSection = ({ formData, activeTab, setActiveTab, isScanning, pu
                 </div>
                 <div className="min-w-0">
                     <p className="text-xs sm:text-sm font-bold text-ink truncate">Auto-Detectar LTHR</p>
-                    <p className="text-[10px] text-ink-4 truncate">Calcula tu umbral desde el historial</p>
+                    <p className="text-2xs text-ink-4 truncate">Calcula tu umbral desde el historial</p>
                 </div>
             </div>
             <button 

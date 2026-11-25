@@ -20,7 +20,7 @@ import { cx } from './cx.js';
 const BUTTON = {
   ghost: 'text-ink-3 rounded-full text-[11px] font-medium hover:bg-surface-2 transition-all',
   inverse: 'bg-inverse text-ink-inverse rounded-full text-[11px] font-medium hover:bg-inverse-2 transition-all shadow-sm',
-  'link-muted': 'text-[10px] text-ink-4-fixed hover:text-body-soft-fixed font-medium transition-colors',
+  'link-muted': 'text-2xs text-ink-4-fixed hover:text-body-soft-fixed font-medium transition-colors',
   primary: 'w-full min-h-[48px] bg-action-solid hover:bg-action-hover text-on-action rounded-xl font-bold text-sm flex items-center justify-center gap-2 transition-colors disabled:opacity-50 active:scale-[0.98]',
   link: 'min-h-[44px] px-2 text-xs font-semibold text-ink-3 hover:text-ink underline-offset-4 hover:underline transition-colors',
   'danger-text': 'text-faint-fixed hover:text-danger transition-colors',

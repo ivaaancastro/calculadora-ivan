@@ -23,9 +23,6 @@ html[data-ui="v2"] [data-skin] {
 
 /* ── Tamaños: el extremo pequeño sube 1 px, el grande 2 px ───────────────────────── */
 
-html[data-ui="v2"] [data-skin] .text-\[8px\] { font-size: var(--skin-type-8); }
-html[data-ui="v2"] [data-skin] .text-\[9px\] { font-size: var(--skin-type-9); }
-html[data-ui="v2"] [data-skin] .text-\[10px\] { font-size: var(--skin-type-10); }
 html[data-ui="v2"] [data-skin] .text-\[11px\] { font-size: var(--skin-type-11); }
 html[data-ui="v2"] [data-skin] .text-\[12px\] { font-size: var(--skin-type-12); }
 html[data-ui="v2"] [data-skin] .text-\[13px\] { font-size: var(--skin-type-13); }
@@ -550,11 +547,8 @@ html[data-ui="v2"] [data-skin="stats"] [data-stats="card"] h3 {
   text-transform: none;
   color: rgb(var(--ink));
 }
-html[data-ui="v2"] [data-skin="stats"] [data-stats="card"] [class*="text-[8px]"],
-html[data-ui="v2"] [data-skin="stats"] [data-stats="card"] [class*="text-[9px]"],
-html[data-ui="v2"] [data-skin="stats"] [data-stats="card"] [class*="text-[10px]"] {
-  font-size: 11px;
-}
+/* Los rótulos de 11 px ganan al título de 13 px (`h3.text-2xs`). */
+html[data-ui="v2"] [data-skin="stats"] [data-stats="card"] .text-2xs { font-size: 11px; }
 html[data-ui="v2"] [data-skin="stats"] [data-stats="card"] [class*="tracking-tighter"] { letter-spacing: 0; }
 html[data-ui="v2"] [data-skin="stats"] [data-stats="card"] :is(p, span)[class*="text-xl"],
 html[data-ui="v2"] [data-skin="stats"] [data-stats="card"] :is(p, h4)[class*="text-2xl"] {
@@ -634,7 +628,7 @@ html[data-ui="v2"] [data-skin="health"] [data-health="energy"] {
     line-height: 1;
   }
   html[data-ui="v2"] [data-skin="health"] [data-health="ring-title"] {
-    font-size: 8px;
+    font-size: 11px;
     letter-spacing: 0.04em;
     max-width: 64px;
     line-height: 1.1;
@@ -1318,9 +1312,6 @@ html[data-ui="v2"] [data-skin="profile"][data-profile="root"] {
 }
 
 /* Perfil D7 (PR 2): General y Zonas. */
-html[data-ui="v2"] [data-skin="profile"] .text-\[10px\] {
-  font-size: 11px;
-}
 html[data-ui="v2"] [data-skin="profile"] [data-profile="avatar"] {
   width: 80px !important;
   height: 80px !important;
