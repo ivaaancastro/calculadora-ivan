@@ -1,5 +1,4 @@
 import React, { useState, useMemo } from 'react';
-import { Loader2 } from 'lucide-react';
 import { useActivityMetrics } from '../../hooks/useActivityMetrics';
 import { useChartTheme } from '../charts/useChartTheme';
 import { useActivityStreams } from '../activity/detail/useActivityStreams';
@@ -21,7 +20,6 @@ import { getBlocksForSport, getTabsForSport, getZoneOptions, applyChartBlocks, g
 
 export const ActivityDetailPage = ({ activity, settings, fetchStreams, onBack, onDelete }) => {
     const ct = useChartTheme();
-    const isV2 = true; // v2 por defecto (Capa 6); las ramas v1 se retiran en los PR 5a–c
     const del = useConfirmDeleteActivity(onDelete, onBack);
     const { streams, loadingStreams } = useActivityStreams(activity, fetchStreams);
     const [activePayload, setActivePayload] = useState(null);
@@ -84,25 +82,17 @@ export const ActivityDetailPage = ({ activity, settings, fetchStreams, onBack, o
                 onBack={onBack}
                 onDelete={onDelete ? () => del.request(activity) : undefined}
                 dateStr={dateStr}
-                metrics={metrics}
             />
 
             {/* Tab Content */}
             <div className="flex-1 min-h-0 overflow-hidden relative flex flex-col w-full">
                 {loadingStreams ? (
-                    isV2 ? (
-                        <div data-detail="loading" role="status" aria-label="Procesando telemetría" className="absolute inset-0 z-20 bg-surface-9 p-2.5 sm:p-5 space-y-4 overflow-hidden">
-                            <Skeleton className="h-3 w-40" />
-                            <Skeleton className="h-8 w-2/3" />
-                            <div className="grid grid-cols-3 gap-4"><Skeleton className="h-12" /><Skeleton className="h-12" /><Skeleton className="h-12" /></div>
-                            <ChartSkeleton className="h-48" label="Procesando telemetría" />
-                        </div>
-                    ) : (
-                    <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-surface-9 z-20">
-                        <Loader2 size={24} className="animate-spin text-indigo-500" />
-                        <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Procesando telemetría técnica...</span>
+                    <div data-detail="loading" role="status" aria-label="Procesando telemetría" className="absolute inset-0 z-20 bg-surface-9 p-2.5 sm:p-5 space-y-4 overflow-hidden">
+                        <Skeleton className="h-3 w-40" />
+                        <Skeleton className="h-8 w-2/3" />
+                        <div className="grid grid-cols-3 gap-4"><Skeleton className="h-12" /><Skeleton className="h-12" /><Skeleton className="h-12" /></div>
+                        <ChartSkeleton className="h-48" label="Procesando telemetría" />
                     </div>
-                    )
                 ) : null}
 
                 {/* --- pestaña: ANÁLISIS --- */}
@@ -111,14 +101,13 @@ export const ActivityDetailPage = ({ activity, settings, fetchStreams, onBack, o
                         {/* Charts Panel */}
                         <div className="flex-1 lg:overflow-y-auto custom-scrollbar p-2.5 sm:p-5 bg-surface-6 min-w-0">
                             <div className="max-w-5xl mx-auto space-y-3">
-                                {isV2 && <DetailHero activity={activity} dateStr={dateStr} metrics={metrics} themeColor={themeColor} />}
+                                <DetailHero activity={activity} dateStr={dateStr} metrics={metrics} themeColor={themeColor} />
                                 <DetailMobileHero
                                     showMap={showMap}
                                     activity={activity}
                                     streams={streams}
                                     themeColor={themeColor}
                                     activePayload={activePayload}
-                                    metrics={metrics}
                                 />
                                 <TelemetryPanel
                                     chartData={chartData}

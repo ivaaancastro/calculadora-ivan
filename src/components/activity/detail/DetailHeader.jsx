@@ -1,11 +1,10 @@
 import React from 'react';
 import { ArrowLeft, Trash2 } from 'lucide-react';
-import { IconButton, Segmented, Stat, MetricTooltip } from '../../ui';
+import { IconButton, Segmented } from '../../ui';
 
-export const DetailHeader = ({ activity, activeTab, setActiveTab, onBack, onDelete, dateStr, tabs, metrics }) => {
-    const isV2 = true; // v2 por defecto (Capa 6); las ramas v1 se retiran en los PR 5a–c
-    // v2: en Análisis el título y las cifras viven en el hero; la cabecera queda en controles.
-    const heroOwnsTitle = isV2 && activeTab === 'analyze';
+export const DetailHeader = ({ activity, activeTab, setActiveTab, onBack, onDelete, dateStr, tabs }) => {
+    // En Análisis el título y las cifras viven en el hero; la cabecera queda en controles.
+    const heroOwnsTitle = activeTab === 'analyze';
     return (
             <header data-detail="header" className="glass-nav px-3.5 py-2 sm:px-6 sm:py-3 shrink-0 z-nav">
                 {/* --- DESKTOP HEADER (lg:flex) --- */}
@@ -87,13 +86,6 @@ export const DetailHeader = ({ activity, activeTab, setActiveTab, onBack, onDele
                         </button>
                     ))}
                 </div>
-
-                {/* Expanded Compact Metric Grid - Desktop Solo (en móvil se muestra en cuadrícula bajo el Mapa) */}
-                {!isV2 && <div className="hidden lg:flex items-center gap-2 py-1 overflow-x-auto hide-scrollbar touch-scroll overscroll-contain sm:flex-wrap -mx-3 px-3 sm:mx-0 sm:px-0 mt-2">
-                    {metrics.map(m => (
-                        <MetricTooltip key={m.id} metricId={m.metricId}><Stat label={m.label} value={m.value} unit={m.unit || undefined} accent={m.accent} /></MetricTooltip>
-                    ))}
-                </div>}
             </header>
     );
 };
