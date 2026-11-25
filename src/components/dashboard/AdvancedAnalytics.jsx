@@ -23,7 +23,6 @@ import { seriesValues, deltaOver, acwrZone } from '../../utils/kpiTrend';
 import { buildFormSummary } from '../../utils/formSummary';
 import { supabase } from '../../supabase';
 import { useTheme } from '../../hooks/useTheme';
-import { useUiMode } from '../../hooks/useUiMode';
 import { ChartSkinProvider } from '../charts/ChartSkin';
 import { getChartTheme } from '../charts/chartTheme';
 import { Card, SectionHeader, StatTile } from '../ui';
@@ -65,7 +64,7 @@ export const AdvancedAnalytics = React.memo(({ activities, settings,  timeRange,
     // Solo v2 en móvil: las métricas secundarias van plegadas bajo el primer vistazo.
     const [showMore, setShowMore] = useState(false);
     const { theme } = useTheme();
-    const { isV2 } = useUiMode();
+    const isV2 = true; // v2 por defecto (Capa 6); las ramas v1 se retiran en los PR 5a–c
     const ct = useChartTheme();
 
     // Load Garmin VO2max from Supabase wellness_data (synced from Intervals.icu)

@@ -24,7 +24,7 @@ async function expectMap(page) {
 
 test.describe('Detalle: mapa (v2)', () => {
   test.beforeEach(async ({ page }) => {
-    await setupApp(page, { authenticated: true, ui: 'v2' });
+    await setupApp(page, { authenticated: true });
   });
 
   const cases = [

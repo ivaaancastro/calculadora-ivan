@@ -2,11 +2,10 @@ import React from 'react';
 import {
     AlertTriangle
 } from 'lucide-react';
-import { useUiMode } from '../../hooks/useUiMode';
 import { HealthHero } from './HealthHero';
 
 export const HealthHeader = ({ wellnessMetrics, readinessInfo, setActiveTab, activeTab, wellnessLoading, apiError }) => {
-    const { isV2 } = useUiMode();
+    const isV2 = true; // v2 por defecto (Capa 6); las ramas v1 se retiran en los PR 5a–c
     return (
     <>
         <div data-health="header" className="pt-2 sm:pt-4 space-y-4">

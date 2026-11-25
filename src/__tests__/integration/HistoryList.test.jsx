@@ -61,19 +61,6 @@ describe('HistoryList Component', () => {
         expect(screen.queryByText('Rodaje Suave Bici')).toBeNull();
     });
 
-    it('filtra por deporte mediante el selector', () => {
-        render(<HistoryList activities={mockActivities} onDelete={vi.fn()} onSelectActivity={vi.fn()} />);
-        
-        const selectInputs = screen.getAllByRole('combobox');
-        const sportSelect = selectInputs[0]; // Primer selector es el deporte
-        
-        fireEvent.change(sportSelect, { target: { value: 'bike' } });
-
-        expect(screen.getByText('1 Actividades')).toBeTruthy();
-        expect(screen.getByText('Rodaje Suave Bici')).toBeTruthy();
-        expect(screen.queryByText('Series en Pista')).toBeNull();
-    });
-
     it('ejecuta onSelectActivity al hacer clic en una actividad', () => {
         const onSelect = vi.fn();
         render(<HistoryList activities={mockActivities} onDelete={vi.fn()} onSelectActivity={onSelect} />);

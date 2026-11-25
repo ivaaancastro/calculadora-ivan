@@ -1,12 +1,11 @@
 import React, { useState } from 'react';
 import { supabase } from '../../supabase';
 import { Button, IconButton, Input, Modal } from '../ui';
-import { useUiMode } from '../../hooks/useUiMode';
 import { Activity, Loader2, Mail, Lock, ArrowLeft, ArrowRight, X } from 'lucide-react';
 
 /* ─── Auth Modal ─── */
 export const AuthModal = ({ open, onClose }) => {
-  const { isV2 } = useUiMode();
+  const isV2 = true; // v2 por defecto (Capa 6); las ramas v1 se retiran en los PR 5a–c
   const [loading, setLoading] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');

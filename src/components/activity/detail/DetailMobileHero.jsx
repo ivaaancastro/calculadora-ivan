@@ -1,10 +1,9 @@
 import React from 'react';
 import { Stat, MetricTooltip } from '../../ui';
 import { InteractiveMap } from '../ActivityMap';
-import { useUiMode } from '../../../hooks/useUiMode';
 
 export const DetailMobileHero = ({ activity, streams, themeColor, activePayload, metrics, showMap }) => {
-    const { isV2 } = useUiMode();
+    const isV2 = true; // v2 por defecto (Capa 6); las ramas v1 se retiran en los PR 5a–c
     if (isV2 && !showMap) return null; // v2: las cifras viven en `DetailHero`
     return (
                                     <div className="lg:hidden space-y-2.5">

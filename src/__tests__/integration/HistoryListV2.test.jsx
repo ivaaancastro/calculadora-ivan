@@ -3,7 +3,6 @@ import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { describe, it, expect, vi } from 'vitest';
 
-vi.mock('../../hooks/useUiMode', () => ({ useUiMode: () => ({ isV2: true }) }));
 import { HistoryList } from '../../components/dashboard/HistoryList';
 
 const acts = [

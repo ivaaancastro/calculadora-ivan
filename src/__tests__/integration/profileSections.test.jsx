@@ -27,10 +27,10 @@ describe('zonesCalc', () => {
 });
 
 describe('secciones de Ajustes', () => {
-  it('General muestra nombre y conmutador v2', () => {
-    render(<GeneralSection formData={form} isUploadingAvatar={false} handleAvatarUpload={noop} handleChange={noop} targetCtl={null} setTargetCtl={noop} isV2={false} setUi={noop} />);
+  it('General muestra nombre y sin conmutador de piel', () => {
+    render(<GeneralSection formData={form} isUploadingAvatar={false} handleAvatarUpload={noop} handleChange={noop} targetCtl={null} setTargetCtl={noop} />);
     expect(screen.getByText('Datos Personales')).toBeInTheDocument();
-    expect(screen.getByRole('switch', { name: 'Vista previa v2' })).toBeInTheDocument();
+    expect(screen.queryByRole('switch', { name: 'Vista previa v2' })).not.toBeInTheDocument();
   });
   it('Zonas muestra el escáner y las zonas de carrera', () => {
     render(<ZonesSection formData={form} activeTab="run" setActiveTab={noop} isScanning={false} pureActs={[]} handleAutoDetectLTHR={noop} handleChange={noop} handleZoneChange={noop} handleZonesMode={noop} />);

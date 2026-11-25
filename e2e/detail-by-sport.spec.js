@@ -16,56 +16,54 @@ const ACTIVITIES = [
 
 const tab = (page, name) => page.getByRole('button', { name, exact: true }).filter({ visible: true });
 
-for (const ui of ['v1', 'v2']) {
-  test.describe(`Detalle por deporte (${ui})`, () => {
-    test.beforeEach(async ({ page }) => {
-      await setupApp(page, { authenticated: true, ui: ui === 'v2' ? 'v2' : undefined, state: { activities: ACTIVITIES } });
-    });
-
-    const open = async (page, id) => {
-      await page.goto(`/activity/${id}`);
-      await expect(page.getByRole('button', { name: 'Volver' }).first()).toBeVisible();
-    };
-
-    for (const id of ['s-run', 's-ride', 's-hike']) {
-      test(`${id}: Análisis, Mapa, Intervalos y Detalle`, async ({ page }) => {
-        await open(page, id);
-        for (const n of ['Análisis', 'Mapa', 'Intervalos', 'Detalle']) await expect(tab(page, n).first()).toBeVisible();
-      });
-    }
-
-    test('fuerza: sin Mapa ni Intervalos', async ({ page }) => {
-      await open(page, 's-str');
-      await expect(tab(page, 'Análisis').first()).toBeVisible();
-      await expect(tab(page, 'Mapa')).toHaveCount(0);
-      await expect(tab(page, 'Intervalos')).toHaveCount(0);
-      await expect(page.getByText('Kcal totales').filter({ visible: true }).first()).toBeVisible();
-    });
-
-    test('natación (genérico): sin ClimbPro en Detalle', async ({ page }) => {
-      await open(page, 's-swim');
-      await tab(page, 'Detalle').first().click();
-      await expect(page.getByText('Análisis de Ascensiones (ClimbPro)')).toHaveCount(0);
-    });
-
-    test('ClimbPro solo en bici; ritmo en senderismo', async ({ page }) => {
-      await open(page, 's-ride');
-      await tab(page, 'Detalle').first().click();
-      await expect(page.getByText('Análisis de Ascensiones (ClimbPro)')).toBeVisible();
-      await open(page, 's-hike');
-      await expect(page.getByText('Ritmo Medio').filter({ visible: true }).first()).toBeVisible();
-      await tab(page, 'Detalle').first().click();
-      await expect(page.getByText('Análisis de Ascensiones (ClimbPro)')).toHaveCount(0);
-    });
-
-    test('carrera: selector de zonas FC / Ritmo', async ({ page }) => {
-      await open(page, 's-run');
-      await tab(page, 'Detalle').first().click();
-      const ritmo = page.getByRole('button', { name: 'Ritmo', exact: true });
-      if (await ritmo.count()) {
-        await ritmo.first().click();
-        await expect(page.locator('[data-detail="pace-zones"]')).toBeVisible();
-      }
-    });
+test.describe(`Detalle por deporte`, () => {
+  test.beforeEach(async ({ page }) => {
+    await setupApp(page, { authenticated: true, state: { activities: ACTIVITIES } });
   });
-}
+
+  const open = async (page, id) => {
+    await page.goto(`/activity/${id}`);
+    await expect(page.getByRole('button', { name: 'Volver' }).first()).toBeVisible();
+  };
+
+  for (const id of ['s-run', 's-ride', 's-hike']) {
+    test(`${id}: Análisis, Mapa, Intervalos y Detalle`, async ({ page }) => {
+      await open(page, id);
+      for (const n of ['Análisis', 'Mapa', 'Intervalos', 'Detalle']) await expect(tab(page, n).first()).toBeVisible();
+    });
+  }
+
+  test('fuerza: sin Mapa ni Intervalos', async ({ page }) => {
+    await open(page, 's-str');
+    await expect(tab(page, 'Análisis').first()).toBeVisible();
+    await expect(tab(page, 'Mapa')).toHaveCount(0);
+    await expect(tab(page, 'Intervalos')).toHaveCount(0);
+    await expect(page.getByText('Kcal totales').filter({ visible: true }).first()).toBeVisible();
+  });
+
+  test('natación (genérico): sin ClimbPro en Detalle', async ({ page }) => {
+    await open(page, 's-swim');
+    await tab(page, 'Detalle').first().click();
+    await expect(page.getByText('Análisis de Ascensiones (ClimbPro)')).toHaveCount(0);
+  });
+
+  test('ClimbPro solo en bici; ritmo en senderismo', async ({ page }) => {
+    await open(page, 's-ride');
+    await tab(page, 'Detalle').first().click();
+    await expect(page.getByText('Análisis de Ascensiones (ClimbPro)')).toBeVisible();
+    await open(page, 's-hike');
+    await expect(page.getByText('Ritmo Medio').filter({ visible: true }).first()).toBeVisible();
+    await tab(page, 'Detalle').first().click();
+    await expect(page.getByText('Análisis de Ascensiones (ClimbPro)')).toHaveCount(0);
+  });
+
+  test('carrera: selector de zonas FC / Ritmo', async ({ page }) => {
+    await open(page, 's-run');
+    await tab(page, 'Detalle').first().click();
+    const ritmo = page.getByRole('button', { name: 'Ritmo', exact: true });
+    if (await ritmo.count()) {
+      await ritmo.first().click();
+      await expect(page.locator('[data-detail="pace-zones"]')).toBeVisible();
+    }
+  });
+});

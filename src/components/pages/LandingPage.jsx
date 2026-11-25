@@ -6,7 +6,6 @@ import { HeaderV2 } from '../landing/HeaderV2';
 import { HeroV2 } from '../landing/HeroV2';
 import { FeaturesV2 } from '../landing/FeaturesV2';
 import { FactsV2, CtaV2, FooterV2 } from '../landing/SectionsV2';
-import { useUiMode } from '../../hooks/useUiMode';
 import {
   Activity, ArrowRight,
   BarChart3, Map, Calendar, Zap, Heart, Timer,
@@ -39,7 +38,7 @@ const StatItem = ({ icon: Icon, value, label }) => (
    ═══════════════════════════════════════════════ */
 export const LandingPage = () => {
   const [authOpen, setAuthOpen] = useState(false);
-  const { isV2 } = useUiMode();
+  const isV2 = true; // v2 por defecto (Capa 6); las ramas v1 se retiran en los PR 5a–c
 
   const scrollToFeatures = useCallback(() => {
     document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' });
