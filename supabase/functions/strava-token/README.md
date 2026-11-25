@@ -25,9 +25,10 @@ con `--no-verify-jwt`) y en la propia función con `supabase.auth.getUser()`.
 1. **Rotar el secreto** en <https://www.strava.com/settings/api>: el anterior estuvo en el bundle.
 2. Guardar las credenciales como secretos de Supabase:
    ```bash
-   supabase secrets set STRAVA_CLIENT_ID=<id> STRAVA_CLIENT_SECRET=<secreto-nuevo>
-   # Orígenes CORS separados por comas (por defecto solo localhost:5173):
-   supabase secrets set ALLOWED_ORIGIN=https://<dominio-de-produccion>,http://localhost:5173
+   supabase secrets set STRAVA_CLIENT_SECRET=<secreto-nuevo>
+   # Opcionales: STRAVA_CLIENT_ID (si no, se usa el id público que envía la app) y
+   # ALLOWED_ORIGIN, orígenes CORS separados por comas (si no, se acepta el origen que llama:
+   # la función exige el JWT de Supabase en la cabecera y no usa cookies).
    ```
 3. Desplegar: `supabase functions deploy strava-token`
 4. Borrar `VITE_STRAVA_CLIENT_SECRET` del `.env` local y de las variables de entorno de Vercel.
