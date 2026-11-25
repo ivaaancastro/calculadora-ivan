@@ -2,6 +2,7 @@
 import { Activity, X } from 'lucide-react';
 import React from 'react';
 import { useChartTheme } from '../charts/useChartTheme';
+import { toDateKey } from '../../utils/dates';
 
 // ── Floating draggable PMC projection chart ─────────────────────────────────
 export const PmcFloatingChart = ({ pmcByDate, onClose, initPos }) => {
@@ -17,7 +18,7 @@ export const PmcFloatingChart = ({ pmcByDate, onClose, initPos }) => {
         .filter(e => e.ctl != null)
         .sort((a, b) => a.date.localeCompare(b.date));
     const today = new Date();
-    const todayStr = today.toLocaleDateString('en-CA');
+    const todayStr = toDateKey(today);
     const cutoffPast = new Date(today); cutoffPast.setDate(today.getDate() - 30);
     const cutoffFuture = new Date(today); cutoffFuture.setDate(today.getDate() + 30);
 

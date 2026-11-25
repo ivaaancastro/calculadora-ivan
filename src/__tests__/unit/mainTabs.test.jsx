@@ -2,7 +2,7 @@ import React from 'react';
 import { describe, it, expect } from 'vitest';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { MemoryRouter } from 'react-router-dom';
-import { MAIN_TABS, MAIN_TAB_PATHS } from '../../components/dashboard/mainTabs';
+import { MAIN_TABS, MAIN_TAB_PATHS } from '../../utils/mainTabs';
 import { MainTabsView } from '../../components/dashboard/MainTabsView';
 
 const views = {

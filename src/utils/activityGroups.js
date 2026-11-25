@@ -2,6 +2,7 @@
  * Agrupación y resumen del historial de actividades (Fase Premium D6, spec premium-actividades).
  * Funciones puras: las semanas salen de la fecha de cada dato, nunca de «hoy».
  */
+import { sportOf } from './sport';
 
 const pad = (n) => String(n).padStart(2, '0');
 
@@ -49,15 +50,8 @@ export const groupByWeek = (activities = []) => {
 export const weeklyTss = (activities = [], n = 12) =>
     groupByWeek(activities).slice(0, n).reverse().map((g) => Math.round(g.totals.tss));
 
-/** Deporte normalizado de una actividad: run | bike | swim | gym | other (mismas reglas que el filtro). */
-export const sportOf = (type) => {
-    const t = String(type).toLowerCase();
-    if (t.includes('run') || t.includes('carrera')) return 'run';
-    if (t.includes('bike') || t.includes('bici') || t.includes('ciclismo') || t.includes('ride')) return 'bike';
-    if (t.includes('swim') || t.includes('nadar') || t.includes('natación') || t.includes('natacion')) return 'swim';
-    if (t.includes('gym') || t.includes('fuerza') || t.includes('weight') || t.includes('workout')) return 'gym';
-    return 'other';
-};
+/** Deporte normalizado (clasificación única de `utils/sport`). */
+export { sportOf };
 
 /** Reparto por deporte: minutos, sesiones y cuota (0–1) del tiempo total; de mayor a menor tiempo. */
 export const breakdownBySport = (activities = []) => {

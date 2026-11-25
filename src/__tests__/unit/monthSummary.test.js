@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { buildMonthSummary, formatMinutes } from '../../utils/monthSummary';
+import { buildMonthSummary } from '../../utils/monthSummary';
 
 const act = (date, o = {}) => ({ date, type: 'Run', tss: 50, duration: 60, ...o });
 const base = { year: 2026, month: 5, today: new Date(2026, 5, 15, 12) };
@@ -44,9 +44,5 @@ describe('buildMonthSummary', () => {
         expect(s.done).toBe(1);
         expect(s.compliance).toBe(50);
         expect(s.sentence).toMatch(/50 %/);
-    });
-    it('formatMinutes', () => {
-        expect(formatMinutes(125)).toBe('2h05m');
-        expect(formatMinutes(45)).toBe('45m');
     });
 });

@@ -1,5 +1,5 @@
 import React from 'react';
-import { useCountUp } from './useCountUp';
+import { useCountUp } from '../../hooks/useCountUp';
 import { chartFigureProps } from '../charts/chartA11y';
 
 export const AppleRingGauge = ({ value, max = 100, colorClass, strokeColor, gradientId, size = 150, strokeWidth = 14, icon: Icon, title, unit = '' }) => {
