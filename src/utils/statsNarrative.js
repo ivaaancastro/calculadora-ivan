@@ -2,6 +2,7 @@
  * Resumen narrativo y KPI del héroe de Rendimiento (v2).
  * Función pura sobre datos ya calculados. Spec: docs/branches/feat/premium-rendimiento/spec.md §3.2.
  */
+import { FORM_STATES, tsbStateKey } from './formState';
 
 const tone = (n, goodWhenPositive = true) => {
     if (n == null || n === 0) return 'neutral';
@@ -16,9 +17,7 @@ export function buildStatsNarrative({ trainingStatus, hrv, ftpDiff, eFTP } = {})
         const tsb = Number(trainingStatus.tsb);
         sentences.push(`Tu estado de entreno es ${String(trainingStatus.status || '').toLowerCase()}.`);
         if (Number.isFinite(tsb)) {
-            if (tsb > 10) sentences.push('Llegas fresco: buen momento para una sesión de calidad.');
-            else if (tsb < -10) sentences.push('Arrastras fatiga: conviene priorizar la recuperación.');
-            else sentences.push('Tu forma está equilibrada entre carga y descanso.');
+            sentences.push(`${FORM_STATES[tsbStateKey(tsb)].lead}.`);
         }
         kpis.push({
             id: 'load', label: 'Carga 7d', value: trainingStatus.load7, unit: '',
@@ -27,7 +26,7 @@ export function buildStatsNarrative({ trainingStatus, hrv, ftpDiff, eFTP } = {})
         if (Number.isFinite(tsb)) {
             kpis.push({
                 id: 'tsb', label: 'Forma (TSB)', value: `${tsb > 0 ? '+' : ''}${tsb}`, unit: '',
-                context: tsb > 10 ? 'Fresco' : tsb < -10 ? 'Fatigado' : 'Equilibrado', tone: tone(tsb),
+                context: FORM_STATES[tsbStateKey(tsb)].label, tone: tone(tsb),
             });
         }
     }

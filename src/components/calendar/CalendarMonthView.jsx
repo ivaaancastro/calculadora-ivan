@@ -7,9 +7,11 @@ import { WEEKDAYS, getZoneColor } from './calendarHelpers';
 import { SportIcon } from '../common/SportIcon';
 import { formatMinutes } from '../../utils/formatters';
 import { toDateKey } from '../../utils/dates';
-import { getSessionState } from '../../utils/calendarLoad';
+import { getSessionState, planProgress } from '../../utils/calendarLoad';
 
 // Acento y punto de cada deporte en las fichas del mes (categoría de `getSportCategory`).
+const PLAN_BAR = { high: 'bg-emerald-500', mid: 'bg-blue-500', low: 'bg-amber-500' };
+
 const SPORT_ACCENT = {
     run: { accent: 'text-legacy-sport-run-emerald', dot: 'bg-legacy-sport-run-emerald' },
     ride: { accent: 'text-sport-bike', dot: 'bg-sport-bike' },
@@ -58,18 +60,19 @@ export const CalendarMonthView = ({
                                 const prevWeekPmc = findPrevWeekPmc(week, fullPmcByDate);
                                 const ramp = weekPmc.ctl && prevWeekPmc.ctl ? (weekPmc.ctl - prevWeekPmc.ctl).toFixed(1) : null;
                                 const isProjected = weekPmc.projected;
+                                const progress = planProgress(weekRealizedTSS, weekPlannedTSS);
 
                                 // Week number
                                 const weekNum = getWeekNumber(week);
 
 
                                 return (
-                                    <div key={wIdx} data-cal="week" className="grid grid-cols-1 lg:grid-cols-[130px_repeat(7,1fr)] border-b border-line-soft-5 last:border-b-0">
+                                    <div key={weekKey} data-cal="week" className="grid grid-cols-1 lg:grid-cols-[130px_repeat(7,1fr)] border-b border-line-soft-5 last:border-b-0">
 
                                         {/* Resumen semanal compacto: solo por debajo de 1024 px. */}
                                         <div data-cal="week-chip" className="lg:hidden">
                                             <span>S{weekNum}{isProjected ? ' · proy.' : ''}</span>
-                                            <span>{Math.round(weekRealizedTSS)}/{Math.round(weekPlannedTSS)} TSS</span>
+                                            <span>{progress.hasPlan ? `${progress.realized}/${progress.planned}` : progress.realized} TSS</span>
                                             <span>{formatMinutes(weekDuration, { compact: true })}</span>
                                         </div>
 
@@ -144,17 +147,17 @@ export const CalendarMonthView = ({
                                                 className="mt-auto px-2.5 py-1 transition-colors border-t border-line-muted"
                                             >
                                                 <div className="flex justify-between text-[9px]">
-                                                    <span className="text-ink-4 font-semibold">Progreso Plan</span>
-                                                    <span className="font-mono font-bold text-body-soft-2">
-                                                        {Math.round(weekRealizedTSS)}/{Math.round(weekPlannedTSS)}
+                                                    <span className="text-ink-4 font-semibold">Progreso del plan</span>
+                                                    <span data-cal="plan-progress" className="font-mono font-bold text-body-soft-2">
+                                                        {progress.hasPlan ? `${progress.realized}/${progress.planned}` : 'Sin plan'}
                                                     </span>
                                                 </div>
-                                                <div className="w-full h-1.5 bg-fill-7 rounded-full overflow-hidden mt-0.5">
-                                                    <div className={`h-full rounded-full transition-all ${
-                                                        Math.min((weekRealizedTSS / (weekPlannedTSS || 1)) * 100, 100) >= 90 ? 'bg-emerald-500' : 
-                                                        Math.min((weekRealizedTSS / (weekPlannedTSS || 1)) * 100, 100) >= 70 ? 'bg-blue-500' : 'bg-amber-500'}`}
-                                                        style={{ width: `${Math.min((weekRealizedTSS / (weekPlannedTSS || 1)) * 100, 100)}%` }}></div>
-                                                </div>
+                                                {progress.hasPlan && (
+                                                    <div className="w-full h-1.5 bg-fill-7 rounded-full overflow-hidden mt-0.5">
+                                                        <div className={`h-full rounded-full transition-all ${PLAN_BAR[progress.level]}`}
+                                                            style={{ width: `${progress.pct}%` }}></div>
+                                                    </div>
+                                                )}
                                             </div>
                                         </div>
 
@@ -170,7 +173,7 @@ export const CalendarMonthView = ({
                                             const zoneBarColor = getZoneColor;
 
                                             return (
-                                                <div key={dIdx}
+                                                <div key={dateKey}
                                                     onDragOver={(e) => handleDragOver(e, dateKey)}
                                                     onDragLeave={handleDragLeave}
                                                     onDrop={(e) => handleDrop(e, day.date)}
@@ -314,8 +317,8 @@ export const CalendarMonthView = ({
                                                                                 </span>
                                                                                 {extraInfo.length > 0 && (
                                                                                     <span className="text-[9px] font-semibold text-ink-4 flex gap-1.5">
-                                                                                        {extraInfo.map((info, idx) => (
-                                                                                            <span key={idx} className="bg-surface-2 px-1 py-0.5 rounded">{info}</span>
+                                                                                        {extraInfo.map((info) => (
+                                                                                            <span key={info} className="bg-surface-2 px-1 py-0.5 rounded">{info}</span>
                                                                                         ))}
                                                                                     </span>
                                                                                 )}
@@ -359,8 +362,8 @@ export const CalendarMonthView = ({
                                                                                 </span>
                                                                                 {extraInfo.length > 0 && (
                                                                                     <span className="text-[9px] font-semibold text-ink-3 flex gap-1.5">
-                                                                                        {extraInfo.map((info, idx) => (
-                                                                                            <span key={idx} className="bg-slate-200/50 dark:bg-zinc-700/50 px-1 py-0.5 rounded">{info}</span>
+                                                                                        {extraInfo.map((info) => (
+                                                                                            <span key={info} className="bg-slate-200/50 dark:bg-zinc-700/50 px-1 py-0.5 rounded">{info}</span>
                                                                                         ))}
                                                                                     </span>
                                                                                 )}

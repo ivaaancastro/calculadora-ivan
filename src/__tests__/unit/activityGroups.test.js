@@ -37,6 +37,19 @@ describe('activityGroups', () => {
         const list = [act('a', '2026-03-10T10:00:00'), act('b', '2026-03-03T10:00:00', { tss: 20 }), act('c', '2026-02-24T10:00:00', { tss: 10 })];
         expect(weeklyTss(list, 2)).toEqual([20, 50]);
     });
+
+    it('BUG-12: las semanas sin actividad cuentan como 0', () => {
+        // Semanas del 23-feb (10), 2-mar (vacía), 9-mar (vacía) y 16-mar (50).
+        const list = [act('a', '2026-03-17T10:00:00'), act('c', '2026-02-24T10:00:00', { tss: 10 })];
+        expect(weeklyTss(list, 12)).toEqual([10, 0, 0, 50]);
+        expect(weeklyTss(list, 3)).toEqual([0, 0, 50]);
+        expect(weeklyTss([], 12)).toEqual([]);
+    });
+
+    it('BUG-7: una fecha YYYY-MM-DD se agrupa en su semana local', () => {
+        expect(weekStartKey('2026-03-02')).toBe('2026-03-02');
+        expect(weekStartKey('2026-03-01')).toBe('2026-02-23');
+    });
 });
 
 import { sportOf, breakdownBySport } from '../../utils/activityGroups';
