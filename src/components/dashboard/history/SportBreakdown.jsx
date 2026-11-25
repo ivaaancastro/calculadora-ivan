@@ -4,7 +4,7 @@ import { formatDuration } from '../../../utils/formatDuration';
 const LABEL = { run: 'Carrera', bike: 'Ciclismo', swim: 'Natación', gym: 'Fuerza', other: 'Otros' };
 const BAR = { run: 'bg-sport-run', bike: 'bg-sport-bike', swim: 'bg-sport-swim', gym: 'bg-sport-strength', other: 'bg-ink-4' };
 
-/** Panel lateral (solo v2, ≥ 1280 px): reparto del tiempo por deporte sobre los datos filtrados. */
+/** Panel lateral (≥ 1280 px): reparto del tiempo por deporte sobre los datos filtrados. */
 export const SportBreakdown = ({ rows }) => {
     if (!rows.length) return null;
     return (

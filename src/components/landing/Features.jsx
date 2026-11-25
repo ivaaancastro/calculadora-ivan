@@ -26,7 +26,7 @@ const BLOCKS = [
   },
 ];
 
-export const FeaturesV2 = () => (
+export const Features = () => (
   <section id="features" className="mx-auto max-w-6xl scroll-mt-[var(--nav-h)] px-4 py-16 sm:px-6 lg:py-24">
     <Reveal>
       <p className="text-xs font-bold uppercase tracking-widest text-action">Funciones</p>

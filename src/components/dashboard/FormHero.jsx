@@ -25,7 +25,7 @@ const TONE_ACCENT = {
 };
 
 /**
- * Héroe del Dashboard (solo v2, spec premium-dashboard §3.1): resumen narrativo + CTL como cifra
+ * Héroe del Dashboard (spec premium-dashboard §3.1): resumen narrativo + CTL como cifra
  * protagonista con su variación a 28 días y el estado de forma (TSB) como chip. Sin cajas.
  */
 export const FormHero = ({ summary, ctl, loadTrend, timeRange, setTimeRange }) => {

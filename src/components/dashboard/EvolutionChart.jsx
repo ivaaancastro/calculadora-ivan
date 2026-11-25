@@ -3,7 +3,6 @@ import { ComposedChart, Area, Line, XAxis, YAxis, CartesianGrid, Tooltip, Respon
 import { Activity } from 'lucide-react';
 import { useChartTheme } from '../charts/useChartTheme';
 import { ChartTooltip } from '../ui';
-import { useChartSkin } from '../charts/ChartSkin';
 import { useChartMotion } from '../charts/useChartMotion';
 import { ChartSkeleton } from '../charts/ChartSkeleton';
 import { summarizeSeries, chartFigureProps } from '../charts/chartA11y';
@@ -49,13 +48,12 @@ const CustomTooltip = ({ active, payload, label }) => {
   return null;
 };
 
-/** Banda de «forma óptima» del TSB (v2): zona de frescura para competir. */
+/** Banda de «forma óptima» del TSB: zona de frescura para competir. */
 const TSB_OPTIMAL = [5, 25];
 
 export const EvolutionChart = ({ data, timeRange, setTimeRange, loading = false }) => {
   const ct = useChartTheme();
   const motion = useChartMotion();
-  const isV2 = useChartSkin() === 'v2';
   const [hoverPoint, setHoverPoint] = useState(null);
 
   if (loading) return <ChartSkeleton />;
@@ -73,7 +71,7 @@ export const EvolutionChart = ({ data, timeRange, setTimeRange, loading = false 
 
   const todayStr = new Date().toISOString().split('T')[0];
   const latestPoint = data[data.length - 1];
-  const hasProjection = isV2 && data.some((d) => d.date > todayStr);
+  const hasProjection = data.some((d) => d.date > todayStr);
   const activePoint = hoverPoint || latestPoint;
 
   return (
@@ -217,9 +215,7 @@ export const EvolutionChart = ({ data, timeRange, setTimeRange, loading = false 
               isAnimationActive={false}
             />
 
-            {isV2 && (
-              <ReferenceArea yAxisId="right" y1={TSB_OPTIMAL[0]} y2={TSB_OPTIMAL[1]} fill={ct.series.tsb} fillOpacity={0.07} stroke="none" ifOverflow="hidden" />
-            )}
+            <ReferenceArea yAxisId="right" y1={TSB_OPTIMAL[0]} y2={TSB_OPTIMAL[1]} fill={ct.series.tsb} fillOpacity={0.07} stroke="none" ifOverflow="hidden" />
             {hasProjection && (
               <ReferenceArea
                 yAxisId="left"
