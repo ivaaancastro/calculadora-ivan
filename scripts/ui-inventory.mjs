@@ -14,7 +14,7 @@ import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { parse } from '@babel/parser';
-import { listFiles } from './codemods/lib.mjs';
+import { listFiles } from './lib.mjs';
 
 const ROOT = fileURLToPath(new URL('..', import.meta.url));
 
