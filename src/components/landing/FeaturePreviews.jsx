@@ -1,7 +1,7 @@
 import React from 'react';
 
 /**
- * Maquetas de la landing v2 (spec-rediseno-02-c4-pr3, D3). Datos de ejemplo escritos aquí a
+ * Maquetas de la landing (spec-rediseno-02-c4-pr3, D3). Datos de ejemplo escritos aquí a
  * propósito: nunca datos de una persona real. Solo tokens (sin hex), así siguen el tema.
  */
 const Frame = ({ label, children }) => (

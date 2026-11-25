@@ -33,7 +33,7 @@ function unlockScroll() {
 const FOCUSABLE = 'a[href],button:not([disabled]),input:not([disabled]),select:not([disabled]),textarea:not([disabled]),[tabindex]:not([tabindex="-1"])';
 
 /**
- * Con `trapFocus` (opt-in, solo el acceso v2): al abrir, el foco pasa al primer campo; Tab y
+ * Con `trapFocus` (opt-in, solo el acceso): al abrir, el foco pasa al primer campo; Tab y
  * Mayús+Tab no salen del diálogo; al cerrar, el foco vuelve a quien lo abrió.
  */
 export function Modal({ open, onClose, variant, labelledBy, closeOnBackdrop = false, trapFocus = false, children }) {

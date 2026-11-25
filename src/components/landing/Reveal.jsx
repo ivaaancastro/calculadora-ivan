@@ -1,8 +1,8 @@
 import React, { useRef, useEffect } from 'react';
 
 /**
- * Aparición al hacer scroll de la landing v2. A diferencia de `FadeIn` (v1, congelada), el
- * contenido nace visible: solo se oculta, ya montado, si hay IntersectionObserver, el usuario
+ * Aparición al hacer scroll de la landing. El contenido nace
+ * visible: solo se oculta, ya montado, si hay IntersectionObserver, el usuario
  * no pidió menos movimiento y el bloque queda bajo la primera pantalla. Así `prefers-reduced-motion`
  * y un script que no llega a ejecutarse muestran la página terminada.
  */
