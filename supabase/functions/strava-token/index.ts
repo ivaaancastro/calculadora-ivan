@@ -155,7 +155,12 @@ serve(async (req) => {
       // Solo el estado; nunca se registran tokens ni credenciales.
       console.error(`strava-token: Strava respondió ${stravaRes.status}`);
       const message = typeof data?.message === "string" ? data.message : "Error de Strava";
-      return jsonResponse({ error: message }, stravaRes.status >= 500 ? 502 : 400, origin);
+      // Qué campo rechaza Strava (p. ej. «RefreshToken.refresh_token:invalid»): sin valores, solo nombres.
+      const detail = Array.isArray(data?.errors)
+        ? (data.errors as Array<Record<string, unknown>>).map((e) => `${e.resource}.${e.field}:${e.code}`)
+        : undefined;
+      if (detail) console.error(`strava-token: ${detail.join(", ")}`);
+      return jsonResponse({ error: message, detail }, stravaRes.status >= 500 ? 502 : 400, origin);
     }
 
     // 5. Devolver solo lo que necesita el cliente
