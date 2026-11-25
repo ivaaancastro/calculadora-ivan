@@ -4,7 +4,7 @@
  * Cada variante copia exactamente una receta que ya existía:
  *  - `filled`: los campos del modal de añadir actividad (Input y Select comparten receta).
  *  - `search`: los filtros del historial (el buscador y los dos selectores, cada uno con la suya).
- *  - `auth` (solo Input): los campos del acceso en la piel v2 (icono a la izquierda: `pl-11`).
+ *  - `auth` (solo Input): los campos del acceso (icono a la izquierda: `pl-11`).
  *  - `cell`: los campos de los bloques del Calendario. En Input, `size` `md` (13 px) y `sm` (11 px).
  *  - `cell-bare` (solo Select): el selector de objetivo de los bloques, sin fondo.
  *  - `inline` (solo Input): los valores de Ajustes. `size` `md` (fisiología: peso, FC en reposo,

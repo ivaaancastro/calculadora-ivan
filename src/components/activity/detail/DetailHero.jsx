@@ -12,7 +12,7 @@ const SPORT_META = {
 };
 
 /**
- * Hero del detalle (solo v2, spec premium-detalle §3.1): título, tres cifras protagonistas y
+ * Hero del detalle (spec premium-detalle §3.1): título, tres cifras protagonistas y
  * «ledger» con el resto de métricas. Sin cajas: la jerarquía sale del tamaño y el peso.
  */
 export const DetailHero = ({ activity, dateStr, metrics, themeColor }) => {
