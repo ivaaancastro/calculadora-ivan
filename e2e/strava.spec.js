@@ -29,7 +29,8 @@ test.describe('Sincronización Strava', () => {
     });
     await page.goto('/strava-callback?code=e2e-code&scope=read,activity:read_all');
     await expect(page.getByText('¡Conectado! Redirigiendo al Laboratorio...')).toBeVisible();
-    expect(state.stravaTokenRequests).toEqual([{ grant_type: 'authorization_code', code: 'e2e-code' }]);
+    // Solo el código y el id público de la app; nunca el secreto.
+    expect(state.stravaTokenRequests).toEqual([{ grant_type: 'authorization_code', code: 'e2e-code', client_id: 'e2e-strava-client' }]);
     expect(direct).toEqual([]);
   });
 

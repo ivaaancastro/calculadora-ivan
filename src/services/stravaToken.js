@@ -21,8 +21,13 @@ async function errorMessage(error) {
   return error?.message || 'Error al obtener el token de Strava';
 }
 
+// Id público de la app de Strava (el mismo de la URL de autorización); el secreto no sale del servidor.
+const CLIENT_ID = import.meta.env.VITE_STRAVA_CLIENT_ID;
+
 async function invokeStravaToken(body) {
-  const { data, error } = await supabase.functions.invoke(FUNCTION_NAME, { body });
+  const { data, error } = await supabase.functions.invoke(FUNCTION_NAME, {
+    body: CLIENT_ID ? { ...body, client_id: String(CLIENT_ID) } : body,
+  });
   if (error) throw new Error(await errorMessage(error));
   if (!data?.access_token) throw new Error('Respuesta de token de Strava inválida');
   return data;

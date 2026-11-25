@@ -25,9 +25,11 @@ function getAllowedOrigin(requestOrigin: string | null): string {
     .split(",")
     .map((o) => o.trim())
     .filter(Boolean);
-  const allowed = envOrigins.length > 0 ? envOrigins : DEFAULT_ALLOWED_ORIGINS;
-  if (requestOrigin && allowed.includes(requestOrigin)) return requestOrigin;
-  return allowed[0];
+  // Sin ALLOWED_ORIGIN se devuelve el origen que llama: la función exige un JWT de Supabase en la
+  // cabecera (no hay cookies), así que abrir CORS no permite nada que no permita ya el token.
+  if (envOrigins.length === 0) return requestOrigin ?? DEFAULT_ALLOWED_ORIGINS[0];
+  if (requestOrigin && envOrigins.includes(requestOrigin)) return requestOrigin;
+  return envOrigins[0];
 }
 
 const corsHeaders = (origin: string) => ({
@@ -81,7 +83,7 @@ serve(async (req) => {
     }
 
     // 2. Cuerpo: { grant_type: 'authorization_code', code } | { grant_type: 'refresh_token', refresh_token }
-    let body: { grant_type?: unknown; code?: unknown; refresh_token?: unknown } | null;
+    let body: { grant_type?: unknown; code?: unknown; refresh_token?: unknown; client_id?: unknown } | null;
     try {
       body = await req.json();
     } catch {
@@ -106,7 +108,10 @@ serve(async (req) => {
     }
 
     // 3. Credenciales de la app (solo en el servidor)
-    const clientId = Deno.env.get("STRAVA_CLIENT_ID");
+    // El id de cliente es público (va en la URL de autorización): si no está como secreto, se acepta
+    // el que envía la app. El secreto solo vive en el servidor.
+    const bodyClientId = typeof body?.client_id === "string" && /^\d{1,12}$/.test(body.client_id) ? body.client_id : null;
+    const clientId = Deno.env.get("STRAVA_CLIENT_ID") || bodyClientId;
     const clientSecret = Deno.env.get("STRAVA_CLIENT_SECRET");
     if (!clientId || !clientSecret) {
       console.error("strava-token: faltan STRAVA_CLIENT_ID o STRAVA_CLIENT_SECRET");

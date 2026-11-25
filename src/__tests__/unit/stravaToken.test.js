@@ -16,7 +16,7 @@ describe('stravaToken (Edge Function strava-token)', () => {
     invokeMock.mockResolvedValue({ data: TOKENS, error: null });
     await expect(exchangeStravaCode('abc')).resolves.toEqual(TOKENS);
     expect(invokeMock).toHaveBeenCalledWith('strava-token', {
-      body: { grant_type: 'authorization_code', code: 'abc' },
+      body: expect.objectContaining({ grant_type: 'authorization_code', code: 'abc' }),
     });
   });
 
@@ -24,7 +24,7 @@ describe('stravaToken (Edge Function strava-token)', () => {
     invokeMock.mockResolvedValue({ data: TOKENS, error: null });
     await expect(refreshStravaToken('rt')).resolves.toEqual(TOKENS);
     expect(invokeMock).toHaveBeenCalledWith('strava-token', {
-      body: { grant_type: 'refresh_token', refresh_token: 'rt' },
+      body: expect.objectContaining({ grant_type: 'refresh_token', refresh_token: 'rt' }),
     });
   });
 
