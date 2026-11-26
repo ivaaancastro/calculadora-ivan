@@ -56,7 +56,8 @@ test.describe(`Detalle: borrar`, () => {
   });
 
   test('confirmar borra, vuelve a Actividades y el total baja en uno', async ({ page }) => {
-    const total = async () => Number((await page.getByText(/^\d+ Actividades$/).filter({ visible: true }).first().innerText()).split(' ')[0]);
+    // Único recuento de Actividades (RF-D1): la cifra del resumen; `data-count` es su valor final.
+    const total = async () => Number(await page.locator('[data-history="summary-count"]').filter({ visible: true }).first().getAttribute('data-count'));
     await gotoReady(page, '/history');
     const before = await total();
     await page.getByText(NAME).filter({ visible: true }).first().click();
@@ -97,9 +98,14 @@ test.describe(`Detalle: borrar`, () => {
     await expect.poll(() => path(page)).toBe('/history');
   });
 
-  test('en la lista también pide confirmación y no abre el detalle', async ({ page }) => {
+  // RF-D8: en la lista, borrar vive en el menú «Más acciones» de la fila.
+  const moreActions = (page) =>
+    page.getByRole('button', { name: new RegExp(`^Más acciones de ${NAME}`) }).filter({ visible: true }).first();
+
+  test('en la lista, borrar vive en «Más acciones», pide confirmación y no abre el detalle', async ({ page }) => {
     await gotoReady(page, '/history');
-    await page.locator('[data-history="delete"]').filter({ visible: true }).first().click();
+    await moreActions(page).click();
+    await page.getByRole('menuitem', { name: 'Eliminar actividad' }).click();
     await expect(dialog(page)).toBeVisible();
     expect(path(page)).toBe('/history');
     expect(deletes).toBe(0);
@@ -107,5 +113,25 @@ test.describe(`Detalle: borrar`, () => {
     await expect(dialog(page)).toBeHidden();
     expect(deletes).toBe(1);
     expect(path(page)).toBe('/history');
+  });
+
+  test('el menú de la fila se maneja con teclado; Esc lo cierra y el foco vuelve al botón', async ({ page }) => {
+    await gotoReady(page, '/history');
+    const more = moreActions(page);
+    await more.focus();
+    await page.keyboard.press('Enter');
+    await expect(more).toHaveAttribute('aria-expanded', 'true');
+    await expect(page.getByRole('menuitem', { name: 'Eliminar actividad' })).toBeFocused();
+    await page.keyboard.press('Escape');
+    await expect(page.getByRole('menu')).toHaveCount(0);
+    await expect(more).toBeFocused();
+    expect(path(page)).toBe('/history');
+    await page.keyboard.press('Enter');
+    await page.keyboard.press('Enter');
+    await expect(dialog(page)).toBeVisible();
+    await page.keyboard.press('Escape');
+    await expect(dialog(page)).toBeHidden();
+    await expect(more).toBeFocused();
+    expect(deletes).toBe(0);
   });
 });
