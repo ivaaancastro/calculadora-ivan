@@ -4,7 +4,11 @@
  */
 const num = (v) => (typeof v === 'number' && Number.isFinite(v) ? v : null);
 
-export const BIOMARKER_KEYS = ['rhr', 'hrv', 'sleep', 'tsb', 'steps', 'spo2', 'vo2', 'weight'];
+/**
+ * Rejilla de biomarcadores. El sueño no está: es el anillo de Sueño (RF-D1, un dato, un sitio);
+ * la forma (TSB) tampoco: es carga de entrenamiento y vive en el Dashboard.
+ */
+export const BIOMARKER_KEYS = ['rhr', 'hrv', 'spo2', 'steps', 'vo2', 'weight'];
 
 export function biomarkerStatus(wm) {
     const out = {};
