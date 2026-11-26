@@ -1,16 +1,16 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { useActivityMetrics } from '../../hooks/useActivityMetrics';
 import { useChartTheme } from '../charts/useChartTheme';
 import { useActivityStreams } from '../activity/detail/useActivityStreams';
-import { computePeaks, getActivePeakType, getSpeedOrPace, getSportTheme } from '../activity/detail/detailUtils';
+import { getSpeedOrPace, getSportTheme } from '../activity/detail/detailUtils';
+import { CursorContext, createCursorStore } from '../activity/detail/cursorStore';
+import { InteractiveMap } from '../activity/ActivityMap';
 import { useConfirmDeleteActivity } from '../../hooks/useConfirmDeleteActivity';
 import { ConfirmDeleteActivityModal } from '../activity/ConfirmDeleteActivityModal';
 import { DetailHeader } from '../activity/detail/DetailHeader';
 import { DetailHero } from '../activity/detail/DetailHero';
 import { Skeleton } from '../ui';
 import { ChartSkeleton } from '../charts/ChartSkeleton';
-import { DetailMobileHero } from '../activity/detail/DetailMobileHero';
-import { TelemetryPanel } from '../activity/detail/TelemetryPanel';
 import { ActivityCharts } from '../activity/detail/ActivityCharts';
 import { AnalysisSidebar } from '../activity/detail/AnalysisSidebar';
 import { MapTab } from '../activity/detail/MapTab';
@@ -22,7 +22,9 @@ export const ActivityDetailPage = ({ activity, settings, fetchStreams, onBack, o
     const ct = useChartTheme();
     const del = useConfirmDeleteActivity(onDelete, onBack);
     const { streams, loadingStreams } = useActivityStreams(activity, fetchStreams);
-    const [activePayload, setActivePayload] = useState(null);
+    // Cursor de las gráficas fuera del estado de la página (RF-C5): moverlo no repinta la página.
+    const [cursor] = useState(createCursorStore);
+    useEffect(() => () => cursor.dispose(), [cursor]);
     const [activeTab, setActiveTab] = useState('analyze');
     const [zoneType, setZoneType] = useState('hr'); // 'hr' | 'pace' | 'power'
 
@@ -49,9 +51,6 @@ export const ActivityDetailPage = ({ activity, settings, fetchStreams, onBack, o
     const effectiveTab = tabs.some(t => t.id === activeTab) ? activeTab : 'analyze';
     const effectiveZone = zoneOptions.some(z => z.value === zoneType) ? zoneType : (zoneOptions[0]?.value || 'hr');
 
-    const peaks = useMemo(() => computePeaks(chartData), [chartData]);
-    const activePeakType = useMemo(() => getActivePeakType(activePayload, peaks, isPaceBased), [activePayload, peaks, isPaceBased]);
-
     if (!activity) return null;
 
     const dateStr = new Date(activity.date).toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'short', year: 'numeric' });
@@ -59,95 +58,57 @@ export const ActivityDetailPage = ({ activity, settings, fetchStreams, onBack, o
     const metrics = getMetricsForSport(sport, activity, proMetrics, speedMetric);
     const themeColor = getSportTheme(activity.type, ct);
 
-    const handleMouseMove = (state) => {
-        if (state && typeof state.activeTooltipIndex !== 'undefined' && state.activeTooltipIndex !== null) {
-            const dataPoint = chartData[state.activeTooltipIndex];
-            if (dataPoint) setActivePayload(dataPoint);
-        } else if (state && state.activePayload && state.activePayload.length > 0) {
-            const dataPoint = state.activePayload[0].payload;
-            if (dataPoint) setActivePayload(dataPoint);
-        }
-    };
+    // El mapa es memo (RF-C5): con estas props estables, el cursor no lo vuelve a pintar.
+    const heroMap = showMap
+        ? <InteractiveMap polyline={activity.map_polyline} highResCoords={streams?.latlng?.data} color={themeColor} />
+        : null;
 
     // Alto de la pantalla: la ventana menos la cabecera de la app y, desde `sm`, el relleno
-    // vertical de `main`. En Análisis la página puede crecer en móvil; en escritorio la caja
-    // queda fija y se desplazan los paneles, como antes. Sin números sueltos (RF2).
+    // vertical de `main`. En Análisis la página crece en móvil; en escritorio la caja queda fija
+    // y se desplaza el contenido. Las demás pestañas tienen alto fijo (mapa a pantalla completa).
+    const analyze = effectiveTab === 'analyze';
     return (
-        <div className={`animate-in fade-in duration-500 bg-sunken-2 ${effectiveTab === 'analyze' ? 'min-h-[calc(100dvh-var(--nav-h-total))] sm:min-h-[calc(100dvh-var(--nav-h-total)-1rem)] lg:h-[calc(100dvh-var(--nav-h-total)-1rem)]' : 'h-[calc(100dvh-var(--nav-h-total))] sm:h-[calc(100dvh-var(--nav-h-total)-1rem)]'} flex flex-col font-sans pb-safe`}>
+        <CursorContext.Provider value={cursor}>
+        <div className={`animate-in fade-in duration-500 bg-sunken-2 ${analyze ? 'min-h-[calc(100dvh-var(--nav-h-total))] sm:min-h-[calc(100dvh-var(--nav-h-total)-1rem)] lg:h-[calc(100dvh-var(--nav-h-total)-1rem)]' : 'h-[calc(100dvh-var(--nav-h-total))] sm:h-[calc(100dvh-var(--nav-h-total)-1rem)]'} flex flex-col font-sans pb-safe`}>
             <DetailHeader
                 activity={activity}
                 activeTab={effectiveTab}
                 setActiveTab={setActiveTab}
                 tabs={tabs}
                 onBack={onBack}
-                onDelete={onDelete ? () => del.request(activity) : undefined}
-                dateStr={dateStr}
+                onDelete={onDelete ? del.request : undefined}
             />
 
-            {/* Tab Content */}
             <div className="flex-1 min-h-0 overflow-hidden relative flex flex-col w-full">
                 {loadingStreams ? (
-                    <div data-detail="loading" role="status" aria-label="Procesando telemetría" className="absolute inset-0 z-20 bg-surface-9 p-2.5 sm:p-5 space-y-4 overflow-hidden">
-                        <Skeleton className="h-3 w-40" />
-                        <Skeleton className="h-8 w-2/3" />
-                        <div className="grid grid-cols-3 gap-4"><Skeleton className="h-12" /><Skeleton className="h-12" /><Skeleton className="h-12" /></div>
-                        <ChartSkeleton className="h-48" label="Procesando telemetría" />
+                    <div data-detail="loading" role="status" aria-label="Procesando telemetría" className="absolute inset-0 z-20 bg-surface-9 overflow-hidden">
+                        <div className="max-w-content mx-auto px-4 md:px-6 py-6 md:py-8 grid gap-6 lg:gap-8 lg:grid-cols-[minmax(0,7fr)_minmax(0,5fr)]">
+                            <Skeleton className="h-[260px] lg:h-[440px]" />
+                            <div className="space-y-4">
+                                <Skeleton className="h-3 w-40" />
+                                <Skeleton className="h-8 w-2/3" />
+                                <div className="grid grid-cols-3 gap-4"><Skeleton className="h-12" /><Skeleton className="h-12" /><Skeleton className="h-12" /></div>
+                                <ChartSkeleton className="h-48" label="Procesando telemetría" />
+                            </div>
+                        </div>
                     </div>
                 ) : null}
 
-                {/* --- pestaña: ANÁLISIS --- */}
-                {effectiveTab === 'analyze' && (
-                    <div className="flex-1 flex flex-col lg:flex-row overflow-y-auto lg:overflow-hidden custom-scrollbar touch-scroll min-h-0 pb-24 lg:pb-0">
-                        {/* Charts Panel */}
-                        <div className="flex-1 lg:overflow-y-auto custom-scrollbar p-2.5 sm:p-5 bg-surface-6 min-w-0">
-                            <div className="max-w-5xl mx-auto space-y-3">
-                                <DetailHero activity={activity} dateStr={dateStr} metrics={metrics} themeColor={themeColor} />
-                                <DetailMobileHero
-                                    showMap={showMap}
-                                    activity={activity}
-                                    streams={streams}
-                                    themeColor={themeColor}
-                                    activePayload={activePayload}
-                                />
-                                <TelemetryPanel
-                                    chartData={chartData}
-                                    peaks={peaks}
-                                    activePayload={activePayload}
-                                    setActivePayload={setActivePayload}
-                                    activePeakType={activePeakType}
-                                    isPaceBased={isPaceBased}
-                                />
-                                <ActivityCharts
-                                    chartData={chartData}
-                                    activePayload={activePayload}
-                                    handleMouseMove={handleMouseMove}
-                                    isPaceBased={isPaceBased}
-                                    blocks={blocks}
-                                />
-                            </div>
+                {/* --- pestaña: ANÁLISIS --- héroe (mapa | cifras), impacto y Coach, gráficas */}
+                {analyze && (
+                    <div data-detail="analyze" className="flex-1 min-h-0 overflow-y-auto custom-scrollbar touch-scroll pb-24 lg:pb-0">
+                        <div className="max-w-content mx-auto px-4 md:px-6 py-6 md:py-8 flex flex-col gap-section md:gap-section-lg">
+                            <DetailHero activity={activity} dateStr={dateStr} metrics={metrics} themeColor={themeColor} map={heroMap} />
+                            <AnalysisSidebar trainingEffect={trainingEffect} fitnessAnalysis={fitnessAnalysis} />
+                            <ActivityCharts chartData={chartData} isPaceBased={isPaceBased} blocks={blocks} />
                         </div>
-
-                        <AnalysisSidebar
-                            showMap={showMap}
-                            activity={activity}
-                            streams={streams}
-                            themeColor={themeColor}
-                            activePayload={activePayload}
-                            trainingEffect={trainingEffect}
-                            fitnessAnalysis={fitnessAnalysis}
-                        />
                     </div>
                 )}
 
-                {/* --- pestaña: MAPA --- */}
-                {effectiveTab === 'map' && (
-                    <MapTab activity={activity} streams={streams} themeColor={themeColor} activePayload={activePayload} />
-                )}
+                {effectiveTab === 'map' && <MapTab activity={activity} streams={streams} themeColor={themeColor} />}
 
-                {/* --- pestaña: LAPS --- */}
                 {effectiveTab === 'laps' && <LapsTab proMetrics={proMetrics} isPaceBased={isPaceBased} />}
 
-                {/* --- pestaña: DETALLE (Deep Analysis) --- */}
                 {effectiveTab === 'data' && (
                     <DataTab
                         sport={sport}
@@ -166,5 +127,6 @@ export const ActivityDetailPage = ({ activity, settings, fetchStreams, onBack, o
             </div>
             <ConfirmDeleteActivityModal activity={del.pending} busy={del.busy} onConfirm={del.confirm} onCancel={del.cancel} />
         </div>
+        </CursorContext.Provider>
     );
 };

@@ -1,9 +1,10 @@
-import React, { useMemo, useEffect, useState } from 'react';
+import React, { memo, useMemo, useEffect, useState } from 'react';
 import { MapContainer, TileLayer, Polyline, useMap, CircleMarker } from 'react-leaflet';
 import { MapPin } from 'lucide-react';
 import 'leaflet/dist/leaflet.css';
 import { MAP_TILES } from './mapTiles';
 import { useChartTheme } from '../charts/useChartTheme';
+import { useCursor } from './detail/cursorStore';
 
 const decodePolyline = (str, precision = 5) => {
     let index = 0, lat = 0, lng = 0, coordinates = [], shift = 0, result = 0, byte = null, latitude_change, longitude_change, factor = Math.pow(10, precision);
@@ -65,7 +66,28 @@ const MapResizer = () => {
     return null;
 };
 
-export const InteractiveMap = ({ polyline, highResCoords, color, currentPosition }) => {
+const MAP_TYPE_LABEL = { light: 'Claro', dark: 'Oscuro', satellite: 'Satélite' };
+
+const latlngOf = (p) => (p ? p.latlng : null);
+
+/** Punto señalado en las gráficas: solo este marcador se repinta al mover el cursor (RF-C5). */
+const CursorMarker = ({ color, ring, position }) => {
+    const fromCursor = useCursor(latlngOf);
+    const center = position || fromCursor;
+    if (!center) return null;
+    return (
+        <>
+            <CircleMarker center={center} radius={10} pathOptions={{ color: 'transparent', fillColor: color, fillOpacity: 0.3, weight: 0 }} />
+            <CircleMarker center={center} radius={5} pathOptions={{ color: ring, fillColor: color, fillOpacity: 1, weight: 2 }} />
+        </>
+    );
+};
+
+/**
+ * Mapa del recorrido. Memoizado: el cursor de las gráficas no lo vuelve a pintar; el marcador
+ * lee el almacén del detalle por su cuenta. `currentPosition` fija el marcador desde fuera.
+ */
+export const InteractiveMap = memo(function InteractiveMap({ polyline, highResCoords, color, currentPosition }) {
     const ct = useChartTheme();
     const [mapType, setMapType] = useState('light');
 
@@ -95,9 +117,9 @@ export const InteractiveMap = ({ polyline, highResCoords, color, currentPosition
                 {['light', 'dark', 'satellite'].map((type) => (
                     <button
                         key={type} onClick={(e) => { e.stopPropagation(); setMapType(type); }}
-                        className={`px-2.5 py-1 text-2xs font-bold uppercase transition-colors rounded-sm ${mapType === type ? 'bg-slate-800 text-ink-inverse dark:bg-zinc-200' : 'text-ink-3 hover:text-ink-2-soft'}`}
+                        className={`px-2.5 py-1 text-2xs font-semibold transition-colors rounded-sm ${mapType === type ? 'bg-slate-800 text-ink-inverse dark:bg-zinc-200' : 'text-ink-3 hover:text-ink-2-soft'}`}
                     >
-                        {type === 'satellite' ? 'Sat' : type}
+                        {MAP_TYPE_LABEL[type]}
                     </button>
                 ))}
             </div>
@@ -109,23 +131,10 @@ export const InteractiveMap = ({ polyline, highResCoords, color, currentPosition
                 <CircleMarker center={coords[0]} radius={5} pathOptions={{ color: ct.map.ring, fillColor: ct.map.start, fillOpacity: 1, weight: 2 }} />
                 <CircleMarker center={coords[coords.length - 1]} radius={5} pathOptions={{ color: ct.map.ring, fillColor: ct.map.end, fillOpacity: 1, weight: 2 }} />
 
-                {currentPosition && (
-                    <>
-                        <CircleMarker
-                            center={currentPosition}
-                            radius={10}
-                            pathOptions={{ color: 'transparent', fillColor: color || ct.map.route, fillOpacity: 0.3, weight: 0 }}
-                        />
-                        <CircleMarker
-                            center={currentPosition}
-                            radius={5}
-                            pathOptions={{ color: ct.map.ring, fillColor: color || ct.map.route, fillOpacity: 1, weight: 2 }}
-                        />
-                    </>
-                )}
+                <CursorMarker color={color || ct.map.route} ring={ct.map.ring} position={currentPosition} />
                 <MapBounds bounds={coords} />
                 <MapResizer />
             </MapContainer>
         </div>
     );
-};
+});
