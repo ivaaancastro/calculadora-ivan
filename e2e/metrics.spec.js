@@ -9,7 +9,6 @@ import { duplicatedMetrics } from './support/metrics.js';
 // Duplicados conocidos (spec §3.2), con el PR del plan de la Capa 6 que los corrige. Al
 // corregirlos, se quitan de aquí: la prueba falla si uno de la lista ya no aparece.
 const PENDING_DUPLICATES = {
-  dashboard: { pr: 15, metrics: ['ctl', 'atl', 'tsb'] }, // héroe y KPI frente al readout del gráfico
   actividades: { pr: 19, metrics: ['activities'] }, // «85 sesiones» y «85 actividades»
 };
 

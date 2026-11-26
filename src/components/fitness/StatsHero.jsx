@@ -22,6 +22,7 @@ export const StatsHero = ({ trainingStatus, hrv }) => {
             label={figure?.label}
             value={figure?.value}
             metric={figure?.metric}
+            tone={figure?.metric === 'tsb' ? 'tsb' : 'ink'}
         >
             {kpis.length > 0 && (
                 <div data-stats="kpis" className="grid grid-cols-2 md:grid-cols-3 gap-x-4 gap-y-5 pt-5 border-t border-line md:col-span-2">

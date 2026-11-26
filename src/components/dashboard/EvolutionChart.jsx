@@ -1,56 +1,14 @@
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { ComposedChart, Area, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine, ReferenceArea } from 'recharts';
 import { Activity } from 'lucide-react';
 import { useChartTheme } from '../charts/useChartTheme';
-import { ChartTooltip } from '../ui';
+import { EmptyState } from '../ui';
 import { useChartMotion } from '../charts/useChartMotion';
 import { ChartSkeleton } from '../charts/ChartSkeleton';
 import { summarizeSeries, chartFigureProps } from '../charts/chartA11y';
-import { pickTodayPoint, pmcTodayKey, projectionLabelText } from '../../utils/pmcPoints';
+import { pmcTodayKey, projectionLabelText } from '../../utils/pmcPoints';
 import { toLocalDate } from '../../utils/dates';
-import { formatNumber } from '../../utils/formatters';
 import { axisProps, AXIS_FONT_SIZE } from '../charts/axisProps.js';
-
-const CustomTooltip = ({ active, payload, label }) => {
-  if (active && payload && payload.length) {
-    const date = new Date(label);
-    const today = new Date();
-    const diffDays = Math.ceil((date.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
-    const title = date.toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long' });
-
-    return (
-      <ChartTooltip variant="glass">
-        <p className="text-2xs font-medium uppercase tracking-[0.08em] text-ink-4 mb-1.5 flex justify-between items-center capitalize">
-          {title}
-          {diffDays > 0 && <span className="bg-surface-2 text-slate-500 px-1 py-0.5 rounded text-2xs ml-2 font-mono font-normal">+{diffDays}d</span>}
-        </p>
-        <div className="space-y-1">
-          {payload.map((entry, index) => {
-            if (entry.dataKey === 'dailyTss') return null;
-            
-            const colors = {
-              ctl: 'text-metric-ctl-ink',
-              atl: 'text-metric-atl-ink',
-              tsb: 'text-metric-tsb-ink'
-            };
-            const labels = {
-              ctl: 'Fitness (CTL)',
-              atl: 'Fatiga (ATL)',
-              tsb: 'Forma (TSB)'
-            };
-            return (
-              <div key={index} className="flex items-center justify-between gap-3">
-                <span className="text-2xs font-medium text-ink-3">{labels[entry.dataKey]}</span>
-                <span className={`text-[12px] font-mono font-bold ${colors[entry.dataKey] || 'text-slate-700'}`}>{formatNumber(entry.value, 1)}</span>
-              </div>
-            );
-          })}
-        </div>
-      </ChartTooltip>
-    );
-  }
-  return null;
-};
 
 /**
  * Etiquetas de «HOY» y «PROYECCIÓN» (BUG-10): cada una a un lado de la línea de hoy, así no se
@@ -71,20 +29,81 @@ const ProjectionLabel = ({ viewBox, fill }) => {
 /** Banda de «forma óptima» del TSB: zona de frescura para competir. */
 const TSB_OPTIMAL = [5, 25];
 
-export const EvolutionChart = ({ data, timeRange, setTimeRange, loading = false }) => {
+const SERIES = [
+  { key: 'ctl', label: 'Fitness', dot: 'bg-metric-ctl', ink: 'text-metric-ctl-ink' },
+  { key: 'atl', label: 'Fatiga', dot: 'bg-metric-atl', ink: 'text-metric-atl-ink' },
+  { key: 'tsb', label: 'Forma', dot: 'bg-metric-tsb', ink: 'text-metric-tsb-ink', signed: true },
+];
+
+const fmtPoint = (v, signed) => {
+  if (typeof v !== 'number' || !Number.isFinite(v)) return null;
+  const r = Math.round(v);
+  return `${signed && r > 0 ? '+' : ''}${r}`;
+};
+
+/**
+ * Leyenda que hace de readout (RF-D1): sin cursor solo nombra las series; al pasar el cursor o
+ * tocar, muestra el día señalado y sus valores. Nunca los de hoy (ya están en el héroe y los KPI).
+ */
+const LegendReadout = ({ point, todayKey }) => {
+  const days = point ? Math.round((toLocalDate(point.date) - toLocalDate(todayKey)) / 86400000) : 0;
+  return (
+    <div data-dash="legend" className="flex flex-wrap items-center justify-between gap-x-4 gap-y-1 min-h-6 mb-3">
+      <ul className="flex items-center gap-4">
+        {SERIES.map((s) => {
+          const v = point && fmtPoint(point[s.key], s.signed);
+          return (
+            <li key={s.key} className="flex items-center gap-1.5 text-xs text-ink-3">
+              <span className={`w-2 h-2 rounded-full ${s.dot}`} aria-hidden="true" />
+              {s.label}
+              {v != null && <span className={`font-mono font-semibold ${s.ink}`}>{v}</span>}
+            </li>
+          );
+        })}
+      </ul>
+      {point && (
+        <p data-dash="readout" aria-live="polite" className="flex items-center gap-1.5 font-mono text-xs text-ink-2-soft capitalize">
+          {toLocalDate(point.date).toLocaleDateString('es-ES', { weekday: 'short', day: 'numeric', month: 'short' })}
+          {days > 0 && <span className="normal-case text-ink-4">· proyección +{days} d</span>}
+        </p>
+      )}
+    </div>
+  );
+};
+
+/** Gráfica de evolución (PMC). El rango y los totales del periodo viven en su tarjeta (RF-D3). */
+export const EvolutionChart = ({ data, loading = false }) => {
   const ct = useChartTheme();
   const motion = useChartMotion();
   const [hoverPoint, setHoverPoint] = useState(null);
+  const figure = useRef(null);
+  // Recharts entrega el mousemove en el siguiente frame: tras salir, uno tardío no debe reabrir el
+  // readout. `pointerleave` no siempre llega (Recharts repinta el nodo bajo el cursor), así que,
+  // mientras hay readout, mover el ratón (o tocar) fuera de la gráfica lo cierra. En táctil, el
+  // día tocado se queda a la vista hasta tocar en otro sitio.
+  const inside = useRef(false);
+  useEffect(() => {
+    if (!hoverPoint) return undefined;
+    const close = (e) => {
+      if (figure.current?.contains(e.target)) return;
+      if (e.type === 'pointermove' && e.pointerType === 'touch') return;
+      inside.current = false;
+      setHoverPoint(null);
+    };
+    document.addEventListener('pointermove', close);
+    document.addEventListener('pointerdown', close);
+    return () => {
+      document.removeEventListener('pointermove', close);
+      document.removeEventListener('pointerdown', close);
+    };
+  }, [hoverPoint]);
 
   if (loading) return <ChartSkeleton />;
 
   if (!data || data.length === 0) {
     return (
-      <div className="bg-transparent rounded-xl border border-dashed border-line p-8 h-full w-full flex items-center justify-center text-center">
-        <div>
-           <Activity size={16} className="mx-auto text-slate-300 mb-2" />
-           <p className="text-2xs text-ink-4-dim uppercase tracking-[0.08em] font-medium">Sin Datos</p>
-        </div>
+      <div className="h-full w-full flex items-center justify-center text-center">
+        <EmptyState icon={Activity} title="Sin datos en este periodo" description="Elige un rango más amplio o registra una actividad." />
       </div>
     );
   }
@@ -92,100 +111,20 @@ export const EvolutionChart = ({ data, timeRange, setTimeRange, loading = false 
   const todayStr = pmcTodayKey();
   const latestPoint = data[data.length - 1];
   const hasProjection = data.some((d) => d.date > todayStr);
-  // Sin hover, el readout muestra HOY (como el héroe), no el último punto proyectado (BUG-1).
-  const activePoint = hoverPoint || pickTodayPoint(data, todayStr);
+  // Recharts 3 ya no da `activePayload`: el punto sale del índice activo.
+  const track = (state) => {
+    const i = Number(state?.activeTooltipIndex);
+    if (inside.current && Number.isInteger(i) && data[i]) setHoverPoint(data[i]);
+  };
 
   return (
     <div className="h-full w-full flex flex-col font-sans touch-manipulation select-none">
-      {/* Selector SOLO en móvil (en escritorio permanece en la cabecera original) */}
-      {timeRange && setTimeRange && (
-        <div className="md:hidden flex bg-fill-6 p-1 rounded-full backdrop-blur-md w-full justify-between shadow-xs mb-3">
-          {[
-            { id: "7d", label: "7D" },
-            { id: "30d", label: "30D" },
-            { id: "90d", label: "3M" },
-            { id: "all", label: "Todo" },
-          ].map((t) => (
-            <button
-              key={t.id}
-              data-dash="range-btn"
-              onClick={() => setTimeRange(t.id)}
-              className={`flex-1 px-3 py-1 min-h-[30px] max-sm:min-h-[44px] text-xs font-semibold transition-paint rounded-full select-none touch-manipulation active:scale-press ${
-                timeRange === t.id
-                  ? "bg-surface-4 text-ink shadow-xs font-bold"
-                  : "text-ink-3"
-              }`}
-            >
-              {t.label}
-            </button>
-          ))}
-        </div>
-      )}
-
-      {/* Dynamic HUD Header (Legibilidad óptima en móvil sin tapar con los dedos) */}
-      <div className="flex flex-wrap items-center justify-between gap-2 p-2 sm:p-2.5 rounded-xl bg-slate-100/70 dark:bg-zinc-800/50 border border-slate-200/50 dark:border-zinc-700/40 mb-3">
-        <div className="flex items-center gap-2">
-          <span className="text-[12px] font-bold text-body capitalize">
-            {activePoint ? toLocalDate(activePoint.date).toLocaleDateString('es-ES', { weekday: 'short', day: 'numeric', month: 'short' }) : 'Hoy'}
-          </span>
-          {hoverPoint ? (
-            <span className="text-2xs font-semibold text-metric-ctl-ink bg-metric-ctl/10 px-1.5 py-0.2 rounded-full">
-              Punto
-            </span>
-          ) : (
-            <span className="text-2xs font-medium text-ink-4 bg-slate-200/60 dark:bg-zinc-700/40 px-1.5 py-0.2 rounded-full">
-              Actual
-            </span>
-          )}
-        </div>
-
-        <div className="flex items-center gap-3 sm:gap-4 shrink-0 text-xs">
-          <div className="flex items-center gap-1">
-            <span className="w-2 h-2 rounded-full bg-metric-ctl"></span>
-            <span className="text-2xs text-ink-4 font-medium">CTL</span>
-            <span data-metric="ctl" className="font-mono font-bold text-metric-ctl text-xs">
-              {activePoint?.ctl !== undefined ? Math.round(activePoint.ctl) : '--'}
-            </span>
-          </div>
-          <div className="flex items-center gap-1">
-            <span className="w-2 h-2 rounded-full bg-metric-atl"></span>
-            <span className="text-2xs text-ink-4 font-medium">ATL</span>
-            <span data-metric="atl" className="font-mono font-bold text-metric-atl text-xs">
-              {activePoint?.atl !== undefined ? Math.round(activePoint.atl) : '--'}
-            </span>
-          </div>
-          <div className="flex items-center gap-1">
-            <span className="w-2 h-2 rounded-full bg-metric-tsb"></span>
-            <span className="text-2xs text-ink-4 font-medium">TSB</span>
-            <span data-metric="tsb" className={`font-mono font-bold text-xs ${
-              (activePoint?.tsb ?? 0) >= 0 ? 'text-legacy-tsb-ios-up' : 'text-legacy-tsb-ios-down'
-            }`}>
-              {activePoint?.tsb !== undefined ? `${activePoint.tsb > 0 ? '+' : ''}${Math.round(activePoint.tsb)}` : '--'}
-            </span>
-          </div>
-        </div>
-      </div>
-
-      {/* Leyenda fija clara */}
-      <div className="flex justify-between items-center mb-2 px-1">
-        <div className="flex gap-3 sm:gap-5">
-          <div className="flex items-center gap-1.5">
-            <div className="w-2 h-2 rounded-full bg-metric-ctl"></div>
-            <span className="text-2xs font-semibold text-ink-3 uppercase tracking-[0.05em]">Fitness</span>
-          </div>
-          <div className="flex items-center gap-1.5">
-            <div className="w-2 h-2 rounded-full bg-metric-atl"></div>
-            <span className="text-2xs font-semibold text-ink-3 uppercase tracking-[0.05em]">Fatiga</span>
-          </div>
-          <div className="flex items-center gap-1.5">
-            <div className="w-2 h-2 rounded-full bg-metric-tsb"></div>
-            <span className="text-2xs font-semibold text-ink-3 uppercase tracking-[0.05em]">Forma</span>
-          </div>
-        </div>
-      </div>
+      <LegendReadout point={hoverPoint} todayKey={todayStr} />
 
       <div
+        ref={figure}
         className="flex-1 w-full min-h-0"
+        onPointerEnter={() => { inside.current = true; }}
         {...chartFigureProps(
           'Evolución de forma: fitness, fatiga y forma',
           summarizeSeries(data, [{ key: 'ctl', label: 'Fitness (CTL)' }, { key: 'atl', label: 'Fatiga (ATL)' }, { key: 'tsb', label: 'Forma (TSB)' }]),
@@ -195,13 +134,9 @@ export const EvolutionChart = ({ data, timeRange, setTimeRange, loading = false 
           <ComposedChart 
             data={data} 
             margin={{ top: 8, right: 6, left: -14, bottom: 0 }}
-            onMouseMove={(state) => {
-              if (state?.activePayload?.[0]?.payload) {
-                setHoverPoint(state.activePayload[0].payload);
-              }
-            }}
-            onMouseLeave={() => setHoverPoint(null)}
-            onTouchEnd={() => setHoverPoint(null)}
+            onMouseMove={track}
+            onTouchStart={track}
+            onTouchMove={track}
           >
             <defs>
               <linearGradient id="colorCtl" x1="0" y1="0" x2="0" y2="1">
@@ -228,8 +163,9 @@ export const EvolutionChart = ({ data, timeRange, setTimeRange, loading = false 
             <YAxis yAxisId="left" {...axisProps(ct)} dx={-10} />
             <YAxis yAxisId="right" orientation="right" hide domain={['dataMin - 30', 'dataMax + 30']} />
 
+            {/* Solo el cursor: los valores del punto van en la leyenda (sin tapar con el dedo). */}
             <Tooltip
-              content={<CustomTooltip />}
+              content={() => null}
               cursor={{ stroke: ct.anatomy.cursor, strokeWidth: 1, strokeDasharray: '4 4' }}
               isAnimationActive={false}
             />
