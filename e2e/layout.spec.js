@@ -18,7 +18,6 @@ const isMobile = (page) => (page.viewportSize()?.width ?? 0) < 768;
 // se quitan de aquí: la prueba falla si uno de la lista ya no aparece (así la lista no se pudre).
 const PENDING_SMALL = {
   dashboard: ['button "7D"', 'button "3M"'], // PR 15: el selector pasa a la cabecera de la gráfica
-  detalle: ['input "Zoom del recorrido: inicio"', 'input "Zoom del recorrido: fin"'], // PR 16
 };
 
 for (const screen of SCREENS) {

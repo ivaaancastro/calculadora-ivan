@@ -1,185 +1,87 @@
-import React from 'react';
+import React, { memo } from 'react';
+import { X } from 'lucide-react';
 import { formatPace, formatDuration } from '../../../utils/formatters';
+import { useCursor, useCursorStore } from './cursorStore';
 
-export const TelemetryPanel = ({ chartData, peaks, activePayload, setActivePayload, activePeakType, isPaceBased }) => {
+const rawTimeOf = (p) => (p ? p.rawTime : null);
+
+/** Posición señalada (tiempo · km) y «Quitar»; sin cursor, una pista de uso. */
+function CursorReadout() {
+    const store = useCursorStore();
+    const point = useCursor();
+    if (!point) {
+        return <p className="text-[12px] text-ink-4">Pasa el cursor o el dedo por las gráficas</p>;
+    }
     return (
-<>
-                                    {chartData.length > 0 && (
-                                        <div className="space-y-2.5">
-                                            {/* Accesos rápidos a los Picos del entrenamiento */}
-                                            {peaks && (
-                                                <div data-detail="peaks" className="flex items-center gap-1.5 overflow-x-auto hide-scrollbar py-0.5 [&>button]:!tracking-[0.01em] [&>button]:![font-variant-numeric:tabular-nums] max-lg:[&>button]:!min-h-[44px]">
-                                                    <span className="text-2xs font-bold text-ink-4 uppercase tracking-[0.08em] shrink-0 mr-1">
-                                                        Picos:
-                                                    </span>
-                                                    {peaks.maxHrPt && (
-                                                        <button
-                                                            type="button"
-                                                            onClick={() => setActivePayload(peaks.maxHrPt)}
-                                                            className={`px-2.5 py-1 rounded-full text-2xs font-bold shrink-0 border transition-paint active:scale-press flex items-center gap-1.5 ${
-                                                                activePayload?.rawTime === peaks.maxHrPt.rawTime
-                                                                    ? 'bg-hr text-white border-hr-strong shadow-xs'
-                                                                    : 'bg-ink-inverse text-hr-ink border-hr-edge hover:bg-hr-tint'
-                                                            }`}
-                                                        >
-                                                            <span>Pico FC</span>
-                                                            <span className="font-mono tabular-nums">{peaks.maxHrPt.hr} bpm</span>
-                                                        </button>
-                                                    )}
-                                                    {peaks.maxWattsPt && (
-                                                        <button
-                                                            type="button"
-                                                            onClick={() => setActivePayload(peaks.maxWattsPt)}
-                                                            className={`px-2.5 py-1 rounded-full text-2xs font-bold shrink-0 border transition-paint active:scale-press flex items-center gap-1.5 ${
-                                                                activePayload?.rawTime === peaks.maxWattsPt.rawTime
-                                                                    ? 'bg-power text-white border-power-strong shadow-xs'
-                                                                    : 'bg-ink-inverse text-power-ink border-power-edge hover:bg-power-tint-2'
-                                                            }`}
-                                                        >
-                                                            <span>Pico W</span>
-                                                            <span className="font-mono tabular-nums">{peaks.maxWattsPt.watts} W</span>
-                                                        </button>
-                                                    )}
-                                                    {(!isPaceBased ? peaks.maxSpeedPt : peaks.bestPacePt) && (
-                                                        <button
-                                                            type="button"
-                                                            onClick={() => setActivePayload(isPaceBased ? peaks.bestPacePt : peaks.maxSpeedPt)}
-                                                            className={`px-2.5 py-1 rounded-full text-2xs font-bold shrink-0 border transition-paint active:scale-press flex items-center gap-1.5 ${
-                                                                activePayload?.rawTime === (isPaceBased ? peaks.bestPacePt?.rawTime : peaks.maxSpeedPt?.rawTime)
-                                                                    ? 'bg-speed text-white border-speed-strong shadow-xs'
-                                                                    : 'bg-ink-inverse text-speed-ink border-speed-edge hover:bg-speed-tint'
-                                                            }`}
-                                                        >
-                                                            <span>{isPaceBased ? 'Mejor Ritmo' : 'Max Vel'}</span>
-                                                            <span className="font-mono tabular-nums">
-                                                                {isPaceBased ? formatPace(peaks.bestPacePt.pace) : `${peaks.maxSpeedPt.speed} km/h`}
-                                                            </span>
-                                                        </button>
-                                                    )}
-                                                    {peaks.maxAltPt && (
-                                                        <button
-                                                            type="button"
-                                                            onClick={() => setActivePayload(peaks.maxAltPt)}
-                                                            className={`px-2.5 py-1 rounded-full text-2xs font-bold shrink-0 border transition-paint active:scale-press flex items-center gap-1.5 ${
-                                                                activePayload?.rawTime === peaks.maxAltPt.rawTime
-                                                                    ? 'bg-inverse-2 text-ink-inverse border-slate-800 shadow-xs'
-                                                                    : 'bg-surface text-body-soft-2 border-slate-200 dark:border-zinc-800 hover:bg-sunken-9'
-                                                            }`}
-                                                        >
-                                                            <span>Cima</span>
-                                                            <span className="font-mono tabular-nums">{peaks.maxAltPt.alt} m</span>
-                                                        </button>
-                                                    )}
-                                                </div>
-                                            )}
-
-                                            {/* HUD de Telemetría Dinámico */}
-                                            <div data-detail="hud" className="bg-surface-8 backdrop-blur-md border border-line-4 rounded-2xl p-2.5 sm:p-3 shadow-card min-h-[92px] transition-paint">
-                                                {activePayload ? (
-                                                    <div className="space-y-2">
-                                                        <div className="flex items-center justify-between border-b border-line-soft-4 pb-1.5">
-                                                            <div className="flex items-center gap-2 flex-wrap">
-                                                                <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-surface-2 font-mono text-[12px] font-bold tabular-nums text-body">
-                                                                    <span>⏱️ {formatDuration(activePayload.rawTime)}</span>
-                                                                    {activePayload.distanceKm !== null && <span className="text-faint-2">|</span>}
-                                                                    {activePayload.distanceKm !== null && <span>📍 {activePayload.distanceKm} km</span>}
-                                                                </div>
-                                                                {activePeakType && (
-                                                                    <span className={`px-2 py-0.5 rounded-md text-2xs font-bold uppercase tracking-tight border animate-pulse ${activePeakType.color}`}>
-                                                                        {activePeakType.label}: {activePeakType.value}
-                                                                    </span>
-                                                                )}
-                                                            </div>
-                                                            <button
-                                                                type="button"
-                                                                onClick={() => setActivePayload(null)}
-                                                                className="text-2xs font-bold text-ink-4 hover:text-body-soft-2 px-1.5 py-0.5 rounded hover:bg-surface-2 transition-colors"
-                                                            >
-                                                                Resetear
-                                                            </button>
-                                                        </div>
-
-                                                        <div className="grid grid-cols-3 sm:grid-cols-5 gap-1.5 text-center">
-                                                            {/* Ritmo / Velocidad */}
-                                                            {(isPaceBased ? activePayload.pace : activePayload.speed) !== null && <div className="bg-sunken rounded-xl p-1.5 border border-line-soft-3">
-                                                                <span className="text-2xs font-bold uppercase tracking-[0.05em] text-ink-4 block">
-                                                                    {isPaceBased ? 'Ritmo' : 'Velocidad'}
-                                                                </span>
-                                                                <span className="text-xs sm:leading-5 font-bold font-mono tabular-nums text-pace">
-                                                                    {isPaceBased ? formatPace(activePayload.pace) : `${activePayload.speed} km/h`}
-                                                                </span>
-                                                            </div>}
-
-                                                            {/* FC */}
-                                                            {activePayload.hr !== null && (
-                                                                <div className="bg-sunken rounded-xl p-1.5 border border-line-soft-3">
-                                                                    <span className="text-2xs font-bold uppercase tracking-[0.05em] text-ink-4 block">
-                                                                        FC
-                                                                    </span>
-                                                                    <span className="text-xs sm:leading-5 font-bold font-mono tabular-nums text-hr">
-                                                                        {activePayload.hr} <span className="text-2xs font-normal">bpm</span>
-                                                                    </span>
-                                                                </div>
-                                                            )}
-
-                                                            {/* Potencia */}
-                                                            {activePayload.watts !== null && (
-                                                                <div className="bg-sunken rounded-xl p-1.5 border border-line-soft-3">
-                                                                    <span className="text-2xs font-bold uppercase tracking-[0.05em] text-ink-4 block">
-                                                                        Potencia
-                                                                    </span>
-                                                                    <span className="text-xs sm:leading-5 font-bold font-mono tabular-nums text-power">
-                                                                        {activePayload.watts} <span className="text-2xs font-normal">W</span>
-                                                                    </span>
-                                                                </div>
-                                                            )}
-
-                                                            {/* Altitud y Pendiente */}
-                                                            {activePayload.alt !== null && (
-                                                                <div className="bg-sunken rounded-xl p-1.5 border border-line-soft-3">
-                                                                    <span className="text-2xs font-bold uppercase tracking-[0.05em] text-ink-4 block">
-                                                                        Altitud
-                                                                    </span>
-                                                                    <div className="flex items-center justify-center gap-1 text-xs sm:leading-5 font-bold font-mono tabular-nums text-body">
-                                                                        <span>{activePayload.alt}m</span>
-                                                                        {activePayload.grade !== undefined && (
-                                                                            <span className={`text-2xs font-bold ${activePayload.grade > 3 ? 'text-rose-500' : activePayload.grade < -3 ? 'text-emerald-500' : 'text-slate-400'}`}>
-                                                                                {activePayload.grade > 0 ? '+' : ''}{activePayload.grade.toFixed(0)}%
-                                                                            </span>
-                                                                        )}
-                                                                    </div>
-                                                                </div>
-                                                            )}
-
-                                                            {/* Cadencia */}
-                                                            {activePayload.cadence !== null && (
-                                                                <div className="bg-sunken rounded-xl p-1.5 border border-line-soft-3">
-                                                                    <span className="text-2xs font-bold uppercase tracking-[0.05em] text-ink-4 block">
-                                                                        Cadencia
-                                                                    </span>
-                                                                    <span className="text-xs sm:leading-5 font-bold font-mono tabular-nums text-cadence">
-                                                                        {activePayload.cadence} <span className="text-2xs font-normal">{isPaceBased ? 'ppm' : 'rpm'}</span>
-                                                                    </span>
-                                                                </div>
-                                                            )}
-                                                        </div>
-                                                    </div>
-                                                ) : (
-                                                    <div className="flex items-center justify-between text-ink-4 py-0.5 px-1">
-                                                        <div className="flex items-center gap-2">
-                                                            <span className="inline-block w-2 h-2 rounded-full bg-indigo-500 animate-ping" />
-                                                            <span className="text-[12px] font-medium">
-                                                                Desliza el dedo por los gráficos para explorar cada punto y pico
-                                                            </span>
-                                                        </div>
-                                                        <span className="text-2xs font-semibold text-indigo-500 uppercase tracking-[0.05em] hidden sm:inline">
-                                                            Telemetría
-                                                        </span>
-                                                    </div>
-                                                )}
-                                            </div>
-                                        </div>
-                                    )}
-</>
+        <div className="flex items-center gap-2">
+            <span data-detail="cursor" className="font-mono text-[12px] font-semibold tabular-nums text-ink">
+                {formatDuration(point.rawTime)}
+                {point.distanceKm !== null && <span className="text-ink-4"> · {point.distanceKm} km</span>}
+            </span>
+            <button
+                type="button"
+                aria-label="Quitar el punto señalado"
+                onClick={() => store.set(null, { immediate: true })}
+                className="w-8 h-8 max-md:w-11 max-md:h-11 -my-2 flex items-center justify-center rounded-full text-ink-4 hover:text-ink hover:bg-surface-2 active:scale-press transition-paint"
+            >
+                <X size={14} />
+            </button>
+        </div>
     );
+}
+
+const PEAK_TONE = {
+    hr: { on: 'bg-hr text-white border-hr-strong', off: 'text-hr-ink border-hr-edge hover:bg-hr-tint' },
+    power: { on: 'bg-power text-white border-power-strong', off: 'text-power-ink border-power-edge hover:bg-power-tint-2' },
+    speed: { on: 'bg-speed text-white border-speed-strong', off: 'text-speed-ink border-speed-edge hover:bg-speed-tint' },
+    alt: { on: 'bg-inverse-2 text-ink-inverse border-line-strong', off: 'text-body-soft-2 border-line hover:bg-sunken-9' },
 };
+
+/** Picos del entrenamiento: llevan el cursor a ese punto. */
+function PeakChips({ peaks, isPaceBased }) {
+    const store = useCursorStore();
+    const activeTime = useCursor(rawTimeOf);
+    const speedPt = isPaceBased ? peaks.bestPacePt : peaks.maxSpeedPt;
+    const items = [
+        peaks.maxHrPt && { id: 'hr', pt: peaks.maxHrPt, label: 'Pico FC', value: `${peaks.maxHrPt.hr} bpm` },
+        peaks.maxWattsPt && { id: 'power', pt: peaks.maxWattsPt, label: 'Pico W', value: `${peaks.maxWattsPt.watts} W` },
+        speedPt && { id: 'speed', pt: speedPt, label: isPaceBased ? 'Mejor ritmo' : 'Vel. máx.', value: isPaceBased ? formatPace(speedPt.pace) : `${speedPt.speed} km/h` },
+        peaks.maxAltPt && { id: 'alt', pt: peaks.maxAltPt, label: 'Cima', value: `${peaks.maxAltPt.alt} m` },
+    ].filter(Boolean);
+    if (!items.length) return null;
+    return (
+        <div data-detail="peaks" className="flex items-center gap-2 overflow-x-auto hide-scrollbar">
+            {items.map(({ id, pt, label, value }) => {
+                const on = activeTime === pt.rawTime;
+                return (
+                    <button
+                        key={id}
+                        type="button"
+                        aria-pressed={on}
+                        onClick={() => store.set(pt, { immediate: true })}
+                        className={`min-h-[32px] max-md:min-h-[44px] px-3 rounded-full text-[12px] font-semibold shrink-0 border transition-paint active:scale-press flex items-center gap-1.5 ${on ? PEAK_TONE[id].on : `bg-surface-card ${PEAK_TONE[id].off}`}`}
+                    >
+                        <span>{label}</span>
+                        <span className="font-mono tabular-nums">{value}</span>
+                    </button>
+                );
+            })}
+        </div>
+    );
+}
+
+/**
+ * Cabecera de la tarjeta de gráficas: la posición del cursor y los picos, junto a lo que
+ * controlan (RF-D3). Sustituye al antiguo HUD, que repetía las lecturas de cada pista.
+ */
+export const TelemetryPanel = memo(function TelemetryPanel({ peaks, isPaceBased }) {
+    return (
+        <div data-detail="telemetry" className="px-4 md:px-6 pt-4 md:pt-5 pb-3 space-y-3 border-b border-hairline">
+            <div className="flex items-center justify-between gap-3 min-h-[32px]">
+                <h3 className="text-sm font-semibold text-ink">Telemetría</h3>
+                <CursorReadout />
+            </div>
+            {peaks && <PeakChips peaks={peaks} isPaceBased={isPaceBased} />}
+        </div>
+    );
+});
