@@ -1,25 +1,11 @@
 /**
  * Resumen narrativo del estado de forma (Fase Premium D2, spec premium-dashboard §3.3).
- * Reglas deterministas sobre CTL/ATL/TSB/ACWR; sin IA ni red. Umbrales de TSB = los de
- * `AdvancedAnalytics` (−30 / −10 / 5 / 25).
+ * Reglas deterministas sobre CTL/ATL/TSB/ACWR; sin IA ni red. Los umbrales de TSB viven en
+ * `formState.js` (fuente única, D3).
  */
-const STATES = {
-  transition: { label: 'Transición', tone: 'neutral', lead: 'Estás descansado de más y la forma empieza a bajar', advice: 'Retoma carga de forma progresiva.' },
-  peak: { label: 'Pico de forma', tone: 'peak', lead: 'Llegas fresco y con la forma en lo alto', advice: 'Buen momento para competir o una sesión clave.' },
-  productive: { label: 'Zona productiva', tone: 'productive', lead: 'Estás en zona productiva: carga y adaptación están equilibradas', advice: 'Mantén el ritmo y sube carga con cuidado.' },
-  overload: { label: 'Sobrecarga', tone: 'overload', lead: 'Acumulas fatiga alta', advice: 'Programa una o dos jornadas de recuperación.' },
-  critical: { label: 'Fatiga crítica', tone: 'critical', lead: 'La fatiga es muy alta y hay riesgo de sobreentrenamiento', advice: 'Descansa y recorta la carga esta semana.' },
-  insufficient: { label: 'Sin datos', tone: 'neutral', lead: 'Aún no hay carga suficiente para valorar tu forma', advice: 'Registra unas semanas de entrenamientos para ver tu estado.' },
-};
+import { FORM_STATES as STATES, formStateKey } from './formState';
 
-export const formStateKey = ({ ctl, tsb }) => {
-  if (!ctl || ctl <= 0) return 'insufficient';
-  if (tsb > 25) return 'transition';
-  if (tsb >= 5) return 'peak';
-  if (tsb >= -10) return 'productive';
-  if (tsb >= -30) return 'overload';
-  return 'critical';
-};
+export { formStateKey };
 
 const pct = (n) => Math.abs(n).toFixed(1).replace('.', ',');
 

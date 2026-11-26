@@ -19,6 +19,8 @@
  * 15. getTrainingStatus          — Estado de entreno (Garmin Training Status style)
  * 16. getHRVAnalysis             — Análisis de variabilidad cardíaca
  */
+import { sportOf } from './sport';
+import { formatDuration } from './formatters';
 
 // ── Tipos compartidos ────────────────────────────────────────────────────────
 
@@ -371,12 +373,7 @@ function estimateRaceTime(vo2max: number, distKm: number): number | null {
 }
 
 function fmtTime(m: number): string {
-  if (!m || m <= 0) return '--';
-  const h = Math.floor(m / 60);
-  const mi = Math.floor(m % 60);
-  const s = Math.round((m % 1) * 60);
-  if (h > 0) return `${h}:${mi.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
-  return `${mi}:${s.toString().padStart(2, '0')}`;
+  return m > 0 ? formatDuration(m * 60) : '--';
 }
 
 function fmtPace(d: number): string {
@@ -397,8 +394,8 @@ function getRunningStats(activities: Activity[]): {
   const fourWeeksAgo = new Date(now.getTime() - (28 * 24 * 60 * 60 * 1000));
 
   const runs = activities.filter((a) => {
-    const t = String(a.type).toLowerCase();
-    return (t.includes('run') || t.includes('carrera')) && new Date(a.date) >= fourWeeksAgo;
+    const sport = sportOf(a.type);
+    return (sport === 'run') && new Date(a.date) >= fourWeeksAgo;
   });
 
   if (runs.length === 0) return { avgWeeklyKm: 0, maxLongRun: 0, consistency: 0 };
@@ -459,8 +456,8 @@ export function estimateFTP(
   const weight = Number(settings?.weight) || 70;
 
   const bikeActivities = activities.filter((act) => {
-    const t = String(act.type).toLowerCase();
-    const matchesSport = t.includes('bici') || t.includes('ciclismo') || t.includes('ride');
+    const sport = sportOf(act.type);
+    const matchesSport = sport === 'bike';
     const matchesDate = cutoffDate ? new Date(act.date) >= cutoffDate : true;
     return matchesSport && matchesDate && act.streams_data?.watts?.data && act.streams_data?.time?.data;
   });
@@ -574,8 +571,8 @@ export function estimateCyclingVO2max(activities: Activity[], settings: UserSett
   const candidates: { vo2: number; quality: number; method: string; actId?: string | number; actName?: string; description: string }[] = [];
 
   activities.forEach((act) => {
-    const t = String(act.type).toLowerCase();
-    const isBike = t.includes('bici') || t.includes('ciclismo') || t.includes('ride');
+    const sport = sportOf(act.type);
+    const isBike = sport === 'bike';
     if (!isBike || new Date(act.date) < d45) return;
 
     const streams = act.streams_data;
@@ -650,8 +647,8 @@ export function estimateCyclingVO2max(activities: Activity[], settings: UserSett
 
   let bestMAP = 0;
   activities.forEach((act) => {
-    const t = String(act.type).toLowerCase();
-    if ((t.includes('bici') || t.includes('ciclismo') || t.includes('ride')) && new Date(act.date) >= d45) {
+    const sport = sportOf(act.type);
+    if ((sport === 'bike') && new Date(act.date) >= d45) {
       if (act.streams_data?.watts?.data && act.streams_data?.time?.data) {
         const map5 = getPeakPower(act.streams_data.watts.data, act.streams_data.time.data, 300);
         if (map5 > bestMAP) bestMAP = map5;
@@ -693,8 +690,8 @@ export function estimateRunningVO2max(activities: Activity[], settings: UserSett
   const candidates: { vo2: number; quality: number; method: string; actId?: string | number; actName?: string; description: string }[] = [];
 
   activities.forEach((act) => {
-    const t = String(act.type).toLowerCase();
-    const isRun = t.includes('run') || t.includes('carrera');
+    const sport = sportOf(act.type);
+    const isRun = sport === 'run';
     if (!isRun || new Date(act.date) < d45 || (act.duration || 0) < 10) return;
 
     const streams = act.streams_data;
@@ -814,8 +811,8 @@ export function predictRaceTimes(vo2max: number, activities: Activity[] = []): R
 export function calculateTrainingEffect(act: Activity, settings: UserSettings): TrainingEffectResult | null {
   if (!act) return null;
 
-  const t = String(act.type).toLowerCase();
-  const isBike = t.includes('bici') || t.includes('ciclismo') || t.includes('ride');
+  const sport = sportOf(act.type);
+  const isBike = sport === 'bike';
   const profile = isBike ? settings.bike : settings.run;
 
   const hrMax = Number(profile?.max) || 190;
@@ -985,8 +982,8 @@ export function getTrainingBalance(
   start.setDate(start.getDate() - days);
 
   const relevant = activities.filter((a) => {
-    const t = String(a.type).toLowerCase();
-    return (t.includes('run') || t.includes('carrera') || t.includes('bici') || t.includes('ciclismo') || t.includes('ride'))
+    const sport = sportOf(a.type);
+    return (sport === 'run' || sport === 'bike')
       && new Date(a.date) >= start && (a.duration || 0) >= 10;
   });
 
@@ -998,8 +995,8 @@ export function getTrainingBalance(
 
   relevant.forEach((act) => {
     const actTss = act.tss || ((act.duration || 0) / 3600 * 50);
-    const t = String(act.type).toLowerCase();
-    const isBike = t.includes('bici') || t.includes('ciclismo') || t.includes('ride');
+    const sport = sportOf(act.type);
+    const isBike = sport === 'bike';
     const maxHr = Number((isBike ? settings.bike : settings.run)?.max) || 190;
 
     let focus: 'low' | 'high' | 'anaerobic' = 'low';
@@ -1260,8 +1257,8 @@ export function calculateFTPHistory(activities: Activity[], settings: UserSettin
     windowStart.setDate(windowStart.getDate() - 90);
 
     const windowActivities = activities.filter((act) => {
-      const t = String(act.type).toLowerCase();
-      const isBike = t.includes('bici') || t.includes('ciclismo') || t.includes('ride');
+      const sport = sportOf(act.type);
+      const isBike = sport === 'bike';
       const d = new Date(act.date);
       return isBike && d >= windowStart && d <= windowEnd && act.streams_data?.watts?.data && act.streams_data?.time?.data;
     });
@@ -1352,11 +1349,11 @@ export function analyzeIntensityDistribution(
 
   activities.forEach((act) => {
     if (new Date(act.date) < d90 || (act.duration || 0) < 10) return;
-    const t = String(act.type).toLowerCase();
-    const isCardio = t.includes('run') || t.includes('carrera') || t.includes('bici') || t.includes('ciclismo') || t.includes('ride');
+    const sport = sportOf(act.type);
+    const isCardio = sport === 'run' || sport === 'bike';
     if (!isCardio) return;
 
-    const isBike = t.includes('bici') || t.includes('ciclismo') || t.includes('ride');
+    const isBike = sport === 'bike';
     const maxHr = Number((isBike ? settings.bike : settings.run)?.max) || 190;
 
     if (act.streams_data?.heartrate?.data && act.streams_data?.time?.data) {
@@ -1457,8 +1454,8 @@ export function getPowerProfileBenchmarks(
   ];
 
   const bikeActivities = activities.filter((act) => {
-    const t = String(act.type).toLowerCase();
-    const matchesSport = t.includes('bici') || t.includes('ciclismo') || t.includes('ride');
+    const sport = sportOf(act.type);
+    const matchesSport = sport === 'bike';
     const matchesDate = cutoffDate ? new Date(act.date) >= cutoffDate : true;
     return matchesSport && matchesDate && act.streams_data?.watts?.data && act.streams_data?.time?.data;
   });

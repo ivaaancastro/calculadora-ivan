@@ -26,10 +26,21 @@ describe('ui/Field recetas', () => {
   });
 
   it('cell y cell-bare copian los campos de los bloques del Calendario', () => {
-    expect(classes(inputClass({ variant: 'cell', mono: true }))).toEqual(classes('bg-sunken text-[13px] font-mono rounded-lg outline-none no-spinner text-body'));
-    expect(classes(inputClass({ variant: 'cell', size: 'sm' }))).toEqual(classes('bg-sunken rounded-lg text-[11px] outline-none no-spinner text-body'));
-    expect(classes(selectClass({ variant: 'cell' }))).toEqual(classes('bg-sunken text-[11px] font-medium text-body rounded-lg outline-none cursor-pointer'));
-    expect(classes(selectClass({ variant: 'cell-bare' }))).toEqual(classes('bg-transparent text-2xs text-ink-4 outline-none cursor-pointer'));
+    expect(classes(inputClass({ variant: 'cell', mono: true }))).toEqual(classes('bg-sunken text-[13px] font-mono rounded-lg outline-none no-spinner text-body focus-visible:ring-2 focus-visible:ring-action-bright'));
+    expect(classes(inputClass({ variant: 'cell', size: 'sm' }))).toEqual(classes('bg-sunken rounded-lg text-[11px] outline-none no-spinner text-body focus-visible:ring-2 focus-visible:ring-action-bright'));
+    expect(classes(selectClass({ variant: 'cell' }))).toEqual(classes('bg-sunken text-[11px] font-medium text-body rounded-lg outline-none cursor-pointer focus-visible:ring-2 focus-visible:ring-action-bright'));
+    expect(classes(selectClass({ variant: 'cell-bare' }))).toEqual(classes('bg-transparent text-2xs text-ink-4 rounded outline-none cursor-pointer focus-visible:ring-2 focus-visible:ring-action-bright'));
+  });
+
+  it('A11Y-3: ningún campo quita el contorno sin un anillo de foco', () => {
+    const variants = [
+      ...['filled', 'search', 'auth', 'inline'].map((v) => inputClass({ variant: v })),
+      inputClass({ variant: 'cell' }), inputClass({ variant: 'cell', size: 'sm' }), inputClass({ variant: 'inline', size: 'sm' }),
+      ...['filled', 'search', 'cell', 'cell-bare'].map((v) => selectClass({ variant: v })),
+    ];
+    for (const c of variants) {
+      if (/outline-none/.test(c)) expect(c, c).toMatch(/focus(-visible)?:ring-/);
+    }
   });
 
   it('inline copia los valores de Ajustes y elige el anillo con ringTone', () => {

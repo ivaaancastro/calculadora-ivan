@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../../supabase';
+import { exchangeStravaCode } from '../../services/stravaToken';
 import { Loader2, CheckCircle, XCircle } from 'lucide-react';
 
 const StravaCallback = () => {
@@ -14,15 +15,6 @@ const StravaCallback = () => {
     const handleCallback = async () => {
       if (hasFetched.current) return;
       hasFetched.current = true;
-
-      const clientId = import.meta.env.VITE_STRAVA_CLIENT_ID;
-      const clientSecret = import.meta.env.VITE_STRAVA_CLIENT_SECRET;
-
-      if (!clientId || !clientSecret) {
-        setStatus('error');
-        setMessage('Error: Faltan las claves API en el archivo .env');
-        return;
-      }
 
       const params = new URLSearchParams(window.location.search);
       const code = params.get('code');
@@ -43,16 +35,8 @@ const StravaCallback = () => {
       try {
         setMessage('Intercambiando credenciales con Strava...');
 
-        const response = await fetch(`https://www.strava.com/oauth/token?client_id=${clientId}&client_secret=${clientSecret}&code=${code}&grant_type=authorization_code`, {
-          method: 'POST'
-        });
-
-        const data = await response.json();
-
-        if (!response.ok) {
-            console.error("Respuesta Strava:", data);
-            throw new Error(data.message || 'Error al canjear token');
-        }
+        // El canje lo hace la Edge Function `strava-token`: el secreto no sale del servidor.
+        const data = await exchangeStravaCode(code);
 
         setMessage('Guardando acceso seguro...');
         

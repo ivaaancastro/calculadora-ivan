@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 
-import { MAIN_TAB_PATHS as MAIN_TABS } from '../components/dashboard/mainTabs';
+import { MAIN_TAB_PATHS as MAIN_TABS } from '../utils/mainTabs';
 
 /**
  * useSwipeNavigation — Hook de navegación lateral por gestos táctiles estilo iOS

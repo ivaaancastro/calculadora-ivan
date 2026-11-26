@@ -6,7 +6,7 @@
  * Sin React ni estilos.
  */
 
-import { formatMinsToHMM } from './formatters';
+import { formatMinutes, formatNumber } from './formatters';
 
 /** Deportes reconocidos. La caminata se agrupa con el senderismo (`hike`). */
 export const SPORTS = ['bike', 'run', 'hike', 'strength', 'generic'];
@@ -133,15 +133,15 @@ export function buildMetricDefs(activity, proMetrics, sport, speedMetric) {
     const isPace = speedMetric?.label === 'Ritmo Medio';
     return {
         kcal: { id: 'kcal', metricId: 'kcal', label: 'Kcal totales', value: Math.round(activity.calories || 0), unit: 'kcal', show: positive(activity.calories) },
-        distance: { id: 'distance', metricId: 'distance', label: 'Distancia', value: ((activity.distance || 0) / 1000).toFixed(2), unit: 'km', show: positive(activity.distance) },
-        duration: { id: 'duration', metricId: 'duration', label: 'Tiempo', value: formatMinsToHMM(activity.duration || 0), unit: null, show: positive(activity.duration) },
+        distance: { id: 'distance', metricId: 'distance', label: 'Distancia', value: formatNumber((activity.distance || 0) / 1000, 2), unit: 'km', show: positive(activity.distance) },
+        duration: { id: 'duration', metricId: 'duration', label: 'Tiempo', value: formatMinutes(activity.duration || 0), unit: null, show: positive(activity.duration) },
         elevation: { id: 'elevation', metricId: 'elevation', label: 'Desnivel', value: activity.elevation_gain || 0, unit: 'm', show: positive(activity.elevation_gain) },
         hrAvg: { id: 'hrAvg', metricId: 'hrAvg', label: 'FC Media', value: activity.hr_avg, unit: 'bpm', accent: 'text-hr', show: positive(activity.hr_avg) },
         speedPace: speedMetric
             ? { id: isPace ? 'pace' : 'speed', metricId: isPace ? 'pace' : 'speed', label: speedMetric.label, value: speedMetric.value, unit: speedMetric.unit, accent: 'text-speed', show: true }
             : { id: 'speedPace', show: false },
         tss: { id: 'tss', metricId: 'tss', label: 'Carga', value: Math.round(activity.tss || 0), unit: 'TSS', accent: 'text-load', show: positive(activity.tss) },
-        if: { id: 'if', metricId: 'if', label: 'IF', value: pm.ifFactor, unit: null, accent: 'text-power', show: positive(pm.ifFactor) },
+        if: { id: 'if', metricId: 'if', label: 'IF', value: positive(pm.ifFactor) ? formatNumber(pm.ifFactor, 2) : pm.ifFactor, unit: null, accent: 'text-power', show: positive(pm.ifFactor) },
         work: { id: 'work', metricId: 'work', label: 'Trabajo', value: pm.workKj, unit: 'kJ', show: positive(pm.workKj) },
         wattsAvg: { id: 'wattsAvg', metricId: 'wattsAvg', label: 'W Media', value: pm.avgWatts, unit: 'w', accent: 'text-power', show: positive(pm.avgWatts) },
         np: { id: 'np', metricId: 'np', label: 'NP', value: pm.npWatts, unit: 'w', accent: 'text-power-strong', show: positive(pm.npWatts) },

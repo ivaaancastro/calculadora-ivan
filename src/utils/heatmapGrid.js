@@ -3,7 +3,8 @@
  * (lunes a domingo) hasta la semana de `today`. `byDate` = { 'YYYY-MM-DD': TSS }.
  * Devuelve columnas de 7 celdas: { key, value, level (0-4), future }.
  */
-const iso = (d) => d.toLocaleDateString('en-CA');
+import { toDateKey } from './dates';
+const iso = toDateKey;
 
 export function heatmapLevel(value, max) {
   if (!(value > 0) || !(max > 0)) return 0;

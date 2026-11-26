@@ -1,11 +1,11 @@
 {
   "$comment": "Línea base de scripts/check-colors.mjs. Solo debe bajar (npm run lint:colors -- --update). Subirla a mano exige justificarlo en el PR.",
   "totals": {
-    "palette": 642,
+    "palette": 622,
     "arbitrary": 3,
     "hex": 60,
     "rgb": 8,
-    "dark": 148
+    "dark": 141
   },
   "files": {
     "src/App.jsx": {
@@ -113,13 +113,6 @@
       "rgb": 0,
       "dark": 9
     },
-    "src/components/calendar/calendarHelpers.jsx": {
-      "palette": 6,
-      "arbitrary": 0,
-      "hex": 0,
-      "rgb": 0,
-      "dark": 3
-    },
     "src/components/common/ErrorBoundary.jsx": {
       "palette": 3,
       "arbitrary": 0,
@@ -134,26 +127,12 @@
       "rgb": 0,
       "dark": 0
     },
-    "src/components/dashboard/ChartsSection.jsx": {
-      "palette": 4,
-      "arbitrary": 0,
-      "hex": 0,
-      "rgb": 0,
-      "dark": 0
-    },
     "src/components/dashboard/EvolutionChart.jsx": {
       "palette": 9,
       "arbitrary": 0,
       "hex": 0,
       "rgb": 0,
       "dark": 3
-    },
-    "src/components/dashboard/FuelingPanel.jsx": {
-      "palette": 10,
-      "arbitrary": 0,
-      "hex": 0,
-      "rgb": 0,
-      "dark": 4
     },
     "src/components/dashboard/HistoryList.jsx": {
       "palette": 18,

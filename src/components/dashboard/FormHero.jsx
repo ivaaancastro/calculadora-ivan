@@ -1,6 +1,7 @@
 import React from 'react';
 import { ArrowUpRight, ArrowDownRight, Minus } from 'lucide-react';
-import { useCountUp } from '../health/useCountUp';
+import { useCountUp } from '../../hooks/useCountUp';
+import { formatNumber } from '../../utils/formatters';
 
 const RANGES = [
     { id: '7d', label: '7D' },
@@ -63,7 +64,7 @@ export const FormHero = ({ summary, ctl, loadTrend, timeRange, setTimeRange }) =
                         {hasData && (
                             <span className={`flex items-center gap-0.5 text-xs font-semibold tabular-nums ${trendTone}`}>
                                 <TrendIcon size={14} strokeWidth={2.5} aria-hidden="true" />
-                                {loadTrend > 0 ? '+' : ''}{loadTrend.toFixed(1)}%
+                                {loadTrend > 0 ? '+' : ''}{formatNumber(loadTrend, 1)}%
                                 <span className="sr-only"> en 28 días</span>
                             </span>
                         )}

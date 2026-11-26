@@ -2,7 +2,7 @@ import React from 'react';
 import {
     BatteryCharging
 } from 'lucide-react';
-import { useCountUp } from './useCountUp';
+import { useCountUp } from '../../hooks/useCountUp';
 
 export const EnergyBank = ({ energyBankAmount }) => {
     const counted = useCountUp(typeof energyBankAmount === 'number' ? energyBankAmount : null);

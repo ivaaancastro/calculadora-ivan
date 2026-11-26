@@ -5,6 +5,7 @@
  * Las frases de IF y de pico de 5 min son de potencia: solo se generan en los
  * deportes cuya matriz (`SPORT_BLOCKS`) muestra esas métricas (bici).
  */
+import { formatNumber } from './formatters';
 import { getBlocksForSport } from './activityMetricsBySport';
 
 export function buildCoachInsights({ sport, ifFactor = 0, decouplingObj = null, primaryBenefit, powerCurve = [], npWatts = 0 }) {
@@ -16,30 +17,30 @@ export function buildCoachInsights({ sport, ifFactor = 0, decouplingObj = null, 
 
     if (showIf) {
         if (ifFactor >= 0.95) {
-            insights.push(`Has trabajado a una intensidad altísima (${ifFactor}), prácticamente a nivel de competición. Este estímulo es excelente para mejorar tu techo de rendimiento, pero requiere una recuperación profunda.`);
+            insights.push(`Has trabajado a una intensidad altísima (${formatNumber(ifFactor, 2)}), prácticamente a nivel de competición. Este estímulo es excelente para mejorar tu techo de rendimiento, pero requiere una recuperación profunda.`);
             score += 20;
         } else if (ifFactor >= 0.85) {
-            insights.push(`Sesión de intensidad sólida (${ifFactor}). Has pasado gran parte del tiempo en zonas exigentes, lo que fortalecerá tu resistencia específica.`);
+            insights.push(`Sesión de intensidad sólida (${formatNumber(ifFactor, 2)}). Has pasado gran parte del tiempo en zonas exigentes, lo que fortalecerá tu resistencia específica.`);
             score += 15;
         } else if (ifFactor > 0.70) {
-            insights.push(`Intensidad moderada (${ifFactor}), ritmo de tempo. Has mantenido un esfuerzo constante y sostenible que construye resistencia sin exigir una recuperación larga.`);
+            insights.push(`Intensidad moderada (${formatNumber(ifFactor, 2)}), ritmo de tempo. Has mantenido un esfuerzo constante y sostenible que construye resistencia sin exigir una recuperación larga.`);
             score += 10;
         } else if (ifFactor > 0) {
-            insights.push(`Buen control de la intensidad (${ifFactor}). Te has mantenido en niveles de base o recuperación, permitiendo sumar volumen sin quemarte.`);
+            insights.push(`Buen control de la intensidad (${formatNumber(ifFactor, 2)}). Te has mantenido en niveles de base o recuperación, permitiendo sumar volumen sin quemarte.`);
             score += 10;
         }
     }
 
     if (decouplingObj) {
-        const drift = parseFloat(decouplingObj.value);
+        const drift = Number.isFinite(decouplingObj.drift) ? decouplingObj.drift : parseFloat(String(decouplingObj.value).replace(',', '.'));
         if (drift > 10) {
-            insights.push(`He detectado un desacople aeróbico alto (${drift}%). Tu pulso ha subido significativamente para mantener la misma potencia; esto sugiere fatiga acumulada, deshidratación o falta de adaptación al calor.`);
+            insights.push(`He detectado un desacople aeróbico alto (${formatNumber(drift, 1)} %). Tu pulso ha subido significativamente para mantener la misma potencia; esto sugiere fatiga acumulada, deshidratación o falta de adaptación al calor.`);
             score -= 15;
         } else if (drift > 5) {
-            insights.push(`Desacople moderado (${drift}%). Hay algo de deriva cardiaca, normal en sesiones largas, pero indica que tu eficiencia aeróbica todavía tiene margen de mejora.`);
+            insights.push(`Desacople moderado (${formatNumber(drift, 1)} %). Hay algo de deriva cardiaca, normal en sesiones largas, pero indica que tu eficiencia aeróbica todavía tiene margen de mejora.`);
             score += 5;
         } else if (drift <= 5 && drift >= -5) {
-            insights.push(`Eficiencia impecable. Tu pulso se ha mantenido estable respecto a la carga (${drift}%), lo que indica que tienes esta intensidad muy bien dominada.`);
+            insights.push(`Eficiencia impecable. Tu pulso se ha mantenido estable respecto a la carga (${formatNumber(drift, 1)} %), lo que indica que tienes esta intensidad muy bien dominada.`);
             score += 25;
         }
     }

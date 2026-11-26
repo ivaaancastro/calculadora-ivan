@@ -216,7 +216,7 @@ export const Navbar = ({ settings, uploading, isStravaConnected, onSync }) => {
         {/* ACTIONS */}
         <div className="flex items-center gap-1.5 sm:gap-2">
 
-          <button onClick={toggleTheme} data-shell="icon-btn" className="w-9 h-9 flex items-center justify-center rounded-full text-ink-3 hover:text-ink-2 bg-slate-100/70 hover:bg-slate-200/60 dark:bg-zinc-900/80 dark:hover:bg-zinc-800 active:scale-90 transition-all" title="Cambiar tema">
+          <button type="button" aria-label="Cambiar tema" onClick={toggleTheme} data-shell="icon-btn" className="w-9 h-9 flex items-center justify-center rounded-full text-ink-3 hover:text-ink-2 bg-slate-100/70 hover:bg-slate-200/60 dark:bg-zinc-900/80 dark:hover:bg-zinc-800 active:scale-90 transition-all" title="Cambiar tema">
             {theme === 'dark' ? <Sun size={17} /> : <Moon size={17} />}
           </button>
 

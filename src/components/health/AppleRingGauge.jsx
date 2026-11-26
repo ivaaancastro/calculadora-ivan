@@ -1,6 +1,7 @@
 import React from 'react';
-import { useCountUp } from './useCountUp';
+import { useCountUp } from '../../hooks/useCountUp';
 import { chartFigureProps } from '../charts/chartA11y';
+import { formatNumber } from '../../utils/formatters';
 
 export const AppleRingGauge = ({ value, max = 100, colorClass, strokeColor, gradientId, size = 150, strokeWidth = 14, icon: Icon, title, unit = '' }) => {
     const numVal = typeof value === 'number' ? value : parseFloat(value);
@@ -43,7 +44,7 @@ export const AppleRingGauge = ({ value, max = 100, colorClass, strokeColor, grad
             <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
                 <Icon data-health="ring-icon" size={20} className={`${colorClass} mb-1 opacity-90`} />
                 <span data-health="ring-value" className={`text-3xl sm:text-4xl font-black tracking-tight tabular-nums ${colorClass}`}>
-                    {valid ? (max === 10 ? counted.toFixed(1) : Math.round(counted)) : '--'}
+                    {valid ? (max === 10 ? formatNumber(counted, 1) : Math.round(counted)) : '--'}
                     {unit && <span className="text-sm font-bold text-ink-4 ml-0.5">{unit}</span>}
                 </span>
                 <span data-health="ring-title" className="text-2xs font-bold text-ink-4 uppercase tracking-widest mt-0.5 text-center">

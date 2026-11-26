@@ -20,6 +20,20 @@ test.describe('Sincronización Strava', () => {
     await expect(page.getByText('Acceso denegado por el usuario.')).toBeVisible();
   });
 
+  test('el callback canjea el código en la Edge Function, sin secreto en el cliente', async ({ page }) => {
+    const state = { stravaTokenRequests: [] };
+    await setupApp(page, { authenticated: true, state });
+    const direct = [];
+    page.on('request', (r) => {
+      if (r.url().startsWith('https://www.strava.com/oauth/token')) direct.push(r.url());
+    });
+    await page.goto('/strava-callback?code=e2e-code&scope=read,activity:read_all');
+    await expect(page.getByText('¡Conectado! Redirigiendo al Laboratorio...')).toBeVisible();
+    // Solo el código y el id público de la app; nunca el secreto.
+    expect(state.stravaTokenRequests).toEqual([{ grant_type: 'authorization_code', code: 'e2e-code', client_id: 'e2e-strava-client' }]);
+    expect(direct).toEqual([]);
+  });
+
   test('el callback sin código informa del error', async ({ page }) => {
     await setupApp(page, { authenticated: true });
     await page.goto('/strava-callback');

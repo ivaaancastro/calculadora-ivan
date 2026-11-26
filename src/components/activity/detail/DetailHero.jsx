@@ -2,6 +2,7 @@ import React from 'react';
 import { Bike, Footprints, Mountain, Dumbbell, Activity as ActivityIcon } from 'lucide-react';
 import { MetricTooltip } from '../../ui';
 import { detectSportType, pickHeroMetrics } from '../../../utils/activityMetricsBySport';
+import { activityTypeLabel } from '../../../utils/sport';
 
 const SPORT_META = {
     bike: { label: 'Ciclismo', icon: Bike },
@@ -29,7 +30,7 @@ export const DetailHero = ({ activity, dateStr, metrics, themeColor }) => {
                     <span className="normal-case tracking-normal font-medium text-ink-4 capitalize">{dateStr}</span>
                 </p>
                 <h1 data-detail="title" className="text-[26px] sm:text-[32px] leading-[1.1] font-bold tracking-[-0.03em] text-ink [text-wrap:balance]">
-                    {activity.name || activity.type}
+                    {activity.name || activityTypeLabel(activity.type)}
                 </h1>
             </div>
 

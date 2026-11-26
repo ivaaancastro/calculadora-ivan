@@ -8,6 +8,8 @@ import { formatInterval } from '../../hooks/useFitnessAnalytics';
 import { useChartTheme } from '../charts/useChartTheme';
 import { useChartMotion } from '../charts/useChartMotion';
 import { Card, chartTooltipStyle, InfoTooltip, Segmented } from '../ui';
+import { formatNumber } from '../../utils/formatters';
+import { chartFigureProps, summarizeCategories } from '../charts/chartA11y';
 import { axisProps } from '../charts/axisProps.js';
 
 export const PowerProfileCard = ({
@@ -96,7 +98,7 @@ export const PowerProfileCard = ({
 
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
                     <div className="lg:col-span-2">
-                        <div className="h-[340px] w-full bg-sunken-7 rounded-3xl p-4 border border-line-faint-2">
+                        <div className="h-[340px] w-full bg-sunken-7 rounded-3xl p-4 border border-line-faint-2" {...chartFigureProps('Perfil de potencia frente a categorías', summarizeCategories(ppChartData, 'name', 'Usuario', powerUnit === 'wkg' ? 'W/kg' : 'W'))}>
                             <ResponsiveContainer width="100%" height="100%">
                                 <LineChart data={ppChartData} margin={{ top: 10, right: 10, left: -20, bottom: 5 }}>
                                     <CartesianGrid strokeDasharray="3 3" stroke={ct.anatomy.grid2} opacity={0.3} vertical={false} />
@@ -140,7 +142,7 @@ export const PowerProfileCard = ({
                                     </p>
                                 </div>
                                 <div className="text-right">
-                                    <p className="text-lg font-bold text-blue-500">{powerUnit === 'wkg' ? p['Usuario'] : (p['Usuario'] / (powerProfile?.weight || 70)).toFixed(2)}</p>
+                                    <p className="text-lg font-bold text-blue-500">{powerUnit === 'wkg' ? p['Usuario'] : formatNumber(p['Usuario'] / (powerProfile?.weight || 70), 2)}</p>
                                     <p className="text-2xs font-bold text-slate-400 uppercase tracking-widest mt-0.5 leading-none">W/kg</p>
                                 </div>
                             </div>

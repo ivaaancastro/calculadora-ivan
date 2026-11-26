@@ -1,15 +1,24 @@
 import React, { useMemo, useState } from 'react';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer } from 'recharts';
-import { formatPace, formatDuration } from '../../../utils/formatters';
+import { formatPace, formatDuration, formatNumber } from '../../../utils/formatters';
 import { Card, EmptyState } from '../../ui';
 import { useChartTheme } from '../../charts/useChartTheme';
 import { ZoomRange } from '../../charts/ZoomRange';
 import { sliceByRange } from '../../charts/sliceRange';
+import { chartFigureProps, summarizeSeries } from '../../charts/chartA11y';
 
 export const ActivityCharts = ({ chartData: fullData, activePayload, handleMouseMove, isPaceBased, blocks }) => {
     const ct = useChartTheme();
     const [range, setRange] = useState([0, 100]);
     const chartData = useMemo(() => sliceByRange(fullData, range), [fullData, range]);
+    // Alternativa textual de cada pista (A11Y-5); memoizada para no recalcularla con cada movimiento del cursor.
+    const summaries = useMemo(() => ({
+        speed: summarizeSeries(chartData, [{ key: isPaceBased ? 'pace' : 'speed', label: isPaceBased ? 'Ritmo' : 'Velocidad' }], { unit: isPaceBased ? 'min/km' : 'km/h' }),
+        hr: summarizeSeries(chartData, [{ key: 'hr', label: 'FC' }], { unit: 'ppm' }),
+        watts: summarizeSeries(chartData, [{ key: 'watts', label: 'Potencia' }], { unit: 'W' }),
+        alt: summarizeSeries(chartData, [{ key: 'alt', label: 'Altitud' }], { unit: 'm' }),
+        cadence: summarizeSeries(chartData, [{ key: 'cadence', label: 'Cadencia' }]),
+    }), [chartData, isPaceBased]);
     const missing = [
         blocks?.charts?.power && !chartData.some(d => d.watts > 0) ? 'potencia' : null,
         !chartData.some(d => d.hr > 0) ? 'frecuencia cardiaca' : null,
@@ -35,23 +44,25 @@ export const ActivityCharts = ({ chartData: fullData, activePayload, handleMouse
                                                     </div>
                                                     {activePayload && <span className="text-xs font-bold tabular-nums text-pace">{isPaceBased ? formatPace(activePayload.pace) : activePayload.speed + ' km/h'}</span>}
                                                 </div>
-                                                <ResponsiveContainer width="100%" height={80}>
-                                                    <AreaChart 
-                                                        data={chartData} 
-                                                        syncId="st" 
-                                                        onMouseMove={handleMouseMove}
-                                                        onTouchMove={handleMouseMove}
-                                                        onTouchStart={handleMouseMove}
-                                                        onClick={handleMouseMove}
-                                                        style={{ touchAction: 'pan-y' }}
-                                                    >
-                                                        <CartesianGrid vertical={false} strokeDasharray="3 3" stroke={ct.anatomy.gridSoft} opacity={0.5} />
-                                                        <XAxis dataKey="time" hide />
-                                                        <YAxis reversed={isPaceBased} hide domain={['dataMin', 'dataMax']} />
-                                                        <RechartsTooltip isAnimationActive={false} content={() => null} cursor={{ stroke: ct.series.pace, strokeWidth: 1.5, strokeDasharray: '3 3' }} />
-                                                        <Area type="monotone" dataKey={isPaceBased ? "pace" : "speed"} stroke={ct.series.pace} fill={ct.series.pace} fillOpacity={0.06} strokeWidth={1.5} dot={false} activeDot={{ r: 3, stroke: ct.anatomy.dotRing, strokeWidth: 1.5, fill: ct.series.pace }} />
-                                                    </AreaChart>
-                                                </ResponsiveContainer>
+                                                <div {...chartFigureProps(isPaceBased ? 'Ritmo' : 'Velocidad', summaries.speed)}>
+                                                    <ResponsiveContainer width="100%" height={80}>
+                                                        <AreaChart 
+                                                            data={chartData} 
+                                                            syncId="st" 
+                                                            onMouseMove={handleMouseMove}
+                                                            onTouchMove={handleMouseMove}
+                                                            onTouchStart={handleMouseMove}
+                                                            onClick={handleMouseMove}
+                                                            style={{ touchAction: 'pan-y' }}
+                                                        >
+                                                            <CartesianGrid vertical={false} strokeDasharray="3 3" stroke={ct.anatomy.gridSoft} opacity={0.5} />
+                                                            <XAxis dataKey="time" hide />
+                                                            <YAxis reversed={isPaceBased} hide domain={['dataMin', 'dataMax']} />
+                                                            <RechartsTooltip isAnimationActive={false} content={() => null} cursor={{ stroke: ct.series.pace, strokeWidth: 1.5, strokeDasharray: '3 3' }} />
+                                                            <Area type="monotone" dataKey={isPaceBased ? "pace" : "speed"} stroke={ct.series.pace} fill={ct.series.pace} fillOpacity={0.06} strokeWidth={1.5} dot={false} activeDot={{ r: 3, stroke: ct.anatomy.dotRing, strokeWidth: 1.5, fill: ct.series.pace }} />
+                                                        </AreaChart>
+                                                    </ResponsiveContainer>
+                                                </div>
                                             </div>
                                             )}
 
@@ -62,23 +73,25 @@ export const ActivityCharts = ({ chartData: fullData, activePayload, handleMouse
                                                         <h4 className="text-2xs font-bold text-slate-400 uppercase tracking-widest">FC</h4>
                                                         {activePayload && <span className="text-xs font-bold tabular-nums text-hr">{activePayload.hr} bpm</span>}
                                                     </div>
-                                                    <ResponsiveContainer width="100%" height={80}>
-                                                        <AreaChart 
-                                                            data={chartData} 
-                                                            syncId="st" 
-                                                            onMouseMove={handleMouseMove}
-                                                            onTouchMove={handleMouseMove}
-                                                            onTouchStart={handleMouseMove}
-                                                            onClick={handleMouseMove}
-                                                            style={{ touchAction: 'pan-y' }}
-                                                        >
-                                                            <CartesianGrid vertical={false} strokeDasharray="3 3" stroke={ct.anatomy.gridSoft} opacity={0.5} />
-                                                            <XAxis dataKey="time" hide />
-                                                            <YAxis hide domain={['dataMin - 5', 'dataMax + 5']} />
-                                                            <RechartsTooltip isAnimationActive={false} content={() => null} cursor={{ stroke: ct.series.hr, strokeWidth: 1.5, strokeDasharray: '3 3' }} />
-                                                            <Area type="monotone" dataKey="hr" stroke={ct.series.hr} fill={ct.series.hr} fillOpacity={0.06} strokeWidth={1.5} dot={false} activeDot={{ r: 3, stroke: ct.anatomy.dotRing, strokeWidth: 1.5, fill: ct.series.hr }} />
-                                                        </AreaChart>
-                                                    </ResponsiveContainer>
+                                                    <div {...chartFigureProps('Frecuencia cardiaca', summaries.hr)}>
+                                                        <ResponsiveContainer width="100%" height={80}>
+                                                            <AreaChart 
+                                                                data={chartData} 
+                                                                syncId="st" 
+                                                                onMouseMove={handleMouseMove}
+                                                                onTouchMove={handleMouseMove}
+                                                                onTouchStart={handleMouseMove}
+                                                                onClick={handleMouseMove}
+                                                                style={{ touchAction: 'pan-y' }}
+                                                            >
+                                                                <CartesianGrid vertical={false} strokeDasharray="3 3" stroke={ct.anatomy.gridSoft} opacity={0.5} />
+                                                                <XAxis dataKey="time" hide />
+                                                                <YAxis hide domain={['dataMin - 5', 'dataMax + 5']} />
+                                                                <RechartsTooltip isAnimationActive={false} content={() => null} cursor={{ stroke: ct.series.hr, strokeWidth: 1.5, strokeDasharray: '3 3' }} />
+                                                                <Area type="monotone" dataKey="hr" stroke={ct.series.hr} fill={ct.series.hr} fillOpacity={0.06} strokeWidth={1.5} dot={false} activeDot={{ r: 3, stroke: ct.anatomy.dotRing, strokeWidth: 1.5, fill: ct.series.hr }} />
+                                                            </AreaChart>
+                                                        </ResponsiveContainer>
+                                                    </div>
                                                 </div>
                                             )}
 
@@ -89,23 +102,25 @@ export const ActivityCharts = ({ chartData: fullData, activePayload, handleMouse
                                                         <h4 className="text-2xs font-bold text-slate-400 uppercase tracking-widest">Potencia</h4>
                                                         {activePayload && <span className="text-xs font-bold tabular-nums text-power">{activePayload.watts} w</span>}
                                                     </div>
-                                                    <ResponsiveContainer width="100%" height={80}>
-                                                        <AreaChart 
-                                                            data={chartData} 
-                                                            syncId="st" 
-                                                            onMouseMove={handleMouseMove}
-                                                            onTouchMove={handleMouseMove}
-                                                            onTouchStart={handleMouseMove}
-                                                            onClick={handleMouseMove}
-                                                            style={{ touchAction: 'pan-y' }}
-                                                        >
-                                                            <CartesianGrid vertical={false} strokeDasharray="3 3" stroke={ct.anatomy.gridSoft} opacity={0.5} />
-                                                            <XAxis dataKey="time" hide />
-                                                            <YAxis hide domain={['dataMin', 'dataMax']} />
-                                                            <RechartsTooltip isAnimationActive={false} content={() => null} cursor={{ stroke: ct.series.power, strokeWidth: 1.5, strokeDasharray: '3 3' }} />
-                                                            <Area type="monotone" dataKey="watts" stroke={ct.series.power} fill={ct.series.power} fillOpacity={0.06} strokeWidth={1.5} dot={false} activeDot={{ r: 3, stroke: ct.anatomy.dotRing, strokeWidth: 1.5, fill: ct.series.power }} />
-                                                        </AreaChart>
-                                                    </ResponsiveContainer>
+                                                    <div {...chartFigureProps('Potencia', summaries.watts)}>
+                                                        <ResponsiveContainer width="100%" height={80}>
+                                                            <AreaChart 
+                                                                data={chartData} 
+                                                                syncId="st" 
+                                                                onMouseMove={handleMouseMove}
+                                                                onTouchMove={handleMouseMove}
+                                                                onTouchStart={handleMouseMove}
+                                                                onClick={handleMouseMove}
+                                                                style={{ touchAction: 'pan-y' }}
+                                                            >
+                                                                <CartesianGrid vertical={false} strokeDasharray="3 3" stroke={ct.anatomy.gridSoft} opacity={0.5} />
+                                                                <XAxis dataKey="time" hide />
+                                                                <YAxis hide domain={['dataMin', 'dataMax']} />
+                                                                <RechartsTooltip isAnimationActive={false} content={() => null} cursor={{ stroke: ct.series.power, strokeWidth: 1.5, strokeDasharray: '3 3' }} />
+                                                                <Area type="monotone" dataKey="watts" stroke={ct.series.power} fill={ct.series.power} fillOpacity={0.06} strokeWidth={1.5} dot={false} activeDot={{ r: 3, stroke: ct.anatomy.dotRing, strokeWidth: 1.5, fill: ct.series.power }} />
+                                                            </AreaChart>
+                                                        </ResponsiveContainer>
+                                                    </div>
                                                 </div>
                                             )}
 
@@ -117,29 +132,31 @@ export const ActivityCharts = ({ chartData: fullData, activePayload, handleMouse
                                                             <h4 className="text-2xs font-bold text-slate-400 uppercase tracking-widest">Altitud</h4>
                                                             {activePayload?.grade !== undefined && (
                                                                 <span className={`text-2xs font-black ${activePayload.grade > 3 ? 'text-rose-500' : activePayload.grade < -3 ? 'text-emerald-500' : 'text-slate-400'}`}>
-                                                                    {activePayload.grade > 0 ? '+' : ''}{activePayload.grade.toFixed(1)}%
+                                                                    {activePayload.grade > 0 ? '+' : ''}{formatNumber(activePayload.grade, 1)}%
                                                                 </span>
                                                             )}
                                                         </div>
                                                         {activePayload && <span className="text-xs font-bold tabular-nums text-slate-500">{activePayload.alt} m</span>}
                                                     </div>
-                                                    <ResponsiveContainer width="100%" height={80}>
-                                                        <AreaChart 
-                                                            data={chartData} 
-                                                            syncId="st" 
-                                                            onMouseMove={handleMouseMove}
-                                                            onTouchMove={handleMouseMove}
-                                                            onTouchStart={handleMouseMove}
-                                                            onClick={handleMouseMove}
-                                                            style={{ touchAction: 'pan-y' }}
-                                                        >
-                                                            <CartesianGrid vertical={false} strokeDasharray="3 3" stroke={ct.anatomy.gridSoft} opacity={0.5} />
-                                                            <XAxis dataKey="time" hide />
-                                                            <YAxis hide domain={['dataMin - 10', 'dataMax + 10']} />
-                                                            <RechartsTooltip isAnimationActive={false} content={() => null} cursor={{ stroke: ct.series.altitude, strokeWidth: 1.5, strokeDasharray: '3 3' }} />
-                                                            <Area type="monotone" dataKey="alt" stroke={ct.series.altitude} fill={ct.series.altitude} fillOpacity={0.06} strokeWidth={1.5} dot={false} activeDot={{ r: 3, stroke: ct.anatomy.dotRing, strokeWidth: 1.5, fill: ct.series.altitude }} />
-                                                        </AreaChart>
-                                                    </ResponsiveContainer>
+                                                    <div {...chartFigureProps('Altitud', summaries.alt)}>
+                                                        <ResponsiveContainer width="100%" height={80}>
+                                                            <AreaChart 
+                                                                data={chartData} 
+                                                                syncId="st" 
+                                                                onMouseMove={handleMouseMove}
+                                                                onTouchMove={handleMouseMove}
+                                                                onTouchStart={handleMouseMove}
+                                                                onClick={handleMouseMove}
+                                                                style={{ touchAction: 'pan-y' }}
+                                                            >
+                                                                <CartesianGrid vertical={false} strokeDasharray="3 3" stroke={ct.anatomy.gridSoft} opacity={0.5} />
+                                                                <XAxis dataKey="time" hide />
+                                                                <YAxis hide domain={['dataMin - 10', 'dataMax + 10']} />
+                                                                <RechartsTooltip isAnimationActive={false} content={() => null} cursor={{ stroke: ct.series.altitude, strokeWidth: 1.5, strokeDasharray: '3 3' }} />
+                                                                <Area type="monotone" dataKey="alt" stroke={ct.series.altitude} fill={ct.series.altitude} fillOpacity={0.06} strokeWidth={1.5} dot={false} activeDot={{ r: 3, stroke: ct.anatomy.dotRing, strokeWidth: 1.5, fill: ct.series.altitude }} />
+                                                            </AreaChart>
+                                                        </ResponsiveContainer>
+                                                    </div>
                                                 </div>
                                             )}
 
@@ -150,23 +167,25 @@ export const ActivityCharts = ({ chartData: fullData, activePayload, handleMouse
                                                         <h4 className="text-2xs font-bold text-slate-400 uppercase tracking-widest">Cadencia</h4>
                                                         {activePayload && <span className="text-xs font-bold tabular-nums text-cadence">{activePayload.cadence} {isPaceBased ? 'ppm' : 'rpm'}</span>}
                                                     </div>
-                                                    <ResponsiveContainer width="100%" height={80}>
-                                                        <AreaChart 
-                                                            data={chartData} 
-                                                            syncId="st" 
-                                                            onMouseMove={handleMouseMove}
-                                                            onTouchMove={handleMouseMove}
-                                                            onTouchStart={handleMouseMove}
-                                                            onClick={handleMouseMove}
-                                                            style={{ touchAction: 'pan-y' }}
-                                                        >
-                                                            <CartesianGrid vertical={false} strokeDasharray="3 3" stroke={ct.anatomy.gridSoft} opacity={0.5} />
-                                                            <XAxis dataKey="time" hide />
-                                                            <YAxis hide domain={['dataMin - 5', 'dataMax + 5']} />
-                                                            <RechartsTooltip isAnimationActive={false} content={() => null} cursor={{ stroke: ct.series.cadence, strokeWidth: 1.5, strokeDasharray: '3 3' }} />
-                                                            <Area type="monotone" dataKey="cadence" stroke={ct.series.cadence} fill={ct.series.cadence} fillOpacity={0.06} strokeWidth={1.5} dot={false} activeDot={{ r: 3, stroke: ct.anatomy.dotRing, strokeWidth: 1.5, fill: ct.series.cadence }} />
-                                                        </AreaChart>
-                                                    </ResponsiveContainer>
+                                                    <div {...chartFigureProps('Cadencia', summaries.cadence)}>
+                                                        <ResponsiveContainer width="100%" height={80}>
+                                                            <AreaChart 
+                                                                data={chartData} 
+                                                                syncId="st" 
+                                                                onMouseMove={handleMouseMove}
+                                                                onTouchMove={handleMouseMove}
+                                                                onTouchStart={handleMouseMove}
+                                                                onClick={handleMouseMove}
+                                                                style={{ touchAction: 'pan-y' }}
+                                                            >
+                                                                <CartesianGrid vertical={false} strokeDasharray="3 3" stroke={ct.anatomy.gridSoft} opacity={0.5} />
+                                                                <XAxis dataKey="time" hide />
+                                                                <YAxis hide domain={['dataMin - 5', 'dataMax + 5']} />
+                                                                <RechartsTooltip isAnimationActive={false} content={() => null} cursor={{ stroke: ct.series.cadence, strokeWidth: 1.5, strokeDasharray: '3 3' }} />
+                                                                <Area type="monotone" dataKey="cadence" stroke={ct.series.cadence} fill={ct.series.cadence} fillOpacity={0.06} strokeWidth={1.5} dot={false} activeDot={{ r: 3, stroke: ct.anatomy.dotRing, strokeWidth: 1.5, fill: ct.series.cadence }} />
+                                                            </AreaChart>
+                                                        </ResponsiveContainer>
+                                                    </div>
                                                 </div>
                                             )}
                                             {missing.length > 0 && (

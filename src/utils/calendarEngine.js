@@ -1,6 +1,7 @@
 // Lógica pura del Calendario (extraída de CalendarPage.jsx, PR 8a). Sin React: testeable.
 import { getEffectiveTSS, getSportCategory, SPORT_LOAD_CONFIG } from './tssEngine';
 import { ZONE_PACE } from './calendarTemplates';
+import { toDateKey } from './dates';
 
 /** Fecha guardada en sessionStorage o ahora. */
 export const loadSavedCalendarDate = (storage = sessionStorage) => {
@@ -30,14 +31,14 @@ export const groupActivitiesByDate = (activities, plannedWorkouts) => {
     const map = {};
     if (activities) {
         activities.forEach(act => {
-            const dateKey = new Date(act.date).toLocaleDateString('en-CA');
+            const dateKey = toDateKey(act.date);
             if (!map[dateKey]) map[dateKey] = [];
             map[dateKey].push({ ...act, isPlanned: false });
         });
     }
     if (plannedWorkouts) {
         plannedWorkouts.forEach(pAct => {
-            const dateKey = new Date(pAct.date).toLocaleDateString('en-CA');
+            const dateKey = toDateKey(pAct.date);
             if (!map[dateKey]) map[dateKey] = [];
             map[dateKey].push({ ...pAct, isPlanned: true });
         });
@@ -53,7 +54,7 @@ export const indexPmcByDate = (chartData) => {
 };
 
 /** Proyección PMC hacia delante (90 días) con el TSS de los entrenos planificados. */
-export const projectPmc = (pmcByDate, plannedWorkouts, today = new Date().toLocaleDateString('en-CA')) => {
+export const projectPmc = (pmcByDate, plannedWorkouts, today = toDateKey(new Date())) => {
     const map = {};
 
     // Copy only past/today actual data
@@ -72,7 +73,7 @@ export const projectPmc = (pmcByDate, plannedWorkouts, today = new Date().toLoca
     // Build a map of planned TSS per date
     const plannedTssByDate = {};
     (plannedWorkouts || []).forEach(p => {
-        const dk = new Date(p.date).toLocaleDateString('en-CA');
+        const dk = toDateKey(p.date);
         plannedTssByDate[dk] = (plannedTssByDate[dk] || 0) + getEffectiveTSS(p);
     });
 
@@ -83,7 +84,7 @@ export const projectPmc = (pmcByDate, plannedWorkouts, today = new Date().toLoca
     for (let i = 1; i <= 90; i++) {
         const d = new Date(startDate);
         d.setDate(d.getDate() + i);
-        const dk = d.toLocaleDateString('en-CA');
+        const dk = toDateKey(d);
         const dayTSS = plannedTssByDate[dk] || 0;
         ctl = ctl + (dayTSS - ctl) / 42;
         atl = atl + (dayTSS - atl) / 7;
@@ -198,16 +199,16 @@ export const getSmartRecommendation = ({ selectedDateForPlan, activities, planne
             const ad = new Date(a.date);
             if (ad >= weekStart && ad < weekEnd) {
                 weekActualTSS += getEffectiveTSS(a);
-                actualDays.add(ad.toLocaleDateString('en-CA'));
+                actualDays.add(toDateKey(ad));
             }
         });
     }
     if (plannedWorkouts) {
         plannedWorkouts.forEach(p => {
             const pd = new Date(p.date);
-            if (pd >= weekStart && pd < weekEnd && pd.toLocaleDateString('en-CA') !== selectedDate.toLocaleDateString('en-CA')) {
+            if (pd >= weekStart && pd < weekEnd && toDateKey(pd) !== toDateKey(selectedDate)) {
                 weekPlannedTSS += getEffectiveTSS(p);
-                plannedDays.add(pd.toLocaleDateString('en-CA'));
+                plannedDays.add(toDateKey(pd));
             }
         });
     }
@@ -226,11 +227,11 @@ export const getSmartRecommendation = ({ selectedDateForPlan, activities, planne
 
     // 5. Ayer entrené?
     const yesterday = new Date(selectedDate); yesterday.setDate(yesterday.getDate() - 1);
-    const yesterdayKey = yesterday.toLocaleDateString('en-CA');
+    const yesterdayKey = toDateKey(yesterday);
     let yesterdayTSS = 0;
     if (activities) {
         activities.forEach(a => {
-            if (new Date(a.date).toLocaleDateString('en-CA') === yesterdayKey) yesterdayTSS += getEffectiveTSS(a);
+            if (toDateKey(a.date) === yesterdayKey) yesterdayTSS += getEffectiveTSS(a);
         });
     }
 
@@ -470,7 +471,7 @@ export const buildPlanPayload = (date, newPlan) => ({
 export const computeWeekStats = (week, activitiesByDate) => {
     let weekRealizedTSS = 0; let weekPlannedTSS = 0; let weekDuration = 0; let weekDist = 0;
     week.forEach(day => {
-        const dateKey = day.date.toLocaleDateString('en-CA');
+        const dateKey = toDateKey(day.date);
         const acts = activitiesByDate[dateKey] || [];
         acts.forEach(a => {
             const cat = a.sportCategory || getSportCategory(a.type || '');
@@ -506,7 +507,7 @@ export const computeWeekStats = (week, activitiesByDate) => {
 /** PMC del último día de la semana con datos (real o proyectado); {} si no hay. */
 export const findWeekPmc = (week, fullPmcByDate) => {
     for (let di = 6; di >= 0; di--) {
-        const dk = week[di].date.toLocaleDateString('en-CA');
+        const dk = toDateKey(week[di].date);
         if (fullPmcByDate[dk]) return fullPmcByDate[dk];
     }
     return {};
@@ -517,7 +518,7 @@ export const findPrevWeekPmc = (week, fullPmcByDate) => {
     const d = new Date(week[0].date);
     d.setDate(d.getDate() - 1);
     for (let i = 0; i < 7; i++) {
-        const dk = d.toLocaleDateString('en-CA');
+        const dk = toDateKey(d);
         if (fullPmcByDate[dk]) return fullPmcByDate[dk];
         d.setDate(d.getDate() - 1);
     }

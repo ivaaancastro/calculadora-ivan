@@ -1,5 +1,5 @@
 import React from 'react';
-import { formatMinsToHMM } from '../../utils/formatters';
+import { formatMinutes } from '../../utils/formatters';
 import { ChartTooltip } from '../ui';
 
 export const CustomChartTooltip = ({ active, payload, label, unit = '' }) => {
@@ -9,7 +9,7 @@ export const CustomChartTooltip = ({ active, payload, label, unit = '' }) => {
         let displayUnit = unit;
 
         if (unit.trim() === "min") {
-            displayValue = formatMinsToHMM(payload[0].value);
+            displayValue = formatMinutes(payload[0].value);
             displayUnit = "";
         }
         

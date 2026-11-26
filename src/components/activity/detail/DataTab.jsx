@@ -4,6 +4,8 @@ import { CustomChartTooltip } from '../ActivitySharedUI';
 import { useChartTheme } from '../../charts/useChartTheme';
 import { Segmented } from '../../ui';
 import { getBlocksForSport, getMetabolicIntensity } from '../../../utils/activityMetricsBySport';
+import { formatNumber } from '../../../utils/formatters';
+import { chartFigureProps, summarizeCategories } from '../../charts/chartA11y';
 import { axisProps } from '../../charts/axisProps.js';
 
 export const DataTab = ({ sport, zoneType, zoneOptions = [], onZoneTypeChange, exactZoneAnalysis, exactPaceZoneAnalysis, exactPowerZoneAnalysis, paceThresholdIsDefault, proMetrics, activity, maxHr }) => {
@@ -28,7 +30,7 @@ export const DataTab = ({ sport, zoneType, zoneOptions = [], onZoneTypeChange, e
                                             <Segmented data-detail="zone-type" variant="pill" value={zoneType} onChange={onZoneTypeChange} options={zoneOptions} />
                                         )}
                                     </div>
-                                    <div className="h-[280px] bg-surface-6 rounded-2xl border border-line-soft p-6 shadow-sm">
+                                    <div className="h-[280px] bg-surface-6 rounded-2xl border border-line-soft p-6 shadow-sm" {...chartFigureProps('Tiempo por zona', summarizeCategories(zoneData, 'label', 'minutes', 'min'))}>
                                         <ResponsiveContainer width="100%" height="100%">
                                             <BarChart data={zoneData} margin={{ bottom: 20 }}>
                                                 <CartesianGrid vertical={false} strokeDasharray="3 3" stroke={ct.anatomy.gridSoft} opacity={0.5} />
@@ -181,7 +183,7 @@ export const DataTab = ({ sport, zoneType, zoneOptions = [], onZoneTypeChange, e
                                         <div className="space-y-1.5">
                                             <div className="flex justify-between text-2xs font-bold text-slate-400 uppercase tracking-widest">
                                                 <span>Intensidad (IF)</span>
-                                                <span className="text-power font-black">{proMetrics.ifFactor}</span>
+                                                <span className="text-power font-black">{formatNumber(proMetrics.ifFactor, 2)}</span>
                                             </div>
                                             <div className="h-1.5 bg-fill-2 rounded-full overflow-hidden">
                                                 <div className="h-full bg-power rounded-full" style={{ width: `${(proMetrics.ifFactor / 1.1) * 100}%` }} />
@@ -191,7 +193,7 @@ export const DataTab = ({ sport, zoneType, zoneOptions = [], onZoneTypeChange, e
                                         <div className="space-y-1.5">
                                             <div className="flex justify-between text-2xs font-bold text-slate-400 uppercase tracking-widest">
                                                 <span>Variabilidad (VI)</span>
-                                                <span className="text-indigo-500 font-black">{proMetrics.vi}</span>
+                                                <span className="text-indigo-500 font-black">{formatNumber(proMetrics.vi, 2)}</span>
                                             </div>
                                             <div className="h-1.5 bg-fill-2 rounded-full overflow-hidden">
                                                 <div className="h-full bg-indigo-500 rounded-full" style={{ width: `${((proMetrics.vi - 1) / 0.3) * 100}%` }} />
