@@ -49,6 +49,6 @@ export const computeDayReadiness = (day, baselineRhr = 50) => {
         label: 'Fatiga Alta',
         color: 'text-rose-500',
         dot: 'bg-rose-500',
-        badge: 'bg-rose-50 text-rose-600 dark:bg-rose-950/40 dark:text-rose-400 border border-rose-200/50 dark:border-rose-800/40'
+        badge: 'bg-rose-50 text-hr-ink dark:bg-rose-950/40 border border-rose-200/50 dark:border-rose-800/40'
     };
 };

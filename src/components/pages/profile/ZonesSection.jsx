@@ -13,14 +13,14 @@ export const ZonesSection = ({ formData, activeTab, setActiveTab, isScanning, pu
                     <RefreshCw size={15} strokeWidth={2.3} />
                 </div>
                 <div className="min-w-0">
-                    <p className="text-xs sm:text-sm font-bold text-ink truncate">Auto-Detectar LTHR</p>
+                    <p className="text-xs sm:leading-5 font-bold text-ink truncate">Auto-Detectar LTHR</p>
                     <p className="text-2xs text-ink-4 truncate">Calcula tu umbral desde el historial</p>
                 </div>
             </div>
             <button 
                 onClick={handleAutoDetectLTHR} 
                 disabled={isScanning || pureActs.length === 0} 
-                className="px-3.5 py-1.5 bg-surface-2 hover:bg-fill-7 text-ink-2-soft rounded-full text-xs font-semibold transition-colors disabled:opacity-50 flex items-center gap-1.5 shrink-0 active:scale-95"
+                className="px-3.5 py-1.5 bg-surface-2 hover:bg-fill-7 text-ink-2-soft rounded-full text-xs font-semibold transition-colors disabled:opacity-50 flex items-center gap-1.5 shrink-0 active:scale-press"
             >
                 {isScanning ? <><Loader2 size={13} className="animate-spin" /> Analizando...</> : 'Escanear'}
             </button>

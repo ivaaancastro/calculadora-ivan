@@ -2,7 +2,6 @@ import React, { Suspense } from 'react';
 import { Routes, Route } from 'react-router-dom';
 import { ErrorBoundary } from '../common/ErrorBoundary';
 import { LoadingState } from '../ui';
-import { AutoChartSkin } from '../charts/ChartSkin';
 import { ActivityRouteWrapper } from './ActivityRouteWrapper';
 
 const ProfilePage = React.lazy(() =>
@@ -34,7 +33,7 @@ export function ActivitySubRoutes({
         element={
           <ErrorBoundary>
             <Suspense fallback={<LoadingState />}>
-              <AutoChartSkin><ProfilePage
+              <><ProfilePage
                 currentSettings={settings}
                 currentMetrics={currentMetrics}
                 onUpdate={updateProfile}
@@ -47,7 +46,7 @@ export function ActivitySubRoutes({
                 section={
                   new URLSearchParams(location.search).get('section') || 'general'
                 }
-              /></AutoChartSkin>
+              /></>
             </Suspense>
           </ErrorBoundary>
         }

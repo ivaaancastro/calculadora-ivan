@@ -66,7 +66,7 @@ export const WorkoutViewerModal = ({ workout, onClose, onDelete, onEdit }) => {
             
             {/* ── HEADER ── */}
             <div className="relative px-6 pt-6 pb-5 shrink-0">
-                <button onClick={onClose} data-cal="modal-close" className="absolute top-4 right-4 w-7 h-7 flex items-center justify-center rounded-full bg-surface-2 text-slate-400 hover:text-slate-700 dark:hover:text-zinc-200 transition-colors z-10">
+                <button onClick={onClose} data-cal="modal-close" className="absolute top-4 right-4 w-11 h-11 flex items-center justify-center rounded-lg bg-surface-2 text-slate-400 hover:text-slate-700 dark:hover:text-zinc-200 transition-colors z-10">
                     <X size={14} />
                 </button>
 
@@ -76,15 +76,15 @@ export const WorkoutViewerModal = ({ workout, onClose, onDelete, onEdit }) => {
                         {sport.icon}
                     </div>
                     <div className="flex-1 min-w-0 pr-8">
-                        <h3 id="plan-viewer-title" className="text-[17px] font-bold text-slate-900 dark:text-zinc-50 leading-tight tracking-tight truncate">
+                        <h3 id="plan-viewer-title" className="text-[18px] font-bold text-slate-900 dark:text-zinc-50 leading-tight tracking-tight truncate">
                             {workout.name || `Entrenamiento de ${sport.label}`}
                         </h3>
                         <div className="flex items-center gap-2 mt-1.5">
-                            <span className="text-[11px] font-medium text-ink-4">
+                            <span className="text-[12px] font-medium text-ink-4">
                                 {workout.date ? new Date(workout.date).toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'short' }) : ''}
                             </span>
                             <span className="text-2xs text-faint">•</span>
-                            <span className={`text-2xs font-semibold uppercase tracking-wider ${sport.accent}`}>{sport.label}</span>
+                            <span className={`text-2xs font-semibold uppercase tracking-[0.05em] ${sport.accent}`}>{sport.label}</span>
                         </div>
                     </div>
                 </div>
@@ -92,22 +92,22 @@ export const WorkoutViewerModal = ({ workout, onClose, onDelete, onEdit }) => {
                 {/* ── METRICS GRID ── */}
                 <div className="grid grid-cols-4 gap-2 mt-5">
                     <div className="bg-sunken rounded-xl px-3 py-2.5 text-center">
-                        <div className="text-2xs font-semibold text-ink-4 uppercase tracking-wider mb-0.5">TSS</div>
-                        <div className="text-[18px] font-black text-ink-2 leading-none font-mono">{workout.tss || '—'}</div>
+                        <div className="text-2xs font-semibold text-ink-4 uppercase tracking-[0.05em] mb-0.5">TSS</div>
+                        <div className="text-[18px] font-bold text-ink-2 leading-none font-mono">{workout.tss || '—'}</div>
                     </div>
                     <div className="bg-sunken rounded-xl px-3 py-2.5 text-center">
-                        <div className="text-2xs font-semibold text-ink-4 uppercase tracking-wider mb-0.5">Duración</div>
-                        <div className="text-[18px] font-black text-ink-2 leading-none font-mono">{fmtDur(workout.duration || 0)}</div>
+                        <div className="text-2xs font-semibold text-ink-4 uppercase tracking-[0.05em] mb-0.5">Duración</div>
+                        <div className="text-[18px] font-bold text-ink-2 leading-none font-mono">{fmtDur(workout.duration || 0)}</div>
                     </div>
                     <div className="bg-sunken rounded-xl px-3 py-2.5 text-center">
-                        <div className="text-2xs font-semibold text-ink-4 uppercase tracking-wider mb-0.5">IF</div>
-                        <div className={`text-[18px] font-black leading-none font-mono ${weightedIF >= 0.85 ? 'text-red-500' : weightedIF >= 0.7 ? 'text-amber-500' : 'text-emerald-500'}`}>
+                        <div className="text-2xs font-semibold text-ink-4 uppercase tracking-[0.05em] mb-0.5">IF</div>
+                        <div className={`text-[18px] font-bold leading-none font-mono ${weightedIF >= 0.85 ? 'text-red-500' : weightedIF >= 0.7 ? 'text-amber-500' : 'text-emerald-500'}`}>
                             {weightedIF > 0 ? weightedIF.toFixed(2) : '—'}
                         </div>
                     </div>
                     <div className="bg-sunken rounded-xl px-3 py-2.5 text-center">
-                        <div className="text-2xs font-semibold text-ink-4 uppercase tracking-wider mb-0.5">Bloques</div>
-                        <div className="text-[18px] font-black text-ink-2 leading-none font-mono">
+                        <div className="text-2xs font-semibold text-ink-4 uppercase tracking-[0.05em] mb-0.5">Bloques</div>
+                        <div className="text-[18px] font-bold text-ink-2 leading-none font-mono">
                             {totalBlocks}
                             {intervalBlocks > 0 && <span className="text-2xs font-semibold text-ink-4 ml-0.5">({intervalBlocks}x)</span>}
                         </div>
@@ -123,7 +123,7 @@ export const WorkoutViewerModal = ({ workout, onClose, onDelete, onEdit }) => {
                         {segments.map((s, i) => {
                             const zoneH = { Z1: '25%', Z2: '40%', Z3: '55%', Z4: '70%', Z5: '82%', Z6: '92%', Z7: '100%', R12: '32%', R23: '47%', R34: '62%' };
                             return (
-                                <div key={i} className="rounded-[3px] transition-all hover:opacity-100" 
+                                <div key={i} className="rounded-[3px] transition-paint hover:opacity-100" 
                                     title={`${s.zone} — ${s.min}m`}
                                     style={{ 
                                         flex: s.min / totalMin, 
@@ -151,7 +151,7 @@ export const WorkoutViewerModal = ({ workout, onClose, onDelete, onEdit }) => {
 
                         {/* LEFT — Zone Distribution */}
                         <div className="p-5">
-                            <h4 className="text-2xs font-bold text-ink-4 uppercase tracking-widest mb-4">Zonas</h4>
+                            <h4 className="text-2xs font-bold text-ink-4 uppercase tracking-[0.08em] mb-4">Zonas</h4>
                             {sortedZones.length > 0 ? (
                                 <div className="space-y-2.5">
                                     {sortedZones.map(([zone, min]) => {
@@ -161,7 +161,7 @@ export const WorkoutViewerModal = ({ workout, onClose, onDelete, onEdit }) => {
                                                 <div className="flex items-center justify-between mb-1">
                                                     <div className="flex items-center gap-2">
                                                         <div className="w-2.5 h-2.5 rounded-full ring-2 ring-white dark:ring-zinc-900" style={{ background: getZoneColor(zone) }} />
-                                                        <span className="text-[11px] font-bold text-body">{zone}</span>
+                                                        <span className="text-[12px] font-bold text-body">{zone}</span>
                                                     </div>
                                                     <div className="flex items-center gap-2">
                                                         <span className="text-2xs font-mono font-semibold text-ink-3">{Math.round(min)}m</span>
@@ -169,20 +169,20 @@ export const WorkoutViewerModal = ({ workout, onClose, onDelete, onEdit }) => {
                                                     </div>
                                                 </div>
                                                 <div className="h-1.5 bg-surface-2 rounded-full overflow-hidden">
-                                                    <div className="h-full rounded-full transition-all duration-500" style={{ width: `${(min / maxZoneMin) * 100}%`, background: getZoneColor(zone) }} />
+                                                    <div className="h-full rounded-full transition-paint duration-500" style={{ width: `${(min / maxZoneMin) * 100}%`, background: getZoneColor(zone) }} />
                                                 </div>
                                             </div>
                                         );
                                     })}
                                 </div>
                             ) : (
-                                <p className="text-[11px] text-ink-4 italic">Sin datos de zonas</p>
+                                <p className="text-[12px] text-ink-4 italic">Sin datos de zonas</p>
                             )}
                         </div>
 
                         {/* RIGHT — Structure */}
                         <div className="p-5">
-                            <h4 className="text-2xs font-bold text-ink-4 uppercase tracking-widest mb-4">Estructura</h4>
+                            <h4 className="text-2xs font-bold text-ink-4 uppercase tracking-[0.08em] mb-4">Estructura</h4>
                             {blocks.length === 0 ? (
                                 <div className="flex items-center justify-center py-10">
                                     <p className="text-[12px] text-ink-4 italic">Sin estructura detallada</p>
@@ -198,8 +198,8 @@ export const WorkoutViewerModal = ({ workout, onClose, onDelete, onEdit }) => {
                                                 <div key={idx} className="rounded-xl bg-slate-50/80 dark:bg-zinc-800/30 overflow-hidden">
                                                     <div className="px-4 py-2.5 flex items-center justify-between">
                                                         <div className="flex items-center gap-2">
-                                                            <span className="text-[11px] text-slate-400">{bl.icon}</span>
-                                                            <span className="text-[11px] font-bold text-body">{bl.text}</span>
+                                                            <span className="text-[12px] text-slate-400">{bl.icon}</span>
+                                                            <span className="text-[12px] font-bold text-body">{bl.text}</span>
                                                             <span className="text-2xs font-bold text-ink-3 bg-slate-200/70 dark:bg-zinc-700/50 px-1.5 py-0.5 rounded-md">x{block.repeats}</span>
                                                         </div>
                                                         <span className="text-2xs font-mono font-semibold text-slate-400">{stepTotal > 0 ? fmtDur(stepTotal) : ''}</span>
@@ -212,7 +212,7 @@ export const WorkoutViewerModal = ({ workout, onClose, onDelete, onEdit }) => {
                                                                     <div className="flex items-center gap-2.5">
                                                                         <div className="w-1 h-5 rounded-full" style={{ background: isWork ? (getZoneColor(step.zone)) : 'rgb(var(--line))' }} />
                                                                         <div>
-                                                                            <span className={`text-[11px] font-semibold ${isWork ? 'text-body-2' : 'text-ink-4'}`}>
+                                                                            <span className={`text-[12px] font-semibold ${isWork ? 'text-body-2' : 'text-ink-4'}`}>
                                                                                 {isWork ? 'Trabajo' : 'Descanso'}
                                                                             </span>
                                                                             {step.details && <span className="text-2xs text-slate-400 ml-1.5">· {step.details}</span>}
@@ -241,12 +241,12 @@ export const WorkoutViewerModal = ({ workout, onClose, onDelete, onEdit }) => {
                                                 <div className="flex items-center gap-2.5">
                                                     <div className="w-1 h-5 rounded-full" style={{ background: getZoneColor(block.zone) }} />
                                                     <div>
-                                                        <span className="text-[11px] font-bold text-body-2">{bl.text}</span>
+                                                        <span className="text-[12px] font-bold text-body-2">{bl.text}</span>
                                                         {block.details && <span className="text-2xs text-slate-400 ml-1.5">· {block.details}</span>}
                                                     </div>
                                                 </div>
                                                 <div className="flex items-center gap-2.5 shrink-0">
-                                                    <span className="text-[14px] font-black font-mono text-body-2">
+                                                    <span className="text-[14px] font-bold font-mono text-body-2">
                                                         {block.duration}<span className="text-2xs font-semibold text-slate-400 ml-0.5">{block.unit === 'dist' ? 'km' : "'"}</span>
                                                     </span>
                                                     {block.targetType === 'power' && block.targetValue ? (
@@ -267,14 +267,14 @@ export const WorkoutViewerModal = ({ workout, onClose, onDelete, onEdit }) => {
 
             {/* ── FOOTER ── */}
             <div className="px-6 py-3.5 border-t border-line-soft flex justify-between items-center shrink-0">
-                <button onClick={(e) => { onDelete(e); onClose(); }} data-cal="modal-delete" className="text-[11px] font-medium text-danger-light-2 hover:text-danger-ink transition-colors">
+                <button onClick={(e) => { onDelete(e); onClose(); }} data-cal="modal-delete" className="min-h-[44px] text-[12px] font-medium text-danger-light-2 hover:text-danger-ink transition-colors">
                     Eliminar
                 </button>
                 <div className="flex gap-2">
-                    <button onClick={onClose} data-cal="modal-secondary" className="px-4 py-2 rounded-full text-[11px] font-medium text-ink-3 hover:bg-surface-2 transition-colors">
+                    <button onClick={onClose} data-cal="modal-secondary" className="min-h-[44px] px-4 py-2 rounded-full text-[12px] font-medium text-ink-3 hover:bg-surface-2 transition-colors">
                         Cerrar
                     </button>
-                    <button onClick={() => { onClose(); onEdit(); }} data-cal="modal-submit" className="px-5 py-2 rounded-full text-[11px] font-semibold bg-inverse text-ink-inverse hover:bg-inverse-2 transition-colors shadow-sm">
+                    <button onClick={() => { onClose(); onEdit(); }} data-cal="modal-submit" className="min-h-[44px] px-5 py-2 rounded-xl text-[12px] font-semibold bg-inverse text-ink-inverse hover:bg-inverse-2 transition-colors shadow-sm">
                         Editar
                     </button>
                 </div>

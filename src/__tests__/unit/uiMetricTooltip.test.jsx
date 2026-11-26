@@ -16,7 +16,7 @@ describe('ui/MetricTooltip', () => {
     expect(html).toContain('aria-label="Más información sobre Carga (TSS)"');
     expect(html).toContain('data-testid="stat"');
     expect(html).toContain('data-metric-trigger');
-    expect(html).not.toContain('min-h-[44px]');
+    expect(html).toContain('min-h-[44px]');
   });
 
   it('no renderiza ningún ícono de ayuda (el disparador es solo el hijo)', () => {

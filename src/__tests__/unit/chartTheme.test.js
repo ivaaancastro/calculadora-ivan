@@ -15,19 +15,6 @@ const readTokens = () => {
   return { light: blocks(':root'), dark: blocks('.dark') };
 };
 
-// Lee los bloques `@tokens:skin-v2` (piel v2): mismo formato, con el selector `html[data-ui="v2"]`.
-const readSkinV2Tokens = () => {
-  const css = readFileSync(fileURLToPath(new URL('../../styles/tokens.css', import.meta.url)), 'utf8');
-  const area = css.slice(css.indexOf('@tokens:skin-v2:start'), css.indexOf('@tokens:skin-v2:end')).replace(/\/\*[\s\S]*?\*\//g, '');
-  const block = (selector) => {
-    const start = area.indexOf(selector);
-    if (start < 0) throw new Error(`Falta el bloque ${selector} en tokens.css`);
-    const body = area.slice(area.indexOf('{', start) + 1, area.indexOf('}', start));
-    return Object.fromEntries([...body.matchAll(/--([\w-]+)\s*:\s*([^;]+);/g)].map(([, k, v]) => [k, v.trim()]));
-  };
-  return { light: block('html[data-ui="v2"] [data-skin]'), dark: block('html[data-ui="v2"].dark [data-skin]') };
-};
-
 /** '#rgb' | '#rrggbb' | 'rgba(r, g, b, a)' → { rgb: 'r g b', a }. */
 const parseColor = (s) => {
   const m = s.match(/^rgba?\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*(?:,\s*([\d.]+)\s*)?\)$/);
@@ -46,9 +33,12 @@ const entries = (node, path = []) => {
 describe('chartTheme ↔ tokens.css', () => {
   const tokens = readTokens();
 
+  // La piel v2 es la base (Capa 6, PR 7b): `chartTheme.v2` es lo que pintan las gráficas y debe
+  // coincidir con `:root` / `.dark`. `chartTheme.light/dark` (v1) queda como paleta estática para
+  // los pocos usos en JS fuera de las gráficas hasta el PR 13.
   for (const mode of ['light', 'dark']) {
-    it(`cada color de ${mode} coincide con su token`, () => {
-      const list = entries(chartTheme[mode]);
+    it(`cada color v2 de ${mode} coincide con su token`, () => {
+      const list = entries(chartTheme.v2[mode]);
       expect(list.length).toBeGreaterThan(50);
       for (const [path, def] of list) {
         expect(tokens[mode], `token --${def.token} (${path})`).toHaveProperty(def.token);
@@ -93,21 +83,4 @@ describe('chartTheme ↔ tokens.css', () => {
     }
     expect(getChartTheme('dark', 'v2')).not.toEqual(getChartTheme('light', 'v2'));
   });
-});
-
-describe('chartTheme.v2 ↔ bloques @tokens:skin-v2', () => {
-  const tokens = readSkinV2Tokens();
-
-  for (const mode of ['light', 'dark']) {
-    it(`cada color v2 de ${mode} coincide con su token de la piel`, () => {
-      const changed = entries(chartTheme.v2[mode]).filter(([path, def]) => def !== path.split('.').reduce((o, k) => o?.[k], chartTheme[mode]));
-      expect(changed.length).toBeGreaterThan(20);
-      for (const [path, def] of changed) {
-        expect(tokens[mode], `token --${def.token} (${path})`).toHaveProperty(def.token);
-        const { rgb, a } = parseColor(def.color);
-        expect(rgb, `v2.${mode}.${path}`).toBe(tokens[mode][def.token]);
-        expect(a, `v2.${mode}.${path} (opacidad)`).toBe(Number(tokens[mode][`${def.token}-a`] ?? 1));
-      }
-    });
-  }
 });

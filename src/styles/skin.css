@@ -1,0 +1,83 @@
+/*
+ * Piel «Panel» (spec-capa6-v2-premium, RF-B3). Desde el PR 7b la piel v2 es la base: sus valores
+ * viven en `:root` / `.dark` de tokens.css y en el tema de Tailwind (tipografía, radios, sombras,
+ * movimiento), y lo propio de cada pantalla, en las clases de sus componentes.
+ *
+ * Aquí solo queda lo que no es una utilidad: pseudo-elementos compartidos y reglas globales de
+ * elementos (foco, ajuste de texto, mapas, Recharts). Ninguna regla redefine una clase de Tailwind.
+ */
+
+/* Rótulo de sección: marca de cobalto de 12 × 2 px delante del texto. */
+.section-header::before,
+.rotulo-marca::before {
+  content: '';
+  display: inline-block;
+  width: 12px;
+  height: 2px;
+  margin-right: 8px;
+  vertical-align: middle;
+  border-radius: 1px;
+  background-color: rgb(var(--action));
+}
+
+/* Filete degradado de los héroes (Dashboard, Rendimiento, Detalle, Salud): color de `--hero-accent`. */
+.hero-rule::before {
+  content: '';
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 2px;
+  border-radius: 2px;
+  background: linear-gradient(90deg, var(--hero-accent, rgb(var(--line))) 0%, transparent 72%);
+}
+
+/* Foco visible (ACC-1): anillo de 2 px del acento. Los campos de texto ya pintan su propio
+   anillo con `focus:ring-*`, así que se excluyen para no duplicarlo. */
+:root :focus-visible:not(input):not(textarea):not(select) {
+  outline: 2px solid rgb(var(--action));
+  outline-offset: 2px;
+}
+
+/* Ajuste de texto (TIP-2): balanceado en títulos, `pretty` en párrafos. Nunca en código. */
+:root :is(h1, h2, h3, h4, .section-header) {
+  text-wrap: balance;
+}
+:root p:not(pre *, code *) {
+  text-wrap: pretty;
+}
+
+/* Contorno neutro en mapas e imágenes (RAD-3): 1 px interior, nunca teñido con la marca. */
+:root .leaflet-container,
+:root :is(img.rounded-full, img.object-cover) {
+  outline: 1px solid rgb(var(--ink) / 0.1);
+  outline-offset: -1px;
+}
+
+/* Gráficas (GRA-3/4): rejilla continua finísima que se desvanece en los bordes, tooltip «de
+   cristal» común y cifras tabulares. */
+:root .recharts-cartesian-grid line {
+  stroke-dasharray: none;
+  stroke-opacity: 0.55;
+}
+:root .recharts-cartesian-grid {
+  -webkit-mask-image: linear-gradient(90deg, transparent, black 6%, black 94%, transparent);
+  mask-image: linear-gradient(90deg, transparent, black 6%, black 94%, transparent);
+}
+:root [data-chart-tooltip] {
+  -webkit-backdrop-filter: blur(12px) saturate(1.4);
+  backdrop-filter: blur(12px) saturate(1.4);
+  border-radius: 12px;
+  box-shadow: var(--elev-2);
+  font-variant-numeric: tabular-nums;
+}
+:root .recharts-text,
+:root .recharts-cartesian-axis-tick-value {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Entrada de sparklines: trazo que se dibuja y área que aparece (estilo en línea de Sparkline). */
+@keyframes chart-draw { from { stroke-dashoffset: 1; } to { stroke-dashoffset: 0; } }
+@keyframes chart-fade { from { opacity: 0; } to { opacity: 1; } }
+@media (prefers-reduced-motion: reduce) {
+  :root svg [style*="chart-draw"],
+  :root svg [style*="chart-fade"] { animation: none !important; }
+}

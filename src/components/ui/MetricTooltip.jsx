@@ -137,10 +137,10 @@ export function MetricTooltip({ metricId, label, description, children }) {
       {isMobile && (
         <Modal open={open} onClose={close} variant="sheet" closeOnBackdrop labelledBy={describedById}>
           <div className="p-4 sm:p-6">
-            <h3 id={describedById} className="text-sm font-bold text-ink mb-2 uppercase tracking-wider">
+            <h3 id={describedById} className="text-sm font-bold text-ink mb-2 uppercase tracking-[0.05em]">
               {finalLabel}
             </h3>
-            <p className="text-[11px] text-ink-4 leading-snug">{finalDescription}</p>
+            <p className="text-[12px] text-ink-4 leading-snug">{finalDescription}</p>
           </div>
         </Modal>
       )}

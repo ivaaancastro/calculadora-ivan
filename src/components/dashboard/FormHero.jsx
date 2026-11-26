@@ -38,23 +38,23 @@ export const FormHero = ({ summary, ctl, loadTrend, timeRange, setTimeRange }) =
             data-dash="hero"
             data-hero="form"
             style={{ '--hero-accent': TONE_ACCENT[summary.tone] }}
-            className="relative grid gap-5 md:grid-cols-[minmax(0,1fr)_auto] md:items-end"
+            className="hero-rule relative grid gap-5 md:grid-cols-[minmax(0,1fr)_auto] md:items-end pt-[22px] pb-1 max-md:order-1 max-md:pt-[18px] max-md:px-3 max-md:pb-0 max-md:gap-3 lg:col-span-full [font-feature-settings:'tnum'_1,'cv11'_1,'ss03'_1]"
         >
             <div className="space-y-3 min-w-0">
-                <p className="flex flex-wrap items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.08em] text-ink-3">
+                <p className="flex flex-wrap items-center gap-2 text-[12px] font-semibold uppercase tracking-[0.08em] text-ink-3">
                     <span>Estado de forma</span>
-                    <span className={`text-2xs font-bold px-2 py-0.5 rounded-full border uppercase tracking-wider ${TONE_CHIP[summary.tone]}`}>
+                    <span className={`text-2xs font-bold px-2 py-0.5 rounded-full border uppercase tracking-[0.05em] ${TONE_CHIP[summary.tone]}`}>
                         {summary.label}
                     </span>
                 </p>
-                <p data-hero="sentence" className="text-[17px] sm:text-[20px] leading-snug font-medium tracking-[-0.01em] text-ink [text-wrap:balance] max-w-[46ch]">
+                <p data-hero="sentence" className="motion-safe:animate-rise text-[18px] leading-snug font-medium tracking-[-0.01em] text-ink [text-wrap:balance] max-w-[46ch]">
                     {summary.sentence}
                 </p>
                 <p data-hero="advice" className="text-xs text-ink-3">{summary.advice}</p>
             </div>
 
             <div className="flex items-end justify-between gap-4 md:flex-col md:items-end">
-                <div data-hero="figure" className="min-w-0">
+                <div data-hero="figure" className="min-w-0 motion-safe:animate-rise motion-safe:[animation-delay:0.12s]">
                     <div className="text-2xs font-semibold uppercase tracking-[0.08em] text-ink-4">Fitness (CTL)</div>
                     <div className="mt-1 flex items-baseline gap-2">
                         <span className="text-[48px] sm:text-[3.5rem] leading-none font-semibold tracking-[-0.04em] tabular-nums text-ink">

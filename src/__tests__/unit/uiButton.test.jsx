@@ -8,9 +8,9 @@ const classes = (s) => s.split(' ').sort();
 
 describe('ui/Button recetas', () => {
   it('copia los chips, el enlace atenuado y el borrar del planificador', () => {
-    expect(classes(buttonClass({ variant: 'ghost' }))).toEqual(classes('text-ink-3 rounded-full text-[11px] font-medium hover:bg-surface-2 transition-all'));
+    expect(classes(buttonClass({ variant: 'ghost' }))).toEqual(classes('text-ink-3 rounded-full text-[12px] font-medium hover:bg-surface-2 transition-paint'));
     expect(classes(buttonClass({ variant: 'inverse' }))).toEqual(
-      classes('bg-inverse text-ink-inverse rounded-full text-[11px] font-medium hover:bg-inverse-2 transition-all shadow-sm'),
+      classes('bg-inverse text-ink-inverse rounded-full text-[12px] font-medium hover:bg-inverse-2 transition-paint shadow-sm'),
     );
     expect(classes(buttonClass({ variant: 'link-muted' }))).toEqual(classes('text-2xs text-ink-4-fixed hover:text-body-soft-fixed font-medium transition-colors'));
     expect(classes(buttonClass({ variant: 'danger-text' }))).toEqual(classes('text-faint-fixed hover:text-danger transition-colors'));
@@ -23,9 +23,9 @@ describe('ui/Button recetas', () => {
 
   it('copia los botones de icono', () => {
     expect(classes(iconButtonClass({ variant: 'soft' }))).toEqual(
-      classes('flex items-center justify-center bg-fill hover:bg-fill-hover active:scale-90 rounded-full transition-all text-body-soft-2'),
+      classes('flex items-center justify-center bg-fill hover:bg-fill-hover active:scale-press rounded-full transition-paint text-body-soft-2'),
     );
-    expect(iconButtonClass({ variant: 'ghost' })).toContain('hover:bg-surface-2 active:scale-95');
+    expect(iconButtonClass({ variant: 'ghost' })).toContain('hover:bg-surface-2 active:scale-press');
   });
 
   it('rechaza variantes que no existían', () => {

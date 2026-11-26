@@ -12,7 +12,7 @@ const TrendTooltip = ({ active, payload }) => {
     const d = payload[0].payload;
     return (
         <ChartTooltip variant="glass">
-            <p className="text-2xs font-bold uppercase tracking-wider text-ink-4 pb-1">{d.dateLabelFull || d.date}</p>
+            <p className="text-2xs font-bold uppercase tracking-[0.05em] text-ink-4 pb-1">{d.dateLabelFull || d.date}</p>
             <div className="flex justify-between gap-4 font-semibold tabular-nums"><span>Recuperación</span><span>{d.readinessScore}%</span></div>
             {d.sleep > 0 && <div className="flex justify-between gap-4 font-semibold tabular-nums"><span>Sueño</span><span>{d.sleep} h</span></div>}
             {d.rhr > 0 && <div className="flex justify-between gap-4 font-semibold tabular-nums"><span>FC reposo</span><span>{d.rhr} lpm</span></div>}
@@ -26,13 +26,13 @@ export const HistoryTrendChart = ({ historySeries, ct }) => {
     const motion = useChartMotion();
     const figure = chartFigureProps('Tendencia de recuperación y sueño', summarizeSeries(historySeries, [{ key: 'readinessScore', label: 'Recuperación' }], { unit: '%' }));
     return (
-        <Card data-health="trend" className="p-4 sm:p-6 space-y-3">
+        <Card data-health="trend" figures="tnum" className="motion-safe:animate-rise-slow p-4 sm:p-6 space-y-3">
             <div className="flex items-start justify-between gap-3">
                 <div>
                     <h3 className="text-sm font-semibold text-ink tracking-tight">Tendencia de recuperación</h3>
-                    <p className="text-[11px] text-ink-4">Recuperación (%) y horas de sueño del periodo</p>
+                    <p className="text-[12px] text-ink-4">Recuperación (%) y horas de sueño del periodo</p>
                 </div>
-                <div className="flex items-center gap-3 text-[11px] font-semibold text-ink-3 shrink-0">
+                <div className="flex items-center gap-3 text-[12px] font-semibold text-ink-3 shrink-0">
                     <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full" style={{ background: ct.series.readiness }} />Recuperación</span>
                     <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full" style={{ background: ct.series.sleep }} />Sueño</span>
                 </div>

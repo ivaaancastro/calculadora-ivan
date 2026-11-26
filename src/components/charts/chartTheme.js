@@ -125,7 +125,7 @@ const THEME = { series: SERIES, sports: SPORTS, distribution: DISTRIBUTION, zone
 
 /**
  * Piel v2 («Panel»): solo las entradas que la piel redefine (series de forma, anatomía, tooltip y PMC);
- * el resto se hereda de v1. Mismos valores que el bloque `@tokens:skin-v2` de tokens.css (lo comprueba chartTheme.test.js).
+ * el resto se hereda de v1. Mismos valores que `:root` / `.dark` de tokens.css (lo comprueba chartTheme.test.js).
  */
 const V2_LIGHT = {
   series: {

@@ -5,12 +5,12 @@ import { Card, Input, SectionHeader } from '../../ui';
 export const GeneralSection = ({ formData, isUploadingAvatar, handleAvatarUpload, handleChange, targetCtl, setTargetCtl }) => (
     <div className="space-y-5 animate-in fade-in slide-in-from-right-3 duration-250">
         {/* AVATAR PROFILE BANNER — HORIZONTAL APPLE SETTINGS STYLE */}
-        <Card data-profile="banner" className="p-4 sm:p-5 flex items-center gap-4 text-left mb-5">
+        <Card data-profile="banner" className="p-4 sm:p-5 flex items-center gap-4 text-left mb-5 max-sm:p-3 max-sm:gap-3 max-sm:mb-4">
             <div className="relative shrink-0">
                 <div 
                     data-profile="avatar"
-                    className="rounded-full overflow-hidden bg-surface-2 border-2 border-white dark:border-zinc-700 shadow-sm flex items-center justify-center relative shrink-0"
-                    style={{ width: '76px', height: '76px', minWidth: '76px', minHeight: '76px' }}
+                    className="rounded-full overflow-hidden bg-surface-2 border-0 shadow-[0_0_0_1px_rgb(var(--line)),0_0_0_4px_rgb(var(--surface))] flex items-center justify-center relative shrink-0"
+                    style={{ width: '80px', height: '80px', minWidth: '80px', minHeight: '80px' }}
                 >
                     {formData.avatarUrl ? (
                         <img 
@@ -28,17 +28,17 @@ export const GeneralSection = ({ formData, isUploadingAvatar, handleAvatarUpload
                         </div>
                     )}
                 </div>
-                <label className="absolute -bottom-1 -right-1 p-2 bg-action-ios-solid text-white rounded-full shadow-md cursor-pointer hover:bg-action-solid active:scale-90 transition-transform">
+                <label className="absolute -bottom-1 -right-1 p-2 bg-action-ios-solid text-white rounded-full shadow-md cursor-pointer hover:bg-action-solid active:scale-press transition-transform">
                     <Camera size={13} strokeWidth={2.5} />
                     <input type="file" className="hidden" accept="image/*" onChange={handleAvatarUpload} disabled={isUploadingAvatar} />
                 </label>
             </div>
             <div className="min-w-0 flex-1">
-                <h3 data-profile="name" className="text-base sm:text-lg font-bold text-ink leading-tight truncate">
+                <h3 data-profile="name" className="text-[22px] font-semibold tracking-[-0.02em] text-ink leading-tight sm:leading-7 truncate">
                     {formData.fullName || 'Atleta Forma'}
                 </h3>
                 <p className="text-xs text-ink-3 mt-0.5 truncate">{formData.email}</p>
-                <span data-profile="badge" className="inline-flex items-center gap-1 mt-2 text-2xs font-semibold text-blue-600 dark:text-blue-400 bg-blue-500/10 px-2.5 py-0.5 rounded-full border border-blue-500/15">
+                <span data-profile="badge" className="inline-flex items-center gap-1 mt-2 text-2xs font-semibold text-action bg-sunken px-2.5 py-0.5 rounded-full border border-line">
                     Atleta Forma
                 </span>
             </div>
@@ -48,20 +48,20 @@ export const GeneralSection = ({ formData, isUploadingAvatar, handleAvatarUpload
         <div>
             <SectionHeader>Datos Personales</SectionHeader>
             <Card divided className="overflow-hidden mb-5">
-                <div data-profile="row" className="p-3 sm:p-3.5 flex items-center justify-between gap-3">
-                    <span className="text-xs sm:text-sm font-medium text-body-soft">Nombre</span>
+                <div data-profile="row" className="min-h-[44px] p-3 sm:p-3.5 flex items-center justify-between gap-3">
+                    <span className="text-xs sm:leading-5 font-medium text-body-soft">Nombre</span>
                     <input
                         type="text"
                         name="fullName"
                         value={formData.fullName || ''}
                         onChange={handleChange}
                         placeholder="Tu nombre"
-                        className="flex-1 text-right bg-transparent text-xs sm:text-sm font-semibold text-slate-900 dark:text-white outline-none placeholder:text-slate-400"
+                        className="flex-1 text-right bg-transparent text-xs sm:leading-5 font-semibold text-slate-900 dark:text-white outline-none placeholder:text-slate-400"
                     />
                 </div>
-                <div data-profile="row" className="p-3 sm:p-3.5 flex items-center justify-between gap-3">
-                    <span className="text-xs sm:text-sm font-medium text-body-soft">Correo</span>
-                    <span className="text-xs sm:text-sm font-medium text-ink-4 truncate max-w-[220px]">{formData.email}</span>
+                <div data-profile="row" className="min-h-[44px] p-3 sm:p-3.5 flex items-center justify-between gap-3">
+                    <span className="text-xs sm:leading-5 font-medium text-body-soft">Correo</span>
+                    <span className="text-xs sm:leading-5 font-medium text-ink-4 truncate max-w-[220px]">{formData.email}</span>
                 </div>
             </Card>
         </div>
@@ -71,13 +71,13 @@ export const GeneralSection = ({ formData, isUploadingAvatar, handleAvatarUpload
             <SectionHeader>Fisiología y Métricas</SectionHeader>
             <Card data-profile="primary" divided className="overflow-hidden">
                 {/* Peso */}
-                <div data-profile="row" className="p-3 sm:p-3.5 flex items-center justify-between gap-3">
+                <div data-profile="row" className="min-h-[3.5rem] p-3 sm:p-3.5 flex items-center justify-between gap-3">
                     <div className="flex items-center gap-3">
                         <div className="w-7 h-7 rounded-[8px] bg-blue-500 text-white flex items-center justify-center shrink-0 shadow-2xs">
                             <Weight size={15} strokeWidth={2.3} />
                         </div>
                         <div>
-                            <p className="text-xs sm:text-sm font-semibold text-ink">Peso Corporal</p>
+                            <p className="text-xs sm:leading-5 font-semibold text-ink">Peso Corporal</p>
                             <p className="text-2xs text-ink-4">Para cálculos de W/kg</p>
                         </div>
                     </div>
@@ -95,13 +95,13 @@ export const GeneralSection = ({ formData, isUploadingAvatar, handleAvatarUpload
                 </div>
 
                 {/* FC Reposo */}
-                <div data-profile="row" className="p-3 sm:p-3.5 flex items-center justify-between gap-3">
+                <div data-profile="row" className="min-h-[3.5rem] p-3 sm:p-3.5 flex items-center justify-between gap-3">
                     <div className="flex items-center gap-3">
                         <div className="w-7 h-7 rounded-[8px] bg-hr text-white flex items-center justify-center shrink-0 shadow-2xs">
                             <Heart size={15} strokeWidth={2.3} />
                         </div>
                         <div>
-                            <p className="text-xs sm:text-sm font-semibold text-ink">FC Reposo</p>
+                            <p className="text-xs sm:leading-5 font-semibold text-ink">FC Reposo</p>
                             <p className="text-2xs text-ink-4">Pulsaciones basales mínimas</p>
                         </div>
                     </div>
@@ -119,13 +119,13 @@ export const GeneralSection = ({ formData, isUploadingAvatar, handleAvatarUpload
                 </div>
 
                 {/* Calibrar CTL */}
-                <div data-profile="row" className="p-3 sm:p-3.5 flex items-center justify-between gap-3">
+                <div data-profile="row" className="min-h-[3.5rem] p-3 sm:p-3.5 flex items-center justify-between gap-3">
                     <div className="flex items-center gap-3">
                         <div className="w-7 h-7 rounded-[8px] bg-emerald-500 text-white flex items-center justify-center shrink-0 shadow-2xs">
                             <Activity size={15} strokeWidth={2.3} />
                         </div>
                         <div>
-                            <p className="text-xs sm:text-sm font-semibold text-ink">Calibrar Fitness (CTL)</p>
+                            <p className="text-xs sm:leading-5 font-semibold text-ink">Calibrar Fitness (CTL)</p>
                             <p className="text-2xs text-ink-4">Ajuste de base histórica</p>
                         </div>
                     </div>

@@ -22,13 +22,13 @@ const TILES = [
 
 export const DashboardPreview = () => (
   <figure
-    className="w-full max-w-md lg:max-w-none rounded-2xl border border-line bg-surface-card p-4 sm:p-5 shadow-sm dark:shadow-none"
+    className="w-full max-w-md lg:max-w-none rounded-2xl border border-line bg-surface-card p-4 sm:p-5 shadow-sm"
     aria-label="Vista de ejemplo del Dashboard de Forma"
   >
     <div className="grid grid-cols-3 gap-2 sm:gap-3">
       {TILES.map((t) => (
         <div key={t.label} className="rounded-xl border border-line-soft bg-sunken p-2.5 sm:p-3">
-          <div className="flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wider text-ink-3">
+          <div className="flex items-center gap-1.5 text-[12px] font-semibold uppercase tracking-[0.05em] text-ink-3">
             <span className={`h-2 w-2 rounded-full ${t.dot}`} aria-hidden="true" />
             <span className="truncate">{t.label}<span className="hidden xl:inline"> ({t.code})</span></span>
           </div>
@@ -43,6 +43,6 @@ export const DashboardPreview = () => (
       <path d={path(ATL)} fill="none" className="stroke-metric-atl" strokeWidth="2" strokeLinejoin="round" />
       <path d={path(CTL)} fill="none" className="stroke-metric-ctl" strokeWidth="2" strokeLinejoin="round" />
     </svg>
-    <figcaption className="mt-3 text-[11px] font-medium text-ink-4">Datos de ejemplo</figcaption>
+    <figcaption className="mt-3 text-[12px] font-medium text-ink-4">Datos de ejemplo</figcaption>
   </figure>
 );

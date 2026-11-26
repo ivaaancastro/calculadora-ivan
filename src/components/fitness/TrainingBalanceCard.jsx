@@ -25,12 +25,12 @@ export const TrainingBalanceCard = ({ balance, balanceDays, setBalanceDays }) =>
                     <div className="space-y-12">
                         <div className="grid grid-cols-2 gap-8 px-2">
                             <div className="p-4 rounded-2xl bg-sunken-3 border border-line-soft">
-                                <p className="text-2xs font-bold text-slate-400 uppercase tracking-widest mb-1">Carga Total</p>
-                                <p className="text-3xl font-black text-ink-soft">{Math.round(balance.totalLoad)} <span className="text-xs font-bold text-slate-400">Pts</span></p>
+                                <p className="text-2xs font-bold text-slate-400 uppercase tracking-[0.08em] mb-1">Carga Total</p>
+                                <p className="text-3xl font-bold text-ink-soft">{Math.round(balance.totalLoad)} <span className="text-xs font-bold text-slate-400">Pts</span></p>
                             </div>
                             <div className="p-4 rounded-2xl bg-sunken-3 border border-line-soft">
-                                <p className="text-2xs font-bold text-slate-400 uppercase tracking-widest mb-1">Ratio An/Ae</p>
-                                <p className="text-3xl font-black text-ink-soft">{(balance.anaerobic / (balance.aerobicHigh + balance.aerobicLow || 1)).toFixed(2)}</p>
+                                <p className="text-2xs font-bold text-slate-400 uppercase tracking-[0.08em] mb-1">Ratio An/Ae</p>
+                                <p className="text-3xl font-bold text-ink-soft">{(balance.anaerobic / (balance.aerobicHigh + balance.aerobicLow || 1)).toFixed(2)}</p>
                                 <p className="text-2xs font-bold text-slate-500 uppercase mt-1 tracking-tighter">Aeróbico vs Anaeróbico</p>
                             </div>
                         </div>
@@ -53,8 +53,8 @@ export const TrainingBalanceCard = ({ balance, balanceDays, setBalanceDays }) =>
                                             <div className="flex flex-col">
                                                 <span className="text-2xs font-bold text-ink-3 uppercase tracking-tight">{b.label}</span>
                                                 <div className="flex items-center gap-2 mt-1">
-                                                    <span className={`text-[13px] font-black ${status === 'Alto' ? 'text-rose-500' : 'text-ink-soft'}`}>{Math.round(b.pct)}%</span>
-                                                    <span className={`text-2xs font-black uppercase px-1.5 py-0.5 rounded-md border ${status === 'Óptimo' ? 'bg-positive/10 border-positive/20 text-positive' : 'bg-surface-2 border-line-2 text-slate-400'}`}>
+                                                    <span className={`text-[13px] font-bold ${status === 'Alto' ? 'text-rose-500' : 'text-ink-soft'}`}>{Math.round(b.pct)}%</span>
+                                                    <span className={`text-2xs font-bold uppercase px-1.5 py-0.5 rounded-md border ${status === 'Óptimo' ? 'bg-positive/10 border-positive/20 text-positive' : 'bg-surface-2 border-line-2 text-slate-400'}`}>
                                                         {status}
                                                     </span>
                                                 </div>
@@ -77,7 +77,7 @@ export const TrainingBalanceCard = ({ balance, balanceDays, setBalanceDays }) =>
 
                                             {/* Current value bar */}
                                             <div
-                                                className={`absolute top-0 bottom-0 ${b.color} rounded-full transition-all duration-1000 shadow-md z-10 ${status === 'Alto' ? 'brightness-110' : ''}`}
+                                                className={`absolute top-0 bottom-0 ${b.color} rounded-full transition-paint duration-1000 shadow-md z-10 ${status === 'Alto' ? 'brightness-110' : ''}`}
                                                 style={{ width: `${barWidth}%` }}
                                             >
                                                 {/* Glow if optimal or higher */}
@@ -91,13 +91,13 @@ export const TrainingBalanceCard = ({ balance, balanceDays, setBalanceDays }) =>
                             })}
                         </div>
 
-                        <div className="p-6 rounded-3xl bg-sunken-3 border border-line-soft flex items-start gap-5 shadow-sm transition-all hover:shadow-md">
+                        <div className="p-6 rounded-3xl bg-sunken-3 border border-line-soft flex items-start gap-5 shadow-sm transition-paint">
                             <div className="p-3 rounded-2xl bg-surface-3 shadow-sm">
                                 <Brain size={24} style={{ color: balance.color }} />
                             </div>
                             <div className="flex-1">
                                 <div className="flex items-center gap-3 mb-2.5">
-                                    <span className="text-2xs font-black uppercase tracking-widest px-3 py-1 rounded-full border shadow-sm" style={{ backgroundColor: `${balance.color}15`, color: balance.color, borderColor: `${balance.color}30` }}>
+                                    <span className="text-2xs font-bold uppercase tracking-[0.08em] px-3 py-1 rounded-full border shadow-sm" style={{ backgroundColor: `${balance.color}15`, color: balance.color, borderColor: `${balance.color}30` }}>
                                         {balance.status}
                                     </span>
                                     <span className="text-2xs font-bold text-slate-400 uppercase tracking-tighter bg-white/50 dark:bg-zinc-800/50 px-2.5 py-1 rounded-lg border border-slate-100/50 dark:border-zinc-700/50">
@@ -107,7 +107,7 @@ export const TrainingBalanceCard = ({ balance, balanceDays, setBalanceDays }) =>
                                 <p className="text-[13px] font-bold text-ink-2 leading-snug mb-1">
                                     {balance.recommendation}
                                 </p>
-                                <p className="text-[11px] font-medium text-ink-3 leading-relaxed">
+                                <p className="text-[12px] font-medium text-ink-3 leading-relaxed">
                                     {balance.details}
                                 </p>
                             </div>

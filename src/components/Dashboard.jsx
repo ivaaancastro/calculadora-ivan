@@ -19,7 +19,6 @@ import { HistoryList } from './dashboard/HistoryList';
 import AddActivityModal from './modals/AddActivityModal';
 import { ErrorBoundary } from './common/ErrorBoundary';
 import { LoadingState } from './ui';
-import { AutoChartSkin } from './charts/ChartSkin';
 
 // Páginas cargadas bajo demanda (code splitting)
 const CalendarPage = React.lazy(() =>
@@ -121,7 +120,7 @@ const Dashboard = () => {
 
   const renderFitnessStats = (
     <ErrorBoundary>
-     <AutoChartSkin>
+     <>
       <FitnessStatsPage
         activities={activities}
         settings={settings}
@@ -134,7 +133,7 @@ const Dashboard = () => {
         isDeepSyncing={isDeepSyncing}
         deepSyncProgress={deepSyncProgress}
       />
-     </AutoChartSkin>
+     </>
     </ErrorBoundary>
   );
 
@@ -157,7 +156,7 @@ const Dashboard = () => {
 
   const renderHealth = (
     <ErrorBoundary>
-      <AutoChartSkin><HealthPage activities={activities} settings={settings} chartData={chartData} /></AutoChartSkin>
+      <><HealthPage activities={activities} settings={settings} chartData={chartData} /></>
     </ErrorBoundary>
   );
 
@@ -167,7 +166,7 @@ const Dashboard = () => {
         <button
           onClick={handleOpenModal}
           data-history="add"
-          className="py-1.5 px-3 bg-surface text-ink-2-soft border border-line-2 rounded-full text-2xs font-bold uppercase flex items-center gap-1.5 hover:bg-sunken-9 transition-colors shadow-2xs active:scale-95"
+          className="py-1.5 px-3 max-sm:min-h-[44px] bg-surface text-ink-2-soft border border-line-2 rounded-full text-2xs font-bold uppercase flex items-center gap-1.5 hover:bg-sunken-9 transition-colors shadow-2xs active:scale-press"
         >
           <span className="text-[14px]">+</span> Añadir Manual
         </button>
@@ -187,7 +186,7 @@ const Dashboard = () => {
   );
 
   return (
-    <div data-skin="shell" className="min-h-screen bg-sunken-2 text-ink-2-soft font-sans md:pb-12 transition-colors duration-300 selection:bg-action-bright/30 overflow-x-hidden">
+    <div className="tabular-nums min-h-screen bg-sunken-2 text-ink-2-soft font-sans md:pb-12 transition-colors duration-300 selection:bg-action-bright/30 overflow-x-hidden">
       <Navbar
         settings={settings}
         uploading={uploading}

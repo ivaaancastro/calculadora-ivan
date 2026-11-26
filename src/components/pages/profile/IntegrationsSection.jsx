@@ -13,11 +13,11 @@ export const IntegrationsSection = ({ formData, isSyncingIntervals, intervalsSyn
                         <Link2 size={17} strokeWidth={2.3} />
                     </div>
                     <div>
-                        <h3 className="text-xs sm:text-sm font-bold text-ink">Intervals.icu</h3>
+                        <h3 className="text-xs sm:leading-5 font-bold text-ink">Intervals.icu</h3>
                         <p className="text-2xs text-ink-4">Métricas de Garmin, Oura y Whoop</p>
                     </div>
                 </div>
-                <span data-profile="status" className={`text-2xs font-bold px-2.5 py-0.5 rounded-full ${
+                <span data-profile="status" className={`text-2xs font-bold px-2.5 py-0.5 rounded-full before:content-[''] before:inline-block before:w-1.5 before:h-1.5 before:mr-1.5 before:rounded-full before:bg-current before:align-[1px] ${
                     formData.intervalsId && formData.intervalsKey 
                         ? 'bg-positive/10 text-positive-ink border border-positive/20' 
                         : 'bg-surface-2 text-slate-400'
@@ -27,7 +27,7 @@ export const IntegrationsSection = ({ formData, isSyncingIntervals, intervalsSyn
             </div>
 
             <div className="p-3.5 sm:p-4 space-y-3">
-                <div data-profile="field-row" className="flex items-center justify-between gap-3">
+                <div data-profile="field-row" className="flex items-center justify-between gap-3 max-sm:flex-col max-sm:items-stretch max-sm:gap-1.5">
                     <span className="text-xs font-medium text-body-soft shrink-0">Athlete ID</span>
                     <input 
                         type="text" 
@@ -35,10 +35,10 @@ export const IntegrationsSection = ({ formData, isSyncingIntervals, intervalsSyn
                         value={formData.intervalsId || ''} 
                         onChange={handleChange} 
                         placeholder="i12345" 
-                        data-profile="field-input" className="w-40 text-right bg-sunken-11 border border-line-3 rounded-lg px-2.5 py-1.5 text-xs font-mono text-slate-900 dark:text-zinc-200 outline-none focus:ring-1 focus:ring-section-integrations" 
+                        data-profile="field-input" className="w-40 text-right max-sm:w-full max-sm:min-h-[44px] max-sm:text-left bg-sunken-11 border border-line-3 rounded-lg px-2.5 py-1.5 text-xs font-mono text-slate-900 dark:text-zinc-200 outline-none focus:ring-1 focus:ring-section-integrations" 
                     />
                 </div>
-                <div data-profile="field-row" className="flex items-center justify-between gap-3">
+                <div data-profile="field-row" className="flex items-center justify-between gap-3 max-sm:flex-col max-sm:items-stretch max-sm:gap-1.5">
                     <span className="text-xs font-medium text-body-soft shrink-0">API Key</span>
                     <input 
                         type="password" 
@@ -46,14 +46,14 @@ export const IntegrationsSection = ({ formData, isSyncingIntervals, intervalsSyn
                         value={formData.intervalsKey || ''} 
                         onChange={handleChange} 
                         placeholder="••••••••" 
-                        data-profile="field-input" className="w-40 text-right bg-sunken-11 border border-line-3 rounded-lg px-2.5 py-1.5 text-xs font-mono text-slate-900 dark:text-zinc-200 outline-none focus:ring-1 focus:ring-section-integrations" 
+                        data-profile="field-input" className="w-40 text-right max-sm:w-full max-sm:min-h-[44px] max-sm:text-left bg-sunken-11 border border-line-3 rounded-lg px-2.5 py-1.5 text-xs font-mono text-slate-900 dark:text-zinc-200 outline-none focus:ring-1 focus:ring-section-integrations" 
                     />
                 </div>
 
                 <button
                     onClick={handleSyncIntervals}
                     disabled={isSyncingIntervals || !formData.intervalsId || !formData.intervalsKey}
-                    className="w-full mt-2 py-2.5 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white rounded-xl text-xs font-semibold flex justify-center items-center gap-2 transition-all shadow-xs active:scale-95"
+                    className="w-full mt-2 py-2.5 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white rounded-xl text-xs font-semibold flex justify-center items-center gap-2 transition-paint shadow-xs active:scale-press"
                 >
                     {isSyncingIntervals
                         ? <><Loader2 size={14} className="animate-spin" /> {intervalsSyncProgress || 'Sincronizando...'}</>

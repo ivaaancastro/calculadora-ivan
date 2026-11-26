@@ -36,7 +36,7 @@ export const BottomNav = ({ activeIndex, onTabChange }) => {
     >
       <div className="flex items-center gap-2 pointer-events-auto max-w-full">
         {/* CÁPSULA PRINCIPAL LIQUID GLASS */}
-        <div data-shell="dock" className="liquid-glass rounded-full h-[var(--bottom-nav-h)] p-1 flex items-center gap-0.5 shadow-2xl transition-all duration-300">
+        <div data-shell="dock" className="liquid-glass rounded-3xl h-[var(--bottom-nav-h)] p-1 flex items-center gap-0.5 transition-paint duration-300">
           {capsuleTabs.map((tab) => {
             const isActive = activeIndex !== undefined
               ? activeIndex === tab.index
@@ -48,7 +48,7 @@ export const BottomNav = ({ activeIndex, onTabChange }) => {
                 key={tab.path}
                 to={tab.path}
                 onClick={(e) => handleTabClick(e, tab.path, tab.index)}
-                className={`flex flex-col items-center justify-center h-[46px] px-3.5 rounded-full transition-all duration-200 select-none touch-manipulation touch-callout-none active:scale-95 ${
+                className={`flex flex-col items-center justify-center h-[46px] px-3.5 rounded-2xl transition-paint duration-200 select-none touch-manipulation touch-callout-none active:scale-press ${
                   isActive
                     ? 'liquid-glass-active text-action-ios'
                     : 'text-ink-4 hover:text-body'
@@ -60,7 +60,7 @@ export const BottomNav = ({ activeIndex, onTabChange }) => {
                   className={`transition-transform duration-200 ${isActive ? 'scale-105' : ''}`}
                 />
                 <span
-                  className={`text-2xs tracking-tight leading-none mt-1 transition-all ${
+                  className={`text-2xs tracking-tight leading-none mt-1 transition-paint ${
                     isActive
                       ? 'font-bold text-action-ios'
                       : 'font-medium'
@@ -78,7 +78,7 @@ export const BottomNav = ({ activeIndex, onTabChange }) => {
           to="/history"
           aria-label="Buscar actividades"
           onClick={(e) => handleTabClick(e, '/history', 4)}
-          className={`liquid-glass w-[var(--bottom-nav-h)] h-[var(--bottom-nav-h)] rounded-full flex items-center justify-center shrink-0 shadow-2xl transition-transform active:scale-90 select-none touch-manipulation touch-callout-none ${
+          className={`liquid-glass w-[var(--bottom-nav-h)] h-[var(--bottom-nav-h)] rounded-3xl flex items-center justify-center shrink-0 transition-transform active:scale-press select-none touch-manipulation touch-callout-none ${
             isSearchActive
               ? 'liquid-glass-active text-action-ios'
               : 'text-ink-4 hover:text-body'

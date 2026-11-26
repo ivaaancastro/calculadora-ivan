@@ -74,7 +74,7 @@ export const Navbar = ({ settings, uploading, isStravaConnected, onSync }) => {
   ];
 
   return (
-    <nav className="glass-nav flex items-center px-3.5 sm:px-6 sticky top-0 z-nav h-[calc(var(--nav-h)+env(safe-area-inset-top,0px))] pt-[env(safe-area-inset-top,0px)] transition-all duration-300">
+    <nav className="glass-nav flex items-center px-3.5 sm:px-6 sticky top-0 z-nav h-[calc(var(--nav-h)+env(safe-area-inset-top,0px))] pt-[env(safe-area-inset-top,0px)] transition-paint duration-300">
       <div className="flex justify-between items-center w-full max-w-[1800px] mx-auto">
 
         {/* FOTO DE PERFIL / TRIGGER MENÚ CONFIGURACIÓN */}
@@ -82,13 +82,13 @@ export const Navbar = ({ settings, uploading, isStravaConnected, onSync }) => {
           <button
             type="button"
             onClick={() => setIsMenuOpen(prev => !prev)}
-            className="flex items-center gap-2 sm:gap-2.5 hover:opacity-90 active:scale-95 transition-all group select-none touch-manipulation text-left"
+            className="flex items-center gap-2 sm:gap-2.5 max-sm:min-h-[44px] hover:opacity-90 active:scale-press transition-paint group select-none touch-manipulation text-left"
             aria-label="Menú de configuración y perfil"
             aria-expanded={isMenuOpen}
           >
             {/* AVATAR CIRCULAR CON BORDE APPLE */}
             <div 
-              className="rounded-full overflow-hidden bg-surface-2 border-2 border-surface-3 shadow-xs flex items-center justify-center shrink-0 ring-1 ring-black/5 dark:ring-white/10 group-hover:ring-blue-500/40 transition-all"
+              className="rounded-full overflow-hidden bg-surface-2 border-2 border-surface-3 shadow-xs flex items-center justify-center shrink-0 ring-black/5 dark:ring-white/10 group-hover:ring-blue-500/40 transition-paint"
               style={{ width: '36px', height: '36px', minWidth: '36px', minHeight: '36px' }}
             >
               {settings?.avatarUrl ? (
@@ -124,7 +124,7 @@ export const Navbar = ({ settings, uploading, isStravaConnected, onSync }) => {
           {isMenuOpen && (
             <div className="absolute left-0 top-full mt-2.5 w-72 sm:w-80 bg-white/95 dark:bg-[#1C1C1E]/95 backdrop-blur-2xl rounded-2xl border border-black/[0.08] dark:border-white/[0.12] shadow-2xl overflow-hidden z-nav-menu animate-in fade-in zoom-in-95 duration-150">
               {/* CABECERA CON PERFIL */}
-              <div className="p-3.5 border-b border-black/[0.05] dark:border-white/[0.08] flex items-center gap-3">
+              <div className="p-3.5 border-b border-hairline-4 flex items-center gap-3">
                 <div 
                   className="rounded-full overflow-hidden bg-surface-2 border border-black/10 dark:border-white/10 shrink-0"
                   style={{ width: '42px', height: '42px', minWidth: '42px', minHeight: '42px' }}
@@ -136,10 +136,10 @@ export const Navbar = ({ settings, uploading, isStravaConnected, onSync }) => {
                   )}
                 </div>
                 <div className="min-w-0 flex-1">
-                  <p className="text-xs sm:text-sm font-bold text-ink truncate leading-tight">
+                  <p className="text-xs sm:leading-5 font-bold text-ink truncate leading-tight">
                     {settings?.fullName || 'Atleta Forma'}
                   </p>
-                  <p className="text-[11px] text-ink-4 truncate mt-0.5">
+                  <p className="text-[12px] text-ink-4 truncate mt-0.5">
                     {settings?.email || 'Ajustes del perfil'}
                   </p>
                 </div>
@@ -147,7 +147,7 @@ export const Navbar = ({ settings, uploading, isStravaConnected, onSync }) => {
 
               {/* OPCIONES DE CONFIGURACIÓN */}
               <div className="p-1.5 space-y-0.5">
-                <div className="px-2.5 pt-1 pb-1 text-2xs font-bold text-ink-4 uppercase tracking-wider">
+                <div className="px-2.5 pt-1 pb-1 text-2xs font-bold text-ink-4 uppercase tracking-[0.05em]">
                   Vistas de Configuración
                 </div>
                 {configOptions.map(opt => {
@@ -156,7 +156,7 @@ export const Navbar = ({ settings, uploading, isStravaConnected, onSync }) => {
                     <button
                       key={opt.id}
                       onClick={() => handleNavigateSection(opt.id)}
-                      className="w-full flex items-center justify-between p-2 rounded-xl hover:bg-fill active:scale-[0.98] transition-all text-left group"
+                      className="w-full flex items-center justify-between p-2 rounded-xl hover:bg-fill active:scale-press transition-paint text-left group"
                     >
                       <div className="flex items-center gap-2.5 min-w-0">
                         <div className={`w-7 h-7 rounded-[8px] ${opt.color} flex items-center justify-center shrink-0`}>
@@ -178,10 +178,10 @@ export const Navbar = ({ settings, uploading, isStravaConnected, onSync }) => {
               </div>
 
               {/* PIE CON CERRAR SESIÓN */}
-              <div className="p-1.5 border-t border-black/[0.05] dark:border-white/[0.08]">
+              <div className="p-1.5 border-t border-hairline-4">
                 <button
                   onClick={handleLogout}
-                  className="w-full flex items-center gap-2.5 p-2 rounded-xl text-danger-ink hover:bg-danger-tint-2 active:scale-[0.98] transition-all text-left text-xs font-semibold"
+                  className="w-full flex items-center gap-2.5 p-2 rounded-xl text-danger-ink hover:bg-danger-tint-2 active:scale-press transition-paint text-left text-xs font-semibold"
                 >
                   <div className="w-7 h-7 rounded-[8px] bg-danger/10 text-danger-ink flex items-center justify-center shrink-0">
                     <LogOut size={15} strokeWidth={2.3} />
@@ -195,13 +195,13 @@ export const Navbar = ({ settings, uploading, isStravaConnected, onSync }) => {
 
         {/* PAGE TABS — Desktop Segmented Control */}
         <div className="hidden md:flex items-center">
-          <div data-shell="tabs" className="flex items-center gap-1 bg-slate-200/50 dark:bg-zinc-800/50 backdrop-blur-md rounded-full p-1 shadow-inner">
+          <div data-shell="tabs" className="flex items-center gap-1 bg-sunken shadow-inset-line rounded-xl p-1">
             {tabs.map(tab => {
               const Icon = tab.icon;
               const isActive = currentPath === tab.path || (tab.path === '/' && currentPath === '');
               return (
                 <Link key={tab.path} to={tab.path}
-                  className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-semibold transition-all ${isActive
+                  className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-paint ${isActive
                     ? 'bg-surface-4 text-ink shadow-xs'
                     : 'text-ink-3 hover:text-ink-2-soft'
                     }`}>
@@ -216,17 +216,17 @@ export const Navbar = ({ settings, uploading, isStravaConnected, onSync }) => {
         {/* ACTIONS */}
         <div className="flex items-center gap-1.5 sm:gap-2">
 
-          <button onClick={toggleTheme} data-shell="icon-btn" className="w-9 h-9 flex items-center justify-center rounded-full text-ink-3 hover:text-ink-2 bg-slate-100/70 hover:bg-slate-200/60 dark:bg-zinc-900/80 dark:hover:bg-zinc-800 active:scale-90 transition-all" title="Cambiar tema">
+          <button onClick={toggleTheme} data-shell="icon-btn" className="w-9 h-9 max-sm:w-11 max-sm:h-11 flex items-center justify-center rounded-lg text-ink-3 hover:text-ink-2 bg-surface shadow-inset-line active:scale-press transition-paint" title="Cambiar tema">
             {theme === 'dark' ? <Sun size={17} /> : <Moon size={17} />}
           </button>
 
           {isStravaConnected ? (
-            <button onClick={onSync} disabled={uploading} className="bg-action-bright/10 text-action hover:bg-action-bright/20 active:scale-95 font-semibold py-1.5 px-3 rounded-full flex items-center gap-1.5 transition-all text-xs">
+            <button onClick={onSync} disabled={uploading} className="bg-action-bright/10 text-action hover:bg-action-bright/20 active:scale-press font-semibold py-1.5 px-3 rounded-full flex items-center gap-1.5 transition-paint text-xs">
               <RefreshCw size={13} className={uploading ? "animate-spin" : ""} />
               <span className={uploading ? "hidden" : "hidden sm:inline"}>Sincronizar</span>
             </button>
           ) : (
-            <div className="scale-90 sm:scale-100 origin-right">
+            <div className="sm:scale-100 origin-right max-sm:[&>button]:min-h-[44px]">
               <StravaConnect />
             </div>
           )}

@@ -91,7 +91,7 @@ export const InteractiveMap = ({ polyline, highResCoords, color, currentPosition
 
     return (
         <div className="w-full h-full rounded-lg overflow-hidden relative border border-line z-0 bg-slate-100 dark:bg-zinc-900 shadow-sm flex flex-col">
-            <div data-detail="map-types" className="absolute top-3 right-3 z-map flex border border-line-3 rounded bg-white/90 dark:bg-zinc-900/90 backdrop-blur-sm shadow-sm overflow-hidden p-0.5">
+            <div data-detail="map-types" className="absolute top-3 right-3 z-map flex border !border-line !rounded-lg !bg-surface backdrop-blur-sm !shadow-sm overflow-hidden p-0.5 max-lg:[&>button]:!min-h-[44px] max-lg:[&>button]:!min-w-[44px]">
                 {['light', 'dark', 'satellite'].map((type) => (
                     <button
                         key={type} onClick={(e) => { e.stopPropagation(); setMapType(type); }}

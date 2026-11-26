@@ -33,7 +33,7 @@ const RECIPES = {
   pill: {
     md: {
       container: 'flex bg-fill-segmented-2 p-0.5 rounded-full gap-0.5 hide-scrollbar',
-      option: 'px-3 sm:px-4 py-1 text-xs font-semibold rounded-full whitespace-nowrap shrink-0 transition-all duration-200 select-none active:scale-95',
+      option: 'px-3 sm:px-4 py-1 text-xs font-semibold rounded-full whitespace-nowrap shrink-0 transition-paint duration-200 select-none active:scale-press',
       on: 'bg-surface-4 shadow-xs font-bold',
       off: 'text-ink-3 hover:text-ink-2-soft',
     },
@@ -41,33 +41,41 @@ const RECIPES = {
   card: {
     'md-wide': {
       container: CARD_CONTAINER,
-      option: 'text-2xs font-bold uppercase tracking-widest rounded-lg transition-all',
+      option: 'text-2xs font-bold uppercase tracking-[0.08em] rounded-lg transition-paint',
       on: 'bg-surface-3 shadow-sm',
       off: CARD_OFF,
     },
     md: {
       container: CARD_CONTAINER,
-      option: 'text-2xs font-bold uppercase rounded-lg transition-all',
+      option: 'text-2xs font-bold uppercase rounded-lg transition-paint',
       on: 'bg-surface-3 shadow-sm',
       off: CARD_OFF,
     },
     sm: {
       container: CARD_CONTAINER,
-      option: 'text-2xs font-bold uppercase rounded-lg transition-all',
+      option: 'text-2xs font-bold uppercase rounded-lg transition-paint',
       on: 'bg-surface-3 shadow-sm',
       off: CARD_OFF,
     },
     xs: {
       container: 'flex bg-surface-2 p-0.5 rounded-lg text-2xs font-bold uppercase',
-      option: 'rounded transition-all',
+      option: 'rounded transition-paint',
       on: 'bg-surface-3 shadow-xs',
       off: CARD_OFF,
+    },
+  },
+  rail: {
+    md: {
+      container: 'flex bg-sunken shadow-inset-line rounded-xl p-[3px] gap-[2px] hide-scrollbar',
+      option: 'flex-[1_0_auto] min-h-[44px] px-3 sm:px-4 py-1 text-xs font-semibold rounded-lg whitespace-nowrap shrink-0 transition-paint duration-200 select-none active:scale-press',
+      on: 'bg-surface-4 shadow-xs font-bold',
+      off: 'text-ink-3 hover:text-ink-2-soft',
     },
   },
   mini: {
     md: {
       container: 'flex bg-fill-5 rounded-full p-0.5',
-      option: 'px-2 py-0.5 text-2xs font-semibold rounded-full transition-all duration-200',
+      option: 'px-2 py-0.5 text-2xs font-semibold rounded-full transition-paint duration-200',
       on: 'bg-surface-3 shadow-sm',
       off: 'text-ink-4-fixed hover:text-body-soft-fixed',
     },
@@ -77,11 +85,12 @@ const RECIPES = {
 /** Tonos permitidos por variante; el primero es el de por defecto. */
 const TONES = {
   pill: ['ink'],
+  rail: ['ink'],
   card: ['ink-soft', 'action-bright', 'action', 'run'],
   mini: ['ink-2', 'hr', 'power'],
 };
 
-export const DEFAULT_SIZE = { pill: 'md', card: 'md', mini: 'md' };
+export const DEFAULT_SIZE = { pill: 'md', rail: 'md', card: 'md', mini: 'md' };
 
 function recipe(variant, size) {
   const byVariant = RECIPES[variant];

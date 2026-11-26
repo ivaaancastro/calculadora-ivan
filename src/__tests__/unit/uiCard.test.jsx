@@ -8,15 +8,15 @@ const classes = (s) => s.split(' ').sort();
 describe('ui/Card', () => {
   it('grouped copia la receta de la tarjeta agrupada de index.css', () => {
     expect(classes(cardClass())).toEqual(
-      classes('bg-surface-card rounded-2xl sm:rounded-3xl border border-hairline-3 shadow-card dark:shadow-none transition-all'),
+      classes('bg-surface-card rounded-2xl sm:rounded-3xl border border-hairline-3 shadow-card transition-paint'),
     );
   });
 
-  it('pressable cambia transition-all por la transición de la compresión al tocar', () => {
+  it('pressable cambia transition-paint por la transición de la compresión al tocar', () => {
     const c = classes(cardClass({ pressable: true }));
-    expect(c).not.toContain('transition-all');
+    expect(c).not.toContain('transition-paint');
     expect(c).toEqual(
-      expect.arrayContaining(['active:scale-[0.97]', 'transition-transform', 'duration-150', 'ease-out', 'select-none', 'touch-manipulation']),
+      expect.arrayContaining(['active:scale-press', 'transition-transform', 'duration-150', 'ease-out', 'select-none', 'touch-manipulation']),
     );
   });
 
@@ -45,7 +45,7 @@ describe('ui/Card', () => {
 
 describe('ui/SectionHeader', () => {
   it('copia la receta del título de sección de index.css', () => {
-    expect(classes(SECTION_HEADER)).toEqual(classes('section-header text-[12px] font-semibold text-ink-3 uppercase tracking-wider px-0.5 mb-2'));
+    expect(classes(SECTION_HEADER)).toEqual(classes('section-header text-[12px] font-semibold text-ink-3 uppercase tracking-[0.05em] px-0.5 mb-2'));
   });
 
   it('renderiza p o div', () => {

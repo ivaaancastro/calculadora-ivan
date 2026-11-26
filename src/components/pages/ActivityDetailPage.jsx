@@ -73,7 +73,7 @@ export const ActivityDetailPage = ({ activity, settings, fetchStreams, onBack, o
     // vertical de `main`. En Análisis la página puede crecer en móvil; en escritorio la caja
     // queda fija y se desplazan los paneles, como antes. Sin números sueltos (RF2).
     return (
-        <div data-skin="detail" className={`animate-in fade-in duration-500 bg-sunken-2 ${effectiveTab === 'analyze' ? 'min-h-[calc(100dvh-var(--nav-h-total))] sm:min-h-[calc(100dvh-var(--nav-h-total)-1rem)] lg:h-[calc(100dvh-var(--nav-h-total)-1rem)]' : 'h-[calc(100dvh-var(--nav-h-total))] sm:h-[calc(100dvh-var(--nav-h-total)-1rem)]'} flex flex-col font-sans pb-safe`}>
+        <div className={`animate-in fade-in duration-500 bg-sunken-2 ${effectiveTab === 'analyze' ? 'min-h-[calc(100dvh-var(--nav-h-total))] sm:min-h-[calc(100dvh-var(--nav-h-total)-1rem)] lg:h-[calc(100dvh-var(--nav-h-total)-1rem)]' : 'h-[calc(100dvh-var(--nav-h-total))] sm:h-[calc(100dvh-var(--nav-h-total)-1rem)]'} flex flex-col font-sans pb-safe`}>
             <DetailHeader
                 activity={activity}
                 activeTab={effectiveTab}

@@ -13,10 +13,10 @@ export function EmptyState() {
           size={32}
           className="mx-auto text-ink-4-dim mb-4"
         />
-        <h2 className="text-sm font-bold uppercase tracking-widest text-ink-2 mb-2">
+        <h2 className="text-sm font-bold uppercase tracking-[0.08em] text-ink-2 mb-2">
           Base de datos vacía
         </h2>
-        <p className="text-2xs text-ink-3-flat uppercase tracking-wider mb-6">
+        <p className="text-2xs text-ink-3-flat uppercase tracking-[0.05em] mb-6">
           Conecta Strava para iniciar el análisis.
         </p>
       </div>

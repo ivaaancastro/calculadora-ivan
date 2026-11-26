@@ -22,7 +22,7 @@ export const Header = ({ onOpenAuth, onFeatures }) => (
         </button>
         <button
           onClick={onOpenAuth}
-          className="min-h-[44px] rounded-xl bg-action-solid px-4 text-sm font-bold text-on-action transition-colors hover:bg-action-hover active:scale-[0.98]"
+          className="min-h-[44px] rounded-xl bg-action-solid px-4 text-sm font-bold text-on-action transition-colors hover:bg-action-hover active:scale-press"
         >
           Empezar
         </button>

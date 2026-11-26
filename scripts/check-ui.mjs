@@ -17,7 +17,7 @@ const ROOT = fileURLToPath(new URL('..', import.meta.url));
 const UI_DIR = 'src/components/ui';
 const RETIRED = join(ROOT, 'scripts', 'ui-retired.json');
 
-const VARIANT = '(?:(?:sm|md|lg|xl|2xl|hover|focus|focus-visible|active|disabled|group-hover|first|last|odd|even):)*';
+const VARIANT = '(?:(?:sm|md|lg|xl|2xl|max-sm|max-md|max-lg|motion-safe|motion-reduce|hover|focus|focus-visible|active|disabled|group-hover|first|last|odd|even):)*';
 /** Lo único que puede ir en el `className` de una primitiva: colocación, tamaño y espaciado. */
 const ALLOWED = new RegExp(
   `^${VARIANT}-?(?:` +
@@ -69,6 +69,8 @@ const ALLOWED = new RegExp(
       'select-none',
       'text-(?:left|center|right)',
       'whitespace-.+',
+      'animate-.+',
+      '\\[animation-delay:[^\\]]+\\]',
     ].join('|') +
     ')$',
 );

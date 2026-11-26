@@ -20,7 +20,7 @@
   "danger-ink-3": { "light": "red-600", "dark": "red-500" },
   "danger-solid": { "light": "red-600", "dark": "red-600" },
   "danger-hover": { "light": "red-700", "dark": "red-700" },
-  "danger-light": { "light": "red-400", "dark": "red-400" },
+  "danger-light": { "light": "[#be123c]", "dark": "[#fb7185]" },
   "danger-light-2": { "light": "red-400", "dark": "red-400/60" },
   "danger-tint": { "light": "red-50", "dark": "red-900/20" },
   "danger-tint-2": { "light": "red-50", "dark": "red-950/30" },

@@ -36,29 +36,29 @@ export const BiomarkersGrid = ({ wellnessMetrics: wm }) => {
                     const Icon = d.icon;
                     const good = s.delta === null || s.delta === 0 ? null : (s.delta < 0) === (s.goodDir === 'down');
                     return (
-                        <Card key={key} data-health="biomarker" data-status={s.status} className="p-3.5 sm:p-4 flex flex-col justify-between gap-3">
+                        <Card key={key} data-health="biomarker" data-status={s.status} variant={s.status === 'attention' ? 'biomarker-attention' : 'biomarker'} figures="tnum" className="p-3.5 sm:p-4 flex flex-col justify-between gap-3 min-h-[112px] motion-safe:animate-rise-slow motion-safe:odd:[animation-delay:0.3s] motion-safe:even:[animation-delay:0.36s]">
                             <div className="flex items-center justify-between">
-                                <span className="text-[11px] font-semibold uppercase tracking-[0.06em] text-ink-4 flex items-center gap-1.5">
+                                <span className="text-[12px] font-semibold uppercase tracking-[0.06em] text-ink-4 flex items-center gap-1.5">
                                     <Icon size={13} strokeWidth={2.25} aria-hidden="true" />{d.label}
                                 </span>
                                 {s.status === 'attention' && (
-                                    <span data-health="status-chip" className="inline-flex items-center gap-1 text-2xs font-bold uppercase tracking-wider text-warning-ink">
+                                    <span data-health="status-chip" className="inline-flex items-center gap-1 text-2xs font-bold uppercase tracking-[0.05em] text-warning-ink">
                                         <AlertTriangle size={11} aria-hidden="true" />Atención
                                     </span>
                                 )}
                             </div>
                             <div>
                                 <div className="flex items-baseline gap-1.5 flex-wrap">
-                                    <span data-health="biomarker-value" className="text-[28px] sm:text-[32px] leading-none font-semibold tabular-nums tracking-[-0.03em] text-ink">{d.value}</span>
-                                    {d.unit && <span className="text-[11px] font-medium text-ink-4">{d.unit}</span>}
+                                    <span data-health="biomarker-value" className={`text-[28px] sm:text-[32px] leading-none font-semibold tabular-nums tracking-[-0.03em] ${s.status === 'none' ? 'text-ink-4' : 'text-ink'}`}>{d.value}</span>
+                                    {d.unit && <span className="text-[12px] font-medium text-ink-4">{d.unit}</span>}
                                     {s.delta !== null && s.delta !== 0 && (
-                                        <span data-health="delta" className={`inline-flex items-center text-[11px] font-semibold tabular-nums ${good ? 'text-positive' : 'text-danger'}`}>
+                                        <span data-health="delta" className={`inline-flex items-center text-[12px] font-semibold tabular-nums ${good ? 'text-positive' : 'text-danger'}`}>
                                             {s.delta > 0 ? <ArrowUp size={11} aria-hidden="true" /> : <ArrowDown size={11} aria-hidden="true" />}{Math.abs(s.delta)}
                                         </span>
                                     )}
                                 </div>
                                 <div className="flex items-end justify-between gap-2 mt-2">
-                                    <span className="text-[11px] font-medium text-ink-4">{s.status === 'none' ? 'Sin dato reciente' : d.sub}</span>
+                                    <span className="text-[12px] font-medium text-ink-4">{s.status === 'none' ? 'Sin dato reciente' : d.sub}</span>
                                     {d.spark.length >= 2 && <Sparkline values={d.spark} color={d.color} width={64} height={24} label={`Tendencia de ${d.label}`} />}
                                 </div>
                             </div>

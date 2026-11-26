@@ -13,6 +13,19 @@ module.exports = {
       // Tokens de src/styles/tokens.css (spec-rediseno-02-c1). La paleta por defecto
       // de Tailwind se mantiene hasta que todo esté migrado (Capa 6).
       colors,
+      // Entrada de los bloques «héroe» y de las fichas (sube 6 px y aparece).
+      keyframes: {
+        rise: { from: { opacity: '0', transform: 'translateY(6px)' }, to: { opacity: '1', transform: 'none' } },
+        'ring-draw': { from: { strokeDashoffset: '459px' } },
+        'fill-x': { from: { transform: 'scaleX(0)' }, to: { transform: 'scaleX(1)' } },
+      },
+      animation: {
+        rise: 'rise 0.45s cubic-bezier(0.22, 1, 0.36, 1) both',
+        'rise-slow': 'rise 0.55s cubic-bezier(0.22, 1, 0.36, 1) both',
+        // Salud: el anillo se dibuja y la barra de energía se llena desde la izquierda.
+        'ring-draw': 'ring-draw 1.3s cubic-bezier(0.22, 1, 0.36, 1) 0.15s both',
+        'fill-x': 'fill-x 1.1s cubic-bezier(0.22, 1, 0.36, 1) 0.45s both',
+      },
       // Escala tipográfica de la piel v2 (spec-capa6-v2-premium, RF-B3): mínimo 11 px (`text-2xs`,
       // sin interlineado propio, como las clases arbitrarias a las que sustituye) y el extremo
       // grande 1–4 px más ancho que Tailwind. Interlineados, los de Tailwind.
@@ -43,12 +56,14 @@ module.exports = {
       // Sombras con valor en tokens.css (spec-rediseno-02-c2; niveles de la piel v2: reposo
       // `xs`/`sm`/`card`, flotante `lg`/`xl` y modal `2xl`).
       boxShadow: {
-        xs: 'var(--skin-shadow-xs, 0 0 #0000)',
-        sm: 'var(--skin-shadow-sm, 0 1px 2px 0 rgb(0 0 0 / 0.05))',
-        card: 'var(--skin-shadow-card, var(--shadow-card))',
+        xs: 'var(--shadow-xs)',
+        sm: 'var(--shadow-sm)',
+        card: 'var(--shadow-card)',
         lg: 'var(--elev-2)',
         xl: 'var(--elev-2)',
         '2xl': 'var(--elev-3)',
+        // Carril hundido: anillo interior de 1 px del token de línea.
+        'inset-line': 'inset 0 0 0 1px rgb(var(--line))',
       },
       // Movimiento (tokens `--dur-*` y `--ease-out`).
       transitionDuration: {
@@ -58,6 +73,15 @@ module.exports = {
       },
       transitionTimingFunction: {
         forma: 'var(--ease-out)',
+      },
+      // Sin `transition: all` (MOV-1): solo pintura y transformación (más ancho/alto/trazo, que
+      // usan barras y anillos), nunca márgenes, rellenos ni posicionamiento.
+      transitionProperty: {
+        paint: 'color, background-color, border-color, text-decoration-color, fill, stroke, opacity, box-shadow, transform, filter, width, height, stroke-dashoffset, stroke-dasharray',
+      },
+      // Pulsación única (MOV-3): `active:scale-press` (0,97; 1 con movimiento reducido).
+      scale: {
+        press: 'var(--press-scale)',
       },
       // Comodidad (RF-D5): separación entre secciones 32/48 px, padding de tarjeta 16/24 px y
       // ancho máximo de contenido de 1200 px.

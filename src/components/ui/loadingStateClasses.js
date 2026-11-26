@@ -15,12 +15,12 @@ const RECIPES = {
   screen: {
     root: 'h-screen flex flex-col items-center justify-center bg-sunken-2 gap-4 transition-colors',
     spinner: 'animate-spin text-action-bright',
-    label: 'text-2xs text-ink-3 font-bold uppercase tracking-widest animate-pulse',
+    label: 'text-2xs text-ink-3 font-bold uppercase tracking-[0.08em] animate-pulse',
   },
   boot: {
     root: 'min-h-screen bg-sunken-2 flex items-center justify-center',
     spinner: '',
-    label: 'text-2xs font-bold text-ink-3-flat uppercase tracking-widest animate-pulse',
+    label: 'text-2xs font-bold text-ink-3-flat uppercase tracking-[0.08em] animate-pulse',
   },
 };
 

@@ -3,7 +3,6 @@ import React, { useState, useMemo } from 'react';
 import { ChevronLeft, ChevronRight, Activity } from 'lucide-react';
 
 import { useChartTheme } from '../charts/useChartTheme';
-import { ChartSkinProvider } from '../charts/ChartSkin';
 import { IconButton, Modal } from '../ui';
 import { useCalendarDate } from '../../hooks/useCalendarDate';
 import { useCalendarData } from '../../hooks/useCalendarData';
@@ -50,27 +49,27 @@ export const CalendarPage = ({ activities, plannedWorkouts = [], addPlannedWorko
     );
 
     return (
-        <ChartSkinProvider skin="v2">
-            <div data-skin="calendar" data-cal="root" className="flex flex-col bg-surface-6 rounded-3xl border border-line-soft overflow-hidden mb-6 shadow-sm">
+        <>
+            <div data-cal="root" className="flex flex-col bg-surface rounded-xl border border-line overflow-hidden mb-6 shadow-card">
 
                 {/* HEADER */}
-                <div data-cal="header" className="flex items-center justify-between px-3 sm:px-5 py-3 sm:py-4 bg-transparent border-b border-line-soft-5">
+                <div data-cal="header" className="flex items-center justify-between px-3 sm:px-5 py-3 sm:py-4 bg-transparent border-b border-line">
                     <div className="flex items-center gap-2 sm:gap-3">
                         <h2 className="text-base sm:text-2xl font-semibold text-ink-2 capitalize tracking-tight flex items-center">
                             {new Date(year, month).toLocaleDateString('es-ES', { month: 'long', year: 'numeric' })}
                         </h2>
-                        <button onClick={goToday} data-cal="today-btn" className="text-[11px] font-medium text-ink-3 hover:text-danger-ink-2 active:scale-95 transition-all ml-1 sm:ml-2 bg-sunken-6 px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full">Hoy</button>
+                        <button onClick={goToday} data-cal="today-btn" className="min-h-[44px] min-w-[44px] text-[12px] font-medium text-ink-3 hover:text-danger-ink-2 active:scale-press transition-paint ml-1 sm:ml-2 bg-sunken shadow-inset-line px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full">Hoy</button>
                     </div>
                     <div className="flex items-center gap-1.5 sm:gap-2">
                         {/* PMC CHART TOGGLE */}
-                        <button onClick={() => setShowPmcChart(p => !p)} data-cal="pmc-toggle" className={`hidden sm:flex items-center gap-1.5 px-3 py-1.5 border rounded-lg text-2xs font-black uppercase tracking-widest transition-colors shadow-sm ${showPmcChart ? 'bg-violet-50 dark:bg-violet-900/20 text-violet-600 dark:text-violet-400 border-violet-200 dark:border-violet-800/50' : 'bg-surface text-ink-3 border-slate-200 dark:border-zinc-700 hover:border-slate-400'}`}>
+                        <button onClick={() => setShowPmcChart(p => !p)} data-cal="pmc-toggle" className={`hidden sm:flex items-center gap-1.5 min-h-[44px] px-3 py-1.5 border rounded-lg text-2xs font-bold uppercase tracking-[0.08em] transition-colors shadow-none ${showPmcChart ? 'bg-violet-50 dark:bg-violet-900/20 text-violet-600 dark:text-violet-400 border-violet-200 dark:border-violet-800/50' : 'bg-surface text-ink-3 border-slate-200 dark:border-zinc-700 hover:border-slate-400'}`}>
                             <Activity size={12} /> Forma
                         </button>
 
-                        <div data-cal="month-nav" className="flex items-center border border-line-2 rounded-lg overflow-hidden ml-1 sm:ml-2">
-                            <IconButton variant="ghost" onClick={prevMonth} className="w-10 h-10" title="Mes anterior" label="Mes anterior" icon={ChevronLeft} iconSize={18} />
+                        <div data-cal="month-nav" className="flex items-center border border-line rounded-lg overflow-hidden ml-1 sm:ml-2">
+                            <IconButton variant="ghost" onClick={prevMonth} className="w-11 h-11" title="Mes anterior" label="Mes anterior" icon={ChevronLeft} iconSize={18} />
                             <div className="w-px h-5 bg-fill-7"></div>
-                            <IconButton variant="ghost" onClick={nextMonth} className="w-10 h-10" title="Mes siguiente" label="Mes siguiente" icon={ChevronRight} iconSize={18} />
+                            <IconButton variant="ghost" onClick={nextMonth} className="w-11 h-11" title="Mes siguiente" label="Mes siguiente" icon={ChevronRight} iconSize={18} />
                         </div>
                     </div>
                 </div>
@@ -154,7 +153,7 @@ export const CalendarPage = ({ activities, plannedWorkouts = [], addPlannedWorko
                 )
             }
 
-        </ChartSkinProvider>
+        </>
     );
 };
 

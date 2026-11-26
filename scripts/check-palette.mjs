@@ -4,8 +4,8 @@
  *
  *   node scripts/check-palette.mjs
  *
- * Lee los dos bloques `html[data-ui="v2"] …` de `src/styles/tokens.css` (marcados con
- * `@tokens:skin-v2`), resuelve sus valores y comprueba:
+ * Lee los bloques `:root` y `.dark` de `src/styles/tokens.css` (la piel v2 es la base desde la
+ * Capa 6), resuelve sus valores y comprueba:
  *
  *  1. Contraste WCAG 2.1 de cada texto sobre **todas** las superficies de su tema
  *     (4,5:1). Si el texto más claro de un tema pasa sobre la superficie más oscura,
@@ -65,24 +65,15 @@ const deltaE = (a, b) => {
 
 // ── Lectura de los bloques de la piel ────────────────────────────────────────────
 
-const css = readFileSync(TOKENS, 'utf8');
-const start = css.indexOf('@tokens:skin-v2:start');
-const end = css.indexOf('@tokens:skin-v2:end');
-if (start < 0 || end < 0) throw new Error('Faltan los marcadores @tokens:skin-v2 en tokens.css');
-
-const section = css.slice(start, end).replace(/\/\*[\s\S]*?\*\//g, '');
-const blocks = [...section.matchAll(/([^{}]+)\{([^}]*)\}/g)].map((m) => ({
-  selector: m[1].trim(),
-  dark: m[1].includes('.dark'),
-  tokens: Object.fromEntries(
-    [...m[2].matchAll(/--([\w-]+)\s*:\s*([^;]+);/g)].map(([, k, v]) => [k, v.trim()]),
-  ),
-}));
-
-const skin = {
-  light: blocks.find((b) => !b.dark)?.tokens,
-  dark: blocks.find((b) => b.dark)?.tokens,
-};
+// Desde la Capa 6 (PR 7b) la piel es la base: se leen todos los bloques `:root` y `.dark`.
+const css = readFileSync(TOKENS, 'utf8').replace(/\/\*[\s\S]*?\*\//g, '');
+const readMode = (selector) =>
+  Object.fromEntries(
+    [...css.matchAll(new RegExp(`(^|\\n)\\s*${selector.replace('.', '\\.')}\\s*\\{([^}]*)\\}`, 'g'))].flatMap((m) =>
+      [...m[2].matchAll(/--([\w-]+)\s*:\s*([^;]+);/g)].map(([, k, v]) => [k, v.trim()]),
+    ),
+  );
+const skin = { light: readMode(':root'), dark: readMode('.dark') };
 if (!skin.light || !skin.dark) throw new Error('La piel v2 necesita un bloque claro y otro oscuro');
 
 // ── Qué se mide ──────────────────────────────────────────────────────────────────
