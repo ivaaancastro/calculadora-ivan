@@ -49,10 +49,21 @@ test.describe('Tooltip de gráfica al tocar', () => {
         .filter((i) => i >= 0),
     );
 
-  for (const c of [
-    { name: 'Dashboard', path: '/' },
-    { name: 'Salud (Historial)', path: '/health', tab: 'Historial' },
-  ]) {
+  // En el Dashboard, los valores del día tocado van en la leyenda de la gráfica (RF-D1), no en
+  // un tooltip bajo el dedo: sin tocar no hay readout; al tocar, aparece con el día señalado.
+  test('Dashboard: tocar la gráfica muestra el día señalado en la leyenda', async ({ page }) => {
+    await gotoReady(page, '/');
+    const readout = page.locator('[data-dash="readout"]').filter({ visible: true });
+    await expect(readout).toHaveCount(0);
+    const chart = visible(page.locator('[data-dash="chart"] .recharts-wrapper'));
+    await chart.scrollIntoViewIfNeeded();
+    const box = await chart.boundingBox();
+    await page.touchscreen.tap(box.x + box.width * 0.3, box.y + box.height * 0.5);
+    await expect(readout.first()).toBeVisible();
+    await expect(readout.first()).not.toHaveText(/proyección/);
+  });
+
+  for (const c of [{ name: 'Salud (Historial)', path: '/health', tab: 'Historial' }]) {
     test(`${c.name}: tocar una gráfica abre su tooltip`, async ({ page }) => {
       await gotoReady(page, c.path);
       if (c.tab) await visible(page.getByRole('button', { name: c.tab, exact: true })).click();

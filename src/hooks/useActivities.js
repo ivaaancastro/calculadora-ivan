@@ -46,6 +46,7 @@ export const useActivities = () => {
     filteredData:    pmc.filteredData,
     currentMetrics:  pmc.currentMetrics,
     chartData:       pmc.chartData,
+    pmcSeries:       pmc.pmcSeries,
     distribution:    pmc.distribution,
     summary:         pmc.summary,
     plannedWorkouts: data.plannedWorkouts,

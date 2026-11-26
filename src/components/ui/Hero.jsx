@@ -12,10 +12,14 @@ import { heroClass, heroChipClass, HERO_ACCENT } from './heroClasses.js';
  *   cambian (RF-D3), no aquí.
  * - `layout`: `split` (texto | cifra) o `stack` (cifra primero, frase debajo).
  * - `accent`: color del filete; por defecto, el del tono del chip.
+ * - `size` (`lg` | `xl`) y `tone` (`ink` | `ctl` | `atl` | `tsb`): tamaño y color de la cifra; `xl` y el
+ *   color de la métrica, para la cifra que responde a la pregunta de la pantalla (RF-D2).
  */
 export function Hero({
   as: Tag = 'section',
   layout = 'split',
+  size = 'lg',
+  tone = 'ink',
   eyebrow,
   chip,
   label,
@@ -32,7 +36,7 @@ export function Hero({
   children,
   ...rest
 }) {
-  const c = heroClass({ layout });
+  const c = heroClass({ layout, size, tone });
   const rule = accent ?? (chip ? HERO_ACCENT[chip.tone ?? 'neutral'] : undefined);
 
   const head = (eyebrow || chip) && (
