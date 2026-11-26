@@ -191,7 +191,7 @@ El repositorio queda sin ficheros que no se usan, y el CI de cada PR tarda **men
 - [x] El usuario elige la paleta, se aplica y supera el contraste AA.
 - [x] `grep -r CLIENT_SECRET src dist` no devuelve nada. `lint:orphans` da 0.
 - [x] `lint`, `lint:colors`, `lint:ui`, `lint:type`, vitest, build y el E2E funcional pasan en verde.
-- [ ] Cada PR de diseño adjunta capturas antes y después a 390 y 1440 px, en claro y oscuro. **Hecho** (con el arnés simulado, enlazadas en cada PR: #155, #158–#162); **pendiente**: la aprobación del usuario de las pantallas.
+- [x] Cada PR de diseño adjunta capturas antes y después a 390 y 1440 px, en claro y oscuro (enlazadas en cada PR: #155, #158–#162). El usuario aprobó las pantallas el 2026-11-26.
 
 ## 6. Diseño técnico
 - **CI y herramientas:**

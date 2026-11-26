@@ -10,7 +10,7 @@
 - Conventional Commits. Producción **no se toca** durante el rediseño: todo va a `develop`.
 
 ## 1. Estado actual
-- **Capa 6 hecha** (#140–#163, `docs/branches/feat/capa6-v2-premium/`): v2 única (sin v1), CI de < 3 min sin capturas, secreto de Strava en la Edge Function `strava-token`, tema aplanado (`skin.css` mínimo, texto ≥ 11 px), paleta «Neón profundo» con una sola fuente de color, guía `docs/design/forma.md` y pantallas premium sin métricas repetidas. **Pendiente:** que el usuario apruebe las pantallas (capturas enlazadas en `tasks.md`) y decidir el merge a `main` (cambia producción). Siguiente capa: 7 (iOS).
+- **Capa 6 hecha** (#140–#163, `docs/branches/feat/capa6-v2-premium/`): v2 única (sin v1), CI de < 3 min sin capturas, secreto de Strava en la Edge Function `strava-token`, tema aplanado (`skin.css` mínimo, texto ≥ 11 px), paleta «Neón profundo» con una sola fuente de color, guía `docs/design/forma.md` y pantallas premium sin métricas repetidas. Pantallas aprobadas por el usuario (2026-11-26). **Pendiente:** decidir el merge a `main` (cambia producción). Siguiente capa: 7 (iOS).
 - **Hecho antes (resumen en `CHANGELOG.md`, detalle en el historial de git):** Capas 0–5 del rediseño y Fase Premium A–D (PR #50–#139). Cada rama conserva su carpeta en `docs/branches/` (D12: se quedan en el repositorio, visibles en GitHub).
 - **Pendiente después:** Capa 7 (iOS). Roadmap: `docs/branches/feat/webapp-redesign/plan.md`.
 - **Pendientes de producto:** funciones de pago a futuro (no prometer gratuidad); Strava se replantea por sus límites de API y se estudiará **Garmin**. Deuda de la Capa 4: `robots.txt`/`og:image` y CSS bloqueante.

@@ -70,10 +70,11 @@ Spec: `spec.md` v0.3 (aprobada 2026-11-24). Plan: `plan.md`. Hallazgos: `auditor
 - Paleta elegida, aplicada y AA (`lint:palette`). ✔
 - `CLIENT_SECRET` ni en `src` ni en `dist`; `lint:orphans` = 0. ✔
 - lint, colors, ui, type, vitest, build y E2E en verde. ✔
-- Capturas antes/después en cada PR de diseño. ✔ — **Pendiente:** la aprobación del usuario de las pantallas.
+- Capturas antes/después en cada PR de diseño, y pantallas aprobadas por el usuario (2026-11-26). ✔
 
 ## Pendiente fuera de esta capa
 - Las pestañas Mapa, Intervalos y Detalle del detalle conservan su contenido anterior.
 - Zonas de ritmo de carrera con nombres en inglés guardados en el perfil del usuario.
 - El conmutador «FORMA» del Calendario aún usa clases de paleta cruda (violeta).
 - Merge a `main` (producción) y despliegue: decisión aparte (R2).
+- 2026-11-26: el usuario aprueba las pantallas. Capa 6 cerrada; todos los criterios de aceptación cumplidos.
