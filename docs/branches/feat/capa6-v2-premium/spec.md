@@ -5,7 +5,7 @@
 - **Título:** Activar v2 para todos, retirar v1, aligerar el CI, limpiar el repositorio y dejar v2 al nivel premium, cómoda de usar y sin bugs.
 - **Autor:** agente Claude Code
 - **Fecha:** 2026-11-24
-- **Estado:** aprobada por el usuario el 2026-11-24 (versión 0.3), en ejecución
+- **Estado:** implementada (2026-11-26; PR #140–#163). Aprobada por el usuario el 2026-11-24 (versión 0.3).
 - **Sustituye a:** `spec-auditoria-rediseno-01`. Esta spec es la Capa 6 del `plan.md` de `webapp-redesign`.
 
 ## 2. Objetivo
@@ -75,56 +75,56 @@ El repositorio queda sin ficheros que no se usan, y el CI de cada PR tarda **men
 ## 4. Requisitos funcionales
 
 ### A. CI rápido y E2E limpio (va primero)
-- [ ] **RF-A1.** Un solo workflow con `concurrency` y `cancel-in-progress`, con dos jobs en paralelo:
+- [x] **RF-A1.** Un solo workflow con `concurrency` y `cancel-in-progress`, con dos jobs en paralelo:
   - `check`: `npm ci` con caché, lint, `lint:colors`, `lint:ui`, vitest y build.
   - `e2e`: Chromium en escritorio, 4 workers, `retries: 1`, sin capturas.
 
   Objetivo: **menos de 5 minutos** por PR.
-- [ ] **RF-A2.** Se borran:
+- [x] **RF-A2.** Se borran:
   - los jobs `changes`, `style-*` y `validate-specs`;
   - `update-snapshots.yml`;
   - los specs `visual`, `visual-v2`, `access-visual-v2`, `ui-mode` y `tools/style-dump`, junto con `e2e/__screenshots__`;
   - `e2e/support/visual.js`;
   - los scripts de comparación y de Docker (`ci-style-dump.sh`, `style-diff.mjs`, `fetch-style-baseline.sh`, `verify-layer.sh`, `changed-lane.mjs`, `e2e-docker.sh` y `heavy-lock.sh`).
-- [ ] **RF-A3.** El E2E queda en specs funcionales con una sola responsabilidad: acceso, Dashboard, Actividades, detalle (volver, por deporte, borrar y **mapa visible**), Strava, exportar, cuenta y modal.
+- [x] **RF-A3.** El E2E queda en specs funcionales con una sola responsabilidad: acceso, Dashboard, Actividades, detalle (volver, por deporte, borrar y **mapa visible**), Strava, exportar, cuenta y modal.
   - `layout` pasa a ser una prueba de DOM a 390 y 1440 px: barras fijas, desbordamiento, solapes entre bloques y objetivos táctiles de al menos 44 px.
   - `shell`, `touch`, `gestures` y `tooltip-touch` se funden en `layout` o en `mobile`.
   - Sin `waitForTimeout`; las esperas son por estado.
-- [ ] **RF-A4.** Se reescriben para el flujo nuevo `AGENTS.md` (§8 y §8 bis, más las referencias a OpenCode según D11) y `MEMORY.md` §2. El flujo queda así: `npm run verify` en local, el CI rápido y la revisión visual del agente en el navegador integrado.
+- [x] **RF-A4.** Se reescriben para el flujo nuevo `AGENTS.md` (§8 y §8 bis, más las referencias a OpenCode según D11) y `MEMORY.md` §2. El flujo queda así: `npm run verify` en local, el CI rápido y la revisión visual del agente en el navegador integrado.
 
 ### B. Retirar v1
-- [ ] **RF-B1.** v2 siempre activa. Desaparecen el interruptor «Vista previa v2», `useUiMode`, `VITE_UI` y el script de `index.html`.
-- [ ] **RF-B2.** Se eliminan las 84 ramas `isV2` (24 ficheros) y los componentes solo-v1. Los `*V2.jsx` pierden el sufijo.
-- [ ] **RF-B3.** La piel se aplana:
+- [x] **RF-B1.** v2 siempre activa. Desaparecen el interruptor «Vista previa v2», `useUiMode`, `VITE_UI` y el script de `index.html`.
+- [x] **RF-B2.** Se eliminan las 84 ramas `isV2` (24 ficheros) y los componentes solo-v1. Los `*V2.jsx` pierden el sufijo.
+- [x] **RF-B3.** La piel se aplana:
   - sin prefijo `data-ui` y sin redefinir utilidades de Tailwind;
   - escala `fontSize` con un mínimo de 11 px, más `borderRadius`, `boxShadow` y curvas definidos en el tema;
   - `skin-v2.css` por debajo de 300 líneas.
-- [ ] **RF-B4.** Los pares `dark:` manuales pasan a tokens.
+- [x] **RF-B4.** Los pares `dark:` manuales pasan a tokens.
 
 ### C. Bugs, seguridad y calidad (IDs en `auditoria.md`)
-- [ ] **RF-C0 (BUG-13, mapa). Prioridad alta.**
+- [x] **RF-C0 (BUG-13, mapa). Prioridad alta.**
   - `map_polyline` entra en `LIGHT_COLS`.
   - `useActivityStreams` vuelve a evaluar cuando cambian los `streams_data` de la actividad (sin la guarda por `id`).
   - Si faltan streams, el detalle pide **solo los de esa actividad** a Supabase antes de recurrir a Strava.
   - Lo cubre un E2E: mapa visible al entrar por URL directa y en una actividad de hace más de 95 días.
-- [ ] **RF-C1 (SEG-1).** Edge Function `strava-token`. `VITE_STRAVA_CLIENT_SECRET` desaparece del código y del bundle, y el usuario rota el secreto.
-- [ ] **RF-C2.** Se corrigen BUG-1 a BUG-12 (tabla en `auditoria.md`). Entre otros:
+- [x] **RF-C1 (SEG-1).** Edge Function `strava-token`. `VITE_STRAVA_CLIENT_SECRET` desaparece del código y del bundle, y el usuario rota el secreto.
+- [x] **RF-C2.** Se corrigen BUG-1 a BUG-12 (tabla en `auditoria.md`). Entre otros:
   - una única fuente de estado de forma (`utils/formState.js`);
   - fechas en hora local (`utils/dates.js`);
   - «sesiones» y la comparación con los mismos días del mes anterior;
   - `toast.error`;
   - historial en O(n).
-- [ ] **RF-C3.**
+- [x] **RF-C3.**
   - **COP-1:** `formatNumber` en es-ES y un nombre único por métrica: Fitness (CTL), Fatiga (ATL), Forma (TSB), Rampa, y el deporte en español.
   - **COP-2:** el origen de cada VO₂max.
-- [ ] **RF-C4. Accesibilidad.**
+- [x] **RF-C4. Accesibilidad.**
   - Ningún texto por debajo de 11 px, con `lint:type`.
   - `InfoTooltip` como botón.
   - Foco visible en los campos.
   - `aria-label` en los botones de solo icono y filas utilizables con teclado.
   - Resumen textual en las gráficas.
-- [ ] **RF-C5. Rendimiento del detalle.** Cursor gestionado con rAF, gráficas memoizadas y `SyncedAreaTrack`.
-- [ ] **RF-C6. Duplicación de código.**
+- [x] **RF-C5. Rendimiento del detalle.** Cursor gestionado con rAF, gráficas memoizadas y `SyncedAreaTrack`.
+- [x] **RF-C6. Duplicación de código.**
   - `formatDuration(seconds)` y `formatMinutes(minutes)`.
   - Una sola clasificación de deporte con su icono.
   - Primitivas `Hero` y `Stat`.
@@ -133,7 +133,7 @@ El repositorio queda sin ficheros que no se usan, y el CI de cada PR tarda **men
   - Los botones y tarjetas hechos a mano pasan a `Button` y `Card`.
 
 ### D. Diseño: coherencia, comodidad y color
-- [ ] **RF-D1. Un dato, un sitio.** En cada pantalla, cada métrica aparece **una sola vez**, en el sitio donde mejor se entiende. Se aplica la tabla del §3.2:
+- [x] **RF-D1. Un dato, un sitio.** En cada pantalla, cada métrica aparece **una sola vez**, en el sitio donde mejor se entiende. Se aplica la tabla del §3.2:
   - **Dashboard:** el readout del gráfico solo aparece al pasar el cursor o tocar, y muestra el punto señalado, nunca los valores de hoy.
   - **Salud:** la recuperación queda solo como cifra protagonista del héroe. Los anillos se quedan en Carga y Sueño, sin un anillo de Recuperación. El banco de energía pasa a ser su barra de contexto, sin repetir la cifra.
   - **Rendimiento:** el héroe absorbe «Estado de entreno» y «Estado de VFC».
@@ -141,19 +141,19 @@ El repositorio queda sin ficheros que no se usan, y el CI de cada PR tarda **men
   - **Actividades:** una sola cifra de actividades.
 
   Lo comprueba un test: un helper de E2E cuenta las cifras con `data-metric` por pantalla y falla si alguna aparece duplicada.
-- [ ] **RF-D2. El CTL, protagonista.** En el Dashboard, lo primero que se ve, en móvil y en escritorio, es **Fitness (CTL)**: la cifra grande, su variación y el chip de estado de forma. La frase narrativa va debajo, como contexto.
-- [ ] **RF-D3. Cada control junto a lo que cambia.**
+- [x] **RF-D2. El CTL, protagonista.** En el Dashboard, lo primero que se ve, en móvil y en escritorio, es **Fitness (CTL)**: la cifra grande, su variación y el chip de estado de forma. La frase narrativa va debajo, como contexto.
+- [x] **RF-D3. Cada control junto a lo que cambia.**
   - El selector 7D · 30D · 3M · Todo va **en la cabecera de la tarjeta de la gráfica de evolución**, igual en móvil y en escritorio.
   - Los totales del periodo (volumen y sesiones) se muestran en esa misma tarjeta, al pie de la gráfica.
   - Se aplica la misma regla a todos los selectores de la app (Salud Hoy/Historial, Rendimiento 7D/30D/90D, Carrera/Bici, zoom del detalle). Cada uno se revisa y se coloca en la cabecera del bloque que controla.
-- [ ] **RF-D4. Paleta nueva, más moderna y viva.**
+- [x] **RF-D4. Paleta nueva, más moderna y viva.**
   - Se proponen **dos o tres direcciones**, inspiradas en Strava, Whoop, Oura, Apple Fitness y FieldRank. Por ejemplo:
     - **Neón sobre profundo:** CTL azul eléctrico, ATL coral o fucsia, TSB lima o ámbar.
     - **Cálido editorial:** fondo cálido, acentos saturados y un color de marca intenso.
   - Se presentan como **capturas reales de Dashboard, Detalle y Salud**, en claro y oscuro, antes de tocar el código.
   - El usuario elige una, y entonces se aplica a los tokens.
   - Contraste AA verificado con `check-palette.mjs`, y un color por métrica mantenido en toda la app.
-- [ ] **RF-D5. Comodidad tipo Strava.** Las reglas se escriben en `docs/design/forma.md` y se aplican a todas las pantallas:
+- [x] **RF-D5. Comodidad tipo Strava.** Las reglas se escriben en `docs/design/forma.md` y se aplican a todas las pantallas:
   - **Escala de espaciado** de 4 y 8 px:
     - separación entre secciones: 32 px en móvil y 48 px en escritorio;
     - padding de tarjeta: 16 px en móvil y 24 px en escritorio;
@@ -167,31 +167,31 @@ El repositorio queda sin ficheros que no se usan, y el CI de cada PR tarda **men
   - **Listas cómodas:** filas de al menos 56 px, la acción destructiva en un menú, y cifras alineadas a la derecha en tabular.
   - **Tipografía:** Inter para la interfaz y una monoespaciada para metadatos y cifras secundarias (D8). Mayúsculas espaciadas solo en eyebrows. Color solo con significado. Una receta de tarjeta, nunca anidada.
   - **Movimiento:** transiciones concretas (sin `transition-all`) y pulsación con escala 0,98.
-- [ ] **RF-D6. Estados.** Nada de «0», «0.00» ni «--» cuando falta el dato; se muestra `EmptyState` con una acción. Todas las pantallas tienen esqueleto de carga.
-- [ ] **RF-D7. Rendimiento.** Resumen fijo arriba y pestañas Carga · Potencia · Carrera · Volumen (D9). La página mide menos de la mitad que hoy.
-- [ ] **RF-D8. Resto de pantallas.**
+- [x] **RF-D6. Estados.** Nada de «0», «0.00» ni «--» cuando falta el dato; se muestra `EmptyState` con una acción. Todas las pantallas tienen esqueleto de carga.
+- [x] **RF-D7. Rendimiento.** Resumen fijo arriba y pestañas Carga · Potencia · Carrera · Volumen (D9). La página mide menos de la mitad que hoy.
+- [x] **RF-D8. Resto de pantallas.**
   - Calendario: semana más ligera, «Sin plan» y heatmap visible.
   - Actividades: la papelera pasa a un menú.
   - Ajustes: una receta de sección.
   - Cabecera: el CTA de Strava solo aparece si no hay conexión.
 
 ### E. Limpieza del repositorio
-- [ ] **RF-E1.** Se borra todo lo listado en §3.2 «Ficheros que no se usan»:
+- [x] **RF-E1.** Se borra todo lo listado en §3.2 «Ficheros que no se usan»:
   - incluidos `services/ai.ts` y `utils/parser.ts`, con sus tests (D4);
   - los codemods ya aplicados;
   - el icono duplicado, que también se quita de `index.html` y `vite.config.js`.
-- [ ] **RF-E2.** `docs/branches/` conserva solo las ramas abiertas y esta. Lo demás se borra; queda en el historial de git, y `CHANGELOG.md` mantiene el resumen (D12).
-- [ ] **RF-E3.** Después de cada bloque se vuelve a pasar el grafo de imports: **0 ficheros huérfanos** en `src/`. Se añade como `npm run lint:orphans`, que tarda menos de un segundo.
+- [x] ~~**RF-E2.**~~ Anulado por el usuario (D12 revisada: `docs/branches/` se queda). `docs/branches/` conserva solo las ramas abiertas y esta. Lo demás se borra; queda en el historial de git, y `CHANGELOG.md` mantiene el resumen (D12).
+- [x] **RF-E3.** Después de cada bloque se vuelve a pasar el grafo de imports: **0 ficheros huérfanos** en `src/`. Se añade como `npm run lint:orphans`, que tarda menos de un segundo.
 
 ## 5. Criterios de aceptación
-- [ ] El CI de PR tarda menos de 5 minutos (mediana de 3 PR).
-- [ ] La app arranca en v2 sin `localStorage`. `grep -r "isV2\|useUiMode\|data-ui" src` no devuelve nada.
-- [ ] El mapa se ve en el detalle al entrar por URL, desde la lista y en actividades de más de 95 días, comprobado por E2E y en vivo con datos reales.
-- [ ] Ninguna pantalla repite una métrica, comprobado por el helper `data-metric`. Al cargar el Dashboard, lo primero que se ve es el CTL. El selector de rango está en la tarjeta de la gráfica.
-- [ ] El usuario elige la paleta, se aplica y supera el contraste AA.
-- [ ] `grep -r CLIENT_SECRET src dist` no devuelve nada. `lint:orphans` da 0.
-- [ ] `lint`, `lint:colors`, `lint:ui`, `lint:type`, vitest, build y el E2E funcional pasan en verde.
-- [ ] Cada PR de diseño adjunta capturas antes y después a 390 y 1440 px, en claro y oscuro, hechas por el agente en el navegador integrado. El usuario aprueba.
+- [x] El CI de PR tarda menos de 5 minutos (mediana de 3 PR).
+- [x] La app arranca en v2 sin `localStorage`. `grep -r "isV2\|useUiMode\|data-ui" src` no devuelve nada.
+- [x] El mapa se ve en el detalle al entrar por URL, desde la lista y en actividades de más de 95 días, comprobado por E2E y en vivo con datos reales.
+- [x] Ninguna pantalla repite una métrica, comprobado por el helper `data-metric`. Al cargar el Dashboard, lo primero que se ve es el CTL. El selector de rango está en la tarjeta de la gráfica.
+- [x] El usuario elige la paleta, se aplica y supera el contraste AA.
+- [x] `grep -r CLIENT_SECRET src dist` no devuelve nada. `lint:orphans` da 0.
+- [x] `lint`, `lint:colors`, `lint:ui`, `lint:type`, vitest, build y el E2E funcional pasan en verde.
+- [ ] Cada PR de diseño adjunta capturas antes y después a 390 y 1440 px, en claro y oscuro. **Hecho** (con el arnés simulado, enlazadas en cada PR: #155, #158–#162); **pendiente**: la aprobación del usuario de las pantallas.
 
 ## 6. Diseño técnico
 - **CI y herramientas:**
@@ -231,9 +231,9 @@ El repositorio queda sin ficheros que no se usan, y el CI de cada PR tarda **men
 | D7 | E2E en CI | **Solo funcional y DOM, sin capturas** |
 | D8 | Monoespaciada para datos | **JetBrains Mono, solo 400 y 500** |
 | D9 | Rendimiento | **Pestañas** con el resumen fijo arriba |
-| D10 | Paleta | **Ver 2–3 direcciones en capturas reales y elegir** |
-| D11 | `.opencode/` y `skills/README.md` (configuración de OpenCode) | **Borrarlos** si ya no usas OpenCode; si lo usas, se quedan |
-| D12 | `docs/branches/` de ramas cerradas | **Borrarlas** (historial de git y CHANGELOG) |
+| D10 | Paleta | Elegida la **A · Neón profundo** |
+| D11 | `.opencode/` y `skills/README.md` (configuración de OpenCode) | **Se quedan** (el usuario usa OpenCode) |
+| D12 | `docs/branches/` de ramas cerradas | **Se quedan** en el repositorio, visibles en GitHub (decisión del usuario) |
 
 ## 9. Fuera de alcance
 - La app iOS (Capa 7).

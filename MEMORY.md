@@ -10,7 +10,7 @@
 - Conventional Commits. Producción **no se toca** durante el rediseño: todo va a `develop`.
 
 ## 1. Estado actual
-- **Capa 6 en curso** (`docs/branches/feat/capa6-v2-premium/`: spec v0.3, plan de 21 PR, auditoría y `tasks.md` con el progreso). v2 es la única interfaz; v1 retirada (PR 4 y 5a–c). Siguiente: tema y piel aplanada (7a/7b), bugs y utils (8–11), paleta elegida por el usuario (12–13) y pantallas premium (14–19).
+- **Capa 6 hecha** (#140–#163, `docs/branches/feat/capa6-v2-premium/`): v2 única (sin v1), CI de < 3 min sin capturas, secreto de Strava en la Edge Function `strava-token`, tema aplanado (`skin.css` mínimo, texto ≥ 11 px), paleta «Neón profundo» con una sola fuente de color, guía `docs/design/forma.md` y pantallas premium sin métricas repetidas. **Pendiente:** que el usuario apruebe las pantallas (capturas enlazadas en `tasks.md`) y decidir el merge a `main` (cambia producción). Siguiente capa: 7 (iOS).
 - **Hecho antes (resumen en `CHANGELOG.md`, detalle en el historial de git):** Capas 0–5 del rediseño y Fase Premium A–D (PR #50–#139). Cada rama conserva su carpeta en `docs/branches/` (D12: se quedan en el repositorio, visibles en GitHub).
 - **Pendiente después:** Capa 7 (iOS). Roadmap: `docs/branches/feat/webapp-redesign/plan.md`.
 - **Pendientes de producto:** funciones de pago a futuro (no prometer gratuidad); Strava se replantea por sus límites de API y se estudiará **Garmin**. Deuda de la Capa 4: `robots.txt`/`og:image` y CSS bloqueante.
@@ -18,7 +18,9 @@
 - **Skill de la landing:** `.taste-skill/` (ignorado por git), solo para las páginas públicas.
 
 ## 2. Reglas de trabajo del rediseño (resumen)
-- **Colores:** tokens en `src/styles/tokens.css` → `tailwindTokens.cjs` → Tailwind. Gráficas: `chartTheme.js` + `useChartTheme()`; nunca un hex suelto. `npm run lint:colors` es trinquete (solo baja).
+- **Colores:** una sola fuente, `src/styles/tokens.css` (`:root`/`.dark`) → `tailwindTokens.cjs` → Tailwind; `chartTheme.js` solo nombra tokens y lee sus valores de tokens.css. Nunca un hex suelto. `lint:colors` y `lint:motion` son trinquetes (solo bajan); `lint:palette` exige AA.
+- **Diseño:** reglas y primitivas (`Hero`, `Stat`, `Delta`, `EmptyState`, `Segmented tabs`) en `docs/design/forma.md`. Un dato, un sitio (`e2e/metrics.spec.js`); cada control junto a lo que cambia.
+- **Copias « 2»:** el repositorio vive en una carpeta sincronizada que crea copias `* 2.*` (también en `.git/refs`); están en `.gitignore`. Si `git fetch` falla con «bad object … 2», mover esa ref duplicada fuera de `.git`.
 - **Primitivas:** `src/components/ui/` (`npm run lint:ui`, 14). «Centralizar sin unificar»; `className` solo para colocación y espaciado.
 - **Cabecera:** mide exactamente `--nav-h` (60 px); nunca debe crecer.
 - **Verificación (Capa 6, `AGENTS.md` §8 bis):** `npm run verify` en local; el CI rápido (< 5 min: `check` + `e2e` funcional y DOM, sin capturas ni `style-diff`); revisión visual del agente en el navegador integrado (puerto 5180) con capturas antes/después en los PR de diseño.
@@ -33,4 +35,4 @@
 Todas en `docs/specs/` y `docs/branches/`. Tabla completa con estados: `docs/memory/` (archivo histórico, sección 3).
 
 ---
-Última actualización: 2026-11-19
+Última actualización: 2026-11-26

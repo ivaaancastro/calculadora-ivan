@@ -7,6 +7,18 @@ y este proyecto adhiere a [Semantic Versioning](https://semver.org/lang/es/).
 
 ## [Unreleased]
 
+### Changed — Capa 6: v2 por defecto, CI rápido y acabado premium (PR #140–#163)
+Spec, plan, auditoría y tareas en `docs/branches/feat/capa6-v2-premium/`.
+- **CI rápido** (#141): un workflow con dos jobs en paralelo y sin capturas ni `style-diff`; mediana de 2 min 44 s por PR (antes 20–30 min). `layout` y `mobile` en DOM (desbordamiento, barras fijas, solapes, táctil ≥ 44 px).
+- **v2 para todos** (#144, #145, #146, #148): fuera v1, `useUiMode`, `VITE_UI` y el interruptor; sin `isV2` en `src`.
+- **Seguridad** (#143, SEG-1): el canje del token de Strava pasa a la Edge Function `strava-token`; el secreto ya no está en el bundle (rotado por el usuario).
+- **Bugs** (#142, #147, #151): mapa del detalle por URL directa y en actividades antiguas (BUG-13), estado de forma con una sola tabla de umbrales, readout del día de hoy, fechas locales, «Sin plan», comparación con los mismos días del mes anterior y el resto de BUG-1…12.
+- **Código** (#149, #150, #152): limpieza con `lint:orphans` = 0; formateo, fechas y deporte con una sola implementación; textos coherentes (Fitness/Fatiga/Forma, coma decimal) y accesibilidad (`InfoTooltip` como botón, foco visible, resúmenes de gráficas).
+- **Tema** (#153, #154): texto ≥ 11 px (`lint:type`), JetBrains Mono para cifras, piel aplanada (`skin.css` de 1.634 a 83 líneas, sin `data-ui`).
+- **Paleta Neón profundo** (#155): una sola fuente de color en `tokens.css` (`chartTheme` lee los tokens), contraste AA con `lint:palette`.
+- **Sistema y pantallas premium** (#157–#162): guía `docs/design/forma.md`, `Hero`/`Stat`/`Delta`, `EmptyState` con tono; ninguna pantalla repite una métrica (`e2e/metrics.spec.js`); CTL protagonista y rango en la gráfica (Dashboard), detalle tipo Strava con cursor sin re-render, Salud sin duplicados, Rendimiento con pestañas (de 5.074 a 1.386 px de alto), Calendario ligero, borrar en un menú y Ajustes con una receta de sección.
+- **Cierre** (#163): precache de la PWA sin recharts ni leaflet (de 1.596 a 1.064 KiB).
+
 ### Added — Fase Premium D5, Calendario (`feat/premium-calendario-cierre`, PR 3)
 - `feat(calendario):` cinta semanal compacta y fija en móvil/tableta, PMC flotante con cromo en tokens (tooltip de cristal, texto ≥ 11 px, leyenda a 44 px). Cierra la Fase D5.
 

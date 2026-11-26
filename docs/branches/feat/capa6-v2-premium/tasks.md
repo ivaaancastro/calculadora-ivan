@@ -29,13 +29,13 @@ Spec: `spec.md` v0.3 (aprobada 2026-11-24). Plan: `plan.md`. Hallazgos: `auditor
 - [x] **PR 11** (#152) `fix/copy-y-a11y`: COP-1, COP-2, A11Y-1..5.
 - [x] **PR 12** `docs/paleta-propuestas` (artefacto con capturas; elegida la A): 2–3 direcciones en capturas reales. **Parada: el usuario elige.**
 - [x] **PR 13** (#155; antes/después: https://claude.ai/artifact/47idCtn2UgqUnZGU9FSehR) `feat/paleta`: paleta elegida en tokens y `chartTheme`, contraste AA.
-- [x] **PR 14** `feat/premium-sistema`: `docs/design/forma.md`, `Hero`/`Stat`, `EmptyState` con `tone`, helper `data-metric`.
-- [ ] **PR 15** `feat/premium-dashboard`.
-- [ ] **PR 16** `feat/premium-detalle`.
-- [ ] **PR 17** `feat/premium-salud`.
-- [ ] **PR 18** `feat/premium-rendimiento`.
-- [ ] **PR 19** `feat/premium-resto`.
-- [ ] **PR 20** `chore/cierre`: PWA, CHANGELOG, MEMORY, estados de specs, `lint:orphans` = 0.
+- [x] **PR 14** (#157) `feat/premium-sistema`: `docs/design/forma.md`, `Hero`/`Stat`, `EmptyState` con `tone`, helper `data-metric`.
+- [x] **PR 15** (#160) `feat/premium-dashboard`.
+- [x] **PR 16** (#159) `feat/premium-detalle`.
+- [x] **PR 17** (#158) `feat/premium-salud`.
+- [x] **PR 18** (#161) `feat/premium-rendimiento`.
+- [x] **PR 19** (#162) `feat/premium-resto`.
+- [x] **PR 20** (#163) `chore/cierre`: PWA, CHANGELOG, MEMORY, estados de specs, `lint:orphans` = 0.
 
 ## Tiempos de CI (mediana de los 3 primeros PR tras el PR 1)
 
@@ -59,3 +59,21 @@ Spec: `spec.md` v0.3 (aprobada 2026-11-24). Plan: `plan.md`. Hallazgos: `auditor
 - 2026-11-26: #153 (7a), #154 (7b: `skin.css` de 1.634 a 83 líneas, sin `data-ui`, capturas idénticas) y #155 (paleta A con una sola fuente de color; `lint:palette` en el CI) mergeados. En curso: PR 14 (sistema).
 - Anotado para el PR 17: en Salud a 390 px, «RECUPERACIÓN» del anillo pisa «Disponibilidad del SNC».
 - 2026-11-26: PR 14 (sistema): `docs/design/forma.md`, primitivas `Hero`/`Stat`/`Delta`, `EmptyState` con `tone` (fuera `ErrorState`), pulsación 0,98, `transition-all` a 0 y comprobación E2E de métricas repetidas (`e2e/metrics.spec.js`, con `PENDING_DUPLICATES` por PR 15–19).
+- 2026-11-26: pantallas premium mergeadas: Salud #158, Detalle #159, Dashboard #160 (CTL a 88 px en su color), Rendimiento #161 y Calendario/Actividades/Ajustes #162. `PENDING_DUPLICATES` vacío. Capturas antes/después: Salud https://claude.ai/artifact/2Gx5R6qJTNzhfi6cT91X4i · Detalle https://claude.ai/artifact/JrRME43poJtkPNAYKj9eJy · Dashboard https://claude.ai/artifact/LicvEgcM7VaK2TJCHgad3K · Rendimiento https://claude.ai/artifact/SBKZL5dkXC3mzbX6KKyNJC · Resto https://claude.ai/artifact/ENjNEmkcfZ4BVWkitMw82o
+- 2026-11-26: PR 20 (cierre): precache de la PWA sin recharts ni leaflet (1.596 → 1.064 KiB), prueba de borrar del detalle sin carreras, CHANGELOG, MEMORY y spec marcada como implementada. `.gitignore` ignora las copias «` 2`» del sincronizador de ficheros (iCloud), que se colaban en commits y en `.git/refs`.
+
+## Criterios de aceptación (spec §5)
+- CI < 5 min: mediana 2 min 44 s. ✔
+- Arranca en v2 sin `localStorage`; sin `isV2`, `useUiMode` ni `data-ui` en `src`. ✔
+- Mapa por URL, desde la lista y en actividades de más de 95 días (E2E y en vivo, dic 2025). ✔
+- Ninguna pantalla repite una métrica (`e2e/metrics.spec.js`, sin pendientes); CTL lo primero; rango en la tarjeta de la gráfica. ✔
+- Paleta elegida, aplicada y AA (`lint:palette`). ✔
+- `CLIENT_SECRET` ni en `src` ni en `dist`; `lint:orphans` = 0. ✔
+- lint, colors, ui, type, vitest, build y E2E en verde. ✔
+- Capturas antes/después en cada PR de diseño. ✔ — **Pendiente:** la aprobación del usuario de las pantallas.
+
+## Pendiente fuera de esta capa
+- Las pestañas Mapa, Intervalos y Detalle del detalle conservan su contenido anterior.
+- Zonas de ritmo de carrera con nombres en inglés guardados en el perfil del usuario.
+- El conmutador «FORMA» del Calendario aún usa clases de paleta cruda (violeta).
+- Merge a `main` (producción) y despliegue: decisión aparte (R2).
