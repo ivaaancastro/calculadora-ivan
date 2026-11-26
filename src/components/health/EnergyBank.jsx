@@ -1,56 +1,43 @@
 import React from 'react';
-import {
-    BatteryCharging
-} from 'lucide-react';
-import { useCountUp } from '../../hooks/useCountUp';
 
+/** Nivel del banco: color de estado y una palabra (la cifra vive en el héroe). */
+const level = (v) =>
+    v > 60 ? { label: 'Alta', bar: 'bg-positive', text: 'text-positive-ink' }
+    : v > 30 ? { label: 'Media', bar: 'bg-warning', text: 'text-warning-ink' }
+    : { label: 'Baja', bar: 'bg-danger', text: 'text-danger-ink' };
+
+/**
+ * Banco de energía como barra de contexto del héroe (spec Capa 6, RF-D1): cuánto queda de la
+ * recuperación tras la carga del día. No repite la cifra; la barra y una palabra bastan.
+ */
 export const EnergyBank = ({ energyBankAmount }) => {
-    const counted = useCountUp(typeof energyBankAmount === 'number' ? energyBankAmount : null);
+    if (typeof energyBankAmount !== 'number') return null;
+    const l = level(energyBankAmount);
     return (
-    <>
-        <div data-health="energy" className="bg-surface rounded-2xl sm:rounded-3xl border border-line shadow-card transition-paint p-4 sm:p-6 flex flex-col sm:flex-row items-center gap-6 max-sm:!py-3 max-sm:!px-3.5 max-sm:!gap-2.5 motion-safe:animate-rise-slow motion-safe:[animation-delay:0.24s]">
-            <div className="flex-1 space-y-2.5 w-full">
-                <div className="flex items-center gap-2">
-                    <div className="w-8 h-8 rounded-xl bg-emerald-500/10 text-emerald-500 flex items-center justify-center shrink-0">
-                        <BatteryCharging size={18} strokeWidth={2.5} />
-                    </div>
-                    <div>
-                        <h3 className="text-sm font-bold text-ink uppercase tracking-tight">
-                            Banco de Energía
-                        </h3>
-                        <p className="text-[12px] text-ink-4">
-                            Nivel metabólico restante estimado para el día
-                        </p>
-                    </div>
-                </div>
-
-                {/* Barra estilo batería de iPhone */}
-                <div data-health="energy-bar" className="w-full h-7 bg-fill-4 rounded-xl overflow-hidden p-1 relative shadow-none">
-                    <div
-                        className={`h-full rounded-lg transition-paint duration-1000 origin-left motion-safe:animate-fill-x ${
-                            energyBankAmount === '--' ? 'w-0' :
-                            energyBankAmount > 60 ? 'bg-gradient-to-r from-emerald-500 to-teal-400' :
-                            energyBankAmount > 30 ? 'bg-gradient-to-r from-amber-500 to-yellow-400' :
-                            'bg-gradient-to-r from-rose-500 to-red-400'
-                        }`}
-                        style={{ width: `${energyBankAmount !== '--' ? Math.max(4, energyBankAmount) : 0}%` }}
-                    />
-                    <span data-health="energy-mark" className="absolute top-1.5 bottom-1.5 w-px bg-line-strong pointer-events-none" style={{ left: '30%' }} aria-hidden="true" />
-                    <span data-health="energy-mark" className="absolute top-1.5 bottom-1.5 w-px bg-line-strong pointer-events-none" style={{ left: '60%' }} aria-hidden="true" />
-                </div>
-            </div>
-
-            <div className="sm:border-l border-line-4 sm:pl-6 text-center sm:text-right shrink-0">
-                <span data-health="energy-value" data-metric="recovery" className={`text-[clamp(3rem,9vw,3.5rem)] leading-none font-semibold tabular-nums tracking-[-0.04em] ${
-                    energyBankAmount === '--' ? 'text-slate-400' :
-                    energyBankAmount > 60 ? 'text-emerald-500' :
-                    energyBankAmount > 30 ? 'text-amber-500' : 'text-rose-500'
-                }`}>
-                    {energyBankAmount !== '--' ? Math.round(counted) : '--'}<span className="text-xl font-sans font-bold text-slate-400 ml-1">%</span>
+        <div data-health="energy" className="motion-safe:animate-rise motion-safe:[animation-delay:0.18s]">
+            <div className="flex items-baseline justify-between gap-3 mb-2">
+                <span className="text-[12px] font-semibold uppercase tracking-[0.08em] text-ink-4">Banco de energía</span>
+                <span className="text-[12px] text-ink-3">
+                    Energía <span className={`font-semibold ${l.text}`}>{l.label.toLowerCase()}</span> tras la carga de hoy
                 </span>
-                <span className="block text-2xs font-bold text-slate-400 uppercase tracking-[0.08em] mt-1">Disponible</span>
+            </div>
+            <div
+                data-health="energy-bar"
+                role="meter"
+                aria-label="Banco de energía"
+                aria-valuemin={0}
+                aria-valuemax={100}
+                aria-valuenow={energyBankAmount}
+                aria-valuetext={`Energía ${l.label.toLowerCase()}`}
+                className="relative w-full h-2 rounded-full bg-fill-4 overflow-hidden"
+            >
+                <div
+                    className={`h-full rounded-full origin-left motion-safe:animate-fill-x ${l.bar}`}
+                    style={{ width: `${Math.max(2, energyBankAmount)}%` }}
+                />
+                <span data-health="energy-mark" className="absolute inset-y-0 w-0.5 bg-surface pointer-events-none" style={{ left: '30%' }} aria-hidden="true" />
+                <span data-health="energy-mark" className="absolute inset-y-0 w-0.5 bg-surface pointer-events-none" style={{ left: '60%' }} aria-hidden="true" />
             </div>
         </div>
-    </>
     );
 };
