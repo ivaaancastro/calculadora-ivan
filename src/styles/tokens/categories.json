@@ -188,8 +188,8 @@
     "dark": "blue-950/30"
   },
   "sport-bike": {
-    "light": "[#2563eb]",
-    "dark": "[#4e93f6]"
+    "light": "[#2457ff]",
+    "dark": "[#4d8dff]"
   },
   "sport-bike-edge": {
     "light": "blue-200",
@@ -220,8 +220,8 @@
     "dark": "blue-950/30"
   },
   "sport-run": {
-    "light": "[#ea580c]",
-    "dark": "[#e56a14]"
+    "light": "[#f05a16]",
+    "dark": "[#ff7a3d]"
   },
   "sport-run-edge": {
     "light": "orange-200",

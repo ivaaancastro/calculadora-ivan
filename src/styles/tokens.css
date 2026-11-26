@@ -17,9 +17,9 @@
   --on-action: 255 255 255; /* texto sobre bg-action-solid */
 
   /* Métricas de carga (valores del Dashboard, EvolutionChart) */
-  --metric-ctl: 37 99 235;
-  --metric-atl: 190 18 60;
-  --metric-tsb: 180 83 9;
+  --metric-ctl: 36 87 255;
+  --metric-atl: 209 15 88;
+  --metric-tsb: 76 125 10;
 
   /* Anatomía de gráficas (EvolutionChart) */
   --chart-grid: 201 207 216;
@@ -66,9 +66,9 @@
 .dark {
   --landing-particle: 96 130 255;
   --on-action: 255 255 255;
-  --metric-ctl: 96 165 250;
-  --metric-atl: 251 113 133;
-  --metric-tsb: 251 191 36;
+  --metric-ctl: 77 141 255;
+  --metric-atl: 255 61 139;
+  --metric-tsb: 197 244 50;
 
   --chart-grid: 43 48 56;
   --chart-axis: 152 161 175;
@@ -80,19 +80,19 @@
 
 /* @tokens:borders:start (generado por scripts/codemods/borders.mjs --tokens; no editar a mano) */
 :root {
-  --line: 214 218 225;
-  --line-2: 214 218 225;
+  --line: 217 222 232;
+  --line-2: 217 222 232;
   --line-3: 226 232 240; --line-3-a: 1; /* slate-200 */
   --line-4: 226 232 240; --line-4-a: 0.8; /* slate-200/80 */
-  --line-soft: 232 235 240; --line-soft-a: 1;
+  --line-soft: 217 222 232; --line-soft-a: 1;
   --line-soft-2: 241 245 249; /* slate-100 */
   --line-soft-3: 241 245 249; --line-soft-3-a: 1; /* slate-100 */
   --line-soft-4: 241 245 249; --line-soft-4-a: 1; /* slate-100 */
   --line-soft-5: 241 245 249; --line-soft-5-a: 1; /* slate-100 */
   --line-soft-6: 241 245 249; /* slate-100 */
-  --line-faint: 236 238 242; --line-faint-a: 1;
+  --line-faint: 217 222 232; --line-faint-a: 1;
   --line-faint-2: 241 245 249; --line-faint-2-a: 0.5; /* slate-100/50 */
-  --line-muted: 214 218 225; --line-muted-a: 1;
+  --line-muted: 217 222 232; --line-muted-a: 1;
   --line-muted-2: 226 232 240; --line-muted-2-a: 0.6; /* slate-200/60 */
   --line-muted-3: 226 232 240; --line-muted-3-a: 0.6; /* slate-200/60 */
   --line-strong: 203 213 225; /* slate-300 */
@@ -108,19 +108,19 @@
   --tooltip-info-arrow: 15 23 42; --tooltip-info-arrow-a: 0.95; /* slate-900/95 */
 }
 .dark {
-  --line: 38 42 49;
-  --line-2: 52 57 66;
+  --line: 35 42 56;
+  --line-2: 35 42 56;
   --line-3: 63 63 70; --line-3-a: 0.8; /* zinc-700/80 */
   --line-4: 39 39 42; --line-4-a: 1; /* zinc-800 */
-  --line-soft: 38 42 49; --line-soft-a: 1;
+  --line-soft: 35 42 56; --line-soft-a: 1;
   --line-soft-2: 39 39 42; /* zinc-800 */
   --line-soft-3: 39 39 42; --line-soft-3-a: 0.6; /* zinc-800/60 */
   --line-soft-4: 39 39 42; --line-soft-4-a: 0.8; /* zinc-800/80 */
   --line-soft-5: 39 39 42; --line-soft-5-a: 0.3; /* zinc-800/30 */
   --line-soft-6: 24 24 27; /* zinc-900 */
-  --line-faint: 38 42 49; --line-faint-a: 1;
+  --line-faint: 35 42 56; --line-faint-a: 1;
   --line-faint-2: 39 39 42; --line-faint-2-a: 0.5; /* zinc-800/50 */
-  --line-muted: 38 42 49; --line-muted-a: 1;
+  --line-muted: 35 42 56; --line-muted-a: 1;
   --line-muted-2: 63 63 70; --line-muted-2-a: 0.6; /* zinc-700/60 */
   --line-muted-3: 39 39 42; --line-muted-3-a: 0.6; /* zinc-800/60 */
   --line-strong: 63 63 70; /* zinc-700 */
@@ -139,9 +139,9 @@
 
 /* @tokens:text:start (generado por scripts/codemods/text.mjs --tokens; no editar a mano) */
 :root {
-  --ink: 16 19 23;
+  --ink: 11 14 20;
   --ink-soft: 15 23 42; /* slate-900 */
-  --ink-2: 26 31 38;
+  --ink-2: 11 14 20;
   --ink-2-soft: 26 31 38;
   --body: 51 59 71;
   --body-2: 51 59 71;
@@ -165,9 +165,9 @@
   --tooltip-info-ink: 255 255 255; /* white */
 }
 .dark {
-  --ink: 242 244 247;
+  --ink: 244 246 251;
   --ink-soft: 244 244 245; /* zinc-100 */
-  --ink-2: 230 233 238;
+  --ink-2: 244 246 251;
   --ink-2-soft: 230 233 238;
   --body: 212 217 224;
   --body-2: 212 217 224;
@@ -197,28 +197,28 @@
   --canvas: 242 242 247; /* #f2f2f7 */
   --canvas-ink: 29 29 31; /* #1d1d1f */
   --surface: 255 255 255;
-  --surface-2: 238 240 244;
+  --surface-2: 238 241 247;
   --surface-3: 255 255 255;
   --surface-4: 255 255 255;
   --surface-5: 255 255 255; --surface-5-a: 1;
   --surface-6: 255 255 255;
-  --surface-7: 255 255 255;
+  --surface-7: 243 245 250;
   --surface-8: 255 255 255; --surface-8-a: 0.95; /* white/95 */
   --surface-9: 255 255 255; --surface-9-a: 0.8; /* white/80 */
   --surface-card: 255 255 255;
   --control-knob: 255 255 255; /* white */
-  --sunken: 244 246 248; --sunken-a: 1;
-  --sunken-2: 238 240 244;
+  --sunken: 243 245 250; --sunken-a: 1;
+  --sunken-2: 238 241 247;
   --sunken-3: 248 250 252; --sunken-3-a: 0.5; /* slate-50/50 */
   --sunken-4: 248 250 252; --sunken-4-a: 1; /* slate-50 */
   --sunken-5: 248 250 252; --sunken-5-a: 1; /* slate-50 */
-  --sunken-6: 241 243 246;
+  --sunken-6: 243 245 250;
   --sunken-7: 248 250 252; --sunken-7-a: 0.3; /* slate-50/30 */
   --sunken-8: 248 250 252; --sunken-8-a: 1; /* slate-50 */
   --sunken-9: 248 250 252; /* slate-50 */
   --sunken-10: 248 250 252; --sunken-10-a: 1; /* slate-50 */
   --sunken-11: 248 250 252; --sunken-11-a: 1; /* slate-50 */
-  --fill: 238 240 244; --fill-a: 1;
+  --fill: 243 245 250; --fill-a: 1;
   --fill-2: 226 232 240; /* slate-200 */
   --fill-3: 241 245 249; --fill-3-a: 1; /* slate-100 */
   --fill-4: 226 232 240; --fill-4-a: 0.7; /* slate-200/70 */
@@ -248,29 +248,29 @@
 .dark {
   --canvas: 0 0 0; /* black */
   --canvas-ink: 245 245 247; /* #f5f5f7 */
-  --surface: 22 25 30;
-  --surface-2: 30 33 39;
-  --surface-3: 38 42 49;
-  --surface-4: 26 29 34;
-  --surface-5: 22 25 30; --surface-5-a: 1;
-  --surface-6: 22 25 30;
-  --surface-7: 30 33 39;
+  --surface: 17 21 30;
+  --surface-2: 7 9 14;
+  --surface-3: 17 21 30;
+  --surface-4: 17 21 30;
+  --surface-5: 17 21 30; --surface-5-a: 1;
+  --surface-6: 17 21 30;
+  --surface-7: 23 28 39;
   --surface-8: 24 24 27; --surface-8-a: 0.95; /* zinc-900/95 */
   --surface-9: 9 9 11; --surface-9-a: 0.8; /* zinc-950/80 */
-  --surface-card: 22 25 30;
+  --surface-card: 17 21 30;
   --control-knob: 255 255 255; /* white */
-  --sunken: 30 33 39; --sunken-a: 1;
-  --sunken-2: 12 14 17;
+  --sunken: 23 28 39; --sunken-a: 1;
+  --sunken-2: 7 9 14;
   --sunken-3: 39 39 42; --sunken-3-a: 0.3; /* zinc-800/30 */
   --sunken-4: 39 39 42; --sunken-4-a: 0.4; /* zinc-800/40 */
   --sunken-5: 39 39 42; --sunken-5-a: 0.8; /* zinc-800/80 */
-  --sunken-6: 30 33 39;
+  --sunken-6: 23 28 39;
   --sunken-7: 39 39 42; --sunken-7-a: 0.2; /* zinc-800/20 */
   --sunken-8: 39 39 42; --sunken-8-a: 0.6; /* zinc-800/60 */
   --sunken-9: 39 39 42; /* zinc-800 */
   --sunken-10: 24 24 27; --sunken-10-a: 0.4; /* zinc-900/40 */
   --sunken-11: 24 24 27; --sunken-11-a: 0.8; /* zinc-900/80 */
-  --fill: 38 42 49; --fill-a: 1;
+  --fill: 23 28 39; --fill-a: 1;
   --fill-2: 39 39 42; /* zinc-800 */
   --fill-3: 39 39 42; --fill-3-a: 0.8; /* zinc-800/80 */
   --fill-4: 39 39 42; --fill-4-a: 0.8; /* zinc-800/80 */
@@ -301,28 +301,28 @@
 
 /* @tokens:accents:start (generado por scripts/codemods/accents.mjs --tokens; no editar a mano) */
 :root {
-  --action: 37 99 235; /* blue-600 */
-  --action-2: 59 130 246; /* blue-500 */
-  --action-3: 37 99 235; /* blue-600 */
-  --action-4: 37 99 235; /* blue-600 */
-  --action-bright: 59 130 246; /* blue-500 */
-  --action-solid: 37 99 235; /* blue-600 */
-  --action-hover: 29 78 216; /* blue-700 */
-  --action-light: 96 165 250; /* blue-400 */
+  --action: 36 87 255; /* blue-600 */
+  --action-2: 36 87 255; /* blue-500 */
+  --action-3: 36 87 255; /* blue-600 */
+  --action-4: 36 87 255; /* blue-600 */
+  --action-bright: 36 87 255; /* blue-500 */
+  --action-solid: 36 87 255; /* blue-600 */
+  --action-hover: 26 68 214; /* blue-700 */
+  --action-light: 36 87 255; /* blue-400 */
   --action-tint: 239 246 255; --action-tint-a: 1; /* blue-50 */
   --action-tint-2: 239 246 255; --action-tint-2-a: 1; /* blue-50 */
   --action-tint-3: 239 246 255; --action-tint-3-a: 1; /* blue-50 */
   --action-tint-hover: 219 234 254; --action-tint-hover-a: 1; /* blue-100 */
   --action-edge: 191 219 254; --action-edge-a: 0.5; /* blue-200/50 */
-  --action-ios: 0 122 255; /* [#007AFF] */
-  --action-ios-solid: 0 122 255; /* [#007AFF] */
+  --action-ios: 36 87 255; /* [#007AFF] */
+  --action-ios-solid: 36 87 255; /* [#007AFF] */
   --danger: 239 68 68; /* red-500 */
   --danger-ink: 220 38 38; /* red-600 */
   --danger-ink-2: 239 68 68; /* red-500 */
   --danger-ink-3: 220 38 38; /* red-600 */
   --danger-solid: 220 38 38; /* red-600 */
   --danger-hover: 185 28 28; /* red-700 */
-  --danger-light: 190 18 60;
+  --danger-light: 209 15 88;
   --danger-light-2: 248 113 113; --danger-light-2-a: 1; /* red-400 */
   --danger-tint: 254 242 242; --danger-tint-a: 1; /* red-50 */
   --danger-tint-2: 254 242 242; --danger-tint-2-a: 1; /* red-50 */
@@ -346,28 +346,28 @@
   --warning-edge-2: 253 230 138; --warning-edge-2-a: 1; /* amber-200 */
 }
 .dark {
-  --action: 96 165 250; /* blue-400 */
-  --action-2: 96 165 250; /* blue-400 */
-  --action-3: 59 130 246; /* blue-500 */
-  --action-4: 29 78 216; /* blue-700 */
-  --action-bright: 59 130 246; /* blue-500 */
-  --action-solid: 37 99 235; /* blue-600 */
-  --action-hover: 29 78 216; /* blue-700 */
-  --action-light: 96 165 250; /* blue-400 */
+  --action: 77 141 255; /* blue-400 */
+  --action-2: 77 141 255; /* blue-400 */
+  --action-3: 77 141 255; /* blue-500 */
+  --action-4: 77 141 255; /* blue-700 */
+  --action-bright: 77 141 255; /* blue-500 */
+  --action-solid: 77 141 255; /* blue-600 */
+  --action-hover: 47 107 255; /* blue-700 */
+  --action-light: 77 141 255; /* blue-400 */
   --action-tint: 23 37 84; --action-tint-a: 0.4; /* blue-950/40 */
   --action-tint-2: 30 58 138; --action-tint-2-a: 0.2; /* blue-900/20 */
   --action-tint-3: 23 37 84; --action-tint-3-a: 0.3; /* blue-950/30 */
   --action-tint-hover: 30 58 138; --action-tint-hover-a: 0.4; /* blue-900/40 */
   --action-edge: 30 64 175; --action-edge-a: 0.5; /* blue-800/50 */
-  --action-ios: 10 132 255; /* [#0A84FF] */
-  --action-ios-solid: 0 122 255; /* [#007AFF] */
+  --action-ios: 77 141 255; /* [#0A84FF] */
+  --action-ios-solid: 77 141 255; /* [#007AFF] */
   --danger: 239 68 68; /* red-500 */
   --danger-ink: 248 113 113; /* red-400 */
   --danger-ink-2: 248 113 113; /* red-400 */
   --danger-ink-3: 239 68 68; /* red-500 */
   --danger-solid: 220 38 38; /* red-600 */
   --danger-hover: 185 28 28; /* red-700 */
-  --danger-light: 251 113 133;
+  --danger-light: 255 61 139;
   --danger-light-2: 248 113 113; --danger-light-2-a: 0.6; /* red-400/60 */
   --danger-tint: 127 29 29; --danger-tint-a: 0.2; /* red-900/20 */
   --danger-tint-2: 69 10 10; --danger-tint-2-a: 0.3; /* red-950/30 */
@@ -394,42 +394,42 @@
 
 /* @tokens:metrics:start (generado por scripts/codemods/metrics.mjs --tokens; no editar a mano) */
 :root {
-  --metric-ctl-ink: 29 78 216;
-  --metric-atl-ink: 159 18 57;
-  --metric-tsb-ink: 146 64 14;
-  --legacy-ctl-sky: 3 105 161;
-  --legacy-atl-red: 190 18 60;
+  --metric-ctl-ink: 26 68 214;
+  --metric-atl-ink: 184 13 78;
+  --metric-tsb-ink: 63 106 6;
+  --legacy-ctl-sky: 36 87 255;
+  --legacy-atl-red: 209 15 88;
   --legacy-atl-orange: 249 115 22; /* orange-500 */
-  --legacy-atl-purple: 190 18 60;
-  --legacy-atl-purple-ink: 159 18 57;
-  --legacy-tsb-up: 4 120 87;
-  --legacy-tsb-up-ink: 4 120 87;
+  --legacy-atl-purple: 209 15 88;
+  --legacy-atl-purple-ink: 184 13 78;
+  --legacy-tsb-up: 10 117 80;
+  --legacy-tsb-up-ink: 10 117 80;
   --legacy-tsb-down: 146 64 14;
   --legacy-tsb-down-2: 180 83 9;
-  --legacy-tsb-low: 190 18 60;
-  --metric-atl-tile: 190 18 60;
-  --metric-tsb-tile: 4 120 87;
+  --legacy-tsb-low: 209 15 88;
+  --metric-atl-tile: 209 15 88;
+  --metric-tsb-tile: 10 117 80;
   --metric-acwr-tile: 180 83 9;
   --metric-ramp-tile: 67 56 202;
   --metric-monotony-tile: 126 34 206;
   --metric-volume-tile: 14 116 144;
 }
 .dark {
-  --metric-ctl-ink: 147 197 253;
-  --metric-atl-ink: 253 164 175;
-  --metric-tsb-ink: 252 211 77;
-  --legacy-ctl-sky: 125 211 252;
-  --legacy-atl-red: 251 113 133;
+  --metric-ctl-ink: 138 180 255;
+  --metric-atl-ink: 255 134 182;
+  --metric-tsb-ink: 217 255 107;
+  --legacy-ctl-sky: 77 141 255;
+  --legacy-atl-red: 255 61 139;
   --legacy-atl-orange: 249 115 22; /* orange-500 */
-  --legacy-atl-purple: 253 164 175;
-  --legacy-atl-purple-ink: 253 164 175;
-  --legacy-tsb-up: 52 211 153;
-  --legacy-tsb-up-ink: 52 211 153;
+  --legacy-atl-purple: 255 61 139;
+  --legacy-atl-purple-ink: 255 134 182;
+  --legacy-tsb-up: 59 232 160;
+  --legacy-tsb-up-ink: 59 232 160;
   --legacy-tsb-down: 251 191 36;
   --legacy-tsb-down-2: 251 191 36;
-  --legacy-tsb-low: 251 113 133;
-  --metric-atl-tile: 251 113 133;
-  --metric-tsb-tile: 52 211 153;
+  --legacy-tsb-low: 255 61 139;
+  --metric-atl-tile: 255 61 139;
+  --metric-tsb-tile: 59 232 160;
   --metric-acwr-tile: 251 191 36;
   --metric-ramp-tile: 129 140 248;
   --metric-monotony-tile: 192 132 252;
@@ -486,7 +486,7 @@
   --speed-ink: 37 99 235; /* blue-600 */
   --speed-strong: 37 99 235; /* blue-600 */
   --speed-tint: 239 246 255; --speed-tint-a: 1; /* blue-50 */
-  --sport-bike: 37 99 235;
+  --sport-bike: 36 87 255;
   --sport-bike-edge: 191 219 254; --sport-bike-edge-a: 1; /* blue-200 */
   --sport-bike-edge-2: 191 219 254; --sport-bike-edge-2-a: 1; /* blue-200 */
   --sport-bike-end: 99 102 241; /* indigo-500 */
@@ -494,7 +494,7 @@
   --sport-bike-ios: 0 122 255; /* [#007AFF] */
   --sport-bike-tint: 219 234 254; --sport-bike-tint-a: 1; /* blue-100 */
   --sport-bike-tint-2: 239 246 255; --sport-bike-tint-2-a: 1; /* blue-50 */
-  --sport-run: 234 88 12;
+  --sport-run: 240 90 22;
   --sport-run-edge: 254 215 170; --sport-run-edge-a: 1; /* orange-200 */
   --sport-run-edge-2: 254 215 170; --sport-run-edge-2-a: 1; /* orange-200 */
   --sport-run-end: 239 68 68; /* red-500 */
@@ -572,7 +572,7 @@
   --speed-ink: 96 165 250; /* blue-400 */
   --speed-strong: 37 99 235; /* blue-600 */
   --speed-tint: 23 37 84; --speed-tint-a: 0.3; /* blue-950/30 */
-  --sport-bike: 78 147 246;
+  --sport-bike: 77 141 255;
   --sport-bike-edge: 30 58 138; --sport-bike-edge-a: 0.5; /* blue-900/50 */
   --sport-bike-edge-2: 30 58 138; --sport-bike-edge-2-a: 0.4; /* blue-900/40 */
   --sport-bike-end: 99 102 241; /* indigo-500 */
@@ -580,7 +580,7 @@
   --sport-bike-ios: 10 132 255; /* [#0A84FF] */
   --sport-bike-tint: 30 58 138; --sport-bike-tint-a: 0.2; /* blue-900/20 */
   --sport-bike-tint-2: 23 37 84; --sport-bike-tint-2-a: 0.3; /* blue-950/30 */
-  --sport-run: 229 106 20;
+  --sport-run: 255 122 61;
   --sport-run-edge: 124 45 18; --sport-run-edge-a: 0.5; /* orange-900/50 */
   --sport-run-edge-2: 124 45 18; --sport-run-edge-2-a: 0.4; /* orange-900/40 */
   --sport-run-end: 239 68 68; /* red-500 */
@@ -620,7 +620,7 @@
   --chart-tick: 98 107 120;
   --chart-tick-zinc: 113 113 122; /* zinc-500 */
   --chart-cursor-zinc: 113 113 122; /* zinc-500 */
-  --chart-cursor-fill: 244 246 248;
+  --chart-cursor-fill: 243 245 250;
   --chart-tooltip: 16 19 23; --chart-tooltip-a: 0.94;
   --chart-tooltip-edge: 255 255 255; --chart-tooltip-edge-a: 0.12;
   --chart-tooltip-ink: 242 244 247;
@@ -629,12 +629,12 @@
   --chart-strain: 225 29 72;
   --chart-tss: 124 58 237;
   --chart-hours: 5 150 105;
-  --chart-profile-user: 37 99 235;
+  --chart-profile-user: 36 87 255;
   --chart-profile-top: 180 83 9;
   --chart-profile-other: 124 135 151;
-  --chart-sport-run: 234 88 12;
+  --chart-sport-run: 240 90 22;
   --chart-sport-walk: 5 150 105;
-  --chart-sport-bike: 37 99 235;
+  --chart-sport-bike: 36 87 255;
   --chart-sport-strength: 124 58 237;
   --chart-sport-other: 113 113 122;
   --chart-sport-fallback: 8 145 178;
@@ -643,7 +643,7 @@
   --chart-dist-workout: 8 145 178;
   --chart-dist-other: 124 135 151;
   --chart-zone-1: 124 135 151;
-  --chart-zone-2: 37 99 235;
+  --chart-zone-2: 36 87 255;
   --chart-zone-3: 5 150 105;
   --chart-zone-4: 217 119 6;
   --chart-zone-5: 234 88 12;
@@ -653,22 +653,22 @@
   --chart-zone-hr-5: 220 38 38;
   --chart-map-halo-light: 255 255 255; /* white */
   --chart-map-halo-dark: 0 0 0; /* black */
-  --chart-map-route: 37 99 235;
+  --chart-map-route: 36 87 255;
   --chart-map-start: 5 150 105;
   --chart-map-end: 24 24 27; /* zinc-900 */
   --chart-map-ring: 255 255 255; /* white */
-  --chart-pmc-ctl: 37 99 235;
-  --chart-pmc-atl: 190 18 60;
-  --chart-pmc-tsb: 180 83 9;
+  --chart-pmc-ctl: 36 87 255;
+  --chart-pmc-atl: 209 15 88;
+  --chart-pmc-tsb: 76 125 10;
   --chart-pmc-ramp: 4 120 87;
-  --chart-pmc-ramp-proj: 37 99 235;
-  --chart-pmc-ctl-ink: 29 78 216;
-  --chart-pmc-atl-ink: 159 18 57;
-  --chart-pmc-tsb-ink: 146 64 14;
+  --chart-pmc-ramp-proj: 36 87 255;
+  --chart-pmc-ctl-ink: 26 68 214;
+  --chart-pmc-atl-ink: 184 13 78;
+  --chart-pmc-tsb-ink: 63 106 6;
   --chart-pmc-ramp-ink: 4 120 87;
-  --chart-pmc-band: 244 246 248;
-  --chart-pmc-band-up: 4 120 87;
-  --chart-pmc-band-down: 190 18 60;
+  --chart-pmc-band: 243 245 250;
+  --chart-pmc-band-up: 10 117 80;
+  --chart-pmc-band-down: 209 15 88;
   --chart-pmc-today: 51 59 71;
 }
 .dark {
@@ -678,7 +678,7 @@
   --chart-tick: 138 147 161;
   --chart-tick-zinc: 113 113 122; /* zinc-500 */
   --chart-cursor-zinc: 113 113 122; /* zinc-500 */
-  --chart-cursor-fill: 28 31 36;
+  --chart-cursor-fill: 23 28 39;
   --chart-tooltip: 28 31 36; --chart-tooltip-a: 0.96;
   --chart-tooltip-edge: 255 255 255; --chart-tooltip-edge-a: 0.1;
   --chart-tooltip-ink: 242 244 247;
@@ -687,12 +687,12 @@
   --chart-strain: 244 63 94;
   --chart-tss: 146 114 245;
   --chart-hours: 15 174 121;
-  --chart-profile-user: 78 147 246;
+  --chart-profile-user: 77 141 255;
   --chart-profile-top: 201 130 9;
   --chart-profile-other: 100 116 139;
-  --chart-sport-run: 229 106 20;
+  --chart-sport-run: 255 122 61;
   --chart-sport-walk: 15 174 121;
-  --chart-sport-bike: 78 147 246;
+  --chart-sport-bike: 77 141 255;
   --chart-sport-strength: 146 114 245;
   --chart-sport-other: 161 161 170;
   --chart-sport-fallback: 5 165 192;
@@ -701,7 +701,7 @@
   --chart-dist-workout: 5 165 192;
   --chart-dist-other: 100 116 139;
   --chart-zone-1: 148 163 184;
-  --chart-zone-2: 96 165 250;
+  --chart-zone-2: 77 141 255;
   --chart-zone-3: 52 211 153;
   --chart-zone-4: 251 191 36;
   --chart-zone-5: 251 146 60;
@@ -711,22 +711,22 @@
   --chart-zone-hr-5: 248 113 113;
   --chart-map-halo-light: 255 255 255; /* white */
   --chart-map-halo-dark: 0 0 0; /* black */
-  --chart-map-route: 78 147 246;
+  --chart-map-route: 77 141 255;
   --chart-map-start: 15 174 121;
   --chart-map-end: 24 24 27; /* zinc-900 */
   --chart-map-ring: 255 255 255; /* white */
-  --chart-pmc-ctl: 96 165 250;
-  --chart-pmc-atl: 251 113 133;
-  --chart-pmc-tsb: 251 191 36;
+  --chart-pmc-ctl: 77 141 255;
+  --chart-pmc-atl: 255 61 139;
+  --chart-pmc-tsb: 197 244 50;
   --chart-pmc-ramp: 52 211 153;
-  --chart-pmc-ramp-proj: 147 197 253;
-  --chart-pmc-ctl-ink: 147 197 253;
-  --chart-pmc-atl-ink: 253 164 175;
-  --chart-pmc-tsb-ink: 252 211 77;
+  --chart-pmc-ramp-proj: 77 141 255;
+  --chart-pmc-ctl-ink: 138 180 255;
+  --chart-pmc-atl-ink: 255 134 182;
+  --chart-pmc-tsb-ink: 217 255 107;
   --chart-pmc-ramp-ink: 52 211 153;
-  --chart-pmc-band: 30 33 39;
-  --chart-pmc-band-up: 52 211 153;
-  --chart-pmc-band-down: 251 113 133;
+  --chart-pmc-band: 23 28 39;
+  --chart-pmc-band-up: 59 232 160;
+  --chart-pmc-band-down: 255 61 139;
   --chart-pmc-today: 212 217 224;
 }
 /* @tokens:charts:end */

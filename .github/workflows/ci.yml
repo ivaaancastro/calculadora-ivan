@@ -29,6 +29,7 @@ jobs:
       - run: npm run lint:ui
       - run: npm run lint:motion
       - run: npm run lint:orphans
+      - run: npm run lint:palette
       - run: npm run lint:type
       - name: La imagen de Playwright del job e2e coincide con package.json
         run: |
