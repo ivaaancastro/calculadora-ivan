@@ -6,10 +6,9 @@ import { useChartTheme } from '../charts/useChartTheme';
 import { computeDayReadiness } from '../health/readiness';
 import { HealthHeader } from '../health/HealthHeader';
 import { ReadinessRings } from '../health/ReadinessRings';
-import { EnergyBank } from '../health/EnergyBank';
+import { HealthHero } from '../health/HealthHero';
 import { BiomarkersGrid } from '../health/BiomarkersGrid';
 import { InsightsList } from '../health/InsightsList';
-import { HistoryRangeSelector } from '../health/HistoryRangeSelector';
 import { HistoryDayStrip } from '../health/HistoryDayStrip';
 import { DaySpotlight } from '../health/DaySpotlight';
 import { HistoryTrendChart } from '../health/HistoryTrendChart';
@@ -144,7 +143,7 @@ export const HealthPage = ({ activities, settings, chartData }) => {
     // Early return mientras carga o si no hay datos disponibles
     if (wellnessLoading && !wellnessMetrics) {
         return (
-            <div className="animate-in fade-in duration-300 pb-20 w-full max-w-[1400px] mx-auto px-3 sm:px-6 py-24 flex flex-col items-center justify-center gap-4 text-center">
+            <div className="animate-in fade-in duration-300 pb-20 w-full max-w-content mx-auto px-1 sm:px-0 py-24 flex flex-col items-center justify-center gap-4 text-center">
                 <div className="flex gap-3">
                     <Skeleton circle className="w-16 h-16" />
                     <Skeleton circle className="w-16 h-16" />
@@ -163,7 +162,7 @@ export const HealthPage = ({ activities, settings, chartData }) => {
 
     if (!wellnessMetrics) {
         return (
-            <div className="animate-in fade-in duration-300 pb-20 w-full max-w-[1400px] mx-auto px-3 sm:px-6 py-16">
+            <div className="animate-in fade-in duration-300 pb-20 w-full max-w-content mx-auto px-1 sm:px-0 py-16">
                 <EmptyState
                     icon={Activity}
                     title="Sin datos de salud"
@@ -174,31 +173,33 @@ export const HealthPage = ({ activities, settings, chartData }) => {
     }
 
     return (
-        <div data-health="root" className="animate-in fade-in duration-500 pb-20 w-full max-w-[1400px] mx-auto px-3 sm:px-6 space-y-6">
+        <div data-health="root" className="animate-in fade-in duration-500 pb-20 w-full max-w-content mx-auto px-1 sm:px-0 flex flex-col gap-section md:gap-section-lg">
+            <div className="flex flex-col gap-6 md:gap-8">
+                <HealthHeader wellnessMetrics={wellnessMetrics} setActiveTab={setActiveTab} activeTab={activeTab} wellnessLoading={wellnessLoading} apiError={apiError} />
+                {activeTab === 'today' && !wellnessLoading && (
+                    <HealthHero wellnessMetrics={wellnessMetrics} readinessInfo={readinessInfo} energyBankAmount={energyBankAmount} />
+                )}
+            </div>
 
-            <HealthHeader wellnessMetrics={wellnessMetrics} readinessInfo={readinessInfo} setActiveTab={setActiveTab} activeTab={activeTab} wellnessLoading={wellnessLoading} apiError={apiError} />
-
-            {/* VISTA 1: HOY (RESUMEN Y ANILLOS APPLE) */}
+            {/* Hoy: carga y sueño, biomarcadores y aspectos destacados */}
             {activeTab === 'today' && (
-                <div className="space-y-6">
-                    <ReadinessRings wellnessMetrics={wellnessMetrics} readinessInfo={readinessInfo} strainInfo={strainInfo} sleepInfo={sleepInfo} ct={ct} />
-                    <EnergyBank energyBankAmount={energyBankAmount} />
+                <>
+                    <ReadinessRings wellnessMetrics={wellnessMetrics} strainInfo={strainInfo} sleepInfo={sleepInfo} ct={ct} />
                     <BiomarkersGrid wellnessMetrics={wellnessMetrics} />
                     <InsightsList wellnessMetrics={wellnessMetrics} />
-                </div>
+                </>
             )}
 
-            {/* VISTA 2: HISTORIAL DIARIO (ESTILO SALUD DE APPLE) */}
+            {/* Historial: tendencia del periodo (con su selector y la tira de días), detalle y registro */}
             {activeTab === 'history' && (
-                <div className="space-y-6">
-                    <HistoryRangeSelector historyRange={historyRange} setHistoryRange={setHistoryRange} />
-                    <HistoryDayStrip currentSelectedDay={currentSelectedDay} historySeries={historySeries} setSelectedDate={setSelectedDate} />
+                <>
+                    <HistoryTrendChart historySeries={historySeries} historyRange={historyRange} setHistoryRange={setHistoryRange} ct={ct}>
+                        <HistoryDayStrip currentSelectedDay={currentSelectedDay} historySeries={historySeries} setSelectedDate={setSelectedDate} />
+                    </HistoryTrendChart>
                     <DaySpotlight currentSelectedDay={currentSelectedDay} />
-                    <HistoryTrendChart historySeries={historySeries} ct={ct} />
                     <DailyLog currentSelectedDay={currentSelectedDay} historyReversed={historyReversed} setSelectedDate={setSelectedDate} />
-                </div>
+                </>
             )}
-
         </div>
     );
 };

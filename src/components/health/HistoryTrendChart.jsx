@@ -1,11 +1,16 @@
 import React from 'react';
 import { ComposedChart, Area, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, ReferenceArea } from 'recharts';
-import { Card, ChartTooltip } from '../ui';
+import { Card, ChartTooltip, Segmented } from '../ui';
 import { useChartMotion } from '../charts/useChartMotion';
 import { chartFigureProps, summarizeSeries } from '../charts/chartA11y';
 import { axisProps } from '../charts/axisProps.js';
 
 const OPTIMAL_FROM = 67;
+const RANGES = [
+    { value: 7, label: '7D' },
+    { value: 14, label: '14D' },
+    { value: 30, label: '30D' },
+];
 
 const TrendTooltip = ({ active, payload }) => {
     if (!active || !payload?.length) return null;
@@ -21,23 +26,36 @@ const TrendTooltip = ({ active, payload }) => {
     );
 };
 
-/** Tendencia de recuperación (spec §3.2): área con degradado, banda «óptima» y línea de sueño. */
-export const HistoryTrendChart = ({ historySeries, ct }) => {
+/**
+ * Tendencia de recuperación (spec §3.2): área con degradado, banda «óptima» y línea de sueño.
+ * El selector 7D/14D/30D va en la cabecera de este bloque, que es lo que cambia (RF-D3), y
+ * `children` (la tira de días del periodo) va dentro, bajo un filete.
+ */
+export const HistoryTrendChart = ({ historySeries, historyRange, setHistoryRange, ct, children }) => {
     const motion = useChartMotion();
     const figure = chartFigureProps('Tendencia de recuperación y sueño', summarizeSeries(historySeries, [{ key: 'readinessScore', label: 'Recuperación' }], { unit: '%' }));
     return (
-        <Card data-health="trend" figures="tnum" className="motion-safe:animate-rise-slow p-4 sm:p-6 space-y-3">
+        <Card data-health="trend" figures="tnum" className="motion-safe:animate-rise-slow p-card md:p-card-lg flex flex-col gap-4">
             <div className="flex items-start justify-between gap-3">
-                <div>
-                    <h3 className="text-sm font-semibold text-ink tracking-tight">Tendencia de recuperación</h3>
-                    <p className="text-[12px] text-ink-4">Recuperación (%) y horas de sueño del periodo</p>
+                <div className="min-w-0">
+                    <h2 className="text-base font-semibold text-ink tracking-tight">Tendencia de recuperación</h2>
+                    <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-[12px] font-medium text-ink-3">
+                        <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full" style={{ background: ct.series.readiness }} />Recuperación</span>
+                        <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full" style={{ background: ct.series.sleep }} />Sueño</span>
+                    </div>
                 </div>
-                <div className="flex items-center gap-3 text-[12px] font-semibold text-ink-3 shrink-0">
-                    <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full" style={{ background: ct.series.readiness }} />Recuperación</span>
-                    <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full" style={{ background: ct.series.sleep }} />Sueño</span>
-                </div>
+                <Segmented
+                    data-health="range"
+                    role="group"
+                    aria-label="Periodo"
+                    className="shrink-0"
+                    optionClassName="min-h-[44px] min-w-[44px] md:min-h-[36px]"
+                    options={RANGES}
+                    value={historyRange}
+                    onChange={setHistoryRange}
+                />
             </div>
-            <div className="h-48 sm:h-56 w-full -ml-3 sm:ml-0" {...figure}>
+            <div className="h-48 md:h-56 w-full -ml-3 md:ml-0" {...figure}>
                 <ResponsiveContainer width="100%" height="100%">
                     <ComposedChart data={historySeries} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                         <defs>
@@ -57,6 +75,7 @@ export const HistoryTrendChart = ({ historySeries, ct }) => {
                     </ComposedChart>
                 </ResponsiveContainer>
             </div>
+            {children && <div className="border-t border-hairline pt-4">{children}</div>}
         </Card>
     );
 };

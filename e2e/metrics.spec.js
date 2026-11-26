@@ -11,7 +11,6 @@ import { duplicatedMetrics } from './support/metrics.js';
 const PENDING_DUPLICATES = {
   dashboard: { pr: 15, metrics: ['ctl', 'atl', 'tsb'] }, // héroe y KPI frente al readout del gráfico
   detalle: { pr: 16, metrics: ['impact'] }, // chip de impacto y primera frase del Coach
-  salud: { pr: 17, metrics: ['recovery', 'sleep'] }, // héroe, anillo y banco; anillo y biomarcador
   rendimiento: { pr: 18, metrics: ['load7', 'tsb', 'hrv', 'vo2max'] }, // héroe frente a tarjetas; VO₂ y subtarjeta
   actividades: { pr: 19, metrics: ['activities'] }, // «85 sesiones» y «85 actividades»
 };
