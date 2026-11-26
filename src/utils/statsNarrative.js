@@ -1,33 +1,30 @@
 /**
- * Resumen narrativo y KPI del héroe de Rendimiento (v2).
- * Función pura sobre datos ya calculados. Spec: docs/branches/feat/premium-rendimiento/spec.md §3.2.
+ * Resumen de Rendimiento: frase, cifra protagonista y KPI del héroe (Capa 6, PR 18, RF-D1).
+ * El héroe absorbe «Estado de entreno» y «Estado de VFC»: Forma (TSB) es la cifra protagonista
+ * con el chip del estado de forma; Carga 7 d, VFC y Estrés la acompañan. El eFTP vive en la
+ * pestaña Potencia, así que no entra aquí. Función pura sobre datos ya calculados.
  */
 import { FORM_STATES, tsbStateKey } from './formState';
 
-const tone = (n, goodWhenPositive = true) => {
-    if (n == null || n === 0) return 'neutral';
-    return (n > 0) === goodWhenPositive ? 'up' : 'down';
-};
+const signed = (n) => `${n > 0 ? '+' : ''}${n}`;
 
-export function buildStatsNarrative({ trainingStatus, hrv, ftpDiff, eFTP } = {}) {
+export function buildStatsNarrative({ trainingStatus, hrv } = {}) {
     const sentences = [];
     const kpis = [];
+    let figure = null;
+    let chip = null;
 
     if (trainingStatus) {
         const tsb = Number(trainingStatus.tsb);
-        sentences.push(`Tu estado de entreno es ${String(trainingStatus.status || '').toLowerCase()}.`);
+        if (trainingStatus.status) sentences.push(`Tu estado de entreno es ${String(trainingStatus.status).toLowerCase()}.`);
         if (Number.isFinite(tsb)) {
-            sentences.push(`${FORM_STATES[tsbStateKey(tsb)].lead}.`);
+            const state = FORM_STATES[tsbStateKey(tsb)];
+            sentences.push(`${state.lead}.`);
+            figure = { label: 'Forma (TSB)', value: signed(tsb), metric: 'tsb' };
+            chip = { label: state.label, tone: state.tone };
         }
-        kpis.push({
-            id: 'load', label: 'Carga 7d', value: trainingStatus.load7, unit: '',
-            context: 'Estrés acumulado de la semana', tone: 'neutral',
-        });
-        if (Number.isFinite(tsb)) {
-            kpis.push({
-                id: 'tsb', label: 'Forma (TSB)', value: `${tsb > 0 ? '+' : ''}${tsb}`, unit: '',
-                context: FORM_STATES[tsbStateKey(tsb)].label, tone: tone(tsb),
-            });
+        if (Number.isFinite(Number(trainingStatus.load7))) {
+            kpis.push({ id: 'load', metric: 'load7', label: 'Carga 7 d', value: trainingStatus.load7, sub: 'Estrés acumulado de la semana' });
         }
     }
 
@@ -38,21 +35,16 @@ export function buildStatsNarrative({ trainingStatus, hrv, ftpDiff, eFTP } = {})
             sentences.push(`Tu VFC está ${diff > 0 ? 'por encima' : 'por debajo'} de tu línea base.`);
         }
         kpis.push({
-            id: 'hrv', label: 'VFC', value: hrv.rmssd, unit: 'ms',
-            context: diff == null ? (hrv.state || '') : `${diff > 0 ? '+' : ''}${diff} ms vs base`, tone: tone(diff),
+            id: 'hrv', metric: 'hrv', label: 'VFC', value: hrv.rmssd, unit: 'ms', delta: diff,
+            sub: Number.isFinite(base) ? `${hrv.state ? `${hrv.state} · ` : ''}base ${Math.round(base)} ms` : (hrv.state || ''),
         });
-    }
-
-    if (Number.isFinite(eFTP) && eFTP > 0) {
-        const hasDiff = Number.isFinite(ftpDiff) && ftpDiff !== 0;
-        if (hasDiff) {
-            sentences.push(`Tu FTP estimado es ${Math.abs(ftpDiff)} W ${ftpDiff > 0 ? 'superior' : 'inferior'} al configurado.`);
+        if (Number.isFinite(hrv.stress)) {
+            kpis.push({
+                id: 'stress', label: 'Estrés', value: hrv.stress, unit: '/100',
+                sub: hrv.stress > 60 ? 'Necesitas recuperación' : 'Cuerpo listo para entrenar',
+            });
         }
-        kpis.push({
-            id: 'eftp', label: 'eFTP', value: Math.round(eFTP), unit: 'W',
-            context: hasDiff ? `${ftpDiff > 0 ? '+' : ''}${ftpDiff} W vs configurado` : 'En línea con tu FTP', tone: tone(hasDiff ? ftpDiff : 0),
-        });
     }
 
-    return { text: sentences.join(' '), kpis: kpis.slice(0, 4) };
+    return { text: sentences.join(' '), figure, chip, sub: trainingStatus?.desc || '', kpis };
 }

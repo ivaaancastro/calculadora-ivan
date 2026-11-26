@@ -1,81 +1,80 @@
 import React from 'react';
-import { Footprints, Bike } from 'lucide-react';
-import { Card, Segmented } from '../ui';
+import { HeartPulse } from 'lucide-react';
+import { Button, EmptyState, Segmented } from '../ui';
 import { VO2_SOURCES } from '../../utils/vo2Source';
+import { formatNumber } from '../../utils/formatters';
+import { StatsCard } from './StatsCard';
 
-export const Vo2MaxCard = ({ vo2Sport, setVo2Sport, currentVo2, vo2Level, vo2Stats }) => {
+const LEVELS = ['Pobre', 'Medio', 'Bueno', 'Excelente', 'Superior'];
+
+/** Posición (%) del VO₂max en la escala de cinco niveles. */
+const levelPosition = (v) => {
+    const p = v <= 35 ? (v - 25) / 10 * 20
+        : v <= 42 ? 20 + (v - 35) / 7 * 20
+        : v <= 50 ? 40 + (v - 42) / 8 * 20
+        : v <= 60 ? 60 + (v - 50) / 10 * 20
+        : 80 + Math.min((v - 60) / 10 * 20, 20);
+    return Math.min(98, Math.max(2, p));
+};
+
+/**
+ * VO₂max del deporte elegido: una sola cifra con su origen (COP-2) y su nivel. El selector de
+ * deporte va en la cabecera de la tarjeta (RF-D3); no hay subtarjetas que repitan la cifra (RF-D1).
+ */
+export const Vo2MaxCard = ({ vo2Sport, setVo2Sport, currentVo2, vo2Level, hasVo2 }) => {
+    const source = VO2_SOURCES[vo2Sport];
     return (
-        <section className="mb-8">
-            <Card variant="panel" className="p-6 sm:p-8">
-                <div className="flex items-center justify-between mb-10">
-                    <div className="flex items-center gap-2">
-                        <h3 className="text-2xs font-bold text-ink-4 uppercase tracking-[0.1em]">VO₂max</h3>
-                    </div>
-                    <Segmented
-                        variant="card"
-                        size="md-wide"
-                        optionClassName="px-4 py-1.5"
-                        value={vo2Sport}
-                        onChange={setVo2Sport}
-                        options={[
-                            { value: 'run', label: 'Carrera' },
-                            { value: 'bike', label: 'Ciclismo' },
-                        ]}
-                    />
-                </div>
-
-                <div className="flex items-end gap-3 mb-8">
-                    <span data-metric="vo2max" className="text-4xl font-bold tracking-tighter" style={{ color: vo2Level.c }}>{currentVo2 > 0 ? currentVo2 : '--'}</span>
-                    <div className="pb-1.5">
-                        <span className="text-2xs font-bold text-slate-400 uppercase tracking-[0.08em]">ml/kg/min</span>
-                        <span className="block text-2xs font-bold uppercase tracking-tight mt-0.5" style={{ color: vo2Level.c }}>Nivel {vo2Level.l}</span>
-                        <span data-fitness="vo2-source" className="block text-[12px] text-ink-4 mt-0.5">{VO2_SOURCES[vo2Sport]?.source ? `${VO2_SOURCES[vo2Sport].label}, ${VO2_SOURCES[vo2Sport].source}` : ''}</span>
-                    </div>
-                </div>
-
-                <div className="relative pt-2 pb-8">
-                    <div className="flex h-1.5 rounded-full overflow-hidden bg-surface-2">
-                        {[
-                            { c: 'bg-red-400', p: '20%' }, { c: 'bg-orange-400', p: '20%' },
-                            { c: 'bg-emerald-400', p: '20%' }, { c: 'bg-blue-400', p: '20%' },
-                            { c: 'bg-purple-400', p: '20%' }
-                        ].map((s, idx) => (
-                            <div key={idx} className={`${s.c} opacity-30`} style={{ width: s.p }} />
-                        ))}
-                    </div>
-                    {currentVo2 > 0 && (
-                        <div
-                            className="absolute top-1.5 h-2.5 w-1 rounded-full bg-inverse transition-paint duration-1000 z-10"
-                            style={{ left: `${Math.min(98, Math.max(2, currentVo2 <= 35 ? (currentVo2 - 25) / 10 * 20 : currentVo2 <= 42 ? 20 + (currentVo2 - 35) / 7 * 20 : currentVo2 <= 50 ? 40 + (currentVo2 - 42) / 8 * 20 : currentVo2 <= 60 ? 60 + (currentVo2 - 50) / 10 * 20 : 80 + Math.min((currentVo2 - 60) / 10 * 20, 20)))}%` }}
-                        />
-                    )}
-                    <div className="flex justify-between mt-4 px-0.5 opacity-40">
-                        {['Pobre', 'Medio', 'Bueno', 'Excelente', 'Superior'].map((l) => (
-                            <span key={l} className="text-2xs font-bold text-slate-500 uppercase tracking-[0.08em]">{l}</span>
-                        ))}
-                    </div>
-                </div>
-
-                {/* Both sports metrics */}
-                <div className="grid grid-cols-2 gap-4 mt-8 pt-6 border-t border-line-soft-2">
-                    <div className="p-4 rounded-2xl bg-sunken-3 border border-line-soft">
-                        <div className="flex items-center gap-2 mb-1.5">
-                            <Footprints size={12} className="text-slate-400" />
-                            <span className="text-2xs font-bold text-slate-400 uppercase tracking-[0.08em]">{VO2_SOURCES.run.label}</span>
+        <StatsCard
+            id="vo2"
+            title="VO₂max"
+            actions={
+                <Segmented
+                    variant="card"
+                    size="md-wide"
+                    aria-label="Deporte del VO₂max"
+                    optionClassName="px-4 py-1.5"
+                    value={vo2Sport}
+                    onChange={setVo2Sport}
+                    options={[
+                        { value: 'run', label: 'Carrera' },
+                        { value: 'bike', label: 'Bici' },
+                    ]}
+                />
+            }
+        >
+            {hasVo2 ? (
+                <>
+                    <div className="flex flex-wrap items-end gap-x-4 gap-y-1">
+                        <span data-metric="vo2max" className="text-[48px] leading-none font-semibold tracking-[-0.04em] tabular-nums text-ink">{formatNumber(currentVo2, 1)}</span>
+                        <div className="pb-1">
+                            <p className="font-mono text-[12px] text-ink-4">ml/kg/min</p>
+                            <p className="text-[13px] font-semibold" style={{ color: vo2Level.c }}>Nivel {String(vo2Level.l).toLowerCase()}</p>
                         </div>
-                        <p data-metric={vo2Sport === 'run' ? 'vo2max' : 'vo2max-run'} className="text-lg font-bold text-ink-soft">{vo2Stats?.run?.vo2max > 0 ? vo2Stats.run.vo2max : '--'}</p>
-                        <p className="text-[12px] text-ink-4">{VO2_SOURCES.run.source}</p>
                     </div>
-                    <div className="p-4 rounded-2xl bg-sunken-3 border border-line-soft">
-                        <div className="flex items-center gap-2 mb-1.5">
-                            <Bike size={12} className="text-slate-400" />
-                            <span className="text-2xs font-bold text-slate-400 uppercase tracking-[0.08em]">{VO2_SOURCES.bike.label}</span>
+                    {source?.source && <p data-fitness="vo2-source" className="mt-2 text-[12px] text-ink-4">{source.label}, {source.source}</p>}
+
+                    <div className="relative mt-6">
+                        <div className="flex h-1.5 rounded-full overflow-hidden bg-surface-2">
+                            {['bg-red-400', 'bg-orange-400', 'bg-emerald-400', 'bg-blue-400', 'bg-purple-400'].map((c) => (
+                                <div key={c} className={`${c} opacity-40 w-1/5`} />
+                            ))}
                         </div>
-                        <p data-metric={vo2Sport === 'bike' ? 'vo2max' : 'vo2max-bike'} className="text-lg font-bold text-ink-soft">{vo2Stats?.bike?.vo2max > 0 ? vo2Stats.bike.vo2max : '--'}</p>
-                        <p className="text-[12px] text-ink-4">{VO2_SOURCES.bike.source}</p>
+                        <div className="absolute -top-0.5 h-2.5 w-1 rounded-full bg-inverse" style={{ left: `${levelPosition(currentVo2)}%` }} />
+                        <div className="flex justify-between mt-3">
+                            {LEVELS.map((l) => (
+                                <span key={l} className="text-[11px] font-medium text-ink-4">{l}</span>
+                            ))}
+                        </div>
                     </div>
-                </div>
-            </Card>
-        </section>
+                </>
+            ) : (
+                <EmptyState
+                    icon={HeartPulse}
+                    title={`Sin VO₂max de ${vo2Sport === 'bike' ? 'bici' : 'carrera'}`}
+                    description={vo2Sport === 'bike' ? 'Se estima con salidas con potenciómetro y pulsómetro.' : 'Se estima con carreras con pulsómetro.'}
+                    action={setVo2Sport && <Button variant="secondary" onClick={() => setVo2Sport(vo2Sport === 'bike' ? 'run' : 'bike')}>Ver {vo2Sport === 'bike' ? 'carrera' : 'bici'}</Button>}
+                />
+            )}
+        </StatsCard>
     );
 };

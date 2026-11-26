@@ -1,123 +1,88 @@
 import React from 'react';
-import { Activity, Brain } from 'lucide-react';
-import { Card, EmptyState, InfoTooltip, Segmented } from '../ui';
+import { Activity } from 'lucide-react';
+import { Button, EmptyState, Segmented, Stat } from '../ui';
 import { formatNumber } from '../../utils/formatters';
+import { StatsCard } from './StatsCard';
 
+/** Balance de la carga por intensidad. El rango 7D/30D/90D va en la cabecera de la tarjeta (RF-D3). */
 export const TrainingBalanceCard = ({ balance, balanceDays, setBalanceDays }) => {
+    const hasData = balance && !balance.empty;
+    const rows = hasData ? [
+        { label: 'Capacidad anaeróbica', value: balance.anaerobic, color: 'bg-purple-500', target: balance.targets.anaerobic, pct: balance.pcts.anaerobic },
+        { label: 'Aeróbico de alta intensidad', value: balance.aerobicHigh, color: 'bg-orange-500', target: balance.targets.high, pct: balance.pcts.high },
+        { label: 'Aeróbico de baja intensidad', value: balance.aerobicLow, color: 'bg-cyan-500', target: balance.targets.low, pct: balance.pcts.low },
+    ] : [];
+
     return (
-        <section className="mb-8">
-            <Card variant="panel" className="p-6 sm:p-8">
-                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-10">
-                    <div className="flex items-center gap-2">
-                        <h3 className="text-2xs font-bold text-ink-4 uppercase tracking-[0.1em]">Balance de Entrenamiento</h3>
-                        <InfoTooltip text="Distribución de la carga en los últimos días según intensidad." />
+        <StatsCard
+            id="balance"
+            title="Balance de entrenamiento"
+            info="Distribución de la carga en los últimos días según intensidad."
+            actions={
+                <Segmented
+                    variant="card"
+                    size="md-wide"
+                    aria-label="Periodo del balance"
+                    optionClassName="px-4 py-1.5"
+                    value={balanceDays}
+                    onChange={setBalanceDays}
+                    options={[7, 30, 90].map((v) => ({ value: v, label: `${v}D`, tone: 'action-bright' }))}
+                />
+            }
+        >
+            {hasData ? (
+                <div className="flex flex-col gap-6">
+                    <div className="grid grid-cols-2 md:grid-cols-3 gap-x-4 gap-y-5">
+                        <Stat label="Carga total" value={Math.round(balance.totalLoad)} unit="TSS" />
+                        <Stat label="Ratio anaeróbico" value={formatNumber(balance.anaerobic / (balance.aerobicHigh + balance.aerobicLow || 1), 2)} sub="Anaeróbico frente a aeróbico" />
+                        <Stat label="Sesiones" value={balance.activityCount} className="max-md:hidden" />
                     </div>
-                    <Segmented
-                        variant="card"
-                        size="md-wide"
-                        optionClassName="px-4 py-1.5"
-                        value={balanceDays}
-                        onChange={setBalanceDays}
-                        options={[7, 30, 90].map((v) => ({ value: v, label: `${v}D`, tone: 'action-bright' }))}
-                    />
-                </div>
 
-                {balance && !balance.empty ? (
-                    <div className="space-y-12">
-                        <div className="grid grid-cols-2 gap-8 px-2">
-                            <div className="p-4 rounded-2xl bg-sunken-3 border border-line-soft">
-                                <p className="text-2xs font-bold text-slate-400 uppercase tracking-[0.08em] mb-1">Carga Total</p>
-                                <p className="text-3xl font-bold text-ink-soft">{Math.round(balance.totalLoad)} <span className="text-xs font-bold text-slate-400">Pts</span></p>
-                            </div>
-                            <div className="p-4 rounded-2xl bg-sunken-3 border border-line-soft">
-                                <p className="text-2xs font-bold text-slate-400 uppercase tracking-[0.08em] mb-1">Ratio An/Ae</p>
-                                <p className="text-3xl font-bold text-ink-soft">{formatNumber(balance.anaerobic / (balance.aerobicHigh + balance.aerobicLow || 1), 2)}</p>
-                                <p className="text-2xs font-bold text-slate-500 uppercase mt-1 tracking-tighter">Aeróbico vs Anaeróbico</p>
-                            </div>
-                        </div>
-
-                        <div className="space-y-8">
-                            {[
-                                { label: 'Capacidad Anaeróbica', value: balance.anaerobic, color: 'bg-purple-500', target: balance.targets.anaerobic, pct: balance.pcts.anaerobic },
-                                { label: 'Aeróbico Alta Intensidad', value: balance.aerobicHigh, color: 'bg-orange-500', target: balance.targets.high, pct: balance.pcts.high },
-                                { label: 'Aeróbico Baja Intensidad', value: balance.aerobicLow, color: 'bg-[#00c2e0]', target: balance.targets.low, pct: balance.pcts.low }
-                            ].map((b, i) => {
-                                const scale = balance.maxScale || 1;
-                                const barWidth = (b.value / scale) * 100;
-                                const targetLeft = (b.target.min / scale) * 100;
-                                const targetWidth = ((b.target.max - b.target.min) / scale) * 100;
-                                const status = b.pct < b.target.pctMin ? 'Bajo' : b.pct > b.target.pctMax ? 'Alto' : 'Óptimo';
-
-                                return (
-                                    <div key={i} className="group">
-                                        <div className="flex justify-between items-end mb-4 px-1">
-                                            <div className="flex flex-col">
-                                                <span className="text-2xs font-bold text-ink-3 uppercase tracking-tight">{b.label}</span>
-                                                <div className="flex items-center gap-2 mt-1">
-                                                    <span className={`text-[13px] font-bold ${status === 'Alto' ? 'text-rose-500' : 'text-ink-soft'}`}>{Math.round(b.pct)}%</span>
-                                                    <span className={`text-2xs font-bold uppercase px-1.5 py-0.5 rounded-md border ${status === 'Óptimo' ? 'bg-positive/10 border-positive/20 text-positive' : 'bg-surface-2 border-line-2 text-slate-400'}`}>
-                                                        {status}
-                                                    </span>
-                                                </div>
-                                            </div>
-                                            <div className="text-right">
-                                                <span className="text-2xs font-bold text-body">{Math.round(b.value)} <span className="text-2xs text-slate-400">TSS</span></span>
-                                                <p className="text-2xs font-bold text-slate-400 uppercase tracking-tighter">Meta: {Math.round(b.target.min)}-{Math.round(b.target.max)}</p>
-                                            </div>
-                                        </div>
-
-                                        <div className="relative h-4 w-full bg-slate-100 dark:bg-zinc-800/40 rounded-full overflow-visible">
-                                            {/* Garmin-style Optimal Range Dotted Capsule (ON TOP) */}
-                                            <div
-                                                className="absolute -top-1.5 -bottom-1.5 border-2 border-dashed border-slate-300 dark:border-zinc-500 rounded-full z-20 pointer-events-none"
-                                                style={{
-                                                    left: `${targetLeft}%`,
-                                                    width: `${targetWidth}%`
-                                                }}
-                                            />
-
-                                            {/* Current value bar */}
-                                            <div
-                                                className={`absolute top-0 bottom-0 ${b.color} rounded-full transition-paint duration-1000 shadow-md z-10 ${status === 'Alto' ? 'brightness-110' : ''}`}
-                                                style={{ width: `${barWidth}%` }}
-                                            >
-                                                {/* Glow if optimal or higher */}
-                                                {status !== 'Bajo' && (
-                                                    <div className="absolute inset-0 bg-white/20 animate-pulse rounded-full" />
-                                                )}
-                                            </div>
-                                        </div>
+                    <ul className="m-0 p-0 list-none flex flex-col gap-5">
+                        {rows.map((b) => {
+                            const scale = balance.maxScale || 1;
+                            const status = b.pct < b.target.pctMin ? 'Bajo' : b.pct > b.target.pctMax ? 'Alto' : 'Óptimo';
+                            return (
+                                <li key={b.label}>
+                                    <div className="flex items-baseline justify-between gap-3 mb-2">
+                                        <p className="flex flex-wrap items-baseline gap-x-2 min-w-0 text-sm font-medium text-ink">
+                                            {b.label}
+                                            <span className={`whitespace-nowrap text-[12px] font-semibold ${status === 'Óptimo' ? 'text-positive' : status === 'Alto' ? 'text-danger-ink' : 'text-ink-4'}`}>{Math.round(b.pct)} % · {status.toLowerCase()}</span>
+                                        </p>
+                                        <p className="shrink-0 font-mono text-[12px] text-ink-4 tabular-nums whitespace-nowrap">
+                                            {Math.round(b.value)} TSS <span className="max-sm:hidden">· meta {Math.round(b.target.min)}–{Math.round(b.target.max)}</span>
+                                        </p>
                                     </div>
-                                );
-                            })}
-                        </div>
+                                    <div className="relative h-2.5 w-full bg-surface-2 rounded-full">
+                                        <div
+                                            aria-hidden="true"
+                                            className="absolute -top-1 -bottom-1 border border-dashed border-line-strong rounded-full z-20 pointer-events-none"
+                                            style={{ left: `${(b.target.min / scale) * 100}%`, width: `${((b.target.max - b.target.min) / scale) * 100}%` }}
+                                        />
+                                        <div className={`absolute inset-y-0 left-0 ${b.color} rounded-full z-10`} style={{ width: `${Math.min(100, (b.value / scale) * 100)}%` }} />
+                                    </div>
+                                </li>
+                            );
+                        })}
+                    </ul>
 
-                        <div className="p-6 rounded-3xl bg-sunken-3 border border-line-soft flex items-start gap-5 shadow-sm transition-paint">
-                            <div className="p-3 rounded-2xl bg-surface-3 shadow-sm">
-                                <Brain size={24} style={{ color: balance.color }} />
-                            </div>
-                            <div className="flex-1">
-                                <div className="flex items-center gap-3 mb-2.5">
-                                    <span className="text-2xs font-bold uppercase tracking-[0.08em] px-3 py-1 rounded-full border shadow-sm" style={{ backgroundColor: `${balance.color}15`, color: balance.color, borderColor: `${balance.color}30` }}>
-                                        {balance.status}
-                                    </span>
-                                    <span className="text-2xs font-bold text-slate-400 uppercase tracking-tighter bg-white/50 dark:bg-zinc-800/50 px-2.5 py-1 rounded-lg border border-slate-100/50 dark:border-zinc-700/50">
-                                        {balance.activityCount} Sesiones
-                                    </span>
-                                </div>
-                                <p className="text-[13px] font-bold text-ink-2 leading-snug mb-1">
-                                    {balance.recommendation}
-                                </p>
-                                <p className="text-[12px] font-medium text-ink-3 leading-relaxed">
-                                    {balance.details}
-                                </p>
-                            </div>
-                        </div>
+                    <div className="pt-5 border-t border-line">
+                        <p className="flex flex-wrap items-center gap-2 text-sm font-semibold text-ink">
+                            <span className="w-2 h-2 rounded-full" style={{ backgroundColor: balance.color }} aria-hidden="true" />
+                            {balance.status}
+                        </p>
+                        <p className="mt-1 text-sm text-ink-2">{balance.recommendation}</p>
+                        {balance.details && <p className="mt-1 text-[13px] text-ink-3">{balance.details}</p>}
                     </div>
-                ) : (
-                    <EmptyState icon={Activity} title="Sin datos suficientes en el periodo" />
-                )}
-            </Card>
-        </section>
+                </div>
+            ) : (
+                <EmptyState
+                    icon={Activity}
+                    title="Sin datos suficientes en el periodo"
+                    description="Amplía el periodo para ver tu balance de intensidad."
+                    action={balanceDays < 90 && <Button variant="secondary" onClick={() => setBalanceDays(90)}>Ver 90 días</Button>}
+                />
+            )}
+        </StatsCard>
     );
 };
