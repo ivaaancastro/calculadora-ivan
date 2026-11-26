@@ -1,6 +1,6 @@
 import React from 'react';
 import { AlertTriangle, RefreshCw } from 'lucide-react';
-import { ErrorState } from '../ui';
+import { EmptyState } from '../ui';
 
 export class ErrorBoundary extends React.Component {
   constructor(props) {
@@ -34,7 +34,8 @@ export class ErrorBoundary extends React.Component {
       return (
         <div className="min-h-screen flex items-center justify-center bg-sunken-2 p-4">
           <div className="bg-surface rounded-2xl shadow-xl p-8 max-w-lg w-full border border-line">
-            <ErrorState
+            <EmptyState
+              tone="danger"
               icon={AlertTriangle}
               title="Vaya, algo se ha roto"
               description="La aplicación ha encontrado un error crítico en la interfaz. No te preocupes, tus datos están a salvo."

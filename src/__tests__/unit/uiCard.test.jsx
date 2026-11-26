@@ -16,7 +16,7 @@ describe('ui/Card', () => {
     const c = classes(cardClass({ pressable: true }));
     expect(c).not.toContain('transition-paint');
     expect(c).toEqual(
-      expect.arrayContaining(['active:scale-press', 'transition-transform', 'duration-150', 'ease-out', 'select-none', 'touch-manipulation']),
+      expect.arrayContaining(['active:scale-press', 'transition-transform', 'duration-fast', 'ease-forma', 'select-none', 'touch-manipulation']),
     );
   });
 

@@ -2,6 +2,9 @@ import React from 'react';
 import { ArrowUpRight, ArrowDownRight } from 'lucide-react';
 import { buildStatsNarrative } from '../../utils/statsNarrative';
 
+/** Clave `data-metric` de cada KPI del héroe (RF-D1). */
+const HERO_METRIC = { load: 'load7' };
+
 /** Héroe «Hoy» de Rendimiento: narrativa + KPI protagonistas. */
 export const StatsHero = ({ trainingStatus, hrv, ftpDiff, eFTP }) => {
     const { text, kpis } = buildStatsNarrative({ trainingStatus, hrv, ftpDiff, eFTP });
@@ -14,7 +17,7 @@ export const StatsHero = ({ trainingStatus, hrv, ftpDiff, eFTP }) => {
                     <div key={k.id} data-stats="kpi" data-tone={k.tone} className="px-4 border-l border-line odd:pl-0 odd:border-l-0 md:odd:pl-4 md:odd:border-l md:first:!pl-0 md:first:!border-l-0 motion-safe:animate-rise motion-safe:[&:nth-child(2)]:[animation-delay:60ms] motion-safe:[&:nth-child(3)]:[animation-delay:120ms] motion-safe:[&:nth-child(4)]:[animation-delay:180ms]">
                         <dt className="text-[11px] font-semibold tracking-[0.08em] uppercase text-ink-4">{k.label}</dt>
                         <dd className="m-0">
-                            <span data-stats="kpi-value" className="text-[36px] md:text-[44px] font-semibold leading-[1.1] tracking-[-0.04em]">{k.value}</span>
+                            <span data-stats="kpi-value" data-metric={HERO_METRIC[k.id] ?? k.id} className="text-[36px] md:text-[44px] font-semibold leading-[1.1] tracking-[-0.04em]">{k.value}</span>
                             {k.unit && <span data-stats="kpi-unit" className="ml-1 text-[13px] font-medium opacity-60">{k.unit}</span>}
                         </dd>
                         <dd data-stats="kpi-context" className={`flex items-center gap-0.5 m-0 text-[12px] font-medium ${k.tone === 'up' ? 'text-positive-ink' : k.tone === 'down' ? 'text-danger-ink' : 'opacity-75'}`}>

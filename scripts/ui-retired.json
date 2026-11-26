@@ -25,6 +25,7 @@
     "MetricCard",
     "PillTab",
     "tooltipStyleFor",
-    "LazyFallback"
+    "LazyFallback",
+    "ErrorState"
   ]
 }

@@ -1,16 +1,12 @@
 import React, { useState } from 'react';
-import { ArrowUpRight, ArrowDownRight, Minus, ChevronDown } from 'lucide-react';
-import { Button } from '../ui';
+import { ChevronDown } from 'lucide-react';
+import { Button, Delta, Stat } from '../ui';
 import { useCountUp } from '../../hooks/useCountUp';
-import { formatMinutes, formatNumber } from '../../utils/formatters';
+import { formatMinutes } from '../../utils/formatters';
 
 const Kpi = ({ label, value, context, delta, bar }) => (
     <div data-cal="kpi" className="min-w-0 rounded-xl border border-line bg-surface px-3.5 py-3 motion-safe:animate-rise motion-safe:[&:nth-child(2)]:[animation-delay:0.06s] motion-safe:[&:nth-child(3)]:[animation-delay:0.12s] motion-safe:[&:nth-child(4)]:[animation-delay:0.18s]">
-        <div className="text-[12px] font-semibold uppercase tracking-[0.08em] text-ink-3">{label}</div>
-        <div className="mt-1 flex items-baseline gap-2">
-            <span className="text-[28px] sm:text-[32px] leading-none font-semibold tracking-[-0.03em] tabular-nums text-ink">{value}</span>
-            {delta}
-        </div>
+        <Stat label={label} value={value} delta={delta} size="md" />
         {bar != null && (
             <div className="mt-2 h-1 rounded-full bg-fill-7 overflow-hidden" aria-hidden="true">
                 <div className="h-full rounded-full bg-form-peak" style={{ width: `${Math.min(100, bar)}%` }} />
@@ -19,21 +15,6 @@ const Kpi = ({ label, value, context, delta, bar }) => (
         <div className="mt-1.5 text-[12px] text-ink-4 truncate">{context}</div>
     </div>
 );
-
-const Delta = ({ pct }) => {
-    if (pct == null) return null;
-    const up = pct >= 2;
-    const down = pct <= -2;
-    const Icon = up ? ArrowUpRight : down ? ArrowDownRight : Minus;
-    const tone = up ? 'text-form-peak' : down ? 'text-form-critical' : 'text-ink-4';
-    return (
-        <span className={`flex items-center gap-0.5 text-xs font-semibold tabular-nums ${tone}`}>
-            <Icon size={14} strokeWidth={2.5} aria-hidden="true" />
-            {pct > 0 ? '+' : ''}{formatNumber(pct, Number.isInteger(pct) ? 0 : 1)}%
-            <span className="sr-only"> frente al mes anterior</span>
-        </span>
-    );
-};
 
 /**
  * Cabecera narrativa del mes (spec premium-calendario §3.1): frase + 4 KPI y, al lado,
@@ -59,7 +40,7 @@ export const MonthHero = ({ summary, heatmap, onPlan }) => {
                             value={Math.round(sessions)}
                             context={summary.pending > 0 ? `${summary.pending} por venir` : summary.planned > 0 ? `${summary.done}/${summary.planned} planificadas` : 'sin plan'}
                         />
-                        <Kpi label="Carga (TSS)" value={Math.round(tss)} delta={<Delta pct={summary.deltaPct} />}
+                        <Kpi label="Carga (TSS)" value={Math.round(tss)} delta={<Delta value={summary.deltaPct} flat={2} unit="%" label="frente al mes anterior" />}
                             context={summary.tssPrev > 0
                                 ? `${summary.comparedDays ? `días 1–${summary.comparedDays} del mes anterior` : 'mes anterior'}: ${summary.tssPrev}`
                                 : 'sin mes anterior'} />

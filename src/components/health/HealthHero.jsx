@@ -24,7 +24,7 @@ export const HealthHero = ({ wellnessMetrics, readinessInfo }) => {
                 </h2>
             </div>
             <div data-health="hero-figure" className="shrink-0 sm:text-right motion-safe:animate-rise motion-safe:[animation-delay:0.12s]">
-                <span data-health="hero-value" className="text-5xl sm:text-[3.5rem] leading-none font-semibold tracking-[-0.04em] tabular-nums text-ink">
+                <span data-health="hero-value" data-metric="recovery" className="text-5xl sm:text-[3.5rem] leading-none font-semibold tracking-[-0.04em] tabular-nums text-ink">
                     {valid ? Math.round(counted) : '--'}<span className="text-xl font-medium text-ink-4 ml-1">%</span>
                 </span>
                 <span className="block text-[12px] font-semibold uppercase tracking-[0.08em] text-ink-4 mt-1">Recuperación</span>

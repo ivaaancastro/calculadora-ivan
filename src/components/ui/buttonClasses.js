@@ -13,25 +13,27 @@
  *  - `quiet`: cerrar y volver del acceso (≥ 44 px).
  * Borrar actividad del detalle no entra: en oscuro, su color de base gana hoy al rojo del hover
  * (D-08) y pasarlo a tokens haría aparecer ese hover.
+ * Los botones con fondo se comprimen al pulsar (`active:scale-press`, 0,98; RF-D5) y animan solo
+ * pintura y transformación (`transition-paint`, nunca todas las propiedades).
  * El tamaño y el relleno van en `className`.
  */
 import { cx } from './cx.js';
 
 const BUTTON = {
-  ghost: 'text-ink-3 rounded-full text-[12px] font-medium hover:bg-surface-2 transition-paint',
-  inverse: 'bg-inverse text-ink-inverse rounded-full text-[12px] font-medium hover:bg-inverse-2 transition-paint shadow-sm',
+  ghost: 'text-ink-3 rounded-full text-[12px] font-medium hover:bg-surface-2 active:scale-press transition-paint',
+  inverse: 'bg-inverse text-ink-inverse rounded-full text-[12px] font-medium hover:bg-inverse-2 active:scale-press transition-paint shadow-sm',
   'link-muted': 'text-2xs text-ink-4-fixed hover:text-body-soft-fixed font-medium transition-colors',
-  primary: 'w-full min-h-[48px] bg-action-solid hover:bg-action-hover text-on-action rounded-xl font-bold text-sm flex items-center justify-center gap-2 transition-colors disabled:opacity-50 active:scale-press',
+  primary: 'w-full min-h-[48px] bg-action-solid hover:bg-action-hover text-on-action rounded-xl font-bold text-sm flex items-center justify-center gap-2 transition-paint disabled:opacity-50 active:scale-press',
   link: 'min-h-[44px] px-2 text-xs font-semibold text-ink-3 hover:text-ink underline-offset-4 hover:underline transition-colors',
   'danger-text': 'text-faint-fixed hover:text-danger transition-colors',
-  secondary: 'min-h-[44px] px-4 border border-line text-ink-3 hover:bg-surface-2 rounded-xl text-sm font-semibold transition-colors disabled:opacity-50',
-  danger: 'min-h-[44px] px-4 bg-danger-solid hover:bg-danger-hover text-on-action rounded-xl text-sm font-semibold transition-colors disabled:opacity-50',
+  secondary: 'min-h-[44px] px-4 border border-line text-ink-3 hover:bg-surface-2 rounded-xl text-sm font-semibold active:scale-press transition-paint disabled:opacity-50',
+  danger: 'min-h-[44px] px-4 bg-danger-solid hover:bg-danger-hover text-on-action rounded-xl text-sm font-semibold active:scale-press transition-paint disabled:opacity-50',
 };
 
 const ICON = {
   soft: 'flex items-center justify-center bg-fill hover:bg-fill-hover active:scale-press rounded-full transition-paint text-body-soft-2',
   ghost: 'flex items-center justify-center bg-transparent hover:bg-surface-2 active:scale-press text-ink-3 transition-paint touch-manipulation',
-  quiet: 'flex items-center justify-center min-h-[44px] min-w-[44px] rounded-full text-ink-3 hover:text-ink hover:bg-surface-2 transition-colors',
+  quiet: 'flex items-center justify-center min-h-[44px] min-w-[44px] rounded-full text-ink-3 hover:text-ink hover:bg-surface-2 active:scale-press transition-paint',
 };
 
 function pick(kind, table, variant) {

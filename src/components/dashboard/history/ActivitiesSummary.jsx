@@ -29,7 +29,7 @@ export const ActivitiesSummary = ({ totals, weekly = [] }) => {
                 <div>
                     <p className="text-[12px] font-semibold uppercase tracking-[0.08em] text-ink-3">Actividades</p>
                     <p className="mt-1 flex items-baseline gap-2">
-                        <span data-history="summary-count" className="text-[40px] sm:text-[44px] leading-none font-semibold tracking-[-0.04em] tabular-nums text-ink">
+                        <span data-history="summary-count" data-metric="activities" className="text-[40px] sm:text-[44px] leading-none font-semibold tracking-[-0.04em] tabular-nums text-ink">
                             {typeof shown === 'number' ? Math.round(shown) : shown}
                         </span>
                         <span className="text-xs text-ink-3">{totals.count === 1 ? 'sesión' : 'sesiones'}</span>

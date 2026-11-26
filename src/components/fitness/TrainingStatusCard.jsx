@@ -33,11 +33,11 @@ export const TrainingStatusCard = ({ trainingStatus }) => {
                     <div className="flex gap-12 md:pl-10 md:border-l border-line-soft-2">
                         <div className="space-y-1">
                             <p className="text-2xs font-bold text-slate-400 uppercase tracking-[0.05em]">Carga (7d)</p>
-                            <p className="text-xl font-bold text-ink-soft">{trainingStatus.load7}</p>
+                            <p data-metric="load7" className="text-xl font-bold text-ink-soft">{trainingStatus.load7}</p>
                         </div>
                         <div className="space-y-1">
                             <p className="text-2xs font-bold text-slate-400 uppercase tracking-[0.05em]">TSB</p>
-                            <p className={`text-xl font-bold ${TSB_TONE[tsbStateKey(trainingStatus.tsb)] || 'text-slate-400'}`}>
+                            <p data-metric="tsb" className={`text-xl font-bold ${TSB_TONE[tsbStateKey(trainingStatus.tsb)] || 'text-slate-400'}`}>
                                 {trainingStatus.tsb > 0 ? '+' : ''}{trainingStatus.tsb}
                             </p>
                         </div>

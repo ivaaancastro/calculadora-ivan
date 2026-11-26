@@ -27,7 +27,7 @@ export const Reveal = ({ children, className = '' }) => {
   return (
     <div
       ref={ref}
-      className={`data-[reveal]:transition-all data-[reveal]:duration-700 data-[reveal]:ease-out data-[reveal=hidden]:translate-y-8 data-[reveal=hidden]:opacity-0 ${className}`}
+      className={`data-[reveal]:transition-[opacity,transform] data-[reveal]:duration-700 data-[reveal]:ease-out data-[reveal=hidden]:translate-y-8 data-[reveal=hidden]:opacity-0 ${className}`}
     >
       {children}
     </div>

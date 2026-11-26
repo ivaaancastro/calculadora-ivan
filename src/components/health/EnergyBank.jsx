@@ -41,7 +41,7 @@ export const EnergyBank = ({ energyBankAmount }) => {
             </div>
 
             <div className="sm:border-l border-line-4 sm:pl-6 text-center sm:text-right shrink-0">
-                <span data-health="energy-value" className={`text-[clamp(3rem,9vw,3.5rem)] leading-none font-semibold tabular-nums tracking-[-0.04em] ${
+                <span data-health="energy-value" data-metric="recovery" className={`text-[clamp(3rem,9vw,3.5rem)] leading-none font-semibold tabular-nums tracking-[-0.04em] ${
                     energyBankAmount === '--' ? 'text-slate-400' :
                     energyBankAmount > 60 ? 'text-emerald-500' :
                     energyBankAmount > 30 ? 'text-amber-500' : 'text-rose-500'

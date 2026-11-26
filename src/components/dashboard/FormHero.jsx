@@ -1,7 +1,6 @@
 import React from 'react';
-import { ArrowUpRight, ArrowDownRight, Minus } from 'lucide-react';
 import { useCountUp } from '../../hooks/useCountUp';
-import { formatNumber } from '../../utils/formatters';
+import { Delta, Hero } from '../ui';
 
 const RANGES = [
     { id: '7d', label: '7D' },
@@ -10,21 +9,6 @@ const RANGES = [
     { id: 'all', label: 'Todo' },
 ];
 
-const TONE_CHIP = {
-    neutral: 'text-body-soft bg-fill-3 border-line-muted-2',
-    peak: 'text-form-peak bg-form-peak-tint border-form-peak/25',
-    productive: 'text-form-productive bg-form-productive-tint border-form-productive/25',
-    overload: 'text-form-overload bg-form-overload-tint border-form-overload/25',
-    critical: 'text-form-critical bg-form-critical-tint border-form-critical/25',
-};
-const TONE_ACCENT = {
-    neutral: 'rgb(var(--line-strong))',
-    peak: 'rgb(var(--form-peak))',
-    productive: 'rgb(var(--form-productive))',
-    overload: 'rgb(var(--form-overload))',
-    critical: 'rgb(var(--form-critical))',
-};
-
 /**
  * Héroe del Dashboard (spec premium-dashboard §3.1): resumen narrativo + CTL como cifra
  * protagonista con su variación a 28 días y el estado de forma (TSB) como chip. Sin cajas.
@@ -32,45 +16,20 @@ const TONE_ACCENT = {
 export const FormHero = ({ summary, ctl, loadTrend, timeRange, setTimeRange }) => {
     const shown = useCountUp(Math.round(ctl));
     const hasData = summary.state !== 'insufficient';
-    const TrendIcon = loadTrend > 2 ? ArrowUpRight : loadTrend < -2 ? ArrowDownRight : Minus;
-    const trendTone = loadTrend > 2 ? 'text-form-peak' : loadTrend < -2 ? 'text-form-critical' : 'text-ink-4';
     return (
-        <section
+        <Hero
             data-dash="hero"
             data-hero="form"
-            style={{ '--hero-accent': TONE_ACCENT[summary.tone] }}
-            className="hero-rule relative grid gap-5 md:grid-cols-[minmax(0,1fr)_auto] md:items-end pt-[22px] pb-1 max-md:order-1 max-md:pt-[18px] max-md:px-3 max-md:pb-0 max-md:gap-3 lg:col-span-full [font-feature-settings:'tnum'_1,'cv11'_1,'ss03'_1]"
-        >
-            <div className="space-y-3 min-w-0">
-                <p className="flex flex-wrap items-center gap-2 text-[12px] font-semibold uppercase tracking-[0.08em] text-ink-3">
-                    <span>Estado de forma</span>
-                    <span className={`text-2xs font-bold px-2 py-0.5 rounded-full border uppercase tracking-[0.05em] ${TONE_CHIP[summary.tone]}`}>
-                        {summary.label}
-                    </span>
-                </p>
-                <p data-hero="sentence" className="motion-safe:animate-rise text-[18px] leading-snug font-medium tracking-[-0.01em] text-ink [text-wrap:balance] max-w-[46ch]">
-                    {summary.sentence}
-                </p>
-                <p data-hero="advice" className="text-xs text-ink-3">{summary.advice}</p>
-            </div>
-
-            <div className="flex items-end justify-between gap-4 md:flex-col md:items-end">
-                <div data-hero="figure" className="min-w-0 motion-safe:animate-rise motion-safe:[animation-delay:0.12s]">
-                    <div className="text-2xs font-semibold uppercase tracking-[0.08em] text-ink-4">Fitness (CTL)</div>
-                    <div className="mt-1 flex items-baseline gap-2">
-                        <span className="text-[48px] sm:text-[3.5rem] leading-none font-semibold tracking-[-0.04em] tabular-nums text-ink">
-                            {hasData ? Math.round(shown) : '--'}
-                        </span>
-                        {hasData && (
-                            <span className={`flex items-center gap-0.5 text-xs font-semibold tabular-nums ${trendTone}`}>
-                                <TrendIcon size={14} strokeWidth={2.5} aria-hidden="true" />
-                                {loadTrend > 0 ? '+' : ''}{formatNumber(loadTrend, 1)}%
-                                <span className="sr-only"> en 28 días</span>
-                            </span>
-                        )}
-                    </div>
-                </div>
-
+            className="pt-[22px] pb-1 max-md:order-1 max-md:pt-[18px] max-md:px-3 max-md:pb-0 max-md:gap-3 lg:col-span-full"
+            eyebrow="Estado de forma"
+            chip={{ label: summary.label, tone: summary.tone }}
+            line={summary.sentence}
+            sub={summary.advice}
+            label="Fitness (CTL)"
+            metric="ctl"
+            value={hasData ? Math.round(shown) : '--'}
+            delta={hasData && <Delta value={loadTrend} flat={2} digits={1} unit="%" label="en 28 días" />}
+            aside={
                 <div role="group" aria-label="Rango de tiempo" data-hero="range" className="flex bg-fill-6 p-1 rounded-full shadow-xs">
                     {RANGES.map((t) => (
                         <button
@@ -84,7 +43,7 @@ export const FormHero = ({ summary, ctl, loadTrend, timeRange, setTimeRange }) =
                         </button>
                     ))}
                 </div>
-            </div>
-        </section>
+            }
+        />
     );
 };

@@ -29,7 +29,7 @@ Spec: `spec.md` v0.3 (aprobada 2026-11-24). Plan: `plan.md`. Hallazgos: `auditor
 - [ ] **PR 11** `fix/copy-y-a11y`: COP-1, COP-2, A11Y-1..5.
 - [x] **PR 12** `docs/paleta-propuestas` (artefacto con capturas; elegida la A): 2–3 direcciones en capturas reales. **Parada: el usuario elige.**
 - [ ] **PR 13** `feat/paleta`: paleta elegida en tokens y `chartTheme`, contraste AA.
-- [ ] **PR 14** `feat/premium-sistema`: `docs/design/forma.md`, `Hero`/`Stat`, `EmptyState` con `tone`, helper `data-metric`.
+- [x] **PR 14** `feat/premium-sistema`: `docs/design/forma.md`, `Hero`/`Stat`/`Delta`, `EmptyState` con `tone` (absorbe `ErrorState`), pulsación 0,98, `transition-all` = 0, helper `data-metric` y `e2e/metrics.spec.js` con `PENDING_DUPLICATES` (15–19).
 - [ ] **PR 15** `feat/premium-dashboard`.
 - [ ] **PR 16** `feat/premium-detalle`.
 - [ ] **PR 17** `feat/premium-salud`.
@@ -54,3 +54,4 @@ Spec: `spec.md` v0.3 (aprobada 2026-11-24). Plan: `plan.md`. Hallazgos: `auditor
 - Nota para el PR 13: `chartTheme.js` duplica en hex los colores de `tokens.css`; la paleta nueva debe tener una sola fuente.
 - 2026-11-24: PR 5b, 5c, 6 y 8 abiertos (CI de 2–3,5 min). `lint:orphans` = 0. En curso: 7a → 7b (tema y piel) y 9 → 10 → 11 (utils, bugs y accesibilidad), en paralelo. Mapa del PR 2 comprobado en vivo con una actividad de dic 2025.
 - 2026-11-24: paleta A elegida; D11 y D12 revisadas por el usuario (se conservan `.opencode/` y `docs/branches/`; el #149 restaura las carpetas).
+- 2026-11-26: PR 14. Las pantallas 15–19 usan `Hero`, `Stat`, `Delta` y `EmptyState` (guía en `docs/design/forma.md`) y vacían su entrada de `PENDING_DUPLICATES` en `e2e/metrics.spec.js`.

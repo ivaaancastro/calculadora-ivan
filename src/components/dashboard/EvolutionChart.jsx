@@ -143,21 +143,21 @@ export const EvolutionChart = ({ data, timeRange, setTimeRange, loading = false 
           <div className="flex items-center gap-1">
             <span className="w-2 h-2 rounded-full bg-metric-ctl"></span>
             <span className="text-2xs text-ink-4 font-medium">CTL</span>
-            <span className="font-mono font-bold text-metric-ctl text-xs">
+            <span data-metric="ctl" className="font-mono font-bold text-metric-ctl text-xs">
               {activePoint?.ctl !== undefined ? Math.round(activePoint.ctl) : '--'}
             </span>
           </div>
           <div className="flex items-center gap-1">
             <span className="w-2 h-2 rounded-full bg-metric-atl"></span>
             <span className="text-2xs text-ink-4 font-medium">ATL</span>
-            <span className="font-mono font-bold text-metric-atl text-xs">
+            <span data-metric="atl" className="font-mono font-bold text-metric-atl text-xs">
               {activePoint?.atl !== undefined ? Math.round(activePoint.atl) : '--'}
             </span>
           </div>
           <div className="flex items-center gap-1">
             <span className="w-2 h-2 rounded-full bg-metric-tsb"></span>
             <span className="text-2xs text-ink-4 font-medium">TSB</span>
-            <span className={`font-mono font-bold text-xs ${
+            <span data-metric="tsb" className={`font-mono font-bold text-xs ${
               (activePoint?.tsb ?? 0) >= 0 ? 'text-legacy-tsb-ios-up' : 'text-legacy-tsb-ios-down'
             }`}>
               {activePoint?.tsb !== undefined ? `${activePoint.tsb > 0 ? '+' : ''}${Math.round(activePoint.tsb)}` : '--'}
