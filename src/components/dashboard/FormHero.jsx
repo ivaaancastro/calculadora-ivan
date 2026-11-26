@@ -14,6 +14,8 @@ export const FormHero = ({ summary, ctl, loadTrend, className }) => {
     return (
         <Hero
             layout="stack"
+            size="xl"
+            tone="ctl"
             data-dash="hero"
             data-hero="form"
             className={className}

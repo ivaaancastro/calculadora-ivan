@@ -17,7 +17,6 @@ const isMobile = (page) => (page.viewportSize()?.width ?? 0) < 768;
 // Controles pequeños conocidos, con el PR del plan de la Capa 6 que los corrige. Al corregirlos,
 // se quitan de aquí: la prueba falla si uno de la lista ya no aparece (así la lista no se pudre).
 const PENDING_SMALL = {
-  detalle: ['input "Zoom del recorrido: inicio"', 'input "Zoom del recorrido: fin"'], // PR 16
 };
 
 for (const screen of SCREENS) {

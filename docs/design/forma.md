@@ -46,7 +46,8 @@ igual en móvil y escritorio. Nunca en el héroe si no cambia la cifra del héro
 
 - Escritorio: mapa grande arriba a la izquierda; cifras clave a la derecha.
 - Móvil: primero el mapa, después la rejilla de cifras.
-- Una sola barra con volver, pestañas y borrar (borrar dentro de un menú).
+- Una sola barra con volver, pestañas y borrar (borrar dentro de un menú o como botón de icono con `aria-label`).
+- El cursor de las gráficas vive en un almacén con rAF (`detail/cursorStore.js`): moverlo no repinta la página ni el mapa (RF-C5).
 
 ## 4. Listas
 

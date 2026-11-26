@@ -1,92 +1,47 @@
-import React from 'react';
+import React, { memo } from 'react';
 import { ArrowLeft, Trash2 } from 'lucide-react';
 import { IconButton, Segmented } from '../../ui';
-import { activityTypeLabel } from '../../../utils/sport';
 
-export const DetailHeader = ({ activity, activeTab, setActiveTab, onBack, onDelete, dateStr, tabs }) => {
-    // En Análisis el título y las cifras viven en el hero; la cabecera queda en controles.
-    const heroOwnsTitle = activeTab === 'analyze';
+/**
+ * Barra única del detalle (RF-D5, «como Strava»): volver, pestañas y borrar en una sola fila,
+ * igual en móvil y escritorio. El título y la fecha viven en el héroe.
+ */
+export const DetailHeader = memo(function DetailHeader({ activity, activeTab, setActiveTab, onBack, onDelete, tabs }) {
     return (
-            <header data-detail="header" className="glass-nav px-3.5 py-2 sm:px-6 sm:py-3 shrink-0 z-nav">
-                {/* --- DESKTOP HEADER (lg:flex) --- */}
-                <div className="hidden lg:flex items-center justify-between gap-2 mb-2.5 sm:mb-3 border-b border-hairline pb-2">
-                    <Segmented
-                        variant="pill"
-                        className="overflow-x-auto min-w-0"
-                        value={activeTab}
-                        onChange={setActiveTab}
-                        options={tabs.map(t => ({ value: t.id, label: t.label }))}
-                    />
-                    
-                    <div className="flex items-center gap-1.5 shrink-0">
-                        {activity.strava_id && (
-                            <a data-detail="action" href={`https://www.strava.com/activities/${activity.strava_id}`} target="_blank" rel="noreferrer" 
-                               className="px-2.5 py-1 text-2xs font-bold text-orange-500 hover:bg-orange-500/10 active:scale-press rounded-full transition-paint uppercase tracking-[0.05em] shrink-0 max-lg:!min-w-[44px] max-lg:!min-h-[44px] max-lg:!inline-flex max-lg:!items-center max-lg:!justify-center">
-                                Strava
-                            </a>
-                        )}
-                        <button type="button" aria-label="Eliminar actividad" data-detail="action" onClick={() => onDelete && onDelete(activity.id)} className="w-8 h-8 flex items-center justify-center text-slate-400 dark:text-zinc-500 hover:text-red-500 hover:bg-danger/10 rounded-full active:scale-press transition-paint shrink-0 max-lg:!min-w-[44px] max-lg:!min-h-[44px] max-lg:!inline-flex max-lg:!items-center max-lg:!justify-center" title="Eliminar actividad">
-                            <Trash2 size={14} />
-                        </button>
-                    </div>
-                </div>
-
-                <div className="hidden lg:flex items-center gap-2.5 sm:gap-3 mb-2 sm:mb-3">
-                    <IconButton variant="soft" data-detail="action" onClick={onBack} className="w-8 h-8 shrink-0 max-lg:min-w-[44px] max-lg:min-h-[44px] max-lg:inline-flex max-lg:items-center max-lg:justify-center" title="Volver" label="Volver" icon={ArrowLeft} iconSize={16} />
-                    {!heroOwnsTitle && (
-                    <div className="min-w-0">
-                        <h1 className="text-sm font-bold text-ink tracking-tight leading-tight truncate">
-                            {activity.name || activityTypeLabel(activity.type)}
-                        </h1>
-                        <p className="text-2xs font-semibold text-ink-4 capitalize">{dateStr}</p>
-                    </div>
-                    )}
-                </div>
-
-                {/* --- MOBILE HEADER (lg:hidden) --- */}
-                {/* Fila 1: Flecha atrás + Título + Acciones Strava y Borrar */}
-                <div className="lg:hidden flex items-center justify-between gap-2 mb-2.5">
-                    <div className="flex items-center gap-2 min-w-0">
-                        <IconButton variant="soft" data-detail="action" onClick={onBack} className="w-8 h-8 shrink-0 max-lg:min-w-[44px] max-lg:min-h-[44px] max-lg:inline-flex max-lg:items-center max-lg:justify-center" title="Volver" label="Volver" icon={ArrowLeft} iconSize={16} />
-                        {!heroOwnsTitle && (
-                        <div className="min-w-0">
-                            <h1 className="text-sm font-bold text-ink tracking-tight leading-tight truncate">
-                                {activity.name || activityTypeLabel(activity.type)}
-                            </h1>
-                            <p className="text-2xs font-semibold text-ink-4 capitalize truncate">{dateStr}</p>
-                        </div>
-                        )}
-                    </div>
-
-                    <div className="flex items-center gap-1.5 shrink-0">
-                        {activity.strava_id && (
-                            <a data-detail="action" href={`https://www.strava.com/activities/${activity.strava_id}`} target="_blank" rel="noreferrer" 
-                               className="px-2.5 py-1 text-2xs font-bold text-orange-500 hover:bg-orange-500/10 active:scale-press rounded-full transition-paint uppercase tracking-[0.05em] shrink-0 max-lg:!min-w-[44px] max-lg:!min-h-[44px] max-lg:!inline-flex max-lg:!items-center max-lg:!justify-center">
-                                Strava
-                            </a>
-                        )}
-                        <button type="button" aria-label="Eliminar actividad" data-detail="action" onClick={() => onDelete && onDelete(activity.id)} className="w-8 h-8 flex items-center justify-center text-slate-400 dark:text-zinc-500 hover:text-red-500 hover:bg-danger/10 rounded-full active:scale-press transition-paint shrink-0 max-lg:!min-w-[44px] max-lg:!min-h-[44px] max-lg:!inline-flex max-lg:!items-center max-lg:!justify-center" title="Eliminar actividad">
-                            <Trash2 size={14} />
-                        </button>
-                    </div>
-                </div>
-
-                {/* Fila 2: Selector Segmentado iOS nativo a ancho completo (4 columnas iguales, cómodo y sin cortes) */}
-                <div data-detail="tabs" style={{ gridTemplateColumns: `repeat(${tabs.length}, minmax(0, 1fr))` }} className="lg:hidden grid w-full p-1 gap-1 bg-sunken shadow-inset-line rounded-xl [&>button]:!min-h-[44px] [&>button]:!rounded-lg">
-                    {tabs.map(tab => (
-                        <button
-                            key={tab.id}
-                            onClick={() => setActiveTab(tab.id)}
-                            className={`py-1.5 text-xs font-semibold rounded-lg text-center transition-paint select-none touch-manipulation active:scale-press ${
-                                activeTab === tab.id
-                                    ? 'bg-surface-4 text-ink shadow-xs font-bold'
-                                    : 'text-ink-3 hover:text-ink'
-                            }`}
-                        >
-                            {tab.label}
-                        </button>
-                    ))}
-                </div>
-            </header>
+        <header data-detail="header" className="glass-nav shrink-0 z-nav border-b border-hairline">
+            <div className="max-w-content mx-auto px-4 md:px-6 py-2 flex items-center gap-1.5 md:gap-4">
+                <IconButton
+                    variant="soft"
+                    data-detail="action"
+                    onClick={onBack}
+                    className="w-11 h-11 shrink-0"
+                    title="Volver"
+                    label="Volver"
+                    icon={ArrowLeft}
+                    iconSize={18}
+                />
+                <Segmented
+                    variant="rail"
+                    data-detail="tabs"
+                    className="flex-1 md:flex-none min-w-0 overflow-x-auto"
+                    optionClassName="max-md:flex-1 max-md:px-1.5 md:min-w-[96px]"
+                    value={activeTab}
+                    onChange={setActiveTab}
+                    options={tabs.map((t) => ({ value: t.id, label: t.label }))}
+                />
+                {onDelete && (
+                    <button
+                        type="button"
+                        data-detail="action"
+                        aria-label="Eliminar actividad"
+                        title="Eliminar actividad"
+                        onClick={() => onDelete(activity)}
+                        className="ml-auto w-11 h-11 shrink-0 flex items-center justify-center rounded-full text-ink-4 hover:text-danger hover:bg-danger/10 active:scale-press transition-paint"
+                    >
+                        <Trash2 size={18} />
+                    </button>
+                )}
+            </div>
+        </header>
     );
-};
+});

@@ -9,8 +9,6 @@ import { duplicatedMetrics } from './support/metrics.js';
 // Duplicados conocidos (spec §3.2), con el PR del plan de la Capa 6 que los corrige. Al
 // corregirlos, se quitan de aquí: la prueba falla si uno de la lista ya no aparece.
 const PENDING_DUPLICATES = {
-  detalle: { pr: 16, metrics: ['impact'] }, // chip de impacto y primera frase del Coach
-  salud: { pr: 17, metrics: ['recovery', 'sleep'] }, // héroe, anillo y banco; anillo y biomarcador
   rendimiento: { pr: 18, metrics: ['load7', 'tsb', 'hrv', 'vo2max'] }, // héroe frente a tarjetas; VO₂ y subtarjeta
   actividades: { pr: 19, metrics: ['activities'] }, // «85 sesiones» y «85 actividades»
 };

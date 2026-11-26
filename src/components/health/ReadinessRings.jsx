@@ -1,98 +1,39 @@
 import React from 'react';
-import {
-    Moon, Battery, Zap
-} from 'lucide-react';
+import { Moon, Zap } from 'lucide-react';
 import { Card } from '../ui';
 import { AppleRingGauge } from './AppleRingGauge';
 
-export const ReadinessRings = ({ wellnessMetrics, readinessInfo, strainInfo, sleepInfo, ct }) => (
-    <>
-        <div data-health="pillars" className="grid grid-cols-1 md:grid-cols-3 gap-3.5 sm:gap-4 max-sm:!gap-2">
-            {/* ANILLO RECUPERACIÓN */}
-            <Card data-health="pillar" variant="pillar" className="p-4 sm:p-6 flex flex-col items-center justify-between relative text-center max-sm:grid max-sm:grid-cols-[96px_1fr] max-sm:grid-rows-[auto_auto] max-sm:gap-x-3.5 max-sm:py-2.5 max-sm:px-3.5 max-sm:text-left motion-safe:animate-rise-slow">
-                <div data-health="pillar-head" className="w-full flex justify-end items-center mb-4 [&>span:first-child]:hidden max-sm:col-start-2 max-sm:row-start-1 max-sm:!mb-1 max-sm:self-end max-sm:flex-col max-sm:items-start max-sm:gap-1">
-                    <span className="text-2xs font-bold uppercase tracking-[0.08em] text-ink-4">Pilar 01</span>
-                    <span className={`px-2.5 py-0.5 rounded-full text-2xs font-bold uppercase tracking-[0.05em] ${readinessInfo.badge}`}>
-                        {readinessInfo.label}
-                    </span>
-                </div>
+/** Las etiquetas de estado llegan en mayúsculas de título («Buen Sueño»); se muestran en frase. */
+const sentence = (s) => (s ? s.charAt(0).toUpperCase() + s.slice(1).toLowerCase() : s);
 
-                <AppleRingGauge
-                    value={wellnessMetrics?.todayReadiness}
-                    colorClass={readinessInfo.color}
-                    strokeColor={ct.series.readiness}
-                    gradientId="apple-ring-rec"
-                    metric="recovery"
-                    icon={Battery}
-                    title="Recuperación"
-                    unit="%"
-                    size={160}
-                    strokeWidth={14}
-                />
-
-                <div data-health="pillar-foot" className="mt-4 pt-3 border-t border-line-soft-4 w-full text-center max-sm:col-start-2 max-sm:row-start-2 max-sm:!mt-0 max-sm:!pt-0 max-sm:border-t-0 max-sm:text-left max-sm:self-start">
-                    <p className="text-[12px] font-medium text-ink-3">
-                        Disponibilidad del SNC
-                    </p>
-                </div>
-            </Card>
-
-            {/* ANILLO ESFUERZO / STRAIN */}
-            <Card data-health="pillar" variant="pillar" className="p-4 sm:p-6 flex flex-col items-center justify-between relative text-center max-sm:grid max-sm:grid-cols-[96px_1fr] max-sm:grid-rows-[auto_auto] max-sm:gap-x-3.5 max-sm:py-2.5 max-sm:px-3.5 max-sm:text-left motion-safe:animate-rise-slow motion-safe:[animation-delay:0.08s]">
-                <div data-health="pillar-head" className="w-full flex justify-end items-center mb-4 [&>span:first-child]:hidden max-sm:col-start-2 max-sm:row-start-1 max-sm:!mb-1 max-sm:self-end max-sm:flex-col max-sm:items-start max-sm:gap-1">
-                    <span className="text-2xs font-bold uppercase tracking-[0.08em] text-ink-4">Pilar 02</span>
-                    <span className={`px-2.5 py-0.5 rounded-full text-2xs font-bold uppercase tracking-[0.05em] bg-rose-50 text-hr-ink dark:bg-rose-950/40 border border-rose-200/50 dark:border-rose-900/40`}>
-                        {strainInfo.label}
-                    </span>
-                </div>
-
-                <AppleRingGauge
-                    value={strainInfo.val}
-                    max={10}
-                    colorClass={strainInfo.color}
-                    strokeColor={ct.series.strain}
-                    gradientId="apple-ring-strain"
-                    icon={Zap}
-                    title="Carga Diaria"
-                    size={160}
-                    strokeWidth={14}
-                />
-
-                <div data-health="pillar-foot" className="mt-4 pt-3 border-t border-line-soft-4 w-full text-center max-sm:col-start-2 max-sm:row-start-2 max-sm:!mt-0 max-sm:!pt-0 max-sm:border-t-0 max-sm:text-left max-sm:self-start">
-                    <p className="text-[12px] font-medium text-ink-3">
-                        Impacto y fatiga acumulada
-                    </p>
-                </div>
-            </Card>
-
-            {/* ANILLO SUEÑO */}
-            <Card data-health="pillar" variant="pillar" className="p-4 sm:p-6 flex flex-col items-center justify-between relative text-center max-sm:grid max-sm:grid-cols-[96px_1fr] max-sm:grid-rows-[auto_auto] max-sm:gap-x-3.5 max-sm:py-2.5 max-sm:px-3.5 max-sm:text-left motion-safe:animate-rise-slow motion-safe:[animation-delay:0.16s]">
-                <div data-health="pillar-head" className="w-full flex justify-end items-center mb-4 [&>span:first-child]:hidden max-sm:col-start-2 max-sm:row-start-1 max-sm:!mb-1 max-sm:self-end max-sm:flex-col max-sm:items-start max-sm:gap-1">
-                    <span className="text-2xs font-bold uppercase tracking-[0.08em] text-ink-4">Pilar 03</span>
-                    <span className={`px-2.5 py-0.5 rounded-full text-2xs font-bold uppercase tracking-[0.05em] bg-action-tint text-action border border-blue-200/50 dark:border-blue-900/40`}>
-                        {sleepInfo.label}
-                    </span>
-                </div>
-
-                <AppleRingGauge
-                    value={wellnessMetrics?.latestSleepScore ?? '--'}
-                    colorClass={sleepInfo.color}
-                    strokeColor={ct.series.sleep}
-                    gradientId="apple-ring-sleep"
-                    metric="sleep"
-                    icon={Moon}
-                    title="Calidad Sueño"
-                    unit="%"
-                    size={160}
-                    strokeWidth={14}
-                />
-
-                <div data-health="pillar-foot" className="mt-4 pt-3 border-t border-line-soft-4 w-full text-center max-sm:col-start-2 max-sm:row-start-2 max-sm:!mt-0 max-sm:!pt-0 max-sm:border-t-0 max-sm:text-left max-sm:self-start">
-                    <p className="text-[12px] font-medium text-ink-3">
-                        {wellnessMetrics?.latestSleep || '--'} horas descansadas
-                    </p>
-                </div>
-            </Card>
+const Pillar =({ icon: Icon, title, status, sub, color, delay, children }) => (
+    <Card data-health="pillar" variant="pillar" className={`p-card md:p-card-lg flex items-center gap-4 md:gap-6 motion-safe:animate-rise-slow ${delay}`}>
+        {children}
+        <div className="min-w-0 flex flex-col gap-1">
+            <span data-health="ring-title" className="flex items-center gap-1.5 text-[12px] font-semibold uppercase tracking-[0.08em] text-ink-4">
+                <Icon size={13} strokeWidth={2.25} style={{ color }} aria-hidden="true" />{title}
+            </span>
+            <span data-health="pillar-status" className="text-lg font-semibold tracking-[-0.01em] text-ink">{sentence(status)}</span>
+            <span className="text-[12px] text-ink-3">{sub}</span>
         </div>
-    </>
+    </Card>
 );
+
+/**
+ * Anillos de Salud (spec Capa 6, RF-D1): Carga y Sueño, cada uno con el color de su métrica.
+ * La recuperación no tiene anillo: es la cifra del héroe.
+ */
+export const ReadinessRings = ({ wellnessMetrics, strainInfo, sleepInfo, ct }) => {
+    const hours = wellnessMetrics?.latestSleep;
+    const hasHours = hours !== undefined && hours !== null && hours !== '--' && hours !== '';
+    return (
+        <div data-health="pillars" className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
+            <Pillar icon={Zap} title="Carga diaria" status={strainInfo.label} sub="Impacto del día, de 0 a 10" color={ct.series.strain} delay="">
+                <AppleRingGauge value={strainInfo.val} max={10} digits={1} color={ct.series.strain} title="Carga diaria" />
+            </Pillar>
+            <Pillar icon={Moon} title="Sueño" status={sleepInfo.label} sub={hasHours ? `${hours} h descansadas` : 'Sin horas registradas'} color={ct.series.sleep} delay="motion-safe:[animation-delay:0.08s]">
+                <AppleRingGauge value={wellnessMetrics?.latestSleepScore} metric="sleep" unit="%" color={ct.series.sleep} title="Calidad del sueño" />
+            </Pillar>
+        </div>
+    );
+};
