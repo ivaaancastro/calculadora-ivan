@@ -341,7 +341,7 @@ export const ProfilePage = ({
                     </button>
                     <div className="ml-1 min-w-0">
                         <h1 data-profile="title" className="text-lg sm:text-2xl font-semibold text-ink tracking-tight leading-tight">Ajustes</h1>
-                        <p data-profile="subtitle" className="text-[12px] sm:leading-4 text-ink-3 truncate !text-balance">{SECTION_NAMES[activeSection] || 'Ajustes'}</p>
+                        <p data-profile="subtitle" className="text-[12px] sm:leading-4 text-ink-3 truncate">{SECTION_NAMES[activeSection] || 'Ajustes'}</p>
                     </div>
                 </div>
                 <div className="flex items-center gap-3">
@@ -356,7 +356,7 @@ export const ProfilePage = ({
                   }} 
                   data-profile="save"
                   data-dirty={String(isDirty)}
-                  className="flex items-center gap-1.5 min-h-[44px] bg-action-ios-solid hover:bg-action-solid text-white px-4 py-1.5 sm:py-2 rounded-lg text-xs font-semibold tracking-wide transition-paint shadow-none active:scale-press select-none touch-manipulation data-[dirty=false]:!bg-sunken data-[dirty=false]:!text-ink-3 data-[dirty=false]:shadow-inset-line"
+                  className={`flex items-center gap-1.5 min-h-[44px] px-4 py-1.5 sm:py-2 rounded-lg text-xs font-semibold tracking-wide transition-paint active:scale-press select-none touch-manipulation ${isDirty ? 'bg-action-ios-solid hover:bg-action-solid text-white' : 'bg-sunken text-ink-3 shadow-inset-line'}`}
                 >
                     <Save size={14} strokeWidth={2.5} /> <span>Guardar</span>
                 </button>

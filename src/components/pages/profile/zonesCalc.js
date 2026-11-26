@@ -60,12 +60,12 @@ export const calcPaceZones = (thresholdPace) => {
 
 // --- Power zones (intervals.icu style: 7 zones + Sweet Spot) ---
 export const POWER_ZONES = [
-    { label: 'Active Recovery', pMin: 0, pMax: 0.55 },
-    { label: 'Endurance', pMin: 0.56, pMax: 0.75 },
+    { label: 'Recuperación activa', pMin: 0, pMax: 0.55 },
+    { label: 'Resistencia', pMin: 0.56, pMax: 0.75 },
     { label: 'Tempo', pMin: 0.76, pMax: 0.90 },
-    { label: 'Threshold', pMin: 0.91, pMax: 1.05 },
+    { label: 'Umbral', pMin: 0.91, pMax: 1.05 },
     { label: 'VO2 Max', pMin: 1.06, pMax: 1.20 },
-    { label: 'Anaerobic', pMin: 1.21, pMax: 1.50 },
+    { label: 'Anaeróbico', pMin: 1.21, pMax: 1.50 },
     { label: 'Neuromuscular', pMin: 1.51, pMax: 2.00 },
 ];
 export const SWEET_SPOT = { label: 'Sweet Spot', pMin: 0.84, pMax: 0.97 };
