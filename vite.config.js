@@ -9,6 +9,18 @@ const config = {
     ...(process.env.VITEST ? [] : [
       VitePWA({
         registerType: 'autoUpdate',
+        // PERF-2 / D6: recharts y leaflet (los dos trozos más pesados) no van en el precache de la
+        // instalación; se guardan la primera vez que se usan (Dashboard/gráficas y mapa del detalle).
+        workbox: {
+          globIgnores: ['**/vendor-charts-*.js', '**/vendor-map-*.js'],
+          runtimeCaching: [
+            {
+              urlPattern: /\/assets\/vendor-(charts|map)-[\w-]+\.js$/,
+              handler: 'CacheFirst',
+              options: { cacheName: 'forma-vendor', expiration: { maxEntries: 8 } },
+            },
+          ],
+        },
         includeAssets: ['favicon.svg', 'favicon-32x32.png', 'favicon-64x64.png', 'apple-touch-icon.png'],
         manifest: {
           name: 'Forma - Rendimiento Deportivo',

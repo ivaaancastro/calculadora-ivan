@@ -55,6 +55,9 @@ igual en móvil y escritorio. Nunca en el héroe si no cambia la cifra del héro
 - La acción destructiva, en un menú (no una papelera en cada fila).
 - Cifras alineadas a la derecha y tabulares (`tabular-nums`).
 
+### Ajustes
+Una receta de sección (`pages/profile/SettingsSection.jsx`): grupo con cabecera, tarjeta, filas de 56 px y bloques; las acciones destructivas van juntas en una **zona de peligro** separada al final de Seguridad.
+
 ## 5. Tipografía y color
 
 - **Inter** para la interfaz; **JetBrains Mono** (`font-mono`, `Stat mono`) para metadatos y

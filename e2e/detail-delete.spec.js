@@ -35,12 +35,12 @@ test.describe(`Detalle: borrar`, () => {
     await openFrom(page, '/history');
     await trash(page).click();
     await expect(dialog(page)).toBeVisible();
-    await expect(page.getByRole('button', { name: 'Cancelar' })).toBeFocused();
+    await expect(dialog(page).getByRole('button', { name: 'Cancelar' })).toBeFocused();
     await page.keyboard.press('Escape');
     await expect(dialog(page)).toBeHidden();
     await expect(trash(page)).toBeFocused();
     await trash(page).click();
-    await page.getByRole('button', { name: 'Cancelar' }).click();
+    await dialog(page).getByRole('button', { name: 'Cancelar' }).click();
     await expect(dialog(page)).toBeHidden();
     expect(deletes).toBe(0);
     expect(path(page)).toMatch(/^\/activity\//);
@@ -49,6 +49,8 @@ test.describe(`Detalle: borrar`, () => {
   test('Tab no sale del diálogo', async ({ page }) => {
     await openFrom(page, '/history');
     await trash(page).click();
+    // El foco inicial llega al montar el diálogo: se espera antes de tabular.
+    await expect(dialog(page).getByRole('button', { name: 'Cancelar' })).toBeFocused();
     for (let i = 0; i < 4; i++) {
       await page.keyboard.press('Tab');
       await expect(dialog(page).locator(':focus')).toHaveCount(1);
