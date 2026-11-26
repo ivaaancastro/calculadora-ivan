@@ -61,6 +61,8 @@ const config = {
       ['src/__tests__/integration/**', 'jsdom']
     ],
     setupFiles: './vitest.setup.js',
+    // chartTheme lee tokens.css como texto (?raw): sin esto Vitest lo sirve vacío.
+    css: { include: [/tokens\.css/] },
     include: ['src/**/*.test.{js,jsx}'],
     coverage: {
       provider: 'v8',

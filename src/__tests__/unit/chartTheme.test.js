@@ -1,7 +1,7 @@
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { describe, it, expect } from 'vitest';
-import { chartTheme, getChartTheme } from '../../components/charts/chartTheme';
+import { CHART_TOKENS, getChartTheme } from '../../components/charts/chartTheme';
 
 // Lee todos los bloques `:root` y `.dark` de src/styles/tokens.css → { light: {token: 'r g b'}, dark: {...} }.
 const readTokens = () => {
@@ -15,36 +15,33 @@ const readTokens = () => {
   return { light: blocks(':root'), dark: blocks('.dark') };
 };
 
-/** '#rgb' | '#rrggbb' | 'rgba(r, g, b, a)' → { rgb: 'r g b', a }. */
+/** '#rrggbb' | 'rgba(r, g, b, a)' → { rgb: 'r g b', a }. */
 const parseColor = (s) => {
   const m = s.match(/^rgba?\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*(?:,\s*([\d.]+)\s*)?\)$/);
   if (m) return { rgb: `${m[1]} ${m[2]} ${m[3]}`, a: m[4] === undefined ? 1 : Number(m[4]) };
   const h = s.replace('#', '');
-  const full = h.length === 3 ? [...h].map((x) => x + x).join('') : h;
-  return { rgb: [0, 2, 4].map((i) => parseInt(full.slice(i, i + 2), 16)).join(' '), a: 1 };
+  return { rgb: [0, 2, 4].map((i) => parseInt(h.slice(i, i + 2), 16)).join(' '), a: 1 };
 };
 
-/** Todas las entradas { token, color } del tema, con su ruta. */
+/** Todas las entradas { token } del tema, con su ruta. */
 const entries = (node, path = []) => {
-  if (node && typeof node.token === 'string') return [[path.join('.'), node]];
+  if (node && typeof node.token === 'string') return [[path, node.token]];
   return Object.entries(node).flatMap(([k, v]) => entries(v, [...path, k]));
 };
 
-describe('chartTheme ↔ tokens.css', () => {
+describe('chartTheme: una sola fuente de color (tokens.css)', () => {
   const tokens = readTokens();
 
-  // La piel v2 es la base (Capa 6, PR 7b): `chartTheme.v2` es lo que pintan las gráficas y debe
-  // coincidir con `:root` / `.dark`. `chartTheme.light/dark` (v1) queda como paleta estática para
-  // los pocos usos en JS fuera de las gráficas hasta el PR 13.
   for (const mode of ['light', 'dark']) {
-    it(`cada color v2 de ${mode} coincide con su token`, () => {
-      const list = entries(chartTheme.v2[mode]);
+    it(`cada color de ${mode} sale de su token`, () => {
+      const list = entries(CHART_TOKENS);
       expect(list.length).toBeGreaterThan(50);
-      for (const [path, def] of list) {
-        expect(tokens[mode], `token --${def.token} (${path})`).toHaveProperty(def.token);
-        const { rgb, a } = parseColor(def.color);
-        expect(rgb, `${mode}.${path}`).toBe(tokens[mode][def.token]);
-        expect(a, `${mode}.${path} (opacidad)`).toBe(Number(tokens[mode][`${def.token}-a`] ?? 1));
+      const theme = getChartTheme(mode);
+      for (const [path, token] of list) {
+        expect(tokens[mode], `--${token}`).toHaveProperty(token);
+        const { rgb, a } = parseColor(path.reduce((o, k) => o[k], theme));
+        expect(rgb, `${mode}.${path.join('.')}`).toBe(tokens[mode][token]);
+        expect(a, `${mode}.${path.join('.')} (opacidad)`).toBe(Number(tokens[mode][`${token}-a`] ?? 1));
       }
     });
   }
@@ -55,32 +52,20 @@ describe('chartTheme ↔ tokens.css', () => {
     expect(colorTokens('dark').sort()).toEqual(colorTokens('light').sort());
   });
 
-  it('getChartTheme devuelve solo colores, con la misma forma que el tema', () => {
-    const t = getChartTheme('dark');
-    expect(t.series.ctl).toBe('#3b82f6');
-    expect(t.zones.hr).toHaveLength(5);
-    expect(t.zones.all).toHaveLength(7);
-    expect(t.tooltip.bg).toBe('rgba(0, 0, 0, 0.8)');
-    expect(getChartTheme('light')).toEqual(getChartTheme('dark'));
-    expect(getChartTheme(undefined)).toBe(getChartTheme('light'));
-    for (const [path, def] of entries(chartTheme.light)) {
-      expect(path.split('.').reduce((o, k) => o[k], getChartTheme('light'))).toBe(def.color);
-    }
+  it('getChartTheme devuelve solo colores, con la forma del tema y valores propios en oscuro', () => {
+    const light = getChartTheme('light');
+    const dark = getChartTheme('dark');
+    expect(light.series.ctl).toMatch(/^#[0-9a-f]{6}$/);
+    expect(light.zones.hr).toHaveLength(5);
+    expect(light.zones.all).toHaveLength(7);
+    expect(getChartTheme(undefined)).toBe(light);
+    for (const g of ['series', 'sports', 'distribution', 'pmc']) expect(dark[g]).not.toEqual(light[g]);
   });
 
-  it('getChartTheme(theme, "v1") es el tema v1 y "v2" cambia solo lo que la piel redefine', () => {
-    expect(getChartTheme('light', 'v1')).toBe(getChartTheme('light'));
-    const v1 = getChartTheme('light');
-    const v2 = getChartTheme('light', 'v2');
-    expect(v2.series.ctl).not.toBe(v1.series.ctl);
-    expect(v2.series.hr).not.toBe(v1.series.hr);
-    expect(v2.zones.hr).toHaveLength(5);
-    expect(v2.zones.all).toHaveLength(7);
-    expect(v2.zones.all[1]).not.toBe(v1.zones.all[1]);
-    // D-10: en v2 las series tienen valores propios en oscuro (más claros que en claro).
-    for (const g of ['series', 'sports', 'distribution']) {
-      expect(getChartTheme('dark', 'v2')[g]).not.toEqual(getChartTheme('light', 'v2')[g]);
+  it('las tres métricas de forma tienen colores distintos entre sí', () => {
+    for (const mode of ['light', 'dark']) {
+      const { ctl, atl, tsb } = getChartTheme(mode).series;
+      expect(new Set([ctl, atl, tsb]).size).toBe(3);
     }
-    expect(getChartTheme('dark', 'v2')).not.toEqual(getChartTheme('light', 'v2'));
   });
 });
