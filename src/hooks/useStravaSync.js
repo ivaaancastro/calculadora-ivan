@@ -4,6 +4,8 @@ import { useAppStore } from "../store/useAppStore";
 import { useQueryClient } from "@tanstack/react-query";
 import { getSportCategory } from "../utils/tssEngine";
 import toast from "react-hot-toast";
+// Refresco del token vía Edge Function `strava-token` (sin secreto en el cliente).
+import { refreshStravaToken } from "../services/stravaToken";
 
 /**
  * useStravaSync — Sincronización con Strava.
@@ -35,23 +37,6 @@ export function useStravaSync({ activities, plannedWorkouts, deletePlannedWorkou
     }).eq('user_id', userId);
     setStravaConnected(false);
   }, [setStravaConnected]);
-
-  /** Refresca el access token de Strava usando el refresh token. */
-  const refreshStravaToken = async (refreshToken) => {
-    const params = new URLSearchParams({
-      client_id:     import.meta.env.VITE_STRAVA_CLIENT_ID,
-      client_secret: import.meta.env.VITE_STRAVA_CLIENT_SECRET,
-      grant_type:    'refresh_token',
-      refresh_token: refreshToken,
-    });
-    const response = await fetch(`https://www.strava.com/oauth/token?${params}`, { method: 'POST' });
-    if (!response.ok) {
-      const err = await response.json().catch(() => ({}));
-      console.error('Strava refresh fail:', err);
-      throw new Error('Error refrescando token Strava');
-    }
-    return response.json();
-  };
 
   /** Devuelve un access token válido, refrescándolo automáticamente si ha caducado. */
   const getValidStravaToken = useCallback(async () => {
