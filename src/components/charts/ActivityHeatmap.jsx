@@ -30,13 +30,26 @@ export function ActivityHeatmap({ activities, weeks = 26 }) {
   const w = weeks * (CELL + GAP) - GAP;
   const h = 7 * (CELL + GAP) - GAP;
   return (
-    <div data-chart="heatmap" className="px-3 sm:px-5 py-3 border-b border-line-soft-5 overflow-x-auto">
-      <p className="text-2xs font-bold text-ink-4 uppercase tracking-[0.08em] mb-2">Constancia · últimas {weeks} semanas</p>
+    <div data-chart="heatmap" className="min-w-0">
+      <div className="flex items-baseline justify-between gap-3 mb-2">
+        <p className="text-2xs font-bold text-ink-4 uppercase tracking-[0.08em]">Constancia · {weeks} semanas</p>
+        <p data-chart="heatmap-legend" className="flex items-center gap-1 text-2xs text-ink-4" aria-hidden="true">
+          Menos
+          {OPACITY.map((o, i) => (
+            <span
+              key={o}
+              className="inline-block w-2.5 h-2.5 rounded-[3px]"
+              style={{ background: i ? ct.series.tss : ct.anatomy.gridSoft, opacity: i ? o : 1 }}
+            />
+          ))}
+          Más
+        </p>
+      </div>
       <svg
         viewBox={`0 0 ${w} ${h}`}
         width={w}
         height={h}
-        className="block max-w-full"
+        className="block max-w-full h-auto"
         {...chartFigureProps('Mapa de constancia', `${days} días con actividad, ${total} TSS en total`)}
       >
         {cols.map((col, x) =>
