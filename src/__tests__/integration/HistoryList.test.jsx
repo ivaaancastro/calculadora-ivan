@@ -5,6 +5,9 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { describe, it, expect, vi } from 'vitest';
 import { HistoryList } from '../../components/dashboard/HistoryList';
 
+/** Único recuento de la pantalla (RF-D1): la cifra del resumen; `data-count` es su valor final. */
+const count = () => document.querySelector('[data-history="summary-count"]')?.getAttribute('data-count');
+
 const mockActivities = [
     {
         id: 'act-1',
@@ -42,12 +45,13 @@ describe('HistoryList Component', () => {
     it('muestra el estado vacío cuando no hay actividades', () => {
         render(<HistoryList activities={[]} onDelete={vi.fn()} onSelectActivity={vi.fn()} />);
         expect(screen.getByText('No hay resultados')).toBeTruthy();
-        expect(screen.getByText('0 Actividades')).toBeTruthy();
+        expect(count()).toBeUndefined();
     });
 
     it('renderiza el resumen de actividades correctamente', () => {
         render(<HistoryList activities={mockActivities} onDelete={vi.fn()} onSelectActivity={vi.fn()} />);
-        expect(screen.getByText('3 Actividades')).toBeTruthy();
+        expect(count()).toBe('3');
+        expect(screen.queryByText(/^\d+ Actividades$/i)).toBeNull();
     });
 
     it('filtra por término de búsqueda en tiempo real', () => {
@@ -56,7 +60,7 @@ describe('HistoryList Component', () => {
         const searchInput = screen.getByPlaceholderText('Buscar por título...');
         fireEvent.change(searchInput, { target: { value: 'Pista' } });
 
-        expect(screen.getByText('1 Actividades')).toBeTruthy();
+        expect(count()).toBe('1');
         expect(screen.getByText('Series en Pista')).toBeTruthy();
         expect(screen.queryByText('Rodaje Suave Bici')).toBeNull();
     });
@@ -81,10 +85,14 @@ describe('HistoryList Component', () => {
         fireEvent.keyDown(row, { key: 'Enter' });
         fireEvent.keyDown(row, { key: ' ' });
         expect(onSelect).toHaveBeenCalledTimes(2);
-        // Las teclas sobre el botón de borrar no abren la actividad.
-        fireEvent.keyDown(row.querySelector('[data-history="delete"]'), { key: 'Enter' });
+        // Las teclas sobre el botón «Más acciones» no abren la actividad.
+        const menu = row.querySelector('[data-history="menu"]');
+        fireEvent.keyDown(menu, { key: 'Enter' });
         expect(onSelect).toHaveBeenCalledTimes(2);
-        expect(row.querySelector('[data-history="delete"]')).toHaveAttribute('aria-label', 'Eliminar actividad');
+        expect(menu).toHaveAttribute('aria-label', 'Más acciones de Rodaje Suave Bici');
+        expect(menu).toHaveAttribute('aria-haspopup', 'menu');
+        // La fila ya no lleva papelera: borrar vive en el menú (RF-D8).
+        expect(row.querySelector('[data-history="delete"]')).toBeNull();
     });
 
     it('COP-1: el deporte se muestra en español', () => {
@@ -98,10 +106,13 @@ describe('HistoryList Component', () => {
         const onDelete = vi.fn().mockResolvedValue(true);
         render(<HistoryList activities={mockActivities} onDelete={onDelete} onSelectActivity={onSelect} />);
 
-        const deleteButtons = screen.getAllByTitle('Eliminar actividad');
-        expect(deleteButtons.length).toBeGreaterThan(0);
-        
-        fireEvent.click(deleteButtons[0]);
+        const menus = screen.getAllByRole('button', { name: /^Más acciones/ });
+        expect(menus.length).toBeGreaterThan(0);
+        fireEvent.click(menus[0]);
+        expect(menus[0]).toHaveAttribute('aria-expanded', 'true');
+        const item = screen.getByRole('menuitem', { name: 'Eliminar actividad' });
+        expect(item).toHaveFocus();
+        fireEvent.click(item);
 
         expect(onDelete).not.toHaveBeenCalled();
         expect(screen.getByRole('dialog')).toBeTruthy();

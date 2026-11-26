@@ -15,7 +15,8 @@ const Secondary = ({ label, value, unit }) => (
 
 /**
  * Cabecera de resumen del historial (spec premium-actividades §3.1): nº de sesiones como
- * cifra protagonista, tiempo/distancia/TSS como secundarias y sparkline del TSS semanal.
+ * cifra protagonista y único recuento de la pantalla (Capa 6, RF-D1; `data-count` da el valor
+ * final aunque la cifra esté animándose), tiempo/distancia/TSS como secundarias y sparkline del TSS semanal.
  * `totals` viene de `summarizeActivities` sobre los datos filtrados.
  */
 export const ActivitiesSummary = ({ totals, weekly = [] }) => {
@@ -29,7 +30,7 @@ export const ActivitiesSummary = ({ totals, weekly = [] }) => {
                 <div>
                     <p className="text-[12px] font-semibold uppercase tracking-[0.08em] text-ink-3">Actividades</p>
                     <p className="mt-1 flex items-baseline gap-2">
-                        <span data-history="summary-count" data-metric="activities" className="text-[40px] sm:text-[44px] leading-none font-semibold tracking-[-0.04em] tabular-nums text-ink">
+                        <span data-history="summary-count" data-metric="activities" data-count={totals.count} className="text-[40px] sm:text-[44px] leading-none font-semibold tracking-[-0.04em] tabular-nums text-ink">
                             {typeof shown === 'number' ? Math.round(shown) : shown}
                         </span>
                         <span className="text-xs text-ink-3">{totals.count === 1 ? 'sesión' : 'sesiones'}</span>

@@ -32,7 +32,7 @@ test.describe('Dashboard (autenticado)', () => {
 
   test('el historial lista las actividades simuladas', async ({ page }) => {
     await page.getByRole('link', { name: 'Actividades' }).first().click();
-    await expect(page.getByRole('button', { name: 'Eliminar actividad' }).first()).toBeVisible();
+    await expect(page.getByRole('button', { name: /^Más acciones de / }).first()).toBeVisible();
     await expect(page.getByText('Salida larga').filter({ visible: true }).first()).toBeVisible();
   });
 });

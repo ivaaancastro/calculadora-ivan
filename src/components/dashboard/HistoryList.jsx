@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useRef } from 'react';
-import { Search, Calendar, Activity, Clock, MapPin, Zap, Trash2, ChevronRight, Flame } from 'lucide-react';
+import { Search, Calendar, Activity, ChevronRight } from 'lucide-react';
 import { useVirtualizer } from '@tanstack/react-virtual';
 import { formatMinutes, formatNumber } from '../../utils/formatters';
 import { sportOf, activityTypeLabel } from '../../utils/sport';
@@ -12,6 +12,7 @@ import { summarizeActivities, weeklyTss, groupByWeek, breakdownBySport } from '.
 import { SportChips } from './history/SportChips';
 import { SportBreakdown } from './history/SportBreakdown';
 import { WeekHeader } from './history/WeekHeader';
+import { RowMenu } from './history/RowMenu';
 
 // Rejilla con panel lateral.
 const Layout = ({ children }) => (
@@ -132,7 +133,7 @@ export const HistoryList = React.memo(({ activities, onDelete, onSelectActivity 
         <Layout>
         <Card data-history="root" className="flex flex-col h-full overflow-hidden max-w-[1100px] mx-auto xl:max-w-none xl:mx-0">
 
-            <><ActivitiesSummary totals={summary.totals} weekly={summary.weekly} /></>
+            <ActivitiesSummary totals={summary.totals} weekly={summary.weekly} />
 
             {/* BARRA DE FILTROS ESTILO APPLE */}
             <div data-history="filters" className="p-3 sm:p-4 border-b border-line bg-sunken flex flex-col flex-wrap sm:flex-row gap-2.5 sm:gap-3 max-sm:grid max-sm:grid-cols-2 max-sm:gap-2 max-sm:[&_input]:min-h-[44px] max-sm:[&_select]:min-h-[44px]">
@@ -153,7 +154,7 @@ export const HistoryList = React.memo(({ activities, onDelete, onSelectActivity 
                 <div data-history="chips-row" className="col-span-full min-w-0 sm:order-last sm:basis-full"><SportChips value={sportFilter} onChange={setSportFilter} /></div>
 
                 {/* Selector de Fecha */}
-                <div className="sm:w-44 relative">
+                <div className="max-sm:col-span-full sm:w-44 relative">
                     <Calendar size={14} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-ink-4 pointer-events-none" />
                     <Select
                         variant="search"
@@ -168,11 +169,6 @@ export const HistoryList = React.memo(({ activities, onDelete, onSelectActivity 
                         <option value="1y">Último Año</option>
                     </Select>
                 </div>
-            </div>
-
-            {/* RESUMEN DE RESULTADOS */}
-            <div data-history="count" className="px-4 py-2 border-b border-line bg-sunken flex justify-between items-center text-[12px] font-semibold text-ink-4 uppercase tracking-[0.05em]">
-                <span data-metric="activities" className="rotulo-marca">{filteredActivities.length} Actividades</span>
             </div>
 
             {/* LISTA DE ACTIVIDADES VIRTUALIZADA */}
@@ -221,7 +217,7 @@ export const HistoryList = React.memo(({ activities, onDelete, onSelectActivity 
                                         transform: `translateY(${virtualRow.start}px)`,
                                     }}
                                     data-history="row"
-                                    className="group flex items-center p-3 hover:bg-sunken active:bg-sunken border-b border-line box-border transition-colors cursor-pointer select-none outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-action-bright"
+                                    className="group flex items-center min-h-[64px] pl-4 pr-2 py-2 hover:bg-sunken active:bg-sunken border-b border-line-faint box-border transition-colors cursor-pointer select-none outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-action-bright"
                                 >
                                     {/* Icono en squircle estilo Apple */}
                                     <div className="mr-3 shrink-0">
@@ -232,61 +228,48 @@ export const HistoryList = React.memo(({ activities, onDelete, onSelectActivity 
                                         <h4 className="text-[14px] tracking-[-0.01em] font-semibold text-ink truncate mb-0.5" title={act.name}>{act.name}</h4>
                                         <div className="flex items-center gap-1.5 text-[12px] text-ink-3">
                                             <span>{shortDate(act.date, refYear)}</span>
-                                            <span>•</span>
+                                            <span aria-hidden="true">·</span>
                                             <span>{activityTypeLabel(act.type)}</span>
                                         </div>
                                     </div>
 
                                     {/* Compact Mobile Metrics (< md) */}
-                                    <div className="flex md:hidden flex-col items-end shrink-0 mr-1 text-right">
-                                        <span className="text-xs font-bold text-ink-soft tabular-nums">
+                                    <div className="flex md:hidden flex-col items-end shrink-0 text-right">
+                                        <span className="text-[14px] font-semibold text-ink tabular-nums">
                                             {formatMinutes(act.duration)}
                                         </span>
-                                        <span className="text-2xs text-ink-4 font-medium tabular-nums">
+                                        <span className="text-[12px] text-ink-4 tabular-nums">
                                             {act.distance > 0 
                                                 ? `${formatNumber(act.distance / 1000, 1)} km` 
                                                 : (act.tss > 0 ? `${Math.round(act.tss)} TSS` : '')}
                                         </span>
                                     </div>
 
-                                    {/* Métricas Clínicas (>= md) */}
-                                    <div className="hidden md:flex items-center gap-6 mr-6">
-                                        <div className="flex flex-col items-end">
-                                            <span className="text-2xs font-medium text-slate-400 mb-0.5">Tiempo</span>
-                                            <span className="text-sm font-semibold text-ink-2-soft tabular-nums">{formatMinutes(act.duration)}</span>
-                                        </div>
-                                        <div className="flex flex-col items-end w-16">
-                                            <span className="text-2xs font-medium text-slate-400 mb-0.5">Dist</span>
-                                            <span className="text-sm font-semibold text-ink-2-soft tabular-nums">{act.distance > 0 ? formatNumber(act.distance / 1000, 1) + 'km' : '--'}</span>
-                                        </div>
-                                        <div className="flex flex-col items-end w-12">
-                                            <span className="text-2xs font-medium text-slate-400 mb-0.5">Kcal</span>
-                                            <span className="text-sm font-semibold text-ink-2-soft tabular-nums">{act.calories || '--'}</span>
-                                        </div>
-                                        <div className="flex flex-col items-end w-12">
-                                            <span className="text-2xs font-medium text-slate-400 mb-0.5">TSS</span>
-                                            <span className={`text-sm font-bold tabular-nums ${act.tss > 0 ? 'text-amber-500' : 'text-slate-400'}`}>
-                                                {act.tss > 0 ? Math.round(act.tss) : '--'}
-                                            </span>
+                                    {/* Cifras (>= md): columnas de ancho fijo, alineadas a la derecha y tabulares. */}
+                                    <div data-history="figures" className="hidden md:grid grid-cols-[72px_80px_88px_64px] items-center gap-x-4 mr-3 text-right tabular-nums">
+                                        <span className="text-[14px] font-semibold text-ink">{formatMinutes(act.duration)}</span>
+                                        <span className="text-[14px] font-medium text-ink-2-soft">
+                                            {act.distance > 0 && <>{formatNumber(act.distance / 1000, 1)}<span className="ml-0.5 text-[12px] font-normal text-ink-4">km</span></>}
+                                        </span>
+                                        <span className="text-[14px] font-medium text-ink-2-soft">
+                                            {act.calories > 0 && <>{Math.round(act.calories)}<span className="ml-0.5 text-[12px] font-normal text-ink-4">kcal</span></>}
+                                        </span>
+                                        <span className="flex flex-col items-end">
                                             {act.tss > 0 && (
-                                                <span data-history="tss-bar" aria-hidden="true" className="mt-1 h-[3px] w-full rounded-full bg-fill-3 overflow-hidden">
-                                                    <span className="block h-full rounded-full bg-warning" style={{ width: `${Math.max(6, Math.round((act.tss / maxTss) * 100))}%` }} />
-                                                </span>
+                                                <>
+                                                    <span className="text-[14px] font-semibold text-ink">{Math.round(act.tss)}<span className="ml-0.5 text-[12px] font-normal text-ink-4">TSS</span></span>
+                                                    <span data-history="tss-bar" aria-hidden="true" className="mt-1 h-[3px] w-12 rounded-full bg-fill-3 overflow-hidden">
+                                                        <span className="block h-full rounded-full bg-warning" style={{ width: `${Math.max(6, Math.round((act.tss / maxTss) * 100))}%` }} />
+                                                    </span>
+                                                </>
                                             )}
-                                        </div>
+                                        </span>
                                     </div>
 
-                                    {/* Botón Borrar y Chevron */}
-                                    <div className="shrink-0 flex items-center gap-1 sm:gap-2">
-                                        <button type="button" aria-label="Eliminar actividad"
-                                            data-history="delete"
-                                            onClick={(e) => { e.stopPropagation(); onDelete && del.request(act); }}
-                                            className="w-11 h-11 flex items-center justify-center text-slate-300 hover:text-red-500 hover:bg-danger/10 active:scale-press rounded-lg transition-paint [@media(hover:hover)_and_(min-width:768px)]:opacity-0 [@media(hover:hover)_and_(min-width:768px)]:[transition:opacity_0.15s_ease] [@media(hover:hover)_and_(min-width:768px)]:group-hover:opacity-100 [@media(hover:hover)_and_(min-width:768px)]:group-focus-within:opacity-100"
-                                            title="Eliminar actividad"
-                                        >
-                                            <Trash2 size={13} />
-                                        </button>
-                                        <ChevronRight size={15} className="text-faint group-hover:text-action-bright transition-colors" />
+                                    {/* Más acciones (borrar) y chevron */}
+                                    <div className="shrink-0 flex items-center">
+                                        {onDelete && <RowMenu name={act.name || activityTypeLabel(act.type)} onDelete={() => del.request(act)} />}
+                                        <ChevronRight size={16} aria-hidden="true" className="text-faint group-hover:text-action-bright transition-colors" />
                                     </div>
                                 </div>
                             );

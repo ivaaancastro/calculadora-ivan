@@ -6,10 +6,9 @@ import { duplicatedMetrics } from './support/metrics.js';
 // «Un dato, un sitio» (spec Capa 6, RF-D1): cada cifra con `data-metric` se ve una sola vez
 // por pantalla. Solo en escritorio (en móvil, las pestañas ocultan parte de la pantalla).
 
-// Duplicados conocidos (spec §3.2), con el PR del plan de la Capa 6 que los corrige. Al
-// corregirlos, se quitan de aquí: la prueba falla si uno de la lista ya no aparece.
+// Duplicados conocidos, con el PR que los corrige (spec §3.2). Hoy no queda ninguno: si se
+// añade uno, la prueba falla si deja de aparecer, para que la lista no se pudra.
 const PENDING_DUPLICATES = {
-  actividades: { pr: 19, metrics: ['activities'] }, // «85 sesiones» y «85 actividades»
 };
 
 for (const screen of SCREENS.filter((s) => s.auth)) {
