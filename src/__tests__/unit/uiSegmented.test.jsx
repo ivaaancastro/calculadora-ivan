@@ -75,4 +75,15 @@ describe('ui/Segmented', () => {
       `<div class="flex bg-fill-5 rounded-full p-0.5 shrink-0"><button class="${segmentedOptionClass({ variant: 'mini', active: true, tone: 'power' })}" aria-pressed="true">W</button></div>`,
     );
   });
+
+  it('tabs: lista de pestañas con aria-selected, aria-controls y tabindex itinerante', () => {
+    const html = renderToStaticMarkup(
+      <Segmented variant="rail" tabs idPrefix="t" value="b" onChange={() => {}} options={[{ value: 'a', label: 'A' }, { value: 'b', label: 'B' }]} />,
+    );
+    expect(html).toContain('role="tablist"');
+    expect(html).toContain('id="t-tab-b"');
+    expect(html).toMatch(/role="tab"[^>]*aria-selected="true"[^>]*aria-controls="t-panel-b"[^>]*tabindex="0"/);
+    expect(html).toMatch(/aria-selected="false"[^>]*tabindex="-1"/);
+    expect(html).not.toContain('aria-pressed');
+  });
 });

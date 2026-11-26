@@ -261,10 +261,12 @@ function respondRows(route, rows) {
  * (fuentes de Google, teselas de mapas…) para que el render sea reproducible.
  *
  * `state.activities` permite a las pruebas de escritura añadir filas; los `DELETE` las quitan
- * y con `state.failDelete = true` responden 500.
+ * y con `state.failDelete = true` responden 500. `state.profile` sobrescribe campos del perfil
+ * (p. ej. un token de Strava para simular una cuenta conectada).
  */
 export async function mockNetwork(page, state = {}) {
   const activities = state.activities || [...MOCK_ACTIVITIES];
+  const profile = { ...MOCK_PROFILE, ...state.profile };
 
   await page.route('**/*', (route) => {
     const url = route.request().url();
@@ -309,8 +311,8 @@ export async function mockNetwork(page, state = {}) {
 
   await page.route(`${SUPABASE_URL}/rest/v1/profiles*`, (route) => {
     const method = route.request().method();
-    if (method !== 'GET') return json(route, [MOCK_PROFILE], 200);
-    return respondRows(route, [MOCK_PROFILE]);
+    if (method !== 'GET') return json(route, [profile], 200);
+    return respondRows(route, [profile]);
   });
 
   await page.route(`${SUPABASE_URL}/rest/v1/wellness_data*`, (route) =>

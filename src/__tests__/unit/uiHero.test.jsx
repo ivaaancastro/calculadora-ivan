@@ -10,6 +10,9 @@ describe('ui/Hero recetas', () => {
   it('sin caja: filete superior y cifras tabulares', () => {
     expect(heroClass().root).toMatch(/^hero-rule relative grid /);
     expect(heroClass({ layout: 'stack' }).root).toContain('flex flex-col');
+    // Cifra protagonista: tamaño xl y color de su métrica (RF-D2).
+    expect(heroClass().value).toContain('text-ink');
+    expect(heroClass({ size: 'xl', tone: 'ctl' }).value).toMatch(/sm:text-\[88px\].*text-metric-ctl/);
     expect(() => heroClass({ layout: 'card' })).toThrow();
   });
 

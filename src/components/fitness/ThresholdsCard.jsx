@@ -1,34 +1,31 @@
 import React from 'react';
-import { Card, InfoTooltip } from '../ui';
+import { Gauge } from 'lucide-react';
+import { EmptyState, Stat } from '../ui';
 import { formatNumber } from '../../utils/formatters';
+import { StatsCard } from './StatsCard';
 
-export const ThresholdsCard = ({ settings }) => {
+/** Umbrales del perfil. Solo se muestran los configurados; sin ninguno, un EmptyState (RF-D6). */
+export const ThresholdsCard = ({ settings, action }) => {
+    const ftp = Number(settings?.bike?.ftp) || null;
+    const weight = Number(settings?.weight) || null;
+    const items = [
+        ftp && { id: 'ftp', label: 'FTP bici', value: ftp, unit: 'W' },
+        settings?.run?.thresholdPace && { id: 'tp', label: 'Ritmo umbral', value: settings.run.thresholdPace, unit: '/km' },
+        ftp && weight && { id: 'wkg', label: 'Relación', value: formatNumber(ftp / weight, 2), unit: 'W/kg' },
+        weight && { id: 'weight', label: 'Peso', value: formatNumber(weight, Number.isInteger(weight) ? 0 : 1), unit: 'kg' },
+    ].filter(Boolean);
+
     return (
-        <section className="mb-8">
-            <Card variant="panel" className="p-6 sm:p-8">
-                <div className="flex items-center gap-2 mb-6">
-                    <span className="text-2xs font-bold text-ink-4 uppercase tracking-[0.1em]">Umbrales Actuales</span>
-                    <InfoTooltip text="Tus valores de referencia (FTP en bici, Ritmo Umbral en carrera) configurados en tu perfil." />
+        <StatsCard id="thresholds" title="Umbrales actuales" info="Tus valores de referencia (FTP en bici, ritmo umbral en carrera) configurados en tu perfil.">
+            {items.length > 0 ? (
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-x-4 gap-y-5">
+                    {items.map((it) => (
+                        <Stat key={it.id} label={it.label} value={it.value} unit={it.unit} size="sm" mono />
+                    ))}
                 </div>
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                    <div className="bg-sunken-8 p-4 rounded-xl">
-                        <p className="text-2xs font-bold text-slate-400 uppercase tracking-[0.08em] mb-1">FTP (Bici)</p>
-                        <p className="text-xl font-bold text-ink-2">{settings?.bike?.ftp || '--'} <span className="text-2xs font-bold text-slate-400">W</span></p>
-                    </div>
-                    <div className="bg-sunken-8 p-4 rounded-xl">
-                        <p className="text-2xs font-bold text-slate-400 uppercase tracking-[0.08em] mb-1">TP (Carrera)</p>
-                        <p className="text-xl font-bold text-ink-2">{settings?.run?.thresholdPace || '--'} <span className="text-2xs font-bold text-slate-400">/km</span></p>
-                    </div>
-                    <div className="bg-sunken-8 p-4 rounded-xl">
-                        <p className="text-2xs font-bold text-slate-400 uppercase tracking-[0.08em] mb-1">W/Kg</p>
-                        <p className="text-xl font-bold text-ink-2">{(settings?.bike?.ftp ? formatNumber(settings.bike.ftp / (settings?.weight || 70), 2) : '--')}</p>
-                    </div>
-                    <div className="bg-sunken-8 p-4 rounded-xl">
-                        <p className="text-2xs font-bold text-slate-400 uppercase tracking-[0.08em] mb-1">Peso</p>
-                        <p className="text-xl font-bold text-ink-2">{settings?.weight || '--'} <span className="text-2xs font-bold text-slate-400">Kg</span></p>
-                    </div>
-                </div>
-            </Card>
-        </section>
+            ) : (
+                <EmptyState icon={Gauge} title="Sin umbrales configurados" description="Añade tu FTP, ritmo umbral y peso para calcular zonas y cargas." action={action} />
+            )}
+        </StatsCard>
     );
 };

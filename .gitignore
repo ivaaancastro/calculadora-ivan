@@ -45,3 +45,6 @@ skills-lock.json
 
 # Estado local del CLI de Supabase
 supabase/.temp/
+
+# Copias de conflicto del sincronizador de ficheros (p. ej. «cursorStore 2.js»)
+* 2.*

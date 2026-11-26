@@ -110,3 +110,7 @@ export function segmentedOptionClass({ variant = 'pill', size, active = false, t
   if (!TONES[variant].includes(t)) throw new Error(`Segmented: la variante "${variant}" no tiene tono "${t}"`);
   return cx(r.option, active ? cx(r.on, TONE_CLASS[t]) : r.off);
 }
+
+/** Id de la pestaña y de su panel cuando el control funciona como pestañas (`Segmented tabs`). */
+export const segmentedTabId = (idPrefix, value) => `${idPrefix}-tab-${value}`;
+export const segmentedPanelId = (idPrefix, value) => `${idPrefix}-panel-${value}`;

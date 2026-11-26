@@ -40,7 +40,15 @@ const LAYOUT = {
   },
 };
 
-export function heroClass({ layout = 'split' } = {}) {
+/** Color de la cifra protagonista: el de su métrica (un color por métrica en toda la app). */
+const VALUE_TONE = { ink: 'text-ink', ctl: 'text-metric-ctl', atl: 'text-metric-atl', tsb: 'text-metric-tsb' };
+/** Tamaño de la cifra: `lg` (por defecto) o `xl` para la cifra que responde a la pregunta de la pantalla. */
+const VALUE_SIZE = {
+  lg: 'text-[48px] sm:text-[3.5rem]',
+  xl: 'text-[72px] sm:text-[88px]',
+};
+
+export function heroClass({ layout = 'split', size = 'lg', tone = 'ink' } = {}) {
   const l = LAYOUT[layout];
   if (!l) throw new Error(`Hero: disposición desconocida "${layout}"`);
   return {
@@ -54,7 +62,7 @@ export function heroClass({ layout = 'split' } = {}) {
     figure: 'min-w-0 motion-safe:animate-rise motion-safe:[animation-delay:0.12s]',
     label: 'text-2xs font-semibold uppercase tracking-[0.08em] text-ink-4',
     row: 'mt-1 flex items-baseline gap-2',
-    value: 'text-[48px] sm:text-[3.5rem] leading-none font-semibold tracking-[-0.04em] tabular-nums text-ink',
+    value: cx(VALUE_SIZE[size] ?? VALUE_SIZE.lg, 'leading-none font-semibold tracking-[-0.04em] tabular-nums', VALUE_TONE[tone] ?? VALUE_TONE.ink),
     unit: 'ml-1 text-xl font-medium text-ink-4',
   };
 }
