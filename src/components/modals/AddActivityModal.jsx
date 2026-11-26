@@ -1,169 +1,124 @@
 import React, { useState } from 'react';
-import { X, Save, Activity, Flame, Clock, Heart, Calendar } from 'lucide-react';
+import { X, Save, Activity } from 'lucide-react';
 import { supabase } from '../../supabase';
+import toast from 'react-hot-toast';
+import { Input, Modal, Select } from '../ui';
 
 const AddActivityModal = ({ isOpen, onClose, onSave }) => {
-  const [loading, setLoading] = useState(false);
-  const [formData, setFormData] = useState({
-    date: new Date().toISOString().split('T')[0], // Hoy por defecto
-    type: 'Carrera',
-    duration: '',
-    hr_avg: '',
-    calories: ''
-  });
+    const [formData, setFormData] = useState({
+        date: new Date().toISOString().split('T')[0],
+        type: 'Carrera', duration: '', hr_avg: '', distance: '', elevation_gain: ''
+    });
+    const [loading, setLoading] = useState(false);
 
-  if (!isOpen) return null;
+    if (!isOpen) return null;
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setLoading(true);
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        setLoading(true);
+        try {
+            const duration = Number(formData.duration);
+            const distance = Number(formData.distance) || 0;
+            const hrAvg = Number(formData.hr_avg) || 0;
+            const elevationGain = Number(formData.elevation_gain) || 0;
 
-    // Validación básica
-    if (!formData.duration || formData.duration <= 0) {
-      alert("La duración debe ser mayor a 0");
-      setLoading(false);
-      return;
-    }
+            if (duration <= 0) throw new Error('La duración debe ser mayor que 0');
+            if (distance < 0 || hrAvg < 0 || elevationGain < 0) throw new Error('No se permiten valores negativos');
 
-    // Preparar objeto para Supabase
-    const newActivity = {
-      date: new Date(formData.date).toISOString(),
-      type: formData.type,
-      duration: parseInt(formData.duration),
-      hr_avg: formData.hr_avg ? parseInt(formData.hr_avg) : 0,
-      calories: formData.calories ? parseInt(formData.calories) : 0
+            const { data: { session } } = await supabase.auth.getSession();
+            const userId = session?.user?.id;
+            if (!userId) throw new Error('No hay sesión activa');
+
+            const { error } = await supabase.from('activities').insert([{
+                user_id: userId,
+                date: formData.date,
+                type: formData.type,
+                duration: duration,
+                hr_avg: hrAvg,
+                distance: distance, // Metros
+                elevation_gain: elevationGain,
+                calories: 0 // Simplificado
+            }]);
+            if (error) throw error;
+            onSave();
+            onClose();
+            toast.success("Actividad generada exitosamente.");
+            setFormData({ date: new Date().toISOString().split('T')[0], type: 'Carrera', duration: '', hr_avg: '', distance: '', elevation_gain: '' });
+        } catch (err) {
+            toast.error(err.message);
+        } finally {
+            setLoading(false);
+        }
     };
 
-    // Guardar en Base de Datos
-    const { error } = await supabase.from('activities').insert([newActivity]);
+    return (
+        <Modal open={isOpen} onClose={onClose} variant="sheet" labelledBy="add-activity-title">
 
-    setLoading(false);
+            {/* iOS drag handle */}
+            <div className="w-12 h-1.5 bg-slate-300 dark:bg-zinc-700 rounded-full mx-auto mt-2.5 sm:hidden shrink-0" />
 
-    if (error) {
-      alert("Error al guardar: " + error.message);
-    } else {
-      onSave(); // Recargar datos en App
-      onClose(); // Cerrar modal
-      // Resetear form
-      setFormData({
-        date: new Date().toISOString().split('T')[0],
-        type: 'Carrera',
-        duration: '',
-        hr_avg: '',
-        calories: ''
-      });
-    }
-  };
-
-  return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4 animate-in fade-in duration-200">
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden animate-in zoom-in-95 duration-200">
-        
-        {/* Header */}
-        <div className="bg-slate-50 border-b border-slate-100 p-4 flex justify-between items-center">
-          <h3 className="font-bold text-slate-800 flex items-center gap-2">
-            <div className="bg-blue-600 text-white p-1.5 rounded-lg"><Activity size={16}/></div>
-            Registrar Actividad
-          </h3>
-          <button onClick={onClose} className="text-slate-400 hover:text-slate-600 transition"><X size={20}/></button>
-        </div>
-
-        {/* Formulario */}
-        <form onSubmit={handleSubmit} className="p-6 space-y-4">
-          
-          {/* Fila 1: Fecha y Tipo */}
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-xs font-bold text-slate-500 uppercase mb-1.5 ml-1">Fecha</label>
-              <div className="relative">
-                <Calendar className="absolute left-3 top-2.5 text-slate-400" size={16}/>
-                <input 
-                  type="date" 
-                  required
-                  value={formData.date}
-                  onChange={e => setFormData({...formData, date: e.target.value})}
-                  className="w-full pl-9 pr-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium focus:ring-2 focus:ring-blue-500 focus:outline-none"
-                />
-              </div>
+            <div className="flex justify-between items-center px-5 py-3 sm:p-5 border-b border-line-soft-2 shrink-0">
+                <h3 id="add-activity-title" className="text-base sm:text-lg font-bold text-slate-800 dark:text-white flex items-center gap-2">
+                    <Activity className="text-action-bright" size={20} /> Añadir Manual
+                </h3>
+                <button type="button" aria-label="Cerrar" onClick={onClose} data-modal="close" className="w-11 h-11 flex items-center justify-center rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-surface-2 active:scale-press transition-paint touch-manipulation" title="Cerrar">
+                    <X size={20} />
+                </button>
             </div>
-            <div>
-              <label className="block text-xs font-bold text-slate-500 uppercase mb-1.5 ml-1">Deporte</label>
-              <select 
-                value={formData.type}
-                onChange={e => setFormData({...formData, type: e.target.value})}
-                className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium focus:ring-2 focus:ring-blue-500 focus:outline-none appearance-none"
-              >
-                <option>Carrera</option>
-                <option>Ciclismo</option>
-                <option>Fuerza</option>
-                <option>Caminata</option>
-                <option>Natación</option>
-                <option>Ciclismo en sala</option>
-              </select>
-            </div>
-          </div>
 
-          {/* Fila 2: Duración */}
-          <div>
-            <label className="block text-xs font-bold text-slate-500 uppercase mb-1.5 ml-1">Duración (minutos)</label>
-            <div className="relative">
-              <Clock className="absolute left-3 top-2.5 text-slate-400" size={16}/>
-              <input 
-                type="number" 
-                placeholder="Ej: 45"
-                required
-                min="1"
-                value={formData.duration}
-                onChange={e => setFormData({...formData, duration: e.target.value})}
-                className="w-full pl-9 pr-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium focus:ring-2 focus:ring-blue-500 focus:outline-none"
-              />
-            </div>
-          </div>
+            <form onSubmit={handleSubmit} className="p-4 sm:p-5 space-y-4 overflow-y-auto custom-scrollbar touch-scroll flex-1">
+                <div className="grid grid-cols-2 gap-3 sm:gap-4">
+                    <div className="space-y-1">
+                        <label htmlFor="activity-date" className="text-[12px] font-bold text-ink-3 uppercase tracking-[0.05em]">Fecha</label>
+                        <Input id="activity-date" type="date" required value={formData.date} onChange={e => setFormData({ ...formData, date: e.target.value })}
+                            variant="filled" className="w-full p-3"
+                        />
+                    </div>
+                    <div className="space-y-1">
+                        <label htmlFor="activity-type" className="text-[12px] font-bold text-ink-3 uppercase tracking-[0.05em]">Deporte</label>
+                        <Select id="activity-type" value={formData.type} onChange={e => setFormData({ ...formData, type: e.target.value })}
+                            variant="filled" className="w-full p-3"
+                        >
+                            <option>Carrera</option><option>Ciclismo</option><option>Fuerza</option><option>Caminata</option><option>Natación</option>
+                        </Select>
+                    </div>
+                </div>
 
-          {/* Fila 3: FC y Calorías */}
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-xs font-bold text-slate-500 uppercase mb-1.5 ml-1">FC Media (Opcional)</label>
-              <div className="relative">
-                <Heart className="absolute left-3 top-2.5 text-slate-400" size={16}/>
-                <input 
-                  type="number" 
-                  placeholder="bpm"
-                  value={formData.hr_avg}
-                  onChange={e => setFormData({...formData, hr_avg: e.target.value})}
-                  className="w-full pl-9 pr-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium focus:ring-2 focus:ring-blue-500 focus:outline-none"
-                />
-              </div>
-            </div>
-            <div>
-              <label className="block text-xs font-bold text-slate-500 uppercase mb-1.5 ml-1">Calorías (Opcional)</label>
-              <div className="relative">
-                <Flame className="absolute left-3 top-2.5 text-slate-400" size={16}/>
-                <input 
-                  type="number" 
-                  placeholder="kcal"
-                  value={formData.calories}
-                  onChange={e => setFormData({...formData, calories: e.target.value})}
-                  className="w-full pl-9 pr-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium focus:ring-2 focus:ring-blue-500 focus:outline-none"
-                />
-              </div>
-            </div>
-          </div>
+                <div className="grid grid-cols-2 gap-3 sm:gap-4">
+                    <div className="space-y-1">
+                        <label htmlFor="duration-input" className="text-[12px] font-bold text-ink-3 uppercase tracking-[0.05em]">Duración (min)</label>
+                        <Input id="duration-input" type="number" inputMode="decimal" min="0.1" step="any" required placeholder="0" value={formData.duration} onChange={e => setFormData({ ...formData, duration: e.target.value })}
+                            variant="filled" mono className="w-full p-3"
+                        />
+                    </div>
+                    <div className="space-y-1">
+                        <label htmlFor="activity-hr" className="text-[12px] font-bold text-ink-3 uppercase tracking-[0.05em]">Pulso Medio</label>
+                        <Input id="activity-hr" type="number" inputMode="numeric" min="0" placeholder="Opcional" value={formData.hr_avg} onChange={e => setFormData({ ...formData, hr_avg: e.target.value })}
+                            variant="filled" mono className="w-full p-3"
+                        />
+                    </div>
+                </div>
 
-          {/* Botón Guardar */}
-          <button 
-            type="submit" 
-            disabled={loading}
-            className="w-full py-3 bg-slate-900 text-white font-bold rounded-xl hover:bg-slate-800 transition shadow-lg shadow-slate-200 flex items-center justify-center gap-2 mt-4"
-          >
-            {loading ? <span className="animate-spin">⏳</span> : <Save size={18}/>}
-            {loading ? 'Guardando...' : 'Guardar Entrenamiento'}
-          </button>
+                <div className="grid grid-cols-2 gap-3 sm:gap-4">
+                    <div className="space-y-1">
+                        <label htmlFor="activity-distance" className="text-[12px] font-bold text-ink-3 uppercase tracking-[0.05em]">Distancia (m)</label>
+                        <Input id="activity-distance" type="number" inputMode="decimal" min="0" placeholder="Ej: 5000" value={formData.distance} onChange={e => setFormData({ ...formData, distance: e.target.value })}
+                            variant="filled" mono className="w-full p-3"
+                        />
+                    </div>
+                    <div className="space-y-1">
+                        <label htmlFor="activity-elevation" className="text-[12px] font-bold text-ink-3 uppercase tracking-[0.05em]">Desnivel (m)</label>
+                        <Input id="activity-elevation" type="number" inputMode="decimal" min="0" placeholder="Ej: 100" value={formData.elevation_gain} onChange={e => setFormData({ ...formData, elevation_gain: e.target.value })}
+                            variant="filled" mono className="w-full p-3"
+                        />
+                    </div>
+                </div>
 
-        </form>
-      </div>
-    </div>
-  );
+                <button type="submit" disabled={loading} data-modal="submit" className="w-full min-h-[48px] bg-action-solid hover:bg-action-hover text-white font-bold py-3 px-4 rounded-xl active:scale-press transition-paint flex items-center justify-center gap-2 mt-4 shadow-md touch-manipulation select-none">
+                    {loading ? 'Guardando...' : <><Save size={18} /> Guardar Actividad</>}
+                </button>
+            </form>
+        </Modal>
+    );
 };
-
 export default AddActivityModal;

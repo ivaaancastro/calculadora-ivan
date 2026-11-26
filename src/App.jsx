@@ -1,22 +1,87 @@
-import React from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import React, { useState, useEffect, lazy, Suspense } from 'react';
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { supabase } from './supabase';
+import { LandingPage } from './components/pages/LandingPage';
+import { EmailConfirmedPage } from './components/pages/EmailConfirmedPage';
+import StravaCallback from './components/common/StravaCallback';
+import { LoadingState } from './components/ui';
+import { Toaster } from 'react-hot-toast';
 
-// Importamos tus páginas
-import Dashboard from './components/Dashboard'; // El código que acabas de mover
-import StravaCallback from './components/common/StravaCallback'; // El recepcionista
+import { useQueryClient } from '@tanstack/react-query';
+import { useAppStore } from './store/useAppStore';
 
-const App = () => {
+// La app autenticada (Dashboard + gráficas) no se descarga en la landing.
+const Dashboard = lazy(() => import('./components/Dashboard'));
+
+function App() {
+  const [session, setSession] = useState(null);
+  const [isInitializing, setIsInitializing] = useState(true);
+  const queryClient = useQueryClient();
+  const resetStore = useAppStore(state => state.resetStore);
+
+  useEffect(() => {
+    // 1. Obtener la sesión inicial al cargar la página
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+      setIsInitializing(false);
+    });
+
+    // 2. Escuchar cambios de autenticación (cuando haces login o logout)
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      setSession(session);
+      if (event === 'SIGNED_OUT') {
+        // Limpieza de datos por seguridad al cerrar sesión
+        queryClient.clear(); // Limpia toda la caché de React Query
+        resetStore(); // Resetea el store de Zustand a valores por defecto
+      }
+    });
+
+    return () => subscription.unsubscribe();
+  }, [queryClient, resetStore]);
+
+  if (isInitializing) {
+    return <LoadingState variant="boot" />;
+  }
+
   return (
-    <Router>
+    <BrowserRouter>
       <Routes>
-        {/* Ruta Principal: Tu Dashboard de siempre */}
-        <Route path="/" element={<Dashboard />} />
-        
-        {/* Ruta de Strava: Donde aterriza el usuario tras autorizar */}
+        {/* Strava OAuth callback — must be accessible regardless of auth state */}
         <Route path="/strava-callback" element={<StravaCallback />} />
-      </Routes>
-    </Router>
-  );
-};
 
-export default App;
+        {/* Email confirmation success page */}
+        <Route path="/email-confirmado" element={<EmailConfirmedPage />} />
+
+        {/* Main app — shows Landing if not authenticated */}
+        <Route
+          path="*"
+          element={
+            <>
+              {session ? (
+                <Suspense fallback={<LoadingState variant="boot" />}>
+                  <Dashboard key={session.user.id} />
+                </Suspense>
+              ) : (
+                <LandingPage />
+              )}
+              <Toaster
+                position="bottom-center"
+                toastOptions={{
+                  style: {
+                    background: '#27272a',
+                    color: '#fff',
+                    fontSize: '12px',
+                    fontWeight: '600',
+                    fontFamily: 'system-ui, sans-serif'
+                  },
+                }}
+              />
+            </>
+          }
+        />
+      </Routes>
+    </BrowserRouter>
+  );
+}
+
+export default App;

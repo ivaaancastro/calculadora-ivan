@@ -1,0 +1,96 @@
+import React from 'react';
+import { Link, useLocation } from 'react-router-dom';
+import { Home, BarChart3, Calendar, HeartPulse, Search } from 'lucide-react';
+
+export const BottomNav = ({ activeIndex, onTabChange }) => {
+  const location = useLocation();
+  const currentPath = location.pathname;
+
+  // En la vista de detalle de actividad no mostramos la barra flotante para dar 100% de pantalla a los gráficos y mapa
+  if (currentPath.startsWith('/activity/')) {
+    return null;
+  }
+
+  // Las 4 pestañas de navegación contenidas en la cápsula principal Liquid Glass
+  const capsuleTabs = [
+    { path: '/', icon: Home, label: 'Inicio', index: 0 },
+    { path: '/stats', icon: BarChart3, label: 'Forma', index: 1 },
+    { path: '/calendar', icon: Calendar, label: 'Calendario', index: 2 },
+    { path: '/health', icon: HeartPulse, label: 'Salud', index: 3 },
+  ];
+
+  // Pestaña satélite independiente (Búsqueda / Registro de Actividades)
+  const isSearchActive = activeIndex !== undefined ? activeIndex === 4 : currentPath === '/history';
+
+  const handleTabClick = (e, path, index) => {
+    if (onTabChange) {
+      e.preventDefault();
+      onTabChange(index, path);
+    }
+  };
+
+  return (
+    <nav
+      aria-label="Navegación móvil flotante estilo Apple"
+      className="md:hidden fixed bottom-[calc(0.75rem+env(safe-area-inset-bottom,0px))] left-0 right-0 z-nav-menu flex items-center justify-center pointer-events-none px-3 select-none"
+    >
+      <div className="flex items-center gap-2 pointer-events-auto max-w-full">
+        {/* CÁPSULA PRINCIPAL LIQUID GLASS */}
+        <div data-shell="dock" className="liquid-glass rounded-3xl h-[var(--bottom-nav-h)] p-1 flex items-center gap-0.5 transition-paint duration-300">
+          {capsuleTabs.map((tab) => {
+            const isActive = activeIndex !== undefined
+              ? activeIndex === tab.index
+              : currentPath === tab.path || (tab.path === '/' && currentPath === '');
+            const Icon = tab.icon;
+
+            return (
+              <Link
+                key={tab.path}
+                to={tab.path}
+                onClick={(e) => handleTabClick(e, tab.path, tab.index)}
+                className={`flex flex-col items-center justify-center h-[46px] px-3.5 rounded-2xl transition-paint duration-200 select-none touch-manipulation touch-callout-none active:scale-press ${
+                  isActive
+                    ? 'liquid-glass-active text-action-ios'
+                    : 'text-ink-4 hover:text-body'
+                }`}
+              >
+                <Icon
+                  size={19}
+                  strokeWidth={isActive ? 2.6 : 1.9}
+                  className={`transition-transform duration-200 ${isActive ? 'scale-105' : ''}`}
+                />
+                <span
+                  className={`text-2xs tracking-tight leading-none mt-1 transition-paint ${
+                    isActive
+                      ? 'font-bold text-action-ios'
+                      : 'font-medium'
+                  }`}
+                >
+                  {tab.label}
+                </span>
+              </Link>
+            );
+          })}
+        </div>
+
+        {/* BOTÓN SATÉLITE FLOTANTE LIQUID GLASS (BÚSQUEDA) */}
+        <Link
+          to="/history"
+          aria-label="Buscar actividades"
+          onClick={(e) => handleTabClick(e, '/history', 4)}
+          className={`liquid-glass w-[var(--bottom-nav-h)] h-[var(--bottom-nav-h)] rounded-3xl flex items-center justify-center shrink-0 transition-transform active:scale-press select-none touch-manipulation touch-callout-none ${
+            isSearchActive
+              ? 'liquid-glass-active text-action-ios'
+              : 'text-ink-4 hover:text-body'
+          }`}
+        >
+          <Search
+            size={21}
+            strokeWidth={isSearchActive ? 2.7 : 2}
+            className={`transition-transform duration-200 ${isSearchActive ? 'scale-110' : ''}`}
+          />
+        </Link>
+      </div>
+    </nav>
+  );
+};

@@ -1,22 +1,66 @@
 /* src/index.css */
+/* Tokens de color (Capa 1): deben ir antes de las capas de Tailwind. */
+@import './styles/tokens.css';
+/* Piel «Panel»: pseudo-elementos compartidos y reglas globales (no redefine utilidades). */
+@import './styles/skin.css';
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 :root {
-  font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+  font-family: theme('fontFamily.sans');
   line-height: 1.5;
   font-weight: 400;
-  color-scheme: light;
+  color-scheme: light dark;
+}
+
+html, body {
+  overflow-x: hidden;
+  width: 100%;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
 }
 
 body {
   margin: 0;
   padding: 0;
-  min-width: 100vw;
   min-height: 100vh;
-  background-color: #f8fafc; /* Fondo gris muy claro */
+  min-height: 100dvh;
+  background-color: rgb(var(--canvas)); /* Apple iOS light grouped background */
+  color: rgb(var(--canvas-ink));
+  font-family: theme('fontFamily.sans');
+  letter-spacing: -0.015em; /* Global tight tracking for Apple aesthetic */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
+
+/* Dark mode — pure OLED black like Apple Fitness (los valores oscuros de --canvas y --canvas-ink) */
+
+/* Apple-style Glassmorphism and HIG utilities */
+@layer utilities {
+  /* Cabecera: superficie sólida con filete inferior de 1 px (piel «Panel»). */
+  .glass-nav {
+    background-color: rgb(var(--surface));
+    border-bottom: 1px solid rgb(var(--line));
+  }
+
+  /* Barra inferior: panel plano con borde de 1 px y sombra de reposo. */
+  .liquid-glass {
+    background: rgb(var(--surface));
+    border: 1px solid rgb(var(--line));
+    box-shadow: var(--shadow-sm);
+  }
+
+  /* Pestaña activa de la barra inferior: fondo hundido. */
+  .liquid-glass-active {
+    background: rgb(var(--sunken));
+    box-shadow: none;
+  }
+
+
+}
+
 
 #root {
   width: 100%;
@@ -31,13 +75,101 @@ body {
   width: 8px;
   height: 8px;
 }
+
 ::-webkit-scrollbar-track {
   background: transparent;
 }
+
 ::-webkit-scrollbar-thumb {
-  background: #cbd5e1;
+  background: rgb(var(--scrollbar-thumb));
   border-radius: 4px;
 }
+
 ::-webkit-scrollbar-thumb:hover {
-  background: #94a3b8;
+  background: rgb(var(--scrollbar-thumb-hover));
+}
+
+/* Scrollbar personalizado fino (se referencia con la clase custom-scrollbar) */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 4px;
+  height: 4px;
+}
+.custom-scrollbar::-webkit-scrollbar-track  { background: transparent; }
+.custom-scrollbar::-webkit-scrollbar-thumb  { background: rgb(var(--scrollbar-thumb)); border-radius: 4px; }
+.custom-scrollbar::-webkit-scrollbar-thumb:hover { background: rgb(var(--scrollbar-thumb-hover)); }
+
+/* Ocultar scrollbar por completo (chrome, safari, opera) */
+.hide-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+/* --- Funciones de Safe Area Insets iOS/Android --- */
+.pb-safe {
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+/* Prevenir llamada al menú de guardar imagen/seleccionar en toques largos */
+.touch-callout-none {
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+/* Evitar rebote extraño de pantalla completa en scroll de modales */
+.overscroll-contain {
+  overscroll-behavior: contain;
+}
+
+/* Scroll táctil nativo fluido iOS */
+.touch-scroll {
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Ocultar flechas de inputs numéricos */
+.no-spinner::-webkit-outer-spin-button,
+.no-spinner::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.no-spinner {
+  -moz-appearance: textfield;
+}
+
+/* Transiciones de vista direccionales por deslizamiento lateral (Estilo iOS) */
+@keyframes nav-slide-to-left {
+  to { transform: translateX(-18%); opacity: 0; }
+}
+@keyframes nav-slide-from-right {
+  from { transform: translateX(18%); opacity: 0; }
+}
+@keyframes nav-slide-to-right {
+  to { transform: translateX(18%); opacity: 0; }
+}
+@keyframes nav-slide-from-left {
+  from { transform: translateX(-18%); opacity: 0; }
+}
+
+html:active-view-transition-type(forward)::view-transition-old(root) {
+  animation: 0.22s cubic-bezier(0.25, 1, 0.5, 1) nav-slide-to-left both;
+}
+html:active-view-transition-type(forward)::view-transition-new(root) {
+  animation: 0.22s cubic-bezier(0.25, 1, 0.5, 1) nav-slide-from-right both;
+}
+
+html:active-view-transition-type(backward)::view-transition-old(root) {
+  animation: 0.22s cubic-bezier(0.25, 1, 0.5, 1) nav-slide-to-right both;
+}
+html:active-view-transition-type(backward)::view-transition-new(root) {
+  animation: 0.22s cubic-bezier(0.25, 1, 0.5, 1) nav-slide-from-left both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-group(root) {
+    animation: none !important;
+  }
 }

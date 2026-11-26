@@ -1,0 +1,140 @@
+import React, { memo, useMemo, useEffect, useState } from 'react';
+import { MapContainer, TileLayer, Polyline, useMap, CircleMarker } from 'react-leaflet';
+import { MapPin } from 'lucide-react';
+import 'leaflet/dist/leaflet.css';
+import { MAP_TILES } from './mapTiles';
+import { useChartTheme } from '../charts/useChartTheme';
+import { useCursor } from './detail/cursorStore';
+
+const decodePolyline = (str, precision = 5) => {
+    let index = 0, lat = 0, lng = 0, coordinates = [], shift = 0, result = 0, byte = null, latitude_change, longitude_change, factor = Math.pow(10, precision);
+    while (index < str.length) {
+        byte = null; shift = 0; result = 0;
+        do { byte = str.charCodeAt(index++) - 63; result |= (byte & 0x1f) << shift; shift += 5; } while (byte >= 0x20);
+        latitude_change = ((result & 1) ? ~(result >> 1) : (result >> 1));
+        shift = result = 0;
+        do { byte = str.charCodeAt(index++) - 63; result |= (byte & 0x1f) << shift; shift += 5; } while (byte >= 0x20);
+        longitude_change = ((result & 1) ? ~(result >> 1) : (result >> 1));
+        lat += latitude_change; lng += longitude_change;
+        coordinates.push([lat / factor, lng / factor]);
+    }
+    return coordinates;
+};
+
+export const MapBounds = ({ bounds }) => {
+    const map = useMap();
+    useEffect(() => { 
+        if (bounds && bounds.length > 0) {
+            map.invalidateSize();
+            map.fitBounds(bounds, { padding: [30, 30] }); 
+            const t = setTimeout(() => {
+                map.invalidateSize();
+                map.fitBounds(bounds, { padding: [30, 30] });
+            }, 150);
+            const t2 = setTimeout(() => {
+                map.invalidateSize();
+            }, 400);
+            return () => {
+                clearTimeout(t);
+                clearTimeout(t2);
+            };
+        }
+    }, [map, bounds]);
+    return null;
+};
+
+const MapResizer = () => {
+    const map = useMap();
+    useEffect(() => {
+        const update = () => {
+            if (map) {
+                map.invalidateSize();
+            }
+        };
+        update();
+        const t1 = setTimeout(update, 100);
+        const t2 = setTimeout(update, 350);
+        const t3 = setTimeout(update, 800);
+        window.addEventListener('resize', update);
+        return () => {
+            clearTimeout(t1);
+            clearTimeout(t2);
+            clearTimeout(t3);
+            window.removeEventListener('resize', update);
+        };
+    }, [map]);
+    return null;
+};
+
+const MAP_TYPE_LABEL = { light: 'Claro', dark: 'Oscuro', satellite: 'Satélite' };
+
+const latlngOf = (p) => (p ? p.latlng : null);
+
+/** Punto señalado en las gráficas: solo este marcador se repinta al mover el cursor (RF-C5). */
+const CursorMarker = ({ color, ring, position }) => {
+    const fromCursor = useCursor(latlngOf);
+    const center = position || fromCursor;
+    if (!center) return null;
+    return (
+        <>
+            <CircleMarker center={center} radius={10} pathOptions={{ color: 'transparent', fillColor: color, fillOpacity: 0.3, weight: 0 }} />
+            <CircleMarker center={center} radius={5} pathOptions={{ color: ring, fillColor: color, fillOpacity: 1, weight: 2 }} />
+        </>
+    );
+};
+
+/**
+ * Mapa del recorrido. Memoizado: el cursor de las gráficas no lo vuelve a pintar; el marcador
+ * lee el almacén del detalle por su cuenta. `currentPosition` fija el marcador desde fuera.
+ */
+export const InteractiveMap = memo(function InteractiveMap({ polyline, highResCoords, color, currentPosition }) {
+    const ct = useChartTheme();
+    const [mapType, setMapType] = useState('light');
+
+    const coords = useMemo(() => {
+        if (highResCoords && highResCoords.length > 0) return highResCoords;
+        if (polyline) return decodePolyline(polyline);
+        return null;
+    }, [polyline, highResCoords]);
+
+    if (!coords || coords.length === 0) return (
+        <div className="w-full h-full min-h-[350px] flex flex-col items-center justify-center bg-sunken-6 rounded-2xl border border-line p-8 text-center">
+            <MapPin size={32} className="text-ink-4-dim mb-2" />
+            <span className="text-body font-bold text-sm">Sin datos GPS</span>
+            <p className="text-ink-4 text-xs mt-1 max-w-xs">Esta actividad no contiene coordenadas de ruta o track GPS.</p>
+        </div>
+    );
+
+    const mapSources = {
+        light: { url: MAP_TILES.light, attribution: '&copy; Esri', maxNativeZoom: 16 },
+        dark: { url: MAP_TILES.dark, attribution: '&copy; Esri', maxNativeZoom: 16 },
+        satellite: { url: "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}", attribution: '&copy; Esri' }
+    };
+
+    return (
+        <div className="w-full h-full rounded-lg overflow-hidden relative border border-line z-0 bg-slate-100 dark:bg-zinc-900 shadow-sm flex flex-col">
+            <div data-detail="map-types" className="absolute top-3 right-3 z-map flex border !border-line !rounded-lg !bg-surface backdrop-blur-sm !shadow-sm overflow-hidden p-0.5 max-lg:[&>button]:!min-h-[44px] max-lg:[&>button]:!min-w-[44px]">
+                {['light', 'dark', 'satellite'].map((type) => (
+                    <button
+                        key={type} onClick={(e) => { e.stopPropagation(); setMapType(type); }}
+                        className={`px-2.5 py-1 text-2xs font-semibold transition-colors rounded-sm ${mapType === type ? 'bg-slate-800 text-ink-inverse dark:bg-zinc-200' : 'text-ink-3 hover:text-ink-2-soft'}`}
+                    >
+                        {MAP_TYPE_LABEL[type]}
+                    </button>
+                ))}
+            </div>
+
+            <MapContainer center={coords[0]} zoom={13} scrollWheelZoom={true} className="w-full h-full z-0" zoomControl={false}>
+                <TileLayer key={mapType} url={mapSources[mapType].url} attribution={mapSources[mapType].attribution} maxNativeZoom={mapSources[mapType].maxNativeZoom} />
+                <Polyline positions={coords} pathOptions={{ color: mapType === 'light' ? ct.map.haloLight : ct.map.haloDark, weight: 6, opacity: 0.3 }} />
+                <Polyline positions={coords} pathOptions={{ color: color || ct.map.route, weight: 3, opacity: 1 }} />
+                <CircleMarker center={coords[0]} radius={5} pathOptions={{ color: ct.map.ring, fillColor: ct.map.start, fillOpacity: 1, weight: 2 }} />
+                <CircleMarker center={coords[coords.length - 1]} radius={5} pathOptions={{ color: ct.map.ring, fillColor: ct.map.end, fillOpacity: 1, weight: 2 }} />
+
+                <CursorMarker color={color || ct.map.route} ring={ct.map.ring} position={currentPosition} />
+                <MapBounds bounds={coords} />
+                <MapResizer />
+            </MapContainer>
+        </div>
+    );
+});

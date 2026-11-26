@@ -1,0 +1,21 @@
+{
+  "metric-ctl-ink": { "light": "[#1a44d6]", "dark": "[#8ab4ff]" },
+  "metric-atl-ink": { "light": "[#b80d4e]", "dark": "[#ff86b6]" },
+  "metric-tsb-ink": { "light": "[#3f6a06]", "dark": "[#d9ff6b]" },
+  "legacy-ctl-sky": { "light": "[#2457ff]", "dark": "[#4d8dff]" },
+  "legacy-atl-red": { "light": "[#d10f58]", "dark": "[#ff3d8b]" },
+  "legacy-atl-orange": { "light": "orange-500", "dark": "orange-500" },
+  "legacy-atl-purple": { "light": "[#d10f58]", "dark": "[#ff3d8b]" },
+  "legacy-atl-purple-ink": { "light": "[#b80d4e]", "dark": "[#ff86b6]" },
+  "legacy-tsb-up": { "light": "[#0a7550]", "dark": "[#3be8a0]" },
+  "legacy-tsb-up-ink": { "light": "[#0a7550]", "dark": "[#3be8a0]" },
+  "legacy-tsb-down": { "light": "[#92400e]", "dark": "[#fbbf24]" },
+  "legacy-tsb-down-2": { "light": "[#b45309]", "dark": "[#fbbf24]" },
+  "legacy-tsb-low": { "light": "[#d10f58]", "dark": "[#ff3d8b]" },
+  "metric-atl-tile": { "light": "[#d10f58]", "dark": "[#ff3d8b]" },
+  "metric-tsb-tile": { "light": "[#0a7550]", "dark": "[#3be8a0]" },
+  "metric-acwr-tile": { "light": "[#b45309]", "dark": "[#fbbf24]" },
+  "metric-ramp-tile": { "light": "[#4338ca]", "dark": "[#818cf8]" },
+  "metric-monotony-tile": { "light": "[#7e22ce]", "dark": "[#c084fc]" },
+  "metric-volume-tile": { "light": "[#0e7490]", "dark": "[#22d3ee]" }
+}

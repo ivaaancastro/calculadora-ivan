@@ -1,158 +1,254 @@
-import React, { useState } from 'react';
-import { Loader2, FileText } from 'lucide-react';
-
-// Subimos un nivel para encontrar el hook
+import React, { useState, useCallback } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useActivities } from '../hooks/useActivities';
+import { useSwipeNavigation } from '../hooks/useSwipeNavigation';
 
-// Componentes del Dashboard
+// Componentes siempre cargados (shell de la app)
 import { Navbar } from './dashboard/Navbar';
-import { KpiGrid } from './dashboard/KpiGrid';
-import { EvolutionChart } from './dashboard/EvolutionChart';
-import { DistributionChart } from './dashboard/DistributionChart';
+import { BottomNav } from './layout/BottomNav';
+import { MobileSwipePager } from './layout/MobileSwipePager';
+
+// Subcomponentes extraídos (SRP)
+import { UploadStatusBanner } from './dashboard/UploadStatusBanner';
+import { Database } from 'lucide-react';
+import { MainTabsView } from './dashboard/MainTabsView';
+import { MAIN_TAB_PATHS } from '../utils/mainTabs';
+import { ActivitySubRoutes } from './dashboard/ActivitySubRoutes';
+import { AdvancedAnalytics } from './dashboard/AdvancedAnalytics';
 import { HistoryList } from './dashboard/HistoryList';
-import { SmartCoach } from './dashboard/SmartCoach';
-import ActivityCalendar from './dashboard/ActivityCalendar';
-import { FitnessStatus } from './dashboard/FitnessStatus';
-
-// Modales
 import AddActivityModal from './modals/AddActivityModal';
-import ProfileModal from './modals/ProfileModal';
+import { ErrorBoundary } from './common/ErrorBoundary';
+import { Card, EmptyState, LoadingState } from './ui';
 
+// Páginas cargadas bajo demanda (code splitting)
+const CalendarPage = React.lazy(() =>
+  import('./pages/CalendarPage').then((m) => ({ default: m.CalendarPage }))
+);
+const HealthPage = React.lazy(() =>
+  import('./pages/HealthPage').then((m) => ({ default: m.HealthPage }))
+);
+const FitnessStatsPage = React.lazy(() =>
+  import('./pages/FitnessStatsPage').then((m) => ({ default: m.FitnessStatsPage }))
+);
+
+/**
+ * Dashboard — Shell de orquestación.
+ *
+ * Coordina el estado global (useActivities), la navegación y los subcomponentes
+ * extraídos (SRP): Navbar, UploadStatusBanner, MainTabsView,
+ * ActivitySubRoutes, BottomNav y AddActivityModal.
+ */
 const Dashboard = () => {
-  const { 
-    activities, loading, uploading, uploadStatus, timeRange, settings,
-    setTimeRange, handleClearDb, processFile, fetchActivities, fetchProfile, 
-    analyzeHistory,
-    filteredData, currentMetrics, chartData, distribution, summary,
-    // Nuevas props de Strava
-    isStravaConnected, handleStravaSync 
+  const {
+    activities,
+    loading,
+    uploading,
+    uploadStatus,
+    handleClearDb,
+    settings,
+    timeRange,
+    setTimeRange,
+    isStravaConnected,
+    handleStravaSync,
+    fetchActivities,
+    deleteActivity,
+    fetchActivityStreams,
+    chartData,
+    pmcSeries,
+    summary,
+    currentMetrics,
+    isDeepSyncing,
+    deepSyncProgress,
+    handleDeepSync,
+    loadHistoricalStreams,
+    isLoadingHistoricalStreams,
+    hasLoadedHistoricalStreams,
+    updateProfile,
+    plannedWorkouts,
+    addPlannedWorkout,
+    deletePlannedWorkout,
+    updatePlannedWorkout,
   } = useActivities();
 
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [isProfileOpen, setIsProfileOpen] = useState(false);
+  const location = useLocation();
+  const navigate = useNavigate();
 
-  // Pantalla de carga inicial
-  if (loading && !uploading) return (
-    <div className="h-screen flex flex-col items-center justify-center bg-slate-50 gap-4">
-      <Loader2 className="animate-spin text-blue-600" size={40}/>
-      <p className="text-slate-400 font-medium text-sm animate-pulse">Cargando métricas...</p>
+  // Gestos táctiles laterales para retroceder desde el borde en subpáginas
+  useSwipeNavigation();
+
+  const handleSelectActivity = useCallback((act) => navigate(`/activity/${act.id}`), [
+    navigate,
+  ]);
+  const handleOpenModal = useCallback(() => setIsModalOpen(true), []);
+  const handleCloseModal = useCallback(() => setIsModalOpen(false), []);
+  const handleBackFromProfile = useCallback(() => navigate('/'), [navigate]);
+
+  const isSubPage = location.pathname.startsWith('/activity/') || location.pathname === '/profile';
+  const currentTabIndex = MAIN_TAB_PATHS.indexOf(location.pathname);
+  const activeTabIndex = currentTabIndex === -1 ? 0 : currentTabIndex;
+
+  const handleMobileTabChange = useCallback(
+    (newIndex, customPath) => {
+      const targetPath = customPath || MAIN_TAB_PATHS[newIndex] || '/';
+      if (location.pathname !== targetPath) {
+        navigate(targetPath);
+        window.scrollTo({ top: 0, behavior: 'instant' });
+      }
+    },
+    [location.pathname, navigate],
+  );
+
+  if (loading && !uploading) {
+    return <LoadingState variant="screen" />;
+  }
+
+  const isActivityPage = location.pathname.startsWith('/activity/');
+
+  // Renderizado de las 5 vistas principales
+  const renderAdvancedAnalytics = (
+    <div className="animate-in fade-in duration-200">
+      <AdvancedAnalytics
+        activities={activities}
+        settings={settings}
+        onSelectActivity={handleSelectActivity}
+        timeRange={timeRange}
+        setTimeRange={setTimeRange}
+        chartData={chartData}
+        pmcSeries={pmcSeries}
+        periodSummary={summary}
+        currentMetrics={currentMetrics}
+      />
     </div>
   );
 
-  return (
-    <div className="min-h-screen bg-[#F8FAFC] text-slate-800 font-sans pb-12">
-      
-      {/* NAVBAR: Le pasamos el estado de Strava */}
-      <Navbar 
+  const renderFitnessStats = (
+    <ErrorBoundary>
+     <>
+      <FitnessStatsPage
         activities={activities}
+        settings={settings}
+        chartData={chartData}
+        onSelectActivity={handleSelectActivity}
+        loadHistoricalStreams={loadHistoricalStreams}
+        isLoadingHistoricalStreams={isLoadingHistoricalStreams}
+        hasLoadedHistoricalStreams={hasLoadedHistoricalStreams}
+        handleDeepSync={handleDeepSync}
+        isDeepSyncing={isDeepSyncing}
+        deepSyncProgress={deepSyncProgress}
+      />
+     </>
+    </ErrorBoundary>
+  );
+
+  const renderCalendar = (
+    <ErrorBoundary>
+      <CalendarPage
+        activities={activities}
+        plannedWorkouts={plannedWorkouts}
+        addPlannedWorkout={addPlannedWorkout}
+        deletePlannedWorkout={deletePlannedWorkout}
+        updatePlannedWorkout={updatePlannedWorkout}
+        currentMetrics={currentMetrics}
+        settings={settings}
+        chartData={chartData}
+        onDelete={deleteActivity}
+        onSelectActivity={handleSelectActivity}
+      />
+    </ErrorBoundary>
+  );
+
+  const renderHealth = (
+    <ErrorBoundary>
+      <><HealthPage activities={activities} settings={settings} chartData={chartData} /></>
+    </ErrorBoundary>
+  );
+
+  const renderHistory = (
+    <>
+      <div className="flex justify-end mb-3">
+        <button
+          onClick={handleOpenModal}
+          data-history="add"
+          className="py-1.5 px-3 max-sm:min-h-[44px] bg-surface text-ink-2-soft border border-line-2 rounded-full text-2xs font-bold uppercase flex items-center gap-1.5 hover:bg-sunken-9 transition-colors shadow-2xs active:scale-press"
+        >
+          <span className="text-[14px]">+</span> Añadir Manual
+        </button>
+      </div>
+      {/* Alto de la lista: la ventana menos la cabecera y el chrome de la página (la fila del
+          botón «Añadir Manual» y los márgenes). Se conservan los 170/250 px de antes. */}
+      <div className="h-[calc(100dvh-var(--nav-h-total)-7.125rem)] sm:h-[calc(100dvh-var(--nav-h-total)-11.875rem)]">
+        <ErrorBoundary>
+          <HistoryList
+            activities={activities}
+            onDelete={deleteActivity}
+            onSelectActivity={handleSelectActivity}
+          />
+        </ErrorBoundary>
+      </div>
+    </>
+  );
+
+  return (
+    <div className="tabular-nums min-h-screen bg-sunken-2 text-ink-2-soft font-sans md:pb-12 transition-colors duration-300 selection:bg-action-bright/30 overflow-x-hidden">
+      <Navbar
+        settings={settings}
         uploading={uploading}
-        handleClearDb={handleClearDb}
-        onFileUpload={processFile}
-        onAddClick={() => setIsModalOpen(true)}
-        onProfileClick={() => setIsProfileOpen(true)}
-        isStravaConnected={isStravaConnected} // <--- Nuevo
-        onSync={handleStravaSync}             // <--- Nuevo
+        isStravaConnected={isStravaConnected}
+        onSync={handleStravaSync}
       />
 
-      {/* STATUS BAR (Notificaciones de carga) */}
-      {uploadStatus && (
-        <div className="bg-blue-600 text-white text-center py-2 text-xs font-bold uppercase animate-in slide-in-from-top sticky top-[73px] z-40">
-          {uploadStatus}
-        </div>
-      )}
+      <UploadStatusBanner uploadStatus={uploadStatus} />
 
-      {/* CONTENIDO PRINCIPAL */}
-      <main className="w-full max-w-[1800px] mx-auto px-4 sm:px-6 py-6 space-y-6">
-        
+      <main className={`w-full max-w-[1800px] mx-auto ${isActivityPage ? 'px-2 sm:px-4 py-0 sm:py-2' : 'px-0 sm:px-6 py-2 sm:py-6'}`}>
         {activities.length === 0 ? (
-           <div className="text-center py-20 bg-white rounded-3xl border-2 border-dashed border-slate-200 max-w-2xl mx-auto mt-10">
-              <FileText size={60} className="mx-auto text-slate-300 mb-4"/>
-              <h2 className="text-2xl font-bold text-slate-800 mb-2">Sin datos</h2>
-              <p className="text-slate-500 mb-6">Conecta Strava, importa un CSV o añade un entreno manual para empezar.</p>
-           </div>
+          <div className="py-20 px-4">
+            <Card className="max-w-md mx-auto">
+              <EmptyState icon={Database} title="Aún no hay actividades" description="Conecta Strava para iniciar el análisis." />
+            </Card>
+          </div>
+        ) : isSubPage ? (
+          <ActivitySubRoutes
+            activities={activities}
+            settings={settings}
+            fetchActivityStreams={fetchActivityStreams}
+            deleteActivity={deleteActivity}
+            currentMetrics={currentMetrics}
+            updateProfile={updateProfile}
+            isDeepSyncing={isDeepSyncing}
+            deepSyncProgress={deepSyncProgress}
+            handleDeepSync={handleDeepSync}
+            handleClearDb={handleClearDb}
+            handleBackFromProfile={handleBackFromProfile}
+            location={location}
+          />
         ) : (
           <>
-            {/* 1. FILTROS DE TIEMPO */}
-            <div className="flex gap-1 overflow-x-auto pb-1 no-scrollbar">
-                {['30d', '90d', '1y', 'all'].map(r => (
-                    <button 
-                      key={r} 
-                      onClick={() => setTimeRange(r)} 
-                      className={`px-3 py-1 rounded-md text-[11px] font-bold transition whitespace-nowrap uppercase tracking-wider ${timeRange === r ? 'bg-slate-800 text-white' : 'bg-white text-slate-500 border border-slate-200 hover:border-slate-300'}`}
-                    >
-                        {r === 'all' ? 'Todo' : r.replace('d', ' Días').replace('y', ' Año')}
-                    </button>
-                ))}
-            </div>
-
-            {/* 2. ANÁLISIS PERSONAL (Coach IA & Niveles) */}
-            <FitnessStatus metrics={currentMetrics} />
-
-            {/* 3. KPIs GLOBALES */}
-            <KpiGrid metrics={currentMetrics} summary={summary} timeRange={timeRange} />
-            
-            {/* 4. GRÁFICOS SUPERIORES (Evolución y Distribución) */}
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
-                {/* Evolución (Más ancho) */}
-                <div className="lg:col-span-8 min-h-[250px]">
-                    <EvolutionChart data={chartData} />
-                </div>
-                {/* Distribución (Más estrecho) */}
-                <div className="lg:col-span-4 min-h-[250px]">
-                    <DistributionChart distribution={distribution} total={summary.count} />
-                </div>
-            </div>
-
-            {/* 5. ZONA INFERIOR DE ANÁLISIS DETALLADO */}
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-                
-                {/* COLUMNA IZQUIERDA (Análisis Visual) */}
-                <div className="lg:col-span-7 xl:col-span-8 grid grid-cols-1 gap-6">
-                    
-                    {/* Fila: Mapa de Esfuerzo + Calendario */}
-                    <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 items-stretch">
-                        
-                        {/* SMART COACH (Consejos) */}
-                        <div className="min-h-[350px]"> 
-                            <SmartCoach metrics={currentMetrics} />
-                        </div>
-                        
-                        {/* CALENDARIO DE ACTIVIDAD */}
-                        <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-5 flex flex-col min-h-[350px]">
-                            <h3 className="text-xs font-bold text-slate-500 uppercase mb-4">Calendario de Actividad</h3>
-                            <div className="flex-1">
-                                <ActivityCalendar activities={activities} />
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                {/* COLUMNA DERECHA (Lista Vertical Historial) */}
-                <div className="lg:col-span-5 xl:col-span-4 h-full">
-                    <div className="h-[725px] lg:h-full lg:max-h-[725px]"> 
-                        <HistoryList activities={filteredData} />
-                    </div>
-                </div>
-            </div>
+            <MainTabsView
+              activeIndex={activeTabIndex}
+              onChangeTab={handleMobileTabChange}
+              views={{
+                analytics: renderAdvancedAnalytics,
+                stats: renderFitnessStats,
+                calendar: renderCalendar,
+                health: renderHealth,
+                history: renderHistory,
+              }}
+            />
           </>
         )}
       </main>
 
-      {/* --- MODALES --- */}
-      <AddActivityModal 
-        isOpen={isModalOpen} 
-        onClose={() => setIsModalOpen(false)} 
-        onSave={fetchActivities} 
+      <BottomNav
+        activeIndex={isSubPage ? undefined : activeTabIndex}
+        onTabChange={handleMobileTabChange}
       />
 
-      <ProfileModal 
-        isOpen={isProfileOpen} 
-        onClose={() => setIsProfileOpen(false)} 
-        onUpdate={fetchProfile} 
-        currentSettings={settings}
-        onAnalyze={analyzeHistory} 
+      <AddActivityModal
+        isOpen={isModalOpen}
+        onClose={handleCloseModal}
+        onSave={fetchActivities}
       />
-
     </div>
   );
 };

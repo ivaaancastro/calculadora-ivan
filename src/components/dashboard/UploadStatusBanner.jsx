@@ -1,0 +1,16 @@
+import React from 'react';
+
+/**
+ * Banner de estado de subida (CSV / sync).
+ * Extraído de Dashboard.jsx para cumplir SRP.
+ * Recibe `uploadStatus` como string opcional; si no hay estado, no renderiza nada.
+ */
+export function UploadStatusBanner({ uploadStatus }) {
+  if (!uploadStatus) return null;
+
+  return (
+    <div className="bg-action-4 text-white text-center py-1.5 text-2xs font-bold uppercase tracking-[0.08em] animate-in slide-in-from-top sticky top-[var(--nav-h-total)] z-sticky shadow-sm">
+      {uploadStatus}
+    </div>
+  );
+}

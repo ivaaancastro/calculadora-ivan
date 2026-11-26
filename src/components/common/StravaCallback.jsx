@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../../supabase';
+import { exchangeStravaCode } from '../../services/stravaToken';
 import { Loader2, CheckCircle, XCircle } from 'lucide-react';
 
 const StravaCallback = () => {
@@ -8,29 +9,13 @@ const StravaCallback = () => {
   const [message, setMessage] = useState('Iniciando conexión...');
   const navigate = useNavigate();
   
-  // TRUCO PRO: Usamos useRef para evitar que React ejecute esto 2 veces en modo desarrollo
   const hasFetched = useRef(false);
 
   useEffect(() => {
     const handleCallback = async () => {
-      // Si ya lo ejecutamos una vez, no hacemos nada más (Evita el error 400 por código usado)
       if (hasFetched.current) return;
       hasFetched.current = true;
 
-      // 1. Obtener claves del entorno
-      const clientId = import.meta.env.VITE_STRAVA_CLIENT_ID;
-      const clientSecret = import.meta.env.VITE_STRAVA_CLIENT_SECRET;
-
-      // DEBUG: Comprobamos si las claves existen (Mira la consola del navegador si falla)
-      console.log("Intentando conectar con ClientID:", clientId ? "OK" : "FALTA");
-
-      if (!clientId || !clientSecret) {
-        setStatus('error');
-        setMessage('Error: Faltan las claves API en el archivo .env (Reinicia la terminal)');
-        return;
-      }
-
-      // 2. Capturar el código de la URL
       const params = new URLSearchParams(window.location.search);
       const code = params.get('code');
       const error = params.get('error');
@@ -50,47 +35,40 @@ const StravaCallback = () => {
       try {
         setMessage('Intercambiando credenciales con Strava...');
 
-        // 3. Llamada a Strava
-        const response = await fetch(`https://www.strava.com/oauth/token?client_id=${clientId}&client_secret=${clientSecret}&code=${code}&grant_type=authorization_code`, {
-          method: 'POST'
-        });
+        // El canje lo hace la Edge Function `strava-token`: el secreto no sale del servidor.
+        const data = await exchangeStravaCode(code);
 
-        const data = await response.json();
-
-        // Si Strava devuelve error, lanzamos excepción
-        if (!response.ok) {
-            console.error("Respuesta Strava:", data);
-            throw new Error(data.message || 'Error al canjear token');
-        }
-
-        // 4. Guardar en Supabase
         setMessage('Guardando acceso seguro...');
         
-        // Obtenemos el ID del atleta de la respuesta de Strava para guardarlo si quieres
-        // const athleteId = data.athlete?.id; 
+        // 1. OBTENEMOS LA SESIÓN DEL USUARIO ACTUAL DE SUPABASE
+        const { data: { session } } = await supabase.auth.getSession();
 
+        if (!session?.user?.id) {
+          throw new Error('No hay sesión activa. Inicia sesión en la app primero.');
+        }
+
+        // 2. GUARDAMOS EL TOKEN ASOCIADO ESTRICTAMENTE A ESTE USUARIO (UPSERT)
         const { error: dbError } = await supabase
           .from('profiles')
-          .update({
+          .upsert({
+            user_id: session.user.id,
             strava_access_token: data.access_token,
             strava_refresh_token: data.refresh_token,
             strava_expires_at: data.expires_at,
-          })
-          .eq('id', 1); // Recuerda: Esto es temporal para el MVP. En prod usaremos user.id real
+          }, { onConflict: 'user_id' }); // IMPORTANTE: Si ya existe el user_id, lo actualiza
 
         if (dbError) throw dbError;
 
         setStatus('success');
-        setMessage('¡Conectado! Descargando tus datos...');
+        setMessage('¡Conectado! Redirigiendo al Laboratorio...');
         
-        // Esperamos un poco y volvemos al dashboard
-        setTimeout(() => navigate('/'), 2000);
+        setTimeout(() => {
+            window.location.href = '/'; 
+        }, 2000);
 
       } catch (err) {
         console.error("Error Strava Auth:", err);
         setStatus('error');
-        // Si el error es "Bad Request" a menudo es porque el código ya se usó.
-        // En ese caso, mejor pedir al usuario que lo intente de nuevo.
         setMessage('Error de conexión. ' + (err.message === 'Bad Request' ? 'El código caducó. Intenta conectar de nuevo.' : err.message));
       }
     };
@@ -99,34 +77,34 @@ const StravaCallback = () => {
   }, [navigate]);
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-slate-50 p-4">
-      <div className="bg-white p-8 rounded-2xl shadow-xl text-center max-w-md w-full border border-slate-100">
+    <div className="min-h-screen flex flex-col items-center justify-center bg-sunken-2 p-4 transition-colors duration-300">
+      <div className="bg-surface p-8 rounded-lg shadow-sm text-center max-w-md w-full border border-line">
         
         {status === 'processing' && (
             <>
-                <Loader2 className="animate-spin h-12 w-12 text-blue-600 mx-auto mb-4" />
-                <h2 className="text-xl font-bold text-slate-800">Procesando...</h2>
+                <Loader2 className="animate-spin h-12 w-12 text-action-3 mx-auto mb-4" />
+                <h2 className="text-xl font-bold text-ink-2 uppercase tracking-tight">Procesando</h2>
             </>
         )}
 
         {status === 'success' && (
             <>
-                <CheckCircle className="h-12 w-12 text-emerald-500 mx-auto mb-4" />
-                <h2 className="text-xl font-bold text-slate-800">¡Éxito!</h2>
+                <CheckCircle className="h-12 w-12 text-positive mx-auto mb-4" />
+                <h2 className="text-xl font-bold text-ink-2 uppercase tracking-tight">¡Éxito!</h2>
             </>
         )}
 
         {status === 'error' && (
             <>
-                <XCircle className="h-12 w-12 text-red-500 mx-auto mb-4" />
-                <h2 className="text-xl font-bold text-slate-800">Error</h2>
+                <XCircle className="h-12 w-12 text-danger mx-auto mb-4" />
+                <h2 className="text-xl font-bold text-ink-2 uppercase tracking-tight">Error</h2>
             </>
         )}
 
-        <p className="text-slate-500 mt-2 font-medium">{message}</p>
+        <p className="text-[12px] font-bold text-ink-3 uppercase tracking-[0.08em] mt-3">{message}</p>
         
         {status === 'error' && (
-            <button onClick={() => navigate('/')} className="mt-6 px-4 py-2 bg-slate-200 text-slate-700 rounded-lg font-bold text-sm hover:bg-slate-300 transition">
+            <button onClick={() => navigate('/')} className="mt-6 w-full py-2.5 bg-surface-2 hover:bg-fill-7 text-body-2 rounded font-bold text-[12px] uppercase tracking-[0.08em] transition-colors">
                 Volver a intentar
             </button>
         )}

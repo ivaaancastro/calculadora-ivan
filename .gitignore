@@ -10,7 +10,17 @@ lerna-debug.log*
 node_modules
 dist
 dist-ssr
+coverage/
 *.local
+
+# Playwright artifacts
+playwright-report/
+test-results/
+
+# Environment files (no versionar secretos)
+.env
+.env.*
+!.env.example
 
 # Editor directories and files
 .vscode/*
@@ -22,3 +32,19 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# OpenCode / skills configuration (entorno del agente, no del proyecto)
+.agents/
+.opencode/skills/
+opencode.json
+skills-lock.json
+
+# Herramientas de agente (no versionar)
+.playwright-mcp/
+.taste-skill/
+
+# Estado local del CLI de Supabase
+supabase/.temp/
+
+# Copias de conflicto del sincronizador de ficheros (p. ej. «cursorStore 2.js»)
+* 2.*

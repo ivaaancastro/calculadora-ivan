@@ -1,0 +1,285 @@
+import React from 'react';
+import {
+    ComposedChart, Area, Scatter, XAxis, YAxis, CartesianGrid,
+    Tooltip as RechartsTooltip, ResponsiveContainer
+} from 'recharts';
+import { MousePointer2, RefreshCw } from 'lucide-react';
+import { formatInterval, formatPace } from '../../hooks/useFitnessAnalytics';
+import { useChartTheme } from '../charts/useChartTheme';
+import { useChartMotion } from '../charts/useChartMotion';
+import { Button, ChartTooltip, InfoTooltip, Segmented } from '../ui';
+import { StatsCard } from './StatsCard';
+import { formatNumber } from '../../utils/formatters';
+import { chartFigureProps, summarizeSeries, summarizeCategories } from '../charts/chartA11y';
+import { axisProps } from '../charts/axisProps.js';
+
+export const MmpAndEfCard = ({
+    activities,
+    onSelectActivity,
+    curveSport,
+    setCurveSport,
+    mmpTimeframe,
+    setMmpTimeframe,
+    curveType,
+    setCurveType,
+    currentCurve,
+    curveColor,
+    curveUnit,
+    isPace,
+    analytics,
+    peaksViewMode = 'period',
+    setPeaksViewMode,
+    telemetryStats,
+    isLoadingHistoricalStreams,
+    handleDeepSync,
+    isDeepSyncing,
+    deepSyncProgress
+}) => {
+    const ct = useChartTheme();
+    const motion = useChartMotion();
+    const enter = motion.active ? motion.props : {};
+    const renderCustomCurveTooltip = ({ active, payload, label }) => {
+        if (active && payload && payload.length) {
+            const data = payload[0].payload;
+            return (
+                <ChartTooltip variant="card" className="min-w-[150px]">
+                    <p className="text-2xs text-zinc-400 uppercase tracking-[0.08em] mb-1">Pico de {label}</p>
+                    <p className="text-sm font-bold mb-2" style={{ color: curveColor }}>
+                        {isPace ? formatPace(data.value) : data.value} <span className="text-2xs font-bold">{curveUnit}</span>
+                    </p>
+                    {data.actName && (
+                        <div className="border-t border-zinc-700 pt-2 mt-1">
+                            <p className="text-2xs text-zinc-200 truncate font-bold">{data.actName}</p>
+                            <p className="text-2xs text-zinc-500">{new Date(data.actDate).toLocaleDateString()}</p>
+                            <div className="flex items-center gap-1 text-2xs text-blue-400 mt-1 font-bold uppercase tracking-[0.08em]">
+                                <MousePointer2 size={8} /> Clic en el punto para abrir
+                            </div>
+                        </div>
+                    )}
+                </ChartTooltip>
+            );
+        }
+        return null;
+    };
+
+    const renderCustomEfTooltip = ({ active, payload }) => {
+        if (active && payload && payload.length) {
+            const data = payload[0].payload;
+            const isRun = curveSport === 'run';
+            return (
+                <ChartTooltip variant="card" className="w-48 z-tooltip">
+                    <p className="text-xs font-semibold text-ink-3 mb-1.5 border-b border-slate-200/50 dark:border-zinc-700/50 pb-1">Factor de Eficiencia</p>
+                    <div className="flex justify-between items-end mb-2">
+                        <span className="text-xl font-bold text-ef leading-none">{data.ef}</span>
+                        <span className="text-2xs text-slate-500 font-medium uppercase">{isRun ? 'm/bpm' : 'w/bpm'}</span>
+                    </div>
+                    <div className="grid grid-cols-2 gap-2 mb-2 bg-zinc-800 p-2 rounded">
+                        <div>
+                            <p className="text-2xs uppercase text-zinc-500 font-bold mb-0.5">{isRun ? 'Ritmo' : 'Potencia'}</p>
+                            <p className="text-xs font-bold text-zinc-200">{isRun ? data.pace : `${data.watts}w`}</p>
+                        </div>
+                        <div>
+                            <p className="text-2xs uppercase text-zinc-500 font-bold mb-0.5">Pulso</p>
+                            <p className="text-xs font-bold text-hr-soft">{data.hr} ppm</p>
+                        </div>
+                    </div>
+                    <div className="border-t border-slate-200/50 dark:border-zinc-700/50 pt-2 mt-1">
+                        <p className="text-[12px] text-body-2 truncate font-semibold" title={data.name}>{data.name}</p>
+                        <p className="text-2xs text-slate-500">{new Date(data.date).toLocaleDateString()}</p>
+                        <div className="flex items-center gap-1 text-2xs text-blue-500 mt-2 font-medium">
+                            <MousePointer2 size={10} /> Clic en el punto para abrir
+                        </div>
+                    </div>
+                </ChartTooltip>
+            );
+        }
+        return null;
+    };
+
+    return (
+        <StatsCard
+            id="mmp"
+            title="Potencial y récords"
+            info="Análisis de eficiencia aeróbica y curvas de potencia/ritmo/FC máxima segundo a segundo"
+            actions={
+                <>
+                    <Segmented
+                        variant="card"
+                        aria-label="Deporte de las curvas"
+                        optionClassName="px-4 py-1.5"
+                        value={curveSport}
+                        onChange={setCurveSport}
+                        options={[
+                            { value: 'bike', label: 'Bici', tone: 'action' },
+                            { value: 'run', label: 'Carrera', tone: 'run' },
+                        ]}
+                    />
+                    <Segmented
+                        variant="card"
+                        size="sm"
+                        aria-label="Periodo de las curvas"
+                        optionClassName="px-3 py-1.5"
+                        value={mmpTimeframe}
+                        onChange={setMmpTimeframe}
+                        options={['90d', '1y', 'all'].map((t) => ({ value: t, label: t === 'all' ? 'Todo' : t.toUpperCase() }))}
+                    />
+                    <Segmented
+                        variant="card"
+                        size="sm"
+                        aria-label="Métrica de la curva"
+                        optionClassName="px-3 py-1.5"
+                        value={curveType}
+                        onChange={setCurveType}
+                        options={['power', 'speed', 'hr'].map((t) => ({ value: t, label: t === 'power' ? 'Potencia' : t === 'speed' ? (curveSport === 'run' ? 'Ritmo' : 'Veloc.') : 'Pulso' }))}
+                    />
+                </>
+            }
+        >
+                {((telemetryStats && telemetryStats.total > 0) || isLoadingHistoricalStreams) && (
+                    <div className="flex flex-wrap items-center gap-x-4 gap-y-2 mb-6 text-[12px] text-ink-3">
+                        {telemetryStats && telemetryStats.total > 0 && (
+                            <span className="flex items-center gap-1.5">
+                                <span aria-hidden="true" className={`w-1.5 h-1.5 rounded-full ${telemetryStats.percentage >= 85 ? 'bg-positive' : (telemetryStats.percentage >= 40 ? 'bg-warning' : 'bg-danger')}`} />
+                                Telemetría: {telemetryStats.withStreams}/{telemetryStats.total} ({telemetryStats.percentage} %)
+                                <InfoTooltip text="Las curvas MMP requieren telemetría detallada. Las sincronizaciones rápidas de Strava solo traen resúmenes hasta procesar el Deep Sync." />
+                            </span>
+                        )}
+                        {isLoadingHistoricalStreams && (
+                            <span className="flex items-center gap-1.5 text-action">
+                                <RefreshCw size={12} className="animate-spin" aria-hidden="true" />
+                                Cargando telemetría histórica…
+                            </span>
+                        )}
+                        {telemetryStats && telemetryStats.withStreams < telemetryStats.total && handleDeepSync && (
+                            <Button variant="link" onClick={handleDeepSync} disabled={isDeepSyncing} className="flex items-center gap-1.5">
+                                <RefreshCw size={12} className={isDeepSyncing ? 'animate-spin' : ''} aria-hidden="true" />
+                                {isDeepSyncing ? `Descargando (${deepSyncProgress?.current || 0}/${deepSyncProgress?.total || 0})…` : 'Completar telemetría'}
+                            </Button>
+                        )}
+                    </div>
+                )}
+
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 lg:gap-10">
+                    {/* EF TREND */}
+                    <div className="flex flex-col lg:col-span-1">
+                        <div className="flex items-center gap-2 mb-4">
+                            <span className="text-[12px] font-semibold uppercase tracking-[0.08em] text-ink-3">Eficiencia aeróbica (EF)</span>
+                            <div className={`px-2 py-0.5 rounded-full text-2xs font-bold uppercase whitespace-nowrap ${curveSport === 'bike' ? 'bg-power-tint text-power-ink-2' : 'bg-sport-run-tint text-sport-run-ink-3'}`}>
+                                {curveSport === 'bike' ? 'Potencia / FC' : 'Ritmo / FC'}
+                            </div>
+                            <InfoTooltip text={curveSport === 'bike' ? "Relación entre vatios medios y pulso medio. Un EF al alza indica que eres más eficiente (generas más vatios a menos pulso)." : "Relación entre velocidad (m/min) y pulso medio. Un EF al alza indica que eres más eficiente (corres más rápido a menos pulso)."} />
+                        </div>
+                        <div className="h-[220px] w-full" {...chartFigureProps('Factor de eficiencia (EF)', summarizeSeries(analytics?.efData?.[curveSport] || [], [{ key: 'ef', label: 'EF' }]))}>
+                            <ResponsiveContainer width="100%" height="100%">
+                                <ComposedChart data={analytics?.efData?.[curveSport] || []}>
+                                    <defs>
+                                        <linearGradient id="efGrad" x1="0" y1="0" x2="0" y2="1">
+                                            <stop offset="5%" stopColor={ct.series.ef} stopOpacity={0.15} />
+                                            <stop offset="95%" stopColor={ct.series.ef} stopOpacity={0} />
+                                        </linearGradient>
+                                    </defs>
+                                    <CartesianGrid strokeDasharray="2 2" stroke={ct.anatomy.gridZinc} opacity={0.1} vertical={false} />
+                                    <XAxis dataKey="dateLabel" hide />
+                                    <YAxis hide domain={['dataMin - 0.1', 'dataMax + 0.1']} />
+                                    <RechartsTooltip content={renderCustomEfTooltip} isAnimationActive={false} />
+                                    <Area type="monotone" dataKey="ef" stroke={ct.series.ef} strokeWidth={3} fill="url(#efGrad)" activeDot={{ r: 5, fill: ct.series.ef, strokeWidth: 2, stroke: ct.anatomy.dotRing }} isAnimationActive={false} {...enter} />
+                                    <Scatter
+                                        dataKey="ef"
+                                        fill="transparent"
+                                        cursor="pointer"
+                                        onClick={(data) => {
+                                            const act = activities.find(a => a.id === data.id);
+                                            if (act && onSelectActivity) onSelectActivity(act);
+                                        }}
+                                    />
+                                </ComposedChart>
+                            </ResponsiveContainer>
+                        </div>
+                    </div>
+
+                    {/* MMP CURVE */}
+                    <div className="flex flex-col lg:col-span-1 lg:border-x border-line lg:px-6">
+                        <div className="flex items-center gap-2 mb-4">
+                            <span className="text-[12px] font-semibold uppercase tracking-[0.08em] text-ink-3">Curva MMP</span>
+                            <InfoTooltip text="Tu mejor potencia/ritmo para cada duración. Refleja tu perfil de capacidades y récords históricos." />
+                        </div>
+                        <div className="h-[220px] w-full" {...chartFigureProps(curveType === 'power' ? 'Curva de potencia máxima' : curveType === 'speed' ? 'Curva de velocidad máxima' : 'Curva de FC máxima', summarizeCategories(currentCurve, 'name', 'value'))}>
+                            <ResponsiveContainer width="100%" height="100%">
+                                <ComposedChart data={currentCurve}>
+                                    <CartesianGrid strokeDasharray="3 3" stroke={ct.anatomy.grid2} opacity={0.3} vertical={false} />
+                                    <XAxis dataKey="name" {...axisProps(ct, { fill: ct.anatomy.tick, fontWeight: 700 })} />
+                                    <YAxis hide reversed={isPace} domain={['auto', 'auto']} />
+                                    <RechartsTooltip content={renderCustomCurveTooltip} isAnimationActive={false} />
+                                    <Area type="stepAfter" dataKey="value" stroke={curveColor} strokeWidth={3} fill={curveColor} fillOpacity={0.05} dot={false} isAnimationActive={false} {...enter} />
+                                    <Scatter
+                                        dataKey="value"
+                                        fill="transparent"
+                                        cursor="pointer"
+                                        onClick={(data) => {
+                                            if (data.actId && onSelectActivity) {
+                                                const act = activities.find(a => a.id === data.actId);
+                                                if (act) onSelectActivity(act);
+                                            }
+                                        }}
+                                    />
+                                </ComposedChart>
+                            </ResponsiveContainer>
+                        </div>
+                    </div>
+
+                    {/* MMP PEAKS TABLE */}
+                    <div className="flex flex-col lg:col-span-1">
+                        <div className="flex items-center justify-between gap-2 mb-2">
+                            <div className="flex items-center gap-2">
+                                <span className="text-[12px] font-semibold uppercase tracking-[0.08em] text-ink-3">
+                                    {peaksViewMode === 'alltime' ? 'Récords absolutos' : `Récords (${mmpTimeframe === 'all' ? 'Todo' : mmpTimeframe.toUpperCase()})`}
+                                </span>
+                                <InfoTooltip text={peaksViewMode === 'alltime' ? "Tus mejores marcas de todos los tiempos en actividades con telemetría registrada." : "Tus mejores marcas dentro del periodo seleccionado arriba (90d / 1y / Todo)."} />
+                            </div>
+                            <Segmented
+                                variant="card"
+                                size="xs"
+                                optionClassName="px-2 py-1"
+                                value={peaksViewMode}
+                                onChange={(mode) => setPeaksViewMode && setPeaksViewMode(mode)}
+                                options={[
+                                    { value: 'period', label: 'Periodo' },
+                                    { value: 'alltime', label: 'Histórico' },
+                                ]}
+                            />
+                        </div>
+                        {(() => {
+                            const metricKey = curveType === 'power' ? 'pwr' : (curveType === 'speed' ? 'spd' : 'hr');
+                            const peaks = [1, 60, 300, 1200]
+                                .map((secs) => ({ secs, pk: analytics?.peaksRecord?.[curveSport]?.[metricKey]?.[secs] }))
+                                .filter(({ pk }) => pk?.value > 0);
+                            if (peaks.length === 0) {
+                                return <p className="py-4 text-sm text-ink-4">Sin récords con telemetría en este periodo.</p>;
+                            }
+                            return (
+                                <ul className="m-0 p-0 list-none divide-y divide-line">
+                                    {peaks.map(({ secs, pk }) => {
+                                        const displayVal = curveType === 'speed'
+                                            ? (curveSport === 'run' ? formatPace(16.6666667 / pk.value) : formatNumber(pk.value * 3.6, 1))
+                                            : Math.round(pk.value);
+                                        return (
+                                            <li key={secs} className="flex items-center justify-between gap-3 min-h-14 py-2">
+                                                <span className="text-sm font-medium text-ink">{formatInterval(secs)}</span>
+                                                <div className="text-right">
+                                                    <p className="text-base font-semibold text-ink tabular-nums">
+                                                        {displayVal}
+                                                        <span className="ml-1 text-[12px] font-medium text-ink-4">{curveUnit}</span>
+                                                    </p>
+                                                    {pk.actDate && <p className="font-mono text-[12px] text-ink-4">{new Date(pk.actDate).toLocaleDateString('es-ES')}</p>}
+                                                </div>
+                                            </li>
+                                        );
+                                    })}
+                                </ul>
+                            );
+                        })()}
+                    </div>
+                </div>
+        </StatsCard>
+    );
+};
