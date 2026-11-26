@@ -7,7 +7,8 @@ import { Settings } from 'lucide-react';
 import { formatInterval } from '../../hooks/useFitnessAnalytics';
 import { useChartTheme } from '../charts/useChartTheme';
 import { useChartMotion } from '../charts/useChartMotion';
-import { Card, chartTooltipStyle, InfoTooltip, Segmented } from '../ui';
+import { Button, chartTooltipStyle, Segmented } from '../ui';
+import { StatsCard } from './StatsCard';
 import { formatNumber } from '../../utils/formatters';
 import { chartFigureProps, summarizeCategories } from '../charts/chartA11y';
 import { axisProps } from '../charts/axisProps.js';
@@ -29,26 +30,21 @@ export const PowerProfileCard = ({
     const motion = useChartMotion();
     const enter = motion.active ? motion.props : {};
     return (
-        <section className="mb-8">
-            <Card variant="panel" className="p-6 sm:p-8">
-                <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-10">
-                    <div className="flex items-center gap-2">
-                        <h3 className="text-2xs font-bold text-ink-4 uppercase tracking-[0.1em]">Perfil de Potencia</h3>
-                        <InfoTooltip text="Tu potencia máxima comparada con categorías típicas (Coggan)." />
-                    </div>
-                    <button
-                        onClick={() => setShowPowerConfig(!showPowerConfig)}
-                        className={`flex items-center gap-2 px-4 py-1.5 rounded-xl text-2xs font-bold uppercase tracking-[0.08em] transition-paint border shadow-sm ${showPowerConfig ? 'bg-surface-2 border-line-2 text-action-bright' : 'bg-surface border-line text-slate-400 hover:text-slate-600'}`}
-                    >
-                        <Settings size={14} /> {showPowerConfig ? 'Cerrar' : 'Configurar'}
-                    </button>
-                </div>
-
+        <StatsCard
+            id="power-profile"
+            title="Perfil de potencia"
+            info="Tu potencia máxima comparada con categorías típicas (Coggan)."
+            actions={
+                <Button variant="secondary" aria-expanded={showPowerConfig} onClick={() => setShowPowerConfig(!showPowerConfig)} className="flex items-center gap-2">
+                    <Settings size={14} aria-hidden="true" /> {showPowerConfig ? 'Cerrar' : 'Configurar'}
+                </Button>
+            }
+        >
                 {showPowerConfig && (
-                    <div className="mb-10 p-6 bg-sunken-3 rounded-2xl border border-line-soft animate-in slide-in-from-top-2 duration-300">
+                    <div className="mb-6 pb-6 border-b border-line">
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                             <div>
-                                <p className="text-2xs font-bold text-slate-400 uppercase tracking-[0.08em] mb-6">Unidad de Medida</p>
+                                <p className="text-[12px] font-semibold uppercase tracking-[0.08em] text-ink-3 mb-3">Unidad de Medida</p>
                                 <Segmented
                                     variant="card"
                                     size="md-wide"
@@ -63,7 +59,7 @@ export const PowerProfileCard = ({
                                 />
                             </div>
                             <div>
-                                <p className="text-2xs font-bold text-slate-400 uppercase tracking-[0.08em] mb-6">Periodo Analizado</p>
+                                <p className="text-[12px] font-semibold uppercase tracking-[0.08em] text-ink-3 mb-3">Periodo Analizado</p>
                                 <Segmented
                                     variant="card"
                                     size="md-wide"
@@ -79,7 +75,7 @@ export const PowerProfileCard = ({
                                 />
                             </div>
                             <div>
-                                <p className="text-2xs font-bold text-slate-400 uppercase tracking-[0.08em] mb-6">Tiempos Visibles</p>
+                                <p className="text-[12px] font-semibold uppercase tracking-[0.08em] text-ink-3 mb-3">Tiempos Visibles</p>
                                 <div className="flex flex-wrap gap-2">
                                     {[5, 60, 300, 1200, 3600, 7200].map(id => (
                                         <button
@@ -96,9 +92,9 @@ export const PowerProfileCard = ({
                     </div>
                 )}
 
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-10">
                     <div className="lg:col-span-2">
-                        <div className="h-[340px] w-full bg-sunken-7 rounded-3xl p-4 border border-line-faint-2" {...chartFigureProps('Perfil de potencia frente a categorías', summarizeCategories(ppChartData, 'name', 'Usuario', powerUnit === 'wkg' ? 'W/kg' : 'W'))}>
+                        <div className="h-[300px] w-full" {...chartFigureProps('Perfil de potencia frente a categorías', summarizeCategories(ppChartData, 'name', 'Usuario', powerUnit === 'wkg' ? 'W/kg' : 'W'))}>
                             <ResponsiveContainer width="100%" height="100%">
                                 <LineChart data={ppChartData} margin={{ top: 10, right: 10, left: -20, bottom: 5 }}>
                                     <CartesianGrid strokeDasharray="3 3" stroke={ct.anatomy.grid2} opacity={0.3} vertical={false} />
@@ -115,12 +111,12 @@ export const PowerProfileCard = ({
 
                         {/* Qualitative Strengths */}
                         {profile && (
-                            <div className="mt-8 grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 gap-x-6 divide-y divide-line sm:divide-y-0">
                                 {profile?.strengths?.map((s, i) => (
-                                    <div key={i} className="flex items-center justify-between p-4 rounded-2xl bg-sunken-3 border border-line-soft group">
+                                    <div key={i} className="flex items-center justify-between gap-3 py-3 min-h-14">
                                         <div>
-                                            <p className="text-2xs font-bold text-ink-2-soft uppercase tracking-tight mb-0.5">{s.area}</p>
-                                            <p className="text-2xs text-slate-400 font-bold uppercase tracking-tighter opacity-70 leading-tight">{s.desc}</p>
+                                            <p className="text-sm font-medium text-ink">{s.area}</p>
+                                            <p className="text-[12px] text-ink-4">{s.desc}</p>
                                         </div>
                                         <span className={`text-2xs font-bold uppercase px-2 py-0.5 rounded-md shadow-sm border ${s.level === 'elite' ? 'text-purple-600 bg-purple-50 border-purple-100 dark:bg-purple-900/20 dark:border-purple-800/30' : s.level === 'good' ? 'text-emerald-600 bg-positive-tint border-emerald-100 dark:border-emerald-800/30' : 'text-slate-500 bg-sunken-9 border-slate-200 dark:border-zinc-700'}`}>
                                             {s.level === 'elite' ? 'Élite' : s.level === 'good' ? 'Destacado' : 'Base'}
@@ -130,26 +126,27 @@ export const PowerProfileCard = ({
                             </div>
                         )}
                     </div>
-                    <div className="space-y-3 overflow-y-auto max-h-[480px] custom-scrollbar pr-2 pt-1 border-l border-line-faint-2 pl-6">
-                        <p className="text-2xs font-bold text-slate-400 uppercase tracking-[0.08em] mb-4">Mejores Esfuerzos</p>
+                    <div className="lg:border-l lg:border-line lg:pl-6">
+                        <p className="text-[12px] font-semibold uppercase tracking-[0.08em] text-ink-3 mb-1">Mejores esfuerzos</p>
+                        <ul className="m-0 p-0 list-none divide-y divide-line">
                         {ppChartData.map(p => (
-                            <div key={p.name} className="flex items-center justify-between p-4 rounded-xl bg-sunken-7 border border-slate-100/50 dark:border-zinc-800/50 hover:border-blue-500/20 transition-paint cursor-default group">
+                            <li key={p.name} className="flex items-center justify-between gap-3 min-h-14 py-2">
                                 <div>
-                                    <p className="text-2xs font-bold text-slate-400 uppercase tracking-[0.08em] mb-1">{p.name}</p>
-                                    <p className="text-sm font-bold text-ink-2 leading-none">
+                                    <p className="text-sm font-medium text-ink">{p.name}</p>
+                                    <p className="font-mono text-[12px] text-ink-4 tabular-nums">
                                         {powerUnit === 'w' ? p['Usuario'] : Math.round(p['Usuario'] * (powerProfile?.weight || 70))}
-                                        <span className="text-2xs ml-1 opacity-40 font-bold uppercase">W</span>
+                                        <span className="ml-1">W</span>
                                     </p>
                                 </div>
                                 <div className="text-right">
-                                    <p className="text-lg font-bold text-blue-500">{powerUnit === 'wkg' ? p['Usuario'] : formatNumber(p['Usuario'] / (powerProfile?.weight || 70), 2)}</p>
-                                    <p className="text-2xs font-bold text-slate-400 uppercase tracking-[0.08em] mt-0.5 leading-none">W/kg</p>
+                                    <p className="text-lg font-semibold text-ink tabular-nums">{powerUnit === 'wkg' ? p['Usuario'] : formatNumber(p['Usuario'] / (powerProfile?.weight || 70), 2)}</p>
+                                    <p className="font-mono text-[12px] text-ink-4">W/kg</p>
                                 </div>
-                            </div>
+                            </li>
                         ))}
+                        </ul>
                     </div>
                 </div>
-            </Card>
-        </section>
+        </StatsCard>
     );
 };

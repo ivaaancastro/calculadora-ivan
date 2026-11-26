@@ -3,10 +3,10 @@ import {
     AreaChart, Area, XAxis, YAxis, CartesianGrid,
     Tooltip as RechartsTooltip, ResponsiveContainer
 } from 'recharts';
-import { ArrowUp, ArrowDown, Minus } from 'lucide-react';
 import { useChartTheme } from '../charts/useChartTheme';
 import { useChartMotion } from '../charts/useChartMotion';
-import { Card, chartTooltipStyle, InfoTooltip } from '../ui';
+import { chartTooltipStyle, Delta, Stat } from '../ui';
+import { StatsCard } from './StatsCard';
 import { chartFigureProps, summarizeCategories } from '../charts/chartA11y';
 import { axisProps } from '../charts/axisProps.js';
 
@@ -20,34 +20,25 @@ export const EstimatedFtpCard = ({
     const motion = useChartMotion();
     const enter = motion.active ? motion.props : {};
     return (
-        <section className="mb-12">
-            <Card variant="panel" className="p-6 sm:p-8">
-                <div className="flex items-center gap-2 mb-10">
-                    <h3 className="text-2xs font-bold text-ink-4 uppercase tracking-[0.1em]">FTP Estimado</h3>
-                    <InfoTooltip text="Umbral funcional de potencia proyectado (eFTP)." />
-                    <span className="text-2xs font-bold text-emerald-600 bg-emerald-50 dark:bg-emerald-950/20 px-2.5 py-0.5 rounded-lg uppercase tracking-[0.08em] border border-emerald-100 dark:border-emerald-900/30 ml-2">Modelo</span>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
-                    <div className="flex flex-col">
-                        <div className="flex items-baseline gap-2">
-                            <span className="text-4xl font-bold tracking-tighter text-ink-soft leading-none">{ftp?.eFTP || '--'}</span>
-                            <span className="text-xs font-bold text-slate-400 uppercase tracking-[0.08em]">Vatios</span>
-                        </div>
-                        {ftp?.wPerKg && (
-                            <p className="text-2xl font-bold text-power tracking-tighter mt-3">{ftp.wPerKg} <span className="text-2xs text-slate-400 font-bold uppercase tracking-[0.08em] ml-1">W/kg</span></p>
-                        )}
-
-                        {ftpDiff !== null && (
-                            <div className="mt-8 flex items-center gap-2.5 p-3.5 rounded-2xl bg-sunken-3 border border-line-soft w-fit">
-                                {ftpDiff > 0 ? <ArrowUp size={16} className="text-positive" /> : ftpDiff < 0 ? <ArrowDown size={16} className="text-danger" /> : <Minus size={16} className="text-slate-400" />}
-                                <span className={`text-2xs font-bold uppercase tracking-tight ${ftpDiff > 0 ? 'text-positive-solid' : ftpDiff < 0 ? 'text-danger-solid' : 'text-slate-500'}`}>
-                                    {ftpDiff > 0 ? '+' : ''}{ftpDiff}W <span className="opacity-50 font-bold ml-1">vs config ({configFTP}W)</span>
-                                </span>
-                            </div>
-                        )}
+        <StatsCard
+            id="ftp"
+            title="FTP estimado"
+            info="Umbral funcional de potencia proyectado (eFTP) a partir de tus mejores esfuerzos."
+            badge={<span className="text-[11px] font-semibold text-ink-3 bg-fill-3 px-2 py-0.5 rounded-full">Modelo</span>}
+        >
+                <div className="grid grid-cols-1 md:grid-cols-[minmax(0,1fr)_minmax(0,2fr)] gap-6 md:gap-10 items-center">
+                    <div className="flex flex-col gap-4">
+                        <Stat
+                            label="eFTP"
+                            size="lg"
+                            value={ftp.eFTP}
+                            unit="W"
+                            delta={Number.isFinite(ftpDiff) && <Delta value={ftpDiff} unit=" W" size="sm" label={`frente a tu FTP configurado (${configFTP} W)`} />}
+                            sub={Number.isFinite(ftpDiff) ? `Configurado: ${configFTP} W` : undefined}
+                        />
+                        {ftp.wPerKg && <Stat label="Relación" size="sm" mono value={ftp.wPerKg} unit="W/kg" />}
                     </div>
-                    <div className="h-[240px] w-full bg-sunken-7 rounded-3xl p-4 border border-line-faint-2" {...chartFigureProps('Curva de potencia para el eFTP', summarizeCategories(curveChartData, 'name', 'actual', 'W'))}>
+                    <div className="h-[220px] w-full" {...chartFigureProps('Curva de potencia para el eFTP', summarizeCategories(curveChartData, 'name', 'actual', 'W'))}>
                         {curveChartData.length > 0 ? (
                             <ResponsiveContainer width="100%" height="100%">
                                 <AreaChart data={curveChartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
@@ -65,11 +56,10 @@ export const EstimatedFtpCard = ({
                                 </AreaChart>
                             </ResponsiveContainer>
                         ) : (
-                            <div className="h-full flex items-center justify-center text-slate-400 text-2xs font-bold uppercase tracking-[0.08em] bg-sunken-7 rounded-3xl border border-dashed border-slate-200 dark:border-zinc-800/50">No hay datos de potencia</div>
+                            <p className="h-full flex items-center justify-center text-sm text-ink-4">Aún no hay mejores esfuerzos para dibujar la curva.</p>
                         )}
                     </div>
                 </div>
-            </Card>
-        </section>
+        </StatsCard>
     );
 };

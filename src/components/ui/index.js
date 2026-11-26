@@ -4,6 +4,7 @@
  */
 export { Card, SectionHeader } from './Card.jsx';
 export { Segmented } from './Segmented.jsx';
+export { segmentedTabId, segmentedPanelId } from './segmentedClasses.js';
 export { Input, Select } from './Field.jsx';
 export { Button, IconButton } from './Button.jsx';
 export { Modal } from './Modal.jsx';

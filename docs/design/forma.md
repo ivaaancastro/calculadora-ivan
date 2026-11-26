@@ -128,3 +128,11 @@ regla vive fuera), `label` (contexto para lectores de pantalla), `size` `sm | md
 ### `EmptyState`
 `icon`, `title`, `description`, `tone` (`neutral | info | warning | danger`; `danger` es el
 estado de error, con `role="alert"`), `action` (o `children`), `surface`, `className`.
+
+### `Segmented tabs`
+Con `tabs` e `idPrefix` (y `options`), el control es una lista de pestañas accesible:
+`role="tablist"`, opciones `role="tab"` con `aria-selected`, `aria-controls` y tabindex itinerante;
+flechas, Inicio y Fin cambian de pestaña. El panel usa `segmentedPanelId(idPrefix, value)` como `id`
+y `aria-labelledby={segmentedTabId(idPrefix, value)}`. Usa `useId()` para el prefijo: el carrusel
+móvil monta cada pantalla dos veces. Ejemplo: `pages/FitnessStatsPage.jsx` (Carga · Potencia ·
+Carrera · Volumen).
