@@ -128,13 +128,13 @@ export const PmcFloatingChart = ({ pmcByDate, onClose, initPos }) => {
                 onPointerDown={handleDragDown} onPointerMove={handleDragMove} onPointerUp={handleDragUp}>
                 <div className="flex items-center gap-2">
                     <Activity size={12} data-cal="pmc-icon" className="text-violet-500" />
-                    <span className="text-[10px] font-black text-body-soft-2 uppercase tracking-widest">Proyección de Forma</span>
+                    <span className="text-2xs font-black text-body-soft-2 uppercase tracking-widest">Proyección de Forma</span>
                 </div>
                 {lastReal && (
                     <div className="flex items-center gap-3 mr-2">
-                        <span data-cal="pmc-stat" className="text-[9px] font-bold text-metric-ctl">CTL {Math.round(lastReal.ctl)}</span>
-                        <span data-cal="pmc-stat" className="text-[9px] font-bold text-legacy-atl-red">ATL {Math.round(lastReal.atl)}</span>
-                        <span data-cal="pmc-stat" className={`text-[9px] font-bold ${lastReal.tcb >= 0 ? 'text-legacy-tsb-up' : 'text-legacy-tsb-down'}`}>
+                        <span data-cal="pmc-stat" className="text-2xs font-bold text-metric-ctl">CTL {Math.round(lastReal.ctl)}</span>
+                        <span data-cal="pmc-stat" className="text-2xs font-bold text-legacy-atl-red">ATL {Math.round(lastReal.atl)}</span>
+                        <span data-cal="pmc-stat" className={`text-2xs font-bold ${lastReal.tcb >= 0 ? 'text-legacy-tsb-up' : 'text-legacy-tsb-down'}`}>
                             TSB {lastReal.tcb >= 0 ? '+' : ''}{Math.round(lastReal.tcb)}
                         </span>
                     </div>
@@ -145,7 +145,7 @@ export const PmcFloatingChart = ({ pmcByDate, onClose, initPos }) => {
             </div>
 
             {/* Legend / Toolbar */}
-            <div data-cal="pmc-legend" className="flex items-center gap-4 px-4 pt-2.5 text-[10px] font-bold text-ink-3">
+            <div data-cal="pmc-legend" className="flex items-center gap-4 px-4 pt-2.5 text-2xs font-bold text-ink-3">
                 <label className="flex items-center gap-1.5 cursor-pointer hover:text-blue-500 transition-colors">
                     <input type="checkbox" checked={viewOpts.top} onChange={e => setViewOpts(v => ({ ...v, top: e.target.checked }))} data-series="ctl" className="accent-blue-500 rounded-sm w-3 h-3" />
                     <span>Fitness / Fatiga</span>
@@ -179,7 +179,7 @@ export const PmcFloatingChart = ({ pmcByDate, onClose, initPos }) => {
                 {[minTop, (minTop + maxTop) / 2, maxTop].map(v => (
                     <g key={`top-${v}`}>
                         <line x1={PAD.l} y1={yTopS(v)} x2={W - PAD.r} y2={yTopS(v)} stroke={ct.anatomy.grid2} strokeWidth="0.5" strokeDasharray="3,3" />
-                        <text x={PAD.l - 6} y={yTopS(v) + 3} textAnchor="end" fontSize={9} fill={ct.anatomy.tick}>{Math.round(v)}</text>
+                        <text x={PAD.l - 6} y={yTopS(v) + 3} textAnchor="end" fontSize={11} fill={ct.anatomy.tick}>{Math.round(v)}</text>
                     </g>
                 ))}
 
@@ -189,13 +189,13 @@ export const PmcFloatingChart = ({ pmcByDate, onClose, initPos }) => {
                 <rect x={PAD.l} y={yMidS(25)} width={cw} height={yMidS(5) - yMidS(25)} fill={ct.pmc.bandUp} fillOpacity="0.05" />
                 <rect x={PAD.l} y={yMidS(-10)} width={cw} height={yMidS(-30) - yMidS(-10)} fill={ct.pmc.bandDown} fillOpacity="0.05" />
                 {[20, 5, -10, -30].map(v => (
-                    <text key={`mid-${v}`} x={PAD.l - 6} y={yMidS(v) + 3} textAnchor="end" fontSize={9} fill={ct.anatomy.tick}>{v}</text>
+                    <text key={`mid-${v}`} x={PAD.l - 6} y={yMidS(v) + 3} textAnchor="end" fontSize={11} fill={ct.anatomy.tick}>{v}</text>
                 ))}
 
                 {/* Y Axis Grid & Labels - BOT */}
                 <line x1={PAD.l} y1={zeroYBot} x2={W - PAD.r} y2={zeroYBot} stroke={ct.anatomy.grid} strokeWidth="1" />
                 {[maxBot, 0, minBot].map(v => (
-                    <text key={`bot-${v}`} x={PAD.l - 6} y={yBotS(v) + 3} textAnchor="end" fontSize={9} fill={ct.anatomy.tick}>{formatNumber(v, 1)}</text>
+                    <text key={`bot-${v}`} x={PAD.l - 6} y={yBotS(v) + 3} textAnchor="end" fontSize={11} fill={ct.anatomy.tick}>{formatNumber(v, 1)}</text>
                 ))}
 
                 {/* Today marker (Vertical Line across all sections) */}
@@ -226,10 +226,10 @@ export const PmcFloatingChart = ({ pmcByDate, onClose, initPos }) => {
                 {/* Current latest values on right edge */}
                 {lastReal && (
                     <g>
-                        <text x={W - PAD.r + 6} y={yTopS(lastReal.ctl) + 3} fontSize={10} fontWeight="bold" fill={ct.pmc.ctlInk}>{Math.round(lastReal.ctl)}</text>
-                        <text x={W - PAD.r + 6} y={yTopS(lastReal.atl) + 3} fontSize={10} fontWeight="bold" fill={ct.pmc.atlInk}>{Math.round(lastReal.atl)}</text>
-                        <text x={W - PAD.r + 6} y={yMidS(lastReal.tcb) + 3} fontSize={10} fontWeight="bold" fill={ct.pmc.tsbInk}>{Math.round(lastReal.tcb)}</text>
-                        <text x={W - PAD.r + 6} y={yBotS(lastReal.ramp) + 3} fontSize={10} fontWeight="bold" fill={ct.pmc.rampInk}>{formatNumber(lastReal.ramp, 1)}</text>
+                        <text x={W - PAD.r + 6} y={yTopS(lastReal.ctl) + 3} fontSize={11} fontWeight="bold" fill={ct.pmc.ctlInk}>{Math.round(lastReal.ctl)}</text>
+                        <text x={W - PAD.r + 6} y={yTopS(lastReal.atl) + 3} fontSize={11} fontWeight="bold" fill={ct.pmc.atlInk}>{Math.round(lastReal.atl)}</text>
+                        <text x={W - PAD.r + 6} y={yMidS(lastReal.tcb) + 3} fontSize={11} fontWeight="bold" fill={ct.pmc.tsbInk}>{Math.round(lastReal.tcb)}</text>
+                        <text x={W - PAD.r + 6} y={yBotS(lastReal.ramp) + 3} fontSize={11} fontWeight="bold" fill={ct.pmc.rampInk}>{formatNumber(lastReal.ramp, 1)}</text>
                     </g>
                 )}
 
@@ -247,7 +247,7 @@ export const PmcFloatingChart = ({ pmcByDate, onClose, initPos }) => {
                 {labels.map((e, li) => {
                     const i = visibleWithRamp.findIndex(v => v.date === e.date);
                     const d = new Date(e.date + 'T00:00:00');
-                    return <text key={li} x={xS(i)} y={H - PAD.b + 14} textAnchor="middle" fontSize={10} fill={ct.anatomy.axis}>
+                    return <text key={li} x={xS(i)} y={H - PAD.b + 14} textAnchor="middle" fontSize={11} fill={ct.anatomy.axis}>
                         {d.toLocaleDateString('es-ES', { day: 'numeric', month: 'short' })}
                     </text>;
                 })}
@@ -257,11 +257,11 @@ export const PmcFloatingChart = ({ pmcByDate, onClose, initPos }) => {
             {hoverEntry && (() => {
                 const tooltipLeft = hover.x > W * 0.65;
                 return (
-                    <div data-cal="pmc-tooltip" className="absolute top-3 pointer-events-none bg-surface-7 border border-line-2 rounded-lg shadow-lg px-3 py-2 text-[10px] z-10 min-w-[130px]"
+                    <div data-cal="pmc-tooltip" className="absolute top-3 pointer-events-none bg-surface-7 border border-line-2 rounded-lg shadow-lg px-3 py-2 text-2xs z-10 min-w-[130px]"
                         style={{ [tooltipLeft ? 'right' : 'left']: tooltipLeft ? 16 : 50 }}>
                         <p className="font-bold text-body-soft-2 mb-1.5">
                             {new Date(hoverEntry.date + 'T00:00:00').toLocaleDateString('es-ES', { weekday: 'short', day: 'numeric', month: 'short' })}
-                            {hoverEntry.projected && <span className="ml-1.5 text-[8px] font-normal text-violet-400 uppercase tracking-wide">proyectado</span>}
+                            {hoverEntry.projected && <span className="ml-1.5 text-2xs font-normal text-violet-400 uppercase tracking-wide">proyectado</span>}
                         </p>
                         <div className="space-y-1">
                             <div className="flex justify-between gap-4">

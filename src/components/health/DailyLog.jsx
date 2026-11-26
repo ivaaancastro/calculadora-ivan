@@ -27,7 +27,7 @@ export const DailyLog = ({ currentSelectedDay, historyReversed, setSelectedDate 
                                     <p className="text-xs sm:text-sm font-bold text-ink capitalize truncate">
                                         {day.dateLabelFull}
                                     </p>
-                                    <p className="text-[10px] text-ink-4">
+                                    <p className="text-2xs text-ink-4">
                                         {day.recoveryInfo.label} • {day.sleep ? `${day.sleep}h sueño` : 'Sin sueño registrado'}
                                     </p>
                                 </div>
@@ -38,7 +38,7 @@ export const DailyLog = ({ currentSelectedDay, historyReversed, setSelectedDate 
                                     <span className={`text-sm sm:text-base font-black font-mono tabular-nums ${day.recoveryInfo.color}`}>
                                         {day.readinessScore}%
                                     </span>
-                                    <div className="flex items-center gap-2 text-[10px] text-slate-400 tabular-nums">
+                                    <div className="flex items-center gap-2 text-2xs text-slate-400 tabular-nums">
                                         {day.rhr > 0 && <span>{day.rhr} lpm</span>}
                                         {day.hrv > 0 && <span>{day.hrv} ms</span>}
                                     </div>

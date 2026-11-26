@@ -95,7 +95,7 @@ export const InteractiveMap = ({ polyline, highResCoords, color, currentPosition
                 {['light', 'dark', 'satellite'].map((type) => (
                     <button
                         key={type} onClick={(e) => { e.stopPropagation(); setMapType(type); }}
-                        className={`px-2.5 py-1 text-[9px] font-bold uppercase transition-colors rounded-sm ${mapType === type ? 'bg-slate-800 text-ink-inverse dark:bg-zinc-200' : 'text-ink-3 hover:text-ink-2-soft'}`}
+                        className={`px-2.5 py-1 text-2xs font-bold uppercase transition-colors rounded-sm ${mapType === type ? 'bg-slate-800 text-ink-inverse dark:bg-zinc-200' : 'text-ink-3 hover:text-ink-2-soft'}`}
                     >
                         {type === 'satellite' ? 'Sat' : type}
                     </button>

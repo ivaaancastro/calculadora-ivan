@@ -3,6 +3,7 @@ import { ComposedChart, Area, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, 
 import { Card, ChartTooltip } from '../ui';
 import { useChartMotion } from '../charts/useChartMotion';
 import { chartFigureProps, summarizeSeries } from '../charts/chartA11y';
+import { axisProps } from '../charts/axisProps.js';
 
 const OPTIMAL_FROM = 67;
 
@@ -11,7 +12,7 @@ const TrendTooltip = ({ active, payload }) => {
     const d = payload[0].payload;
     return (
         <ChartTooltip variant="glass">
-            <p className="text-[10px] font-bold uppercase tracking-wider text-ink-4 pb-1">{d.dateLabelFull || d.date}</p>
+            <p className="text-2xs font-bold uppercase tracking-wider text-ink-4 pb-1">{d.dateLabelFull || d.date}</p>
             <div className="flex justify-between gap-4 font-semibold tabular-nums"><span>Recuperación</span><span>{d.readinessScore}%</span></div>
             {d.sleep > 0 && <div className="flex justify-between gap-4 font-semibold tabular-nums"><span>Sueño</span><span>{d.sleep} h</span></div>}
             {d.rhr > 0 && <div className="flex justify-between gap-4 font-semibold tabular-nums"><span>FC reposo</span><span>{d.rhr} lpm</span></div>}
@@ -46,8 +47,8 @@ export const HistoryTrendChart = ({ historySeries, ct }) => {
                             </linearGradient>
                         </defs>
                         <CartesianGrid stroke={ct.anatomy.grid} opacity={0.3} vertical={false} />
-                        <XAxis dataKey="dateLabel" tick={{ fontSize: 10, fill: ct.anatomy.axis, fontWeight: 500 }} axisLine={false} tickLine={false} minTickGap={24} />
-                        <YAxis yAxisId="left" domain={[0, 100]} tick={{ fontSize: 10, fill: ct.anatomy.axis, fontWeight: 500 }} axisLine={false} tickLine={false} />
+                        <XAxis dataKey="dateLabel" {...axisProps(ct)} minTickGap={24} />
+                        <YAxis yAxisId="left" domain={[0, 100]} {...axisProps(ct)} />
                         <YAxis yAxisId="right" orientation="right" domain={[0, 12]} hide />
                         <ReferenceArea yAxisId="left" y1={OPTIMAL_FROM} y2={100} fill={ct.series.readiness} fillOpacity={0.07} stroke="none" ifOverflow="hidden" />
                         <Tooltip content={<TrendTooltip />} cursor={{ stroke: ct.anatomy.cursor, strokeWidth: 1, strokeDasharray: '4 4' }} isAnimationActive={false} />

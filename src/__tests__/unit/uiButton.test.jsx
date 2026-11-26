@@ -12,7 +12,7 @@ describe('ui/Button recetas', () => {
     expect(classes(buttonClass({ variant: 'inverse' }))).toEqual(
       classes('bg-inverse text-ink-inverse rounded-full text-[11px] font-medium hover:bg-inverse-2 transition-all shadow-sm'),
     );
-    expect(classes(buttonClass({ variant: 'link-muted' }))).toEqual(classes('text-[10px] text-ink-4-fixed hover:text-body-soft-fixed font-medium transition-colors'));
+    expect(classes(buttonClass({ variant: 'link-muted' }))).toEqual(classes('text-2xs text-ink-4-fixed hover:text-body-soft-fixed font-medium transition-colors'));
     expect(classes(buttonClass({ variant: 'danger-text' }))).toEqual(classes('text-faint-fixed hover:text-danger transition-colors'));
   });
 

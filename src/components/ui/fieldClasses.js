@@ -46,7 +46,7 @@ const SELECT = {
     md: 'bg-fill-6 border-0 rounded-xl text-xs sm:text-sm font-semibold text-ink-2-soft focus:outline-none focus:ring-2 focus:ring-action-bright/40 appearance-none cursor-pointer transition-all',
   },
   cell: { md: `bg-sunken text-[11px] font-medium text-body rounded-lg outline-none cursor-pointer ${FOCUS_RING}` },
-  'cell-bare': { md: `bg-transparent text-[10px] text-ink-4 rounded outline-none cursor-pointer ${FOCUS_RING}` },
+  'cell-bare': { md: `bg-transparent text-2xs text-ink-4 rounded outline-none cursor-pointer ${FOCUS_RING}` },
 };
 
 /** Anillos de foco de `inline`: una lista cerrada con los que ya se usaban; el primero es el de por defecto. */

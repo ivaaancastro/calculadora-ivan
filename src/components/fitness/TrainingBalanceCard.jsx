@@ -9,7 +9,7 @@ export const TrainingBalanceCard = ({ balance, balanceDays, setBalanceDays }) =>
             <Card variant="panel" className="p-6 sm:p-8">
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-10">
                     <div className="flex items-center gap-2">
-                        <h3 className="text-[10px] font-bold text-ink-4 uppercase tracking-[0.1em]">Balance de Entrenamiento</h3>
+                        <h3 className="text-2xs font-bold text-ink-4 uppercase tracking-[0.1em]">Balance de Entrenamiento</h3>
                         <InfoTooltip text="Distribución de la carga en los últimos días según intensidad." />
                     </div>
                     <Segmented
@@ -26,13 +26,13 @@ export const TrainingBalanceCard = ({ balance, balanceDays, setBalanceDays }) =>
                     <div className="space-y-12">
                         <div className="grid grid-cols-2 gap-8 px-2">
                             <div className="p-4 rounded-2xl bg-sunken-3 border border-line-soft">
-                                <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1">Carga Total</p>
+                                <p className="text-2xs font-bold text-slate-400 uppercase tracking-widest mb-1">Carga Total</p>
                                 <p className="text-3xl font-black text-ink-soft">{Math.round(balance.totalLoad)} <span className="text-xs font-bold text-slate-400">Pts</span></p>
                             </div>
                             <div className="p-4 rounded-2xl bg-sunken-3 border border-line-soft">
-                                <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1">Ratio An/Ae</p>
+                                <p className="text-2xs font-bold text-slate-400 uppercase tracking-widest mb-1">Ratio An/Ae</p>
                                 <p className="text-3xl font-black text-ink-soft">{formatNumber(balance.anaerobic / (balance.aerobicHigh + balance.aerobicLow || 1), 2)}</p>
-                                <p className="text-[8px] font-bold text-slate-500 uppercase mt-1 tracking-tighter">Aeróbico vs Anaeróbico</p>
+                                <p className="text-2xs font-bold text-slate-500 uppercase mt-1 tracking-tighter">Aeróbico vs Anaeróbico</p>
                             </div>
                         </div>
 
@@ -52,17 +52,17 @@ export const TrainingBalanceCard = ({ balance, balanceDays, setBalanceDays }) =>
                                     <div key={i} className="group">
                                         <div className="flex justify-between items-end mb-4 px-1">
                                             <div className="flex flex-col">
-                                                <span className="text-[10px] font-bold text-ink-3 uppercase tracking-tight">{b.label}</span>
+                                                <span className="text-2xs font-bold text-ink-3 uppercase tracking-tight">{b.label}</span>
                                                 <div className="flex items-center gap-2 mt-1">
                                                     <span className={`text-[13px] font-black ${status === 'Alto' ? 'text-rose-500' : 'text-ink-soft'}`}>{Math.round(b.pct)}%</span>
-                                                    <span className={`text-[8px] font-black uppercase px-1.5 py-0.5 rounded-md border ${status === 'Óptimo' ? 'bg-positive/10 border-positive/20 text-positive' : 'bg-surface-2 border-line-2 text-slate-400'}`}>
+                                                    <span className={`text-2xs font-black uppercase px-1.5 py-0.5 rounded-md border ${status === 'Óptimo' ? 'bg-positive/10 border-positive/20 text-positive' : 'bg-surface-2 border-line-2 text-slate-400'}`}>
                                                         {status}
                                                     </span>
                                                 </div>
                                             </div>
                                             <div className="text-right">
-                                                <span className="text-[10px] font-bold text-body">{Math.round(b.value)} <span className="text-[8px] text-slate-400">TSS</span></span>
-                                                <p className="text-[8px] font-bold text-slate-400 uppercase tracking-tighter">Meta: {Math.round(b.target.min)}-{Math.round(b.target.max)}</p>
+                                                <span className="text-2xs font-bold text-body">{Math.round(b.value)} <span className="text-2xs text-slate-400">TSS</span></span>
+                                                <p className="text-2xs font-bold text-slate-400 uppercase tracking-tighter">Meta: {Math.round(b.target.min)}-{Math.round(b.target.max)}</p>
                                             </div>
                                         </div>
 
@@ -98,10 +98,10 @@ export const TrainingBalanceCard = ({ balance, balanceDays, setBalanceDays }) =>
                             </div>
                             <div className="flex-1">
                                 <div className="flex items-center gap-3 mb-2.5">
-                                    <span className="text-[9px] font-black uppercase tracking-widest px-3 py-1 rounded-full border shadow-sm" style={{ backgroundColor: `${balance.color}15`, color: balance.color, borderColor: `${balance.color}30` }}>
+                                    <span className="text-2xs font-black uppercase tracking-widest px-3 py-1 rounded-full border shadow-sm" style={{ backgroundColor: `${balance.color}15`, color: balance.color, borderColor: `${balance.color}30` }}>
                                         {balance.status}
                                     </span>
-                                    <span className="text-[9px] font-bold text-slate-400 uppercase tracking-tighter bg-white/50 dark:bg-zinc-800/50 px-2.5 py-1 rounded-lg border border-slate-100/50 dark:border-zinc-700/50">
+                                    <span className="text-2xs font-bold text-slate-400 uppercase tracking-tighter bg-white/50 dark:bg-zinc-800/50 px-2.5 py-1 rounded-lg border border-slate-100/50 dark:border-zinc-700/50">
                                         {balance.activityCount} Sesiones
                                     </span>
                                 </div>

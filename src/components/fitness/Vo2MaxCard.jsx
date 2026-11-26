@@ -9,7 +9,7 @@ export const Vo2MaxCard = ({ vo2Sport, setVo2Sport, currentVo2, vo2Level, vo2Sta
             <Card variant="panel" className="p-6 sm:p-8">
                 <div className="flex items-center justify-between mb-10">
                     <div className="flex items-center gap-2">
-                        <h3 className="text-[10px] font-bold text-ink-4 uppercase tracking-[0.1em]">VO₂max</h3>
+                        <h3 className="text-2xs font-bold text-ink-4 uppercase tracking-[0.1em]">VO₂max</h3>
                     </div>
                     <Segmented
                         variant="card"
@@ -27,8 +27,8 @@ export const Vo2MaxCard = ({ vo2Sport, setVo2Sport, currentVo2, vo2Level, vo2Sta
                 <div className="flex items-end gap-3 mb-8">
                     <span className="text-4xl font-bold tracking-tighter" style={{ color: vo2Level.c }}>{currentVo2 > 0 ? currentVo2 : '--'}</span>
                     <div className="pb-1.5">
-                        <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">ml/kg/min</span>
-                        <span className="block text-[10px] font-bold uppercase tracking-tight mt-0.5" style={{ color: vo2Level.c }}>Nivel {vo2Level.l}</span>
+                        <span className="text-2xs font-bold text-slate-400 uppercase tracking-widest">ml/kg/min</span>
+                        <span className="block text-2xs font-bold uppercase tracking-tight mt-0.5" style={{ color: vo2Level.c }}>Nivel {vo2Level.l}</span>
                         <span data-fitness="vo2-source" className="block text-[11px] text-ink-4 mt-0.5">{VO2_SOURCES[vo2Sport]?.source ? `${VO2_SOURCES[vo2Sport].label}, ${VO2_SOURCES[vo2Sport].source}` : ''}</span>
                     </div>
                 </div>
@@ -51,7 +51,7 @@ export const Vo2MaxCard = ({ vo2Sport, setVo2Sport, currentVo2, vo2Level, vo2Sta
                     )}
                     <div className="flex justify-between mt-4 px-0.5 opacity-40">
                         {['Pobre', 'Medio', 'Bueno', 'Excelente', 'Superior'].map((l) => (
-                            <span key={l} className="text-[8px] font-bold text-slate-500 uppercase tracking-widest">{l}</span>
+                            <span key={l} className="text-2xs font-bold text-slate-500 uppercase tracking-widest">{l}</span>
                         ))}
                     </div>
                 </div>
@@ -61,7 +61,7 @@ export const Vo2MaxCard = ({ vo2Sport, setVo2Sport, currentVo2, vo2Level, vo2Sta
                     <div className="p-4 rounded-2xl bg-sunken-3 border border-line-soft">
                         <div className="flex items-center gap-2 mb-1.5">
                             <Footprints size={12} className="text-slate-400" />
-                            <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">{VO2_SOURCES.run.label}</span>
+                            <span className="text-2xs font-bold text-slate-400 uppercase tracking-widest">{VO2_SOURCES.run.label}</span>
                         </div>
                         <p className="text-lg font-bold text-ink-soft">{vo2Stats?.run?.vo2max > 0 ? vo2Stats.run.vo2max : '--'}</p>
                         <p className="text-[11px] text-ink-4">{VO2_SOURCES.run.source}</p>
@@ -69,7 +69,7 @@ export const Vo2MaxCard = ({ vo2Sport, setVo2Sport, currentVo2, vo2Level, vo2Sta
                     <div className="p-4 rounded-2xl bg-sunken-3 border border-line-soft">
                         <div className="flex items-center gap-2 mb-1.5">
                             <Bike size={12} className="text-slate-400" />
-                            <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">{VO2_SOURCES.bike.label}</span>
+                            <span className="text-2xs font-bold text-slate-400 uppercase tracking-widest">{VO2_SOURCES.bike.label}</span>
                         </div>
                         <p className="text-lg font-bold text-ink-soft">{vo2Stats?.bike?.vo2max > 0 ? vo2Stats.bike.vo2max : '--'}</p>
                         <p className="text-[11px] text-ink-4">{VO2_SOURCES.bike.source}</p>

@@ -7,14 +7,14 @@ export const LapsTab = ({ proMetrics, isPaceBased }) => (
                             <div className="flex items-center justify-between border-b border-line-soft-6 pb-4">
                                 <div className="space-y-1">
                                     <h2 className="text-sm font-bold text-ink-soft uppercase tracking-tight">Análisis Técnico por Intervalos</h2>
-                                    <p className="text-[10px] text-ink-4 font-medium tracking-wide uppercase">Segmentación automática ({isPaceBased ? '1km' : '5km'})</p>
+                                    <p className="text-2xs text-ink-4 font-medium tracking-wide uppercase">Segmentación automática ({isPaceBased ? '1km' : '5km'})</p>
                                 </div>
                             </div>
                             
                             <div data-detail="laps" className="bg-white dark:bg-zinc-900/20 rounded-2xl border border-line-soft-3 overflow-x-auto custom-scrollbar shadow-sm">
                                 <table className="w-full text-left border-collapse">
                                     <thead className="bg-sunken-10">
-                                        <tr className="text-[9px] font-bold text-ink-4 uppercase tracking-widest border-b border-line-soft-2">
+                                        <tr className="text-2xs font-bold text-ink-4 uppercase tracking-widest border-b border-line-soft-2">
                                             <th className="p-4">#</th>
                                             <th className="p-4">Tiempo</th>
                                             <th className="p-4 text-right">Dist (km)</th>
@@ -41,7 +41,7 @@ export const LapsTab = ({ proMetrics, isPaceBased }) => (
                                                     {lap.pwrAvg !== null && (
                                                         <td className="p-4 text-right">
                                                             <span className="text-power font-black">{lap.pwrAvg}</span>
-                                                            <span className="ml-1 text-[9px] text-slate-400 font-bold opacity-0 group-hover:opacity-100 transition-opacity">w</span>
+                                                            <span className="ml-1 text-2xs text-slate-400 font-bold opacity-0 group-hover:opacity-100 transition-opacity">w</span>
                                                         </td>
                                                     )}
                                                     <td className="p-4 text-right">

@@ -891,9 +891,6 @@ html[data-ui="v2"] [data-skin] {
   --skin-shadow-sm: 0 0 0 1px rgba(16, 19, 23, 0.05), 0 1px 2px rgba(16, 19, 23, 0.05), 0 2px 6px -2px rgba(30, 41, 70, 0.06);
   --skin-shadow-card: 0 0 0 1px rgba(16, 19, 23, 0.04), 0 1px 2px rgba(16, 19, 23, 0.04), 0 4px 12px -6px rgba(30, 41, 70, 0.08);
   /* Tipografía: mínimo 10 px (rótulos); el contenido arranca en 11 px */
-  --skin-type-8: 10px;
-  --skin-type-9: 10px;
-  --skin-type-10: 11px;
   --skin-type-11: 12px;
   --skin-type-12: 12px;
   --skin-type-13: 13px;

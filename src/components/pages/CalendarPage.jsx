@@ -64,7 +64,7 @@ export const CalendarPage = ({ activities, plannedWorkouts = [], addPlannedWorko
                     </div>
                     <div className="flex items-center gap-1.5 sm:gap-2">
                         {/* PMC CHART TOGGLE */}
-                        <button onClick={() => setShowPmcChart(p => !p)} data-cal="pmc-toggle" className={`hidden sm:flex items-center gap-1.5 px-3 py-1.5 border rounded-lg text-[9px] font-black uppercase tracking-widest transition-colors shadow-sm ${showPmcChart ? 'bg-violet-50 dark:bg-violet-900/20 text-violet-600 dark:text-violet-400 border-violet-200 dark:border-violet-800/50' : 'bg-surface text-ink-3 border-slate-200 dark:border-zinc-700 hover:border-slate-400'}`}>
+                        <button onClick={() => setShowPmcChart(p => !p)} data-cal="pmc-toggle" className={`hidden sm:flex items-center gap-1.5 px-3 py-1.5 border rounded-lg text-2xs font-black uppercase tracking-widest transition-colors shadow-sm ${showPmcChart ? 'bg-violet-50 dark:bg-violet-900/20 text-violet-600 dark:text-violet-400 border-violet-200 dark:border-violet-800/50' : 'bg-surface text-ink-3 border-slate-200 dark:border-zinc-700 hover:border-slate-400'}`}>
                             <Activity size={12} /> Forma
                         </button>
 

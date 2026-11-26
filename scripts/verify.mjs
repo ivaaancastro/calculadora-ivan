@@ -2,7 +2,7 @@
 /**
  * Verificación local (spec-capa6-v2-premium, RF-A4). `npm run verify`.
  *   node scripts/verify.mjs [--e2e <spec> [--project <p>]]
- * lint, lint:ui, lint:colors, lint:motion, lint:orphans, vitest y build, en silencio: solo el resumen con la
+ * lint, lint:ui, lint:colors, lint:motion, lint:orphans, lint:type, vitest y build, en silencio: solo el resumen con la
  * duración de cada paso o, si falla, la cola de su salida. `--e2e <spec>` añade ese E2E en local.
  * El E2E completo lo ejecuta el CI en cada PR.
  */
@@ -20,6 +20,7 @@ const steps = [
   ['lint:colors', 'npm', ['run', '-s', 'lint:colors']],
   ['lint:motion', 'npm', ['run', '-s', 'lint:motion']],
   ['lint:orphans', 'npm', ['run', '-s', 'lint:orphans']],
+  ['lint:type', 'npm', ['run', '-s', 'lint:type']],
   ['vitest', 'npx', ['vitest', 'run', '--reporter=dot']],
   ['build', 'npm', ['run', '-s', 'build']],
 ];

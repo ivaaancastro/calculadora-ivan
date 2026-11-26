@@ -6,7 +6,7 @@ import { formatMinutes, formatNumber } from '../../../utils/formatters';
 
 const Secondary = ({ label, value, unit }) => (
     <div data-history="summary-stat" className="min-w-0">
-        <div className="text-[10px] font-semibold uppercase tracking-[0.08em] text-ink-4">{label}</div>
+        <div className="text-2xs font-semibold uppercase tracking-[0.08em] text-ink-4">{label}</div>
         <div className="mt-0.5 text-[17px] sm:text-[19px] font-semibold tracking-[-0.02em] tabular-nums text-ink">
             {value}{unit && <span className="ml-0.5 text-[11px] font-medium text-ink-3">{unit}</span>}
         </div>
@@ -44,7 +44,7 @@ export const ActivitiesSummary = ({ totals, weekly = [] }) => {
             {weekly.length >= 3 && (
                 <div data-history="summary-spark" className="hidden sm:block shrink-0 text-right">
                     <Sparkline values={weekly} color={ct.series.power} width={140} height={44} label="TSS semanal" />
-                    <p className="mt-1 text-[10px] font-semibold uppercase tracking-[0.08em] text-ink-4">TSS por semana</p>
+                    <p className="mt-1 text-2xs font-semibold uppercase tracking-[0.08em] text-ink-4">TSS por semana</p>
                 </div>
             )}
         </section>

@@ -14,7 +14,7 @@ export const SecuritySection = ({ newPassword, setNewPassword, isUpdatingPwd, ha
                     </div>
                     <div>
                         <h3 className="text-xs sm:text-sm font-bold text-ink">Contraseña de Acceso</h3>
-                        <p className="text-[10px] text-ink-4">Actualiza tu clave de acceso</p>
+                        <p className="text-2xs text-ink-4">Actualiza tu clave de acceso</p>
                     </div>
                 </div>
                 <form onSubmit={handleUpdatePassword} className="flex gap-2">
@@ -46,7 +46,7 @@ export const SecuritySection = ({ newPassword, setNewPassword, isUpdatingPwd, ha
                     </div>
                     <div>
                         <h3 className="text-xs sm:text-sm font-bold text-ink">Deep Sync (Datos Crudos)</h3>
-                        <p className="text-[10px] text-ink-4">{pureActs.length} de {stravaActs.length} actividades descargadas</p>
+                        <p className="text-2xs text-ink-4">{pureActs.length} de {stravaActs.length} actividades descargadas</p>
                     </div>
                 </div>
 
@@ -74,7 +74,7 @@ export const SecuritySection = ({ newPassword, setNewPassword, isUpdatingPwd, ha
                     </div>
                     <div>
                         <h3 className="text-xs sm:text-sm font-bold text-danger-ink">Eliminar cuenta definitivamente</h3>
-                        <p className="text-[10px] text-ink-4">Se eliminarán todas tus actividades y métricas</p>
+                        <p className="text-2xs text-ink-4">Se eliminarán todas tus actividades y métricas</p>
                     </div>
                 </div>
                 <button 
@@ -95,7 +95,7 @@ export const SecuritySection = ({ newPassword, setNewPassword, isUpdatingPwd, ha
                     </div>
                     <div>
                         <h3 className="text-xs sm:text-sm font-bold text-danger-ink">Borrar todas las actividades</h3>
-                        <p className="text-[10px] text-ink-4">Se borran tus actividades, no tu cuenta</p>
+                        <p className="text-2xs text-ink-4">Se borran tus actividades, no tu cuenta</p>
                     </div>
                 </div>
                 <button

@@ -41,24 +41,24 @@ const RECIPES = {
   card: {
     'md-wide': {
       container: CARD_CONTAINER,
-      option: 'text-[9px] font-bold uppercase tracking-widest rounded-lg transition-all',
+      option: 'text-2xs font-bold uppercase tracking-widest rounded-lg transition-all',
       on: 'bg-surface-3 shadow-sm',
       off: CARD_OFF,
     },
     md: {
       container: CARD_CONTAINER,
-      option: 'text-[9px] font-bold uppercase rounded-lg transition-all',
+      option: 'text-2xs font-bold uppercase rounded-lg transition-all',
       on: 'bg-surface-3 shadow-sm',
       off: CARD_OFF,
     },
     sm: {
       container: CARD_CONTAINER,
-      option: 'text-[8px] font-bold uppercase rounded-lg transition-all',
+      option: 'text-2xs font-bold uppercase rounded-lg transition-all',
       on: 'bg-surface-3 shadow-sm',
       off: CARD_OFF,
     },
     xs: {
-      container: 'flex bg-surface-2 p-0.5 rounded-lg text-[8px] font-bold uppercase',
+      container: 'flex bg-surface-2 p-0.5 rounded-lg text-2xs font-bold uppercase',
       option: 'rounded transition-all',
       on: 'bg-surface-3 shadow-xs',
       off: CARD_OFF,
@@ -67,7 +67,7 @@ const RECIPES = {
   mini: {
     md: {
       container: 'flex bg-fill-5 rounded-full p-0.5',
-      option: 'px-2 py-0.5 text-[10px] font-semibold rounded-full transition-all duration-200',
+      option: 'px-2 py-0.5 text-2xs font-semibold rounded-full transition-all duration-200',
       on: 'bg-surface-3 shadow-sm',
       off: 'text-ink-4-fixed hover:text-body-soft-fixed',
     },

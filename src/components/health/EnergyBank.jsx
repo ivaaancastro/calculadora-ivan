@@ -48,7 +48,7 @@ export const EnergyBank = ({ energyBankAmount }) => {
                 }`}>
                     {energyBankAmount !== '--' ? Math.round(counted) : '--'}<span className="text-xl font-sans font-bold text-slate-400 ml-1">%</span>
                 </span>
-                <span className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">Disponible</span>
+                <span className="block text-2xs font-bold text-slate-400 uppercase tracking-widest mt-1">Disponible</span>
             </div>
         </div>
     </>

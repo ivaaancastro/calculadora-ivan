@@ -39,7 +39,7 @@ export const DetailHero = ({ activity, dateStr, metrics, themeColor }) => {
                     {hero.map((m) => (
                         <MetricTooltip key={m.id} metricId={m.metricId}>
                             <div data-detail="figure" className="min-w-0 px-3 first:pl-0 last:pr-0 sm:px-5">
-                                <div className="text-[10px] font-semibold uppercase tracking-[0.08em] text-ink-4 truncate">{m.label}</div>
+                                <div className="text-2xs font-semibold uppercase tracking-[0.08em] text-ink-4 truncate">{m.label}</div>
                                 <div className="mt-1 flex items-baseline gap-1 min-w-0">
                                     <span className={`text-[28px] sm:text-[44px] leading-none font-semibold tracking-[-0.04em] tabular-nums truncate ${m.accent || 'text-ink'}`}>{m.value}</span>
                                     {m.unit && <span className="text-[11px] sm:text-sm font-medium text-ink-4 shrink-0">{m.unit}</span>}
@@ -58,7 +58,7 @@ export const DetailHero = ({ activity, dateStr, metrics, themeColor }) => {
                                 <span className="text-[11px] font-medium text-ink-4 truncate">{m.label}</span>
                                 <span className="flex items-baseline gap-1 shrink-0">
                                     <span className={`text-[13px] font-semibold tabular-nums ${m.accent || 'text-ink'}`}>{m.value}</span>
-                                    {m.unit && <span className="text-[10px] font-medium text-ink-4">{m.unit}</span>}
+                                    {m.unit && <span className="text-2xs font-medium text-ink-4">{m.unit}</span>}
                                 </span>
                             </div>
                         </MetricTooltip>

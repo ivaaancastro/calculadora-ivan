@@ -114,7 +114,7 @@ export const Navbar = ({ settings, uploading, isStravaConnected, onSync }) => {
                   className={`text-ink-4 transition-transform duration-200 ${isMenuOpen ? 'rotate-180 text-action-bright' : 'group-hover:text-body'}`} 
                 />
               </div>
-              <p className="text-[10px] font-medium text-ink-4 truncate max-w-[110px] sm:max-w-[160px] leading-tight mt-0.5">
+              <p className="text-2xs font-medium text-ink-4 truncate max-w-[110px] sm:max-w-[160px] leading-tight mt-0.5">
                 {settings?.fullName || 'Ajustes'}
               </p>
             </div>
@@ -147,7 +147,7 @@ export const Navbar = ({ settings, uploading, isStravaConnected, onSync }) => {
 
               {/* OPCIONES DE CONFIGURACIÓN */}
               <div className="p-1.5 space-y-0.5">
-                <div className="px-2.5 pt-1 pb-1 text-[10px] font-bold text-ink-4 uppercase tracking-wider">
+                <div className="px-2.5 pt-1 pb-1 text-2xs font-bold text-ink-4 uppercase tracking-wider">
                   Vistas de Configuración
                 </div>
                 {configOptions.map(opt => {
@@ -166,7 +166,7 @@ export const Navbar = ({ settings, uploading, isStravaConnected, onSync }) => {
                           <p className="text-xs font-semibold text-ink-soft group-hover:text-action transition-colors">
                             {opt.label}
                           </p>
-                          <p className="text-[10px] text-ink-4 truncate">
+                          <p className="text-2xs text-ink-4 truncate">
                             {opt.desc}
                           </p>
                         </div>

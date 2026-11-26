@@ -8,7 +8,7 @@ const ModeSelector = ({ sport, data, onZonesMode }) => (
     <div className="flex gap-0.5 bg-slate-200/60 dark:bg-zinc-800/80 rounded-full p-0.5">
         {[{ k: 'lthr', l: '% LTHR' }, { k: 'fcmax', l: '% FCmax' }, { k: 'custom', l: 'Manual' }].map(m => (
             <button key={m.k} onClick={() => onZonesMode(sport, m.k)}
-                className={`px-2.5 py-1 rounded-full text-[10px] font-semibold transition-all select-none touch-manipulation active:scale-95 ${data.zonesMode === m.k
+                className={`px-2.5 py-1 rounded-full text-2xs font-semibold transition-all select-none touch-manipulation active:scale-95 ${data.zonesMode === m.k
                     ? 'bg-surface-4 shadow-xs text-ink'
                     : 'text-slate-500 dark:text-zinc-400 hover:text-slate-700'
                     }`}>{m.l}</button>
@@ -32,13 +32,13 @@ export const SportZonesSection = ({ sport, sportLabel, icon: Icon, color, showPa
                     </div>
                     <div>
                         <h4 className="text-xs sm:text-sm font-bold text-ink tracking-tight">{sportLabel}</h4>
-                        <p className="text-[10px] text-ink-4">Umbrales de referencia</p>
+                        <p className="text-2xs text-ink-4">Umbrales de referencia</p>
                     </div>
                 </div>
 
                 <div className={`grid ${showPace ? 'grid-cols-2 sm:grid-cols-3' : showPower ? 'grid-cols-2 sm:grid-cols-3' : 'grid-cols-2'} gap-2 sm:gap-3`}>
                     <div data-profile="threshold" className="bg-sunken-4 rounded-xl p-2.5 border border-hairline-2">
-                        <label className="text-[10px] font-semibold text-ink-3 block mb-0.5">FC Umbral</label>
+                        <label className="text-2xs font-semibold text-ink-3 block mb-0.5">FC Umbral</label>
                         <div className="flex items-baseline gap-1">
                             <input 
                                 type="number" 
@@ -47,12 +47,12 @@ export const SportZonesSection = ({ sport, sportLabel, icon: Icon, color, showPa
                                 onChange={(e) => onChange(e, sport, 'lthr')}
                                 className="w-full bg-transparent font-mono font-bold text-sm sm:text-base text-ink outline-none" 
                             />
-                            <span className="text-[10px] font-semibold text-slate-400">bpm</span>
+                            <span className="text-2xs font-semibold text-slate-400">bpm</span>
                         </div>
                     </div>
 
                     <div data-profile="threshold" className="bg-sunken-4 rounded-xl p-2.5 border border-hairline-2">
-                        <label className="text-[10px] font-semibold text-ink-3 block mb-0.5">FC Máx.</label>
+                        <label className="text-2xs font-semibold text-ink-3 block mb-0.5">FC Máx.</label>
                         <div className="flex items-baseline gap-1">
                             <input 
                                 type="number" 
@@ -61,13 +61,13 @@ export const SportZonesSection = ({ sport, sportLabel, icon: Icon, color, showPa
                                 onChange={(e) => onChange(e, sport, 'max')}
                                 className="w-full bg-transparent font-mono font-bold text-sm sm:text-base text-ink outline-none" 
                             />
-                            <span className="text-[10px] font-semibold text-slate-400">bpm</span>
+                            <span className="text-2xs font-semibold text-slate-400">bpm</span>
                         </div>
                     </div>
 
                     {showPace && (
                         <div data-profile="threshold" className="bg-sunken-4 rounded-xl p-2.5 border border-hairline-2 col-span-2 sm:col-span-1">
-                            <label className="text-[10px] font-semibold text-ink-3 block mb-0.5">Ritmo Umbral</label>
+                            <label className="text-2xs font-semibold text-ink-3 block mb-0.5">Ritmo Umbral</label>
                             <div className="flex items-baseline gap-1">
                                 <input 
                                     type="text" 
@@ -76,14 +76,14 @@ export const SportZonesSection = ({ sport, sportLabel, icon: Icon, color, showPa
                                     placeholder="4:30"
                                     className="w-full bg-transparent font-mono font-bold text-sm sm:text-base text-sport-run-ink outline-none" 
                                 />
-                                <span className="text-[10px] font-semibold text-slate-400">/km</span>
+                                <span className="text-2xs font-semibold text-slate-400">/km</span>
                             </div>
                         </div>
                     )}
 
                     {showPower && (
                         <div data-profile="threshold" className="bg-sunken-4 rounded-xl p-2.5 border border-hairline-2 col-span-2 sm:col-span-1">
-                            <label className="text-[10px] font-semibold text-ink-3 block mb-0.5">FTP</label>
+                            <label className="text-2xs font-semibold text-ink-3 block mb-0.5">FTP</label>
                             <div className="flex items-baseline gap-1">
                                 <input 
                                     type="number" 
@@ -92,7 +92,7 @@ export const SportZonesSection = ({ sport, sportLabel, icon: Icon, color, showPa
                                     onChange={(e) => onChange(e, sport, 'ftp')}
                                     className="w-full bg-transparent font-mono font-bold text-sm sm:text-base text-emerald-600 dark:text-emerald-400 outline-none" 
                                 />
-                                <span className="text-[10px] font-semibold text-slate-400">W</span>
+                                <span className="text-2xs font-semibold text-slate-400">W</span>
                             </div>
                         </div>
                     )}
@@ -121,11 +121,11 @@ export const SportZonesSection = ({ sport, sportLabel, icon: Icon, color, showPa
                                 </div>
                                 <div className="flex items-center gap-3 shrink-0">
                                     {pctStr && (
-                                        <span className="text-[10px] font-mono text-ink-4 hidden sm:inline">{pctStr}</span>
+                                        <span className="text-2xs font-mono text-ink-4 hidden sm:inline">{pctStr}</span>
                                     )}
                                     {isReadOnly ? (
                                         <span className="font-mono font-bold text-body text-xs">
-                                            {zone.min} - {zone.max} <span className="text-[10px] font-normal text-slate-400">bpm</span>
+                                            {zone.min} - {zone.max} <span className="text-2xs font-normal text-slate-400">bpm</span>
                                         </span>
                                     ) : (
                                         <div className="flex items-center gap-1">
@@ -149,7 +149,7 @@ export const SportZonesSection = ({ sport, sportLabel, icon: Icon, color, showPa
                             <Timer size={14} className="text-sport-run" />
                             <span className="text-xs sm:text-sm font-bold text-ink">Zonas de Ritmo</span>
                         </div>
-                        <span className="text-[10px] font-semibold text-slate-400">por km</span>
+                        <span className="text-2xs font-semibold text-slate-400">por km</span>
                     </div>
                     <div className="divide-y divide-hairline-2">
                         {(data?.paceZones || calcPaceZones(data?.thresholdPace) || []).map((zone, i) => (
@@ -160,7 +160,7 @@ export const SportZonesSection = ({ sport, sportLabel, icon: Icon, color, showPa
                                     <span className="text-ink-3 truncate text-[11px]">{zone.label}</span>
                                 </div>
                                 <div className="flex items-center gap-3 shrink-0">
-                                    <span className="text-[10px] font-mono text-ink-4 hidden sm:inline">
+                                    <span className="text-2xs font-mono text-ink-4 hidden sm:inline">
                                         {zone.pctMin > 0 ? `${(zone.pctMin * 100).toFixed(0)}` : '0'}-{(zone.pctMax * 100).toFixed(0)}%
                                     </span>
                                     <span className="font-mono font-bold text-body text-xs">
@@ -194,11 +194,11 @@ export const SportZonesSection = ({ sport, sportLabel, icon: Icon, color, showPa
                                         <span className="text-ink-3 truncate text-[11px]">{pz.label}</span>
                                     </div>
                                     <div className="flex items-center gap-3 shrink-0">
-                                        <span className="text-[10px] font-mono text-ink-4 hidden sm:inline">
+                                        <span className="text-2xs font-mono text-ink-4 hidden sm:inline">
                                             {Math.round(pz.pMin * 100)}-{Math.round(pz.pMax * 100)}%
                                         </span>
                                         <span className="font-mono font-bold text-body text-xs">
-                                            {minW} - {i === 6 ? maxW + '+' : maxW} <span className="text-[10px] font-normal text-slate-400">W</span>
+                                            {minW} - {i === 6 ? maxW + '+' : maxW} <span className="text-2xs font-normal text-slate-400">W</span>
                                         </span>
                                     </div>
                                 </div>

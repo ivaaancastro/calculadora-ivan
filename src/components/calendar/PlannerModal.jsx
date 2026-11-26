@@ -97,11 +97,11 @@ export const PlannerModal = ({
                                 </div>
                                 <div className="flex gap-4 shrink-0 pb-1">
                                     <div className="text-center">
-                                        <span className="text-[10px] font-medium text-ink-4 uppercase tracking-wider block mb-0.5">TSS</span>
+                                        <span className="text-2xs font-medium text-ink-4 uppercase tracking-wider block mb-0.5">TSS</span>
                                         <span className="text-lg font-semibold text-ink-2-soft font-mono">{newPlan.tss}</span>
                                     </div>
                                     <div className="text-center">
-                                        <span className="text-[10px] font-medium text-ink-4 uppercase tracking-wider block mb-0.5">Duración</span>
+                                        <span className="text-2xs font-medium text-ink-4 uppercase tracking-wider block mb-0.5">Duración</span>
                                         <span className="text-lg font-semibold text-ink-2-soft font-mono">{formatMinutes(newPlan.duration)}</span>
                                     </div>
                                 </div>
@@ -112,7 +112,7 @@ export const PlannerModal = ({
                                 <div className="flex flex-col sm:flex-row justify-between sm:items-center mb-3 gap-2">
                                     <div className="flex items-center gap-2">
                                         <h4 className="text-[13px] font-semibold text-ink-2-soft tracking-tight">Estructura</h4>
-                                        <button onClick={() => setIsPastingString(!isPastingString)} className={`px-2 py-0.5 rounded-full text-[10px] font-medium transition-all duration-200 ${isPastingString ? 'bg-action-bright/10 text-action-solid' : 'text-slate-400 hover:text-slate-600 hover:bg-surface-2'}`} title="Importar desde texto">
+                                        <button onClick={() => setIsPastingString(!isPastingString)} className={`px-2 py-0.5 rounded-full text-2xs font-medium transition-all duration-200 ${isPastingString ? 'bg-action-bright/10 text-action-solid' : 'text-slate-400 hover:text-slate-600 hover:bg-surface-2'}`} title="Importar desde texto">
                                             Texto
                                         </button>
                                     </div>
@@ -132,7 +132,7 @@ export const PlannerModal = ({
                                 {/* AI SMART PASTE AREA */}
                                 {isPastingString && (
                                     <div className="mb-4 p-4 rounded-xl bg-sunken-2 border border-line-soft">
-                                        <label className="block text-[10px] font-semibold text-ink-3 uppercase tracking-wider mb-2">Importar desde texto</label>
+                                        <label className="block text-2xs font-semibold text-ink-3 uppercase tracking-wider mb-2">Importar desde texto</label>
                                         <textarea
                                             value={pasteText}
                                             onChange={e => setPasteText(e.target.value)}
@@ -237,7 +237,7 @@ export const PlannerModal = ({
                                                         <span className="text-[11px] font-semibold text-body-soft">Repetir</span>
                                                         <input type="number" value={block.repeats} min={1} onChange={e => updateBlock(block.id, 'repeats', parseInt(e.target.value) || 1)}
                                                             className="w-9 bg-surface-7 rounded-lg text-[13px] font-mono px-1.5 py-0.5 outline-none no-spinner text-center text-body" />
-                                                        <span className="text-[10px] font-medium text-ink-4">veces</span>
+                                                        <span className="text-2xs font-medium text-ink-4">veces</span>
                                                         {canUsePower && !isStr && (
                                                             <Segmented variant="mini" className="shrink-0 ml-auto mr-2">
                                                                 <Segmented.Option onClick={() => handleZoneModeChange('hr')}
@@ -380,7 +380,7 @@ export const PlannerModal = ({
                                                     {currentZoneMode === 'power' && block.targetValue && (
                                                         <span className="text-[11px] font-mono font-semibold text-power-ink bg-power-tint-3 px-2 py-0.5 rounded-full">
                                                             {block.targetValue}w
-                                                            {ftp > 0 && <span className="text-[9px] text-power-soft ml-1">{Math.round((Number(block.targetValue) / ftp) * 100)}%</span>}
+                                                            {ftp > 0 && <span className="text-2xs text-power-soft ml-1">{Math.round((Number(block.targetValue) / ftp) * 100)}%</span>}
                                                         </span>
                                                     )}
                                                     {!isStr && currentZoneMode !== 'power' && (

@@ -47,7 +47,7 @@ export const AppleRingGauge = ({ value, max = 100, colorClass, strokeColor, grad
                     {valid ? (max === 10 ? formatNumber(counted, 1) : Math.round(counted)) : '--'}
                     {unit && <span className="text-sm font-bold text-ink-4 ml-0.5">{unit}</span>}
                 </span>
-                <span data-health="ring-title" className="text-[10px] font-bold text-ink-4 uppercase tracking-widest mt-0.5 text-center">
+                <span data-health="ring-title" className="text-2xs font-bold text-ink-4 uppercase tracking-widest mt-0.5 text-center">
                     {title}
                 </span>
             </div>

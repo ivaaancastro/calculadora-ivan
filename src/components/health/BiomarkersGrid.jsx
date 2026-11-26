@@ -43,7 +43,7 @@ export const BiomarkersGrid = ({ wellnessMetrics: wm }) => {
                                     <Icon size={13} strokeWidth={2.25} aria-hidden="true" />{d.label}
                                 </span>
                                 {s.status === 'attention' && (
-                                    <span data-health="status-chip" className="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider text-warning-ink">
+                                    <span data-health="status-chip" className="inline-flex items-center gap-1 text-2xs font-bold uppercase tracking-wider text-warning-ink">
                                         <AlertTriangle size={11} aria-hidden="true" />Atención
                                     </span>
                                 )}

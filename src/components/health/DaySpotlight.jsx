@@ -20,7 +20,7 @@ export const DaySpotlight = ({ currentSelectedDay: d }) => {
                 <div className="min-w-0">
                     <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-ink-4">Detalle del día</p>
                     <h3 className="mt-1 text-xl font-bold tracking-[-0.02em] text-ink capitalize [text-wrap:balance]">{d.dateLabelFull}</h3>
-                    <span className={`inline-block mt-2 px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider ${d.recoveryInfo.badge}`}>{d.recoveryInfo.label}</span>
+                    <span className={`inline-block mt-2 px-2.5 py-0.5 rounded-full text-2xs font-bold uppercase tracking-wider ${d.recoveryInfo.badge}`}>{d.recoveryInfo.label}</span>
                 </div>
                 <div className="text-right shrink-0">
                     <span className="text-5xl leading-none font-semibold tabular-nums tracking-[-0.04em] text-ink">{d.readinessScore}<span className="text-xl font-medium text-ink-4 ml-0.5">%</span></span>

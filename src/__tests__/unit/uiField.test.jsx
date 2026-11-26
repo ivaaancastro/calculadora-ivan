@@ -29,7 +29,7 @@ describe('ui/Field recetas', () => {
     expect(classes(inputClass({ variant: 'cell', mono: true }))).toEqual(classes('bg-sunken text-[13px] font-mono rounded-lg outline-none no-spinner text-body focus-visible:ring-2 focus-visible:ring-action-bright'));
     expect(classes(inputClass({ variant: 'cell', size: 'sm' }))).toEqual(classes('bg-sunken rounded-lg text-[11px] outline-none no-spinner text-body focus-visible:ring-2 focus-visible:ring-action-bright'));
     expect(classes(selectClass({ variant: 'cell' }))).toEqual(classes('bg-sunken text-[11px] font-medium text-body rounded-lg outline-none cursor-pointer focus-visible:ring-2 focus-visible:ring-action-bright'));
-    expect(classes(selectClass({ variant: 'cell-bare' }))).toEqual(classes('bg-transparent text-[10px] text-ink-4 rounded outline-none cursor-pointer focus-visible:ring-2 focus-visible:ring-action-bright'));
+    expect(classes(selectClass({ variant: 'cell-bare' }))).toEqual(classes('bg-transparent text-2xs text-ink-4 rounded outline-none cursor-pointer focus-visible:ring-2 focus-visible:ring-action-bright'));
   });
 
   it('A11Y-3: ningún campo quita el contorno sin un anillo de foco', () => {

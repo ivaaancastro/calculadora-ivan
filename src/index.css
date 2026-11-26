@@ -13,7 +13,7 @@
 @tailwind utilities;
 
 :root {
-  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "SF Pro", "Inter", system-ui, Avenir, Helvetica, Arial, sans-serif;
+  font-family: theme('fontFamily.sans');
   line-height: 1.5;
   font-weight: 400;
   color-scheme: light dark;
@@ -33,7 +33,7 @@ body {
   min-height: 100dvh;
   background-color: rgb(var(--canvas)); /* Apple iOS light grouped background */
   color: rgb(var(--canvas-ink));
-  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "SF Pro", "Inter", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  font-family: theme('fontFamily.sans');
   letter-spacing: -0.015em; /* Global tight tracking for Apple aesthetic */
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
