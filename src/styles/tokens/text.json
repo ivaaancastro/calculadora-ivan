@@ -1,7 +1,7 @@
 {
-  "ink": { "light": "[#101317]", "dark": "[#f2f4f7]" },
+  "ink": { "light": "[#0b0e14]", "dark": "[#f4f6fb]" },
   "ink-soft": { "light": "slate-900", "dark": "zinc-100" },
-  "ink-2": { "light": "[#1a1f26]", "dark": "[#e6e9ee]" },
+  "ink-2": { "light": "[#0b0e14]", "dark": "[#f4f6fb]" },
   "ink-2-soft": { "light": "[#1a1f26]", "dark": "[#e6e9ee]" },
   "body": { "light": "[#333b47]", "dark": "[#d4d9e0]" },
   "body-2": { "light": "[#333b47]", "dark": "[#d4d9e0]" },
