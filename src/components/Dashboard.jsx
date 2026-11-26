@@ -54,6 +54,8 @@ const Dashboard = () => {
     deleteActivity,
     fetchActivityStreams,
     chartData,
+    pmcSeries,
+    summary,
     currentMetrics,
     isDeepSyncing,
     deepSyncProgress,
@@ -105,7 +107,7 @@ const Dashboard = () => {
 
   // Renderizado de las 5 vistas principales
   const renderAdvancedAnalytics = (
-    <div className="space-y-4 animate-in fade-in duration-200">
+    <div className="animate-in fade-in duration-200">
       <AdvancedAnalytics
         activities={activities}
         settings={settings}
@@ -113,6 +115,8 @@ const Dashboard = () => {
         timeRange={timeRange}
         setTimeRange={setTimeRange}
         chartData={chartData}
+        pmcSeries={pmcSeries}
+        periodSummary={summary}
         currentMetrics={currentMetrics}
       />
     </div>

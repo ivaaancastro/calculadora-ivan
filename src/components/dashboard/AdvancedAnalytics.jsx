@@ -24,7 +24,8 @@ import { buildFormSummary } from '../../utils/formSummary';
 import { supabase } from '../../supabase';
 import { useTheme } from '../../hooks/useTheme';
 import { getChartTheme } from '../charts/chartTheme';
-import { Card, SectionHeader } from '../ui';
+import { Card, SectionHeader, Segmented, Stat } from '../ui';
+import { pmcTodayKey } from '../../utils/pmcPoints';
 import { formatNumber } from '../../utils/formatters';
 import { pickPrimaryVo2, VO2_SOURCES } from '../../utils/vo2Source';
 
@@ -60,7 +61,7 @@ async function fetchLatestWellnessRow() {
 //   { ctl, atl, tcb (=TSB), rampRate, acwr, monotony, strain, avgTss7d, pastCtl }
 // chartData — daily series from useActivities, already filtered by timeRange
 // ─────────────────────────────────────────────────────────────────────────────
-export const AdvancedAnalytics = React.memo(({ activities, settings,  timeRange, setTimeRange, chartData, currentMetrics }) => {
+export const AdvancedAnalytics = React.memo(({ activities, settings, timeRange, setTimeRange, chartData, pmcSeries, periodSummary, currentMetrics }) => {
     const [garminVo2max, setGarminVo2max] = useState(null);
     // En móvil, las métricas secundarias van plegadas bajo el primer vistazo.
     const [showMore, setShowMore] = useState(false);
@@ -127,16 +128,18 @@ export const AdvancedAnalytics = React.memo(({ activities, settings,  timeRange,
 
     if (!activities || activities.length === 0) return null;
 
-    const atlVals = seriesValues(chartData, 'atl');
-    const tsbVals = seriesValues(chartData, 'tcb');
-    const atlSpark = atlVals;
-    const tsbSpark = tsbVals;
+    // Los KPI son valores de hoy: su sparkline y su variación salen de la serie completa hasta
+    // hoy, no del rango de la gráfica ni de los días proyectados (RF-D3).
+    const todayKey = pmcTodayKey();
+    const pastSeries = (pmcSeries || chartData || []).filter((d) => String(d.date) <= todayKey);
+    const atlVals = seriesValues(pastSeries, 'atl');
+    const tsbVals = seriesValues(pastSeries, 'tsb');
     const fmtDelta = (d, digits = 0) => `${d > 0 ? '+' : ''}${formatNumber(d, digits)}`;
     const mkDelta = (vals, upTone, downTone) => {
         const d = deltaOver(vals, 7);
         if (d === null) return null;
         const r = Math.round(d);
-        return { value: r, text: `${fmtDelta(r)} 7d`, tone: r > 0 ? upTone : r < 0 ? downTone : 'flat' };
+        return { value: r, text: fmtDelta(r), label: 'en 7 días', tone: r > 0 ? upTone : r < 0 ? downTone : 'flat' };
     };
     const atlDelta = mkDelta(atlVals, 'warn', 'good');
     const tsbDelta = mkDelta(tsbVals, 'good', 'bad');
@@ -148,84 +151,131 @@ export const AdvancedAnalytics = React.memo(({ activities, settings,  timeRange,
         critical: 'text-form-critical bg-form-critical-tint border-form-critical/25',
     };
 
+    // Tendencia y capacidad: sin dato no hay fila (RF-D6).
+    const ledger = [
+        { label: 'Rampa', metric: 'ramp', value: `${model.rampRate > 0 ? '+' : ''}${formatNumber(model.rampRate, 1)}`, sub: 'pts/sem' },
+        model.monotony > 0 && { label: 'Monotonía', value: formatNumber(model.monotony, 2), sub: 'índice de carga' },
+        primaryVo2.value && { label: primaryVo2.source ? VO2_SOURCES[primaryVo2.source].label : 'VO₂max', metric: 'vo2max', value: formatNumber(primaryVo2.value, 1), sub: primaryVo2.source ? VO2_SOURCES[primaryVo2.source].source : '' },
+    ].filter(Boolean);
+
     return (
-        <div data-dash="root" className="space-y-6 sm:space-y-8 pb-8 max-md:flex max-md:flex-col max-md:gap-3 max-md:pb-4 max-md:[&>*]:!m-0 lg:grid lg:grid-cols-12 lg:gap-x-6 lg:gap-y-8 lg:max-w-[1440px] lg:mx-auto lg:[&>*]:!m-0 lg:[&>*]:min-w-0">
-            {/* HERO: ESTADO DE FORMA ESTILO APPLE FITNESS */}
+        <div data-dash="root" className="max-w-content mx-auto max-sm:px-4 pb-8 flex flex-col gap-section md:gap-section-lg lg:grid lg:grid-cols-12 lg:gap-x-12 lg:[&>*]:min-w-0">
+            {/* 1. La pregunta principal: ¿cómo estoy? El CTL, protagonista (RF-D2). */}
             <FormHero
+                className="pt-6 lg:col-span-7 lg:row-start-1"
                 summary={buildFormSummary(model)}
                 ctl={model.ctl}
                 loadTrend={model.loadTrend}
-                timeRange={timeRange}
-                setTimeRange={setTimeRange}
             />
 
-            {/* SECCIÓN 1: MÉTRICAS CLAVE (APPLE HEALTH CARDS) */}
-            <div data-dash="primary" className="max-md:order-2 max-md:[&>p]:mb-1.5 max-md:[&>div]:gap-2 lg:col-span-full">
-                <SectionHeader as="p">Fisiología y Carga</SectionHeader>
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4">
-                    <KpiCard
-                        className="motion-safe:[animation-delay:0.18s]"
-                        label="Fatiga (ATL)" metric="atl" icon={Battery} color={ct.series.atl}
-                        value={Math.round(model.atl)} format={(n) => String(Math.round(n))}
-                        delta={atlDelta} spark={atlSpark} sub="Carga últ. 7 días"
-                    />
-                    <KpiCard
-                        className="motion-safe:[animation-delay:0.24s]"
-                        label="Forma (TSB)" metric="tsb" icon={Zap} color={ct.series.tsb}
-                        value={Math.round(model.tsb)} format={(n) => (Math.round(n) > 0 ? '+' : '') + Math.round(n)}
-                        delta={tsbDelta} spark={tsbSpark} sub="Balance CTL / ATL"
-                    />
-                    <KpiCard
-                        className="col-span-2 md:col-span-1 motion-safe:[animation-delay:0.3s]"
-                        label="Ratio Carga" metric="acwr" icon={Target} color={ct.series.tsb}
-                        value={model.acwr} format={(n) => formatNumber(n, 2)}
-                        sub={`Aguda vs Crónica · óptimo 0,8–1,3`}
-                        chip={<span className={`text-2xs font-bold px-2 py-0.5 rounded-full border uppercase tracking-[0.05em] ${ACWR_CHIP[acwrInfo.tone]}`}>{acwrInfo.label}</span>}
-                    />
+            {/* 2. Tendencia y capacidad: a la derecha del héroe en escritorio; plegada y al final en móvil. */}
+            <section data-dash="secondary" aria-labelledby="dash-secondary-title" className="max-lg:order-last lg:col-span-5 lg:col-start-8 lg:row-start-1 lg:pt-6">
+                <div className="max-md:sr-only">
+                    <SectionHeader as="h2" id="dash-secondary-title" data-dash="secondary-title">Tendencia y capacidad</SectionHeader>
                 </div>
-            </div>
-
-            {/* SECCIÓN 2: MÉTRICAS SECUNDARIAS */}
-            <div data-dash="secondary" className="max-md:order-4 lg:col-[9/span_4] lg:row-start-3 lg:self-start lg:sticky lg:top-[calc(var(--nav-h-total)+16px)]">
-                <SectionHeader as="p" data-dash="secondary-title" className="max-md:hidden">Tendencia y Capacidad</SectionHeader>
                 <button
                     type="button"
                     data-dash="more-toggle"
                     aria-expanded={showMore}
                     aria-controls="dash-secondary-grid"
                     onClick={() => setShowMore((v) => !v)}
-                    className="md:hidden max-md:mb-2 w-full min-h-[44px] px-4 flex items-center justify-between rounded-lg border border-line bg-surface active:bg-sunken text-xs font-semibold text-ink-3 touch-manipulation"
+                    className="md:hidden w-full min-h-14 px-4 flex items-center justify-between gap-3 rounded-2xl border border-hairline-3 bg-surface-card active:scale-press transition-transform duration-fast ease-forma text-sm font-semibold text-ink touch-manipulation"
                 >
-                    <span>Tendencia y capacidad</span>
-                    <span className="flex items-center gap-1.5 text-2xs font-medium text-ink-4">
-                        {showMore ? 'Ocultar' : 'Rampa, monotonía, volumen, VO₂max'}
-                        <ChevronDown size={14} className={showMore ? 'rotate-180' : ''} />
+                    <span className="whitespace-nowrap">Tendencia y capacidad</span>
+                    <span className="flex items-center gap-1.5 text-xs font-medium text-ink-4 whitespace-nowrap">
+                        {showMore ? 'Ocultar' : 'Mostrar'}
+                        <ChevronDown size={16} aria-hidden="true" className={`transition-transform duration-base ease-forma ${showMore ? 'rotate-180' : ''}`} />
                     </span>
                 </button>
-                <div id="dash-secondary-grid" data-dash="secondary-grid" data-open={showMore ? 'true' : 'false'} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-[minmax(0,1fr)] gap-x-8 max-md:data-[open=false]:hidden">
-                    {[
-                        { label: 'Rampa', metric: 'ramp', value: `${model.rampRate > 0 ? '+' : ''}${formatNumber(model.rampRate, 1)}`, sub: 'pts/sem' },
-                        { label: 'Monotonía', value: formatNumber(model.monotony, 2), sub: 'Índice carga' },
-                        { label: 'Volumen 30D', value: `${Math.round(model.totalVolume / 60)}h`, sub: `${model.totalActivities} sesiones` },
-                        { label: primaryVo2.source ? VO2_SOURCES[primaryVo2.source].label : 'VO₂max', metric: 'vo2max', value: primaryVo2.value ? formatNumber(primaryVo2.value, 1) : '--', sub: primaryVo2.source ? VO2_SOURCES[primaryVo2.source].source : '' }
-                    ].map((kpi) => (
-                        <div key={kpi.label} data-dash="ledger-row" className="flex items-baseline justify-between gap-3 py-3 border-b border-hairline hover:border-line-strong min-w-0">
-                            <span className="text-[12px] font-medium text-ink-4 truncate">{kpi.label}<span className="ml-1.5 text-ink-4/70">{kpi.sub}</span></span>
-                            <span data-metric={kpi.metric} className="text-[15px] font-semibold tabular-nums text-ink shrink-0">{kpi.value}</span>
+                <dl id="dash-secondary-grid" data-dash="secondary-grid" data-open={showMore ? 'true' : 'false'} className="divide-y divide-hairline max-md:mt-2 max-md:data-[open=false]:hidden">
+                    {ledger.map((kpi) => (
+                        <div key={kpi.label} data-dash="ledger-row" className="flex items-center justify-between gap-3 min-h-14 min-w-0">
+                            <dt className="text-sm text-ink-2-soft truncate">{kpi.label}<span className="ml-2 text-xs text-ink-4">{kpi.sub}</span></dt>
+                            <dd data-metric={kpi.metric} className="text-lg font-semibold tabular-nums text-ink shrink-0">{kpi.value}</dd>
                         </div>
                     ))}
-                </div>
-            </div>
+                </dl>
+            </section>
 
-            {/* SECCIÓN 3: GRÁFICA DE EVOLUCIÓN (PMC) */}
-            <div data-dash="chart" className="max-md:order-3 lg:col-[1/span_8] lg:row-start-3">
-                <SectionHeader as="p">Evolución de Rendimiento</SectionHeader>
-                <Card className="p-3 sm:p-5">
-                    <div data-dash="chart-body" className="h-[290px] sm:h-[330px] lg:h-[380px]">
-                        <EvolutionChart data={chartData} timeRange={timeRange} setTimeRange={setTimeRange} />
-                    </div>
-                </Card>
-            </div>
+            {/* 3. Métricas clave de hoy (sin repetir el CTL del héroe). */}
+            <section data-dash="primary" className="lg:col-span-12 lg:row-start-2">
+                <SectionHeader as="h2">Fisiología y carga</SectionHeader>
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-4">
+                    <KpiCard
+                        className="motion-safe:[animation-delay:0.18s]"
+                        label="Fatiga (ATL)" metric="atl" icon={Battery} color={ct.series.atl}
+                        value={Math.round(model.atl)} format={(n) => String(Math.round(n))}
+                        delta={atlDelta} spark={atlVals} sub="Cambio en 7 días"
+                    />
+                    <KpiCard
+                        className="motion-safe:[animation-delay:0.24s]"
+                        label="Forma (TSB)" metric="tsb" icon={Zap} color={ct.series.tsb}
+                        value={Math.round(model.tsb)} format={(n) => (Math.round(n) > 0 ? '+' : '') + Math.round(n)}
+                        delta={tsbDelta} spark={tsbVals} sub="Cambio en 7 días"
+                    />
+                    <KpiCard
+                        className="col-span-2 md:col-span-1 motion-safe:[animation-delay:0.3s]"
+                        label="Ratio de carga" metric="acwr" icon={Target} color={ct.series.tsb}
+                        value={model.acwr > 0 ? model.acwr : null} format={(n) => formatNumber(n, 2)}
+                        sub="Aguda / crónica · óptimo 0,8–1,3"
+                        chip={<span className={`text-2xs font-bold px-2 py-0.5 rounded-full border uppercase tracking-[0.05em] ${ACWR_CHIP[acwrInfo.tone]}`}>{acwrInfo.label}</span>}
+                    />
+                </div>
+            </section>
+
+            {/* 4. Evolución: el selector de rango en su cabecera y los totales del periodo al pie (RF-D3). */}
+            <Card as="section" data-dash="chart" aria-labelledby="dash-chart-title" className="p-card md:p-card-lg lg:col-span-12 lg:row-start-3">
+                <header className="flex flex-wrap items-center justify-between gap-3 mb-4">
+                    <h2 id="dash-chart-title" className="text-base font-semibold text-ink">Evolución</h2>
+                    <Segmented
+                        role="group"
+                        aria-label="Rango de la gráfica"
+                        data-dash="range"
+                        options={RANGES}
+                        value={timeRange}
+                        onChange={setTimeRange}
+                        optionClassName="min-w-[44px] min-h-[44px] md:min-h-[36px] touch-manipulation"
+                    />
+                </header>
+                <div data-dash="chart-body" className="h-[280px] sm:h-[320px] lg:h-[360px]">
+                    <EvolutionChart data={chartData} />
+                </div>
+                <PeriodTotals summary={periodSummary} range={timeRange} />
+            </Card>
         </div>
     );
 });
+
+const RANGES = [
+    { value: '7d', label: '7D' },
+    { value: '30d', label: '30D' },
+    { value: '90d', label: '3M' },
+    { value: 'all', label: 'Todo' },
+];
+
+const RANGE_CAPTION = { '7d': 'Últimos 7 días', '30d': 'Últimos 30 días', '90d': 'Últimos 3 meses', all: 'Desde el inicio' };
+
+/** Totales del periodo de la gráfica: lo único, además de la gráfica, que cambia con el rango. */
+const PeriodTotals = ({ summary, range }) => {
+    if (!summary) return null;
+    const caption = RANGE_CAPTION[range] || 'Periodo';
+    return (
+        <footer data-dash="period-totals" className="mt-5 pt-4 border-t border-hairline flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
+            <p className="text-xs text-ink-3">{caption}</p>
+            {summary.count > 0 ? (
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-x-4 gap-y-4 md:gap-x-10">
+                    {[
+                        { label: 'Sesiones', value: formatNumber(summary.count, 0) },
+                        { label: 'Tiempo', value: formatNumber(summary.duration, 0), unit: 'h' },
+                        { label: 'Distancia', value: formatNumber(summary.distance, 0), unit: 'km' },
+                        { label: 'Carga', value: formatNumber(summary.tss, 0), unit: 'TSS' },
+                    ].map((t) => (
+                        <Stat key={t.label} as="div" size="sm" mono label={t.label} value={t.value} unit={t.unit} className="min-w-0" />
+                    ))}
+                </div>
+            ) : (
+                <p className="text-sm text-ink-3">Sin sesiones en este periodo.</p>
+            )}
+        </footer>
+    );
+};

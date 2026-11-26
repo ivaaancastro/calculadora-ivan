@@ -112,6 +112,7 @@ export function usePMCMetrics({ activities, settings, timeRange }) {
       filteredData: visibleActs.slice().reverse(),
       currentMetrics,
       chartData,
+      pmcSeries:    fullSeries, // Serie completa, sin recortar por timeRange (sparklines del Dashboard)
       distribution,
       summary,
     };
@@ -122,6 +123,7 @@ export function usePMCMetrics({ activities, settings, timeRange }) {
     filteredData:    metrics.filteredData,
     currentMetrics:  metrics.currentMetrics,
     chartData:       metrics.chartData,
+    pmcSeries:       metrics.pmcSeries,
     distribution:    metrics.distribution,
     summary:         metrics.summary,
   };
