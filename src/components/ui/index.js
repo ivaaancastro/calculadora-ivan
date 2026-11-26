@@ -14,4 +14,5 @@ export { MetricTooltip } from './MetricTooltip.jsx';
 export { LoadingState } from './LoadingState.jsx';
 export { Skeleton } from './Skeleton.jsx';
 export { EmptyState } from './EmptyState.jsx';
-export { ErrorState } from './ErrorState.jsx';
+export { Hero } from './Hero.jsx';
+export { Stat, Delta } from './Stat.jsx';

@@ -25,7 +25,7 @@ export const Vo2MaxCard = ({ vo2Sport, setVo2Sport, currentVo2, vo2Level, vo2Sta
                 </div>
 
                 <div className="flex items-end gap-3 mb-8">
-                    <span className="text-4xl font-bold tracking-tighter" style={{ color: vo2Level.c }}>{currentVo2 > 0 ? currentVo2 : '--'}</span>
+                    <span data-metric="vo2max" className="text-4xl font-bold tracking-tighter" style={{ color: vo2Level.c }}>{currentVo2 > 0 ? currentVo2 : '--'}</span>
                     <div className="pb-1.5">
                         <span className="text-2xs font-bold text-slate-400 uppercase tracking-[0.08em]">ml/kg/min</span>
                         <span className="block text-2xs font-bold uppercase tracking-tight mt-0.5" style={{ color: vo2Level.c }}>Nivel {vo2Level.l}</span>
@@ -63,7 +63,7 @@ export const Vo2MaxCard = ({ vo2Sport, setVo2Sport, currentVo2, vo2Level, vo2Sta
                             <Footprints size={12} className="text-slate-400" />
                             <span className="text-2xs font-bold text-slate-400 uppercase tracking-[0.08em]">{VO2_SOURCES.run.label}</span>
                         </div>
-                        <p className="text-lg font-bold text-ink-soft">{vo2Stats?.run?.vo2max > 0 ? vo2Stats.run.vo2max : '--'}</p>
+                        <p data-metric={vo2Sport === 'run' ? 'vo2max' : 'vo2max-run'} className="text-lg font-bold text-ink-soft">{vo2Stats?.run?.vo2max > 0 ? vo2Stats.run.vo2max : '--'}</p>
                         <p className="text-[12px] text-ink-4">{VO2_SOURCES.run.source}</p>
                     </div>
                     <div className="p-4 rounded-2xl bg-sunken-3 border border-line-soft">
@@ -71,7 +71,7 @@ export const Vo2MaxCard = ({ vo2Sport, setVo2Sport, currentVo2, vo2Level, vo2Sta
                             <Bike size={12} className="text-slate-400" />
                             <span className="text-2xs font-bold text-slate-400 uppercase tracking-[0.08em]">{VO2_SOURCES.bike.label}</span>
                         </div>
-                        <p className="text-lg font-bold text-ink-soft">{vo2Stats?.bike?.vo2max > 0 ? vo2Stats.bike.vo2max : '--'}</p>
+                        <p data-metric={vo2Sport === 'bike' ? 'vo2max' : 'vo2max-bike'} className="text-lg font-bold text-ink-soft">{vo2Stats?.bike?.vo2max > 0 ? vo2Stats.bike.vo2max : '--'}</p>
                         <p className="text-[12px] text-ink-4">{VO2_SOURCES.bike.source}</p>
                     </div>
                 </div>

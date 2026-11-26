@@ -5,7 +5,7 @@
  *  - `grouped`: la tarjeta agrupada que definía index.css (Ajustes, Salud, Dashboard, detalle).
  *  - `panel`:   las tarjetas de Rendimiento (`bg-surface-5 … shadow-sm`).
  * `pressable` es la compresión al tocar que siempre acompañaba a la tarjeta agrupada; como
- * entonces, su `transition-transform` sustituye al `transition-all` de la tarjeta.
+ * entonces, su `transition-transform` sustituye a la transición de todas las propiedades.
  * `divided` es `divide-y divide-hairline` (las listas de Ajustes).
  * La tarjeta no tiene relleno propio: el relleno sigue en `className`, como antes.
  *
@@ -39,7 +39,7 @@ const FIGURES = {
 /** Biomarcadores: se elevan 2 px al pasar el ratón (sin movimiento reducido). */
 const LIFT = 'motion-safe:[transition:transform_0.2s_ease,box-shadow_0.2s_ease] motion-safe:hover:-translate-y-0.5';
 
-const PRESSABLE = 'active:scale-press transition-transform duration-150 ease-out select-none touch-manipulation';
+const PRESSABLE = 'active:scale-press transition-transform duration-fast ease-forma select-none touch-manipulation';
 
 export function cardClass({ variant = 'grouped', pressable = false, divided = false, figures } = {}) {
   if (!SURFACE[variant]) throw new Error(`Card: variante desconocida "${variant}"`);

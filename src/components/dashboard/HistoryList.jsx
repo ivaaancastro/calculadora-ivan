@@ -172,7 +172,7 @@ export const HistoryList = React.memo(({ activities, onDelete, onSelectActivity 
 
             {/* RESUMEN DE RESULTADOS */}
             <div data-history="count" className="px-4 py-2 border-b border-line bg-sunken flex justify-between items-center text-[12px] font-semibold text-ink-4 uppercase tracking-[0.05em]">
-                <span className="rotulo-marca">{filteredActivities.length} Actividades</span>
+                <span data-metric="activities" className="rotulo-marca">{filteredActivities.length} Actividades</span>
             </div>
 
             {/* LISTA DE ACTIVIDADES VIRTUALIZADA */}

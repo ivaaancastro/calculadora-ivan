@@ -17,13 +17,13 @@ export const BiomarkersGrid = ({ wellnessMetrics: wm }) => {
     const sparkOf = (field) => lastSeries(cd, field);
 
     const defs = {
-        rhr: { label: 'FC Reposo', icon: Activity, value: typeof wm?.latestRhr === 'number' ? Math.round(wm.latestRhr) : '--', unit: 'lpm', sub: `Base: ${typeof wm?.baselineRhr === 'number' ? Math.round(wm.baselineRhr) : '--'}`, spark: sparkOf('rhr'), color: ct.series.hr, deltaUnit: '' },
-        hrv: { label: 'VFC anoche', icon: Zap, value: numOrDash(wm?.latestHrv), unit: 'ms', sub: `7d: ${numOrDash(wm?.avgHrv7d)} ms`, spark: sparkOf('hrv'), color: ct.series.ef, deltaUnit: '' },
-        sleep: { label: 'Sueño', icon: Moon, value: numOrDash(wm?.latestSleep), unit: 'h', sub: `Score: ${wm?.latestSleepScore ?? '--'}%`, spark: sparkOf('sleep'), color: ct.series.sleep },
-        tsb: { label: 'Forma TSB', icon: ActivitySquare, value: typeof wm?.currentTsb === 'number' ? (wm.currentTsb > 0 ? '+' : '') + Math.round(wm.currentTsb) : '--', unit: '', sub: 'Equilibrio de fatiga', spark: [], color: ct.series.tsb },
+        rhr: { metric: 'rhr', label: 'FC Reposo', icon: Activity, value: typeof wm?.latestRhr === 'number' ? Math.round(wm.latestRhr) : '--', unit: 'lpm', sub: `Base: ${typeof wm?.baselineRhr === 'number' ? Math.round(wm.baselineRhr) : '--'}`, spark: sparkOf('rhr'), color: ct.series.hr, deltaUnit: '' },
+        hrv: { metric: 'hrv', label: 'VFC anoche', icon: Zap, value: numOrDash(wm?.latestHrv), unit: 'ms', sub: `7d: ${numOrDash(wm?.avgHrv7d)} ms`, spark: sparkOf('hrv'), color: ct.series.ef, deltaUnit: '' },
+        sleep: { metric: 'sleep', label: 'Sueño', icon: Moon, value: numOrDash(wm?.latestSleep), unit: 'h', sub: `Score: ${wm?.latestSleepScore ?? '--'}%`, spark: sparkOf('sleep'), color: ct.series.sleep },
+        tsb: { metric: 'tsb', label: 'Forma TSB', icon: ActivitySquare, value: typeof wm?.currentTsb === 'number' ? (wm.currentTsb > 0 ? '+' : '') + Math.round(wm.currentTsb) : '--', unit: '', sub: 'Equilibrio de fatiga', spark: [], color: ct.series.tsb },
         steps: { label: 'Pasos', icon: Footprints, value: typeof wm?.latestSteps === 'number' ? wm.latestSteps.toLocaleString('es-ES') : numOrDash(wm?.latestSteps), unit: '', sub: 'Objetivo 10.000', spark: sparkOf('steps'), color: ct.series.cadence },
         spo2: { label: 'SpO₂', icon: Wind, value: fmt(wm?.latestSpo2), unit: '%', sub: 'Saturación', spark: [], color: ct.series.ef },
-        vo2: { label: 'VO₂max', icon: TrendingUp, value: fmt(wm?.latestVo2max, 1), unit: 'ml/kg', sub: 'Del dispositivo (Intervals.icu)', spark: [], color: ct.series.ef },
+        vo2: { metric: 'vo2max', label: 'VO₂max', icon: TrendingUp, value: fmt(wm?.latestVo2max, 1), unit: 'ml/kg', sub: 'Del dispositivo (Intervals.icu)', spark: [], color: ct.series.ef },
         weight: { label: 'Peso', icon: Scale, value: numOrDash(wm?.latestWeight), unit: 'kg', sub: wm?.weightTrend != null ? '7 días' : 'Estable', spark: sparkOf('weight'), color: ct.series.power },
     };
 
@@ -50,7 +50,7 @@ export const BiomarkersGrid = ({ wellnessMetrics: wm }) => {
                             </div>
                             <div>
                                 <div className="flex items-baseline gap-1.5 flex-wrap">
-                                    <span data-health="biomarker-value" className={`text-[28px] sm:text-[32px] leading-none font-semibold tabular-nums tracking-[-0.03em] ${s.status === 'none' ? 'text-ink-4' : 'text-ink'}`}>{d.value}</span>
+                                    <span data-health="biomarker-value" data-metric={d.metric} className={`text-[28px] sm:text-[32px] leading-none font-semibold tabular-nums tracking-[-0.03em] ${s.status === 'none' ? 'text-ink-4' : 'text-ink'}`}>{d.value}</span>
                                     {d.unit && <span className="text-[12px] font-medium text-ink-4">{d.unit}</span>}
                                     {s.delta !== null && s.delta !== 0 && (
                                         <span data-health="delta" className={`inline-flex items-center text-[12px] font-semibold tabular-nums ${good ? 'text-positive' : 'text-danger'}`}>

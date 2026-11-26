@@ -23,7 +23,7 @@ export const HrvCard = ({ hrv }) => {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
                     <div>
                         <div className="flex items-baseline gap-2 mb-2">
-                            <span className="text-4xl font-bold tracking-tighter text-ink-soft">{hrv.rmssd}</span>
+                            <span data-metric="hrv" className="text-4xl font-bold tracking-tighter text-ink-soft">{hrv.rmssd}</span>
                             <span className="text-sm font-bold text-slate-400 uppercase tracking-[0.08em]">ms</span>
                             <div className="ml-4 px-2 py-0.5 rounded-md text-2xs font-bold uppercase border shadow-sm" style={{ backgroundColor: `${hrv.color}10`, color: hrv.color, borderColor: `${hrv.color}20` }}>
                                 {hrv.state}

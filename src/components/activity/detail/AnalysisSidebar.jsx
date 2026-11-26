@@ -1,6 +1,9 @@
 import React from 'react';
 import { InteractiveMap } from '../ActivityMap';
 
+/** ¿La frase del Coach repite el impacto del chip? (RF-D1; se corrige en el PR 16). */
+const repeatsImpact = (insight, te) => !!te?.primaryBenefit && insight.toLowerCase().includes(te.primaryBenefit.toLowerCase());
+
 export const AnalysisSidebar = ({ showMap, activity, streams, themeColor, activePayload, trainingEffect, fitnessAnalysis }) => (
                             <aside data-detail="sidebar" className="w-full lg:w-[380px] border-t lg:border-t-0 lg:border-l border-line bg-surface-6 overflow-y-auto custom-scrollbar p-4 sm:p-5 space-y-6 shrink-0">
                                 {/* Map - Desktop Solo (en móvil se muestra arriba estilo Strava) */}
@@ -24,7 +27,7 @@ export const AnalysisSidebar = ({ showMap, activity, streams, themeColor, active
                                                         )}
                                                     </div>
                                                 </div>
-                                                <span className={`px-2.5 py-1 rounded-full text-2xs font-bold uppercase tracking-tight bg-surface-2 border ${trainingEffect.benefitColor.replace('text-', 'border-').replace('dark:', '')} ${trainingEffect.benefitColor}`}>
+                                                <span data-metric="impact" className={`px-2.5 py-1 rounded-full text-2xs font-bold uppercase tracking-tight bg-surface-2 border ${trainingEffect.benefitColor.replace('text-', 'border-').replace('dark:', '')} ${trainingEffect.benefitColor}`}>
                                                     {trainingEffect.primaryBenefit}
                                                 </span>
                                             </div>
@@ -74,7 +77,7 @@ export const AnalysisSidebar = ({ showMap, activity, streams, themeColor, active
                                                     {fitnessAnalysis.insights.slice(0, 3).map((insight, idx) => (
                                                         <div key={idx} className="flex gap-3">
                                                             <div className="text-2xs font-bold text-faint-2 mt-0.5">0{idx + 1}</div>
-                                                            <p className="text-2xs font-medium text-ink-3 leading-snug">
+                                                            <p data-metric={repeatsImpact(insight, trainingEffect) ? 'impact' : undefined} className="text-2xs font-medium text-ink-3 leading-snug">
                                                                 {insight}
                                                             </p>
                                                         </div>

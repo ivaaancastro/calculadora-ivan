@@ -744,7 +744,7 @@
   --dur-base: 200ms;
   --dur-slow: 400ms;
   --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
-  --press-scale: 0.97;
+  --press-scale: 0.98;
   --shadow-xs: 0 0 0 1px rgba(16, 19, 23, 0.04), 0 1px 1px rgba(16, 19, 23, 0.04);
   --shadow-sm: 0 0 0 1px rgba(16, 19, 23, 0.05), 0 1px 2px rgba(16, 19, 23, 0.05), 0 2px 6px -2px rgba(30, 41, 70, 0.06);
   --shadow-card: 0 0 0 1px rgba(16, 19, 23, 0.04), 0 1px 2px rgba(16, 19, 23, 0.04), 0 4px 12px -6px rgba(30, 41, 70, 0.08);
@@ -756,7 +756,7 @@
   --dur-base: 200ms;
   --dur-slow: 400ms;
   --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
-  --press-scale: 0.97;
+  --press-scale: 0.98;
   --shadow-xs: 0 0 0 1px rgba(255, 255, 255, 0.07);
   --shadow-sm: 0 0 0 1px rgba(255, 255, 255, 0.09), inset 0 1px 0 rgba(255, 255, 255, 0.03);
   --shadow-card: 0 0 0 1px rgba(255, 255, 255, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.03);

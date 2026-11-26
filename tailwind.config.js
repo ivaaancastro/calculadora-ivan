@@ -79,7 +79,7 @@ module.exports = {
       transitionProperty: {
         paint: 'color, background-color, border-color, text-decoration-color, fill, stroke, opacity, box-shadow, transform, filter, width, height, stroke-dashoffset, stroke-dasharray',
       },
-      // Pulsación única (MOV-3): `active:scale-press` (0,97; 1 con movimiento reducido).
+      // Pulsación única (MOV-3, RF-D5): `active:scale-press` (0,98; 1 con movimiento reducido).
       scale: {
         press: 'var(--press-scale)',
       },

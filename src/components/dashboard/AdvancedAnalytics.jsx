@@ -165,19 +165,19 @@ export const AdvancedAnalytics = React.memo(({ activities, settings,  timeRange,
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4">
                     <KpiCard
                         className="motion-safe:[animation-delay:0.18s]"
-                        label="Fatiga (ATL)" icon={Battery} color={ct.series.atl}
+                        label="Fatiga (ATL)" metric="atl" icon={Battery} color={ct.series.atl}
                         value={Math.round(model.atl)} format={(n) => String(Math.round(n))}
                         delta={atlDelta} spark={atlSpark} sub="Carga últ. 7 días"
                     />
                     <KpiCard
                         className="motion-safe:[animation-delay:0.24s]"
-                        label="Forma (TSB)" icon={Zap} color={ct.series.tsb}
+                        label="Forma (TSB)" metric="tsb" icon={Zap} color={ct.series.tsb}
                         value={Math.round(model.tsb)} format={(n) => (Math.round(n) > 0 ? '+' : '') + Math.round(n)}
                         delta={tsbDelta} spark={tsbSpark} sub="Balance CTL / ATL"
                     />
                     <KpiCard
                         className="col-span-2 md:col-span-1 motion-safe:[animation-delay:0.3s]"
-                        label="Ratio Carga" icon={Target} color={ct.series.tsb}
+                        label="Ratio Carga" metric="acwr" icon={Target} color={ct.series.tsb}
                         value={model.acwr} format={(n) => formatNumber(n, 2)}
                         sub={`Aguda vs Crónica · óptimo 0,8–1,3`}
                         chip={<span className={`text-2xs font-bold px-2 py-0.5 rounded-full border uppercase tracking-[0.05em] ${ACWR_CHIP[acwrInfo.tone]}`}>{acwrInfo.label}</span>}
@@ -204,14 +204,14 @@ export const AdvancedAnalytics = React.memo(({ activities, settings,  timeRange,
                 </button>
                 <div id="dash-secondary-grid" data-dash="secondary-grid" data-open={showMore ? 'true' : 'false'} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-[minmax(0,1fr)] gap-x-8 max-md:data-[open=false]:hidden">
                     {[
-                        { label: 'Rampa', value: `${model.rampRate > 0 ? '+' : ''}${formatNumber(model.rampRate, 1)}`, sub: 'pts/sem' },
+                        { label: 'Rampa', metric: 'ramp', value: `${model.rampRate > 0 ? '+' : ''}${formatNumber(model.rampRate, 1)}`, sub: 'pts/sem' },
                         { label: 'Monotonía', value: formatNumber(model.monotony, 2), sub: 'Índice carga' },
                         { label: 'Volumen 30D', value: `${Math.round(model.totalVolume / 60)}h`, sub: `${model.totalActivities} sesiones` },
-                        { label: primaryVo2.source ? VO2_SOURCES[primaryVo2.source].label : 'VO₂max', value: primaryVo2.value ? formatNumber(primaryVo2.value, 1) : '--', sub: primaryVo2.source ? VO2_SOURCES[primaryVo2.source].source : '' }
+                        { label: primaryVo2.source ? VO2_SOURCES[primaryVo2.source].label : 'VO₂max', metric: 'vo2max', value: primaryVo2.value ? formatNumber(primaryVo2.value, 1) : '--', sub: primaryVo2.source ? VO2_SOURCES[primaryVo2.source].source : '' }
                     ].map((kpi) => (
                         <div key={kpi.label} data-dash="ledger-row" className="flex items-baseline justify-between gap-3 py-3 border-b border-hairline hover:border-line-strong min-w-0">
                             <span className="text-[12px] font-medium text-ink-4 truncate">{kpi.label}<span className="ml-1.5 text-ink-4/70">{kpi.sub}</span></span>
-                            <span className="text-[15px] font-semibold tabular-nums text-ink shrink-0">{kpi.value}</span>
+                            <span data-metric={kpi.metric} className="text-[15px] font-semibold tabular-nums text-ink shrink-0">{kpi.value}</span>
                         </div>
                     ))}
                 </div>

@@ -29,7 +29,7 @@ Spec: `spec.md` v0.3 (aprobada 2026-11-24). Plan: `plan.md`. Hallazgos: `auditor
 - [x] **PR 11** (#152) `fix/copy-y-a11y`: COP-1, COP-2, A11Y-1..5.
 - [x] **PR 12** `docs/paleta-propuestas` (artefacto con capturas; elegida la A): 2–3 direcciones en capturas reales. **Parada: el usuario elige.**
 - [x] **PR 13** (#155; antes/después: https://claude.ai/artifact/47idCtn2UgqUnZGU9FSehR) `feat/paleta`: paleta elegida en tokens y `chartTheme`, contraste AA.
-- [ ] **PR 14** `feat/premium-sistema`: `docs/design/forma.md`, `Hero`/`Stat`, `EmptyState` con `tone`, helper `data-metric`.
+- [x] **PR 14** `feat/premium-sistema`: `docs/design/forma.md`, `Hero`/`Stat`, `EmptyState` con `tone`, helper `data-metric`.
 - [ ] **PR 15** `feat/premium-dashboard`.
 - [ ] **PR 16** `feat/premium-detalle`.
 - [ ] **PR 17** `feat/premium-salud`.
@@ -58,3 +58,4 @@ Spec: `spec.md` v0.3 (aprobada 2026-11-24). Plan: `plan.md`. Hallazgos: `auditor
 - 2026-11-25: #143 mergeado. El usuario rotó el secreto; `strava-token` desplegada en FORMA y comprobada en vivo (Strava acepta id + secreto y solo rechaza el token de prueba). La función funciona solo con `STRAVA_CLIENT_SECRET`; `STRAVA_CLIENT_ID` y `ALLOWED_ORIGIN` son opcionales.
 - 2026-11-26: #153 (7a), #154 (7b: `skin.css` de 1.634 a 83 líneas, sin `data-ui`, capturas idénticas) y #155 (paleta A con una sola fuente de color; `lint:palette` en el CI) mergeados. En curso: PR 14 (sistema).
 - Anotado para el PR 17: en Salud a 390 px, «RECUPERACIÓN» del anillo pisa «Disponibilidad del SNC».
+- 2026-11-26: PR 14 (sistema): `docs/design/forma.md`, primitivas `Hero`/`Stat`/`Delta`, `EmptyState` con `tone` (fuera `ErrorState`), pulsación 0,98, `transition-all` a 0 y comprobación E2E de métricas repetidas (`e2e/metrics.spec.js`, con `PENDING_DUPLICATES` por PR 15–19).
