@@ -34,7 +34,7 @@ const CARD_ORDER = { status: 'max-md:!order-2', hrv: 'max-md:!order-3', threshol
 const CATEGORIES = [
     { id: 'physiology', label: 'Fisiología' },
     { id: 'power', label: 'Potencia' },
-    { id: 'vo2', label: 'VO2 y Marcas' },
+    { id: 'vo2', label: 'VO₂max y marcas' },
     { id: 'volume', label: 'Volumen' },
     { id: 'all', label: 'Todos' },
 ];

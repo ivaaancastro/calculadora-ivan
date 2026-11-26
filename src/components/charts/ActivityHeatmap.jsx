@@ -5,8 +5,9 @@
  */
 import { useMemo } from 'react';
 import { useChartTheme } from './useChartTheme';
-import { buildHeatmap } from './heatmapGrid';
+import { buildHeatmap } from '../../utils/heatmapGrid';
 import { chartFigureProps } from './chartA11y';
+import { toDateKey } from '../../utils/dates';
 
 const CELL = 11;
 const GAP = 3;
@@ -18,7 +19,7 @@ export function ActivityHeatmap({ activities, weeks = 26 }) {
     const byDate = {};
     (activities || []).forEach((a) => {
       if (!(a.tss > 0) || a.isPlanned) return;
-      const k = new Date(a.date).toLocaleDateString('en-CA');
+      const k = toDateKey(a.date);
       byDate[k] = (byDate[k] || 0) + a.tss;
     });
     const grid = buildHeatmap(byDate, new Date(), weeks);

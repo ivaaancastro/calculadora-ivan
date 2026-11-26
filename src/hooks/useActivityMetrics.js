@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { formatPace, formatDuration } from '../utils/formatters';
+import { formatPace, formatDuration, formatNumber } from '../utils/formatters';
 import { calculateTrainingEffect } from '../utils/fitnessStatsEngine';
 import { buildCoachInsights } from '../utils/coachInsights';
 import { detectSportType, isPaceSport } from '../utils/activityMetricsBySport';
@@ -186,7 +186,7 @@ export const useActivityMetrics = (activity, streams, settings) => {
             const maxMs = Math.max(...streams.velocity_smooth.data);
             if (isPaceBased) {
                 if (maxMs > 0.1) maxSpeedObj = { value: formatPace(16.6666667 / maxMs), unit: '/km', label: 'Ritmo Máx' };
-            } else { maxSpeedObj = { value: (maxMs * 3.6).toFixed(1), unit: 'km/h', label: 'Vel. Máxima' }; }
+            } else { maxSpeedObj = { value: formatNumber(maxMs * 3.6, 1), unit: 'km/h', label: 'Vel. Máxima' }; }
         }
 
         if (streams.heartrate?.data && streams.time.data.length > 1200) {
@@ -219,7 +219,7 @@ export const useActivityMetrics = (activity, streams, settings) => {
                     if (countTotal > 300) {
                         const efTotal = (workTotal / countTotal) / (hrTotal / countTotal);
                         const efVal = isPowerBased ? efTotal : (efTotal * 60);
-                        efObj = { value: efVal.toFixed(2), unit: isPowerBased ? 'w/bpm' : 'm/bpm' };
+                        efObj = { value: formatNumber(efVal, 2), unit: isPowerBased ? 'w/bpm' : 'm/bpm' };
 
                         if (count1 > 150 && count2 > 150) {
                             const ef1 = (work1 / count1) / (hr1 / count1);
@@ -231,7 +231,7 @@ export const useActivityMetrics = (activity, streams, settings) => {
                             if (decVal > 8) { color = 'text-red-500'; label = 'Alto'; }
                             if (decVal < -5) { color = 'text-slate-400'; label = 'Negativo'; }
 
-                            decouplingObj = { value: decVal.toFixed(1), color, label };
+                            decouplingObj = { value: formatNumber(decVal, 1), drift: Number(decVal.toFixed(1)), color, label };
                         }
                     }
                 }
@@ -248,13 +248,13 @@ export const useActivityMetrics = (activity, streams, settings) => {
                     index: idx + 1,
                     name: lap.name,
                     timeStr: formatPace(lapTimeMin),
-                    speedVal: isPaceBased ? formatPace(16.6666667 / avgSpdMs) : (avgSpdMs * 3.6).toFixed(1),
+                    speedVal: isPaceBased ? formatPace(16.6666667 / avgSpdMs) : formatNumber(avgSpdMs * 3.6, 1),
                     rawSpeed: avgSpdMs,
                     hrAvg: Math.round(lap.average_heartrate) || 0,
                     pwrAvg: lap.average_watts ? Math.round(lap.average_watts) : null,
                     cadAvg: lap.average_cadence ? Math.round(lap.average_cadence) : null,
                     elev: Math.round(lap.total_elevation_gain) || 0,
-                    distanceKm: lapDistKm.toFixed(2)
+                    distanceKm: formatNumber(lapDistKm, 2)
                 });
             });
         } else if (streams.distance?.data && streams.time.data && streams.heartrate?.data && streams.velocity_smooth?.data) {
@@ -291,13 +291,13 @@ export const useActivityMetrics = (activity, streams, settings) => {
                             autoLaps.push({
                                 index: autoLaps.length + 1,
                                 timeStr: formatPace(lapTimeSecs / 60),
-                                speedVal: isPaceBased ? formatPace(16.6666667 / avgSpdMs) : (avgSpdMs * 3.6).toFixed(1),
+                                speedVal: isPaceBased ? formatPace(16.6666667 / avgSpdMs) : formatNumber(avgSpdMs * 3.6, 1),
                                 rawSpeed: avgSpdMs,
                                 hrAvg: Math.round(hrSum / count),
                                 pwrAvg: wattData ? Math.round(pwrSum / count) : null,
                                 cadAvg: cadData ? Math.round(cadSum / count) : null,
                                 elev: Math.round(elevGain),
-                                distanceKm: (lapDistMeters / 1000).toFixed(2)
+                                distanceKm: formatNumber(lapDistMeters / 1000, 2)
                             });
                         }
                     }
@@ -391,9 +391,9 @@ export const useActivityMetrics = (activity, streams, settings) => {
 
                         climbPro.push({
                             index: climbPro.length + 1,
-                            distance: (cDist / 1000).toFixed(2),
+                            distance: formatNumber(cDist / 1000, 2),
                             gain: Math.round(cGain),
-                            avgGrade: avgGrade.toFixed(1),
+                            avgGrade: formatNumber(avgGrade, 1),
                             vam: vam,
                             category: category,
                             timeStr: formatDuration(cTime)
@@ -458,7 +458,7 @@ export const useActivityMetrics = (activity, streams, settings) => {
             data.push({
                 time: Math.floor(timeData[i] / 60),
                 rawTime: timeData[i],
-                distanceKm: distData ? (distData[i] / 1000).toFixed(2) : null,
+                distanceKm: distData ? formatNumber(distData[i] / 1000, 2) : null,
                 grade: slope,
                 hr: streams.heartrate ? streams.heartrate.data[i] : null,
                 speed: speed,

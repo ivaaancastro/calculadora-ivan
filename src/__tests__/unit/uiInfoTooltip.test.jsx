@@ -1,7 +1,11 @@
+/** @vitest-environment jsdom */
 import { describe, it, expect } from 'vitest';
-import { renderToStaticMarkup } from 'react-dom/server';
+import { render, screen, fireEvent } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { InfoTooltip } from '../../components/ui/InfoTooltip.jsx';
 import { INFO_TOOLTIP, infoBubbleClass } from '../../components/ui/infoTooltipClasses.js';
+
+const isOpen = () => screen.getByRole('tooltip', { hidden: true }).className.split(' ').includes('visible');
 
 describe('ui/InfoTooltip', () => {
   it('copia la receta de la burbuja con tokens exactos', () => {
@@ -11,15 +15,55 @@ describe('ui/InfoTooltip', () => {
     expect(INFO_TOOLTIP.arrow).toContain('border-t-tooltip-info-arrow');
   });
 
-  it('pinta el grupo, el icono y la burbuja con el texto y la flecha', () => {
-    const html = renderToStaticMarkup(<InfoTooltip text="Hola" />);
-    expect(html.startsWith(`<div class="${INFO_TOOLTIP.root}"><svg `)).toBe(true);
-    expect(html).toMatch(/<svg[^>]* width="11"/);
-    expect(html).toContain(` ${INFO_TOOLTIP.icon}"`);
-    expect(html).toContain(`<div role="tooltip" class="${INFO_TOOLTIP.bubble}">Hola<div class="${INFO_TOOLTIP.arrow}"></div></div></div>`);
+  it('A11Y-2: es un botón con nombre accesible descrito por la burbuja', () => {
+    render(<InfoTooltip text="Hola" />);
+    const btn = screen.getByRole('button', { name: 'Más información' });
+    expect(btn).toHaveAttribute('type', 'button');
+    const tip = screen.getByRole('tooltip', { hidden: true });
+    expect(btn).toHaveAttribute('aria-describedby', tip.id);
+    expect(tip).toHaveTextContent('Hola');
+    expect(btn.querySelector('svg')).toHaveAttribute('width', '14');
   });
 
-  it('abierta por un toque cambia solo la visibilidad y la opacidad', () => {
+  it('acepta una etiqueta propia', () => {
+    render(<InfoTooltip text="x" label="Qué es el eFTP" />);
+    expect(screen.getByRole('button', { name: 'Qué es el eFTP' })).toBeInTheDocument();
+  });
+
+  it('zona táctil ≥ 24 px con ratón y 44 px en pantallas táctiles', () => {
+    expect(INFO_TOOLTIP.trigger).toContain('w-6 h-6');
+    expect(INFO_TOOLTIP.trigger).toContain('[@media(pointer:coarse)]:w-11 [@media(pointer:coarse)]:h-11');
+    expect(INFO_TOOLTIP.trigger).toContain('focus-visible:ring-2');
+  });
+
+  it('se abre con un clic o toque y se cierra con otro, fuera o con Escape', async () => {
+    const user = userEvent.setup();
+    render(<div><InfoTooltip text="Hola" /><p>fuera</p></div>);
+    const btn = screen.getByRole('button', { name: 'Más información' });
+    await user.click(btn);
+    expect(isOpen()).toBe(true);
+    expect(btn).toHaveAttribute('aria-expanded', 'true');
+    await user.click(btn);
+    expect(isOpen()).toBe(false);
+    await user.click(btn);
+    fireEvent.pointerDown(screen.getByText('fuera'));
+    expect(isOpen()).toBe(false);
+    await user.click(btn);
+    await user.keyboard('{Escape}');
+    expect(isOpen()).toBe(false);
+  });
+
+  it('se abre al llegar con el teclado y se cierra al salir con Tab', async () => {
+    const user = userEvent.setup();
+    render(<div><InfoTooltip text="Hola" /><button type="button">otro</button></div>);
+    await user.tab();
+    expect(screen.getByRole('button', { name: 'Más información' })).toHaveFocus();
+    expect(isOpen()).toBe(true);
+    await user.tab();
+    expect(isOpen()).toBe(false);
+  });
+
+  it('abierta cambia solo la visibilidad y la opacidad', () => {
     expect(infoBubbleClass(false)).toBe(INFO_TOOLTIP.bubble);
     const open = infoBubbleClass(true).split(' ');
     expect(open).toContain('visible');

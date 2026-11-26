@@ -10,15 +10,15 @@ import { MobileSwipePager } from './layout/MobileSwipePager';
 
 // Subcomponentes extraídos (SRP)
 import { UploadStatusBanner } from './dashboard/UploadStatusBanner';
-import { EmptyState } from './dashboard/EmptyState';
+import { Database } from 'lucide-react';
 import { MainTabsView } from './dashboard/MainTabsView';
-import { MAIN_TAB_PATHS } from './dashboard/mainTabs';
+import { MAIN_TAB_PATHS } from '../utils/mainTabs';
 import { ActivitySubRoutes } from './dashboard/ActivitySubRoutes';
 import { AdvancedAnalytics } from './dashboard/AdvancedAnalytics';
 import { HistoryList } from './dashboard/HistoryList';
 import AddActivityModal from './modals/AddActivityModal';
 import { ErrorBoundary } from './common/ErrorBoundary';
-import { LoadingState } from './ui';
+import { Card, EmptyState, LoadingState } from './ui';
 
 // Páginas cargadas bajo demanda (code splitting)
 const CalendarPage = React.lazy(() =>
@@ -198,7 +198,11 @@ const Dashboard = () => {
 
       <main className={`w-full max-w-[1800px] mx-auto ${isActivityPage ? 'px-2 sm:px-4 py-0 sm:py-2' : 'px-0 sm:px-6 py-2 sm:py-6'}`}>
         {activities.length === 0 ? (
-          <EmptyState />
+          <div className="py-20 px-4">
+            <Card className="max-w-md mx-auto">
+              <EmptyState icon={Database} title="Aún no hay actividades" description="Conecta Strava para iniciar el análisis." />
+            </Card>
+          </div>
         ) : isSubPage ? (
           <ActivitySubRoutes
             activities={activities}

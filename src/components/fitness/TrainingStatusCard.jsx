@@ -1,6 +1,10 @@
 import React from 'react';
 import { TrendingUp } from 'lucide-react';
 import { Card, InfoTooltip } from '../ui';
+import { tsbStateKey } from '../../utils/formState';
+
+// Color del TSB según el estado de forma común (formState.js, BUG-6).
+const TSB_TONE = { transition: 'text-legacy-tsb-up', peak: 'text-legacy-tsb-up', overload: 'text-legacy-tsb-down-2', critical: 'text-legacy-tsb-down-2' };
 
 export const TrainingStatusCard = ({ trainingStatus }) => {
     if (!trainingStatus) return null;
@@ -33,7 +37,7 @@ export const TrainingStatusCard = ({ trainingStatus }) => {
                         </div>
                         <div className="space-y-1">
                             <p className="text-2xs font-bold text-slate-400 uppercase tracking-[0.05em]">TSB</p>
-                            <p className={`text-xl font-bold ${trainingStatus.tsb > 10 ? 'text-legacy-tsb-up' : trainingStatus.tsb < -10 ? 'text-legacy-tsb-down-2' : 'text-slate-400'}`}>
+                            <p className={`text-xl font-bold ${TSB_TONE[tsbStateKey(trainingStatus.tsb)] || 'text-slate-400'}`}>
                                 {trainingStatus.tsb > 0 ? '+' : ''}{trainingStatus.tsb}
                             </p>
                         </div>

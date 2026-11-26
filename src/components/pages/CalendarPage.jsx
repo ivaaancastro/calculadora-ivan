@@ -15,6 +15,7 @@ import { CalendarMonthView } from '../calendar/CalendarMonthView';
 import { PlannerModal } from '../calendar/PlannerModal';
 import { MonthHero } from '../calendar/MonthHero';
 import { buildMonthSummary } from '../../utils/monthSummary';
+import { monthTitle } from '../../utils/monthTitle';
 import { buildDayLoadLevels } from '../../utils/calendarLoad';
 
 export const CalendarPage = ({ activities, plannedWorkouts = [], addPlannedWorkout, deletePlannedWorkout, updatePlannedWorkout, currentMetrics, settings, chartData = [], onDelete, onSelectActivity }) => {
@@ -55,8 +56,8 @@ export const CalendarPage = ({ activities, plannedWorkouts = [], addPlannedWorko
                 {/* HEADER */}
                 <div data-cal="header" className="flex items-center justify-between px-3 sm:px-5 py-3 sm:py-4 bg-transparent border-b border-line">
                     <div className="flex items-center gap-2 sm:gap-3">
-                        <h2 className="text-base sm:text-2xl font-semibold text-ink-2 capitalize tracking-tight flex items-center">
-                            {new Date(year, month).toLocaleDateString('es-ES', { month: 'long', year: 'numeric' })}
+                        <h2 className="text-base sm:text-2xl font-semibold text-ink-2 tracking-tight flex items-center">
+                            {monthTitle(year, month)}
                         </h2>
                         <button onClick={goToday} data-cal="today-btn" className="min-h-[44px] min-w-[44px] text-[12px] font-medium text-ink-3 hover:text-danger-ink-2 active:scale-press transition-paint ml-1 sm:ml-2 bg-sunken shadow-inset-line px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full">Hoy</button>
                     </div>

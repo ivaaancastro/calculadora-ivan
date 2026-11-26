@@ -25,6 +25,8 @@ import { supabase } from '../../supabase';
 import { useTheme } from '../../hooks/useTheme';
 import { getChartTheme } from '../charts/chartTheme';
 import { Card, SectionHeader } from '../ui';
+import { formatNumber } from '../../utils/formatters';
+import { pickPrimaryVo2, VO2_SOURCES } from '../../utils/vo2Source';
 
 const TIME_INTERVALS = [1, 5, 15, 30, 60, 180, 300, 600, 1200, 2400, 3600, 7200];
 // const formatInterval = (secs) => { if (secs < 60) return `${secs}s`; if (secs < 3600) return `${secs / 60}m`; return `${secs / 3600}h`; };
@@ -120,11 +122,8 @@ export const AdvancedAnalytics = React.memo(({ activities, settings,  timeRange,
         };
     }, [currentMetrics, analytics]);
 
-    // Primary VO2max: Priority Bike > Garmin > Run
-    const globalMaxVo2 = analytics.vo2Max.bike.vo2max 
-        ? analytics.vo2Max.bike.vo2max
-        : (garminVo2max || analytics.vo2Max.run.vo2max || 0);
-    const vo2IsGarmin = !!garminVo2max;
+    // VO₂max principal con su origen (COP-2): ciclismo estimado > dispositivo > carrera estimada.
+    const primaryVo2 = pickPrimaryVo2({ bike: analytics.vo2Max.bike.vo2max, device: garminVo2max, run: analytics.vo2Max.run.vo2max });
 
     if (!activities || activities.length === 0) return null;
 
@@ -132,7 +131,7 @@ export const AdvancedAnalytics = React.memo(({ activities, settings,  timeRange,
     const tsbVals = seriesValues(chartData, 'tcb');
     const atlSpark = atlVals;
     const tsbSpark = tsbVals;
-    const fmtDelta = (d, digits = 0) => `${d > 0 ? '+' : ''}${d.toFixed(digits)}`;
+    const fmtDelta = (d, digits = 0) => `${d > 0 ? '+' : ''}${formatNumber(d, digits)}`;
     const mkDelta = (vals, upTone, downTone) => {
         const d = deltaOver(vals, 7);
         if (d === null) return null;
@@ -179,7 +178,7 @@ export const AdvancedAnalytics = React.memo(({ activities, settings,  timeRange,
                     <KpiCard
                         className="col-span-2 md:col-span-1 motion-safe:[animation-delay:0.3s]"
                         label="Ratio Carga" icon={Target} color={ct.series.tsb}
-                        value={model.acwr} format={(n) => n.toFixed(2)}
+                        value={model.acwr} format={(n) => formatNumber(n, 2)}
                         sub={`Aguda vs Crónica · óptimo 0,8–1,3`}
                         chip={<span className={`text-2xs font-bold px-2 py-0.5 rounded-full border uppercase tracking-[0.05em] ${ACWR_CHIP[acwrInfo.tone]}`}>{acwrInfo.label}</span>}
                     />
@@ -199,18 +198,18 @@ export const AdvancedAnalytics = React.memo(({ activities, settings,  timeRange,
                 >
                     <span>Tendencia y capacidad</span>
                     <span className="flex items-center gap-1.5 text-2xs font-medium text-ink-4">
-                        {showMore ? 'Ocultar' : 'Rampa, monotonía, volumen, VO2'}
+                        {showMore ? 'Ocultar' : 'Rampa, monotonía, volumen, VO₂max'}
                         <ChevronDown size={14} className={showMore ? 'rotate-180' : ''} />
                     </span>
                 </button>
                 <div id="dash-secondary-grid" data-dash="secondary-grid" data-open={showMore ? 'true' : 'false'} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-[minmax(0,1fr)] gap-x-8 max-md:data-[open=false]:hidden">
                     {[
-                        { label: 'Rampa Semanal', value: `${model.rampRate > 0 ? '+' : ''}${model.rampRate.toFixed(1)}`, sub: 'pts/sem' },
-                        { label: 'Monotonía', value: model.monotony.toFixed(2), sub: 'Índice carga' },
+                        { label: 'Rampa', value: `${model.rampRate > 0 ? '+' : ''}${formatNumber(model.rampRate, 1)}`, sub: 'pts/sem' },
+                        { label: 'Monotonía', value: formatNumber(model.monotony, 2), sub: 'Índice carga' },
                         { label: 'Volumen 30D', value: `${Math.round(model.totalVolume / 60)}h`, sub: `${model.totalActivities} sesiones` },
-                        { label: 'VO2 Max', value: globalMaxVo2 || '--', sub: vo2IsGarmin ? 'Sincronizado' : 'Estimado' }
-                    ].map((kpi, i) => (
-                        <div key={i} data-dash="ledger-row" className="flex items-baseline justify-between gap-3 py-3 border-b border-hairline hover:border-line-strong min-w-0">
+                        { label: primaryVo2.source ? VO2_SOURCES[primaryVo2.source].label : 'VO₂max', value: primaryVo2.value ? formatNumber(primaryVo2.value, 1) : '--', sub: primaryVo2.source ? VO2_SOURCES[primaryVo2.source].source : '' }
+                    ].map((kpi) => (
+                        <div key={kpi.label} data-dash="ledger-row" className="flex items-baseline justify-between gap-3 py-3 border-b border-hairline hover:border-line-strong min-w-0">
                             <span className="text-[12px] font-medium text-ink-4 truncate">{kpi.label}<span className="ml-1.5 text-ink-4/70">{kpi.sub}</span></span>
                             <span className="text-[15px] font-semibold tabular-nums text-ink shrink-0">{kpi.value}</span>
                         </div>

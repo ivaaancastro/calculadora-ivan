@@ -2,6 +2,8 @@
 import { Activity, X } from 'lucide-react';
 import React from 'react';
 import { useChartTheme } from '../charts/useChartTheme';
+import { toDateKey } from '../../utils/dates';
+import { formatNumber } from '../../utils/formatters';
 
 // ── Floating draggable PMC projection chart ─────────────────────────────────
 export const PmcFloatingChart = ({ pmcByDate, onClose, initPos }) => {
@@ -17,7 +19,7 @@ export const PmcFloatingChart = ({ pmcByDate, onClose, initPos }) => {
         .filter(e => e.ctl != null)
         .sort((a, b) => a.date.localeCompare(b.date));
     const today = new Date();
-    const todayStr = today.toLocaleDateString('en-CA');
+    const todayStr = toDateKey(today);
     const cutoffPast = new Date(today); cutoffPast.setDate(today.getDate() - 30);
     const cutoffFuture = new Date(today); cutoffFuture.setDate(today.getDate() + 30);
 
@@ -137,7 +139,7 @@ export const PmcFloatingChart = ({ pmcByDate, onClose, initPos }) => {
                         </span>
                     </div>
                 )}
-                <button onClick={onClose} data-cal="modal-close" className="w-11 h-11 p-0.5 text-slate-400 hover:text-slate-700 dark:hover:text-zinc-200 rounded-lg transition-colors">
+                <button type="button" aria-label="Cerrar gráfica de forma" onClick={onClose} data-cal="modal-close" className="w-11 h-11 p-0.5 text-slate-400 hover:text-slate-700 dark:hover:text-zinc-200 rounded-lg transition-colors">
                     <X size={13} />
                 </button>
             </div>
@@ -146,7 +148,7 @@ export const PmcFloatingChart = ({ pmcByDate, onClose, initPos }) => {
             <div data-cal="pmc-legend" className="flex items-center gap-4 px-4 pt-2.5 text-2xs font-bold text-ink-3 [&_label]:min-h-[44px]">
                 <label className="flex items-center gap-1.5 cursor-pointer hover:text-blue-500 transition-colors">
                     <input type="checkbox" checked={viewOpts.top} onChange={e => setViewOpts(v => ({ ...v, top: e.target.checked }))} data-series="ctl" className="accent-chart-pmc-ctl rounded-sm w-3 h-3" />
-                    <span>Aptitud / Fatiga</span>
+                    <span>Fitness / Fatiga</span>
                 </label>
                 <label className="flex items-center gap-1.5 cursor-pointer hover:text-emerald-500 transition-colors">
                     <input type="checkbox" checked={viewOpts.mid} onChange={e => setViewOpts(v => ({ ...v, mid: e.target.checked }))} data-series="tsb" className="accent-chart-pmc-tsb rounded-sm w-3 h-3" />
@@ -193,7 +195,7 @@ export const PmcFloatingChart = ({ pmcByDate, onClose, initPos }) => {
                 {/* Y Axis Grid & Labels - BOT */}
                 <line x1={PAD.l} y1={zeroYBot} x2={W - PAD.r} y2={zeroYBot} stroke={ct.anatomy.grid} strokeWidth="1" />
                 {[maxBot, 0, minBot].map(v => (
-                    <text key={`bot-${v}`} x={PAD.l - 6} y={yBotS(v) + 3} textAnchor="end" fontSize={11} fill={ct.anatomy.tick}>{v.toFixed(1)}</text>
+                    <text key={`bot-${v}`} x={PAD.l - 6} y={yBotS(v) + 3} textAnchor="end" fontSize={11} fill={ct.anatomy.tick}>{formatNumber(v, 1)}</text>
                 ))}
 
                 {/* Today marker (Vertical Line across all sections) */}
@@ -227,7 +229,7 @@ export const PmcFloatingChart = ({ pmcByDate, onClose, initPos }) => {
                         <text x={W - PAD.r + 6} y={yTopS(lastReal.ctl) + 3} fontSize={11} fontWeight="bold" fill={ct.pmc.ctlInk}>{Math.round(lastReal.ctl)}</text>
                         <text x={W - PAD.r + 6} y={yTopS(lastReal.atl) + 3} fontSize={11} fontWeight="bold" fill={ct.pmc.atlInk}>{Math.round(lastReal.atl)}</text>
                         <text x={W - PAD.r + 6} y={yMidS(lastReal.tcb) + 3} fontSize={11} fontWeight="bold" fill={ct.pmc.tsbInk}>{Math.round(lastReal.tcb)}</text>
-                        <text x={W - PAD.r + 6} y={yBotS(lastReal.ramp) + 3} fontSize={11} fontWeight="bold" fill={ct.pmc.rampInk}>{lastReal.ramp.toFixed(1)}</text>
+                        <text x={W - PAD.r + 6} y={yBotS(lastReal.ramp) + 3} fontSize={11} fontWeight="bold" fill={ct.pmc.rampInk}>{formatNumber(lastReal.ramp, 1)}</text>
                     </g>
                 )}
 
@@ -263,7 +265,7 @@ export const PmcFloatingChart = ({ pmcByDate, onClose, initPos }) => {
                         </p>
                         <div className="space-y-1">
                             <div className="flex justify-between gap-4">
-                                <span className="text-legacy-ctl-sky font-semibold">Aptitud (CTL)</span>
+                                <span className="text-legacy-ctl-sky font-semibold">Fitness (CTL)</span>
                                 <span className="font-mono font-bold text-body-2">{Math.round(hoverEntry.ctl)}</span>
                             </div>
                             <div className="flex justify-between gap-4">
@@ -277,8 +279,8 @@ export const PmcFloatingChart = ({ pmcByDate, onClose, initPos }) => {
                                 </span>
                             </div>
                             <div className="flex justify-between gap-4 pt-1 border-t border-slate-100 dark:border-zinc-700 mt-1">
-                                <span data-cal="pmc-ramp" className="text-chart-pmc-ramp-ink font-semibold">Rampa (est)</span>
-                                <span className="font-mono font-bold text-body-2">{hoverEntry.ramp.toFixed(1)}</span>
+                                <span data-cal="pmc-ramp" className="text-chart-pmc-ramp-ink font-semibold">Rampa (est.)</span>
+                                <span className="font-mono font-bold text-body-2">{formatNumber(hoverEntry.ramp, 1)}</span>
                             </div>
                         </div>
                     </div>

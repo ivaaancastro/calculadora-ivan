@@ -1,6 +1,7 @@
 import React from 'react';
 import { Footprints, Bike } from 'lucide-react';
 import { Card, Segmented } from '../ui';
+import { VO2_SOURCES } from '../../utils/vo2Source';
 
 export const Vo2MaxCard = ({ vo2Sport, setVo2Sport, currentVo2, vo2Level, vo2Stats }) => {
     return (
@@ -8,7 +9,7 @@ export const Vo2MaxCard = ({ vo2Sport, setVo2Sport, currentVo2, vo2Level, vo2Sta
             <Card variant="panel" className="p-6 sm:p-8">
                 <div className="flex items-center justify-between mb-10">
                     <div className="flex items-center gap-2">
-                        <h3 className="text-2xs font-bold text-ink-4 uppercase tracking-[0.1em]">VO2 Máximo</h3>
+                        <h3 className="text-2xs font-bold text-ink-4 uppercase tracking-[0.1em]">VO₂max</h3>
                     </div>
                     <Segmented
                         variant="card"
@@ -18,7 +19,7 @@ export const Vo2MaxCard = ({ vo2Sport, setVo2Sport, currentVo2, vo2Level, vo2Sta
                         onChange={setVo2Sport}
                         options={[
                             { value: 'run', label: 'Carrera' },
-                            { value: 'bike', label: 'Bici' },
+                            { value: 'bike', label: 'Ciclismo' },
                         ]}
                     />
                 </div>
@@ -28,6 +29,7 @@ export const Vo2MaxCard = ({ vo2Sport, setVo2Sport, currentVo2, vo2Level, vo2Sta
                     <div className="pb-1.5">
                         <span className="text-2xs font-bold text-slate-400 uppercase tracking-[0.08em]">ml/kg/min</span>
                         <span className="block text-2xs font-bold uppercase tracking-tight mt-0.5" style={{ color: vo2Level.c }}>Nivel {vo2Level.l}</span>
+                        <span data-fitness="vo2-source" className="block text-[12px] text-ink-4 mt-0.5">{VO2_SOURCES[vo2Sport]?.source ? `${VO2_SOURCES[vo2Sport].label}, ${VO2_SOURCES[vo2Sport].source}` : ''}</span>
                     </div>
                 </div>
 
@@ -59,16 +61,18 @@ export const Vo2MaxCard = ({ vo2Sport, setVo2Sport, currentVo2, vo2Level, vo2Sta
                     <div className="p-4 rounded-2xl bg-sunken-3 border border-line-soft">
                         <div className="flex items-center gap-2 mb-1.5">
                             <Footprints size={12} className="text-slate-400" />
-                            <span className="text-2xs font-bold text-slate-400 uppercase tracking-[0.08em]">VO2 Carrera</span>
+                            <span className="text-2xs font-bold text-slate-400 uppercase tracking-[0.08em]">{VO2_SOURCES.run.label}</span>
                         </div>
                         <p className="text-lg font-bold text-ink-soft">{vo2Stats?.run?.vo2max > 0 ? vo2Stats.run.vo2max : '--'}</p>
+                        <p className="text-[12px] text-ink-4">{VO2_SOURCES.run.source}</p>
                     </div>
                     <div className="p-4 rounded-2xl bg-sunken-3 border border-line-soft">
                         <div className="flex items-center gap-2 mb-1.5">
                             <Bike size={12} className="text-slate-400" />
-                            <span className="text-2xs font-bold text-slate-400 uppercase tracking-[0.08em]">VO2 Bici</span>
+                            <span className="text-2xs font-bold text-slate-400 uppercase tracking-[0.08em]">{VO2_SOURCES.bike.label}</span>
                         </div>
                         <p className="text-lg font-bold text-ink-soft">{vo2Stats?.bike?.vo2max > 0 ? vo2Stats.bike.vo2max : '--'}</p>
+                        <p className="text-[12px] text-ink-4">{VO2_SOURCES.bike.source}</p>
                     </div>
                 </div>
             </Card>

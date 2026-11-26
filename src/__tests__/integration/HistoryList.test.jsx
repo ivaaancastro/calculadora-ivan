@@ -73,6 +73,26 @@ describe('HistoryList Component', () => {
         expect(onSelect).toHaveBeenCalledWith(expect.objectContaining({ id: 'act-1' }));
     });
 
+    it('A11Y-4: la fila es un botón enfocable que se abre con Enter o Espacio', () => {
+        const onSelect = vi.fn();
+        render(<HistoryList activities={mockActivities} onDelete={vi.fn()} onSelectActivity={onSelect} />);
+        const row = screen.getByRole('button', { name: /^Abrir Rodaje Suave Bici/ });
+        expect(row).toHaveAttribute('tabindex', '0');
+        fireEvent.keyDown(row, { key: 'Enter' });
+        fireEvent.keyDown(row, { key: ' ' });
+        expect(onSelect).toHaveBeenCalledTimes(2);
+        // Las teclas sobre el botón de borrar no abren la actividad.
+        fireEvent.keyDown(row.querySelector('[data-history="delete"]'), { key: 'Enter' });
+        expect(onSelect).toHaveBeenCalledTimes(2);
+        expect(row.querySelector('[data-history="delete"]')).toHaveAttribute('aria-label', 'Eliminar actividad');
+    });
+
+    it('COP-1: el deporte se muestra en español', () => {
+        render(<HistoryList activities={mockActivities} onDelete={vi.fn()} onSelectActivity={vi.fn()} />);
+        expect(screen.getAllByText('Ciclismo').length).toBeGreaterThan(0);
+        expect(screen.queryByText('Ride')).toBeNull();
+    });
+
     it('pide confirmación antes de onDelete y no propaga el clic a onSelectActivity', async () => {
         const onSelect = vi.fn();
         const onDelete = vi.fn().mockResolvedValue(true);

@@ -1,7 +1,9 @@
 import React, { useState, useMemo, useRef } from 'react';
-import { Search, Calendar, Activity, Clock, MapPin, Zap, Trash2, ChevronRight, Bike, Footprints, Dumbbell, Flame } from 'lucide-react';
+import { Search, Calendar, Activity, Clock, MapPin, Zap, Trash2, ChevronRight, Flame } from 'lucide-react';
 import { useVirtualizer } from '@tanstack/react-virtual';
-import { formatDuration } from '../../utils/formatDuration';
+import { formatMinutes, formatNumber } from '../../utils/formatters';
+import { sportOf, activityTypeLabel } from '../../utils/sport';
+import { SportIcon } from '../common/SportIcon';
 import { Button, Card, EmptyState, Input, Select } from '../ui';
 import { useConfirmDeleteActivity } from '../../hooks/useConfirmDeleteActivity';
 import { ConfirmDeleteActivityModal } from '../activity/ConfirmDeleteActivityModal';
@@ -27,19 +29,17 @@ const shortDate = (date, refYear) => {
     return d.toLocaleDateString('es-ES', opts);
 };
 
-const getSportIcon = (type) => {
-    const t = String(type).toLowerCase();
-    const [Icon, tone] =
-        t.includes('run') || t.includes('carrera') ? [Footprints, 'bg-sport-run text-on-action']
-        : t.includes('bike') || t.includes('bici') || t.includes('ciclismo') || t.includes('ride') ? [Bike, 'bg-sport-bike text-on-action']
-        : t.includes('gym') || t.includes('fuerza') || t.includes('weight') || t.includes('workout') ? [Dumbbell, 'bg-sport-strength text-on-action']
-        : [Activity, 'bg-fill-3 text-body-soft'];
-    return (
-        <div data-history="sport" className={`w-10 h-10 rounded-[14px] flex items-center justify-center shrink-0 ${tone}`}>
-            <Icon size={19} strokeWidth={2.2} />
-        </div>
-    );
+const SPORT_TONE = {
+    run: 'bg-sport-run text-on-action',
+    bike: 'bg-sport-bike text-on-action',
+    strength: 'bg-sport-strength text-on-action',
 };
+
+const SportTile = ({ type }) => (
+    <div data-history="sport" className={`w-10 h-10 rounded-[14px] flex items-center justify-center shrink-0 ${SPORT_TONE[sportOf(type)] || 'bg-fill-3 text-body-soft'}`}>
+        <SportIcon type={type} size={19} strokeWidth={2.2} />
+    </div>
+);
 
 export const HistoryList = React.memo(({ activities, onDelete, onSelectActivity }) => {
     const parentRef = useRef(null);
@@ -66,14 +66,7 @@ export const HistoryList = React.memo(({ activities, onDelete, onSelectActivity 
 
         // 2. Filtro de Deporte
         if (sportFilter !== 'all') {
-            filtered = filtered.filter(act => {
-                const t = String(act.type).toLowerCase();
-                if (sportFilter === 'run') return t.includes('run') || t.includes('carrera');
-                if (sportFilter === 'bike') return t.includes('bike') || t.includes('bici') || t.includes('ciclismo') || t.includes('ride');
-                if (sportFilter === 'swim') return t.includes('swim') || t.includes('nadar') || t.includes('natación') || t.includes('natacion');
-                if (sportFilter === 'gym') return t.includes('gym') || t.includes('fuerza') || t.includes('weight') || t.includes('workout');
-                return true;
-            });
+            filtered = filtered.filter((act) => sportOf(act.type) === sportFilter);
         }
 
         // 3. Filtro de Fecha
@@ -108,7 +101,15 @@ export const HistoryList = React.memo(({ activities, onDelete, onSelectActivity 
         ]);
     }, [filteredActivities]);
     const sizes = useMemo(() => flat.map((f) => (f.kind === 'week' ? WEEK_H : ROW_H)), [flat]);
-    const starts = useMemo(() => sizes.map((_, i) => sizes.slice(0, i).reduce((a, b) => a + b, 0)), [sizes]);
+    // Suma acumulada en O(n) (BUG-5): antes se recalculaba el prefijo de cada fila.
+    const starts = useMemo(() => {
+        let acc = 0;
+        return sizes.map((h) => {
+            const start = acc;
+            acc += h;
+            return start;
+        });
+    }, [sizes]);
     const totalH = sizes.reduce((a, b) => a + b, 0);
     const maxTss = useMemo(() => Math.max(1, ...filteredActivities.map((a) => Number(a.tss) || 0)), [filteredActivities]);
 
@@ -203,6 +204,15 @@ export const HistoryList = React.memo(({ activities, onDelete, onSelectActivity 
                                     data-index={virtualRow.index}
                                     ref={virtualRow.isVirtual ? rowVirtualizer.measureElement : undefined}
                                     onClick={() => onSelectActivity && onSelectActivity(act)}
+                                    // A11Y-4: la fila se abre también con Enter o Espacio.
+                                    role="button"
+                                    tabIndex={0}
+                                    aria-label={`Abrir ${act.name || activityTypeLabel(act.type)}, ${shortDate(act.date, refYear)}`}
+                                    onKeyDown={(e) => {
+                                        if (e.target !== e.currentTarget || (e.key !== 'Enter' && e.key !== ' ')) return;
+                                        e.preventDefault();
+                                        if (onSelectActivity) onSelectActivity(act);
+                                    }}
                                     style={{
                                         position: 'absolute',
                                         top: 0,
@@ -211,11 +221,11 @@ export const HistoryList = React.memo(({ activities, onDelete, onSelectActivity 
                                         transform: `translateY(${virtualRow.start}px)`,
                                     }}
                                     data-history="row"
-                                    className="group flex items-center p-3 hover:bg-sunken active:bg-sunken border-b border-line box-border transition-colors cursor-pointer select-none"
+                                    className="group flex items-center p-3 hover:bg-sunken active:bg-sunken border-b border-line box-border transition-colors cursor-pointer select-none outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-action-bright"
                                 >
                                     {/* Icono en squircle estilo Apple */}
                                     <div className="mr-3 shrink-0">
-                                        {getSportIcon(act.type)}
+                                        <SportTile type={act.type} />
                                     </div>
 
                                     <div className="flex-1 min-w-0 mr-2 sm:mr-4">
@@ -223,18 +233,18 @@ export const HistoryList = React.memo(({ activities, onDelete, onSelectActivity 
                                         <div className="flex items-center gap-1.5 text-[12px] text-ink-3">
                                             <span>{shortDate(act.date, refYear)}</span>
                                             <span>•</span>
-                                            <span className="capitalize">{act.type}</span>
+                                            <span>{activityTypeLabel(act.type)}</span>
                                         </div>
                                     </div>
 
                                     {/* Compact Mobile Metrics (< md) */}
                                     <div className="flex md:hidden flex-col items-end shrink-0 mr-1 text-right">
                                         <span className="text-xs font-bold text-ink-soft tabular-nums">
-                                            {formatDuration(act.duration)}
+                                            {formatMinutes(act.duration)}
                                         </span>
                                         <span className="text-2xs text-ink-4 font-medium tabular-nums">
                                             {act.distance > 0 
-                                                ? `${(act.distance / 1000).toFixed(1)} km` 
+                                                ? `${formatNumber(act.distance / 1000, 1)} km` 
                                                 : (act.tss > 0 ? `${Math.round(act.tss)} TSS` : '')}
                                         </span>
                                     </div>
@@ -243,11 +253,11 @@ export const HistoryList = React.memo(({ activities, onDelete, onSelectActivity 
                                     <div className="hidden md:flex items-center gap-6 mr-6">
                                         <div className="flex flex-col items-end">
                                             <span className="text-2xs font-medium text-slate-400 mb-0.5">Tiempo</span>
-                                            <span className="text-sm font-semibold text-ink-2-soft tabular-nums">{formatDuration(act.duration)}</span>
+                                            <span className="text-sm font-semibold text-ink-2-soft tabular-nums">{formatMinutes(act.duration)}</span>
                                         </div>
                                         <div className="flex flex-col items-end w-16">
                                             <span className="text-2xs font-medium text-slate-400 mb-0.5">Dist</span>
-                                            <span className="text-sm font-semibold text-ink-2-soft tabular-nums">{act.distance > 0 ? (act.distance / 1000).toFixed(1) + 'km' : '--'}</span>
+                                            <span className="text-sm font-semibold text-ink-2-soft tabular-nums">{act.distance > 0 ? formatNumber(act.distance / 1000, 1) + 'km' : '--'}</span>
                                         </div>
                                         <div className="flex flex-col items-end w-12">
                                             <span className="text-2xs font-medium text-slate-400 mb-0.5">Kcal</span>
@@ -268,7 +278,7 @@ export const HistoryList = React.memo(({ activities, onDelete, onSelectActivity 
 
                                     {/* Botón Borrar y Chevron */}
                                     <div className="shrink-0 flex items-center gap-1 sm:gap-2">
-                                        <button
+                                        <button type="button" aria-label="Eliminar actividad"
                                             data-history="delete"
                                             onClick={(e) => { e.stopPropagation(); onDelete && del.request(act); }}
                                             className="w-11 h-11 flex items-center justify-center text-slate-300 hover:text-red-500 hover:bg-danger/10 active:scale-press rounded-lg transition-paint [@media(hover:hover)_and_(min-width:768px)]:opacity-0 [@media(hover:hover)_and_(min-width:768px)]:[transition:opacity_0.15s_ease] [@media(hover:hover)_and_(min-width:768px)]:group-hover:opacity-100 [@media(hover:hover)_and_(min-width:768px)]:group-focus-within:opacity-100"

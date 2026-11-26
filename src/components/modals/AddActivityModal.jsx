@@ -61,7 +61,7 @@ const AddActivityModal = ({ isOpen, onClose, onSave }) => {
                 <h3 id="add-activity-title" className="text-base sm:text-lg font-bold text-slate-800 dark:text-white flex items-center gap-2">
                     <Activity className="text-action-bright" size={20} /> Añadir Manual
                 </h3>
-                <button onClick={onClose} data-modal="close" className="w-11 h-11 flex items-center justify-center rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-surface-2 active:scale-press transition-paint touch-manipulation" title="Cerrar">
+                <button type="button" aria-label="Cerrar" onClick={onClose} data-modal="close" className="w-11 h-11 flex items-center justify-center rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-surface-2 active:scale-press transition-paint touch-manipulation" title="Cerrar">
                     <X size={20} />
                 </button>
             </div>

@@ -2,6 +2,7 @@ import { Bike, Dumbbell, Activity, X, User, Waves } from 'lucide-react';
 import React from 'react';
 import { Modal } from '../ui';
 import { getZoneColor } from './calendarHelpers';
+import { formatNumber } from '../../utils/formatters';
 
 // ── Workout Viewer Modal Component ──────────────────────────────────────────
 export const WorkoutViewerModal = ({ workout, onClose, onDelete, onEdit }) => {
@@ -66,7 +67,7 @@ export const WorkoutViewerModal = ({ workout, onClose, onDelete, onEdit }) => {
             
             {/* ── HEADER ── */}
             <div className="relative px-6 pt-6 pb-5 shrink-0">
-                <button onClick={onClose} data-cal="modal-close" className="absolute top-4 right-4 w-11 h-11 flex items-center justify-center rounded-lg bg-surface-2 text-slate-400 hover:text-slate-700 dark:hover:text-zinc-200 transition-colors z-10">
+                <button type="button" aria-label="Cerrar" onClick={onClose} data-cal="modal-close" className="absolute top-4 right-4 w-11 h-11 flex items-center justify-center rounded-lg bg-surface-2 text-slate-400 hover:text-slate-700 dark:hover:text-zinc-200 transition-colors z-10">
                     <X size={14} />
                 </button>
 
@@ -102,7 +103,7 @@ export const WorkoutViewerModal = ({ workout, onClose, onDelete, onEdit }) => {
                     <div className="bg-sunken rounded-xl px-3 py-2.5 text-center">
                         <div className="text-2xs font-semibold text-ink-4 uppercase tracking-[0.05em] mb-0.5">IF</div>
                         <div className={`text-[18px] font-bold leading-none font-mono ${weightedIF >= 0.85 ? 'text-red-500' : weightedIF >= 0.7 ? 'text-amber-500' : 'text-emerald-500'}`}>
-                            {weightedIF > 0 ? weightedIF.toFixed(2) : '—'}
+                            {weightedIF > 0 ? formatNumber(weightedIF, 2) : '—'}
                         </div>
                     </div>
                     <div className="bg-sunken rounded-xl px-3 py-2.5 text-center">

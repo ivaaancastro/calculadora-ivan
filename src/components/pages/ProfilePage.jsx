@@ -10,6 +10,7 @@ import { GeneralSection } from './profile/GeneralSection';
 import { ZonesSection } from './profile/ZonesSection';
 import { IntegrationsSection } from './profile/IntegrationsSection';
 import { SecuritySection } from './profile/SecuritySection';
+import { sportOf } from '../../utils/sport';
 
 const SECTION_TABS = [
     { value: 'general', label: 'General' },
@@ -91,7 +92,7 @@ export const ProfilePage = ({
 
     const handleSyncIntervals = async () => {
         if (!formData?.intervalsId || !formData?.intervalsKey) {
-            toast._or('Introduce tu Athlete ID y API Key de Intervals.icu primero');
+            toast.error('Introduce tu Athlete ID y API Key de Intervals.icu primero');
             return;
         }
         const result = await syncIntervals(formData);
@@ -245,9 +246,9 @@ export const ProfilePage = ({
             let maxBikeLthr = 0, maxRunLthr = 0;
             activities.forEach(act => {
                 if (!act.streams_data?.heartrate?.data || !act.streams_data?.time?.data) return;
-                const t = act.type.toLowerCase();
-                const isBike = t.includes('bici') || t.includes('ciclismo');
-                const isRun = t.includes('run') || t.includes('carrera');
+                const sport = sportOf(act.type);
+                const isBike = sport === 'bike';
+                const isRun = sport === 'run';
                 if (!isBike && !isRun) return;
                 const hr = act.streams_data.heartrate.data, tm = act.streams_data.time.data;
                 const p60 = getPeakByTime(hr, tm, 3600), p20 = getPeakByTime(hr, tm, 1200);

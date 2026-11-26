@@ -1,6 +1,7 @@
 import React from 'react';
 import { Activity, Brain } from 'lucide-react';
 import { Card, EmptyState, InfoTooltip, Segmented } from '../ui';
+import { formatNumber } from '../../utils/formatters';
 
 export const TrainingBalanceCard = ({ balance, balanceDays, setBalanceDays }) => {
     return (
@@ -30,7 +31,7 @@ export const TrainingBalanceCard = ({ balance, balanceDays, setBalanceDays }) =>
                             </div>
                             <div className="p-4 rounded-2xl bg-sunken-3 border border-line-soft">
                                 <p className="text-2xs font-bold text-slate-400 uppercase tracking-[0.08em] mb-1">Ratio An/Ae</p>
-                                <p className="text-3xl font-bold text-ink-soft">{(balance.anaerobic / (balance.aerobicHigh + balance.aerobicLow || 1)).toFixed(2)}</p>
+                                <p className="text-3xl font-bold text-ink-soft">{formatNumber(balance.anaerobic / (balance.aerobicHigh + balance.aerobicLow || 1), 2)}</p>
                                 <p className="text-2xs font-bold text-slate-500 uppercase mt-1 tracking-tighter">Aeróbico vs Anaeróbico</p>
                             </div>
                         </div>

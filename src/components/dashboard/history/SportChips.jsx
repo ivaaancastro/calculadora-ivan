@@ -5,7 +5,7 @@ const CHIPS = [
     { value: 'run', label: 'Carrera' },
     { value: 'bike', label: 'Ciclismo' },
     { value: 'swim', label: 'Natación' },
-    { value: 'gym', label: 'Fuerza' },
+    { value: 'strength', label: 'Fuerza' },
 ];
 
 /** Filtro de deporte como chips: todas las opciones visibles, con scroll horizontal en móvil. */
