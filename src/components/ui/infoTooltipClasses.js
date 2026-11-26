@@ -12,7 +12,7 @@ export const INFO_TOOLTIP = {
     'inline-flex items-center justify-center w-6 h-6 -m-[5px] rounded-full align-middle cursor-help text-ink-4 hover:text-action-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-action-bright [@media(pointer:coarse)]:w-11 [@media(pointer:coarse)]:h-11 [@media(pointer:coarse)]:-m-[15px]',
   icon: 'transition-colors opacity-70',
   bubble:
-    'invisible group-hover:visible absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-56 p-3 bg-tooltip-info backdrop-blur-md text-tooltip-info-ink text-2xs leading-snug rounded-xl shadow-2xl opacity-0 group-hover:opacity-100 transition-all duration-200 pointer-events-none text-left border border-tooltip-info-edge',
+    'invisible group-hover:visible absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-56 p-3 bg-tooltip-info backdrop-blur-md text-tooltip-info-ink text-2xs leading-snug rounded-xl shadow-2xl opacity-0 group-hover:opacity-100 transition-paint duration-200 pointer-events-none text-left border border-tooltip-info-edge',
   arrow: 'absolute top-full left-1/2 -translate-x-1/2 border-x-[6px] border-x-transparent border-t-[6px] border-t-tooltip-info-arrow',
 };
 

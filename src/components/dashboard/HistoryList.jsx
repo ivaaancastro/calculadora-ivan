@@ -7,7 +7,6 @@ import { SportIcon } from '../common/SportIcon';
 import { Button, Card, EmptyState, Input, Select } from '../ui';
 import { useConfirmDeleteActivity } from '../../hooks/useConfirmDeleteActivity';
 import { ConfirmDeleteActivityModal } from '../activity/ConfirmDeleteActivityModal';
-import { AutoChartSkin } from '../charts/ChartSkin';
 import { ActivitiesSummary } from './history/ActivitiesSummary';
 import { summarizeActivities, weeklyTss, groupByWeek, breakdownBySport } from '../../utils/activityGroups';
 import { SportChips } from './history/SportChips';
@@ -131,15 +130,15 @@ export const HistoryList = React.memo(({ activities, onDelete, onSelectActivity 
     return (
         <>
         <Layout>
-        <Card data-skin="history" data-history="root" className="flex flex-col h-full overflow-hidden">
+        <Card data-history="root" className="flex flex-col h-full overflow-hidden max-w-[1100px] mx-auto xl:max-w-none xl:mx-0">
 
-            <AutoChartSkin><ActivitiesSummary totals={summary.totals} weekly={summary.weekly} /></AutoChartSkin>
+            <><ActivitiesSummary totals={summary.totals} weekly={summary.weekly} /></>
 
             {/* BARRA DE FILTROS ESTILO APPLE */}
-            <div data-history="filters" className="p-3 sm:p-4 border-b border-hairline bg-slate-50/50 dark:bg-zinc-900/30 flex flex-col sm:flex-row gap-2.5 sm:gap-3">
+            <div data-history="filters" className="p-3 sm:p-4 border-b border-line bg-sunken flex flex-col flex-wrap sm:flex-row gap-2.5 sm:gap-3 max-sm:grid max-sm:grid-cols-2 max-sm:gap-2 max-sm:[&_input]:min-h-[44px] max-sm:[&_select]:min-h-[44px]">
 
                 {/* Buscador de Texto estilo iOS */}
-                <div data-history="search" className="relative flex-1">
+                <div data-history="search" className="relative flex-1 max-sm:col-span-full">
                     <Search size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-ink-4" />
                     <Input
                         variant="search"
@@ -151,7 +150,7 @@ export const HistoryList = React.memo(({ activities, onDelete, onSelectActivity 
                     />
                 </div>
 
-                <div data-history="chips-row" className="sm:order-last sm:basis-full"><SportChips value={sportFilter} onChange={setSportFilter} /></div>
+                <div data-history="chips-row" className="col-span-full min-w-0 sm:order-last sm:basis-full"><SportChips value={sportFilter} onChange={setSportFilter} /></div>
 
                 {/* Selector de Fecha */}
                 <div className="sm:w-44 relative">
@@ -172,8 +171,8 @@ export const HistoryList = React.memo(({ activities, onDelete, onSelectActivity 
             </div>
 
             {/* RESUMEN DE RESULTADOS */}
-            <div data-history="count" className="px-4 py-2 border-b border-hairline bg-slate-50/40 dark:bg-zinc-900/20 flex justify-between items-center text-[11px] font-semibold text-ink-4 uppercase tracking-wider">
-                <span>{filteredActivities.length} Actividades</span>
+            <div data-history="count" className="px-4 py-2 border-b border-line bg-sunken flex justify-between items-center text-[12px] font-semibold text-ink-4 uppercase tracking-[0.05em]">
+                <span className="rotulo-marca">{filteredActivities.length} Actividades</span>
             </div>
 
             {/* LISTA DE ACTIVIDADES VIRTUALIZADA */}
@@ -222,7 +221,7 @@ export const HistoryList = React.memo(({ activities, onDelete, onSelectActivity 
                                         transform: `translateY(${virtualRow.start}px)`,
                                     }}
                                     data-history="row"
-                                    className="group flex items-center p-3 hover:bg-slate-50/80 dark:hover:bg-zinc-800/40 active:bg-slate-100 dark:active:bg-zinc-800/70 border-b border-black/[0.04] dark:border-white/[0.05] box-border transition-colors cursor-pointer select-none outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-action-bright"
+                                    className="group flex items-center p-3 hover:bg-sunken active:bg-sunken border-b border-line box-border transition-colors cursor-pointer select-none outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-action-bright"
                                 >
                                     {/* Icono en squircle estilo Apple */}
                                     <div className="mr-3 shrink-0">
@@ -230,8 +229,8 @@ export const HistoryList = React.memo(({ activities, onDelete, onSelectActivity 
                                     </div>
 
                                     <div className="flex-1 min-w-0 mr-2 sm:mr-4">
-                                        <h4 className="text-[13px] font-semibold text-ink truncate mb-0.5" title={act.name}>{act.name}</h4>
-                                        <div className="flex items-center gap-1.5 text-[11px] text-ink-3">
+                                        <h4 className="text-[14px] tracking-[-0.01em] font-semibold text-ink truncate mb-0.5" title={act.name}>{act.name}</h4>
+                                        <div className="flex items-center gap-1.5 text-[12px] text-ink-3">
                                             <span>{shortDate(act.date, refYear)}</span>
                                             <span>•</span>
                                             <span>{activityTypeLabel(act.type)}</span>
@@ -282,7 +281,7 @@ export const HistoryList = React.memo(({ activities, onDelete, onSelectActivity 
                                         <button type="button" aria-label="Eliminar actividad"
                                             data-history="delete"
                                             onClick={(e) => { e.stopPropagation(); onDelete && del.request(act); }}
-                                            className="w-7 h-7 flex items-center justify-center text-slate-300 hover:text-red-500 hover:bg-danger/10 active:scale-90 rounded-full transition-all"
+                                            className="w-11 h-11 flex items-center justify-center text-slate-300 hover:text-red-500 hover:bg-danger/10 active:scale-press rounded-lg transition-paint [@media(hover:hover)_and_(min-width:768px)]:opacity-0 [@media(hover:hover)_and_(min-width:768px)]:[transition:opacity_0.15s_ease] [@media(hover:hover)_and_(min-width:768px)]:group-hover:opacity-100 [@media(hover:hover)_and_(min-width:768px)]:group-focus-within:opacity-100"
                                             title="Eliminar actividad"
                                         >
                                             <Trash2 size={13} />
@@ -294,7 +293,7 @@ export const HistoryList = React.memo(({ activities, onDelete, onSelectActivity 
                         })}
                     </div>
                 ) : (
-                    <EmptyState data-history="empty" className="h-full" icon={Activity} title="No hay resultados" description="Prueba a cambiar los filtros de búsqueda.">
+                    <EmptyState data-history="empty" surface className="h-full" icon={Activity} title="No hay resultados" description="Prueba a cambiar los filtros de búsqueda.">
                         {hasFilters && <Button variant="secondary" onClick={clearFilters}>Quitar filtros</Button>}
                     </EmptyState>
                 )}

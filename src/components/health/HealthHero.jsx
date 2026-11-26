@@ -14,20 +14,20 @@ export const HealthHero = ({ wellnessMetrics, readinessInfo }) => {
     const today = new Date().toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long' });
 
     return (
-        <div data-health="hero" data-tone={tone} className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 pt-5">
+        <div data-health="hero" data-tone={tone} className="hero-rule relative flex flex-col sm:flex-row sm:items-end justify-between gap-4 pt-5 [font-feature-settings:'tnum'_1,'cv11'_1,'ss03'_1] data-[tone=positive]:[--hero-accent:rgb(var(--positive))] data-[tone=warning]:[--hero-accent:rgb(var(--warning))] data-[tone=danger]:[--hero-accent:rgb(var(--danger))]">
             <div className="min-w-0">
-                <p data-health="hero-eyebrow" className="text-[11px] font-semibold uppercase tracking-[0.08em] text-ink-4">
+                <p data-health="hero-eyebrow" className="motion-safe:animate-rise text-[12px] font-semibold uppercase tracking-[0.08em] text-ink-4">
                     Hoy · {today}{wellnessMetrics?.isSimulated ? ' · Modo demo' : ''}
                 </p>
-                <h2 data-health="hero-headline" className="mt-2 text-[26px] sm:text-[30px] leading-[1.15] font-bold tracking-[-0.03em] text-ink [text-wrap:balance]">
-                    {h.lead} <span data-health="hero-accent">{h.accent}</span> {h.tail}
+                <h2 data-health="hero-headline" className="motion-safe:animate-rise motion-safe:[animation-delay:0.05s] mt-2 text-[26px] sm:text-[30px] leading-[1.15] font-bold tracking-[-0.03em] text-ink [text-wrap:balance]">
+                    {h.lead} <span data-health="hero-accent" className="text-[color:var(--hero-accent,inherit)]">{h.accent}</span> {h.tail}
                 </h2>
             </div>
-            <div data-health="hero-figure" className="shrink-0 sm:text-right">
+            <div data-health="hero-figure" className="shrink-0 sm:text-right motion-safe:animate-rise motion-safe:[animation-delay:0.12s]">
                 <span data-health="hero-value" className="text-5xl sm:text-[3.5rem] leading-none font-semibold tracking-[-0.04em] tabular-nums text-ink">
                     {valid ? Math.round(counted) : '--'}<span className="text-xl font-medium text-ink-4 ml-1">%</span>
                 </span>
-                <span className="block text-[11px] font-semibold uppercase tracking-[0.08em] text-ink-4 mt-1">Recuperación</span>
+                <span className="block text-[12px] font-semibold uppercase tracking-[0.08em] text-ink-4 mt-1">Recuperación</span>
             </div>
         </div>
     );

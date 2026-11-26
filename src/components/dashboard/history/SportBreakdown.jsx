@@ -9,7 +9,7 @@ export const SportBreakdown = ({ rows }) => {
     if (!rows.length) return null;
     return (
         <aside data-history="breakdown" aria-label="Reparto por deporte" className="hidden xl:block self-start sticky top-4">
-            <h3 className="text-[11px] font-semibold uppercase tracking-[0.08em] text-ink-3">Reparto por deporte</h3>
+            <h3 className="text-[12px] font-semibold uppercase tracking-[0.08em] text-ink-3">Reparto por deporte</h3>
             <ul className="mt-4 space-y-4">
                 {rows.map((r) => (
                     <li key={r.sport}>
@@ -20,7 +20,7 @@ export const SportBreakdown = ({ rows }) => {
                         <div className="mt-1.5 h-1.5 rounded-full bg-fill-3 overflow-hidden">
                             <div className={`h-full rounded-full ${BAR[r.sport]}`} style={{ width: `${Math.max(3, Math.round(r.share * 100))}%` }} />
                         </div>
-                        <div className="mt-1 text-[11px] text-ink-4 tabular-nums">{r.count} {r.count === 1 ? 'sesión' : 'sesiones'}</div>
+                        <div className="mt-1 text-[12px] text-ink-4 tabular-nums">{r.count} {r.count === 1 ? 'sesión' : 'sesiones'}</div>
                     </li>
                 ))}
             </ul>

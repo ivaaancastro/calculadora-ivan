@@ -10,7 +10,6 @@
  * - Los tokens se añaden con la familia que los usa por primera vez (bordes, texto,
  *   superficies, acentos, gráficas); `chartTheme.js` debe coincidir con este archivo
  *   (lo comprueba src/__tests__/unit/chartTheme.test.js).
- * - `html[data-ui="v2"]` queda reservado para la piel v2 (Capa 3).
  */
 
 :root {
@@ -18,18 +17,17 @@
   --on-action: 255 255 255; /* texto sobre bg-action-solid */
 
   /* Métricas de carga (valores del Dashboard, EvolutionChart) */
-  --metric-ctl: 59 130 246;   /* #3b82f6 */
-  --metric-atl: 244 63 94;    /* #f43f5e */
-  --metric-tsb: 234 179 8;    /* #eab308 */
+  --metric-ctl: 37 99 235;
+  --metric-atl: 190 18 60;
+  --metric-tsb: 180 83 9;
 
   /* Anatomía de gráficas (EvolutionChart) */
-  --chart-grid: 203 213 225;      /* #cbd5e1, se pinta al 30 % */
-  --chart-axis: 100 116 139;      /* #64748b, ticks y etiqueta de "HOY" */
-  --chart-cursor: 148 163 184;    /* #94a3b8, cursor y línea de referencia */
-  --chart-dot-ring: 255 255 255;  /* #ffffff, anillo del punto activo */
+  --chart-grid: 201 207 216;
+  --chart-axis: 91 100 114;
+  --chart-cursor: 98 107 120;
+  --chart-dot-ring: 255 255 255;
 
   /* Sombras (spec-rediseno-02-c2). En oscuro, las tarjetas llevan `dark:shadow-none`. */
-  --shadow-card: 0 2px 12px rgba(0, 0, 0, 0.03); /* Card grouped (antes .ios-card) */
   --shadow-chart-tooltip: 0 8px 32px rgba(0, 0, 0, 0.12); /* ChartTooltip `card` y `chartTooltipStyle` */
 }
 
@@ -68,71 +66,70 @@
 .dark {
   --landing-particle: 96 130 255;
   --on-action: 255 255 255;
-  --metric-ctl: 59 130 246;
-  --metric-atl: 244 63 94;
-  --metric-tsb: 234 179 8;
+  --metric-ctl: 96 165 250;
+  --metric-atl: 251 113 133;
+  --metric-tsb: 251 191 36;
 
-  --chart-grid: 203 213 225;
-  --chart-axis: 100 116 139;
-  --chart-cursor: 148 163 184;
-  --chart-dot-ring: 255 255 255;
+  --chart-grid: 43 48 56;
+  --chart-axis: 152 161 175;
+  --chart-cursor: 152 161 175;
+  --chart-dot-ring: 20 22 26;
 
-  --shadow-card: 0 2px 12px rgba(0, 0, 0, 0.03); /* igual que en claro; no se ve: la tarjeta lleva dark:shadow-none */
   --shadow-chart-tooltip: 0 8px 32px rgba(0, 0, 0, 0.12); /* igual que en claro */
 }
 
 /* @tokens:borders:start (generado por scripts/codemods/borders.mjs --tokens; no editar a mano) */
 :root {
-  --line: 226 232 240; /* slate-200 */
-  --line-2: 226 232 240; /* slate-200 */
+  --line: 214 218 225;
+  --line-2: 214 218 225;
   --line-3: 226 232 240; --line-3-a: 1; /* slate-200 */
   --line-4: 226 232 240; --line-4-a: 0.8; /* slate-200/80 */
-  --line-soft: 241 245 249; --line-soft-a: 1; /* slate-100 */
+  --line-soft: 232 235 240; --line-soft-a: 1;
   --line-soft-2: 241 245 249; /* slate-100 */
   --line-soft-3: 241 245 249; --line-soft-3-a: 1; /* slate-100 */
   --line-soft-4: 241 245 249; --line-soft-4-a: 1; /* slate-100 */
   --line-soft-5: 241 245 249; --line-soft-5-a: 1; /* slate-100 */
   --line-soft-6: 241 245 249; /* slate-100 */
-  --line-faint: 241 245 249; --line-faint-a: 0.5; /* slate-100/50 */
+  --line-faint: 236 238 242; --line-faint-a: 1;
   --line-faint-2: 241 245 249; --line-faint-2-a: 0.5; /* slate-100/50 */
-  --line-muted: 226 232 240; --line-muted-a: 0.5; /* slate-200/50 */
+  --line-muted: 214 218 225; --line-muted-a: 1;
   --line-muted-2: 226 232 240; --line-muted-2-a: 0.6; /* slate-200/60 */
   --line-muted-3: 226 232 240; --line-muted-3-a: 0.6; /* slate-200/60 */
   --line-strong: 203 213 225; /* slate-300 */
-  --line-strong-2: 148 163 184; /* slate-400 */
-  --hairline: 0 0 0; --hairline-a: 0.04; /* black/[0.04] */
+  --line-strong-2: 176 183 194;
+  --hairline: 16 19 23; --hairline-a: 0.06;
   --hairline-2: 0 0 0; --hairline-2-a: 0.03; /* black/[0.03] */
-  --hairline-3: 0 0 0; --hairline-3-a: 0.04; /* black/[0.04] */
+  --hairline-3: 16 19 23; --hairline-3-a: 0.06;
   --hairline-4: 0 0 0; --hairline-4-a: 0.05; /* black/[0.05] */
-  --hairline-5: 0 0 0; --hairline-5-a: 0.04; /* black/[0.04] */
+  --hairline-5: 16 19 23; --hairline-5-a: 0.06;
   --tooltip-dark-edge: 63 63 70; --tooltip-dark-edge-a: 0.8; /* zinc-700/80 */
   --tooltip-dark-edge-2: 51 65 85; --tooltip-dark-edge-2-a: 0.6; /* slate-700/60 */
   --tooltip-info-edge: 255 255 255; --tooltip-info-edge-a: 0.1; /* white/10 */
   --tooltip-info-arrow: 15 23 42; --tooltip-info-arrow-a: 0.95; /* slate-900/95 */
 }
 .dark {
-  --line: 39 39 42; /* zinc-800 */
-  --line-2: 63 63 70; /* zinc-700 */
+  --line: 38 42 49;
+  --line-2: 52 57 66;
   --line-3: 63 63 70; --line-3-a: 0.8; /* zinc-700/80 */
   --line-4: 39 39 42; --line-4-a: 1; /* zinc-800 */
-  --line-soft: 39 39 42; --line-soft-a: 0.5; /* zinc-800/50 */
+  --line-soft: 38 42 49; --line-soft-a: 1;
   --line-soft-2: 39 39 42; /* zinc-800 */
   --line-soft-3: 39 39 42; --line-soft-3-a: 0.6; /* zinc-800/60 */
   --line-soft-4: 39 39 42; --line-soft-4-a: 0.8; /* zinc-800/80 */
   --line-soft-5: 39 39 42; --line-soft-5-a: 0.3; /* zinc-800/30 */
   --line-soft-6: 24 24 27; /* zinc-900 */
-  --line-faint: 39 39 42; --line-faint-a: 0.3; /* zinc-800/30 */
+  --line-faint: 38 42 49; --line-faint-a: 1;
   --line-faint-2: 39 39 42; --line-faint-2-a: 0.5; /* zinc-800/50 */
-  --line-muted: 39 39 42; --line-muted-a: 0.5; /* zinc-800/50 */
+  --line-muted: 38 42 49; --line-muted-a: 1;
   --line-muted-2: 63 63 70; --line-muted-2-a: 0.6; /* zinc-700/60 */
   --line-muted-3: 39 39 42; --line-muted-3-a: 0.6; /* zinc-800/60 */
   --line-strong: 63 63 70; /* zinc-700 */
-  --line-strong-2: 82 82 91; /* zinc-600 */
-  --hairline: 255 255 255; --hairline-a: 0.06; /* white/[0.06] */
+  --line-strong-2: 70 76 86;
+  --hairline: 255 255 255; --hairline-a: 0.08;
   --hairline-2: 255 255 255; --hairline-2-a: 0.04; /* white/[0.04] */
-  --hairline-3: 255 255 255; --hairline-3-a: 0.08; /* white/[0.08] */
+  --hairline-3: 255 255 255; --hairline-3-a: 0.08;
   --hairline-4: 255 255 255; --hairline-4-a: 0.08; /* white/[0.08] */
-  --hairline-5: 255 255 255; --hairline-5-a: 0.07; /* white/[0.07] */
+  --hairline-5: 255 255 255; --hairline-5-a: 0.08;
   --tooltip-dark-edge: 63 63 70; --tooltip-dark-edge-a: 0.8; /* zinc-700/80 */
   --tooltip-dark-edge-2: 39 39 42; --tooltip-dark-edge-2-a: 1; /* zinc-800 */
   --tooltip-info-edge: 255 255 255; --tooltip-info-edge-a: 0.1; /* white/10 */
@@ -142,21 +139,21 @@
 
 /* @tokens:text:start (generado por scripts/codemods/text.mjs --tokens; no editar a mano) */
 :root {
-  --ink: 15 23 42; /* slate-900 */
+  --ink: 16 19 23;
   --ink-soft: 15 23 42; /* slate-900 */
-  --ink-2: 30 41 59; /* slate-800 */
-  --ink-2-soft: 30 41 59; /* slate-800 */
-  --body: 51 65 85; /* slate-700 */
-  --body-2: 51 65 85; /* slate-700 */
+  --ink-2: 26 31 38;
+  --ink-2-soft: 26 31 38;
+  --body: 51 59 71;
+  --body-2: 51 59 71;
   --body-3: 51 65 85; /* slate-700 */
-  --body-soft: 71 85 105; /* slate-600 */
-  --body-soft-2: 71 85 105; /* slate-600 */
-  --ink-3: 100 116 139; /* slate-500 */
+  --body-soft: 73 84 98;
+  --body-soft-2: 73 84 98;
+  --ink-3: 75 85 99;
   --ink-3-flat: 100 116 139; /* slate-500 */
-  --ink-4: 148 163 184; /* slate-400 */
-  --ink-4-dim: 148 163 184; /* slate-400 */
+  --ink-4: 98 107 120;
+  --ink-4-dim: 98 107 120;
   --ink-4-flat: 148 163 184; /* slate-400 */
-  --faint: 203 213 225; /* slate-300 */
+  --faint: 154 163 176;
   --faint-2: 203 213 225; /* slate-300 */
   --ink-inverse: 255 255 255; /* white */
   --segmented-off: 100 116 139; /* slate-500 */
@@ -168,21 +165,21 @@
   --tooltip-info-ink: 255 255 255; /* white */
 }
 .dark {
-  --ink: 255 255 255; /* white */
+  --ink: 242 244 247;
   --ink-soft: 244 244 245; /* zinc-100 */
-  --ink-2: 244 244 245; /* zinc-100 */
-  --ink-2-soft: 228 228 231; /* zinc-200 */
-  --body: 212 212 216; /* zinc-300 */
-  --body-2: 228 228 231; /* zinc-200 */
+  --ink-2: 230 233 238;
+  --ink-2-soft: 230 233 238;
+  --body: 212 217 224;
+  --body-2: 212 217 224;
   --body-3: 255 255 255; /* white */
-  --body-soft: 161 161 170; /* zinc-400 */
-  --body-soft-2: 212 212 216; /* zinc-300 */
-  --ink-3: 161 161 170; /* zinc-400 */
+  --body-soft: 168 177 189;
+  --body-soft-2: 168 177 189;
+  --ink-3: 154 163 177;
   --ink-3-flat: 113 113 122; /* zinc-500 */
-  --ink-4: 113 113 122; /* zinc-500 */
-  --ink-4-dim: 82 82 91; /* zinc-600 */
+  --ink-4: 138 147 161;
+  --ink-4-dim: 138 147 161;
   --ink-4-flat: 161 161 170; /* zinc-400 */
-  --faint: 82 82 91; /* zinc-600 */
+  --faint: 75 82 92;
   --faint-2: 63 63 70; /* zinc-700 */
   --ink-inverse: 24 24 27; /* zinc-900 */
   --segmented-off: 100 116 139; /* slate-500 */
@@ -199,35 +196,35 @@
 :root {
   --canvas: 242 242 247; /* #f2f2f7 */
   --canvas-ink: 29 29 31; /* #1d1d1f */
-  --surface: 255 255 255; /* white */
-  --surface-2: 241 245 249; /* slate-100 */
-  --surface-3: 255 255 255; /* white */
-  --surface-4: 255 255 255; /* white */
-  --surface-5: 255 255 255; --surface-5-a: 1; /* white */
-  --surface-6: 255 255 255; /* white */
-  --surface-7: 255 255 255; /* white */
+  --surface: 255 255 255;
+  --surface-2: 238 240 244;
+  --surface-3: 255 255 255;
+  --surface-4: 255 255 255;
+  --surface-5: 255 255 255; --surface-5-a: 1;
+  --surface-6: 255 255 255;
+  --surface-7: 255 255 255;
   --surface-8: 255 255 255; --surface-8-a: 0.95; /* white/95 */
   --surface-9: 255 255 255; --surface-9-a: 0.8; /* white/80 */
-  --surface-card: 255 255 255; /* white */
+  --surface-card: 255 255 255;
   --control-knob: 255 255 255; /* white */
-  --sunken: 248 250 252; --sunken-a: 1; /* slate-50 */
-  --sunken-2: 248 250 252; /* slate-50 */
+  --sunken: 244 246 248; --sunken-a: 1;
+  --sunken-2: 238 240 244;
   --sunken-3: 248 250 252; --sunken-3-a: 0.5; /* slate-50/50 */
   --sunken-4: 248 250 252; --sunken-4-a: 1; /* slate-50 */
   --sunken-5: 248 250 252; --sunken-5-a: 1; /* slate-50 */
-  --sunken-6: 248 250 252; /* slate-50 */
+  --sunken-6: 241 243 246;
   --sunken-7: 248 250 252; --sunken-7-a: 0.3; /* slate-50/30 */
   --sunken-8: 248 250 252; --sunken-8-a: 1; /* slate-50 */
   --sunken-9: 248 250 252; /* slate-50 */
   --sunken-10: 248 250 252; --sunken-10-a: 1; /* slate-50 */
   --sunken-11: 248 250 252; --sunken-11-a: 1; /* slate-50 */
-  --fill: 241 245 249; --fill-a: 0.8; /* slate-100/80 */
+  --fill: 238 240 244; --fill-a: 1;
   --fill-2: 226 232 240; /* slate-200 */
   --fill-3: 241 245 249; --fill-3-a: 1; /* slate-100 */
   --fill-4: 226 232 240; --fill-4-a: 0.7; /* slate-200/70 */
   --fill-5: 241 245 249; --fill-5-a: 1; /* slate-100 */
-  --fill-6: 226 232 240; --fill-6-a: 0.6; /* slate-200/60 */
-  --fill-7: 226 232 240; /* slate-200 */
+  --fill-6: 214 218 225; --fill-6-a: 0.6;
+  --fill-7: 214 218 225;
   --fill-8: 241 245 249; --fill-8-a: 1; /* slate-100 */
   --fill-segmented: 226 232 240; --fill-segmented-a: 0.6; /* slate-200/60 */
   --fill-segmented-2: 226 232 240; --fill-segmented-2-a: 0.6; /* slate-200/60 */
@@ -251,35 +248,35 @@
 .dark {
   --canvas: 0 0 0; /* black */
   --canvas-ink: 245 245 247; /* #f5f5f7 */
-  --surface: 24 24 27; /* zinc-900 */
-  --surface-2: 39 39 42; /* zinc-800 */
-  --surface-3: 63 63 70; /* zinc-700 */
-  --surface-4: 44 44 46; /* [#2c2c2e] */
-  --surface-5: 24 24 27; --surface-5-a: 0.5; /* zinc-900/50 */
-  --surface-6: 9 9 11; /* zinc-950 */
-  --surface-7: 39 39 42; /* zinc-800 */
+  --surface: 22 25 30;
+  --surface-2: 30 33 39;
+  --surface-3: 38 42 49;
+  --surface-4: 26 29 34;
+  --surface-5: 22 25 30; --surface-5-a: 1;
+  --surface-6: 22 25 30;
+  --surface-7: 30 33 39;
   --surface-8: 24 24 27; --surface-8-a: 0.95; /* zinc-900/95 */
   --surface-9: 9 9 11; --surface-9-a: 0.8; /* zinc-950/80 */
-  --surface-card: 28 28 30; /* [#1c1c1e] */
+  --surface-card: 22 25 30;
   --control-knob: 255 255 255; /* white */
-  --sunken: 39 39 42; --sunken-a: 0.5; /* zinc-800/50 */
-  --sunken-2: 9 9 11; /* zinc-950 */
+  --sunken: 30 33 39; --sunken-a: 1;
+  --sunken-2: 12 14 17;
   --sunken-3: 39 39 42; --sunken-3-a: 0.3; /* zinc-800/30 */
   --sunken-4: 39 39 42; --sunken-4-a: 0.4; /* zinc-800/40 */
   --sunken-5: 39 39 42; --sunken-5-a: 0.8; /* zinc-800/80 */
-  --sunken-6: 24 24 27; /* zinc-900 */
+  --sunken-6: 30 33 39;
   --sunken-7: 39 39 42; --sunken-7-a: 0.2; /* zinc-800/20 */
   --sunken-8: 39 39 42; --sunken-8-a: 0.6; /* zinc-800/60 */
   --sunken-9: 39 39 42; /* zinc-800 */
   --sunken-10: 24 24 27; --sunken-10-a: 0.4; /* zinc-900/40 */
   --sunken-11: 24 24 27; --sunken-11-a: 0.8; /* zinc-900/80 */
-  --fill: 39 39 42; --fill-a: 0.8; /* zinc-800/80 */
+  --fill: 38 42 49; --fill-a: 1;
   --fill-2: 39 39 42; /* zinc-800 */
   --fill-3: 39 39 42; --fill-3-a: 0.8; /* zinc-800/80 */
   --fill-4: 39 39 42; --fill-4-a: 0.8; /* zinc-800/80 */
   --fill-5: 39 39 42; --fill-5-a: 0.5; /* zinc-800/50 */
-  --fill-6: 39 39 42; --fill-6-a: 0.7; /* zinc-800/70 */
-  --fill-7: 63 63 70; /* zinc-700 */
+  --fill-6: 52 57 66; --fill-6-a: 0.7;
+  --fill-7: 52 57 66;
   --fill-8: 39 39 42; --fill-8-a: 0.6; /* zinc-800/60 */
   --fill-segmented: 28 28 30; --fill-segmented-a: 1; /* [#1c1c1e] */
   --fill-segmented-2: 39 39 42; --fill-segmented-2-a: 0.8; /* zinc-800/80 */
@@ -325,7 +322,7 @@
   --danger-ink-3: 220 38 38; /* red-600 */
   --danger-solid: 220 38 38; /* red-600 */
   --danger-hover: 185 28 28; /* red-700 */
-  --danger-light: 248 113 113; /* red-400 */
+  --danger-light: 190 18 60;
   --danger-light-2: 248 113 113; --danger-light-2-a: 1; /* red-400 */
   --danger-tint: 254 242 242; --danger-tint-a: 1; /* red-50 */
   --danger-tint-2: 254 242 242; --danger-tint-2-a: 1; /* red-50 */
@@ -370,7 +367,7 @@
   --danger-ink-3: 239 68 68; /* red-500 */
   --danger-solid: 220 38 38; /* red-600 */
   --danger-hover: 185 28 28; /* red-700 */
-  --danger-light: 248 113 113; /* red-400 */
+  --danger-light: 251 113 133;
   --danger-light-2: 248 113 113; --danger-light-2-a: 0.6; /* red-400/60 */
   --danger-tint: 127 29 29; --danger-tint-a: 0.2; /* red-900/20 */
   --danger-tint-2: 69 10 10; --danger-tint-2-a: 0.3; /* red-950/30 */
@@ -397,53 +394,53 @@
 
 /* @tokens:metrics:start (generado por scripts/codemods/metrics.mjs --tokens; no editar a mano) */
 :root {
-  --metric-ctl-ink: 37 99 235; /* blue-600 */
-  --metric-atl-ink: 225 29 72; /* rose-600 */
-  --metric-tsb-ink: 217 119 6; /* amber-600 */
-  --legacy-ctl-sky: 14 165 233; /* sky-500 */
-  --legacy-atl-red: 248 113 113; /* red-400 */
+  --metric-ctl-ink: 29 78 216;
+  --metric-atl-ink: 159 18 57;
+  --metric-tsb-ink: 146 64 14;
+  --legacy-ctl-sky: 3 105 161;
+  --legacy-atl-red: 190 18 60;
   --legacy-atl-orange: 249 115 22; /* orange-500 */
-  --legacy-atl-purple: 192 132 252; /* purple-400 */
-  --legacy-atl-purple-ink: 147 51 234; /* purple-600 */
-  --legacy-tsb-up: 16 185 129; /* emerald-500 */
-  --legacy-tsb-up-ink: 5 150 105; /* emerald-600 */
-  --legacy-tsb-down: 251 146 60; /* orange-400 */
-  --legacy-tsb-down-2: 249 115 22; /* orange-500 */
-  --legacy-tsb-low: 239 68 68; /* red-500 */
-  --metric-atl-tile: 250 17 79; /* [#FA114F] */
-  --metric-tsb-tile: 48 209 88; /* [#30D158] */
-  --metric-acwr-tile: 255 159 10; /* [#FF9F0A] */
-  --metric-ramp-tile: 99 102 241; /* indigo-500 */
-  --metric-monotony-tile: 168 85 247; /* purple-500 */
-  --metric-volume-tile: 6 182 212; /* cyan-500 */
+  --legacy-atl-purple: 190 18 60;
+  --legacy-atl-purple-ink: 159 18 57;
+  --legacy-tsb-up: 4 120 87;
+  --legacy-tsb-up-ink: 4 120 87;
+  --legacy-tsb-down: 146 64 14;
+  --legacy-tsb-down-2: 180 83 9;
+  --legacy-tsb-low: 190 18 60;
+  --metric-atl-tile: 190 18 60;
+  --metric-tsb-tile: 4 120 87;
+  --metric-acwr-tile: 180 83 9;
+  --metric-ramp-tile: 67 56 202;
+  --metric-monotony-tile: 126 34 206;
+  --metric-volume-tile: 14 116 144;
 }
 .dark {
-  --metric-ctl-ink: 96 165 250; /* blue-400 */
-  --metric-atl-ink: 251 113 133; /* rose-400 */
-  --metric-tsb-ink: 251 191 36; /* amber-400 */
-  --legacy-ctl-sky: 14 165 233; /* sky-500 */
-  --legacy-atl-red: 248 113 113; /* red-400 */
+  --metric-ctl-ink: 147 197 253;
+  --metric-atl-ink: 253 164 175;
+  --metric-tsb-ink: 252 211 77;
+  --legacy-ctl-sky: 125 211 252;
+  --legacy-atl-red: 251 113 133;
   --legacy-atl-orange: 249 115 22; /* orange-500 */
-  --legacy-atl-purple: 192 132 252; /* purple-400 */
-  --legacy-atl-purple-ink: 192 132 252; /* purple-400 */
-  --legacy-tsb-up: 16 185 129; /* emerald-500 */
-  --legacy-tsb-up-ink: 52 211 153; /* emerald-400 */
-  --legacy-tsb-down: 251 146 60; /* orange-400 */
-  --legacy-tsb-down-2: 249 115 22; /* orange-500 */
-  --legacy-tsb-low: 239 68 68; /* red-500 */
-  --metric-atl-tile: 250 17 79; /* [#FA114F] */
-  --metric-tsb-tile: 48 209 88; /* [#30D158] */
-  --metric-acwr-tile: 255 159 10; /* [#FF9F0A] */
-  --metric-ramp-tile: 99 102 241; /* indigo-500 */
-  --metric-monotony-tile: 168 85 247; /* purple-500 */
-  --metric-volume-tile: 6 182 212; /* cyan-500 */
+  --legacy-atl-purple: 253 164 175;
+  --legacy-atl-purple-ink: 253 164 175;
+  --legacy-tsb-up: 52 211 153;
+  --legacy-tsb-up-ink: 52 211 153;
+  --legacy-tsb-down: 251 191 36;
+  --legacy-tsb-down-2: 251 191 36;
+  --legacy-tsb-low: 251 113 133;
+  --metric-atl-tile: 251 113 133;
+  --metric-tsb-tile: 52 211 153;
+  --metric-acwr-tile: 251 191 36;
+  --metric-ramp-tile: 129 140 248;
+  --metric-monotony-tile: 192 132 252;
+  --metric-volume-tile: 34 211 238;
 }
 /* @tokens:metrics:end */
 
 /* @tokens:categories:start (generado por scripts/codemods/categories.mjs --tokens; no editar a mano) */
 :root {
-  --cadence: 16 185 129; /* emerald-500 */
-  --ef: 139 92 246; /* violet-500 */
+  --cadence: 5 150 105;
+  --ef: 124 58 237;
   --form-critical: 250 17 79; /* [#FA114F] */
   --form-critical-tint: 250 17 79; --form-critical-tint-a: 0.1; /* [#FA114F]/10 */
   --form-overload: 255 159 10; /* [#FF9F0A] */
@@ -452,7 +449,7 @@
   --form-peak-tint: 48 209 88; --form-peak-tint-a: 0.1; /* [#30D158]/10 */
   --form-productive: 10 132 255; /* [#0A84FF] */
   --form-productive-tint: 10 132 255; --form-productive-tint-a: 0.1; /* [#0A84FF]/10 */
-  --hr: 244 63 94; /* rose-500 */
+  --hr: 225 29 72;
   --hr-edge: 254 205 211; --hr-edge-a: 1; /* rose-200 */
   --hr-ink: 225 29 72; /* rose-600 */
   --hr-soft: 251 113 133; /* rose-400 */
@@ -468,9 +465,9 @@
   --legacy-tsb-ios-down: 255 159 10; /* [#FF9F0A] */
   --legacy-tsb-ios-up: 48 209 88; /* [#30D158] */
   --load: 99 102 241; /* indigo-500 */
-  --pace: 99 102 241; /* indigo-500 */
+  --pace: 8 145 178;
   --pace-ink: 79 70 229; /* indigo-600 */
-  --power: 245 158 11; /* amber-500 */
+  --power: 180 83 9;
   --power-edge: 253 230 138; --power-edge-a: 1; /* amber-200 */
   --power-ink: 217 119 6; /* amber-600 */
   --power-ink-2: 217 119 6; /* amber-600 */
@@ -483,13 +480,13 @@
   --section-integrations: 99 102 241; /* indigo-500 */
   --section-security: 245 158 11; /* amber-500 */
   --section-zones: 244 63 94; /* rose-500 */
-  --sleep: 59 130 246; /* blue-500 */
+  --sleep: 124 58 237;
   --speed: 59 130 246; /* blue-500 */
   --speed-edge: 191 219 254; --speed-edge-a: 1; /* blue-200 */
   --speed-ink: 37 99 235; /* blue-600 */
   --speed-strong: 37 99 235; /* blue-600 */
   --speed-tint: 239 246 255; --speed-tint-a: 1; /* blue-50 */
-  --sport-bike: 59 130 246; /* blue-500 */
+  --sport-bike: 37 99 235;
   --sport-bike-edge: 191 219 254; --sport-bike-edge-a: 1; /* blue-200 */
   --sport-bike-edge-2: 191 219 254; --sport-bike-edge-2-a: 1; /* blue-200 */
   --sport-bike-end: 99 102 241; /* indigo-500 */
@@ -497,7 +494,7 @@
   --sport-bike-ios: 0 122 255; /* [#007AFF] */
   --sport-bike-tint: 219 234 254; --sport-bike-tint-a: 1; /* blue-100 */
   --sport-bike-tint-2: 239 246 255; --sport-bike-tint-2-a: 1; /* blue-50 */
-  --sport-run: 249 115 22; /* orange-500 */
+  --sport-run: 234 88 12;
   --sport-run-edge: 254 215 170; --sport-run-edge-a: 1; /* orange-200 */
   --sport-run-edge-2: 254 215 170; --sport-run-edge-2-a: 1; /* orange-200 */
   --sport-run-end: 239 68 68; /* red-500 */
@@ -528,8 +525,8 @@
   --vo2: 16 185 129; /* emerald-500 */
 }
 .dark {
-  --cadence: 16 185 129; /* emerald-500 */
-  --ef: 139 92 246; /* violet-500 */
+  --cadence: 15 174 121;
+  --ef: 146 114 245;
   --form-critical: 250 17 79; /* [#FA114F] */
   --form-critical-tint: 250 17 79; --form-critical-tint-a: 0.15; /* [#FA114F]/15 */
   --form-overload: 255 159 10; /* [#FF9F0A] */
@@ -538,7 +535,7 @@
   --form-peak-tint: 48 209 88; --form-peak-tint-a: 0.15; /* [#30D158]/15 */
   --form-productive: 10 132 255; /* [#0A84FF] */
   --form-productive-tint: 10 132 255; --form-productive-tint-a: 0.15; /* [#0A84FF]/15 */
-  --hr: 244 63 94; /* rose-500 */
+  --hr: 244 63 94;
   --hr-edge: 136 19 55; --hr-edge-a: 0.5; /* rose-900/50 */
   --hr-ink: 251 113 133; /* rose-400 */
   --hr-soft: 251 113 133; /* rose-400 */
@@ -554,9 +551,9 @@
   --legacy-tsb-ios-down: 255 159 10; /* [#FF9F0A] */
   --legacy-tsb-ios-up: 48 209 88; /* [#30D158] */
   --load: 99 102 241; /* indigo-500 */
-  --pace: 99 102 241; /* indigo-500 */
+  --pace: 5 165 192;
   --pace-ink: 129 140 248; /* indigo-400 */
-  --power: 245 158 11; /* amber-500 */
+  --power: 201 130 9;
   --power-edge: 120 53 15; --power-edge-a: 0.5; /* amber-900/50 */
   --power-ink: 251 191 36; /* amber-400 */
   --power-ink-2: 245 158 11; /* amber-500 */
@@ -569,13 +566,13 @@
   --section-integrations: 99 102 241; /* indigo-500 */
   --section-security: 245 158 11; /* amber-500 */
   --section-zones: 244 63 94; /* rose-500 */
-  --sleep: 59 130 246; /* blue-500 */
+  --sleep: 146 114 245;
   --speed: 59 130 246; /* blue-500 */
   --speed-edge: 30 58 138; --speed-edge-a: 0.5; /* blue-900/50 */
   --speed-ink: 96 165 250; /* blue-400 */
   --speed-strong: 37 99 235; /* blue-600 */
   --speed-tint: 23 37 84; --speed-tint-a: 0.3; /* blue-950/30 */
-  --sport-bike: 59 130 246; /* blue-500 */
+  --sport-bike: 78 147 246;
   --sport-bike-edge: 30 58 138; --sport-bike-edge-a: 0.5; /* blue-900/50 */
   --sport-bike-edge-2: 30 58 138; --sport-bike-edge-2-a: 0.4; /* blue-900/40 */
   --sport-bike-end: 99 102 241; /* indigo-500 */
@@ -583,7 +580,7 @@
   --sport-bike-ios: 10 132 255; /* [#0A84FF] */
   --sport-bike-tint: 30 58 138; --sport-bike-tint-a: 0.2; /* blue-900/20 */
   --sport-bike-tint-2: 23 37 84; --sport-bike-tint-2-a: 0.3; /* blue-950/30 */
-  --sport-run: 249 115 22; /* orange-500 */
+  --sport-run: 229 106 20;
   --sport-run-edge: 124 45 18; --sport-run-edge-a: 0.5; /* orange-900/50 */
   --sport-run-edge-2: 124 45 18; --sport-run-edge-2-a: 0.4; /* orange-900/40 */
   --sport-run-end: 239 68 68; /* red-500 */
@@ -617,236 +614,17 @@
 
 /* @tokens:charts:start (generado por scripts/codemods/charts.mjs --tokens; no editar a mano) */
 :root {
-  --chart-grid-soft: 241 245 249; /* slate-100 */
-  --chart-grid-2: 226 232 240; /* slate-200 */
-  --chart-grid-zinc: 63 63 70; /* zinc-700 */
-  --chart-tick: 148 163 184; /* slate-400 */
-  --chart-tick-zinc: 113 113 122; /* zinc-500 */
-  --chart-cursor-zinc: 113 113 122; /* zinc-500 */
-  --chart-cursor-fill: 248 250 252; /* slate-50 */
-  --chart-tooltip: 0 0 0; --chart-tooltip-a: 0.8; /* black/80 */
-  --chart-tooltip-edge: 255 255 255; --chart-tooltip-edge-a: 0.1; /* white/10 */
-  --chart-tooltip-ink: 255 255 255; /* white */
-  --chart-altitude: 100 116 139; /* slate-500 */
-  --chart-readiness: 16 185 129; /* emerald-500 */
-  --chart-strain: 244 63 94; /* rose-500 */
-  --chart-tss: 139 92 246; /* violet-500 */
-  --chart-hours: 16 185 129; /* emerald-500 */
-  --chart-profile-user: 59 130 246; /* blue-500 */
-  --chart-profile-top: 251 191 36; /* amber-400 */
-  --chart-profile-other: 148 163 184; /* slate-400 */
-  --chart-sport-run: 234 88 12; /* orange-600 */
-  --chart-sport-walk: 16 185 129; /* emerald-500 */
-  --chart-sport-bike: 37 99 235; /* blue-600 */
-  --chart-sport-strength: 124 58 237; /* violet-600 */
-  --chart-sport-other: 113 113 122; /* zinc-500 */
-  --chart-sport-fallback: 99 102 241; /* indigo-500 */
-  --chart-dist-strength: 139 92 246; /* violet-500 */
-  --chart-dist-walk: 16 185 129; /* emerald-500 */
-  --chart-dist-workout: 99 102 241; /* indigo-500 */
-  --chart-dist-other: 203 213 225; /* slate-300 */
-  --chart-zone-1: 148 163 184; /* slate-400 */
-  --chart-zone-2: 59 130 246; /* blue-500 */
-  --chart-zone-3: 16 185 129; /* emerald-500 */
-  --chart-zone-4: 245 158 11; /* amber-500 */
-  --chart-zone-5: 249 115 22; /* orange-500 */
-  --chart-zone-6: 239 68 68; /* red-500 */
-  --chart-zone-7: 124 58 237; /* violet-600 */
-  --chart-zone-hr-4: 234 179 8; /* yellow-500 */
-  --chart-zone-hr-5: 239 68 68; /* red-500 */
-  --chart-map-halo-light: 255 255 255; /* white */
-  --chart-map-halo-dark: 0 0 0; /* black */
-  --chart-map-route: 37 99 235; /* blue-600 */
-  --chart-map-start: 16 185 129; /* emerald-500 */
-  --chart-map-end: 24 24 27; /* zinc-900 */
-  --chart-map-ring: 255 255 255; /* white */
-  --chart-pmc-ctl: 56 189 248; /* sky-400 */
-  --chart-pmc-atl: 167 139 250; /* violet-400 */
-  --chart-pmc-tsb: 34 197 94; /* green-500 */
-  --chart-pmc-ramp: 34 197 94; /* green-500 */
-  --chart-pmc-ramp-proj: 56 189 248; /* sky-400 */
-  --chart-pmc-ctl-ink: 2 132 199; /* sky-600 */
-  --chart-pmc-atl-ink: 124 58 237; /* violet-600 */
-  --chart-pmc-tsb-ink: 100 116 139; /* slate-500 */
-  --chart-pmc-ramp-ink: 22 163 74; /* green-600 */
-  --chart-pmc-band: 241 245 249; /* slate-100 */
-  --chart-pmc-band-up: 16 185 129; /* emerald-500 */
-  --chart-pmc-band-down: 248 113 113; /* red-400 */
-  --chart-pmc-today: 71 85 105; /* slate-600 */
-}
-.dark {
-  --chart-grid-soft: 241 245 249; /* slate-100 */
-  --chart-grid-2: 226 232 240; /* slate-200 */
-  --chart-grid-zinc: 63 63 70; /* zinc-700 */
-  --chart-tick: 148 163 184; /* slate-400 */
-  --chart-tick-zinc: 113 113 122; /* zinc-500 */
-  --chart-cursor-zinc: 113 113 122; /* zinc-500 */
-  --chart-cursor-fill: 248 250 252; /* slate-50 */
-  --chart-tooltip: 0 0 0; --chart-tooltip-a: 0.8; /* black/80 */
-  --chart-tooltip-edge: 255 255 255; --chart-tooltip-edge-a: 0.1; /* white/10 */
-  --chart-tooltip-ink: 255 255 255; /* white */
-  --chart-altitude: 100 116 139; /* slate-500 */
-  --chart-readiness: 16 185 129; /* emerald-500 */
-  --chart-strain: 244 63 94; /* rose-500 */
-  --chart-tss: 139 92 246; /* violet-500 */
-  --chart-hours: 16 185 129; /* emerald-500 */
-  --chart-profile-user: 59 130 246; /* blue-500 */
-  --chart-profile-top: 251 191 36; /* amber-400 */
-  --chart-profile-other: 148 163 184; /* slate-400 */
-  --chart-sport-run: 234 88 12; /* orange-600 */
-  --chart-sport-walk: 16 185 129; /* emerald-500 */
-  --chart-sport-bike: 37 99 235; /* blue-600 */
-  --chart-sport-strength: 124 58 237; /* violet-600 */
-  --chart-sport-other: 113 113 122; /* zinc-500 */
-  --chart-sport-fallback: 99 102 241; /* indigo-500 */
-  --chart-dist-strength: 139 92 246; /* violet-500 */
-  --chart-dist-walk: 16 185 129; /* emerald-500 */
-  --chart-dist-workout: 99 102 241; /* indigo-500 */
-  --chart-dist-other: 203 213 225; /* slate-300 */
-  --chart-zone-1: 148 163 184; /* slate-400 */
-  --chart-zone-2: 59 130 246; /* blue-500 */
-  --chart-zone-3: 16 185 129; /* emerald-500 */
-  --chart-zone-4: 245 158 11; /* amber-500 */
-  --chart-zone-5: 249 115 22; /* orange-500 */
-  --chart-zone-6: 239 68 68; /* red-500 */
-  --chart-zone-7: 124 58 237; /* violet-600 */
-  --chart-zone-hr-4: 234 179 8; /* yellow-500 */
-  --chart-zone-hr-5: 239 68 68; /* red-500 */
-  --chart-map-halo-light: 255 255 255; /* white */
-  --chart-map-halo-dark: 0 0 0; /* black */
-  --chart-map-route: 37 99 235; /* blue-600 */
-  --chart-map-start: 16 185 129; /* emerald-500 */
-  --chart-map-end: 24 24 27; /* zinc-900 */
-  --chart-map-ring: 255 255 255; /* white */
-  --chart-pmc-ctl: 56 189 248; /* sky-400 */
-  --chart-pmc-atl: 167 139 250; /* violet-400 */
-  --chart-pmc-tsb: 34 197 94; /* green-500 */
-  --chart-pmc-ramp: 34 197 94; /* green-500 */
-  --chart-pmc-ramp-proj: 56 189 248; /* sky-400 */
-  --chart-pmc-ctl-ink: 2 132 199; /* sky-600 */
-  --chart-pmc-atl-ink: 124 58 237; /* violet-600 */
-  --chart-pmc-tsb-ink: 100 116 139; /* slate-500 */
-  --chart-pmc-ramp-ink: 22 163 74; /* green-600 */
-  --chart-pmc-band: 241 245 249; /* slate-100 */
-  --chart-pmc-band-up: 16 185 129; /* emerald-500 */
-  --chart-pmc-band-down: 248 113 113; /* red-400 */
-  --chart-pmc-today: 71 85 105; /* slate-600 */
-}
-/* @tokens:charts:end */
-
-/* @tokens:skin-v2:start (piel v2, spec-rediseno-02-c3-skin-dir; no lo genera ningún codemod) */
-/*
- * Dirección «Panel» (D7, 2026-11-11). Añade valores ENCIMA de los tokens v1 sin tocarlos:
- * los dos selectores acotan la piel a las pantallas que la estrenan (Dashboard y Calendario),
- * así que el resto de la app sigue viendo `:root` / `.dark` tal cual.
- *
- * Se declaran las dos variantes completas a propósito: el bloque oscuro no hereda del claro
- * y el orden de `.dark` en el archivo deja de importar.
- *
- * Los tokens `-a` (opacidad de un token en v1) se fijan aquí a 1 cuando la piel quiere un
- * borde nítido. `--faint` no es texto: es el token de líneas y elementos deshabilitados, y
- * queda fuera de la comprobación de contraste (scripts/check-palette.mjs).
- */
-html[data-ui="v2"] [data-skin] {
-  /* Superficies: tarjeta blanca sobre gris azulado frío */
-  --surface: 255 255 255;
-  --surface-2: 238 240 244;
-  --surface-3: 255 255 255;
-  --surface-4: 255 255 255;
-  --surface-5: 255 255 255; --surface-5-a: 1;
-  --surface-6: 255 255 255;
-  --surface-7: 255 255 255;
-  --surface-card: 255 255 255;
-  --sunken: 244 246 248; --sunken-a: 1;
-  --sunken-2: 238 240 244;
-  --sunken-6: 241 243 246;
-  --fill: 238 240 244; --fill-a: 1;
-  --fill-6: 214 218 225; --fill-6-a: 0.6;
-  --fill-7: 214 218 225;
-
-  /* Bordes: un valor explícito en vez de sombra difusa */
-  --line: 214 218 225;
-  --line-2: 214 218 225;
-  --line-soft: 232 235 240; --line-soft-a: 1;
-  --line-faint: 236 238 242; --line-faint-a: 1;
-  --line-muted: 214 218 225; --line-muted-a: 1;
-  --line-strong-2: 176 183 194;
-  --hairline: 16 19 23; --hairline-a: 0.06;
-  --hairline-3: 16 19 23; --hairline-3-a: 0.06;
-  --hairline-5: 16 19 23; --hairline-5-a: 0.06;
-
-  /* Rampa de texto: todo pasa AA sobre las superficies de la piel */
-  --ink: 16 19 23;
-  --ink-2: 26 31 38;
-  --ink-2-soft: 26 31 38;
-  --body: 51 59 71;
-  --body-2: 51 59 71;
-  --body-soft: 73 84 98;
-  --body-soft-2: 73 84 98;
-  --ink-3: 75 85 99;
-  --ink-4: 98 107 120;
-  --ink-4-dim: 98 107 120;
-  --faint: 154 163 176;
-
-  /* Semáforo único: cobalto = CTL, carmín = ATL, ámbar = TSB */
-  --metric-ctl: 37 99 235;
-  --metric-atl: 190 18 60;
-  --metric-tsb: 180 83 9;
-  --metric-ctl-ink: 29 78 216;
-  --metric-atl-ink: 159 18 57;
-  --metric-tsb-ink: 146 64 14;
-  --metric-atl-tile: 190 18 60;
-  --metric-tsb-tile: 4 120 87;
-  --metric-acwr-tile: 180 83 9;
-  --metric-ramp-tile: 67 56 202;
-  --metric-monotony-tile: 126 34 206;
-  --metric-volume-tile: 14 116 144;
-
-  /* Colores con significado del Calendario (los antiguos `legacy-*`) */
-  --legacy-ctl-sky: 3 105 161;
-  --legacy-atl-red: 190 18 60;
-  --legacy-atl-purple: 190 18 60;
-  --legacy-atl-purple-ink: 159 18 57;
-  --legacy-tsb-up: 4 120 87;
-  --legacy-tsb-up-ink: 4 120 87;
-  --legacy-tsb-down: 146 64 14;
-  --legacy-tsb-down-2: 180 83 9;
-  --legacy-tsb-low: 190 18 60;
-  --danger-light: 190 18 60;
-
-  /* Gráficas: rejilla y ejes recesivos, series del semáforo */
-  --chart-grid: 201 207 216;
   --chart-grid-soft: 241 243 246;
   --chart-grid-2: 232 235 240;
-  --chart-axis: 91 100 114;
+  --chart-grid-zinc: 63 63 70; /* zinc-700 */
   --chart-tick: 98 107 120;
-  --chart-cursor: 98 107 120;
+  --chart-tick-zinc: 113 113 122; /* zinc-500 */
+  --chart-cursor-zinc: 113 113 122; /* zinc-500 */
   --chart-cursor-fill: 244 246 248;
-  --chart-dot-ring: 255 255 255;
   --chart-tooltip: 16 19 23; --chart-tooltip-a: 0.94;
   --chart-tooltip-edge: 255 255 255; --chart-tooltip-edge-a: 0.12;
   --chart-tooltip-ink: 242 244 247;
-  --chart-pmc-ctl: 37 99 235;
-  --chart-pmc-atl: 190 18 60;
-  --chart-pmc-tsb: 180 83 9;
-  --chart-pmc-ramp: 4 120 87;
-  --chart-pmc-ramp-proj: 37 99 235;
-  --chart-pmc-ctl-ink: 29 78 216;
-  --chart-pmc-atl-ink: 159 18 57;
-  --chart-pmc-tsb-ink: 146 64 14;
-  --chart-pmc-ramp-ink: 4 120 87;
-  --chart-pmc-band: 244 246 248;
-  --chart-pmc-band-up: 4 120 87;
-  --chart-pmc-band-down: 190 18 60;
-  --chart-pmc-today: 51 59 71;
-  /* Series, deportes, distribución, zonas y mapa (D-10) */
-  --hr: 225 29 72;
-  --pace: 8 145 178;
-  --power: 180 83 9;
-  --cadence: 5 150 105;
   --chart-altitude: 100 116 139;
-  --ef: 124 58 237;
-  --sleep: 124 58 237;
   --chart-readiness: 5 150 105;
   --chart-strain: 225 29 72;
   --chart-tss: 124 58 237;
@@ -860,8 +638,6 @@ html[data-ui="v2"] [data-skin] {
   --chart-sport-strength: 124 58 237;
   --chart-sport-other: 113 113 122;
   --chart-sport-fallback: 8 145 178;
-  --sport-bike: 37 99 235;
-  --sport-run: 234 88 12;
   --chart-dist-strength: 124 58 237;
   --chart-dist-walk: 5 150 105;
   --chart-dist-workout: 8 145 178;
@@ -869,139 +645,44 @@ html[data-ui="v2"] [data-skin] {
   --chart-zone-1: 124 135 151;
   --chart-zone-2: 37 99 235;
   --chart-zone-3: 5 150 105;
-  --chart-zone-hr-4: 217 119 6;
-  --chart-zone-hr-5: 220 38 38;
   --chart-zone-4: 217 119 6;
   --chart-zone-5: 234 88 12;
   --chart-zone-6: 220 38 38;
   --chart-zone-7: 124 58 237;
+  --chart-zone-hr-4: 217 119 6;
+  --chart-zone-hr-5: 220 38 38;
+  --chart-map-halo-light: 255 255 255; /* white */
+  --chart-map-halo-dark: 0 0 0; /* black */
   --chart-map-route: 37 99 235;
   --chart-map-start: 5 150 105;
-
-  /* Escala: radios contenidos, borde de 1 px, tipografía más ancha */
-  /* Radios concéntricos (Fase B): exterior = interior + padding. Escala 6/8/12/16/20:
-     tarjeta 16 → ficha 12 (padding 4) → control 8; carril 12 → pestaña 8; dock 20 → tecla 16. */
-  --skin-radius-md: 6px;
-  --skin-radius-lg: 8px;
-  --skin-radius-xl: 12px;
-  --skin-radius-2xl: 16px;
-  --skin-radius-3xl: 20px;
-  /* Sombras en capas (reposo): anillo de 1 px + contacto + difusión fría, todo transparente */
-  --skin-shadow-xs: 0 0 0 1px rgba(16, 19, 23, 0.04), 0 1px 1px rgba(16, 19, 23, 0.04);
-  --skin-shadow-sm: 0 0 0 1px rgba(16, 19, 23, 0.05), 0 1px 2px rgba(16, 19, 23, 0.05), 0 2px 6px -2px rgba(30, 41, 70, 0.06);
-  --skin-shadow-card: 0 0 0 1px rgba(16, 19, 23, 0.04), 0 1px 2px rgba(16, 19, 23, 0.04), 0 4px 12px -6px rgba(30, 41, 70, 0.08);
-  /* Tipografía: mínimo 10 px (rótulos); el contenido arranca en 11 px */
-  --skin-type-11: 12px;
-  --skin-type-12: 12px;
-  --skin-type-13: 13px;
-  --skin-type-14: 14px;
-  --skin-type-15: 15px;
-  --skin-type-17: 18px;
-  --skin-type-18: 18px;
-  --skin-type-xs: 12px;
-  --skin-type-sm: 14px;
-  --skin-type-base: 16px;
-  --skin-type-lg: 19px;
-  --skin-type-xl: 22px;
-  --skin-type-2xl: 26px;
-  --skin-type-3xl: 34px;
+  --chart-map-end: 24 24 27; /* zinc-900 */
+  --chart-map-ring: 255 255 255; /* white */
+  --chart-pmc-ctl: 37 99 235;
+  --chart-pmc-atl: 190 18 60;
+  --chart-pmc-tsb: 180 83 9;
+  --chart-pmc-ramp: 4 120 87;
+  --chart-pmc-ramp-proj: 37 99 235;
+  --chart-pmc-ctl-ink: 29 78 216;
+  --chart-pmc-atl-ink: 159 18 57;
+  --chart-pmc-tsb-ink: 146 64 14;
+  --chart-pmc-ramp-ink: 4 120 87;
+  --chart-pmc-band: 244 246 248;
+  --chart-pmc-band-up: 4 120 87;
+  --chart-pmc-band-down: 190 18 60;
+  --chart-pmc-today: 51 59 71;
 }
-
-html[data-ui="v2"].dark [data-skin] {
-  /* Grafito en oscuro; la tarjeta se separa del lienzo por el anillo, no por la sombra */
-  --surface: 22 25 30;
-  --surface-2: 30 33 39;
-  --surface-3: 38 42 49;
-  --surface-4: 26 29 34;
-  --surface-5: 22 25 30; --surface-5-a: 1;
-  --surface-6: 22 25 30;
-  --surface-7: 30 33 39;
-  --surface-card: 22 25 30;
-  --sunken: 30 33 39; --sunken-a: 1;
-  --sunken-2: 12 14 17;
-  --sunken-6: 30 33 39;
-  --fill: 38 42 49; --fill-a: 1;
-  --fill-6: 52 57 66; --fill-6-a: 0.7;
-  --fill-7: 52 57 66;
-
-  --line: 38 42 49;
-  --line-2: 52 57 66;
-  --line-soft: 38 42 49; --line-soft-a: 1;
-  --line-faint: 38 42 49; --line-faint-a: 1;
-  --line-muted: 38 42 49; --line-muted-a: 1;
-  --line-strong-2: 70 76 86;
-  --hairline: 255 255 255; --hairline-a: 0.08;
-  --hairline-3: 255 255 255; --hairline-3-a: 0.08;
-  --hairline-5: 255 255 255; --hairline-5-a: 0.08;
-
-  --ink: 242 244 247;
-  --ink-2: 230 233 238;
-  --ink-2-soft: 230 233 238;
-  --body: 212 217 224;
-  --body-2: 212 217 224;
-  --body-soft: 168 177 189;
-  --body-soft-2: 168 177 189;
-  --ink-3: 154 163 177;
-  --ink-4: 138 147 161;
-  --ink-4-dim: 138 147 161;
-  --faint: 75 82 92;
-
-  --metric-ctl: 96 165 250;
-  --metric-atl: 251 113 133;
-  --metric-tsb: 251 191 36;
-  --metric-ctl-ink: 147 197 253;
-  --metric-atl-ink: 253 164 175;
-  --metric-tsb-ink: 252 211 77;
-  --metric-atl-tile: 251 113 133;
-  --metric-tsb-tile: 52 211 153;
-  --metric-acwr-tile: 251 191 36;
-  --metric-ramp-tile: 129 140 248;
-  --metric-monotony-tile: 192 132 252;
-  --metric-volume-tile: 34 211 238;
-
-  --legacy-ctl-sky: 125 211 252;
-  --legacy-atl-red: 251 113 133;
-  --legacy-atl-purple: 253 164 175;
-  --legacy-atl-purple-ink: 253 164 175;
-  --legacy-tsb-up: 52 211 153;
-  --legacy-tsb-up-ink: 52 211 153;
-  --legacy-tsb-down: 251 191 36;
-  --legacy-tsb-down-2: 251 191 36;
-  --legacy-tsb-low: 251 113 133;
-  --danger-light: 251 113 133;
-
-  --chart-grid: 43 48 56;
+.dark {
   --chart-grid-soft: 35 38 44;
   --chart-grid-2: 52 57 66;
-  --chart-axis: 152 161 175;
+  --chart-grid-zinc: 63 63 70; /* zinc-700 */
   --chart-tick: 138 147 161;
-  --chart-cursor: 152 161 175;
+  --chart-tick-zinc: 113 113 122; /* zinc-500 */
+  --chart-cursor-zinc: 113 113 122; /* zinc-500 */
   --chart-cursor-fill: 28 31 36;
-  --chart-dot-ring: 20 22 26;
   --chart-tooltip: 28 31 36; --chart-tooltip-a: 0.96;
   --chart-tooltip-edge: 255 255 255; --chart-tooltip-edge-a: 0.1;
   --chart-tooltip-ink: 242 244 247;
-  --chart-pmc-ctl: 96 165 250;
-  --chart-pmc-atl: 251 113 133;
-  --chart-pmc-tsb: 251 191 36;
-  --chart-pmc-ramp: 52 211 153;
-  --chart-pmc-ramp-proj: 147 197 253;
-  --chart-pmc-ctl-ink: 147 197 253;
-  --chart-pmc-atl-ink: 253 164 175;
-  --chart-pmc-tsb-ink: 252 211 77;
-  --chart-pmc-ramp-ink: 52 211 153;
-  --chart-pmc-band: 30 33 39;
-  --chart-pmc-band-up: 52 211 153;
-  --chart-pmc-band-down: 251 113 133;
-  --chart-pmc-today: 212 217 224;
-  /* Series, deportes, distribución, zonas y mapa (D-10) */
-  --hr: 244 63 94;
-  --pace: 5 165 192;
-  --power: 201 130 9;
-  --cadence: 15 174 121;
   --chart-altitude: 148 163 184;
-  --ef: 146 114 245;
-  --sleep: 146 114 245;
   --chart-readiness: 15 174 121;
   --chart-strain: 244 63 94;
   --chart-tss: 146 114 245;
@@ -1015,8 +696,6 @@ html[data-ui="v2"].dark [data-skin] {
   --chart-sport-strength: 146 114 245;
   --chart-sport-other: 161 161 170;
   --chart-sport-fallback: 5 165 192;
-  --sport-bike: 78 147 246;
-  --sport-run: 229 106 20;
   --chart-dist-strength: 146 114 245;
   --chart-dist-walk: 15 174 121;
   --chart-dist-workout: 5 165 192;
@@ -1024,27 +703,41 @@ html[data-ui="v2"].dark [data-skin] {
   --chart-zone-1: 148 163 184;
   --chart-zone-2: 96 165 250;
   --chart-zone-3: 52 211 153;
-  --chart-zone-hr-4: 251 191 36;
-  --chart-zone-hr-5: 248 113 113;
   --chart-zone-4: 251 191 36;
   --chart-zone-5: 251 146 60;
   --chart-zone-6: 248 113 113;
   --chart-zone-7: 167 139 250;
+  --chart-zone-hr-4: 251 191 36;
+  --chart-zone-hr-5: 248 113 113;
+  --chart-map-halo-light: 255 255 255; /* white */
+  --chart-map-halo-dark: 0 0 0; /* black */
   --chart-map-route: 78 147 246;
   --chart-map-start: 15 174 121;
-
-  /* Sin sombra difusa en oscuro: anillo de 1 px que separa la tarjeta del lienzo */
-  --skin-shadow-xs: 0 0 0 1px rgba(255, 255, 255, 0.07);
-  --skin-shadow-sm: 0 0 0 1px rgba(255, 255, 255, 0.09), inset 0 1px 0 rgba(255, 255, 255, 0.03);
-  --skin-shadow-card: 0 0 0 1px rgba(255, 255, 255, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.03);
+  --chart-map-end: 24 24 27; /* zinc-900 */
+  --chart-map-ring: 255 255 255; /* white */
+  --chart-pmc-ctl: 96 165 250;
+  --chart-pmc-atl: 251 113 133;
+  --chart-pmc-tsb: 251 191 36;
+  --chart-pmc-ramp: 52 211 153;
+  --chart-pmc-ramp-proj: 147 197 253;
+  --chart-pmc-ctl-ink: 147 197 253;
+  --chart-pmc-atl-ink: 253 164 175;
+  --chart-pmc-tsb-ink: 252 211 77;
+  --chart-pmc-ramp-ink: 52 211 153;
+  --chart-pmc-band: 30 33 39;
+  --chart-pmc-band-up: 52 211 153;
+  --chart-pmc-band-down: 251 113 133;
+  --chart-pmc-today: 212 217 224;
 }
+/* @tokens:charts:end */
 
+/* @tokens:tema:start (piel «Panel» aplanada, Capa 6 PR 7b: tokens sin familia generada) */
 /*
- * Elevación y movimiento v2 (Fase B). Van en `html[data-ui="v2"]` (no en `[data-skin]`) porque
- * modales, menús y tooltips viven en portales fuera de la raíz de pantalla.
- * Niveles: 1 reposo (`--skin-shadow-*`), 2 flotante (popover, tooltip, menú), 3 modal.
+ * Escala de la piel (radios, sombras de reposo, elevación y movimiento) y los tokens de color
+ * que no tienen bloque de familia. Los valores de color de cada familia viven en su bloque.
+ * Niveles de sombra: 1 reposo (`--shadow-*`), 2 flotante (popover, tooltip, menú), 3 modal.
  */
-html[data-ui="v2"] {
+:root {
   --elev-2: 0 0 0 1px rgba(16, 19, 23, 0.08), 0 4px 8px -2px rgba(16, 19, 23, 0.08), 0 12px 24px -8px rgba(30, 41, 70, 0.16);
   --elev-3: 0 0 0 1px rgba(16, 19, 23, 0.08), 0 8px 16px -4px rgba(16, 19, 23, 0.1), 0 24px 48px -12px rgba(30, 41, 70, 0.26);
   --dur-fast: 120ms;
@@ -1052,10 +745,25 @@ html[data-ui="v2"] {
   --dur-slow: 400ms;
   --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
   --press-scale: 0.97;
+  --shadow-xs: 0 0 0 1px rgba(16, 19, 23, 0.04), 0 1px 1px rgba(16, 19, 23, 0.04);
+  --shadow-sm: 0 0 0 1px rgba(16, 19, 23, 0.05), 0 1px 2px rgba(16, 19, 23, 0.05), 0 2px 6px -2px rgba(30, 41, 70, 0.06);
+  --shadow-card: 0 0 0 1px rgba(16, 19, 23, 0.04), 0 1px 2px rgba(16, 19, 23, 0.04), 0 4px 12px -6px rgba(30, 41, 70, 0.08);
 }
-html[data-ui="v2"].dark {
-  /* En oscuro la sombra no se ve: el anillo claro separa y el brillo superior da el relieve */
+.dark {
   --elev-2: 0 0 0 1px rgba(255, 255, 255, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.05), 0 8px 24px rgba(0, 0, 0, 0.5);
   --elev-3: 0 0 0 1px rgba(255, 255, 255, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.06), 0 16px 48px rgba(0, 0, 0, 0.62);
+  --dur-fast: 120ms;
+  --dur-base: 200ms;
+  --dur-slow: 400ms;
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+  --press-scale: 0.97;
+  --shadow-xs: 0 0 0 1px rgba(255, 255, 255, 0.07);
+  --shadow-sm: 0 0 0 1px rgba(255, 255, 255, 0.09), inset 0 1px 0 rgba(255, 255, 255, 0.03);
+  --shadow-card: 0 0 0 1px rgba(255, 255, 255, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.03);
 }
-/* @tokens:skin-v2:end */
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --press-scale: 1;
+  }
+}
+/* @tokens:tema:end */

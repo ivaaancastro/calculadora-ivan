@@ -61,7 +61,7 @@ const AddActivityModal = ({ isOpen, onClose, onSave }) => {
                 <h3 id="add-activity-title" className="text-base sm:text-lg font-bold text-slate-800 dark:text-white flex items-center gap-2">
                     <Activity className="text-action-bright" size={20} /> Añadir Manual
                 </h3>
-                <button type="button" aria-label="Cerrar" onClick={onClose} data-modal="close" className="w-9 h-9 flex items-center justify-center rounded-xl text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-surface-2 active:scale-95 transition-all touch-manipulation" title="Cerrar">
+                <button type="button" aria-label="Cerrar" onClick={onClose} data-modal="close" className="w-11 h-11 flex items-center justify-center rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-surface-2 active:scale-press transition-paint touch-manipulation" title="Cerrar">
                     <X size={20} />
                 </button>
             </div>
@@ -69,13 +69,13 @@ const AddActivityModal = ({ isOpen, onClose, onSave }) => {
             <form onSubmit={handleSubmit} className="p-4 sm:p-5 space-y-4 overflow-y-auto custom-scrollbar touch-scroll flex-1">
                 <div className="grid grid-cols-2 gap-3 sm:gap-4">
                     <div className="space-y-1">
-                        <label htmlFor="activity-date" className="text-[11px] font-bold text-ink-3 uppercase tracking-wider">Fecha</label>
+                        <label htmlFor="activity-date" className="text-[12px] font-bold text-ink-3 uppercase tracking-[0.05em]">Fecha</label>
                         <Input id="activity-date" type="date" required value={formData.date} onChange={e => setFormData({ ...formData, date: e.target.value })}
                             variant="filled" className="w-full p-3"
                         />
                     </div>
                     <div className="space-y-1">
-                        <label htmlFor="activity-type" className="text-[11px] font-bold text-ink-3 uppercase tracking-wider">Deporte</label>
+                        <label htmlFor="activity-type" className="text-[12px] font-bold text-ink-3 uppercase tracking-[0.05em]">Deporte</label>
                         <Select id="activity-type" value={formData.type} onChange={e => setFormData({ ...formData, type: e.target.value })}
                             variant="filled" className="w-full p-3"
                         >
@@ -86,13 +86,13 @@ const AddActivityModal = ({ isOpen, onClose, onSave }) => {
 
                 <div className="grid grid-cols-2 gap-3 sm:gap-4">
                     <div className="space-y-1">
-                        <label htmlFor="duration-input" className="text-[11px] font-bold text-ink-3 uppercase tracking-wider">Duración (min)</label>
+                        <label htmlFor="duration-input" className="text-[12px] font-bold text-ink-3 uppercase tracking-[0.05em]">Duración (min)</label>
                         <Input id="duration-input" type="number" inputMode="decimal" min="0.1" step="any" required placeholder="0" value={formData.duration} onChange={e => setFormData({ ...formData, duration: e.target.value })}
                             variant="filled" mono className="w-full p-3"
                         />
                     </div>
                     <div className="space-y-1">
-                        <label htmlFor="activity-hr" className="text-[11px] font-bold text-ink-3 uppercase tracking-wider">Pulso Medio</label>
+                        <label htmlFor="activity-hr" className="text-[12px] font-bold text-ink-3 uppercase tracking-[0.05em]">Pulso Medio</label>
                         <Input id="activity-hr" type="number" inputMode="numeric" min="0" placeholder="Opcional" value={formData.hr_avg} onChange={e => setFormData({ ...formData, hr_avg: e.target.value })}
                             variant="filled" mono className="w-full p-3"
                         />
@@ -101,20 +101,20 @@ const AddActivityModal = ({ isOpen, onClose, onSave }) => {
 
                 <div className="grid grid-cols-2 gap-3 sm:gap-4">
                     <div className="space-y-1">
-                        <label htmlFor="activity-distance" className="text-[11px] font-bold text-ink-3 uppercase tracking-wider">Distancia (m)</label>
+                        <label htmlFor="activity-distance" className="text-[12px] font-bold text-ink-3 uppercase tracking-[0.05em]">Distancia (m)</label>
                         <Input id="activity-distance" type="number" inputMode="decimal" min="0" placeholder="Ej: 5000" value={formData.distance} onChange={e => setFormData({ ...formData, distance: e.target.value })}
                             variant="filled" mono className="w-full p-3"
                         />
                     </div>
                     <div className="space-y-1">
-                        <label htmlFor="activity-elevation" className="text-[11px] font-bold text-ink-3 uppercase tracking-wider">Desnivel (m)</label>
+                        <label htmlFor="activity-elevation" className="text-[12px] font-bold text-ink-3 uppercase tracking-[0.05em]">Desnivel (m)</label>
                         <Input id="activity-elevation" type="number" inputMode="decimal" min="0" placeholder="Ej: 100" value={formData.elevation_gain} onChange={e => setFormData({ ...formData, elevation_gain: e.target.value })}
                             variant="filled" mono className="w-full p-3"
                         />
                     </div>
                 </div>
 
-                <button type="submit" disabled={loading} data-modal="submit" className="w-full min-h-[46px] bg-action-solid hover:bg-action-hover text-white font-bold py-3 px-4 rounded-xl active:scale-98 transition-all flex items-center justify-center gap-2 mt-4 shadow-md touch-manipulation select-none">
+                <button type="submit" disabled={loading} data-modal="submit" className="w-full min-h-[48px] bg-action-solid hover:bg-action-hover text-white font-bold py-3 px-4 rounded-xl active:scale-press transition-paint flex items-center justify-center gap-2 mt-4 shadow-md touch-manipulation select-none">
                     {loading ? 'Guardando...' : <><Save size={18} /> Guardar Actividad</>}
                 </button>
             </form>

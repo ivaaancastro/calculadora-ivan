@@ -83,28 +83,28 @@ const StravaCallback = () => {
         {status === 'processing' && (
             <>
                 <Loader2 className="animate-spin h-12 w-12 text-action-3 mx-auto mb-4" />
-                <h2 className="text-xl font-black text-ink-2 uppercase tracking-tight">Procesando</h2>
+                <h2 className="text-xl font-bold text-ink-2 uppercase tracking-tight">Procesando</h2>
             </>
         )}
 
         {status === 'success' && (
             <>
                 <CheckCircle className="h-12 w-12 text-positive mx-auto mb-4" />
-                <h2 className="text-xl font-black text-ink-2 uppercase tracking-tight">¡Éxito!</h2>
+                <h2 className="text-xl font-bold text-ink-2 uppercase tracking-tight">¡Éxito!</h2>
             </>
         )}
 
         {status === 'error' && (
             <>
                 <XCircle className="h-12 w-12 text-danger mx-auto mb-4" />
-                <h2 className="text-xl font-black text-ink-2 uppercase tracking-tight">Error</h2>
+                <h2 className="text-xl font-bold text-ink-2 uppercase tracking-tight">Error</h2>
             </>
         )}
 
-        <p className="text-[11px] font-bold text-ink-3 uppercase tracking-widest mt-3">{message}</p>
+        <p className="text-[12px] font-bold text-ink-3 uppercase tracking-[0.08em] mt-3">{message}</p>
         
         {status === 'error' && (
-            <button onClick={() => navigate('/')} className="mt-6 w-full py-2.5 bg-surface-2 hover:bg-fill-7 text-body-2 rounded font-bold text-[11px] uppercase tracking-widest transition-colors">
+            <button onClick={() => navigate('/')} className="mt-6 w-full py-2.5 bg-surface-2 hover:bg-fill-7 text-body-2 rounded font-bold text-[12px] uppercase tracking-[0.08em] transition-colors">
                 Volver a intentar
             </button>
         )}

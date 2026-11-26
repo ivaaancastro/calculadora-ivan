@@ -2,7 +2,6 @@ import React, { Suspense, useState } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { ErrorBoundary } from '../common/ErrorBoundary';
 import { LoadingState } from '../ui';
-import { AutoChartSkin } from '../charts/ChartSkin';
 
 const ActivityDetailPage = React.lazy(() =>
   import('../pages/ActivityDetailPage').then((m) => ({ default: m.ActivityDetailPage }))
@@ -40,7 +39,7 @@ export function ActivityRouteWrapper({ activities, settings, fetchActivityStream
   return (
     <ErrorBoundary>
       <Suspense fallback={<LoadingState />}>
-        <AutoChartSkin>
+        <>
         <ActivityDetailPage
           activity={activity}
           settings={settings}
@@ -48,7 +47,7 @@ export function ActivityRouteWrapper({ activities, settings, fetchActivityStream
           onBack={handleBack}
           onDelete={handleDelete}
         />
-        </AutoChartSkin>
+        </>
       </Suspense>
     </ErrorBoundary>
   );

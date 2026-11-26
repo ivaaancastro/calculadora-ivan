@@ -46,7 +46,7 @@ export const PlannerModal = ({
                                 {selectedDateForPlan?.toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long' })}
                             </p>
                         </div>
-                        <button type="button" aria-label="Cerrar" onClick={() => setIsModalOpen(false)} data-cal="modal-close" className="shrink-0 ml-4 w-7 h-7 flex items-center justify-center text-slate-400 hover:text-slate-700 dark:hover:text-zinc-200 hover:bg-surface-2 rounded-full transition-colors"><X size={15} /></button>
+                        <button type="button" aria-label="Cerrar" onClick={() => setIsModalOpen(false)} data-cal="modal-close" className="shrink-0 ml-4 w-11 h-11 flex items-center justify-center text-slate-400 hover:text-slate-700 dark:hover:text-zinc-200 hover:bg-surface-2 rounded-lg transition-colors"><X size={15} /></button>
                     </div>
 
                     <div className="px-6 py-5 overflow-y-auto flex-1 bg-surface custom-scrollbar">
@@ -62,7 +62,7 @@ export const PlannerModal = ({
                                     { key: 'Workout', label: 'Otro', icon: <Activity size={13} /> },
                                 ].map(s => (
                                     <button key={s.key} onClick={() => setNewPlan(prev => ({ ...prev, type: s.key, blocks: [] }))}
-                                        className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-all duration-200
+                                        className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-paint duration-200
                                             ${newPlan.type === s.key
                                                 ? 'bg-inverse text-ink-inverse shadow-sm'
                                                 : 'text-ink-3 hover:bg-surface-2'}`}>
@@ -76,7 +76,7 @@ export const PlannerModal = ({
                                 <div className="flex gap-1.5 flex-wrap">
                                     {(WORKOUT_TEMPLATES[newPlan.type] || []).map((t, i) => (
                                         <button key={i} onClick={() => applyTemplate(t)}
-                                            className={`px-2.5 py-1 rounded-full text-[11px] font-medium transition-all duration-200
+                                            className={`px-2.5 py-1 rounded-full text-[12px] font-medium transition-paint duration-200
                                                 ${newPlan.name === t.name
                                                     ? 'bg-blue-500/10 text-action dark:bg-blue-500/20'
                                                     : 'text-ink-4 hover:text-body-soft-2 hover:bg-sunken'}`}
@@ -97,11 +97,11 @@ export const PlannerModal = ({
                                 </div>
                                 <div className="flex gap-4 shrink-0 pb-1">
                                     <div className="text-center">
-                                        <span className="text-2xs font-medium text-ink-4 uppercase tracking-wider block mb-0.5">TSS</span>
+                                        <span className="text-2xs font-medium text-ink-4 uppercase tracking-[0.05em] block mb-0.5">TSS</span>
                                         <span className="text-lg font-semibold text-ink-2-soft font-mono">{newPlan.tss}</span>
                                     </div>
                                     <div className="text-center">
-                                        <span className="text-2xs font-medium text-ink-4 uppercase tracking-wider block mb-0.5">Duración</span>
+                                        <span className="text-2xs font-medium text-ink-4 uppercase tracking-[0.05em] block mb-0.5">Duración</span>
                                         <span className="text-lg font-semibold text-ink-2-soft font-mono">{formatMinutes(newPlan.duration)}</span>
                                     </div>
                                 </div>
@@ -112,7 +112,7 @@ export const PlannerModal = ({
                                 <div className="flex flex-col sm:flex-row justify-between sm:items-center mb-3 gap-2">
                                     <div className="flex items-center gap-2">
                                         <h4 className="text-[13px] font-semibold text-ink-2-soft tracking-tight">Estructura</h4>
-                                        <button onClick={() => setIsPastingString(!isPastingString)} className={`px-2 py-0.5 rounded-full text-2xs font-medium transition-all duration-200 ${isPastingString ? 'bg-action-bright/10 text-action-solid' : 'text-slate-400 hover:text-slate-600 hover:bg-surface-2'}`} title="Importar desde texto">
+                                        <button onClick={() => setIsPastingString(!isPastingString)} className={`px-2 py-0.5 rounded-full text-2xs font-medium transition-paint duration-200 ${isPastingString ? 'bg-action-bright/10 text-action-solid' : 'text-slate-400 hover:text-slate-600 hover:bg-surface-2'}`} title="Importar desde texto">
                                             Texto
                                         </button>
                                     </div>
@@ -132,7 +132,7 @@ export const PlannerModal = ({
                                 {/* AI SMART PASTE AREA */}
                                 {isPastingString && (
                                     <div className="mb-4 p-4 rounded-xl bg-sunken-2 border border-line-soft">
-                                        <label className="block text-2xs font-semibold text-ink-3 uppercase tracking-wider mb-2">Importar desde texto</label>
+                                        <label className="block text-2xs font-semibold text-ink-3 uppercase tracking-[0.05em] mb-2">Importar desde texto</label>
                                         <textarea
                                             value={pasteText}
                                             onChange={e => setPasteText(e.target.value)}
@@ -140,8 +140,8 @@ export const PlannerModal = ({
                                             className="w-full bg-surface border border-line rounded-lg p-3 text-sm text-body resize-y min-h-[80px] outline-none focus:border-line-strong-2 mb-3 placeholder:text-faint"
                                         />
                                         <div className="flex justify-end gap-2">
-                                            <button onClick={() => setIsPastingString(false)} className="px-3 py-1.5 rounded-full text-[11px] font-medium text-ink-3 hover:bg-surface-2 transition-all">Cancelar</button>
-                                            <button onClick={handleMagicPaste} disabled={!pasteText.trim()} className="px-4 py-1.5 rounded-full text-[11px] font-semibold bg-slate-900 dark:bg-white text-ink-inverse hover:bg-slate-700 disabled:opacity-50 transition-all shadow-sm">
+                                            <button onClick={() => setIsPastingString(false)} className="px-3 py-1.5 rounded-full text-[12px] font-medium text-ink-3 hover:bg-surface-2 transition-paint">Cancelar</button>
+                                            <button onClick={handleMagicPaste} disabled={!pasteText.trim()} className="px-4 py-1.5 rounded-full text-[12px] font-semibold bg-slate-900 dark:bg-white text-ink-inverse hover:bg-slate-700 disabled:opacity-50 transition-paint shadow-sm">
                                                 Analizar e Insertar
                                             </button>
                                         </div>
@@ -232,9 +232,9 @@ export const PlannerModal = ({
                                                     onDragOver={(e) => handleDragBlockOver(e, idx)}
                                                     onDrop={(e) => handleDropBlock(e, idx)}
                                                     onDragEnd={handleDragBlockEnd}
-                                                    className={`rounded-xl bg-surface-6 overflow-hidden cursor-move transition-all border border-line-soft ${draggedBlockIdx === idx ? 'opacity-50' : 'hover:border-line-2'}`}>
+                                                    className={`rounded-xl bg-surface-6 overflow-hidden cursor-move transition-paint border border-line-soft ${draggedBlockIdx === idx ? 'opacity-50' : 'hover:border-line-2'}`}>
                                                     <div className="flex items-center gap-2 px-3 py-2 bg-slate-50/50 dark:bg-zinc-900/50 border-b border-line-soft">
-                                                        <span className="text-[11px] font-semibold text-body-soft">Repetir</span>
+                                                        <span className="text-[12px] font-semibold text-body-soft">Repetir</span>
                                                         <input type="number" value={block.repeats} min={1} onChange={e => updateBlock(block.id, 'repeats', parseInt(e.target.value) || 1)}
                                                             className="w-9 bg-surface-7 rounded-lg text-[13px] font-mono px-1.5 py-0.5 outline-none no-spinner text-center text-body" />
                                                         <span className="text-2xs font-medium text-ink-4">veces</span>
@@ -253,7 +253,7 @@ export const PlannerModal = ({
                                                             {(block.steps || []).map((step, sIdx) => (
                                                                  <div key={step.id} className="flex flex-wrap items-center gap-2 relative">
                                                                     <select value={step.type} onChange={e => updateStep(block.id, step.id, 'type', e.target.value)}
-                                                                        className={`w-20 shrink-0 bg-transparent ${step.type === 'active' ? 'text-ink-2-soft font-semibold' : 'text-ink-4'} text-[11px] outline-none cursor-pointer`}>
+                                                                        className={`w-20 shrink-0 bg-transparent ${step.type === 'active' ? 'text-ink-2-soft font-semibold' : 'text-ink-4'} text-[12px] outline-none cursor-pointer`}>
                                                                         <option value="active">{isStr ? 'Trabajar' : 'Activo'}</option>
                                                                         <option value="recovery">Pausa</option>
                                                                     </select>
@@ -283,7 +283,7 @@ export const PlannerModal = ({
 
                                                                     {/* Target value display */}
                                                                     {currentZoneMode === 'power' && step.targetValue && (
-                                                                        <span className="text-[11px] font-mono font-semibold text-power-ink bg-power-tint-3 px-2 py-0.5 rounded-full">
+                                                                        <span className="text-[12px] font-mono font-semibold text-power-ink bg-power-tint-3 px-2 py-0.5 rounded-full">
                                                                             {step.targetValue}w
                                                                         </span>
                                                                     )}
@@ -308,14 +308,14 @@ export const PlannerModal = ({
 
                                                                     <input type="text" value={step.details || ''} onChange={e => updateStep(block.id, step.id, 'details', e.target.value)}
                                                                         placeholder="Nota"
-                                                                        className="flex-1 min-w-[60px] bg-transparent border-b border-dashed border-slate-200 dark:border-zinc-800 py-1 text-[11px] outline-none focus:border-slate-400 placeholder:text-faint" />
+                                                                        className="flex-1 min-w-[60px] bg-transparent border-b border-dashed border-slate-200 dark:border-zinc-800 py-1 text-[12px] outline-none focus:border-slate-400 placeholder:text-faint" />
                                                                     
                                                                     <Button variant="danger-text" onClick={() => removeStep(block.id, step.id)} className="ml-1 shrink-0"><X size={13}/></Button>
                                                                 </div>
                                                             ))}
                                                             
                                                             <div className="flex gap-2 pt-2 border-t border-line-soft mt-1">
-                                                                <button onClick={() => addStepToRepeat(block.id, 'pair')} className="text-[11px] text-slate-500 hover:text-slate-800 dark:hover:text-zinc-300 font-medium transition-colors">+ Par Trabajo/Descanso</button>
+                                                                <button onClick={() => addStepToRepeat(block.id, 'pair')} className="text-[12px] text-slate-500 hover:text-slate-800 dark:hover:text-zinc-300 font-medium transition-colors">+ Par Trabajo/Descanso</button>
                                                                 <span className="text-slate-200 dark:text-zinc-700">|</span>
                                                                 <Button variant="link-muted" onClick={() => addStepToRepeat(block.id, 'active')}>+ Trabajo</Button>
                                                                 <Button variant="link-muted" onClick={() => addStepToRepeat(block.id, 'recovery')}>+ Descanso</Button>
@@ -337,11 +337,11 @@ export const PlannerModal = ({
                                                 onDragOver={(e) => handleDragBlockOver(e, idx)}
                                                 onDrop={(e) => handleDropBlock(e, idx)}
                                                 onDragEnd={handleDragBlockEnd}
-                                                className={`py-2.5 px-3 flex flex-wrap items-center gap-2.5 bg-surface-6 rounded-xl border border-line-soft cursor-move transition-all ${draggedBlockIdx === idx ? 'opacity-50' : 'hover:border-line-2'}`}>
+                                                className={`py-2.5 px-3 flex flex-wrap items-center gap-2.5 bg-surface-6 rounded-xl border border-line-soft cursor-move transition-paint ${draggedBlockIdx === idx ? 'opacity-50' : 'hover:border-line-2'}`}>
 
                                                 <div className="flex-1 min-w-0 flex flex-wrap items-center gap-2">
                                                     <div className={`w-1 h-5 rounded-full shrink-0`} style={{ background: zoneColors[block.zone] || zoneColors.Z1 }}></div>
-                                                    <span className={`text-[11px] font-semibold w-14 shrink-0 ${bLabelStyle}`}>{bLabel}</span>
+                                                    <span className={`text-[12px] font-semibold w-14 shrink-0 ${bLabelStyle}`}>{bLabel}</span>
                                                     
                                                     {/* KM / MIN toggle */}
                                                     <Segmented variant="mini" className="shrink-0">
@@ -378,7 +378,7 @@ export const PlannerModal = ({
 
                                                     {/* Target value (auto for power, manual for pace) */}
                                                     {currentZoneMode === 'power' && block.targetValue && (
-                                                        <span className="text-[11px] font-mono font-semibold text-power-ink bg-power-tint-3 px-2 py-0.5 rounded-full">
+                                                        <span className="text-[12px] font-mono font-semibold text-power-ink bg-power-tint-3 px-2 py-0.5 rounded-full">
                                                             {block.targetValue}w
                                                             {ftp > 0 && <span className="text-2xs text-power-soft ml-1">{Math.round((Number(block.targetValue) / ftp) * 100)}%</span>}
                                                         </span>
@@ -404,7 +404,7 @@ export const PlannerModal = ({
 
                                                     <input type="text" value={block.details || ''} onChange={e => updateBlock(block.id, 'details', e.target.value)}
                                                         placeholder="Nota"
-                                                        className="flex-1 min-w-[80px] bg-transparent border-b border-dashed border-line py-1 text-[11px] outline-none focus:border-line-strong-2 placeholder:text-faint" />
+                                                        className="flex-1 min-w-[80px] bg-transparent border-b border-dashed border-line py-1 text-[12px] outline-none focus:border-line-strong-2 placeholder:text-faint" />
                                                 </div>
 
                                                 <Button variant="danger-text" onClick={() => removeBlock(block.id)} className="shrink-0"><X size={14} /></Button>
@@ -419,8 +419,8 @@ export const PlannerModal = ({
 
                     {/* FOOTER */}
                     <div className="px-6 py-3.5 border-t border-line-soft flex justify-end items-center gap-2 shrink-0">
-                        <button onClick={() => setIsModalOpen(false)} className="px-4 py-2 rounded-full text-xs font-medium text-ink-3 hover:bg-surface-2 transition-all">Cancelar</button>
-                        <button onClick={handleSavePlan} data-cal="modal-submit" disabled={isSaving} className="px-5 py-2 rounded-full text-xs font-semibold text-ink-inverse bg-inverse hover:bg-inverse-2 disabled:opacity-50 transition-all shadow-sm">
+                        <button onClick={() => setIsModalOpen(false)} className="px-4 py-2 rounded-full text-xs font-medium text-ink-3 hover:bg-surface-2 transition-paint">Cancelar</button>
+                        <button onClick={handleSavePlan} data-cal="modal-submit" disabled={isSaving} className="min-h-[44px] px-5 py-2 rounded-xl text-xs font-semibold text-ink-inverse bg-inverse hover:bg-inverse-2 disabled:opacity-50 transition-paint shadow-sm">
                             {isSaving ? 'Guardando...' : editingPlanId ? 'Guardar' : 'Añadir'}
                         </button>
                     </div>

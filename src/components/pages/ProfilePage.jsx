@@ -316,24 +316,24 @@ export const ProfilePage = ({
             data-active={activeSection === id}
             aria-current={activeSection === id ? 'page' : undefined}
             onClick={() => handleSectionChange(id)}
-            className={`flex items-center gap-2.5 px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-xl transition-all text-left whitespace-nowrap select-none touch-manipulation active:scale-95 ${activeSection === id
-                ? 'bg-action-solid text-white shadow-xs font-bold'
+            className={`flex items-center gap-2.5 px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-xl md:relative md:min-h-[44px] md:rounded-lg md:shadow-none transition-paint text-left whitespace-nowrap select-none touch-manipulation active:scale-press ${activeSection === id
+                ? "bg-action-solid text-white shadow-xs font-bold md:bg-sunken md:text-ink md:before:content-[''] md:before:absolute md:before:left-0 md:before:top-2.5 md:before:bottom-2.5 md:before:w-[3px] md:before:rounded-[2px] md:before:bg-action"
                 : 'text-body hover:bg-fill-5 font-medium'
                 }`}
         >
-            <IconComponent size={17} className={activeSection === id ? 'text-white' : 'text-ink-4'} />
-            <span className="text-xs sm:text-sm">{label}</span>
+            <IconComponent size={17} className={activeSection === id ? 'text-white md:text-action' : 'text-ink-4'} />
+            <span className="text-xs sm:leading-5 md:text-[14px]">{label}</span>
         </button>
     );
 
     return (
-        <div data-skin="profile" data-profile="root" className="animate-in fade-in duration-300 pb-16 max-w-5xl mx-auto px-3.5 sm:px-6">
+        <div data-profile="root" className="animate-in fade-in duration-300 pb-16 max-w-6xl mx-auto px-3.5 sm:px-6">
             {/* APPLE NAVIGATION HEADER */}
-            <div data-profile="header" className="flex items-center justify-between mb-4 sm:mb-8 border-b border-black/[0.05] dark:border-white/[0.06] pb-3 sm:pb-4">
+            <div data-profile="header" className="flex items-center justify-between mb-4 sm:mb-8 border-b border-line pb-3 sm:pb-4">
                 <div className="flex items-center gap-2 sm:gap-4">
                     <button 
                         onClick={onBack} 
-                        className="flex items-center gap-1 text-action-ios text-sm font-semibold hover:opacity-80 active:opacity-50 transition-opacity -ml-1 select-none touch-manipulation"
+                        className="flex items-center gap-1 max-sm:min-w-[44px] max-sm:min-h-[44px] max-sm:justify-center text-action-ios text-sm font-semibold hover:opacity-80 active:opacity-50 transition-opacity -ml-1 select-none touch-manipulation"
                         aria-label="Volver"
                     >
                         <ArrowLeft size={18} strokeWidth={2.5} />
@@ -341,11 +341,11 @@ export const ProfilePage = ({
                     </button>
                     <div className="ml-1 min-w-0">
                         <h1 data-profile="title" className="text-lg sm:text-2xl font-semibold text-ink tracking-tight leading-tight">Ajustes</h1>
-                        <p data-profile="subtitle" className="text-[11px] sm:text-xs text-ink-3 truncate">{SECTION_NAMES[activeSection] || 'Ajustes'}</p>
+                        <p data-profile="subtitle" className="text-[12px] sm:leading-4 text-ink-3 truncate !text-balance">{SECTION_NAMES[activeSection] || 'Ajustes'}</p>
                     </div>
                 </div>
                 <div className="flex items-center gap-3">
-                <span data-profile="dirty" role="status" aria-live="polite" className="hidden sm:inline-flex items-center gap-1.5 text-[11px] font-medium text-ink-3">
+                <span data-profile="dirty" role="status" aria-live="polite" className="hidden sm:inline-flex items-center gap-1.5 text-[12px] font-medium text-ink-3">
                     {isDirty && (<><span aria-hidden="true" className="w-1.5 h-1.5 rounded-full bg-action-ios-solid" />Cambios sin guardar</>)}
                 </span>
                 <button 
@@ -356,7 +356,7 @@ export const ProfilePage = ({
                   }} 
                   data-profile="save"
                   data-dirty={String(isDirty)}
-                  className="flex items-center gap-1.5 bg-action-ios-solid hover:bg-action-solid text-white px-4 sm:px-5 py-1.5 sm:py-2 rounded-full text-xs font-semibold tracking-wide transition-all shadow-xs active:scale-95 select-none touch-manipulation"
+                  className="flex items-center gap-1.5 min-h-[44px] bg-action-ios-solid hover:bg-action-solid text-white px-4 py-1.5 sm:py-2 rounded-lg text-xs font-semibold tracking-wide transition-paint shadow-none active:scale-press select-none touch-manipulation data-[dirty=false]:!bg-sunken data-[dirty=false]:!text-ink-3 data-[dirty=false]:shadow-inset-line"
                 >
                     <Save size={14} strokeWidth={2.5} /> <span>Guardar</span>
                 </button>
@@ -366,9 +366,9 @@ export const ProfilePage = ({
             {/* Móvil: selector de sección en la página (antes solo estaba en el menú de la cabecera) */}
             <Segmented
                 data-profile="section-tabs"
+                variant="rail"
                 aria-label="Secciones de Ajustes"
                 className="md:hidden mb-4 overflow-x-auto"
-                optionClassName="min-h-9"
                 options={SECTION_TABS}
                 value={activeSection}
                 onChange={handleSectionChange}
@@ -376,7 +376,7 @@ export const ProfilePage = ({
 
             <div className="flex flex-col md:flex-row gap-6 md:gap-8">
                 {/* DESKTOP SIDEBAR */}
-                <div data-profile="nav" className="hidden md:flex w-56 flex-shrink-0 flex-col gap-1">
+                <div data-profile="nav" className="hidden md:flex md:sticky md:top-[calc(var(--nav-h)+16px)] md:self-start w-56 flex-shrink-0 flex-col gap-1">
                     {renderMenuButton('general', 'General', Activity)}
                     {renderMenuButton('zones', 'Zonas y Umbrales', Heart)}
                     {renderMenuButton('integrations', 'Integraciones', Link2)}
@@ -384,7 +384,7 @@ export const ProfilePage = ({
                 </div>
 
                 {/* CONTENT AREA */}
-                <div data-profile="content" className="flex-1 min-w-0">
+                <div data-profile="content" className="flex-1 min-w-0 max-w-[720px]">
                     {activeSection === 'general' && (
                         <GeneralSection formData={formData} isUploadingAvatar={isUploadingAvatar} handleAvatarUpload={handleAvatarUpload} handleChange={handleChange} targetCtl={targetCtl} setTargetCtl={setTargetCtl} />
                     )}

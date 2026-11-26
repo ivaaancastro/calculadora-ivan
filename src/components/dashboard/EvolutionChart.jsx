@@ -20,7 +20,7 @@ const CustomTooltip = ({ active, payload, label }) => {
 
     return (
       <ChartTooltip variant="glass">
-        <p className="text-2xs font-medium uppercase tracking-widest text-ink-4 mb-1.5 flex justify-between items-center capitalize">
+        <p className="text-2xs font-medium uppercase tracking-[0.08em] text-ink-4 mb-1.5 flex justify-between items-center capitalize">
           {title}
           {diffDays > 0 && <span className="bg-surface-2 text-slate-500 px-1 py-0.5 rounded text-2xs ml-2 font-mono font-normal">+{diffDays}d</span>}
         </p>
@@ -41,7 +41,7 @@ const CustomTooltip = ({ active, payload, label }) => {
             return (
               <div key={index} className="flex items-center justify-between gap-3">
                 <span className="text-2xs font-medium text-ink-3">{labels[entry.dataKey]}</span>
-                <span className={`text-[11px] font-mono font-bold ${colors[entry.dataKey] || 'text-slate-700'}`}>{formatNumber(entry.value, 1)}</span>
+                <span className={`text-[12px] font-mono font-bold ${colors[entry.dataKey] || 'text-slate-700'}`}>{formatNumber(entry.value, 1)}</span>
               </div>
             );
           })}
@@ -83,7 +83,7 @@ export const EvolutionChart = ({ data, timeRange, setTimeRange, loading = false 
       <div className="bg-transparent rounded-xl border border-dashed border-line p-8 h-full w-full flex items-center justify-center text-center">
         <div>
            <Activity size={16} className="mx-auto text-slate-300 mb-2" />
-           <p className="text-2xs text-ink-4-dim uppercase tracking-widest font-medium">Sin Datos</p>
+           <p className="text-2xs text-ink-4-dim uppercase tracking-[0.08em] font-medium">Sin Datos</p>
         </div>
       </div>
     );
@@ -110,7 +110,7 @@ export const EvolutionChart = ({ data, timeRange, setTimeRange, loading = false 
               key={t.id}
               data-dash="range-btn"
               onClick={() => setTimeRange(t.id)}
-              className={`flex-1 px-3 py-1 min-h-[30px] text-xs font-semibold transition-all rounded-full select-none touch-manipulation active:scale-95 ${
+              className={`flex-1 px-3 py-1 min-h-[30px] max-sm:min-h-[44px] text-xs font-semibold transition-paint rounded-full select-none touch-manipulation active:scale-press ${
                 timeRange === t.id
                   ? "bg-surface-4 text-ink shadow-xs font-bold"
                   : "text-ink-3"
@@ -125,7 +125,7 @@ export const EvolutionChart = ({ data, timeRange, setTimeRange, loading = false 
       {/* Dynamic HUD Header (Legibilidad óptima en móvil sin tapar con los dedos) */}
       <div className="flex flex-wrap items-center justify-between gap-2 p-2 sm:p-2.5 rounded-xl bg-slate-100/70 dark:bg-zinc-800/50 border border-slate-200/50 dark:border-zinc-700/40 mb-3">
         <div className="flex items-center gap-2">
-          <span className="text-[11px] font-bold text-body capitalize">
+          <span className="text-[12px] font-bold text-body capitalize">
             {activePoint ? toLocalDate(activePoint.date).toLocaleDateString('es-ES', { weekday: 'short', day: 'numeric', month: 'short' }) : 'Hoy'}
           </span>
           {hoverPoint ? (
@@ -171,15 +171,15 @@ export const EvolutionChart = ({ data, timeRange, setTimeRange, loading = false 
         <div className="flex gap-3 sm:gap-5">
           <div className="flex items-center gap-1.5">
             <div className="w-2 h-2 rounded-full bg-metric-ctl"></div>
-            <span className="text-2xs font-semibold text-ink-3 uppercase tracking-wider">Fitness</span>
+            <span className="text-2xs font-semibold text-ink-3 uppercase tracking-[0.05em]">Fitness</span>
           </div>
           <div className="flex items-center gap-1.5">
             <div className="w-2 h-2 rounded-full bg-metric-atl"></div>
-            <span className="text-2xs font-semibold text-ink-3 uppercase tracking-wider">Fatiga</span>
+            <span className="text-2xs font-semibold text-ink-3 uppercase tracking-[0.05em]">Fatiga</span>
           </div>
           <div className="flex items-center gap-1.5">
             <div className="w-2 h-2 rounded-full bg-metric-tsb"></div>
-            <span className="text-2xs font-semibold text-ink-3 uppercase tracking-wider">Forma</span>
+            <span className="text-2xs font-semibold text-ink-3 uppercase tracking-[0.05em]">Forma</span>
           </div>
         </div>
       </div>

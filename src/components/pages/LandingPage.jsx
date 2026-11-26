@@ -16,7 +16,7 @@ export const LandingPage = () => {
   }, []);
 
   return (
-    <div data-skin="landing" className="min-h-screen bg-surface-6 text-ink-2-soft overflow-x-hidden selection:bg-action-bright/30">
+    <div className="tabular-nums min-h-screen bg-surface-6 text-ink-2-soft overflow-x-hidden selection:bg-action-bright/30">
 
       <a
         href="#main"

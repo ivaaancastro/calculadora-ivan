@@ -25,14 +25,14 @@ export const Hero = ({ onOpenAuth, onFeatures }) => (
         <div className="mt-8 flex flex-col gap-3 sm:flex-row">
           <button
             onClick={onOpenAuth}
-            className="group inline-flex min-h-[48px] items-center justify-center gap-2 rounded-xl bg-action-solid px-6 text-sm font-bold text-on-action transition-colors hover:bg-action-hover active:scale-[0.98]"
+            className="group inline-flex min-h-[48px] items-center justify-center gap-2 rounded-xl bg-action-solid px-6 text-sm font-bold text-on-action transition-colors hover:bg-action-hover active:scale-press"
           >
             Empezar
             <ArrowRight size={16} className="transition-transform group-hover:translate-x-0.5" />
           </button>
           <button
             onClick={onFeatures}
-            className="inline-flex min-h-[48px] items-center justify-center rounded-xl border border-line px-6 text-sm font-semibold text-body-soft transition-colors hover:border-line-strong-2 hover:text-ink active:scale-[0.98]"
+            className="inline-flex min-h-[48px] items-center justify-center rounded-xl border border-line px-6 text-sm font-semibold text-body-soft transition-colors hover:border-line-strong-2 hover:text-ink active:scale-press"
           >
             Ver funciones
           </button>

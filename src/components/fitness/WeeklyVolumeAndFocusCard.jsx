@@ -68,14 +68,14 @@ export const WeeklyVolumeAndFocusCard = ({
                                         <span className="text-body">{focus.value}%</span>
                                     </div>
                                     <div className="h-1.5 w-full bg-surface-2 rounded-full overflow-hidden">
-                                        <div className="h-full rounded-full transition-all duration-500" style={{ width: `${focus.value}%`, backgroundColor: focus.color }} />
+                                        <div className="h-full rounded-full transition-paint duration-500" style={{ width: `${focus.value}%`, backgroundColor: focus.color }} />
                                     </div>
                                 </div>
                             ))}
                         </div>
 
                         <div className="pt-4 border-t border-line-soft-2">
-                            <span className="text-2xs font-bold uppercase tracking-widest text-slate-400 block mb-3">Desglose por Zona</span>
+                            <span className="text-2xs font-bold uppercase tracking-[0.08em] text-slate-400 block mb-3">Desglose por Zona</span>
                             <div className="grid grid-cols-2 gap-x-4 gap-y-2">
                                 {zonesChart.filter(z => z.hours > 0).map((z, i) => (
                                     <div key={i} className="flex justify-between items-center text-2xs font-medium">

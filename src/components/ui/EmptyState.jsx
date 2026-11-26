@@ -2,9 +2,9 @@
 import { cx } from './cx.js';
 import { stateClass } from './stateClasses.js';
 
-export function EmptyState({ icon: Icon, title, description, children, className, ...rest }) {
+export function EmptyState({ icon: Icon, title, description, surface = false, children, className, ...rest }) {
   return (
-    <div className={cx(stateClass.root, className)} {...rest}>
+    <div className={cx(stateClass.root, surface && 'bg-surface', className)} {...rest}>
       {Icon && (
         <span className={stateClass.chip}>
           <Icon size={22} strokeWidth={1.75} aria-hidden="true" />

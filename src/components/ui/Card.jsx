@@ -2,9 +2,9 @@
 import { cx } from './cx.js';
 import { cardClass, SECTION_HEADER } from './cardClasses.js';
 
-export function Card({ as: Tag = 'div', variant = 'grouped', pressable = false, divided = false, className, children, ...rest }) {
+export function Card({ as: Tag = 'div', variant = 'grouped', pressable = false, divided = false, figures, className, children, ...rest }) {
   return (
-    <Tag className={cx(cardClass({ variant, pressable, divided }), className)} {...rest}>
+    <Tag className={cx(cardClass({ variant, pressable, divided, figures }), className)} {...rest}>
       {children}
     </Tag>
   );

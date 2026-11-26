@@ -6,11 +6,11 @@ import React from 'react';
  */
 const Frame = ({ label, children }) => (
   <figure
-    className="w-full rounded-2xl border border-line bg-surface-card p-4 shadow-sm sm:p-5 dark:shadow-none"
+    className="w-full rounded-2xl border border-line bg-surface-card p-4 shadow-sm sm:p-5"
     aria-label={label}
   >
     {children}
-    <figcaption className="mt-3 text-[11px] font-medium text-ink-4">Datos de ejemplo</figcaption>
+    <figcaption className="mt-3 text-[12px] font-medium text-ink-4">Datos de ejemplo</figcaption>
   </figure>
 );
 
@@ -26,14 +26,14 @@ export const ZonesPreview = () => (
     <div className="grid grid-cols-3 gap-2">
       {[['NP', '218 W'], ['IF', '0,84'], ['TSS', '96']].map(([k, v]) => (
         <div key={k} className="rounded-xl border border-line-soft bg-sunken p-2.5">
-          <div className="text-[11px] font-semibold uppercase tracking-wider text-ink-3">{k}</div>
+          <div className="text-[12px] font-semibold uppercase tracking-[0.05em] text-ink-3">{k}</div>
           <div className="mt-1 text-xl font-bold tabular-nums text-ink">{v}</div>
         </div>
       ))}
     </div>
     <ul className="mt-4 space-y-1.5" aria-label="Minutos por zona de FC">
       {ZONES.map(({ z, min }) => (
-        <li key={z} className="flex items-center gap-2 text-[11px] font-semibold text-ink-3">
+        <li key={z} className="flex items-center gap-2 text-[12px] font-semibold text-ink-3">
           <span className="w-6">{z}</span>
           <span className="h-3 flex-1 rounded-sm bg-sunken">
             <span className="block h-3 rounded-sm bg-action" style={{ width: `${(min / ZMAX) * 100}%` }} />
@@ -56,7 +56,7 @@ const DAYS = ['L', 'M', 'X', 'J', 'V', 'S', 'D'];
 
 export const CalendarPreview = () => (
   <Frame label="Vista de ejemplo del calendario con la carga diaria">
-    <div className="grid grid-cols-7 gap-1.5 text-center text-[11px] font-semibold text-ink-3">
+    <div className="grid grid-cols-7 gap-1.5 text-center text-[12px] font-semibold text-ink-3">
       {DAYS.map((d) => <span key={d}>{d}</span>)}
       {LOAD.map((l, i) => (
         <span
@@ -67,7 +67,7 @@ export const CalendarPreview = () => (
         </span>
       ))}
     </div>
-    <p className="mt-3 flex items-center gap-2 text-[11px] font-medium text-ink-3">
+    <p className="mt-3 flex items-center gap-2 text-[12px] font-medium text-ink-3">
       <span className="flex gap-1" aria-hidden="true">
         {TINT.map((t) => <span key={t} className={`h-3 w-3 rounded-sm border border-line-soft ${t}`} />)}
       </span>
@@ -106,7 +106,7 @@ export const HealthPreview = () => (
     <div className="grid grid-cols-3 gap-2">
       {[['Sueño', '7 h 40'], ['VFC', '63 ms'], ['FC reposo', '48']].map(([k, v]) => (
         <div key={k} className="rounded-xl border border-line-soft bg-sunken p-2.5">
-          <div className="truncate text-[11px] font-semibold uppercase tracking-wider text-ink-3">{k}</div>
+          <div className="truncate text-[12px] font-semibold uppercase tracking-[0.05em] text-ink-3">{k}</div>
           <div className="mt-1 text-xl font-bold tabular-nums text-ink">{v}</div>
         </div>
       ))}

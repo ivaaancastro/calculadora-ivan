@@ -18,17 +18,17 @@ describe('ui/Field recetas', () => {
 
   it('search copia el buscador y los selectores del historial', () => {
     expect(classes(inputClass({ variant: 'search' }))).toEqual(
-      classes('bg-fill-6 border-0 rounded-xl text-sm font-medium text-ink-soft placeholder-ink-4-fixed focus:outline-none focus:ring-2 focus:ring-action-bright/40 transition-all'),
+      classes('bg-fill-6 border-0 rounded-xl text-sm font-medium text-ink-soft placeholder-ink-4-fixed focus:outline-none focus:ring-2 focus:ring-action-bright/40 transition-paint'),
     );
     expect(classes(selectClass({ variant: 'search' }))).toEqual(
-      classes('bg-fill-6 border-0 rounded-xl text-xs sm:text-sm font-semibold text-ink-2-soft focus:outline-none focus:ring-2 focus:ring-action-bright/40 appearance-none cursor-pointer transition-all'),
+      classes('bg-fill-6 border-0 rounded-xl text-xs sm:leading-5 font-semibold text-ink-2-soft focus:outline-none focus:ring-2 focus:ring-action-bright/40 appearance-none cursor-pointer transition-paint'),
     );
   });
 
   it('cell y cell-bare copian los campos de los bloques del Calendario', () => {
     expect(classes(inputClass({ variant: 'cell', mono: true }))).toEqual(classes('bg-sunken text-[13px] font-mono rounded-lg outline-none no-spinner text-body focus-visible:ring-2 focus-visible:ring-action-bright'));
-    expect(classes(inputClass({ variant: 'cell', size: 'sm' }))).toEqual(classes('bg-sunken rounded-lg text-[11px] outline-none no-spinner text-body focus-visible:ring-2 focus-visible:ring-action-bright'));
-    expect(classes(selectClass({ variant: 'cell' }))).toEqual(classes('bg-sunken text-[11px] font-medium text-body rounded-lg outline-none cursor-pointer focus-visible:ring-2 focus-visible:ring-action-bright'));
+    expect(classes(inputClass({ variant: 'cell', size: 'sm' }))).toEqual(classes('bg-sunken rounded-lg text-[12px] outline-none no-spinner text-body focus-visible:ring-2 focus-visible:ring-action-bright'));
+    expect(classes(selectClass({ variant: 'cell' }))).toEqual(classes('bg-sunken text-[12px] font-medium text-body rounded-lg outline-none cursor-pointer focus-visible:ring-2 focus-visible:ring-action-bright'));
     expect(classes(selectClass({ variant: 'cell-bare' }))).toEqual(classes('bg-transparent text-2xs text-ink-4 rounded outline-none cursor-pointer focus-visible:ring-2 focus-visible:ring-action-bright'));
   });
 
@@ -45,7 +45,7 @@ describe('ui/Field recetas', () => {
 
   it('inline copia los valores de Ajustes y elige el anillo con ringTone', () => {
     expect(classes(inputClass({ variant: 'inline', mono: true, ringTone: 'hr' }))).toEqual(
-      classes('font-mono font-bold text-xs sm:text-sm text-ink bg-fill-3 rounded-lg outline-none focus:ring-1 focus:ring-hr'),
+      classes('font-mono font-bold text-xs sm:leading-5 text-ink bg-fill-3 rounded-lg outline-none focus:ring-1 focus:ring-hr'),
     );
     expect(inputClass({ variant: 'inline' })).toMatch(/focus:ring-action-bright$/);
     expect(classes(inputClass({ variant: 'inline', size: 'sm', mono: true }))).toEqual(

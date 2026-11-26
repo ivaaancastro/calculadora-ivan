@@ -23,6 +23,26 @@ const SPORT_ACCENT = {
     other: { accent: 'text-ink-3-flat', dot: 'bg-slate-400 dark:bg-zinc-600' },
 };
 
+/**
+ * Piel «Panel» del Calendario (Fase D5): tinte de carga por día (color de la serie TSS, 4 niveles;
+ * hoy conserva el fondo hundido) y ficha de sesión plana cuyo borde y fondo dicen su estado.
+ * En escritorio, planificadas y omitidas llevan además su etiqueta abajo a la derecha.
+ */
+const LOAD_TINT = {
+    1: '!bg-[rgb(var(--chart-tss)/0.05)]',
+    2: '!bg-[rgb(var(--chart-tss)/0.09)]',
+    3: '!bg-[rgb(var(--chart-tss)/0.14)]',
+    4: '!bg-[rgb(var(--chart-tss)/0.2)]',
+};
+const ACT_BASE = '!rounded-lg ![box-shadow:none] hover:![box-shadow:var(--shadow-card)] hover:!transform-none max-lg:!min-h-[60px] max-lg:!py-2.5 max-lg:!px-3 lg:[&_span]:!text-[11px]';
+const ACT_LABEL = 'lg:!pb-6 lg:after:absolute lg:after:right-2.5 lg:after:bottom-1.5 lg:after:text-[11px] lg:after:font-semibold lg:after:tracking-[0.02em]';
+const ACT_STATE = {
+    planned: `!bg-sunken !border-dashed !border-action/55 ${ACT_LABEL} lg:after:content-['Plan'] lg:after:text-action`,
+    omitted: `!bg-form-overload/[0.07] !border-dashed !border-form-overload/55 ${ACT_LABEL} lg:after:content-['Omitida'] lg:after:text-form-overload`,
+    fulfilled: '!bg-surface !border-form-peak/45',
+    done: '!bg-surface !border-line',
+};
+
 export const CalendarMonthView = ({
     activitiesByDate,
     calendarGrid,
@@ -41,10 +61,10 @@ export const CalendarMonthView = ({
                     <div className="w-full relative">
 
                         {/* CABECERA DÍAS DE LA SEMANA */}
-                        <div data-cal="weekdays" className="hidden lg:grid grid-cols-[130px_repeat(7,1fr)] bg-surface-9 backdrop-blur-md border-b border-line-soft-5 sticky top-0 z-20">
+                        <div data-cal="weekdays" className="hidden lg:grid grid-cols-[130px_repeat(7,1fr)] lg:grid-cols-[156px_repeat(7,minmax(0,1fr))] bg-surface-9 backdrop-blur-md border-b border-line-soft-5 sticky top-0 z-20">
                             <div className="py-2.5 border-r border-line-faint"></div>
                             {WEEKDAYS.map((day, i) => (
-                                <div key={day} className={`py-2 text-center text-2xs font-medium tracking-widest uppercase border-r border-line-faint last:border-r-0
+                                <div key={day} className={`py-2 text-center text-2xs font-medium tracking-[0.08em] uppercase border-r border-line-faint last:border-r-0
                                     ${i >= 5 ? 'text-slate-400/80 dark:text-zinc-600' : 'text-ink-3-flat'}`}>{day}</div>
                             ))}
                         </div>
@@ -68,22 +88,22 @@ export const CalendarMonthView = ({
 
 
                                 return (
-                                    <div key={weekKey} data-cal="week" className="grid grid-cols-1 lg:grid-cols-[130px_repeat(7,1fr)] border-b border-line-soft-5 last:border-b-0">
+                                    <div key={weekKey} data-cal="week" className="grid grid-cols-1 lg:grid-cols-[156px_repeat(7,minmax(0,1fr))] border-b border-line last:border-b-0">
 
                                         {/* Resumen semanal compacto: solo por debajo de 1024 px. */}
-                                        <div data-cal="week-chip" className="lg:hidden">
+                                        <div data-cal="week-chip" className="lg:hidden max-lg:flex max-lg:items-center max-lg:justify-between max-lg:gap-3 max-lg:sticky max-lg:top-[var(--nav-h)] max-lg:z-[5] max-lg:min-h-8 max-lg:px-3 max-lg:bg-sunken max-lg:border-b max-lg:border-line max-lg:text-[11px] max-lg:font-semibold max-lg:tracking-[0.02em] max-lg:text-ink-3 max-lg:tabular-nums">
                                             <span>S{weekNum}{isProjected ? ' · proy.' : ''}</span>
                                             <span>{progress.hasPlan ? `${progress.realized}/${progress.planned}` : progress.realized} TSS</span>
                                             <span>{formatMinutes(weekDuration, { compact: true })}</span>
                                         </div>
 
                                         {/* ====== PANEL SEMANAL IZQUIERDO ====== */}
-                                        <div data-cal="week-panel" className="hidden lg:flex flex-col border-r border-line-faint bg-transparent text-2xs relative overflow-hidden">
+                                        <div data-cal="week-panel" className="hidden lg:flex flex-col border-r border-line-faint bg-transparent text-2xs relative overflow-hidden lg:tabular-nums lg:[&_span]:!text-[11px] lg:[&_span]:![font-variant-numeric:tabular-nums] lg:[&_div]:!text-[11px] lg:[&_div]:![font-variant-numeric:tabular-nums]">
                                             {/* Header with week number */}
                                             <div className="px-3 py-2.5 flex items-center justify-between">
-                                                <span className="text-[11px] font-medium text-ink-4 flex items-center gap-1">
+                                                <span className="text-[12px] font-medium text-ink-4 flex items-center gap-1">
                                                     Semana {weekNum}
-                                                    {isProjected && <span className="text-2xs font-semibold text-blue-500 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/30 px-1 py-px rounded">PROY</span>}
+                                                    {isProjected && <span className="text-2xs font-semibold text-action-2 bg-blue-50 dark:bg-blue-900/30 px-1 py-px rounded">PROY</span>}
                                                 </span>
                                             </div>
 
@@ -93,20 +113,20 @@ export const CalendarMonthView = ({
                                                 <div className="flex items-center justify-between">
                                                     <div className="flex items-center gap-1.5">
                                                         <span className="text-2xs text-ink-3 w-9" title="Fitness (CTL)">Fitness</span>
-                                                        <span className="text-[11px] font-bold text-metric-ctl">{weekPmc.ctl != null ? Math.round(weekPmc.ctl) : '-'}</span>
+                                                        <span className="text-[12px] font-bold text-metric-ctl">{weekPmc.ctl != null ? Math.round(weekPmc.ctl) : '-'}</span>
                                                     </div>
-                                                    <span className="text-[11px] font-bold text-ink-2-soft">{formatMinutes(weekDuration, { compact: true })}</span>
+                                                    <span className="text-[12px] font-bold text-ink-2-soft">{formatMinutes(weekDuration, { compact: true })}</span>
                                                 </div>
 
                                                 {/* Row 2: Fatiga & Carga */}
                                                 <div className="flex items-center justify-between">
                                                     <div className="flex items-center gap-1.5">
                                                         <span className="text-2xs text-ink-3 w-9" title="Fatiga (ATL)">Fatiga</span>
-                                                        <span className="text-[11px] font-bold text-legacy-atl-purple-ink">{weekPmc.atl != null ? Math.round(weekPmc.atl) : '-'}</span>
+                                                        <span className="text-[12px] font-bold text-legacy-atl-purple-ink">{weekPmc.atl != null ? Math.round(weekPmc.atl) : '-'}</span>
                                                     </div>
                                                     <div className="flex items-center gap-1">
                                                         <span className="text-2xs text-ink-4">Carga</span>
-                                                        <span className="text-[11px] font-bold text-ink-2-soft">{Math.round(weekRealizedTSS)}</span>
+                                                        <span className="text-[12px] font-bold text-ink-2-soft">{Math.round(weekRealizedTSS)}</span>
                                                     </div>
                                                 </div>
 
@@ -115,11 +135,11 @@ export const CalendarMonthView = ({
                                                     <div className="flex items-center gap-1.5">
                                                         <span className="text-2xs text-ink-3 w-9" title="Forma (TSB)">Forma</span>
                                                         {weekPmc.tcb != null ? (
-                                                            <span className={`text-[11px] font-semibold ${weekPmc.tcb > 5 ? 'text-legacy-tsb-up' : weekPmc.tcb < -15 ? 'text-legacy-tsb-low' : 'text-body-soft-2'}`}>
+                                                            <span className={`text-[12px] font-semibold ${weekPmc.tcb > 5 ? 'text-legacy-tsb-up' : weekPmc.tcb < -15 ? 'text-legacy-tsb-low' : 'text-body-soft-2'}`}>
                                                                 {Math.round(weekPmc.tcb)}
                                                             </span>
                                                         ) : (
-                                                            <span className="text-[11px] font-medium text-slate-400">-</span>
+                                                            <span className="text-[12px] font-medium text-slate-400">-</span>
                                                         )}
                                                     </div>
                                                     {ramp != null && (
@@ -137,7 +157,7 @@ export const CalendarMonthView = ({
                                                     <div className="flex items-center justify-between pt-0.5 border-t border-line-faint">
                                                         <div className="flex items-center gap-1.5">
                                                             <span className="text-2xs text-ink-3 w-9">Dist.</span>
-                                                            <span className="text-[11px] font-bold text-body">{formatNumber(weekDist / 1000, 1)} km</span>
+                                                            <span className="text-[12px] font-bold text-body">{formatNumber(weekDist / 1000, 1)} km</span>
                                                         </div>
                                                     </div>
                                                 )}
@@ -155,7 +175,7 @@ export const CalendarMonthView = ({
                                                 </div>
                                                 {progress.hasPlan && (
                                                     <div className="w-full h-1.5 bg-fill-7 rounded-full overflow-hidden mt-0.5">
-                                                        <div className={`h-full rounded-full transition-all ${PLAN_BAR[progress.level]}`}
+                                                        <div className={`h-full rounded-full transition-paint ${PLAN_BAR[progress.level]}`}
                                                             style={{ width: `${progress.pct}%` }}></div>
                                                     </div>
                                                 )}
@@ -178,23 +198,23 @@ export const CalendarMonthView = ({
                                                     onDragOver={(e) => handleDragOver(e, dateKey)}
                                                     onDragLeave={handleDragLeave}
                                                     onDrop={(e) => handleDrop(e, day.date)}
-                                                    data-cal="day" data-today={isToday ? 'true' : undefined} data-load={loadLevels[dateKey]} className={`relative p-2 lg:p-2.5 border-r border-line-faint flex flex-col min-h-[72px] lg:h-[220px] overflow-y-auto custom-scrollbar transition-colors group/daycell
-                                                        ${isToday ? 'bg-blue-50/10 dark:bg-blue-900/5' : 'bg-transparent'}
+                                                    data-cal="day" data-today={isToday ? 'true' : undefined} data-load={loadLevels[dateKey]} className={`relative p-2 lg:p-2.5 border-r !border-line flex flex-col min-h-[72px] lg:h-[220px] max-lg:!min-h-[58px] max-lg:!py-1.5 max-lg:!px-3 overflow-y-auto custom-scrollbar transition-colors group/daycell
+                                                        ${isToday ? '!bg-sunken' : LOAD_TINT[loadLevels[dateKey]] ?? 'bg-transparent'}
                                                         ${dragOverDate === dateKey ? 'bg-blue-50 dark:bg-blue-900/20 ring-2 ring-action-light ring-inset rounded-lg z-10' : ''}
                                                         ${!day.isCurrentMonth ? 'opacity-40' : 'opacity-100'}
                                                     `}>
                                                     {/* Day number + add button */}
-                                                    <div className="flex justify-between items-start mb-2 shrink-0">
+                                                    <div className="flex justify-between items-start mb-2 max-lg:!mb-1 shrink-0">
                                                         <div className="flex items-center gap-1.5 -ml-1 -mt-1">
                                                             <span className={`text-[13px] font-semibold leading-none flex items-center justify-center
-                                                                ${isToday ? 'text-white bg-today w-7 h-7 rounded-full shadow-sm' : !day.isCurrentMonth ? 'text-faint' : 'text-ink-2-soft'}`}>
+                                                                ${isToday ? 'text-white bg-action w-7 h-7 rounded-full shadow-none' : !day.isCurrentMonth ? 'text-faint' : 'text-ink-2-soft'}`}>
                                                                 {day.date.getDate()}
                                                             </span>
-                                                            <span className="lg:hidden text-[11px] font-medium text-ink-4 uppercase tracking-wide">
+                                                            <span className="lg:hidden text-[12px] font-medium text-ink-4 uppercase tracking-wide">
                                                                 {WEEKDAYS[dIdx]}
                                                             </span>
                                                         </div>
-                                                        <button type="button" aria-label="Planificar sesión" onClick={(e) => handleOpenPlanModal(e, day.date)} data-cal="add" className="opacity-90 lg:opacity-0 group-hover/daycell:opacity-100 text-slate-400 hover:text-red-500 w-8 h-8 sm:w-7 sm:h-7 flex items-center justify-center rounded-full active:scale-90 transition-all touch-manipulation" title="Planificar sesión">
+                                                        <button type="button" aria-label="Planificar sesión" onClick={(e) => handleOpenPlanModal(e, day.date)} data-cal="add" className="opacity-90 lg:opacity-0 group-hover/daycell:opacity-100 text-slate-400 hover:text-red-500 w-11 h-11 -mt-2 -mr-2 flex items-center justify-center rounded-full active:scale-press transition-paint touch-manipulation" title="Planificar sesión">
                                                             <Plus size={14} />
                                                         </button>
                                                     </div>
@@ -297,10 +317,10 @@ export const CalendarMonthView = ({
                                                                             if (onSelectActivity) onSelectActivity(act);
                                                                         }
                                                                     }}
-                                                                    className={`rounded-xl cursor-pointer w-full shrink-0 relative flex flex-col p-2.5 mb-1 group/act transition-all duration-200 ease-out min-h-[70px] justify-center
+                                                                    className={`rounded-xl cursor-pointer w-full shrink-0 relative flex flex-col p-2.5 mb-1 group/act transition-paint duration-200 ease-out min-h-[70px] justify-center ${ACT_BASE} ${ACT_STATE[getSessionState(act, { fulfilled: isFulfilled, dateKey })]}
                                                                         ${act.isPlanned
-                                                                            ? `${sportColors.planned} shadow-sm border-dashed hover:shadow-md cursor-grab active:cursor-grabbing opacity-100 bg-white`
-                                                                            : `${sportColors.done} shadow-sm hover:shadow-md`
+                                                                            ? `${sportColors.planned} shadow-sm border-dashed cursor-grab active:cursor-grabbing opacity-100 bg-white`
+                                                                            : `${sportColors.done} shadow-sm`
                                                                         }
                                                                         hover:scale-[1.02] hover:z-10
                                                                     `}
@@ -309,11 +329,11 @@ export const CalendarMonthView = ({
                                                                         <>
                                                                             <div className="flex items-center gap-1.5 mb-1">
                                                                                 <span className={`shrink-0 ${sportColors.accent}`}><SportIcon type={act.type} size={13} /></span>
-                                                                                <span className="text-[11px] font-semibold tracking-tight leading-none text-body">{formatMinutes(act.duration, { compact: true })}</span>
+                                                                                <span className="text-[12px] font-semibold tracking-tight leading-none text-body">{formatMinutes(act.duration, { compact: true })}</span>
                                                                                 {act.tss > 0 && <span className="ml-auto text-2xs font-medium text-ink-4">{Math.round(act.tss)} TSS</span>}
                                                                             </div>
                                                                             <div className="flex flex-col gap-0.5">
-                                                                                <span className="text-[11px] font-medium leading-tight truncate text-body-soft">
+                                                                                <span className="text-[12px] font-medium leading-tight truncate text-body-soft">
                                                                                     {act.name || activityTypeLabel(act.type)}
                                                                                 </span>
                                                                                 {extraInfo.length > 0 && (
@@ -353,12 +373,12 @@ export const CalendarMonthView = ({
                                                                         <>
                                                                             <div className="flex items-center gap-1.5 mb-1">
                                                                                 <span className={`shrink-0 ${sportColors.accent}`}><SportIcon type={act.type} size={13} /></span>
-                                                                                <span className="text-[11px] font-semibold tracking-tight leading-none text-ink-2-soft">{formatMinutes(act.duration, { compact: true })}</span>
+                                                                                <span className="text-[12px] font-semibold tracking-tight leading-none text-ink-2-soft">{formatMinutes(act.duration, { compact: true })}</span>
                                                                                 {act.tss > 0 && <span className="ml-auto text-2xs font-bold text-ink-3">{Math.round(act.tss)} TSS</span>}
-                                                                                {isFulfilled && <span data-cal="check" className="ml-1 text-2xs font-bold text-emerald-500" title="Plan completado">✓</span>}
+                                                                                {isFulfilled && <span data-cal="check" className="ml-1 text-2xs font-bold text-form-peak bg-form-peak/[0.14] rounded-full px-1.5 py-px" title="Plan completado">✓</span>}
                                                                             </div>
                                                                             <div className="flex flex-col gap-0.5">
-                                                                                <span className="text-[11px] font-medium leading-tight truncate text-body">
+                                                                                <span className="text-[12px] font-medium leading-tight truncate text-body">
                                                                                     {act.name || activityTypeLabel(act.type)}
                                                                                 </span>
                                                                                 {extraInfo.length > 0 && (

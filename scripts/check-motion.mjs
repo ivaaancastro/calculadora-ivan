@@ -4,7 +4,7 @@
  *
  * Cuenta en src/ (sin tests) las apariciones de `transition-all` / `transition: all`. Falla si
  * superan la línea base de scripts/motion-baseline.json. `--update` baja la línea base (nunca la
- * sube). En v2 la piel ya limita las propiedades animadas (skin-v2.css); el objetivo es migrar
+ * sube). En v2 la piel ya limita las propiedades animadas (tema `transition-paint`); el objetivo es migrar
  * las clases a `transition-[…]` explícito y llegar a 0 al retirar v1.
  */
 import { readFileSync, writeFileSync, readdirSync, statSync } from 'node:fs';

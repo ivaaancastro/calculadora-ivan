@@ -5,7 +5,7 @@ import { Card } from '../ui';
 
 export const EmailConfirmedPage = () => {
   return (
-    <div data-skin="email" className="min-h-screen bg-surface-6 flex flex-col items-center justify-center p-4 sm:p-6 selection:bg-action-bright/30">
+    <div className="tabular-nums min-h-screen bg-surface-6 flex flex-col items-center justify-center p-4 sm:p-6 selection:bg-action-bright/30">
       <main id="main" className="w-full max-w-md">
         <Card variant="panel" className="p-6 sm:p-8 text-center">
           <div className="flex justify-center mb-6">

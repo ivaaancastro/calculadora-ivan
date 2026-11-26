@@ -149,7 +149,7 @@ export const AdvancedAnalytics = React.memo(({ activities, settings,  timeRange,
     };
 
     return (
-        <div data-skin="dashboard" data-dash="root" className="space-y-6 sm:space-y-8 pb-8">
+        <div data-dash="root" className="space-y-6 sm:space-y-8 pb-8 max-md:flex max-md:flex-col max-md:gap-3 max-md:pb-4 max-md:[&>*]:!m-0 lg:grid lg:grid-cols-12 lg:gap-x-6 lg:gap-y-8 lg:max-w-[1440px] lg:mx-auto lg:[&>*]:!m-0 lg:[&>*]:min-w-0">
             {/* HERO: ESTADO DE FORMA ESTILO APPLE FITNESS */}
             <FormHero
                 summary={buildFormSummary(model)}
@@ -160,39 +160,41 @@ export const AdvancedAnalytics = React.memo(({ activities, settings,  timeRange,
             />
 
             {/* SECCIÓN 1: MÉTRICAS CLAVE (APPLE HEALTH CARDS) */}
-            <div data-dash="primary">
+            <div data-dash="primary" className="max-md:order-2 max-md:[&>p]:mb-1.5 max-md:[&>div]:gap-2 lg:col-span-full">
                 <SectionHeader as="p">Fisiología y Carga</SectionHeader>
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4">
                     <KpiCard
+                        className="motion-safe:[animation-delay:0.18s]"
                         label="Fatiga (ATL)" icon={Battery} color={ct.series.atl}
                         value={Math.round(model.atl)} format={(n) => String(Math.round(n))}
                         delta={atlDelta} spark={atlSpark} sub="Carga últ. 7 días"
                     />
                     <KpiCard
+                        className="motion-safe:[animation-delay:0.24s]"
                         label="Forma (TSB)" icon={Zap} color={ct.series.tsb}
                         value={Math.round(model.tsb)} format={(n) => (Math.round(n) > 0 ? '+' : '') + Math.round(n)}
                         delta={tsbDelta} spark={tsbSpark} sub="Balance CTL / ATL"
                     />
                     <KpiCard
-                        className="col-span-2 md:col-span-1"
+                        className="col-span-2 md:col-span-1 motion-safe:[animation-delay:0.3s]"
                         label="Ratio Carga" icon={Target} color={ct.series.tsb}
                         value={model.acwr} format={(n) => formatNumber(n, 2)}
                         sub={`Aguda vs Crónica · óptimo 0,8–1,3`}
-                        chip={<span className={`text-2xs font-bold px-2 py-0.5 rounded-full border uppercase tracking-wider ${ACWR_CHIP[acwrInfo.tone]}`}>{acwrInfo.label}</span>}
+                        chip={<span className={`text-2xs font-bold px-2 py-0.5 rounded-full border uppercase tracking-[0.05em] ${ACWR_CHIP[acwrInfo.tone]}`}>{acwrInfo.label}</span>}
                     />
                 </div>
             </div>
 
             {/* SECCIÓN 2: MÉTRICAS SECUNDARIAS */}
-            <div data-dash="secondary">
-                <SectionHeader as="p" data-dash="secondary-title">Tendencia y Capacidad</SectionHeader>
+            <div data-dash="secondary" className="max-md:order-4 lg:col-[9/span_4] lg:row-start-3 lg:self-start lg:sticky lg:top-[calc(var(--nav-h-total)+16px)]">
+                <SectionHeader as="p" data-dash="secondary-title" className="max-md:hidden">Tendencia y Capacidad</SectionHeader>
                 <button
                     type="button"
                     data-dash="more-toggle"
                     aria-expanded={showMore}
                     aria-controls="dash-secondary-grid"
                     onClick={() => setShowMore((v) => !v)}
-                    className="md:hidden w-full min-h-[44px] px-4 flex items-center justify-between rounded-xl border border-line bg-surface text-xs font-semibold text-ink-3 touch-manipulation"
+                    className="md:hidden max-md:mb-2 w-full min-h-[44px] px-4 flex items-center justify-between rounded-lg border border-line bg-surface active:bg-sunken text-xs font-semibold text-ink-3 touch-manipulation"
                 >
                     <span>Tendencia y capacidad</span>
                     <span className="flex items-center gap-1.5 text-2xs font-medium text-ink-4">
@@ -200,15 +202,15 @@ export const AdvancedAnalytics = React.memo(({ activities, settings,  timeRange,
                         <ChevronDown size={14} className={showMore ? 'rotate-180' : ''} />
                     </span>
                 </button>
-                <div id="dash-secondary-grid" data-dash="secondary-grid" data-open={showMore ? 'true' : 'false'} className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-x-8">
+                <div id="dash-secondary-grid" data-dash="secondary-grid" data-open={showMore ? 'true' : 'false'} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-[minmax(0,1fr)] gap-x-8 max-md:data-[open=false]:hidden">
                     {[
                         { label: 'Rampa', value: `${model.rampRate > 0 ? '+' : ''}${formatNumber(model.rampRate, 1)}`, sub: 'pts/sem' },
                         { label: 'Monotonía', value: formatNumber(model.monotony, 2), sub: 'Índice carga' },
                         { label: 'Volumen 30D', value: `${Math.round(model.totalVolume / 60)}h`, sub: `${model.totalActivities} sesiones` },
                         { label: primaryVo2.source ? VO2_SOURCES[primaryVo2.source].label : 'VO₂max', value: primaryVo2.value ? formatNumber(primaryVo2.value, 1) : '--', sub: primaryVo2.source ? VO2_SOURCES[primaryVo2.source].source : '' }
                     ].map((kpi) => (
-                        <div key={kpi.label} data-dash="ledger-row" className="flex items-baseline justify-between gap-3 py-3 border-b border-hairline min-w-0">
-                            <span className="text-[11px] font-medium text-ink-4 truncate">{kpi.label}<span className="ml-1.5 text-ink-4/70">{kpi.sub}</span></span>
+                        <div key={kpi.label} data-dash="ledger-row" className="flex items-baseline justify-between gap-3 py-3 border-b border-hairline hover:border-line-strong min-w-0">
+                            <span className="text-[12px] font-medium text-ink-4 truncate">{kpi.label}<span className="ml-1.5 text-ink-4/70">{kpi.sub}</span></span>
                             <span className="text-[15px] font-semibold tabular-nums text-ink shrink-0">{kpi.value}</span>
                         </div>
                     ))}
@@ -216,10 +218,10 @@ export const AdvancedAnalytics = React.memo(({ activities, settings,  timeRange,
             </div>
 
             {/* SECCIÓN 3: GRÁFICA DE EVOLUCIÓN (PMC) */}
-            <div data-dash="chart">
+            <div data-dash="chart" className="max-md:order-3 lg:col-[1/span_8] lg:row-start-3">
                 <SectionHeader as="p">Evolución de Rendimiento</SectionHeader>
                 <Card className="p-3 sm:p-5">
-                    <div data-dash="chart-body" className="h-[290px] sm:h-[330px]">
+                    <div data-dash="chart-body" className="h-[290px] sm:h-[330px] lg:h-[380px]">
                         <EvolutionChart data={chartData} timeRange={timeRange} setTimeRange={setTimeRange} />
                     </div>
                 </Card>

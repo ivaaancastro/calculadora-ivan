@@ -17,21 +17,40 @@
 import { cx } from './cx.js';
 
 const SURFACE = {
-  grouped: 'bg-surface-card rounded-2xl sm:rounded-3xl border border-hairline-3 shadow-card dark:shadow-none',
+  grouped: 'bg-surface-card rounded-2xl sm:rounded-3xl border border-hairline-3 shadow-card',
   panel: 'bg-surface-5 rounded-2xl border border-line-muted shadow-sm',
+  /** Bloques del detalle (gráficas): radio 20 y filete del token. */
+  detail: 'bg-surface-card rounded-3xl border border-line shadow-card',
+  /** Zona de peligro de Ajustes: transparente, sin sombra y con borde rojo suave. */
+  danger: 'bg-transparent rounded-2xl sm:rounded-3xl border border-danger/20 shadow-none',
+  /** Pilares de Salud: en oscuro, degradado de la superficie al hundido. */
+  pillar: 'bg-surface-card rounded-2xl sm:rounded-3xl border border-hairline-3 shadow-card dark:bg-[linear-gradient(180deg,rgb(var(--surface)),rgb(var(--sunken)))]',
+  /** Biomarcadores de Salud; `attention` resalta el que pide atención. */
+  biomarker: 'bg-surface-card rounded-2xl sm:rounded-3xl border border-hairline-3 shadow-card',
+  'biomarker-attention': 'bg-surface-card rounded-2xl sm:rounded-3xl border border-warning/55 shadow-card bg-[linear-gradient(180deg,rgb(var(--warning)/0.07),transparent_60%)]',
 };
 
-const PRESSABLE = 'active:scale-[0.97] transition-transform duration-150 ease-out select-none touch-manipulation';
+/** Cifras tabulares con las variantes de Inter (`tnum`, `cv11` y, en los héroes, `ss03`). */
+const FIGURES = {
+  tnum: "[font-feature-settings:'tnum'_1,'cv11'_1]",
+  ss03: "[font-feature-settings:'tnum'_1,'cv11'_1,'ss03'_1]",
+};
 
-export function cardClass({ variant = 'grouped', pressable = false, divided = false } = {}) {
+/** Biomarcadores: se elevan 2 px al pasar el ratón (sin movimiento reducido). */
+const LIFT = 'motion-safe:[transition:transform_0.2s_ease,box-shadow_0.2s_ease] motion-safe:hover:-translate-y-0.5';
+
+const PRESSABLE = 'active:scale-press transition-transform duration-150 ease-out select-none touch-manipulation';
+
+export function cardClass({ variant = 'grouped', pressable = false, divided = false, figures } = {}) {
   if (!SURFACE[variant]) throw new Error(`Card: variante desconocida "${variant}"`);
-  if (variant === 'panel' && pressable) throw new Error('Card: `pressable` solo existe en la variante grouped');
+  if (variant !== 'grouped' && pressable) throw new Error('Card: `pressable` solo existe en la variante grouped');
   return cx(
     SURFACE[variant],
-    variant === 'grouped' && (pressable ? PRESSABLE : 'transition-all'),
+    variant.startsWith('biomarker') ? `transition-paint ${LIFT}` : variant !== 'panel' && (pressable ? PRESSABLE : 'transition-paint'),
+    figures && FIGURES[figures],
     divided && 'divide-y divide-hairline',
   );
 }
 
 /** Título de sección fuera de la tarjeta. `section-header` solo pinta en la piel v2. */
-export const SECTION_HEADER = 'section-header text-[12px] font-semibold text-ink-3 uppercase tracking-wider px-0.5 mb-2';
+export const SECTION_HEADER = 'section-header text-[12px] font-semibold text-ink-3 uppercase tracking-[0.05em] px-0.5 mb-2';

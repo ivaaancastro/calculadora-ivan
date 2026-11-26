@@ -13,7 +13,7 @@ export const DurationInput = ({ value, onChange, className = '' }) => {
         onChange((clampH * 3600 + clampM * 60 + clampS) / 60);
     };
     const inCls = 'w-8 shrink-0 bg-transparent text-[13px] font-mono font-medium py-1 text-center outline-none text-body no-spinner';
-    const sep = <span className="text-faint text-[11px] font-semibold select-none">:</span>;
+    const sep = <span className="text-faint text-[12px] font-semibold select-none">:</span>;
     return (
         <div className={`inline-flex shrink-0 items-center rounded-lg bg-sunken px-1.5 py-0.5 gap-0.5 ${className}`} title="HH:MM:SS">
             <input type="number" value={h} min={0} max={23}

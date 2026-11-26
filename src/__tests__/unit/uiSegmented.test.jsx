@@ -8,20 +8,20 @@ const classes = (s) => s.split(' ').sort();
 describe('ui/Segmented recetas', () => {
   it('pill copia la receta de las pestañas del detalle', () => {
     expect(classes(segmentedOptionClass({ variant: 'pill', active: true }))).toEqual(
-      classes('px-3 sm:px-4 py-1 text-xs font-semibold rounded-full whitespace-nowrap shrink-0 transition-all duration-200 select-none active:scale-95 bg-surface-4 text-ink shadow-xs font-bold'),
+      classes('px-3 sm:px-4 py-1 text-xs font-semibold rounded-full whitespace-nowrap shrink-0 transition-paint duration-200 select-none active:scale-press bg-surface-4 text-ink shadow-xs font-bold'),
     );
     expect(classes(segmentedOptionClass({ variant: 'pill' }))).toEqual(
-      classes('px-3 sm:px-4 py-1 text-xs font-semibold rounded-full whitespace-nowrap shrink-0 transition-all duration-200 select-none active:scale-95 text-ink-3 hover:text-ink-2-soft'),
+      classes('px-3 sm:px-4 py-1 text-xs font-semibold rounded-full whitespace-nowrap shrink-0 transition-paint duration-200 select-none active:scale-press text-ink-3 hover:text-ink-2-soft'),
     );
     expect(classes(segmentedClass({ variant: 'pill' }))).toEqual(classes('flex bg-fill-segmented-2 p-0.5 rounded-full gap-0.5 hide-scrollbar'));
   });
 
   it('card copia las recetas de las tarjetas de Rendimiento por tamaño', () => {
     expect(classes(segmentedOptionClass({ variant: 'card', size: 'md-wide', active: true }))).toEqual(
-      classes('text-2xs font-bold uppercase tracking-widest rounded-lg transition-all bg-surface-3 text-ink-soft shadow-sm'),
+      classes('text-2xs font-bold uppercase tracking-[0.08em] rounded-lg transition-paint bg-surface-3 text-ink-soft shadow-sm'),
     );
     expect(classes(segmentedOptionClass({ variant: 'card', size: 'sm' }))).toEqual(
-      classes('text-2xs font-bold uppercase rounded-lg transition-all text-segmented-off hover:text-segmented-off-hover'),
+      classes('text-2xs font-bold uppercase rounded-lg transition-paint text-segmented-off hover:text-segmented-off-hover'),
     );
     expect(segmentedOptionClass({ variant: 'card', active: true, tone: 'run' })).toContain('text-sport-run-ink');
     expect(classes(segmentedClass({ variant: 'card', size: 'xs' }))).toEqual(classes('flex bg-surface-2 p-0.5 rounded-lg text-2xs font-bold uppercase'));
@@ -30,7 +30,7 @@ describe('ui/Segmented recetas', () => {
 
   it('mini copia la receta de los conmutadores del Calendario', () => {
     expect(classes(segmentedOptionClass({ variant: 'mini', active: true, tone: 'hr' }))).toEqual(
-      classes('px-2 py-0.5 text-2xs font-semibold rounded-full transition-all duration-200 bg-surface-3 text-legacy-hr-red shadow-sm'),
+      classes('px-2 py-0.5 text-2xs font-semibold rounded-full transition-paint duration-200 bg-surface-3 text-legacy-hr-red shadow-sm'),
     );
     expect(segmentedOptionClass({ variant: 'mini' })).toMatch(/text-ink-4-fixed hover:text-body-soft-fixed$/);
     expect(segmentedClass({ variant: 'mini' })).toBe('flex bg-fill-5 rounded-full p-0.5');

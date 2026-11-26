@@ -24,18 +24,18 @@ const FILLED = 'bg-sunken-5 border border-line-muted-2 rounded-xl text-sm font-s
 const INPUT = {
   filled: { md: FILLED },
   search: {
-    md: 'bg-fill-6 border-0 rounded-xl text-sm font-medium text-ink-soft placeholder-ink-4-fixed focus:outline-none focus:ring-2 focus:ring-action-bright/40 transition-all',
+    md: 'bg-fill-6 border-0 rounded-xl text-sm font-medium text-ink-soft placeholder-ink-4-fixed focus:outline-none focus:ring-2 focus:ring-action-bright/40 transition-paint',
   },
   auth: {
-    md: 'w-full min-h-[48px] pl-11 pr-4 bg-sunken-2 border border-line rounded-xl text-base sm:text-sm text-ink-2-soft placeholder-ink-4 focus:border-action-bright focus:ring-2 focus:ring-action-bright/30 outline-none transition-colors',
+    md: 'w-full min-h-[48px] pl-11 pr-4 bg-sunken-2 border border-line rounded-xl text-base sm:leading-5 text-ink-2-soft placeholder-ink-4 focus:border-action-bright focus:ring-2 focus:ring-action-bright/30 outline-none transition-colors',
   },
   // A11Y-3: `outline-none` siempre con un anillo de foco visible.
   cell: {
     md: `bg-sunken text-[13px] rounded-lg outline-none no-spinner text-body ${FOCUS_RING}`,
-    sm: `bg-sunken rounded-lg text-[11px] outline-none no-spinner text-body ${FOCUS_RING}`,
+    sm: `bg-sunken rounded-lg text-[12px] outline-none no-spinner text-body ${FOCUS_RING}`,
   },
   inline: {
-    md: 'font-bold text-xs sm:text-sm text-ink bg-fill-3 rounded-lg outline-none focus:ring-1',
+    md: 'font-bold text-xs sm:leading-5 text-ink bg-fill-3 rounded-lg outline-none focus:ring-1',
     sm: 'bg-surface-2 rounded text-xs outline-none focus:ring-1',
   },
 };
@@ -43,9 +43,9 @@ const INPUT = {
 const SELECT = {
   filled: { md: FILLED },
   search: {
-    md: 'bg-fill-6 border-0 rounded-xl text-xs sm:text-sm font-semibold text-ink-2-soft focus:outline-none focus:ring-2 focus:ring-action-bright/40 appearance-none cursor-pointer transition-all',
+    md: 'bg-fill-6 border-0 rounded-xl text-xs sm:leading-5 font-semibold text-ink-2-soft focus:outline-none focus:ring-2 focus:ring-action-bright/40 appearance-none cursor-pointer transition-paint',
   },
-  cell: { md: `bg-sunken text-[11px] font-medium text-body rounded-lg outline-none cursor-pointer ${FOCUS_RING}` },
+  cell: { md: `bg-sunken text-[12px] font-medium text-body rounded-lg outline-none cursor-pointer ${FOCUS_RING}` },
   'cell-bare': { md: `bg-transparent text-2xs text-ink-4 rounded outline-none cursor-pointer ${FOCUS_RING}` },
 };
 

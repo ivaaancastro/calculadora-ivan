@@ -14,6 +14,23 @@ import { Activity, HeartPulse, Trophy } from 'lucide-react';
 import { EmptyState } from '../ui';
 import { StatsHero } from '../fitness/StatsHero';
 
+/**
+ * Receta de tarjeta única de Rendimiento (Fase D3, PR 2), aplicada desde el envoltorio porque cada
+ * tarjeta es un componente propio: filete y sombra del token, radios concéntricos (tarjeta 20 →
+ * ficha 12), título 13/600 sin mayúsculas, rótulos de 11 px y cifras tabulares. En móvil, menos
+ * aire y el orden de «¿cómo estoy?» primero (estado, VFC, umbrales, balance).
+ */
+const STATS_CARD = [
+    '[&_section>div:first-child]:border-line [&_section>div:first-child]:shadow-card [&_section>div:first-child]:rounded-[20px]',
+    "[&_section_[class*='rounded-xl']]:rounded-[12px] [&_section_[class*='rounded-2xl']]:rounded-[12px]",
+    '[&_h3]:text-[13px] [&_h3]:font-semibold [&_h3]:tracking-[-0.005em] [&_h3]:normal-case [&_h3]:text-ink [&_.text-2xs]:text-[11px]',
+    "[&_[class*='tracking-tighter']]:tracking-[0]",
+    "[&_:is(p,span)[class*='text-xl']]:[font-feature-settings:'tnum'_1,'cv11'_1] [&_:is(p,h4)[class*='text-2xl']]:[font-feature-settings:'tnum'_1,'cv11'_1]",
+    'max-md:order-[10] max-md:[&_section]:mb-3 max-md:[&_section>div:first-child]:p-4 max-md:[&_section>div:first-child>div:first-child]:mb-3',
+    'data-[empty=true]:[&_section]:border data-[empty=true]:[&_section]:border-dashed data-[empty=true]:[&_section]:border-line data-[empty=true]:[&_section]:rounded-[20px]',
+].join(' ');
+const CARD_ORDER = { status: 'max-md:!order-2', hrv: 'max-md:!order-3', thresholds: 'max-md:!order-4', balance: 'max-md:!order-5' };
+
 const CATEGORIES = [
     { id: 'physiology', label: 'Fisiología' },
     { id: 'power', label: 'Potencia' },
@@ -70,35 +87,36 @@ export const FitnessStatsPage = ({
 
     if (!activities || activities.length === 0) return null;
 
-    const cardVisibility = (category) => {
-        return (mobileCategory === 'all' || mobileCategory === category)
+    const cardVisibility = (category, id) => {
+        const shown = (mobileCategory === 'all' || mobileCategory === category)
             ? 'block'
             : 'hidden md:block';
+        return `${STATS_CARD} ${CARD_ORDER[id] ?? ''} ${shown}`;
     };
 
     const cardNodes = {
         'thresholds': (
-    <div data-stats="card" data-card="thresholds" className={cardVisibility('physiology')}>
+    <div data-stats="card" data-card="thresholds" className={cardVisibility('physiology', 'thresholds')}>
         <ThresholdsCard settings={settings} />
     </div>
         ),
         'status': (
-    <div data-stats="card" data-card="status" className={cardVisibility('physiology')}>
+    <div data-stats="card" data-card="status" className={cardVisibility('physiology', 'status')}>
         <TrainingStatusCard trainingStatus={stats.trainingStatus} />
     </div>
         ),
         'hrv': (
-    <div data-stats="card" data-card="hrv" className={cardVisibility('physiology')}>
+    <div data-stats="card" data-card="hrv" className={cardVisibility('physiology', 'hrv')}>
         <HrvCard hrv={stats.hrv} />
     </div>
         ),
         'race': (
-    <div data-stats="card" data-card="race" className={cardVisibility('vo2')}>
+    <div data-stats="card" data-card="race" className={cardVisibility('vo2', 'race')}>
         <RacePredictionsCard racePredictions={stats.racePredictions} />
     </div>
         ),
         'vo2': (
-    <div data-stats="card" data-card="vo2" className={cardVisibility('vo2')}>
+    <div data-stats="card" data-card="vo2" className={cardVisibility('vo2', 'vo2')}>
         <Vo2MaxCard
             vo2Sport={vo2Sport}
             setVo2Sport={setVo2Sport}
@@ -109,7 +127,7 @@ export const FitnessStatsPage = ({
     </div>
         ),
         'balance': (
-    <div data-stats="card" data-card="balance" className={cardVisibility('physiology')}>
+    <div data-stats="card" data-card="balance" className={cardVisibility('physiology', 'balance')}>
         <TrainingBalanceCard
             balance={stats.balance}
             balanceDays={balanceDays}
@@ -118,7 +136,7 @@ export const FitnessStatsPage = ({
     </div>
         ),
         'volume': (
-    <div data-stats="card" data-card="volume" className={cardVisibility('volume')}>
+    <div data-stats="card" data-card="volume" className={cardVisibility('volume', 'volume')}>
         <WeeklyVolumeAndFocusCard
             weeklyChart={analytics.weeklyChart}
             focusChart={analytics.focusChart}
@@ -129,7 +147,7 @@ export const FitnessStatsPage = ({
     </div>
         ),
         'power-profile': (
-    <div data-stats="card" data-card="power-profile" className={cardVisibility('power')}>
+    <div data-stats="card" data-card="power-profile" className={cardVisibility('power', 'power-profile')}>
         <PowerProfileCard
             showPowerConfig={showPowerConfig}
             setShowPowerConfig={setShowPowerConfig}
@@ -146,7 +164,7 @@ export const FitnessStatsPage = ({
     </div>
         ),
         'ftp': (
-    <div data-stats="card" data-card="ftp" className={cardVisibility('power')}>
+    <div data-stats="card" data-card="ftp" className={cardVisibility('power', 'ftp')}>
         <EstimatedFtpCard
             ftp={stats.ftp}
             ftpDiff={ftpDiff}
@@ -156,7 +174,7 @@ export const FitnessStatsPage = ({
     </div>
         ),
         'mmp': (
-    <div data-stats="card" data-card="mmp" className={cardVisibility('power')}>
+    <div data-stats="card" data-card="mmp" className={cardVisibility('power', 'mmp')}>
         <MmpAndEfCard
             activities={activities}
             onSelectActivity={onSelectActivity}
@@ -187,7 +205,7 @@ export const FitnessStatsPage = ({
 
     // Una tarjeta sin datos explica qué falta en lugar de desaparecer (EST-4).
     const emptyCard = (id, Icon, title, description) => (
-        <div data-stats="card" data-card={id} data-empty="true" className={cardVisibility(CARD_CATEGORY[id])}>
+        <div data-stats="card" data-card={id} data-empty="true" className={cardVisibility(CARD_CATEGORY[id], id)}>
             <section className="mb-8">
                 <EmptyState icon={Icon} title={title} description={description} />
             </section>
@@ -206,20 +224,20 @@ export const FitnessStatsPage = ({
     const isShown = (id) => mobileCategory === 'all' || mobileCategory === CARD_CATEGORY[id];
 
     return (
-        <div data-skin="stats" data-stats="page" className="animate-in fade-in duration-500 pb-16 w-full max-w-[1100px] mx-auto px-4 sm:px-8">
+        <div data-stats="page" className="animate-in fade-in duration-500 pb-16 w-full max-w-[1200px] mx-auto px-4 sm:px-8 max-md:flex max-md:flex-col max-md:!pb-8 max-sm:[&_button[aria-pressed]]:min-h-[44px]">
             {/* Header */}
-            <div data-stats="header" className="pt-8 pb-6 sm:pb-10">
-                <h2 className="text-3xl font-bold text-ink tracking-tight">Rendimiento</h2>
+            <div data-stats="header" className="pt-8 pb-6 sm:pb-10 max-md:order-none max-md:!pt-4 max-md:!pb-3">
+                <h2 className="text-3xl max-md:text-[26px] font-bold text-ink tracking-tight">Rendimiento</h2>
                 <p className="text-sm font-medium text-ink-3-flat mt-1.5 opacity-80">Perfil fisiológico avanzado y recuperación</p>
             </div>
 
             {/* Selector por categorías SOLO en móvil (estilo Apple sobrio, sin emojis) */}
-            <div data-stats="tabs" className="md:hidden flex items-center gap-2 overflow-x-auto hide-scrollbar touch-scroll -mx-4 px-4 mb-6 pb-1">
+            <div data-stats="tabs" className="md:hidden flex items-center gap-2 overflow-x-auto hide-scrollbar touch-scroll -mx-4 px-4 mb-6 pb-1 max-md:order-1 max-md:!mb-3 max-md:[&_button]:min-h-[44px]">
                 {CATEGORIES.map(cat => (
                     <button
                         key={cat.id}
                         onClick={() => setMobileCategory(cat.id)}
-                        className={`px-4 py-2 rounded-full text-xs font-semibold whitespace-nowrap transition-all select-none touch-manipulation active:scale-95 shrink-0 ${
+                        className={`px-4 py-2 rounded-full text-xs font-semibold whitespace-nowrap transition-paint select-none touch-manipulation active:scale-press shrink-0 ${
                             mobileCategory === cat.id
                                 ? 'bg-inverse text-ink-inverse shadow-xs font-bold'
                                 : 'bg-fill-4 text-body-soft hover:text-ink'
@@ -234,8 +252,8 @@ export const FitnessStatsPage = ({
                 <StatsHero trainingStatus={stats.trainingStatus} hrv={stats.hrv} ftpDiff={ftpDiff} eFTP={stats.ftp?.eFTP} />
             )}
             {GROUPS.map(g => (
-                <div key={g.id} data-stats="group" data-group={g.id} className={g.cards.some(isShown) ? 'block' : 'hidden md:block'}>
-                    <h3 data-stats="group-title">{g.label}</h3>
+                <div key={g.id} data-stats="group" data-group={g.id} className={`mb-4 max-md:order-3 ${g.cards.some(isShown) ? 'block' : 'hidden md:block'}`}>
+                    <h3 data-stats="group-title" className="flex items-center gap-3 m-0 mb-4 text-[11px] font-semibold tracking-[0.08em] uppercase text-ink-4 after:content-[''] after:flex-1 after:h-px after:bg-line">{g.label}</h3>
                     {g.cards.map(id => <React.Fragment key={id}>{cardNodes[id]}</React.Fragment>)}
                 </div>
             ))}

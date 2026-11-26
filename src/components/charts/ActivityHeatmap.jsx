@@ -31,7 +31,7 @@ export function ActivityHeatmap({ activities, weeks = 26 }) {
   const h = 7 * (CELL + GAP) - GAP;
   return (
     <div data-chart="heatmap" className="px-3 sm:px-5 py-3 border-b border-line-soft-5 overflow-x-auto">
-      <p className="text-2xs font-bold text-ink-4 uppercase tracking-widest mb-2">Constancia · últimas {weeks} semanas</p>
+      <p className="text-2xs font-bold text-ink-4 uppercase tracking-[0.08em] mb-2">Constancia · últimas {weeks} semanas</p>
       <svg
         viewBox={`0 0 ${w} ${h}`}
         width={w}

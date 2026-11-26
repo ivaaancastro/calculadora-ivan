@@ -26,14 +26,14 @@ export const ActivityCharts = ({ chartData: fullData, activePayload, handleMouse
     return (
 <>
                                     {chartData.length > 0 ? (
-                                        <Card data-detail="charts" className="overflow-hidden">
+                                        <Card data-detail="charts" variant="detail" className="overflow-hidden">
                                             {fullData.length > 20 && <ZoomRange range={range} onChange={setRange} />}
                                             {/* Velocity/Pace */}
                                             {blocks?.charts?.speed !== false && (
                                             <div className="h-[120px] pt-3.5 px-3.5 sm:px-6 border-b border-line-soft-3">
                                                 <div className="flex justify-between items-center mb-1">
                                                     <div className="flex items-center gap-3">
-                                                        <h4 className="text-2xs font-bold text-slate-400 uppercase tracking-widest">{isPaceBased ? 'Ritmo' : 'Velocidad'}</h4>
+                                                        <h4 className="text-2xs font-bold text-slate-400 uppercase tracking-[0.08em]">{isPaceBased ? 'Ritmo' : 'Velocidad'}</h4>
                                                         {activePayload && (
                                                             <div className="px-1.5 py-0.5 bg-surface-2 rounded flex items-center gap-2 text-2xs font-bold tabular-nums">
                                                                 <span className="text-body-soft">{formatDuration(activePayload.rawTime)}</span>
@@ -70,7 +70,7 @@ export const ActivityCharts = ({ chartData: fullData, activePayload, handleMouse
                                             {chartData.some(d => d.hr > 0) && (
                                                 <div className="h-[120px] pt-3.5 px-3.5 sm:px-6 border-b border-line-soft-3">
                                                     <div className="flex justify-between items-center mb-1">
-                                                        <h4 className="text-2xs font-bold text-slate-400 uppercase tracking-widest">FC</h4>
+                                                        <h4 className="text-2xs font-bold text-slate-400 uppercase tracking-[0.08em]">FC</h4>
                                                         {activePayload && <span className="text-xs font-bold tabular-nums text-hr">{activePayload.hr} bpm</span>}
                                                     </div>
                                                     <div {...chartFigureProps('Frecuencia cardiaca', summaries.hr)}>
@@ -99,7 +99,7 @@ export const ActivityCharts = ({ chartData: fullData, activePayload, handleMouse
                                             {chartData.some(d => d.watts > 0) && (
                                                 <div className="h-[120px] pt-3.5 px-3.5 sm:px-6 border-b border-line-soft-3">
                                                     <div className="flex justify-between items-center mb-1">
-                                                        <h4 className="text-2xs font-bold text-slate-400 uppercase tracking-widest">Potencia</h4>
+                                                        <h4 className="text-2xs font-bold text-slate-400 uppercase tracking-[0.08em]">Potencia</h4>
                                                         {activePayload && <span className="text-xs font-bold tabular-nums text-power">{activePayload.watts} w</span>}
                                                     </div>
                                                     <div {...chartFigureProps('Potencia', summaries.watts)}>
@@ -129,9 +129,9 @@ export const ActivityCharts = ({ chartData: fullData, activePayload, handleMouse
                                                 <div className="h-[120px] pt-3.5 px-3.5 sm:px-6 border-b border-line-soft-3">
                                                     <div className="flex justify-between items-center mb-1">
                                                         <div className="flex items-center gap-3">
-                                                            <h4 className="text-2xs font-bold text-slate-400 uppercase tracking-widest">Altitud</h4>
+                                                            <h4 className="text-2xs font-bold text-slate-400 uppercase tracking-[0.08em]">Altitud</h4>
                                                             {activePayload?.grade !== undefined && (
-                                                                <span className={`text-2xs font-black ${activePayload.grade > 3 ? 'text-rose-500' : activePayload.grade < -3 ? 'text-emerald-500' : 'text-slate-400'}`}>
+                                                                <span className={`text-2xs font-bold ${activePayload.grade > 3 ? 'text-rose-500' : activePayload.grade < -3 ? 'text-emerald-500' : 'text-slate-400'}`}>
                                                                     {activePayload.grade > 0 ? '+' : ''}{formatNumber(activePayload.grade, 1)}%
                                                                 </span>
                                                             )}
@@ -164,7 +164,7 @@ export const ActivityCharts = ({ chartData: fullData, activePayload, handleMouse
                                             {chartData.some(d => d.cadence > 0) && (
                                                 <div className="h-[120px] pt-3.5 px-3.5 sm:px-6">
                                                     <div className="flex justify-between items-center mb-1">
-                                                        <h4 className="text-2xs font-bold text-slate-400 uppercase tracking-widest">Cadencia</h4>
+                                                        <h4 className="text-2xs font-bold text-slate-400 uppercase tracking-[0.08em]">Cadencia</h4>
                                                         {activePayload && <span className="text-xs font-bold tabular-nums text-cadence">{activePayload.cadence} {isPaceBased ? 'ppm' : 'rpm'}</span>}
                                                     </div>
                                                     <div {...chartFigureProps('Cadencia', summaries.cadence)}>
@@ -189,7 +189,7 @@ export const ActivityCharts = ({ chartData: fullData, activePayload, handleMouse
                                                 </div>
                                             )}
                                             {missing.length > 0 && (
-                                                <p data-detail="missing" className="px-3.5 sm:px-6 py-3 text-[11px] text-ink-4">
+                                                <p data-detail="missing" className="px-3.5 sm:px-6 py-3 text-[12px] text-ink-4">
                                                     Sin {missing.join(' ni ')} en este registro: el dispositivo no grabó esa serie.
                                                 </p>
                                             )}

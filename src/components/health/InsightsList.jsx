@@ -14,11 +14,11 @@ export const InsightsList = ({ wellnessMetrics }) => (
                         const isDanger = insight.type === 'danger';
                         const isWarning = insight.type === 'warning';
                         return (
-                            <Card key={idx} data-health="insight" className="p-3.5 sm:p-4 flex items-start gap-3.5">
+                            <Card key={idx} data-health="insight" className="motion-safe:animate-rise-slow motion-safe:[animation-delay:0.4s] p-3.5 sm:p-4 flex items-start gap-3.5">
                                 <div className={`p-2 rounded-xl shrink-0 mt-0.5 ${
-                                    isDanger ? 'bg-rose-50 text-rose-600 dark:bg-rose-950/50 dark:text-rose-400' :
-                                    isWarning ? 'bg-amber-50 text-amber-600 dark:bg-amber-950/50 dark:text-amber-400' :
-                                    'bg-emerald-50 text-emerald-600 dark:bg-emerald-950/50 dark:text-emerald-400'
+                                    isDanger ? 'bg-rose-50 text-hr-ink dark:bg-rose-950/50' :
+                                    isWarning ? 'bg-amber-50 text-warning-ink dark:bg-amber-950/50' :
+                                    'bg-emerald-50 text-positive-ink dark:bg-emerald-950/50'
                                 }`}>
                                     {isDanger ? <ShieldAlert size={16} /> : isWarning ? <AlertTriangle size={16} /> : <ShieldCheck size={16} />}
                                 </div>

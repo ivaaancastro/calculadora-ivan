@@ -15,7 +15,7 @@ const MODAL = {
     backdrop:
       'fixed inset-0 z-sheet flex items-end sm:items-center justify-center p-0 sm:p-4 bg-scrim backdrop-blur-sm overscroll-contain animate-in fade-in duration-200',
     panel:
-      'bg-surface rounded-t-3xl sm:rounded-2xl shadow-2xl w-full max-w-md border-t sm:border border-line-4 transform transition-all max-h-[92dvh] flex flex-col overflow-hidden pb-safe',
+      'bg-surface rounded-t-3xl sm:rounded-2xl shadow-card w-full max-w-md border-t sm:border border-line transform transition-paint max-h-[92dvh] flex flex-col overflow-hidden pb-safe',
   },
   auth: {
     backdrop: 'fixed inset-0 z-sheet flex items-end sm:items-center justify-center p-0 sm:p-4',
@@ -26,7 +26,7 @@ const MODAL = {
   planner: {
     backdrop: 'fixed inset-0 bg-scrim-3 backdrop-blur-sm z-sheet flex items-center justify-center p-4',
     panel:
-      'bg-surface rounded-2xl max-w-3xl w-full shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200 border border-line-muted flex flex-col max-h-[90vh]',
+      'bg-surface rounded-2xl max-w-3xl w-full shadow-card overflow-hidden animate-in zoom-in-95 duration-200 border border-line flex flex-col max-h-[90vh]',
   },
   confirm: {
     backdrop: 'fixed inset-0 z-sheet flex items-center justify-center p-4 bg-scrim backdrop-blur-sm overscroll-contain',
@@ -36,7 +36,7 @@ const MODAL = {
     backdrop: 'fixed inset-0 bg-scrim-4 backdrop-blur-sm z-modal flex items-center justify-center p-4 sm:p-8',
     style: { overscrollBehavior: 'contain' },
     panel:
-      'bg-surface rounded-lg w-full max-w-4xl shadow-2xl overflow-hidden border border-line max-h-[90vh] flex flex-col animate-in zoom-in-95 duration-200',
+      'bg-surface rounded-lg w-full max-w-4xl shadow-card overflow-hidden border border-line max-h-[90vh] flex flex-col animate-in zoom-in-95 duration-200',
   },
 };
 

@@ -54,14 +54,14 @@ export class ErrorBoundary extends React.Component {
             <div className="flex flex-col gap-3">
               <button 
                 onClick={this.handleReload}
-                className="w-full flex items-center justify-center gap-2 bg-action-solid hover:bg-action-hover text-white py-3 rounded-xl font-bold text-sm uppercase tracking-widest transition-colors"
+                className="w-full flex items-center justify-center gap-2 bg-action-solid hover:bg-action-hover text-white py-3 rounded-xl font-bold text-sm uppercase tracking-[0.08em] transition-colors"
               >
                 <RefreshCw size={16} />
                 Reiniciar Aplicación
               </button>
               <button 
                 onClick={this.handleClearCache}
-                className="w-full text-ink-3 hover:text-body-2 py-3 font-bold text-xs uppercase tracking-widest transition-colors"
+                className="w-full text-ink-3 hover:text-body-2 py-3 font-bold text-xs uppercase tracking-[0.08em] transition-colors"
               >
                 Borrar caché y salir
               </button>

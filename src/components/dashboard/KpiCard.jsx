@@ -21,9 +21,9 @@ export const KpiCard = ({ label, icon: Icon, value, format, delta, spark, color,
     const text = typeof value === 'number' ? format(shown) : '--';
     const DeltaIcon = delta ? (delta.value > 0 ? ArrowUpRight : delta.value < 0 ? ArrowDownRight : Minus) : null;
     return (
-        <Card data-kpi="card" className={`p-4 sm:p-5 flex flex-col gap-3 ${className || ''}`}>
+        <Card data-kpi="card" figures="ss03" className={`p-4 sm:p-5 flex flex-col gap-3 motion-safe:animate-rise ${className || ''}`}>
             <div className="flex items-center justify-between gap-2">
-                <span className="flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-[0.08em] text-ink-3 truncate">
+                <span className="flex items-center gap-1.5 text-[12px] font-semibold uppercase tracking-[0.08em] text-ink-3 truncate">
                     {Icon && <Icon size={14} strokeWidth={2.25} aria-hidden="true" style={{ color }} />}
                     {label}
                 </span>
@@ -40,7 +40,7 @@ export const KpiCard = ({ label, icon: Icon, value, format, delta, spark, color,
                             </span>
                         )}
                     </div>
-                    {sub && <div className="mt-1.5 text-[11px] text-ink-4">{sub}</div>}
+                    {sub && <div className="mt-1.5 text-[12px] text-ink-4">{sub}</div>}
                 </div>
                 {spark && spark.length >= 3 && (
                     <Sparkline values={spark} color={color} width={88} height={32} label={label} className="shrink-0" />

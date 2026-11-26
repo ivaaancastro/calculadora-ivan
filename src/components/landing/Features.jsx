@@ -29,8 +29,8 @@ const BLOCKS = [
 export const Features = () => (
   <section id="features" className="mx-auto max-w-6xl scroll-mt-[var(--nav-h)] px-4 py-16 sm:px-6 lg:py-24">
     <Reveal>
-      <p className="text-xs font-bold uppercase tracking-widest text-action">Funciones</p>
-      <h2 className="mt-3 max-w-2xl text-3xl font-bold tracking-tight text-ink sm:text-4xl">
+      <p className="text-xs font-bold uppercase tracking-[0.08em] text-action">Funciones</p>
+      <h2 className="mt-3 max-w-2xl text-3xl font-bold tracking-tight text-ink sm:leading-10">
         Todo lo que necesitas para entrenar con datos
       </h2>
     </Reveal>

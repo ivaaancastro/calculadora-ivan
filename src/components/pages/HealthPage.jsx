@@ -101,7 +101,7 @@ export const HealthPage = ({ activities, settings, chartData }) => {
             color: 'text-rose-500',
             label: 'Fatiga Alta',
             msg: 'El sistema nervioso autónomo refleja sobrecarga. Prioriza el descanso profundo o una sesión de descarga.',
-            badge: 'bg-rose-50 text-rose-600 dark:bg-rose-950/40 dark:text-rose-400 border border-rose-200/50 dark:border-rose-800/40'
+            badge: 'bg-rose-50 text-hr-ink dark:bg-rose-950/40 border border-rose-200/50 dark:border-rose-800/40'
         };
     }, [wellnessMetrics]);
 
@@ -174,7 +174,7 @@ export const HealthPage = ({ activities, settings, chartData }) => {
     }
 
     return (
-        <div data-skin="health" data-health="root" className="animate-in fade-in duration-500 pb-20 w-full max-w-[1400px] mx-auto px-3 sm:px-6 space-y-6">
+        <div data-health="root" className="animate-in fade-in duration-500 pb-20 w-full max-w-[1400px] mx-auto px-3 sm:px-6 space-y-6">
 
             <HealthHeader wellnessMetrics={wellnessMetrics} readinessInfo={readinessInfo} setActiveTab={setActiveTab} activeTab={activeTab} wellnessLoading={wellnessLoading} apiError={apiError} />
 

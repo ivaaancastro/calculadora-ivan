@@ -6,7 +6,7 @@ export const DetailMobileHero = ({ activity, streams, themeColor, activePayload,
     return (
                                     <div className="lg:hidden space-y-2.5">
                                         {showMap && (
-                                            <div data-detail="map" className="h-48 sm:h-64 rounded-2xl overflow-hidden shadow-sm border border-slate-200/80 dark:border-zinc-800/80">
+                                            <div data-detail="map" className="h-48 sm:h-64 overflow-hidden border border-line rounded-3xl shadow-card">
                                                 <InteractiveMap 
                                                     polyline={activity.map_polyline} 
                                                     highResCoords={streams?.latlng?.data} 

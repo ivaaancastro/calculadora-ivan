@@ -42,15 +42,15 @@ export const MmpAndEfCard = ({
             const data = payload[0].payload;
             return (
                 <ChartTooltip variant="card" className="min-w-[150px]">
-                    <p className="text-2xs text-zinc-400 uppercase tracking-widest mb-1">Pico de {label}</p>
-                    <p className="text-sm font-black mb-2" style={{ color: curveColor }}>
+                    <p className="text-2xs text-zinc-400 uppercase tracking-[0.08em] mb-1">Pico de {label}</p>
+                    <p className="text-sm font-bold mb-2" style={{ color: curveColor }}>
                         {isPace ? formatPace(data.value) : data.value} <span className="text-2xs font-bold">{curveUnit}</span>
                     </p>
                     {data.actName && (
                         <div className="border-t border-zinc-700 pt-2 mt-1">
                             <p className="text-2xs text-zinc-200 truncate font-bold">{data.actName}</p>
                             <p className="text-2xs text-zinc-500">{new Date(data.actDate).toLocaleDateString()}</p>
-                            <div className="flex items-center gap-1 text-2xs text-blue-400 mt-1 font-bold uppercase tracking-widest">
+                            <div className="flex items-center gap-1 text-2xs text-blue-400 mt-1 font-bold uppercase tracking-[0.08em]">
                                 <MousePointer2 size={8} /> Clic en el punto para abrir
                             </div>
                         </div>
@@ -83,7 +83,7 @@ export const MmpAndEfCard = ({
                         </div>
                     </div>
                     <div className="border-t border-slate-200/50 dark:border-zinc-700/50 pt-2 mt-1">
-                        <p className="text-[11px] text-body-2 truncate font-semibold" title={data.name}>{data.name}</p>
+                        <p className="text-[12px] text-body-2 truncate font-semibold" title={data.name}>{data.name}</p>
                         <p className="text-2xs text-slate-500">{new Date(data.date).toLocaleDateString()}</p>
                         <div className="flex items-center gap-1 text-2xs text-blue-500 mt-2 font-medium">
                             <MousePointer2 size={10} /> Clic en el punto para abrir
@@ -114,7 +114,7 @@ export const MmpAndEfCard = ({
                         )}
 
                         {isLoadingHistoricalStreams && (
-                            <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-action-bright/10 text-action-bright text-2xs font-bold uppercase tracking-wider animate-pulse">
+                            <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-action-bright/10 text-action-bright text-2xs font-bold uppercase tracking-[0.05em] animate-pulse">
                                 <RefreshCw size={10} className="animate-spin" />
                                 Cargando telemetría histórica...
                             </div>
@@ -124,7 +124,7 @@ export const MmpAndEfCard = ({
                             <button
                                 onClick={handleDeepSync}
                                 disabled={isDeepSyncing}
-                                className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-action-tint hover:bg-action-tint-hover text-action text-2xs font-bold uppercase tracking-wider transition-all disabled:opacity-50"
+                                className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-action-tint hover:bg-action-tint-hover text-action text-2xs font-bold uppercase tracking-[0.05em] transition-paint disabled:opacity-50"
                             >
                                 <RefreshCw size={10} className={isDeepSyncing ? 'animate-spin' : ''} />
                                 {isDeepSyncing ? `Descargando (${deepSyncProgress?.current || 0}/${deepSyncProgress?.total || 0})...` : 'Completar telemetría'}
@@ -153,7 +153,7 @@ export const MmpAndEfCard = ({
                         />
                         <div className="flex gap-4 ml-2">
                             {['power', 'speed', 'hr'].map(t => (
-                                <button key={t} onClick={() => setCurveType(t)} className={`text-2xs font-bold uppercase pb-1 border-b-2 transition-all ${curveType === t ? 'text-action-bright border-action-bright' : 'text-slate-400 border-transparent hover:border-slate-300'}`}>
+                                <button key={t} onClick={() => setCurveType(t)} className={`text-2xs font-bold uppercase pb-1 border-b-2 transition-paint ${curveType === t ? 'text-action-bright border-action-bright' : 'text-slate-400 border-transparent hover:border-slate-300'}`}>
                                     {t === 'power' ? 'Potencia' : (t === 'speed' ? (curveSport === 'run' ? 'Ritmo' : 'Veloc.') : 'Pulso')}
                                 </button>
                             ))}
@@ -165,8 +165,8 @@ export const MmpAndEfCard = ({
                     {/* EF TREND */}
                     <div className="flex flex-col lg:col-span-1">
                         <div className="flex items-center gap-2 mb-6">
-                            <span className="text-2xs font-bold uppercase tracking-widest text-slate-400">Eficiencia Aeróbica (EF)</span>
-                            <div className={`px-2 py-0.5 rounded-full text-2xs font-black uppercase ${curveSport === 'bike' ? 'bg-power-tint text-power-ink-2' : 'bg-sport-run-tint text-sport-run-ink-3'}`}>
+                            <span className="text-2xs font-bold uppercase tracking-[0.08em] text-slate-400">Eficiencia Aeróbica (EF)</span>
+                            <div className={`px-2 py-0.5 rounded-full text-2xs font-bold uppercase ${curveSport === 'bike' ? 'bg-power-tint text-power-ink-2' : 'bg-sport-run-tint text-sport-run-ink-3'}`}>
                                 {curveSport === 'bike' ? 'Potencia / FC' : 'Ritmo / FC'}
                             </div>
                             <InfoTooltip text={curveSport === 'bike' ? "Relación entre vatios medios y pulso medio. Un EF al alza indica que eres más eficiente (generas más vatios a menos pulso)." : "Relación entre velocidad (m/min) y pulso medio. Un EF al alza indica que eres más eficiente (corres más rápido a menos pulso)."} />
@@ -202,7 +202,7 @@ export const MmpAndEfCard = ({
                     {/* MMP CURVE */}
                     <div className="flex flex-col lg:col-span-1 lg:border-x border-line-soft-2 lg:px-6">
                         <div className="flex items-center gap-2 mb-6">
-                            <span className="text-2xs font-bold uppercase tracking-widest text-slate-400">Curva MMP</span>
+                            <span className="text-2xs font-bold uppercase tracking-[0.08em] text-slate-400">Curva MMP</span>
                             <InfoTooltip text="Tu mejor potencia/ritmo para cada duración. Refleja tu perfil de capacidades y récords históricos." />
                         </div>
                         <div className="h-[220px] w-full" {...chartFigureProps(curveType === 'power' ? 'Curva de potencia máxima' : curveType === 'speed' ? 'Curva de velocidad máxima' : 'Curva de FC máxima', summarizeCategories(currentCurve, 'name', 'value'))}>
@@ -233,7 +233,7 @@ export const MmpAndEfCard = ({
                     <div className="flex flex-col lg:col-span-1">
                         <div className="flex items-center justify-between gap-2 mb-6">
                             <div className="flex items-center gap-2">
-                                <span className="text-2xs font-bold uppercase tracking-widest text-slate-400">
+                                <span className="text-2xs font-bold uppercase tracking-[0.08em] text-slate-400">
                                     {peaksViewMode === 'alltime' ? 'Récords Absolutos' : `Récords (${mmpTimeframe === 'all' ? 'Todo' : mmpTimeframe.toUpperCase()})`}
                                 </span>
                                 <InfoTooltip text={peaksViewMode === 'alltime' ? "Tus mejores marcas de todos los tiempos en actividades con telemetría registrada." : "Tus mejores marcas dentro del periodo seleccionado arriba (90d / 1y / Todo)."} />
@@ -263,10 +263,10 @@ export const MmpAndEfCard = ({
                                 }
 
                                 return (
-                                    <div key={secs} className="flex items-center justify-between p-3 rounded-xl bg-sunken-3 border border-slate-100 dark:border-zinc-800/50 hover:border-blue-500/30 transition-all cursor-default">
-                                        <span className="text-2xs font-bold text-slate-500 uppercase tracking-widest">{formatInterval(secs)}</span>
+                                    <div key={secs} className="flex items-center justify-between p-3 rounded-xl bg-sunken-3 border border-slate-100 dark:border-zinc-800/50 hover:border-blue-500/30 transition-paint cursor-default">
+                                        <span className="text-2xs font-bold text-slate-500 uppercase tracking-[0.08em]">{formatInterval(secs)}</span>
                                         <div className="text-right">
-                                            <p className="text-sm font-black text-ink-2">
+                                            <p className="text-sm font-bold text-ink-2">
                                                 {pk.value > 0 ? displayVal : '--'}
                                                 <span className="text-2xs ml-1 font-bold text-slate-400">{curveUnit}</span>
                                             </p>

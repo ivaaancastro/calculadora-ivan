@@ -5,8 +5,8 @@ import { useCountUp } from '../../hooks/useCountUp';
 import { formatMinutes, formatNumber } from '../../utils/formatters';
 
 const Kpi = ({ label, value, context, delta, bar }) => (
-    <div data-cal="kpi" className="min-w-0 rounded-xl border border-line px-3.5 py-3">
-        <div className="text-[11px] font-semibold uppercase tracking-[0.08em] text-ink-3">{label}</div>
+    <div data-cal="kpi" className="min-w-0 rounded-xl border border-line bg-surface px-3.5 py-3 motion-safe:animate-rise motion-safe:[&:nth-child(2)]:[animation-delay:0.06s] motion-safe:[&:nth-child(3)]:[animation-delay:0.12s] motion-safe:[&:nth-child(4)]:[animation-delay:0.18s]">
+        <div className="text-[12px] font-semibold uppercase tracking-[0.08em] text-ink-3">{label}</div>
         <div className="mt-1 flex items-baseline gap-2">
             <span className="text-[28px] sm:text-[32px] leading-none font-semibold tracking-[-0.03em] tabular-nums text-ink">{value}</span>
             {delta}
@@ -16,7 +16,7 @@ const Kpi = ({ label, value, context, delta, bar }) => (
                 <div className="h-full rounded-full bg-form-peak" style={{ width: `${Math.min(100, bar)}%` }} />
             </div>
         )}
-        <div className="mt-1.5 text-[11px] text-ink-4 truncate">{context}</div>
+        <div className="mt-1.5 text-[12px] text-ink-4 truncate">{context}</div>
     </div>
 );
 
@@ -44,9 +44,9 @@ export const MonthHero = ({ summary, heatmap, onPlan }) => {
     const sessions = useCountUp(summary.sessions);
     const tss = useCountUp(summary.tss);
     return (
-        <section data-cal="hero" className="grid gap-4 px-3 sm:px-5 py-4 border-b border-line lg:grid-cols-[minmax(0,1fr)_auto] lg:items-start">
+        <section data-cal="hero" className="[font-feature-settings:'tnum'_1,'cv11'_1] grid gap-4 px-3 sm:px-5 py-4 border-b border-line lg:grid-cols-[minmax(0,1fr)_auto] lg:items-start">
             <div className="min-w-0 space-y-3">
-                <p data-cal="sentence" className="text-[17px] sm:text-[20px] leading-snug font-medium tracking-[-0.01em] text-ink [text-wrap:balance] max-w-[52ch]">
+                <p data-cal="sentence" className="motion-safe:animate-rise text-[18px] leading-snug font-medium tracking-[-0.01em] text-ink [text-wrap:balance] max-w-[52ch]">
                     {summary.sentence}
                 </p>
                 {summary.empty && onPlan && (
@@ -69,9 +69,9 @@ export const MonthHero = ({ summary, heatmap, onPlan }) => {
                     </div>
                 )}
             </div>
-            <div data-cal="heatmap-wrap" className="min-w-0">
+            <div data-cal="heatmap-wrap" className="min-w-0 [&_[data-chart=heatmap]]:!p-0 [&_[data-chart=heatmap]]:!border-b-0">
                 <button type="button" aria-expanded={open} onClick={() => setOpen((o) => !o)}
-                    className="lg:hidden flex items-center gap-1.5 min-h-[44px] text-[11px] font-semibold uppercase tracking-[0.08em] text-ink-3">
+                    className="lg:hidden flex items-center gap-1.5 min-h-[44px] text-[12px] font-semibold uppercase tracking-[0.08em] text-ink-3">
                     Constancia <ChevronDown size={14} className={open ? 'rotate-180' : ''} aria-hidden="true" />
                 </button>
                 <div className={open ? 'block' : 'hidden lg:block'}>{heatmap}</div>

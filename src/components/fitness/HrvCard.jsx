@@ -14,9 +14,9 @@ export const HrvCard = ({ hrv }) => {
                         <InfoTooltip text="La Variabilidad de Frecuencia Cardíaca (RMSSD) indica tu recuperación real." />
                     </div>
                     {hrv.source === 'garmin' && (
-                        <div className="flex items-center gap-1.5 px-3 py-1 bg-blue-50 dark:bg-blue-900/20 rounded-full border border-blue-100 dark:border-blue-800/50">
+                        <div className="flex items-center gap-1.5 px-3 py-1 bg-action-tint-2 rounded-full border border-blue-100 dark:border-blue-800/50">
                             <ShieldCheck size={10} className="text-blue-500" />
-                            <span className="text-2xs font-bold text-blue-600 dark:text-blue-400 uppercase tracking-tighter">Biometría Sincronizada</span>
+                            <span className="text-2xs font-bold text-action uppercase tracking-tighter">Biometría Sincronizada</span>
                         </div>
                     )}
                 </div>
@@ -24,7 +24,7 @@ export const HrvCard = ({ hrv }) => {
                     <div>
                         <div className="flex items-baseline gap-2 mb-2">
                             <span className="text-4xl font-bold tracking-tighter text-ink-soft">{hrv.rmssd}</span>
-                            <span className="text-sm font-bold text-slate-400 uppercase tracking-widest">ms</span>
+                            <span className="text-sm font-bold text-slate-400 uppercase tracking-[0.08em]">ms</span>
                             <div className="ml-4 px-2 py-0.5 rounded-md text-2xs font-bold uppercase border shadow-sm" style={{ backgroundColor: `${hrv.color}10`, color: hrv.color, borderColor: `${hrv.color}20` }}>
                                 {hrv.state}
                             </div>
@@ -33,9 +33,9 @@ export const HrvCard = ({ hrv }) => {
                         
                         <div className="mt-8 space-y-3">
                             <div className="h-1.5 w-full bg-surface-2 rounded-full overflow-hidden">
-                                <div className="h-full bg-blue-500 rounded-full transition-all duration-1000" style={{ width: `${Math.min(100, (hrv.rmssd / hrv.baseline) * 80)}%` }} />
+                                <div className="h-full bg-blue-500 rounded-full transition-paint duration-1000" style={{ width: `${Math.min(100, (hrv.rmssd / hrv.baseline) * 80)}%` }} />
                             </div>
-                            <div className="flex justify-between px-0.5 text-2xs font-bold text-slate-400 uppercase tracking-widest opacity-60">
+                            <div className="flex justify-between px-0.5 text-2xs font-bold text-slate-400 uppercase tracking-[0.08em] opacity-60">
                                 <span>Bajo</span>
                                 <span>Personal: {hrv.baseline}ms</span>
                                 <span>Alto</span>
@@ -55,7 +55,7 @@ export const HrvCard = ({ hrv }) => {
                         </div>
                         <div className="flex items-center gap-2">
                             <div className={`w-2 h-2 rounded-full ${hrv.stress > 60 ? 'bg-orange-500' : 'bg-emerald-500'}`} />
-                            <p className="text-[11px] font-bold text-body-soft uppercase tracking-tight">
+                            <p className="text-[12px] font-bold text-body-soft uppercase tracking-tight">
                                 {hrv.stress > 60 ? 'Necesitas recuperación' : 'Cuerpo listo para entrenar'}
                             </p>
                         </div>

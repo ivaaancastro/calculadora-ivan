@@ -25,17 +25,17 @@ export const EstimatedFtpCard = ({
                 <div className="flex items-center gap-2 mb-10">
                     <h3 className="text-2xs font-bold text-ink-4 uppercase tracking-[0.1em]">FTP Estimado</h3>
                     <InfoTooltip text="Umbral funcional de potencia proyectado (eFTP)." />
-                    <span className="text-2xs font-bold text-emerald-600 bg-emerald-50 dark:bg-emerald-950/20 px-2.5 py-0.5 rounded-lg uppercase tracking-widest border border-emerald-100 dark:border-emerald-900/30 ml-2">Modelo</span>
+                    <span className="text-2xs font-bold text-emerald-600 bg-emerald-50 dark:bg-emerald-950/20 px-2.5 py-0.5 rounded-lg uppercase tracking-[0.08em] border border-emerald-100 dark:border-emerald-900/30 ml-2">Modelo</span>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
                     <div className="flex flex-col">
                         <div className="flex items-baseline gap-2">
                             <span className="text-4xl font-bold tracking-tighter text-ink-soft leading-none">{ftp?.eFTP || '--'}</span>
-                            <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">Vatios</span>
+                            <span className="text-xs font-bold text-slate-400 uppercase tracking-[0.08em]">Vatios</span>
                         </div>
                         {ftp?.wPerKg && (
-                            <p className="text-2xl font-bold text-power tracking-tighter mt-3">{ftp.wPerKg} <span className="text-2xs text-slate-400 font-bold uppercase tracking-widest ml-1">W/kg</span></p>
+                            <p className="text-2xl font-bold text-power tracking-tighter mt-3">{ftp.wPerKg} <span className="text-2xs text-slate-400 font-bold uppercase tracking-[0.08em] ml-1">W/kg</span></p>
                         )}
 
                         {ftpDiff !== null && (
@@ -65,7 +65,7 @@ export const EstimatedFtpCard = ({
                                 </AreaChart>
                             </ResponsiveContainer>
                         ) : (
-                            <div className="h-full flex items-center justify-center text-slate-400 text-2xs font-bold uppercase tracking-widest bg-sunken-7 rounded-3xl border border-dashed border-slate-200 dark:border-zinc-800/50">No hay datos de potencia</div>
+                            <div className="h-full flex items-center justify-center text-slate-400 text-2xs font-bold uppercase tracking-[0.08em] bg-sunken-7 rounded-3xl border border-dashed border-slate-200 dark:border-zinc-800/50">No hay datos de potencia</div>
                         )}
                     </div>
                 </div>
