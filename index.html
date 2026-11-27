@@ -25,11 +25,18 @@
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="apple-mobile-web-app-title" content="Forma" />
-  <meta name="theme-color" content="#06080f" />
+  <meta name="theme-color" content="#f2f2f7" />
   <script>
-    if (localStorage.getItem('theme') === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-      document.documentElement.classList.add('dark');
-    }
+    // Primera pintura: misma lectura que src/hooks/useTheme.js; los colores son --canvas de tokens.css.
+    (function () {
+      var stored = null;
+      var systemDark = false;
+      try { stored = localStorage.getItem('theme'); } catch (e) { /* sin almacenamiento */ }
+      try { systemDark = window.matchMedia('(prefers-color-scheme: dark)').matches; } catch (e) { /* sin matchMedia */ }
+      var dark = stored === 'dark' || (stored !== 'light' && systemDark);
+      document.documentElement.classList.toggle('dark', dark);
+      document.querySelector('meta[name="theme-color"]').setAttribute('content', dark ? '#000000' : '#f2f2f7');
+    })();
   </script>
 
 

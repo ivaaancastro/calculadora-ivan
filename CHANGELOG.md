@@ -7,6 +7,13 @@ y este proyecto adhiere a [Semantic Versioning](https://semver.org/lang/es/).
 
 ## [Unreleased]
 
+### Changed — Tema del sistema y mapa según el tema (`feat/tema-sistema`)
+Spec, plan y tareas en `docs/branches/feat/tema-sistema/`.
+- `feat(tema):` por defecto se sigue el tema del sistema, también al cambiar con la app abierta; el botón de la cabecera vuelve a «Sistema» cuando coincide con él.
+- `feat(ajustes):` grupo «Apariencia» en Ajustes → General (Sistema · Claro · Oscuro).
+- `feat(mapa):` las teselas siguen al tema activo; Claro, Oscuro y Satélite se pueden elegir a mano.
+- `fix(tema):` barra del navegador (`theme-color`) y controles nativos según el tema; la app carga aunque el almacenamiento falle.
+
 ### Changed — Capa 6: v2 por defecto, CI rápido y acabado premium (PR #140–#163)
 Spec, plan, auditoría y tareas en `docs/branches/feat/capa6-v2-premium/`.
 - **CI rápido** (#141): un workflow con dos jobs en paralelo y sin capturas ni `style-diff`; mediana de 2 min 44 s por PR (antes 20–30 min). `layout` y `mobile` en DOM (desbordamiento, barras fijas, solapes, táctil ≥ 44 px).

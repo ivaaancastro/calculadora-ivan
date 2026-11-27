@@ -12,7 +12,12 @@
   font-family: theme('fontFamily.sans');
   line-height: 1.5;
   font-weight: 400;
-  color-scheme: light dark;
+  color-scheme: light;
+}
+
+/* Los controles nativos siguen al tema de la app, no al del sistema. */
+:root.dark {
+  color-scheme: dark;
 }
 
 html, body {

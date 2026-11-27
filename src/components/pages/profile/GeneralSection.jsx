@@ -2,6 +2,7 @@ import React from 'react';
 import { Activity, Heart, Weight, User, Camera, Loader2, Mail, IdCard } from 'lucide-react';
 import { Input } from '../../ui';
 import { SettingsGroup, SettingsRow, SettingsBlock } from './SettingsSection';
+import { AppearanceGroup } from './AppearanceGroup';
 
 const Unit = ({ children }) => <span className="w-8 text-[12px] font-medium text-ink-4">{children}</span>;
 
@@ -98,5 +99,7 @@ export const GeneralSection = ({ formData, isUploadingAvatar, handleAvatarUpload
                 <Unit>CTL</Unit>
             </SettingsRow>
         </SettingsGroup>
+
+        <AppearanceGroup />
     </div>
 );
