@@ -13,6 +13,7 @@
 - **Capa 6 hecha** (#140–#163, `docs/branches/feat/capa6-v2-premium/`): v2 única (sin v1), CI de < 3 min sin capturas, secreto de Strava en la Edge Function `strava-token`, tema aplanado (`skin.css` mínimo, texto ≥ 11 px), paleta «Neón profundo» con una sola fuente de color, guía `docs/design/forma.md` y pantallas premium sin métricas repetidas. Pantallas aprobadas por el usuario (2026-11-26). **Pendiente:** decidir el merge a `main` (cambia producción). Siguiente capa: 7 (iOS).
 - **Hecho antes (resumen en `CHANGELOG.md`, detalle en el historial de git):** Capas 0–5 del rediseño y Fase Premium A–D (PR #50–#139). Cada rama conserva su carpeta en `docs/branches/` (D12: se quedan en el repositorio, visibles en GitHub).
 - **Tema (B3, `feat/tema-sistema`):** preferencia Sistema (sin clave `theme`) / `light` / `dark` en `useTheme.js`; `index.html` repite la lectura y los colores de `--canvas` (lo vigila `indexTheme.test.jsx`). Para la Capa 7: en la PWA de iOS en claro la barra de estado queda con texto blanco (`black-translucent`).
+- **Datos (B8a, `docs/auditoria-datos`):** informe y recortes en `docs/branches/docs/auditoria-datos/informe.md`. Urgente: el auto-sync de Intervals rompe la app (S1, `fix` aparte; también en `main`). Cifras simuladas: falta que el usuario ejecute `consultas.sql`.
 - **Pendiente después:** Capa 7 (iOS). Roadmap: `docs/branches/feat/webapp-redesign/plan.md`.
 - **Pendientes de producto:** funciones de pago a futuro (no prometer gratuidad); Strava se replantea por sus límites de API y se estudiará **Garmin**. Deuda de la Capa 4: `robots.txt`/`og:image` y CSS bloqueante.
 - `feat/webapp-redesign` remoto = intento descartado: no hacer `git pull` ahí ni usar `archive/webapp-redesign-v1` ni `stash@{0}`.
@@ -36,4 +37,4 @@
 Todas en `docs/specs/` y `docs/branches/`. Tabla completa con estados: `docs/memory/` (archivo histórico, sección 3).
 
 ---
-Última actualización: 2026-11-26
+Última actualización: 2026-11-27

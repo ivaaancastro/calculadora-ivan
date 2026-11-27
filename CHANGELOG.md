@@ -7,6 +7,10 @@ y este proyecto adhiere a [Semantic Versioning](https://semver.org/lang/es/).
 
 ## [Unreleased]
 
+### Docs — Auditoría de carga de datos (`docs/auditoria-datos`, B8a)
+Informe, mediciones y `consultas.sql` en `docs/branches/docs/auditoria-datos/`. Sin cambios de código.
+- `docs(auditoria-datos):` medido con datos simulados qué carga cada pantalla; confirmados el bucle del auto-sync de Intervals y el resto de sospechas, con recortes priorizados.
+
 ### Changed — Tema del sistema y mapa según el tema (`feat/tema-sistema`)
 Spec, plan y tareas en `docs/branches/feat/tema-sistema/`.
 - `feat(tema):` por defecto se sigue el tema del sistema, también al cambiar con la app abierta; el botón de la cabecera vuelve a «Sistema» cuando coincide con él.
