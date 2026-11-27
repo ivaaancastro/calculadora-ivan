@@ -9,10 +9,10 @@ Base auditada: `develop` @ `cb595b8` (igual que `main` salvo el merge de la rele
 
 | Bloque | Oleada | Depende de | Estado | Rama | PR | Sesión |
 |--------|--------|-----------|--------|------|----|--------|
-| B1 Cálculos centralizados | 1 | — | Spec (en redacción) | `feat/calculos-centralizados` | — | `b1-calculos` |
-| B3 Tema | 1 | — | Spec (en redacción) | `feat/tema-sistema` | — | `b3-tema` |
-| B5 Popovers de información | 1 | código: tras B1 | Spec (en redacción) | `feat/popovers-info` | — | `b5-popovers` |
-| B8a Auditoría de datos | 1 | — | Spec (en redacción) | `docs/auditoria-datos` | — | `b8a-datos` |
+| B1 Cálculos centralizados | 1 | — | Por aprobar | `feat/calculos-centralizados` | — | `b1-calculos` |
+| B3 Tema | 1 | — | Por aprobar | `feat/tema-sistema` | — | `b3-tema` |
+| B5 Popovers de información | 1 | código: tras B1 | Por aprobar | `feat/popovers-info` | — | `b5-popovers` |
+| B8a Auditoría de datos | 1 | — | Por aprobar | `docs/auditoria-datos` | — | `b8a-datos` |
 | B2 Detalle de actividad | 2 | B1, B5 (y B3 por el mapa) | Bloqueado | — | — | — |
 | B4 Calendario | 2 | B1, B5 | Bloqueado | — | — | — |
 | B7 Modo por deporte | 3 | B1 + brainstorming | Bloqueado | — | — | — |
@@ -90,6 +90,8 @@ Cada sesión usa su worktree desde `origin/develop` y redacta `spec.md` y `plan.
 | B3 | `useTheme.js`, `index.html`, `vite.config.js`, `Navbar.jsx`, `activity/{ActivityMap.jsx,mapTiles.js}`, ajuste en Perfil si se aprueba; `e2e/layout`, `e2e/detail-map` | `src/utils` de métricas, tarjetas | 5182 / 5282 |
 | B8a | `docs/branches/docs/auditoria-datos/` (solo documentos; scripts de medida en scratchpad) | `src/` | 5184 / — |
 | B5 | `components/ui/*Tooltip*` y componente nuevo, llamadas en `fitness/*`, `detail/DetailHero`, `title=` informativos, `tokens.css`, sus tests, `e2e/mobile` | motores de cálculo | 5183 / 5283 |
+
+**B1 propone 3 PR:** fechas y zonas; PMC, TSS y carga; distribución de carga. B5 implementa tras el tercero.
 
 **Orden de código:** B1, B3 y B8a en paralelo. B5 redacta su spec a la vez e implementa cuando B1 esté en `develop` (comparten las tarjetas de Rendimiento y `CalendarMonthView`).
 **Merges:** de uno en uno. Antes de cada PR, la sesión actualiza su rama con `develop` y solo entonces añade su entrada en `CHANGELOG.md` y `MEMORY.md`. La sesión PM revisa diff, CI y navegador antes de mergear. Nunca a `main`.
