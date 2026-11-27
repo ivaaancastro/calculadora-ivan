@@ -144,3 +144,48 @@ test.describe('Shell', () => {
     await expect(button).toBeVisible();
   });
 });
+
+test.describe('Tema del sistema', () => {
+  test.beforeEach(async ({ page }) => {
+    await page.emulateMedia({ colorScheme: 'light' });
+    await setupApp(page, { authenticated: true, theme: null });
+    await gotoReady(page, '/profile?section=general');
+  });
+
+  const isDark = (page) => () => page.evaluate(() => document.documentElement.classList.contains('dark'));
+  const stored = (page) => page.evaluate(() => localStorage.getItem('theme'));
+  const themeColor = (page) => page.locator('meta[name="theme-color"]');
+
+  test('sigue al sistema en vivo, también la barra y los controles nativos', async ({ page }) => {
+    await expect(themeColor(page)).toHaveAttribute('content', 'rgb(242, 242, 247)');
+    await page.emulateMedia({ colorScheme: 'dark' });
+    await expect.poll(isDark(page)).toBe(true);
+    await expect(themeColor(page)).toHaveAttribute('content', 'rgb(0, 0, 0)');
+    await expect(page.locator('html')).toHaveCSS('color-scheme', 'dark');
+    expect(await stored(page)).toBeNull();
+  });
+
+  test('Ajustes fija el tema, lo recuerda y vuelve a Sistema', async ({ page }) => {
+    const group = page.getByRole('group', { name: 'Tema' });
+    for (const option of await group.getByRole('button').all()) {
+      expect((await option.boundingBox()).height).toBeGreaterThanOrEqual(44);
+    }
+    await group.getByRole('button', { name: 'Oscuro' }).click();
+    await expect.poll(isDark(page)).toBe(true);
+    await page.reload();
+    await expect(group.getByRole('button', { name: 'Oscuro' })).toHaveAttribute('aria-pressed', 'true');
+    expect(await isDark(page)()).toBe(true);
+    await group.getByRole('button', { name: 'Sistema' }).click();
+    await expect.poll(isDark(page)).toBe(false);
+    expect(await stored(page)).toBeNull();
+    expect(await horizontalOverflow(page)).toBe(0);
+  });
+
+  test('dos toques en el interruptor dejan la preferencia en Sistema', async ({ page }) => {
+    const toggle = page.getByRole('button', { name: 'Cambiar tema' });
+    await toggle.click();
+    await expect.poll(() => stored(page)).toBe('dark');
+    await toggle.click();
+    await expect.poll(() => stored(page)).toBeNull();
+  });
+});

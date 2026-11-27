@@ -43,6 +43,14 @@ test.describe('Detalle: mapa (v2)', () => {
     });
   }
 
+  test('las teselas siguen al tema activo', async ({ page }) => {
+    await gotoReady(page, `/activity/${DETAIL_ACTIVITY_ID}`);
+    const tile = page.locator('.leaflet-container').filter({ visible: true }).first().locator('img.leaflet-tile').first();
+    await expect(tile).toHaveAttribute('src', /World_Light_Gray_Base/);
+    await page.getByRole('button', { name: 'Cambiar tema' }).click();
+    await expect(tile).toHaveAttribute('src', /World_Dark_Gray_Base/);
+  });
+
   test('pide solo los streams de la actividad abierta', async ({ page }) => {
     const perId = page.waitForRequest(
       (r) => r.url().includes('select=streams_data') && r.url().includes(`id=eq.${OLD_STREAMS_ACTIVITY_ID}`),

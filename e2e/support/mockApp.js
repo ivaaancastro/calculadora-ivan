@@ -401,7 +401,7 @@ export async function setupApp(page, { authenticated = false, theme = 'light', s
         // borrado de cuenta, una recarga no debe volver a iniciar sesión.
         if (!sessionStorage.getItem('e2e-seeded')) {
           sessionStorage.setItem('e2e-seeded', '1');
-          localStorage.setItem('theme', th);
+          if (th) localStorage.setItem('theme', th); // null: sin preferencia (Sistema)
           if (auth) localStorage.setItem(key, JSON.stringify(session));
         }
       } catch {
