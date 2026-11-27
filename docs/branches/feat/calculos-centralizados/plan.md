@@ -1,6 +1,6 @@
 # Plan — B1 · Cálculos centralizados
 
-Deriva de [spec.md](spec.md). Sin aprobación de la spec y de D1–D5 no hay `tasks.md` ni código.
+Deriva de [spec.md](spec.md). Aprobado el 2026-11-27 (D1–D5 en A). Progreso en [tasks.md](tasks.md).
 
 ## Enfoque
 **Elegido:** extender los motores actuales (`tssEngine` como único PMC) y sacar a dos módulos

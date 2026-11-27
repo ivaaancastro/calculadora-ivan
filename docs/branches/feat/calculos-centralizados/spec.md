@@ -5,7 +5,7 @@
 - **Título:** Una sola fuente de verdad para carga, forma, zonas y fechas
 - **Autor:** agente B1 (Oleada 1)
 - **Fecha:** 2026-11-27
-- **Estado:** pendiente de aprobación (decisiones D1–D5)
+- **Estado:** en curso — aprobada por el usuario el 2026-11-27 con **D1–D5 en la opción A**
 
 ## 2. Objetivo
 Que CTL, ATL, TSB, TSS, zonas y carga salgan de un único sitio y digan lo mismo en todas las
