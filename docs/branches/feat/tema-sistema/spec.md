@@ -5,7 +5,7 @@
 - **Título:** Seguir el tema del sistema por defecto y teselas del mapa según el tema
 - **Autor:** agente B3 (Oleada 1)
 - **Fecha:** 2026-11-27
-- **Estado:** en curso (aprobada por el usuario el 2026-11-27, D1–D5 en A)
+- **Estado:** implementada (aprobada por el usuario el 2026-11-27, D1–D5 en A)
 
 ## 2. Objetivo
 Por defecto Forma sigue el tema del sistema, también cuando cambia con la app abierta, y el mapa del detalle usa teselas claras u oscuras según el tema activo.
@@ -26,24 +26,24 @@ Estado actual, confirmado en el código:
 ## 4. Requisitos funcionales
 Las letras D remiten a las decisiones de la sección 8 (aquí, la opción recomendada).
 
-- [ ] **RF1 — Preferencia.** Tres valores: Sistema, Claro, Oscuro. Sistema es el valor por defecto y se representa sin clave `theme` en `localStorage`; Claro y Oscuro guardan `light` / `dark`. Un valor desconocido equivale a Sistema.
-- [ ] **RF2 — En vivo.** En Sistema, cambiar el tema del sistema cambia la app sin recargar, en cualquier ruta. Con Claro u Oscuro, no.
-- [ ] **RF3 — Preferencias guardadas.** Quien ya tiene `theme` guardado lo conserva (D4).
-- [ ] **RF4 — Interruptor de la cabecera.** Alterna claro/oscuro. Si el resultado coincide con el sistema, vuelve a Sistema; si no, queda fijo (D2).
-- [ ] **RF5 — Ajustes.** En Ajustes → General, grupo «Apariencia» con control segmentado Sistema · Claro · Oscuro. Se aplica al instante, es de este dispositivo y no cuenta como «Cambios sin guardar» (D1).
-- [ ] **RF6 — Mapa.** Las teselas empiezan en el tema activo y le siguen en vivo. El selector Claro · Oscuro · Satélite se mantiene: una elección distinta del tema activo dura mientras el mapa está abierto; elegir la del tema activo vuelve a seguirlo (D3). El halo de la ruta acompaña a las teselas.
-- [ ] **RF7 — Barra del navegador.** `meta theme-color` toma el valor de `--canvas` del tema activo, desde la primera pintura y en cada cambio. El manifest no cambia (D5).
-- [ ] **RF8 — Controles nativos.** `color-scheme` coincide con el tema activo.
-- [ ] **RF9 — Robustez.** Si `localStorage` o `matchMedia` fallan o no existen, la app carga (Sistema o claro) y el interruptor funciona durante la sesión.
+- [x] **RF1 — Preferencia.** Tres valores: Sistema, Claro, Oscuro. Sistema es el valor por defecto y se representa sin clave `theme` en `localStorage`; Claro y Oscuro guardan `light` / `dark`. Un valor desconocido equivale a Sistema.
+- [x] **RF2 — En vivo.** En Sistema, cambiar el tema del sistema cambia la app sin recargar, en cualquier ruta. Con Claro u Oscuro, no.
+- [x] **RF3 — Preferencias guardadas.** Quien ya tiene `theme` guardado lo conserva (D4).
+- [x] **RF4 — Interruptor de la cabecera.** Alterna claro/oscuro. Si el resultado coincide con el sistema, vuelve a Sistema; si no, queda fijo (D2).
+- [x] **RF5 — Ajustes.** En Ajustes → General, grupo «Apariencia» con control segmentado Sistema · Claro · Oscuro. Se aplica al instante, es de este dispositivo y no cuenta como «Cambios sin guardar» (D1).
+- [x] **RF6 — Mapa.** Las teselas empiezan en el tema activo y le siguen en vivo. El selector Claro · Oscuro · Satélite se mantiene: una elección distinta del tema activo dura mientras el mapa está abierto; elegir la del tema activo vuelve a seguirlo (D3). El halo de la ruta acompaña a las teselas.
+- [x] **RF7 — Barra del navegador.** `meta theme-color` toma el valor de `--canvas` del tema activo, desde la primera pintura y en cada cambio. El manifest no cambia (D5).
+- [x] **RF8 — Controles nativos.** `color-scheme` coincide con el tema activo.
+- [x] **RF9 — Robustez.** Si `localStorage` o `matchMedia` fallan o no existen, la app carga (Sistema o claro) y el interruptor funciona durante la sesión.
 
 ## 5. Criterios de aceptación
-- [ ] Sin preferencia guardada, emular claro/oscuro con la app abierta cambia la clase `dark`, las teselas y `theme-color` sin recargar.
-- [ ] Elegir Oscuro en Ajustes con el sistema en claro sobrevive a recargar; volver a Sistema borra la clave.
-- [ ] Dos toques en el interruptor dejan la preferencia en Sistema.
-- [ ] No hay destello del tema contrario al cargar.
-- [ ] Control de Ajustes con objetivos ≥ 44 px a 390 px y sin desbordamiento.
-- [ ] `npm run verify` en verde, sin subir líneas base; CI < 5 min.
-- [ ] Capturas antes/después a 390 y 1440 px, claro y oscuro (Ajustes y detalle con mapa), en el PR.
+- [x] Sin preferencia guardada, emular claro/oscuro con la app abierta cambia la clase `dark`, las teselas y `theme-color` sin recargar.
+- [x] Elegir Oscuro en Ajustes con el sistema en claro sobrevive a recargar; volver a Sistema borra la clave.
+- [x] Dos toques en el interruptor dejan la preferencia en Sistema.
+- [x] No hay destello del tema contrario al cargar.
+- [x] Control de Ajustes con objetivos ≥ 44 px a 390 px y sin desbordamiento.
+- [x] `npm run verify` en verde, sin subir líneas base; CI < 5 min.
+- [x] Capturas antes/después a 390 y 1440 px, claro y oscuro (Ajustes y detalle con mapa), en el PR.
 
 ## 6. Diseño técnico
 - **Hooks:** `src/hooks/useTheme.js`: almacén compartido `{ preference, theme }`, lectura y escritura protegidas, un solo oyente de `matchMedia`, `setPreference`, `toggleTheme`, `initTheme`. Aplica clase `dark` y `theme-color` (leído de `--canvas`, sin colores sueltos). Sigue devolviendo `theme` y `toggleTheme`: los consumidores actuales no cambian.
