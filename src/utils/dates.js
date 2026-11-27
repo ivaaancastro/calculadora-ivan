@@ -26,3 +26,49 @@ export const toDateKey = (value) => {
     if (!d || Number.isNaN(d.getTime())) return '';
     return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
 };
+
+/**
+ * Día de una actividad. Su fecha ya es la hora local del deportista (Strava la manda con una `Z`
+ * que no significa UTC), así que cuenta el día escrito. Para un `Date`, el día local.
+ */
+export const activityDayKey = (value) => {
+    if (typeof value === 'string') {
+        const day = value.slice(0, 10);
+        return parseDateKey(day) ? day : '';
+    }
+    return value == null ? '' : toDateKey(value);
+};
+
+/** Día de un entreno planificado: se guarda como instante (medianoche local), cuenta el día local. */
+export const planDayKey = (value) => (value == null ? '' : toDateKey(value));
+
+/** Hoy, en el calendario local. */
+export const todayKey = (now = new Date()) => toDateKey(now);
+
+/** Clave desplazada `n` días de calendario (no suma horas: no le afectan los cambios de hora). */
+export const addDays = (key, n) => {
+    const d = parseDateKey(key);
+    if (!d) return '';
+    d.setDate(d.getDate() + n);
+    return toDateKey(d);
+};
+
+/** Lunes de la semana de `key`. */
+export const startOfWeekKey = (key) => {
+    const d = parseDateKey(key);
+    return d ? addDays(key, -((d.getDay() + 6) % 7)) : '';
+};
+
+const SHORT_WEEKDAYS = ['dom', 'lun', 'mar', 'mié', 'jue', 'vie', 'sáb'];
+const SHORT_MONTHS = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'];
+
+/**
+ * «lun 15 jun» (con `{ year: true }`, «lun 15 jun 2026»). Recibe un `Date`, una clave de día o la
+ * fecha de una actividad; para un plan, pásale `planDayKey(plan.date)`.
+ */
+export const formatDayShort = (value, { year = false } = {}) => {
+    const d = parseDateKey(activityDayKey(value));
+    if (!d) return '';
+    const text = `${SHORT_WEEKDAYS[d.getDay()]} ${d.getDate()} ${SHORT_MONTHS[d.getMonth()]}`;
+    return year ? `${text} ${d.getFullYear()}` : text;
+};

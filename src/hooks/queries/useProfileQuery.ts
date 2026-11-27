@@ -14,7 +14,7 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "../../supabase";
 import { useAppStore } from "../../store/useAppStore";
-import { calcZonesFromLTHR } from "../../utils/tssEngine";
+import { calcZonesFromLTHR } from "../../utils/zones";
 import toast from "react-hot-toast";
 
 /** Obtiene el user de la sesión activa, o null si no hay sesión. */

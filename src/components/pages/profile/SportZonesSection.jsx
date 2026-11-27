@@ -1,8 +1,8 @@
 import React from 'react';
 import { Heart, HeartPulse, Timer, Zap } from 'lucide-react';
-import { LTHR_ZONE_PCT } from '../../../utils/tssEngine';
+import { calcPaceZones, LTHR_ZONE_PCT, FCMAX_PCT, POWER_ZONES } from '../../../utils/zones';
 import { Input, Segmented } from '../../ui';
-import { calcPaceZones, FCMAX_PCT, POWER_ZONES, ZONE_COLORS, HR_LABELS } from './zonesCalc';
+import { ZONE_COLORS, HR_LABELS } from './zonesCalc';
 import { SettingsGroup, SettingsRow } from './SettingsSection';
 
 /** Nombre de cada zona de FC (las tablas de porcentajes no lo traen: antes salía vacío). */

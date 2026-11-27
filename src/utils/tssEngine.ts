@@ -12,6 +12,8 @@
  * HRSS = (TRIMP / TRIMP_1h@LTHR) × 100
  */
 
+import { ZONE_PACE } from './zones';
+
 // ── Tipos compartidos ────────────────────────────────────────────────────────
 
 export type SportCategory =
@@ -22,11 +24,6 @@ export type SportCategory =
   | 'yoga'
   | 'strength'
   | 'other';
-
-export interface ZonePct {
-  pMin: number;
-  pMax: number;
-}
 
 export interface SportLoadEntry {
   fitness: number;
@@ -168,17 +165,6 @@ export interface PlannedWorkout {
   blocks?: WorkoutBlock[];
 }
 
-// ── Porcentajes de zona (Joe Friel 7 zonas, % de LTHR) ──────────────────────
-export const LTHR_ZONE_PCT: ZonePct[] = [
-  { pMin: 0.00, pMax: 0.81 },  // Z1 — Recuperación
-  { pMin: 0.81, pMax: 0.89 },  // Z2 — Aeróbico
-  { pMin: 0.90, pMax: 0.93 },  // Z3 — Tempo
-  { pMin: 0.94, pMax: 0.99 },  // Z4 — Subumbral
-  { pMin: 1.00, pMax: 1.02 },  // Z5 — Superumbral
-  { pMin: 1.03, pMax: 1.06 },  // Z6 — Capacidad aeróbica
-  { pMin: 1.06, pMax: 1.15 },  // Z7 — Anaeróbico
-];
-
 /**
  * Configuración de la contribución al PMC por tipo de deporte.
  * - fitness:           % de contribución al CTL (forma crónica)
@@ -237,24 +223,6 @@ export function getSportCategory(typeStr: string): SportCategory {
     t.includes('bike')
   ) return 'ride';
   return 'other';
-}
-
-// ── Generación de zonas desde LTHR ────────────────────────────────────────────
-/**
- * Genera un array de 7 zonas de FC a partir del LTHR configurado.
- * La Z1 empieza en 0 (reposo); la Z7 acaba en HRmax.
- */
-export function calcZonesFromLTHR(
-  lthr: number,
-  maxHr: number
-): { min: number; max: number }[] {
-  return LTHR_ZONE_PCT.map((z, i) => ({
-    min: i === 0 ? 0 : Math.round(lthr * z.pMin),
-    max:
-      i === 6
-        ? maxHr || Math.round(lthr * z.pMax)
-        : Math.round(lthr * z.pMax),
-  }));
 }
 
 // ── Constantes de género Banister ─────────────────────────────────────────────
@@ -553,13 +521,7 @@ export function estimateTssFromBlocks(
   const category = getSportCategory(sportType);
   const ftp = Number(settings?.bike?.ftp || settings?.ftp || 0);
 
-  // Velocidades de referencia por zona para estimar duración a partir de distancia (min/km ó min/100m)
-  const ZONE_PACE: Record<string, Record<string, number>> = {
-    Run:  { Z1: 7.0, R12: 6.5, Z2: 6.0, R23: 5.6, Z3: 5.2, R34: 4.85, Z4: 4.5, R45: 4.15, Z5: 3.8, Z6: 3.2 },
-    Ride: { Z1: 3.0, R12: 2.75, Z2: 2.5, R23: 2.35, Z3: 2.2, R34: 2.1, Z4: 2.0, R45: 1.85, Z5: 1.7, Z6: 1.5 },
-    Swim: { Z1: 3.0, R12: 2.75, Z2: 2.5, R23: 2.35, Z3: 2.2, R34: 2.1, Z4: 2.0, R45: 1.85, Z5: 1.7, Z6: 1.5 },
-  };
-  const sportPace = ZONE_PACE[sportType] || ZONE_PACE.Run;
+  const sportPace = ZONE_PACE[sportType as keyof typeof ZONE_PACE] || ZONE_PACE.Run;
 
   let totalTSS = 0;
 
@@ -567,7 +529,7 @@ export function estimateTssFromBlocks(
   const getMins = (item: WorkoutBlock): number => {
     const dur = Number(item.duration) || 0;
     return item.unit === 'dist'
-      ? dur * (sportPace[item.zone ?? 'Z2'] ?? 5)
+      ? dur * (sportPace[(item.zone ?? 'Z2') as keyof typeof sportPace] ?? 5)
       : dur;
   };
 

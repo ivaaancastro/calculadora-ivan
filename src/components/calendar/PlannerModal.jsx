@@ -6,6 +6,7 @@ import { Button, Input, Modal, Segmented, Select } from '../ui';
 import { WORKOUT_TEMPLATES } from '../../utils/calendarTemplates';
 import { DurationInput } from './DurationInput';
 import { zoneColors } from './calendarHelpers';
+import { POWER_ZONES, POWER_RAMPS } from '../../utils/zones';
 
 export const PlannerModal = ({
     addBlock,
@@ -159,15 +160,6 @@ export const PlannerModal = ({
                                         const isStr = newPlan.type === 'WeightTraining';
                                         const canUsePower = newPlan.type === 'Ride';
                                         const ftp = settings?.bike?.ftp || 200;
-                                        const POWER_ZONES_DEF = [
-                                            { label: 'Rec', pMin: 0, pMax: 0.55 },
-                                            { label: 'Endur', pMin: 0.56, pMax: 0.75 },
-                                            { label: 'Tempo', pMin: 0.76, pMax: 0.90 },
-                                            { label: 'Umbral', pMin: 0.91, pMax: 1.05 },
-                                            { label: 'VO2', pMin: 1.06, pMax: 1.20 },
-                                            { label: 'AnC', pMin: 1.21, pMax: 1.50 },
-                                            { label: 'Neu', pMin: 1.51, pMax: 2.00 },
-                                        ];
                                         // Sport-specific zone labels
                                         const sportKey = newPlan.type === 'Ride' ? 'bike' : newPlan.type === 'Swim' ? 'swim' : 'run';
                                         const sportZones = settings?.[sportKey]?.zones || settings?.run?.zones || [];
@@ -177,12 +169,14 @@ export const PlannerModal = ({
                                             ? [{ v: 'Z1', l: 'Ligero' }, { v: 'Z2', l: 'Mod.' }, { v: 'Z3', l: 'Duro' }, { v: 'Z4', l: 'Máx.' }]
                                             : currentZoneMode === 'power' && canUsePower
                                                 ? [
-                                                    ...POWER_ZONES_DEF.map((pz, i) => ({
+                                                    ...POWER_ZONES.map((pz, i) => ({
                                                         v: `Z${i + 1}`,
-                                                        l: `Z${i + 1} ${pz.label} ${Math.round(ftp * pz.pMin)}-${Math.round(ftp * pz.pMax)}w`,
+                                                        l: `Z${i + 1} ${pz.short} ${Math.round(ftp * pz.pMin)}-${Math.round(ftp * pz.pMax)}w`,
                                                     })),
-                                                    { v: 'R23', l: `Rampa Z2→Z3 ${Math.round(ftp * 0.65)}-${Math.round(ftp * 0.90)}w` },
-                                                    { v: 'R34', l: `Rampa Z3→Z4 ${Math.round(ftp * 0.83)}-${Math.round(ftp * 1.05)}w` },
+                                                    ...Object.entries(POWER_RAMPS).map(([v, r]) => ({
+                                                        v,
+                                                        l: `${r.label} ${Math.round(ftp * r.pMin)}-${Math.round(ftp * r.pMax)}w`,
+                                                    })),
                                                 ]
                                                 : [
                                                     ...(sportZones || []).map((z, i) => ({
@@ -208,10 +202,8 @@ export const PlannerModal = ({
                                         };
                                         // Helper: get midpoint watts for a zone or ramp
                                         const getWattsForZone = (zone) => {
-                                            if (zone === 'R23') return Math.round(ftp * (0.65 + 0.90) / 2);
-                                            if (zone === 'R34') return Math.round(ftp * (0.83 + 1.05) / 2);
                                             const zIdx = parseInt(zone.replace('Z', '')) - 1;
-                                            const pz = POWER_ZONES_DEF[zIdx] || POWER_ZONES_DEF[1];
+                                            const pz = POWER_RAMPS[zone] || POWER_ZONES[zIdx] || POWER_ZONES[1];
                                             return Math.round(ftp * (pz.pMin + pz.pMax) / 2);
                                         };
                                         // Helper: when zone changes in power mode, auto-update target watts

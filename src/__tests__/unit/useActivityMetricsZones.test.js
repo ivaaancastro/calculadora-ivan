@@ -41,4 +41,19 @@ describe('useActivityMetrics por deporte', () => {
         const r = renderHook(() => useActivityMetrics({ type: 'Carrera' }, null, { run: {}, bike: {} })).result.current;
         expect(r.paceThresholdIsDefault).toBe(true);
     });
+
+    it('Ride usa las zonas de FC de bici, no las de carrera', () => {
+        const zonesFrom = (base) => Array.from({ length: 7 }, (_, i) => ({ min: i ? base + i * 10 : 0, max: base + i * 10 + 9 }));
+        const s = { run: { zones: zonesFrom(150) }, bike: { ftp: 200, zones: zonesFrom(100) } };
+        const streams = { time, heartrate: { data: Array(N).fill(165) } };
+        const { result } = renderHook(() => useActivityMetrics({ type: 'Ride' }, streams, s));
+        expect(result.current.exactZoneAnalysis[6].pct).toBe(100);
+    });
+
+    it('un valor entre dos rangos cuenta en la zona inferior', () => {
+        const s = { run: { zones: [0, 137, 151, 158, 168, 173, 178].map((min, i) => ({ min, max: [136, 150, 156, 166, 171, 178, 200][i] })) }, bike: {} };
+        const streams = { time, heartrate: { data: Array(N).fill(157) } };
+        const { result } = renderHook(() => useActivityMetrics({ type: 'Run' }, streams, s));
+        expect(result.current.exactZoneAnalysis[2].pct).toBe(100);
+    });
 });
