@@ -4,7 +4,7 @@
 - **ID:** `b8a-auditoria-datos`
 - **Rama:** `docs/auditoria-datos` (desde `origin/develop`, `cb595b8`)
 - **Fecha:** 2026-11-27
-- **Estado:** pendiente de aprobación
+- **Estado:** en curso (aprobada el 2026-11-27: D-1 = A, D-2 = A, D-3 sí)
 
 ## 2. Objetivo
 Medir qué carga cada pantalla (peticiones, tamaño de respuestas, columnas y streams sin usar, paginación y caché) y proponer recortes priorizados con el ahorro estimado. **Solo medir y proponer.** El resultado alimenta B8b (sincronización con Strava, Oleada 4).
