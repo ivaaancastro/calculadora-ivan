@@ -96,11 +96,28 @@ export const calcPaceZones = (thresholdPace) => {
     }));
 };
 
-/** Mínimos de cada zona, en la unidad del dato que se clasifica. */
-export const hrZoneMins = (zones) => zones.map((z) => Number(z.min) || 0);
-// `200 * 0.56` da 112.00000000000001: sin recortar, 112 W caería en la zona anterior.
+/**
+ * Mínimos de FC. En zonas personalizadas, un mínimo que no supera al anterior (p. ej. un campo
+ * vaciado, que se guarda como 0) no es válido: la zona empieza tras el máximo de la anterior y, si
+ * tampoco sirve, queda sin uso.
+ */
+export const hrZoneMins = (zones) => {
+    let last = -Infinity;
+    return zones.map((zone, i) => {
+        let min = Number(zone.min) || 0;
+        if (i > 0 && !(min > last)) {
+            const prevMax = Number(zones[i - 1].max) || 0;
+            if (!(prevMax > last)) return Infinity;
+            min = prevMax + 1;
+        }
+        last = min;
+        return min;
+    });
+};
+/** El mismo vatio mínimo que se muestra: redondeado (FTP 215 → Z2 desde 120 W). */
+export const powerZoneMins = (ftp) => POWER_ZONES.map((z) => Math.round(ftp * z.pMin));
+// Sin recortar los decimales, una velocidad justo en el límite puede caer en la zona anterior.
 const exact = (n) => Number(n.toFixed(9));
-export const powerZoneMins = (ftp) => POWER_ZONES.map((z) => exact(ftp * z.pMin));
 export const paceZoneMins = (thresholdPace) => {
     const speed = 1000 / paceToSec(thresholdPace);
     return PACE_ZONES.map((z) => exact(speed * z.sMin));

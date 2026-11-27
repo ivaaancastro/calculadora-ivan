@@ -77,6 +77,40 @@ describe('zones — clasificación contigua', () => {
     });
 });
 
+describe('zones — mínimos personalizados no válidos', () => {
+    const base = () => calcZonesFromLTHR(168, 190); // mínimos 0 137 151 158 168 173 178
+    const withMin = (i, min) => base().map((z, j) => (j === i ? { ...z, min } : z));
+    const zonesOf = (zones, values) => values.map((v) => zoneIndex(v, hrZoneMins(zones)));
+
+    it('un mínimo vaciado (0) en Z7 no se lleva todas las muestras', () => {
+        expect(zonesOf(withMin(6, 0), [120, 145, 160, 175, 185])).toEqual([0, 1, 3, 5, 6]);
+    });
+
+    it('un mínimo vaciado en medio usa el máximo de la zona anterior', () => {
+        expect(zonesOf(withMin(2, 0), [145, 153, 160])).toEqual([1, 2, 3]);
+    });
+
+    it('un mínimo que no supera al anterior no es válido', () => {
+        for (const min of [100, 151]) {
+            expect(zonesOf(withMin(3, min), [120, 153, 160, 170])).toEqual([0, 2, 3, 4]);
+        }
+    });
+
+    it('sin máximo anterior aprovechable, la zona queda sin uso', () => {
+        const zones = [{ min: 0, max: 0 }, { min: 0, max: 0 }, { min: 150, max: 160 }];
+        expect(zonesOf(zones, [100, 155])).toEqual([0, 2]);
+    });
+});
+
+describe('zones — potencia con FTP no redondo', () => {
+    it('clasifica con el mismo mínimo que se muestra', () => {
+        const mins = powerZoneMins(215);
+        POWER_ZONES.forEach((z, i) => expect(mins[i]).toBe(Math.round(215 * z.pMin)));
+        expect(zoneIndex(119, mins)).toBe(0);
+        expect(zoneIndex(120, mins)).toBe(1); // Z2 se muestra 120–161 W
+    });
+});
+
 describe('zones — deporte', () => {
     const settings = { run: { max: 200 }, bike: { max: 190 } };
 
