@@ -4,11 +4,11 @@ Aprobado el 2026-11-27 (D1–D5 en A). Un PR por sección; no se empieza la sigu
 confirme que la anterior está en `develop`.
 
 ## PR 1 — Fechas y zonas (`feat/calculos-centralizados`)
-- [ ] `dates.js`: claves de día, semana y `formatDayShort`, con tests en tres husos (RF-1, RF-2)
-- [ ] `zones.js`: definiciones únicas y clasificación contigua, con tests (RF-3, RF-4)
-- [ ] Consumidores de zonas y deporte con `sportOf`; borrar copias y código muerto (RF-3, RF-5)
-- [ ] `npm run verify` y revisión visual
-- [ ] Registrar y abrir PR a `develop`
+- [x] `dates.js`: claves de día, semana y `formatDayShort`, con tests en tres husos (RF-1, RF-2)
+- [x] `zones.js`: definiciones únicas y clasificación contigua, con tests (RF-3, RF-4)
+- [x] Consumidores de zonas y deporte con `sportOf`; borrar copias y código muerto (RF-3, RF-5)
+- [x] `npm run verify` y revisión visual
+- [x] Registrar y abrir PR a `develop`
 
 ## PR 2 — PMC, TSS y carga (`feat/calculos-pmc`)
 - [ ] `load.js`: totales (D3), ACWR, rampa, tendencia, monotonía
