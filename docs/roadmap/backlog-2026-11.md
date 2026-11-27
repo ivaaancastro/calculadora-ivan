@@ -9,8 +9,8 @@ Base auditada: `develop` @ `cb595b8` (igual que `main` salvo el merge de la rele
 
 | Bloque | Oleada | Depende de | Estado | Rama | PR | Sesión |
 |--------|--------|-----------|--------|------|----|--------|
-| B1 Cálculos centralizados | 1 | — | Implementando (PR 1 de 3) | `feat/calculos-centralizados` | — | `b1-calculos` |
-| B3 Tema | 1 | — | Implementando | `feat/tema-sistema` | — | `b3-tema` |
+| B1 Cálculos centralizados | 1 | — | En revisión (PR 1 de 3) | `feat/calculos-centralizados` | #168 | `b1-calculos` |
+| B3 Tema | 1 | — | En `develop` | `feat/tema-sistema` | #169 | `b3-tema` |
 | B5 Popovers de información | 1 | código: tras B1 | Bloqueado (spec aprobada) | `feat/popovers-info` | — | `b5-popovers` |
 | B8a Auditoría de datos | 1 | — | Implementando | `docs/auditoria-datos` | — | `b8a-datos` |
 | B2 Detalle de actividad | 2 | B1, B5 (y B3 por el mapa) | Bloqueado | — | — | — |
