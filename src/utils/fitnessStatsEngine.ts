@@ -14,8 +14,7 @@
  * 10. calculateFTPHistory        — Evolución del eFTP en los últimos meses
  * 11. calculateFitnessScore      — Score global 0-100 (VO2max + W/kg + CTL)
  * 12. getPowerProfileBenchmarks  — Comparación W/kg vs nivel Coggan
- * 13. getTrainingStatus          — Estado de entreno (Garmin Training Status style)
- * 14. getHRVAnalysis             — Análisis de variabilidad cardíaca
+ * 13. getHRVAnalysis             — Análisis de variabilidad cardíaca
  */
 import { sportOf } from './sport';
 import { formatDuration } from './formatters';
@@ -176,23 +175,14 @@ export interface PowerProfileBenchmarks {
   eFTP: number;
 }
 
-export interface TrainingStatusResult {
-  status: string;
-  desc: string;
-  color: string;
-  load7: number;
-  load28: number;
-  tsb: number;
-}
-
 export interface HrVAnalysisResult {
   rmssd: number;
-  baseline: number;
-  state: string;
-  color: string;
-  msg: string;
+  baseline: number | null;
+  state: string | null;
+  color: string | null;
+  msg: string | null;
   source: string;
-  stress: number;
+  stress: number | null;
 }
 
 // ── Constantes internas ──────────────────────────────────────────────────────
@@ -1367,107 +1357,61 @@ export function getPowerProfileBenchmarks(
   };
 }
 
-export function getTrainingStatus(activities: Activity[]): TrainingStatusResult | null {
-  if (!activities || activities.length < 5) return null;
-
-  const today = new Date();
-  const d7 = new Date(today);
-  d7.setDate(today.getDate() - 7);
-  const d28 = new Date(today);
-  d28.setDate(today.getDate() - 28);
-
-  const load7 = activities.filter((a) => new Date(a.date) >= d7).reduce((s, a) => s + (a.tss || 45), 0) / 7;
-  const load28 = activities.filter((a) => new Date(a.date) >= d28).reduce((s, a) => s + (a.tss || 45), 0) / 28;
-
-  const tsb = load28 - load7;
-  const loadTrend = load7 / (load28 || 1);
-
-  let status = 'Mantenimiento';
-  let desc = 'Tu carga actual es estable. Estás manteniendo tu nivel físico.';
-  let color = '#3b82f6';
-
-  if (loadTrend > 1.15 && tsb < -5) {
-    status = 'Productivo';
-    desc = 'Carga en aumento y forma en mejora. ¡Sigue así!';
-    color = '#10b981';
-  } else if (loadTrend > 1.45) {
-    status = 'Esfuerzo excesivo';
-    desc = 'La carga sube demasiado rápido. Riesgo de fatiga extrema.';
-    color = '#ef4444';
-  } else if (loadTrend < 0.75 && load7 > 5) {
-    status = 'Recuperación';
-    desc = 'Carga baja para permitir la supercompensación.';
-    color = '#8b5cf6';
-  } else if (loadTrend < 0.4) {
-    status = 'Desentrenamiento';
-    desc = 'Pérdida de condición física por baja carga.';
-    color = '#94a3b8';
-  } else if (tsb > 12 && loadTrend > 0.8) {
-    status = 'Pico de forma';
-    desc = 'Excelente balance entre forma y descanso. ¡Momento de competir!';
-    color = '#f59e0b';
-  }
-
-  return { status, desc, color, load7: Math.round(load7), load28: Math.round(load28), tsb: Math.round(tsb) };
-}
-
+/**
+ * VFC medida (dispositivo o actividades). Sin dato real no hay análisis: no se estima ninguna VFC
+ * (D5), y sin línea base tampoco se inventan el estado ni el estrés.
+ */
 export function getHRVAnalysis(
   activities: Activity[],
-  wellnessData?: { latestHrv: number | string | null; baselineHrv?: number | null } | null
+  wellnessData?: { latestHrv: number | string | null; baselineHrv?: number | null; isSimulated?: boolean } | null
 ): HrVAnalysisResult | null {
   if (!activities || activities.length === 0) return null;
 
-  let currentRMSSD: number | null = null;
-  let source = 'estimated';
-  let baseline = 48;
+  let rmssd: number | null = null;
+  let source = 'activities';
+  let baseline: number | null = null;
 
-  if (wellnessData && wellnessData.latestHrv && wellnessData.latestHrv !== '--') {
-    currentRMSSD = typeof wellnessData.latestHrv === 'number' ? wellnessData.latestHrv : Number(wellnessData.latestHrv);
+  const measured = wellnessData && !wellnessData.isSimulated ? Number(wellnessData.latestHrv) : NaN;
+  if (measured > 0) {
+    rmssd = measured;
     source = 'garmin';
-    if (wellnessData.baselineHrv) baseline = wellnessData.baselineHrv;
+    baseline = wellnessData!.baselineHrv || null;
   } else {
     const hrvData = activities.filter((a) => (a.hrv_rmssd || 0) > 0).sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
     if (hrvData.length > 0) {
-      currentRMSSD = hrvData[0].hrv_rmssd ?? null;
-      source = 'activities';
-
-      const last30 = hrvData.filter((a) => {
-        const diff = (new Date().getTime() - new Date(a.date).getTime()) / (1000 * 60 * 60 * 24);
-        return diff <= 30;
-      });
-      if (last30.length > 0) {
-        baseline = Math.round(last30.reduce((s, a) => s + (a.hrv_rmssd || 0), 0) / last30.length);
-      }
+      rmssd = hrvData[0].hrv_rmssd!;
+      const last30 = hrvData.filter((a) => (Date.now() - new Date(a.date).getTime()) / 86400000 <= 30);
+      const sample = last30.length > 0 ? last30 : hrvData;
+      baseline = Math.round(sample.reduce((s, a) => s + (a.hrv_rmssd || 0), 0) / sample.length);
     }
   }
 
-  if (currentRMSSD === null) {
-    const stats = getTrainingStatus(activities);
-    const tsb = stats?.tsb || 0;
-    currentRMSSD = Math.round(baseline + (tsb * 0.4) + (Math.sin(Date.now() / 1000000) * 5));
+  if (rmssd === null) return null;
+  if (baseline === null) {
+    return { rmssd: Math.round(rmssd), baseline, state: null, color: null, msg: null, source, stress: null };
   }
 
   let state = 'Equilibrado';
   let color = '#10b981';
   let msg = 'Tu recuperación es óptima. Tu cuerpo responde bien.';
 
-  if (currentRMSSD < baseline * 0.85) {
-    state = 'Bajo';
-    color = '#f59e0b';
-    msg = 'Ligero estrés acumulado. Considera un día suave.';
-  } else if (currentRMSSD < baseline * 0.7) {
+  if (rmssd < baseline * 0.7) {
     state = 'No equilibrado';
     color = '#ef4444';
     msg = 'Estrés elevado. Tu sistema nervioso necesita descanso.';
+  } else if (rmssd < baseline * 0.85) {
+    state = 'Bajo';
+    color = '#f59e0b';
+    msg = 'Ligero estrés acumulado. Considera un día suave.';
   }
 
   return {
-    rmssd: Math.round(currentRMSSD),
+    rmssd: Math.round(rmssd),
     baseline,
     state,
     color,
     msg,
     source,
-    stress: Math.round(Math.max(0, 100 - (currentRMSSD / baseline) * 100 + 40)),
+    stress: Math.round(Math.max(0, 100 - (rmssd / baseline) * 100 + 40)),
   };
 }

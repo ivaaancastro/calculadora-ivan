@@ -1,11 +1,11 @@
 // Resumen del mes del Calendario (Fase Premium D5). Sin React ni red: reglas deterministas.
 import { getSportCategory } from './tssEngine';
 import { formatNumber } from './formatters';
-import { toDateKey as key, toLocalDate } from './dates';
+import { activityDayKey, planDayKey, toDateKey as key, toLocalDate } from './dates';
 
 // Fechas en hora local: '2026-06-01' es el 1 de junio en cualquier huso (BUG-7).
-const inMonth = (d, year, month) => {
-    const x = toLocalDate(d);
+const inMonth = (dayKey, year, month) => {
+    const x = toLocalDate(dayKey);
     return x.getFullYear() === year && x.getMonth() === month;
 };
 const sessionsWord = (n) => (n === 1 ? 'sesión' : 'sesiones');
@@ -20,24 +20,24 @@ const minutesOf = (list) => Math.round(list.reduce((s, a) => s + (a.duration > 0
  */
 export const buildMonthSummary = ({ activities = [], plannedWorkouts = [], year, month, today = new Date() }) => {
     const real = (activities || []).filter((a) => !a.isPlanned);
-    const cur = real.filter((a) => inMonth(a.date, year, month));
+    const cur = real.filter((a) => inMonth(activityDayKey(a.date), year, month));
     const prevDate = new Date(year, month - 1, 1);
     // Mes en curso: se compara con los mismos días del mes anterior (D2), no con el mes completo.
     const isCurrentMonth = today.getFullYear() === year && today.getMonth() === month;
     const prevLastDay = new Date(year, month, 0).getDate();
     const prevUpToDay = isCurrentMonth ? Math.min(today.getDate(), prevLastDay) : prevLastDay;
-    const prev = real.filter((a) => inMonth(a.date, prevDate.getFullYear(), prevDate.getMonth())
-        && toLocalDate(a.date).getDate() <= prevUpToDay);
+    const prev = real.filter((a) => inMonth(activityDayKey(a.date), prevDate.getFullYear(), prevDate.getMonth())
+        && toLocalDate(activityDayKey(a.date)).getDate() <= prevUpToDay);
     const todayKey = key(today);
 
-    const plans = (plannedWorkouts || []).filter((p) => inMonth(p.date, year, month));
-    const due = plans.filter((p) => key(p.date) <= todayKey);
+    const plans = (plannedWorkouts || []).filter((p) => inMonth(planDayKey(p.date), year, month));
+    const due = plans.filter((p) => planDayKey(p.date) <= todayKey);
     const pending = plans.length - due.length;
     const used = new Set();
     let done = 0;
     due.forEach((p) => {
         const cat = getSportCategory(p.type || '');
-        const idx = cur.findIndex((a, i) => !used.has(i) && key(a.date) === key(p.date) && getSportCategory(a.type || '') === cat);
+        const idx = cur.findIndex((a, i) => !used.has(i) && activityDayKey(a.date) === planDayKey(p.date) && getSportCategory(a.type || '') === cat);
         if (idx >= 0) { used.add(idx); done += 1; }
     });
 

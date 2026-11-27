@@ -14,9 +14,9 @@ import { DaySpotlight } from '../health/DaySpotlight';
 import { HistoryTrendChart } from '../health/HistoryTrendChart';
 import { DailyLog } from '../health/DailyLog';
 
-export const HealthPage = ({ activities, settings, chartData }) => {
+export const HealthPage = ({ activities, settings, currentMetrics }) => {
     const ct = useChartTheme();
-    const { wellnessMetrics, loading: wellnessLoading, error: apiError } = useWellnessInfo(activities, settings, chartData);
+    const { wellnessMetrics, loading: wellnessLoading, error: apiError } = useWellnessInfo(activities, settings, currentMetrics);
 
     const [activeTab, setActiveTab] = useState('today'); // 'today' | 'history'
     const [historyRange, setHistoryRange] = useState(14); // 7 | 14 | 30 días

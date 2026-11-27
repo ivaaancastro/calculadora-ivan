@@ -20,7 +20,7 @@ describe('formState: fuente única de umbrales de TSB (BUG-6, D3)', () => {
 
     it('con TSB 6, Dashboard y Rendimiento dicen lo mismo', () => {
         const dashboard = buildFormSummary({ ctl: 40, tsb: 6 });
-        const stats = buildStatsNarrative({ trainingStatus: { status: 'Productivo', load7: 300, tsb: 6 } });
+        const stats = buildStatsNarrative({ metrics: { ctl: 50, atl: 44, tsb: 6, load7: 300 } });
         expect(dashboard.label).toBe(FORM_STATES.peak.label);
         expect(stats.chip.label).toBe(dashboard.label);
         expect(stats.chip.tone).toBe(dashboard.tone);

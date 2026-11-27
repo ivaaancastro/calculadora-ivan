@@ -3,12 +3,11 @@ import { Delta, Hero, Stat } from '../ui';
 import { buildStatsNarrative } from '../../utils/statsNarrative';
 
 /**
- * Resumen fijo de Rendimiento (Capa 6, PR 18; RF-D1, RF-D7). Absorbe «Estado de entreno» y
- * «Estado de VFC»: Forma (TSB) protagonista con el chip del estado de forma, la frase y, debajo,
+ * Resumen fijo de Rendimiento (Capa 6, PR 18; RF-D1, RF-D7): Forma (TSB) protagonista con el chip del estado de forma, la frase y, debajo,
  * Carga 7 d, VFC y Estrés. Cada cifra aparece solo aquí; las pestañas no las repiten.
  */
-export const StatsHero = ({ trainingStatus, hrv }) => {
-    const { text, figure, chip, sub, kpis } = buildStatsNarrative({ trainingStatus, hrv });
+export const StatsHero = ({ metrics, hrv }) => {
+    const { text, figure, chip, sub, kpis } = buildStatsNarrative({ metrics, hrv });
     if (!figure && kpis.length === 0) return null;
     return (
         <Hero

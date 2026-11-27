@@ -2,6 +2,8 @@
  * Estado de cada biomarcador de Salud (v2, spec §3.1.4): 'ok' | 'attention' | 'none'.
  * `delta` = variación frente a la referencia (null si no aplica) y `goodDir` el sentido favorable.
  */
+import { TSB_THRESHOLDS } from '../../utils/formState';
+
 const num = (v) => (typeof v === 'number' && Number.isFinite(v) ? v : null);
 
 /**
@@ -34,7 +36,7 @@ export function biomarkerStatus(wm) {
     out.sleep = sleep === null ? none : { status: sleep < 6 ? 'attention' : 'ok', delta: null, goodDir: 'up' };
 
     const tsb = num(wm?.currentTsb);
-    out.tsb = tsb === null ? none : { status: tsb < -10 ? 'attention' : 'ok', delta: null, goodDir: 'up' };
+    out.tsb = tsb === null ? none : { status: tsb < TSB_THRESHOLDS.productive ? 'attention' : 'ok', delta: null, goodDir: 'up' };
 
     out.steps = num(wm?.latestSteps) === null ? none : { status: 'ok', delta: null, goodDir: 'up' };
 

@@ -5,7 +5,6 @@ import {
   calculateActivityTSS,
   computeZoneTssPerHour,
   estimateTssFromBlocks,
-  getEffectiveTSS,
 } from '../../../src/utils/tssEngine';
 import { calcZonesFromLTHR } from '../../../src/utils/zones';
 
@@ -132,19 +131,5 @@ describe('tssEngine - estimateTssFromBlocks', () => {
     ];
     const result = estimateTssFromBlocks(blocks, 'Run', settings);
     expect(result).toBeGreaterThan(0);
-  });
-});
-
-describe('tssEngine - getEffectiveTSS', () => {
-  it('debe aplicar factor de fatiga del deporte', () => {
-    const ride = { tss: 100, type: 'Ride' };
-    const walk = { tss: 100, type: 'Walk' };
-    expect(getEffectiveTSS(ride)).toBe(100);
-    expect(getEffectiveTSS(walk)).toBe(50);
-  });
-
-  it('debe usar sportCategory si está disponible', () => {
-    const act = { tss: 100, sportCategory: 'strength' };
-    expect(getEffectiveTSS(act)).toBe(100);
   });
 });

@@ -35,24 +35,16 @@ export const PmcFloatingChart = ({ pmcByDate, onClose, initPos }) => {
     const cw = W - PAD.l - PAD.r;
 
     // Calculate values for scaling
-    const ctlAtlVals = visible.flatMap(e => [e.ctl, e.atl].filter(v => v != null));
+    const ctlAtlVals = visible.flatMap(e => [e.ctlRaw, e.atlRaw].filter(v => v != null));
     const minTop = Math.max(0, Math.min(...ctlAtlVals) - 10);
     const maxTop = Math.max(...ctlAtlVals) + 10;
     const rangeTop = maxTop - minTop || 1;
 
-    const tcbVals = visible.map(e => e.tcb).filter(v => v != null);
-    const minMid = Math.min(...tcbVals, -25) - 5;
-    const maxMid = Math.max(...tcbVals, 25) + 5;
+    const tsbVals = visible.map(e => e.tsb).filter(v => v != null);
+    const minMid = Math.min(...tsbVals, -25) - 5;
+    const maxMid = Math.max(...tsbVals, 25) + 5;
 
-    // Ramp rate approximation (daily ctl change * 7 for weekly ramp rate)
-    // For smooth visual, we just plot the daily difference * 7 as "ramp"
-    const visibleWithRamp = visible.map((e, i, arr) => {
-        if (i === 0) return { ...e, ramp: 0 };
-        const prev = arr[i - 1];
-        return { ...e, ramp: ((e.ctl || 0) - (prev.ctl || 0)) * 7 };
-    });
-
-    const rampVals = visibleWithRamp.map(e => e.ramp).filter(v => v != null);
+    const rampVals = visible.map(e => e.ramp).filter(v => v != null);
     const minBot = Math.min(...rampVals, -5) - 2;
     const maxBot = Math.max(...rampVals, 5) + 2;
 
@@ -71,18 +63,18 @@ export const PmcFloatingChart = ({ pmcByDate, onClose, initPos }) => {
     const yMidS = v => yTopLine + hMid - ((v - minMid) / (maxMid - minMid || 1)) * hMid;
     const yBotS = v => yMidLine + hBot - ((v - minBot) / (maxBot - minBot || 1)) * hBot;
 
-    const realE = visibleWithRamp.filter(e => !e.projected);
-    const lastRealIdx = visibleWithRamp.findLastIndex(e => !e.projected);
+    const realE = visible.filter(e => !e.projected);
+    const lastRealIdx = visible.findLastIndex(e => !e.projected);
     const projWithJoin = lastRealIdx >= 0
-        ? [visibleWithRamp[lastRealIdx], ...visibleWithRamp.slice(lastRealIdx + 1).filter(e => e.projected)]
-        : visibleWithRamp.filter(e => e.projected);
+        ? [visible[lastRealIdx], ...visible.slice(lastRealIdx + 1).filter(e => e.projected)]
+        : visible.filter(e => e.projected);
     const buildPath = (key, entries, scaleY) => entries.map((e, li) => {
-        const i = visibleWithRamp.findIndex(v => v.date === e.date);
+        const i = visible.findIndex(v => v.date === e.date);
         return `${li === 0 ? 'M' : 'L'}${xS(i).toFixed(1)},${scaleY(e[key] ?? 0).toFixed(1)}`;
     }).join(' ');
 
     const buildRampPath = (entries) => entries.map((e, li) => {
-        const i = visibleWithRamp.findIndex(v => v.date === e.date);
+        const i = visible.findIndex(v => v.date === e.date);
         const yH = yBotS(e.ramp ?? 0);
         // Step path for ramp rate
         if (li === 0) return `M${xS(i).toFixed(1)},${yH.toFixed(1)}`;
@@ -90,12 +82,12 @@ export const PmcFloatingChart = ({ pmcByDate, onClose, initPos }) => {
         return `L${prevX},${yH.toFixed(1)} L${xS(i).toFixed(1)},${yH.toFixed(1)}`;
     }).join(' ');
 
-    const todayIdx = visibleWithRamp.findIndex(e => e.date === todayStr);
+    const todayIdx = visible.findIndex(e => e.date === todayStr);
     const todayX = todayIdx >= 0 ? xS(todayIdx) : null;
     const zeroYMid = yMidS(0);
     const zeroYBot = yBotS(0);
-    const labelStep = Math.max(1, Math.floor(visibleWithRamp.length / 7));
-    const labels = visibleWithRamp.filter((_, i) => i % labelStep === 0);
+    const labelStep = Math.max(1, Math.floor(visible.length / 7));
+    const labels = visible.filter((_, i) => i % labelStep === 0);
     const lastReal = realE[realE.length - 1];
 
     const handleDragDown = (e) => {
@@ -117,7 +109,7 @@ export const PmcFloatingChart = ({ pmcByDate, onClose, initPos }) => {
         setHover({ idx: Math.max(0, Math.min(visible.length - 1, idx)), x: xS(Math.max(0, Math.min(visible.length - 1, idx))) });
     };
 
-    const hoverEntry = hover != null ? visibleWithRamp[hover.idx] : null;
+    const hoverEntry = hover != null ? visible[hover.idx] : null;
     const isMobileScreen = typeof window !== 'undefined' && window.innerWidth < 640;
 
     return (
@@ -132,10 +124,10 @@ export const PmcFloatingChart = ({ pmcByDate, onClose, initPos }) => {
                 </div>
                 {lastReal && (
                     <div className="flex items-center gap-3 mr-2">
-                        <span data-cal="pmc-stat" className="tabular-nums text-2xs font-bold text-metric-ctl">CTL {Math.round(lastReal.ctl)}</span>
-                        <span data-cal="pmc-stat" className="tabular-nums text-2xs font-bold text-legacy-atl-red">ATL {Math.round(lastReal.atl)}</span>
-                        <span data-cal="pmc-stat" className={`tabular-nums text-2xs font-bold ${lastReal.tcb >= 0 ? 'text-legacy-tsb-up' : 'text-legacy-tsb-down'}`}>
-                            TSB {lastReal.tcb >= 0 ? '+' : ''}{Math.round(lastReal.tcb)}
+                        <span data-cal="pmc-stat" className="tabular-nums text-2xs font-bold text-metric-ctl">CTL {lastReal.ctl}</span>
+                        <span data-cal="pmc-stat" className="tabular-nums text-2xs font-bold text-legacy-atl-red">ATL {lastReal.atl}</span>
+                        <span data-cal="pmc-stat" className={`tabular-nums text-2xs font-bold ${lastReal.tsb >= 0 ? 'text-legacy-tsb-up' : 'text-legacy-tsb-down'}`}>
+                            TSB {lastReal.tsb >= 0 ? '+' : ''}{lastReal.tsb}
                         </span>
                     </div>
                 )}
@@ -165,7 +157,7 @@ export const PmcFloatingChart = ({ pmcByDate, onClose, initPos }) => {
                 onMouseMove={handleSvgMouseMove} onMouseLeave={() => setHover(null)}>
 
                 <defs>
-                    <linearGradient id="tcbGrad" x1="0" x2="0" y1="0" y2="1">
+                    <linearGradient id="tsbGrad" x1="0" x2="0" y1="0" y2="1">
                         <stop offset="0%" stopColor={ct.pmc.bandUp} stopOpacity="0.2" />
                         <stop offset="100%" stopColor={ct.pmc.bandDown} stopOpacity="0.2" />
                     </linearGradient>
@@ -204,17 +196,17 @@ export const PmcFloatingChart = ({ pmcByDate, onClose, initPos }) => {
                 </>}
 
                 {/* === TOP SECTION: CTL & ATL === */}
-                <path d={buildPath('atl', realE, yTopS)} fill="none" stroke={ct.pmc.atl} strokeWidth="1.5" strokeLinejoin="round" />
-                <path d={buildPath('ctl', realE, yTopS)} fill="none" stroke={ct.pmc.ctl} strokeWidth="2.5" strokeLinejoin="round" />
+                <path d={buildPath('atlRaw', realE, yTopS)} fill="none" stroke={ct.pmc.atl} strokeWidth="1.5" strokeLinejoin="round" />
+                <path d={buildPath('ctlRaw', realE, yTopS)} fill="none" stroke={ct.pmc.ctl} strokeWidth="2.5" strokeLinejoin="round" />
                 {projWithJoin.length > 1 && <>
-                    <path d={buildPath('atl', projWithJoin, yTopS)} fill="none" stroke={ct.pmc.atl} strokeWidth="1.5" strokeDasharray="4,3" opacity="0.6" strokeLinejoin="round" />
-                    <path d={buildPath('ctl', projWithJoin, yTopS)} fill="none" stroke={ct.pmc.ctl} strokeWidth="2.5" strokeDasharray="4,3" opacity="0.6" strokeLinejoin="round" />
+                    <path d={buildPath('atlRaw', projWithJoin, yTopS)} fill="none" stroke={ct.pmc.atl} strokeWidth="1.5" strokeDasharray="4,3" opacity="0.6" strokeLinejoin="round" />
+                    <path d={buildPath('ctlRaw', projWithJoin, yTopS)} fill="none" stroke={ct.pmc.ctl} strokeWidth="2.5" strokeDasharray="4,3" opacity="0.6" strokeLinejoin="round" />
                 </>}
 
                 {/* === MID SECTION: TCB (Forma) === */}
-                <path d={buildPath('tcb', realE, yMidS)} fill="none" stroke={ct.pmc.tsb} strokeWidth="2.5" strokeLinejoin="round" />
+                <path d={buildPath('tsb', realE, yMidS)} fill="none" stroke={ct.pmc.tsb} strokeWidth="2.5" strokeLinejoin="round" />
                 {projWithJoin.length > 1 && <>
-                    <path d={buildPath('tcb', projWithJoin, yMidS)} fill="none" stroke={ct.pmc.tsb} strokeWidth="2.5" strokeDasharray="4,3" opacity="0.6" strokeLinejoin="round" />
+                    <path d={buildPath('tsb', projWithJoin, yMidS)} fill="none" stroke={ct.pmc.tsb} strokeWidth="2.5" strokeDasharray="4,3" opacity="0.6" strokeLinejoin="round" />
                 </>}
 
                 {/* === BOTTOM SECTION: Ramp Rate === */}
@@ -226,9 +218,9 @@ export const PmcFloatingChart = ({ pmcByDate, onClose, initPos }) => {
                 {/* Current latest values on right edge */}
                 {lastReal && (
                     <g>
-                        <text x={W - PAD.r + 6} y={yTopS(lastReal.ctl) + 3} fontSize={11} fontWeight="bold" fill={ct.pmc.ctlInk}>{Math.round(lastReal.ctl)}</text>
-                        <text x={W - PAD.r + 6} y={yTopS(lastReal.atl) + 3} fontSize={11} fontWeight="bold" fill={ct.pmc.atlInk}>{Math.round(lastReal.atl)}</text>
-                        <text x={W - PAD.r + 6} y={yMidS(lastReal.tcb) + 3} fontSize={11} fontWeight="bold" fill={ct.pmc.tsbInk}>{Math.round(lastReal.tcb)}</text>
+                        <text x={W - PAD.r + 6} y={yTopS(lastReal.ctlRaw) + 3} fontSize={11} fontWeight="bold" fill={ct.pmc.ctlInk}>{lastReal.ctl}</text>
+                        <text x={W - PAD.r + 6} y={yTopS(lastReal.atlRaw) + 3} fontSize={11} fontWeight="bold" fill={ct.pmc.atlInk}>{lastReal.atl}</text>
+                        <text x={W - PAD.r + 6} y={yMidS(lastReal.tsb) + 3} fontSize={11} fontWeight="bold" fill={ct.pmc.tsbInk}>{lastReal.tsb}</text>
                         <text x={W - PAD.r + 6} y={yBotS(lastReal.ramp) + 3} fontSize={11} fontWeight="bold" fill={ct.pmc.rampInk}>{formatNumber(lastReal.ramp, 1)}</text>
                     </g>
                 )}
@@ -236,16 +228,16 @@ export const PmcFloatingChart = ({ pmcByDate, onClose, initPos }) => {
                 {/* Hover crosshair */}
                 {hover != null && <>
                     <line x1={hover.x} y1={PAD.t} x2={hover.x} y2={H - PAD.b} stroke={ct.anatomy.cursor} strokeWidth="1" opacity="0.8" />
-                    {hoverEntry?.ctl != null && <circle cx={hover.x} cy={yTopS(hoverEntry.ctl)} r={3.5} fill={ct.pmc.ctl} stroke={ct.anatomy.dotRing} strokeWidth="1.5" />}
-                    {hoverEntry?.atl != null && <circle cx={hover.x} cy={yTopS(hoverEntry.atl)} r={3.5} fill={ct.pmc.atl} stroke={ct.anatomy.dotRing} strokeWidth="1.5" />}
-                    {hoverEntry?.tcb != null && <circle cx={hover.x} cy={yMidS(hoverEntry.tcb)} r={3.5} fill={ct.pmc.tsb} stroke={ct.anatomy.dotRing} strokeWidth="1.5" />}
+                    {hoverEntry?.ctl != null && <circle cx={hover.x} cy={yTopS(hoverEntry.ctlRaw)} r={3.5} fill={ct.pmc.ctl} stroke={ct.anatomy.dotRing} strokeWidth="1.5" />}
+                    {hoverEntry?.atl != null && <circle cx={hover.x} cy={yTopS(hoverEntry.atlRaw)} r={3.5} fill={ct.pmc.atl} stroke={ct.anatomy.dotRing} strokeWidth="1.5" />}
+                    {hoverEntry?.tsb != null && <circle cx={hover.x} cy={yMidS(hoverEntry.tsb)} r={3.5} fill={ct.pmc.tsb} stroke={ct.anatomy.dotRing} strokeWidth="1.5" />}
                     {hoverEntry?.ramp != null && <circle cx={hover.x} cy={yBotS(hoverEntry.ramp)} r={2.5} fill={ct.pmc.rampInk} />}
                 </>}
 
                 {/* X axis Base Line */}
                 <line x1={PAD.l} y1={H - PAD.b} x2={W - PAD.r} y2={H - PAD.b} stroke={ct.anatomy.grid} strokeWidth="1" />
                 {labels.map((e, li) => {
-                    const i = visibleWithRamp.findIndex(v => v.date === e.date);
+                    const i = visible.findIndex(v => v.date === e.date);
                     const d = new Date(e.date + 'T00:00:00');
                     return <text key={li} x={xS(i)} y={H - PAD.b + 14} textAnchor="middle" fontSize={11} fill={ct.anatomy.axis}>
                         {d.toLocaleDateString('es-ES', { day: 'numeric', month: 'short' })}
@@ -266,21 +258,21 @@ export const PmcFloatingChart = ({ pmcByDate, onClose, initPos }) => {
                         <div className="space-y-1">
                             <div className="flex justify-between gap-4">
                                 <span className="text-legacy-ctl-sky font-semibold">Fitness (CTL)</span>
-                                <span className="font-mono font-bold text-body-2">{Math.round(hoverEntry.ctl)}</span>
+                                <span className="font-mono font-bold text-body-2">{hoverEntry.ctl}</span>
                             </div>
                             <div className="flex justify-between gap-4">
                                 <span className="text-legacy-atl-purple font-semibold">Fatiga (ATL)</span>
-                                <span className="font-mono font-bold text-body-2">{Math.round(hoverEntry.atl)}</span>
+                                <span className="font-mono font-bold text-body-2">{hoverEntry.atl}</span>
                             </div>
                             <div className="flex justify-between gap-4">
-                                <span className={`font-semibold ${hoverEntry.tcb >= 0 ? 'text-legacy-tsb-up' : 'text-legacy-tsb-down'}`}>Forma (TSB)</span>
-                                <span className={`font-mono font-bold ${hoverEntry.tcb >= 0 ? 'text-legacy-tsb-up-ink' : 'text-legacy-tsb-down-2'}`}>
-                                    {hoverEntry.tcb >= 0 ? '+' : ''}{Math.round(hoverEntry.tcb)}
+                                <span className={`font-semibold ${hoverEntry.tsb >= 0 ? 'text-legacy-tsb-up' : 'text-legacy-tsb-down'}`}>Forma (TSB)</span>
+                                <span className={`font-mono font-bold ${hoverEntry.tsb >= 0 ? 'text-legacy-tsb-up-ink' : 'text-legacy-tsb-down-2'}`}>
+                                    {hoverEntry.tsb >= 0 ? '+' : ''}{hoverEntry.tsb}
                                 </span>
                             </div>
                             <div className="flex justify-between gap-4 pt-1 border-t border-slate-100 dark:border-zinc-700 mt-1">
-                                <span data-cal="pmc-ramp" className="text-chart-pmc-ramp-ink font-semibold">Rampa (est.)</span>
-                                <span className="font-mono font-bold text-body-2">{formatNumber(hoverEntry.ramp, 1)}</span>
+                                <span data-cal="pmc-ramp" className="text-chart-pmc-ramp-ink font-semibold">Rampa 7 d</span>
+                                <span className="font-mono font-bold text-body-2">{hoverEntry.ramp != null ? formatNumber(hoverEntry.ramp, 1) : '—'}</span>
                             </div>
                         </div>
                     </div>

@@ -6,6 +6,7 @@ import { getSportCategory } from "../utils/tssEngine";
 import toast from "react-hot-toast";
 // Refresco del token vía Edge Function `strava-token` (sin secreto en el cliente).
 import { refreshStravaToken } from "../services/stravaToken";
+import { activityDayKey, planDayKey } from '../utils/dates';
 
 /**
  * useStravaSync — Sincronización con Strava.
@@ -226,13 +227,13 @@ export function useStravaSync({ activities, plannedWorkouts, deletePlannedWorkou
           const matchedIds  = new Set();
 
           for (const newAct of newRows) {
-            const actDate     = new Date(newAct.date).toISOString().split('T')[0];
+            const actDate     = activityDayKey(newAct.date);
             const actCategory = getSportCategory(newAct.type);
             const actDuration = newAct.duration || 0;
 
             const match = plannedWorkouts.find(p => {
               if (matchedIds.has(p.id)) return false;
-              const planDate     = new Date(p.date).toISOString().split('T')[0];
+              const planDate     = planDayKey(p.date);
               const planCategory = getSportCategory(p.type);
               if (planDate !== actDate || planCategory !== actCategory) return false;
               const planDuration = p.duration || 0;

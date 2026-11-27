@@ -1,4 +1,5 @@
 import { useMemo } from 'react';
+import { formStateKey } from '../utils/formState';
 
 /**
  * Función pura que calcula las métricas analíticas de bienestar.
@@ -6,12 +7,12 @@ import { useMemo } from 'react';
  * de react-hooks/immutability (reasignación de variables locales).
  *
  * @param {object[]} wellnessData - Datos de bienestar ordenados por fecha
- * @param {number} currentTsb - TSB actual del último punto del chart PMC
+ * @param {{ctl:number, tsb:number}|null} pmcToday - CTL y TSB de hoy del PMC
  * @param {Map<string,number>} dailyTSS - Mapa fecha → TSS diario total
  * @param {Error|null} error - Error de carga, si lo hay
  * @returns {object|null} Métricas analíticas calculadas o null si no hay datos
  */
-function calculateWellnessAnalytics(wellnessData, currentTsb, dailyTSS, error) {
+function calculateWellnessAnalytics(wellnessData, pmcToday, dailyTSS, error) {
   if (!wellnessData || wellnessData.length === 0 || error) return null;
 
   // EWMA de 30 días para HRV y RHR (alpha = 2/(30+1))
@@ -146,10 +147,11 @@ function calculateWellnessAnalytics(wellnessData, currentTsb, dailyTSS, error) {
     ? Math.round(nativeReadiness)
     : ((avgHrv7d === '--' && avgSleep7d === '--') ? '--' : calculatedReadiness);
 
-  // Alertas por TSB extremos
-  if (currentTsb < -30) {
+  // Alertas de forma: mismos estados que en el resto de la app (formState).
+  const form = pmcToday ? formStateKey(pmcToday) : 'insufficient';
+  if (form === 'critical') {
     insights.push({ type: 'danger', label: 'Carga Extrema (TSB)', desc: 'Acumulación de fatiga crónica altísima. Riesgo de estancamiento asegurado sin descanso.' });
-  } else if (currentTsb > 10) {
+  } else if (form === 'transition') {
     insights.push({ type: 'warning', label: 'Desentrenamiento', desc: 'Riesgo de perder estado de forma general. TSB indicando infra-carga.' });
   }
 
@@ -226,7 +228,7 @@ function calculateWellnessAnalytics(wellnessData, currentTsb, dailyTSS, error) {
     weightTrend,
 
     effort:     { score: effortScore, label: effortLabel, color: effortColor, tss: activeTSS },
-    currentTsb,
+    currentTsb: pmcToday?.tsb ?? null,
   };
 }
 
@@ -236,13 +238,13 @@ function calculateWellnessAnalytics(wellnessData, currentTsb, dailyTSS, error) {
  * Responsabilidad única: calcular métricas analíticas a partir de los datos
  * de bienestar. Delega el cálculo a la función pura `calculateWellnessAnalytics`.
  *
- * Recibe `wellnessData`, `currentTsb`, `dailyTSS` y `error` como parámetros.
+ * Recibe `wellnessData`, `pmcToday`, `dailyTSS` y `error` como parámetros.
  * Devuelve `wellnessMetrics`.
  */
-export function useWellnessAnalytics({ wellnessData, currentTsb, dailyTSS, error }) {
+export function useWellnessAnalytics({ wellnessData, pmcToday, dailyTSS, error }) {
   const wellnessMetrics = useMemo(() => {
-    return calculateWellnessAnalytics(wellnessData, currentTsb, dailyTSS, error);
-  }, [wellnessData, currentTsb, dailyTSS, error]);
+    return calculateWellnessAnalytics(wellnessData, pmcToday, dailyTSS, error);
+  }, [wellnessData, pmcToday, dailyTSS, error]);
 
   return { wellnessMetrics };
 }

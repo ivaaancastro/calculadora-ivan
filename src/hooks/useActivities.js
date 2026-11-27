@@ -35,6 +35,7 @@ export const useActivities = () => {
   // ── Capa de PMC y métricas ───────────────────────────────────────────────
   const pmc = usePMCMetrics({
     activities: data.activities,
+    plannedWorkouts: data.plannedWorkouts,
     settings: data.settings,
     timeRange: data.timeRange,
   });

@@ -19,12 +19,13 @@ import { EvolutionChart } from './EvolutionChart';
 import { FormHero } from './FormHero';
 import { KpiCard } from './KpiCard';
 import { useChartTheme } from '../charts/useChartTheme';
-import { seriesValues, deltaOver, acwrZone } from '../../utils/kpiTrend';
+import { seriesValues, deltaOver } from '../../utils/kpiTrend';
+import { acwrZone } from '../../utils/load';
 import { buildFormSummary } from '../../utils/formSummary';
 import { supabase } from '../../supabase';
 import { useTheme } from '../../hooks/useTheme';
 import { Card, SectionHeader, Segmented, Stat } from '../ui';
-import { pmcTodayKey } from '../../utils/pmcPoints';
+import { todayKey as getTodayKey } from '../../utils/dates';
 import { formatNumber } from '../../utils/formatters';
 import { pickPrimaryVo2, VO2_SOURCES } from '../../utils/vo2Source';
 
@@ -55,7 +56,7 @@ async function fetchLatestWellnessRow() {
 // ─────────────────────────────────────────────────────────────────────────────
 // Component
 // currentMetrics — comes from useActivities (single source of truth for CTL/ATL)
-//   { ctl, atl, tcb (=TSB), rampRate, acwr, monotony, strain, avgTss7d, pastCtl }
+//   { ctl, atl, tsb, rampRate, acwr, monotony, strain, loadTrend, load7 }
 // chartData — daily series from useActivities, already filtered by timeRange
 // ─────────────────────────────────────────────────────────────────────────────
 export const AdvancedAnalytics = React.memo(({ activities, settings, timeRange, setTimeRange, chartData, pmcSeries, periodSummary, currentMetrics }) => {
@@ -74,7 +75,7 @@ export const AdvancedAnalytics = React.memo(({ activities, settings, timeRange, 
 
     // ── ANALYTICS MEMO: MMP peaks, zones, EF, weekly volume, profile ─────────
     // NOTE: CTL/ATL/TSB are NOT calculated here — they come from currentMetrics
-    //       (single source of truth via useActivities with Intervals.icu formula)
+    //       (single source of truth via useActivities)
     const analytics = useMemo(() => {
         const today = new Date();
         const date30d = new Date(today); date30d.setDate(today.getDate() - 30);
@@ -104,8 +105,7 @@ export const AdvancedAnalytics = React.memo(({ activities, settings, timeRange, 
     // This guarantees that every place showing CTL/ATL/TSB shows the exact same value
     const model = useMemo(() => {
         if (!currentMetrics) return { ctl: 0, atl: 0, tsb: 0, acwr: 0, rampRate: 0, monotony: 0, strain: 0, loadTrend: 0, totalActivities: 0, totalVolume: 0 };
-        const { ctl, atl, tcb: tsb, rampRate, acwr, monotony, strain, pastCtl } = currentMetrics;
-        const loadTrend = pastCtl > 0 ? ((ctl - pastCtl) / pastCtl) * 100 : 0;
+        const { ctl, atl, tsb, rampRate, acwr, monotony, strain, loadTrend } = currentMetrics;
         return {
             ctl: ctl || 0,
             atl: atl || 0,
@@ -127,8 +127,8 @@ export const AdvancedAnalytics = React.memo(({ activities, settings, timeRange, 
 
     // Los KPI son valores de hoy: su sparkline y su variación salen de la serie completa hasta
     // hoy, no del rango de la gráfica ni de los días proyectados (RF-D3).
-    const todayKey = pmcTodayKey();
-    const pastSeries = (pmcSeries || chartData || []).filter((d) => String(d.date) <= todayKey);
+    const todayKey = getTodayKey();
+    const pastSeries = (pmcSeries || []).filter((d) => String(d.date) <= todayKey);
     const atlVals = seriesValues(pastSeries, 'atl');
     const tsbVals = seriesValues(pastSeries, 'tsb');
     const fmtDelta = (d, digits = 0) => `${d > 0 ? '+' : ''}${formatNumber(d, digits)}`;

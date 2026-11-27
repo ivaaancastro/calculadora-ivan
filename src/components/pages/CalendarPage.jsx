@@ -18,7 +18,7 @@ import { buildMonthSummary } from '../../utils/monthSummary';
 import { monthTitle } from '../../utils/monthTitle';
 import { buildDayLoadLevels } from '../../utils/calendarLoad';
 
-export const CalendarPage = ({ activities, plannedWorkouts = [], addPlannedWorkout, deletePlannedWorkout, updatePlannedWorkout, currentMetrics, settings, chartData = [], onDelete, onSelectActivity }) => {
+export const CalendarPage = ({ activities, plannedWorkouts = [], addPlannedWorkout, deletePlannedWorkout, updatePlannedWorkout, settings, pmcSeries = [], onDelete, onSelectActivity }) => {
     const { year, month, prevMonth, nextMonth, goToday } = useCalendarDate();
 
     const [showPmcChart, setShowPmcChart] = useState(false);
@@ -39,7 +39,7 @@ export const CalendarPage = ({ activities, plannedWorkouts = [], addPlannedWorko
     } = useWorkoutDragDrop(updatePlannedWorkout);
 
     const { activitiesByDate, fullPmcByDate, calendarGrid } = useCalendarData({
-        activities, plannedWorkouts, chartData, year, month,
+        activities, plannedWorkouts, pmcSeries, year, month,
     });
 
     const loadLevels = useMemo(() => buildDayLoadLevels(activitiesByDate, calendarGrid), [activitiesByDate, calendarGrid]);

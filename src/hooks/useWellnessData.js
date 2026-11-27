@@ -1,5 +1,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { supabase } from '../supabase';
+import { toDateKey } from '../utils/dates';
+import { loadByDay } from '../utils/load';
 
 // ── Lectura directa de Supabase (sin importar hooks para evitar deps cíclicas) ──
 async function fetchWellnessDB(days = 180) {
@@ -55,11 +57,11 @@ function buildSimulatedWellness(settings, dailyTSS) {
   for (let i = 180; i >= 0; i--) {
     const d = new Date(today);
     d.setDate(d.getDate() - i);
-    const dateStr  = d.toISOString().split('T')[0];
+    const dateStr  = toDateKey(d);
 
     const prevDate = new Date(d);
     prevDate.setDate(d.getDate() - 1);
-    const yesterdayTSS = dailyTSS.get(prevDate.toISOString().split('T')[0]) || 0;
+    const yesterdayTSS = dailyTSS.get(toDateKey(prevDate)) || 0;
 
     const fatigueImpact    = Math.min(yesterdayTSS / 150, 1);
     const rndHrv           = (Math.random() * 10)  - 5;
@@ -121,13 +123,7 @@ export function useWellnessData({ activities, settings }) {
 
   // TSS diario acumulado — se usa tanto en el simulador como en el cómputo de esfuerzo
   const dailyTSS = useMemo(() => {
-    const map = new Map();
-    if (!activities) return map;
-    activities.forEach(act => {
-      const dateKey = new Date(act.date).toISOString().split('T')[0];
-      map.set(dateKey, (map.get(dateKey) || 0) + (act.tss || 0));
-    });
-    return map;
+    return loadByDay(activities);
   }, [activities]);
 
   // ── Carga de datos ────────────────────────────────────────────────────────

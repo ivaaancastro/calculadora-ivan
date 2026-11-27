@@ -1,10 +1,10 @@
 import { describe, it, expect, vi, afterEach } from 'vitest';
 import {
-    loadSavedCalendarDate, getWeekDays, groupActivitiesByDate, indexPmcByDate, projectPmc,
-    getComplianceForDay, buildCalendarGrid, estimateBlocksMinutes, getSmartRecommendation,
+    loadSavedCalendarDate, getWeekDays, groupActivitiesByDate, indexPmcByDate, 
+    getComplianceForDay, buildCalendarGrid, estimateBlocksMinutes, 
     parsePasteText, stampTemplateBlocks, appendBlock, appendStep, updateStepIn, removeStepFrom,
     updateBlockIn, removeBlockFrom, reorderBlocks, parsePlanBlocks, planToFormState,
-    buildPlanPayload, computeWeekStats, findWeekPmc, findPrevWeekPmc, getWeekNumber, EMPTY_PLAN,
+    buildPlanPayload, computeWeekStats, findWeekPmc, getWeekNumber, EMPTY_PLAN,
 } from '../../utils/calendarEngine';
 import { WORKOUT_TEMPLATES } from '../../utils/calendarTemplates';
 
@@ -60,19 +60,6 @@ describe('agrupación y PMC', () => {
     it('indexa el PMC por fecha', () => {
         expect(indexPmcByDate([{ date: 'a', ctl: 1 }, { date: 'b', ctl: 2 }]).b.ctl).toBe(2);
         expect(indexPmcByDate(null)).toEqual({});
-    });
-    it('proyecta 90 días sin pasado ni futuro real y aplica el TSS planificado', () => {
-        const pmc = { '2026-06-14': { date: '2026-06-14', ctl: 50, atl: 60 }, '2026-06-20': { date: '2026-06-20', ctl: 1, atl: 1 } };
-        const full = projectPmc(pmc, [{ date: '2026-06-16T08:00:00', tss: 100 }], '2026-06-15');
-        expect(full['2026-06-14'].projected).toBeUndefined();
-        expect(full['2026-06-20'].projected).toBe(true); // se sobrescribe con la proyección
-        expect(full['2026-06-15'].ctl).toBeCloseTo(50 - 50 / 42, 5);
-        expect(full['2026-06-16'].ctl).toBeGreaterThan(full['2026-06-15'].ctl);
-        expect(Object.keys(full)).toHaveLength(91);
-    });
-    it('sin datos previos no proyecta', () => {
-        expect(projectPmc({ '2030-01-01': { ctl: 1 } }, [], '2026-06-15')).toEqual({});
-        expect(projectPmc({ '2026-06-10': { ctl: null } }, [], '2026-06-15')).toEqual({ '2026-06-10': { ctl: null } });
     });
 });
 
@@ -175,30 +162,6 @@ describe('parsePasteText', () => {
     it('texto vacío no genera bloques', () => expect(parsePasteText('  \n', 'Run')).toEqual([]));
 });
 
-describe('getSmartRecommendation', () => {
-    const date = new Date(2026, 5, 17);
-    const base = { selectedDateForPlan: date, activities: [], plannedWorkouts: [] };
-    it('null sin fecha', () => expect(getSmartRecommendation({ ...base, selectedDateForPlan: null })).toBeNull());
-    it('descanso total con TSB muy negativo', () => {
-        expect(getSmartRecommendation({ ...base, currentMetrics: { ctl: 50, tsb: -35 } })).toMatchObject({ intensity: 'rest', tssRange: [0, 0] });
-    });
-    it('recovery con fatiga o monotonía alta', () => {
-        expect(getSmartRecommendation({ ...base, currentMetrics: { ctl: 50, tsb: -20 } }).intensity).toBe('recovery');
-        expect(getSmartRecommendation({ ...base, currentMetrics: { ctl: 50, tsb: 0, monotony: 2.5 } }).intensity).toBe('recovery');
-    });
-    it('hard cuando está fresco y la semana vacía; moderate con forma equilibrada', () => {
-        expect(getSmartRecommendation({ ...base, currentMetrics: { ctl: 50, tsb: 10 } }).intensity).toBe('hard');
-        expect(getSmartRecommendation({ ...base, currentMetrics: { ctl: 50, tsb: 0 } }).intensity).toBe('moderate');
-    });
-    it('endurance tras un día fuerte y presupuesto semanal', () => {
-        const activities = [{ date: new Date(2026, 5, 16, 9).toISOString(), tss: 200, type: 'Run' }];
-        const r = getSmartRecommendation({ ...base, activities, currentMetrics: { ctl: 50, tsb: 0 } });
-        expect(r.intensity).toBe('endurance');
-        expect(r.weekContext.target).toBe(Math.round(50 * 7 * 1.1));
-        expect(r.last7.count).toBe(1);
-    });
-});
-
 describe('resumen semanal', () => {
     const week = buildCalendarGrid(2026, 5)[2]; // 15–21 junio
     it('suma TSS, duración y distancia (los planificados convierten bloques `dist` a metros)', () => {
@@ -214,12 +177,19 @@ describe('resumen semanal', () => {
         expect(s.weekDuration).toBe(85);
         expect(s.weekDist).toBe(8000 + 8000);
     });
-    it('PMC de la semana y la anterior', () => {
+    it('suma el TSS de todos los deportes, también fuerza y yoga (D3)', () => {
+        const byDate = { '2026-06-15': [{ type: 'WeightTraining', tss: 30 }, { type: 'Yoga', tss: 10 }, { type: 'Run', tss: 50, isPlanned: true }] };
+        expect(computeWeekStats(week, byDate)).toMatchObject({ weekRealizedTSS: 40, weekPlannedTSS: 50 });
+    });
+    it('agrupa cada actividad en el día escrito y cada plan en su día local', () => {
+        const grouped = groupActivitiesByDate([{ date: '2026-06-15T23:30:00Z' }], [{ date: new Date(2026, 5, 16).toISOString() }]);
+        expect(grouped['2026-06-15']).toHaveLength(1);
+        expect(grouped['2026-06-16']).toHaveLength(1);
+    });
+    it('PMC de la semana', () => {
         const full = { '2026-06-19': { ctl: 5 }, '2026-06-10': { ctl: 3 } };
         expect(findWeekPmc(week, full)).toEqual({ ctl: 5 });
         expect(findWeekPmc(week, {})).toEqual({});
-        expect(findPrevWeekPmc(week, full)).toEqual({ ctl: 3 });
-        expect(findPrevWeekPmc(week, {})).toEqual({});
     });
     it('número de semana ISO', () => expect(getWeekNumber(week)).toBe(25));
 });

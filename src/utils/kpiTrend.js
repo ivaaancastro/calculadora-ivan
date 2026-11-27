@@ -16,12 +16,3 @@ export function deltaOver(values, lag = 7) {
   const idx = Math.max(0, values.length - 1 - lag);
   return values[values.length - 1] - values[idx];
 }
-
-/** Estado del ratio de carga aguda:crónica: óptimo 0,8–1,3; vigilar hasta 1,5; riesgo por encima. */
-export function acwrZone(acwr) {
-  if (!(acwr > 0)) return { key: 'none', label: 'Sin datos', tone: 'neutral' };
-  if (acwr < 0.8) return { key: 'low', label: 'Carga baja', tone: 'neutral' };
-  if (acwr <= 1.3) return { key: 'optimal', label: 'Zona óptima', tone: 'peak' };
-  if (acwr <= 1.5) return { key: 'watch', label: 'Vigilar', tone: 'overload' };
-  return { key: 'risk', label: 'Riesgo', tone: 'critical' };
-}

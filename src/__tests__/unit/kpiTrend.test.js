@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { seriesValues, deltaOver, acwrZone } from '../../utils/kpiTrend';
+import { seriesValues, deltaOver } from '../../utils/kpiTrend';
 
 describe('seriesValues', () => {
   it('toma los últimos n valores numéricos', () => {
@@ -22,9 +22,4 @@ describe('deltaOver', () => {
     expect(deltaOver([4, 6], 7)).toBe(2);
     expect(deltaOver([4])).toBeNull();
   });
-});
-
-describe('acwrZone', () => {
-  it.each([[0, 'none'], [0.5, 'low'], [1, 'optimal'], [1.4, 'watch'], [1.8, 'risk']])('%s → %s', (v, k) =>
-    expect(acwrZone(v).key).toBe(k));
 });
