@@ -10,10 +10,10 @@ Base auditada: `develop` @ `cb595b8` (igual que `main` salvo el merge de la rele
 | Bloque | Oleada | Depende de | Estado | Rama | PR | Sesión |
 |--------|--------|-----------|--------|------|----|--------|
 | **Fix auto-sync de Intervals (urgente, afecta a `main`)** | 1 | — | Por lanzar | `fix/intervals-auto-sync` (prevista) | — | — |
-| B1 Cálculos centralizados | 1 | — | Implementando (PR 2 de 3) | `feat/calculos-pmc` | #168 mergeado | `b1-calculos` |
+| B1 Cálculos centralizados | 1 | — | En revisión (PR 2 de 3) | `feat/calculos-pmc` | #168 mergeado; #171 | `b1-calculos` |
 | B3 Tema | 1 | — | En `develop` | `feat/tema-sistema` | #169 | `b3-tema` |
 | B5 Popovers de información | 1 | código: tras B1 | Bloqueado (spec aprobada) | `feat/popovers-info` | — | `b5-popovers` |
-| B8a Auditoría de datos | 1 | — | Implementando | `docs/auditoria-datos` | — | `b8a-datos` |
+| B8a Auditoría de datos | 1 | — | En `develop`; falta calibrar con datos reales | `docs/auditoria-datos` | #172 | `b8a-datos` |
 | B2 Detalle de actividad | 2 | B1, B5 (y B3 por el mapa) | Bloqueado | — | — | — |
 | B4 Calendario | 2 | B1, B5 | Bloqueado | — | — | — |
 | B7 Modo por deporte | 3 | B1 + brainstorming | Bloqueado | — | — | — |
@@ -45,12 +45,17 @@ Base auditada: `develop` @ `cb595b8` (igual que `main` salvo el merge de la rele
 - **Existe:** dos componentes, `ui/InfoTooltip` y `ui/MetricTooltip`, además de varios `title=` nativos.
 - **Falta:** un solo componente con portal y colisiones, animación de salida, foco y móvil. Pendiente decidir si entran los tooltips de gráfica.
 
-### B8a Auditoría de datos (primera pasada, sin medir)
+### B8a Auditoría de datos
+Informe y recortes priorizados: `docs/branches/docs/auditoria-datos/informe.md`. Medido con datos simulados; falta ejecutar `consultas.sql`. Un arranque descarga 14,1 MB (93 % streams).
+
+Sospechas iniciales, ya confirmadas (el corte a 1.000 filas, solo en el código):
 1. **Confirmado con datos simulados (2026-11-27):** el auto-sync de Intervals lanza ~53 sincronizaciones a la vez y la app cae en la pantalla de error (`useIntervalsAutoSync.js`). El código es igual en `main`.
 2. Streams de 95 días descargados al arrancar; un refetch borra los históricos.
 3. `wellness_data select('*')` de 180 días repetido y sin caché.
 4. `activities` sin paginar (posible corte a 1.000 filas) y `profiles select('*')` con tokens.
 5. Deep sync secuencial tras cada sync de Strava, sin parar con 429.
+
+**Observación (revisión de #171, anterior a B1):** en la gráfica del Dashboard la Forma se dibuja sobre un eje oculto y su trazo no se lee contra la escala visible. Valorar en B6.
 
 ### B2 Detalle de actividad
 - **Existe:** cursor sincronizado entre gráficas y de gráfica a mapa; zonas en la pestaña Detalle (`DataTab.jsx`).
