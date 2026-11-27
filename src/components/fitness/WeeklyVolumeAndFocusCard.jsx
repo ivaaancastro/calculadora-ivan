@@ -5,14 +5,14 @@ import {
 } from 'recharts';
 import { useChartTheme } from '../charts/useChartTheme';
 import { useChartMotion } from '../charts/useChartMotion';
-import { chartTooltipStyle, InfoTooltip, Segmented } from '../ui';
+import { chartTooltipStyle, Segmented } from '../ui';
 import { StatsCard } from './StatsCard';
 import { chartFigureProps, summarizeSeries } from '../charts/chartA11y';
 import { axisProps } from '../charts/axisProps.js';
+import { formatNumber } from '../../utils/formatters';
 
 export const WeeklyVolumeAndFocusCard = ({
     weeklyChart,
-    focusChart,
     zonesChart,
     intensityTimeframe,
     setIntensityTimeframe
@@ -20,12 +20,6 @@ export const WeeklyVolumeAndFocusCard = ({
     const ct = useChartTheme();
     const motion = useChartMotion();
     const enter = motion.active ? motion.props : {};
-    const focusInfo = (name) => {
-        const n = String(name).toLowerCase();
-        if (n.startsWith('aer')) return 'Zonas 1 y 2. Base de resistencia.';
-        if (n.startsWith('tempo')) return 'Zonas 3 y 4. Ritmos de carrera sostenidos.';
-        return 'Zonas 5 y superiores. Potencia explosiva y series cortas.';
-    };
     return (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-6">
             <StatsCard
@@ -50,12 +44,12 @@ export const WeeklyVolumeAndFocusCard = ({
 
             <StatsCard
                 id="focus"
-                title="Distribución de foco"
+                title="Horas por zona"
                 actions={
                     <Segmented
                         variant="card"
                         size="sm"
-                        aria-label="Periodo de la distribución"
+                        aria-label="Periodo de las horas por zona"
                         optionClassName="px-3 py-1"
                         value={intensityTimeframe}
                         onChange={setIntensityTimeframe}
@@ -63,39 +57,21 @@ export const WeeklyVolumeAndFocusCard = ({
                     />
                 }
             >
-                <div className="flex flex-col gap-6">
-                    <ul className="m-0 p-0 list-none flex flex-col gap-4">
-                        {focusChart.map((focus) => (
-                            <li key={focus.name} className="flex flex-col gap-1.5">
-                                <div className="flex items-center justify-between text-sm">
-                                    <span className="flex items-center gap-1 text-ink">
-                                        {focus.name}
-                                        <InfoTooltip text={focusInfo(focus.name)} />
-                                    </span>
-                                    <span className="font-mono text-[12px] text-ink-3 tabular-nums">{focus.value} %</span>
-                                </div>
-                                <div className="h-1.5 w-full bg-surface-2 rounded-full overflow-hidden">
-                                    <div className="h-full rounded-full" style={{ width: `${focus.value}%`, backgroundColor: focus.color }} />
-                                </div>
+                {zonesChart.some((z) => z.hours > 0) ? (
+                    <ul className="m-0 p-0 list-none flex flex-col gap-3">
+                        {zonesChart.filter((z) => z.hours > 0).map((z) => (
+                            <li key={z.name} className="flex justify-between items-center gap-3 text-sm">
+                                <span className="flex items-center gap-2 text-ink min-w-0">
+                                    <span aria-hidden="true" className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: z.fill }} />
+                                    <span className="truncate">{z.name}</span>
+                                </span>
+                                <span className="font-mono text-[12px] text-ink-3 tabular-nums">{formatNumber(z.hours, 1)} h</span>
                             </li>
                         ))}
                     </ul>
-
-                    <div className="pt-4 border-t border-line">
-                        <p className="text-[12px] font-semibold uppercase tracking-[0.08em] text-ink-3 mb-3">Horas por zona</p>
-                        <ul className="m-0 p-0 list-none grid grid-cols-2 gap-x-4 gap-y-2">
-                            {zonesChart.filter((z) => z.hours > 0).map((z) => (
-                                <li key={z.name} className="flex justify-between items-center text-[12px]">
-                                    <span className="flex items-center gap-1.5 text-ink-3 min-w-0">
-                                        <span aria-hidden="true" className="w-1.5 h-1.5 rounded-full shrink-0" style={{ backgroundColor: z.fill }} />
-                                        <span className="truncate">{z.name.split(' ')[0]}</span>
-                                    </span>
-                                    <span className="font-mono text-ink-2 tabular-nums">{z.hours} h</span>
-                                </li>
-                            ))}
-                        </ul>
-                    </div>
-                </div>
+                ) : (
+                    <p className="text-sm text-ink-3">Sin pulso registrado en el periodo.</p>
+                )}
             </StatsCard>
         </div>
     );

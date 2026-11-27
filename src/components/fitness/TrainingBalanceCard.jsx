@@ -4,62 +4,88 @@ import { Button, EmptyState, Segmented, Stat } from '../ui';
 import { formatNumber } from '../../utils/formatters';
 import { StatsCard } from './StatsCard';
 
-/** Balance de la carga por intensidad. El rango 7D/30D/90D va en la cabecera de la tarjeta (RF-D3). */
+const ROWS = [
+    { key: 'anaerobic', label: 'Anaeróbico', zones: 'Z6–Z7', color: 'bg-purple-500' },
+    { key: 'high', label: 'Aeróbico alto', zones: 'Z3–Z5', color: 'bg-orange-500' },
+    { key: 'low', label: 'Aeróbico bajo', zones: 'Z1–Z2', color: 'bg-cyan-500' },
+];
+
+const VERDICTS = {
+    balanced: ['Equilibrado', 'La carga está repartida dentro de los tres objetivos.'],
+    lowShort: ['Falta base', 'Incluye más sesiones fáciles, de baja intensidad.'],
+    highShort: ['Falta aeróbico alto', 'Añade algo más de ritmo sostenido: tempo y umbral.'],
+    anaerobicShort: ['Falta anaeróbico', 'Añade intervalos cortos y muy intensos.'],
+    anaerobicOver: ['Exceso anaeróbico', 'Reduce los intervalos máximos y recupera.'],
+    highOver: ['Mucho aeróbico alto', 'Baja la intensidad de parte de las sesiones.'],
+    lowOver: ['Casi todo suave', 'Puedes dar más peso a las sesiones de calidad.'],
+};
+
+const plural = (n, one, many) => `${n} ${n === 1 ? one : many}`;
+
+/** Sesiones estimadas y fuera del reparto (RF-16). */
+const coverage = ({ estimated, unclassified }) => [
+    estimated > 0 && `${plural(estimated, 'sesión estimada', 'sesiones estimadas')} con la FC media`,
+    unclassified > 0 && `${unclassified} sin clasificar por falta de pulso, potencia o TSS`,
+].filter(Boolean).join(' · ');
+
+/** Distribución de la carga por intensidad. El rango 7D/28D/90D va en la cabecera de la tarjeta (RF-D3). */
 export const TrainingBalanceCard = ({ balance, balanceDays, setBalanceDays }) => {
     const hasData = balance && !balance.empty;
-    const rows = hasData ? [
-        { label: 'Capacidad anaeróbica', value: balance.anaerobic, color: 'bg-purple-500', target: balance.targets.anaerobic, pct: balance.pcts.anaerobic },
-        { label: 'Aeróbico de alta intensidad', value: balance.aerobicHigh, color: 'bg-orange-500', target: balance.targets.high, pct: balance.pcts.high },
-        { label: 'Aeróbico de baja intensidad', value: balance.aerobicLow, color: 'bg-cyan-500', target: balance.targets.low, pct: balance.pcts.low },
-    ] : [];
+    const gaps = balance ? coverage(balance) : '';
+    const [status, advice] = hasData ? VERDICTS[balance.verdict] : [];
+    // Escala común de las barras: la mayor entre las cargas y el techo de cada objetivo.
+    const scale = hasData ? Math.max(...ROWS.flatMap(({ key }) => [balance.values[key], balance.targets[key].max]), 1) : 1;
 
     return (
         <StatsCard
             id="balance"
-            title="Balance de entrenamiento"
-            info="Distribución de la carga en los últimos días según intensidad."
+            title="Distribución de carga"
+            info="Reparte el TSS de cada sesión según el tiempo en cada zona. Cuentan carrera, bici, natación y otros deportes; no fuerza, yoga ni caminata."
             actions={
                 <Segmented
                     variant="card"
                     size="md-wide"
-                    aria-label="Periodo del balance"
+                    aria-label="Periodo de la distribución de carga"
                     optionClassName="px-4 py-1.5"
                     value={balanceDays}
                     onChange={setBalanceDays}
-                    options={[7, 30, 90].map((v) => ({ value: v, label: `${v}D`, tone: 'action-bright' }))}
+                    options={[7, 28, 90].map((v) => ({ value: v, label: `${v}D`, tone: 'action-bright' }))}
                 />
             }
         >
             {hasData ? (
                 <div className="flex flex-col gap-6">
                     <div className="grid grid-cols-2 md:grid-cols-3 gap-x-4 gap-y-5">
-                        <Stat label="Carga total" value={Math.round(balance.totalLoad)} unit="TSS" />
-                        <Stat label="Ratio anaeróbico" value={formatNumber(balance.anaerobic / (balance.aerobicHigh + balance.aerobicLow || 1), 2)} sub="Anaeróbico frente a aeróbico" />
-                        <Stat label="Sesiones" value={balance.activityCount} className="max-md:hidden" />
+                        <div data-load="total"><Stat label="Carga clasificada" value={balance.total} unit="TSS" /></div>
+                        <Stat label="Sesiones" value={balance.sessions} />
+                        <div className="max-md:hidden"><Stat label="Estimadas" value={balance.estimated} sub="Con la FC media" /></div>
                     </div>
 
                     <ul className="m-0 p-0 list-none flex flex-col gap-5">
-                        {rows.map((b) => {
-                            const scale = balance.maxScale || 1;
-                            const status = b.pct < b.target.pctMin ? 'Bajo' : b.pct > b.target.pctMax ? 'Alto' : 'Óptimo';
+                        {ROWS.map(({ key, label, zones, color }) => {
+                            const value = balance.values[key];
+                            const pct = balance.pcts[key];
+                            const target = balance.targets[key];
+                            const state = pct < target.pctMin ? 'Bajo' : pct > target.pctMax ? 'Alto' : 'Óptimo';
                             return (
-                                <li key={b.label}>
+                                <li key={key} data-load="category">
                                     <div className="flex items-baseline justify-between gap-3 mb-2">
                                         <p className="flex flex-wrap items-baseline gap-x-2 min-w-0 text-sm font-medium text-ink">
-                                            {b.label}
-                                            <span className={`whitespace-nowrap text-[12px] font-semibold ${status === 'Óptimo' ? 'text-positive' : status === 'Alto' ? 'text-danger-ink' : 'text-ink-4'}`}>{Math.round(b.pct)} % · {status.toLowerCase()}</span>
+                                            {label}
+                                            <span className="text-[12px] font-normal text-ink-4">{zones}</span>
+                                            <span className={`whitespace-nowrap text-[12px] font-semibold ${state === 'Óptimo' ? 'text-positive' : state === 'Alto' ? 'text-danger-ink' : 'text-ink-4'}`}>{formatNumber(pct)} % · {state.toLowerCase()}</span>
                                         </p>
                                         <p className="shrink-0 font-mono text-[12px] text-ink-4 tabular-nums whitespace-nowrap">
-                                            {Math.round(b.value)} TSS <span className="max-sm:hidden">· meta {Math.round(b.target.min)}–{Math.round(b.target.max)}</span>
+                                            <span data-load="value">{value} TSS</span> <span className="max-sm:hidden">· meta {target.pctMin}–{target.pctMax} %</span>
                                         </p>
                                     </div>
                                     <div className="relative h-2.5 w-full bg-surface-2 rounded-full">
                                         <div
                                             aria-hidden="true"
                                             className="absolute -top-1 -bottom-1 border border-dashed border-line-strong rounded-full z-20 pointer-events-none"
-                                            style={{ left: `${(b.target.min / scale) * 100}%`, width: `${((b.target.max - b.target.min) / scale) * 100}%` }}
+                                            style={{ left: `${(target.min / scale) * 100}%`, width: `${((target.max - target.min) / scale) * 100}%` }}
                                         />
-                                        <div className={`absolute inset-y-0 left-0 ${b.color} rounded-full z-10`} style={{ width: `${Math.min(100, (b.value / scale) * 100)}%` }} />
+                                        <div className={`absolute inset-y-0 left-0 ${color} rounded-full z-10`} style={{ width: `${Math.min(100, (value / scale) * 100)}%` }} />
                                     </div>
                                 </li>
                             );
@@ -67,19 +93,19 @@ export const TrainingBalanceCard = ({ balance, balanceDays, setBalanceDays }) =>
                     </ul>
 
                     <div className="pt-5 border-t border-line">
-                        <p className="flex flex-wrap items-center gap-2 text-sm font-semibold text-ink">
-                            <span className="w-2 h-2 rounded-full" style={{ backgroundColor: balance.color }} aria-hidden="true" />
-                            {balance.status}
+                        <p className="text-sm font-semibold text-ink">{status}</p>
+                        <p className="mt-1 text-sm text-ink-2">{advice}</p>
+                        <p data-load="note" className="mt-3 text-[12px] text-ink-3">
+                            {gaps && `${gaps}. `}
+                            Aproximación propia a partir del tiempo en zonas, inspirada en el «Enfoque de carga» de Garmin; su modelo (Firstbeat, basado en EPOC) es propietario y las cifras no coinciden.
                         </p>
-                        <p className="mt-1 text-sm text-ink-2">{balance.recommendation}</p>
-                        {balance.details && <p className="mt-1 text-[13px] text-ink-3">{balance.details}</p>}
                     </div>
                 </div>
             ) : (
                 <EmptyState
                     icon={Activity}
                     title="Sin datos suficientes en el periodo"
-                    description="Amplía el periodo para ver tu balance de intensidad."
+                    description={gaps || 'Hacen falta sesiones con pulso o potencia.'}
                     action={balanceDays < 90 && <Button variant="secondary" onClick={() => setBalanceDays(90)}>Ver 90 días</Button>}
                 />
             )}

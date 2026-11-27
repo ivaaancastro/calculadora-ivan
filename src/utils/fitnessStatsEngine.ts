@@ -7,14 +7,13 @@
  *  3.  estimateRunningVO2max     — VO2max carrera (pace/HR extrapolación)
  *  4.  predictRaceTimes          — Pronóstico de carrera (Daniels VDOT + penalización volumen)
  *  5.  calculateTrainingEffect   — Efecto aeróbico / anaeróbico de la última sesión
- *  6.  getTrainingBalance         — Distribución de carga (7/14/28 días)
- *  7.  analyzePowerProfile        — Perfil sprint/anaeróbico desde eFTP + W'
- *  8.  calculateDanielsPaces      — Ritmos Daniels E/M/T/I/R desde VO2max
- *  9.  estimateThresholdPace      — Ritmo umbral estimado
- * 10. calculateFTPHistory        — Evolución del eFTP en los últimos meses
- * 11. calculateFitnessScore      — Score global 0-100 (VO2max + W/kg + CTL)
- * 12. getPowerProfileBenchmarks  — Comparación W/kg vs nivel Coggan
- * 13. getHRVAnalysis             — Análisis de variabilidad cardíaca
+ *  6.  analyzePowerProfile        — Perfil sprint/anaeróbico desde eFTP + W'
+ *  7.  calculateDanielsPaces      — Ritmos Daniels E/M/T/I/R desde VO2max
+ *  8.  estimateThresholdPace      — Ritmo umbral estimado
+ *  9.  calculateFTPHistory        — Evolución del eFTP en los últimos meses
+ * 10. calculateFitnessScore      — Score global 0-100 (VO2max + W/kg + CTL)
+ * 11. getPowerProfileBenchmarks  — Comparación W/kg vs nivel Coggan
+ * 12. getHRVAnalysis             — Análisis de variabilidad cardíaca
  */
 import { sportOf } from './sport';
 import { formatDuration } from './formatters';
@@ -103,25 +102,6 @@ export interface TrainingEffectResult {
   primaryBenefit: string;
   benefitDesc: string;
   peakEpoc: number;
-}
-
-export interface TrainingBalanceResult {
-  aerobicLow: number;
-  aerobicHigh: number;
-  anaerobic: number;
-  totalLoad: number;
-  maxScale: number;
-  pcts: { low: number; high: number; anaerobic: number };
-  targets: {
-    low: { min: number; max: number; pctMin: number; pctMax: number; label: string };
-    high: { min: number; max: number; pctMin: number; pctMax: number; label: string };
-    anaerobic: { min: number; max: number; pctMin: number; pctMax: number; label: string };
-  };
-  recommendation: string;
-  status: string;
-  color: string;
-  details: string;
-  activityCount: number;
 }
 
 export interface PowerProfileAnalysis {
@@ -931,194 +911,6 @@ export function calculateTrainingEffect(act: Activity, settings: UserSettings): 
     primaryBenefit,
     benefitDesc,
     peakEpoc: Math.round(peakEpoc),
-  };
-}
-
-export function getTrainingBalance(
-  activities: Activity[],
-  settings: UserSettings,
-  days: number = 7
-): TrainingBalanceResult | { empty: true } {
-  if (!activities || activities.length === 0) return null;
-  const start = new Date();
-  start.setDate(start.getDate() - days);
-
-  const relevant = activities.filter((a) => {
-    const sport = sportOf(a.type);
-    return (sport === 'run' || sport === 'bike')
-      && new Date(a.date) >= start && (a.duration || 0) >= 10;
-  });
-
-  if (!relevant.length) return { empty: true };
-
-  let totalLow = 0;
-  let totalHigh = 0;
-  let totalAnaerobic = 0;
-
-  relevant.forEach((act) => {
-    const actTss = act.tss || ((act.duration || 0) / 3600 * 50);
-    const sport = sportOf(act.type);
-    const isBike = sport === 'bike';
-    const maxHr = Number((isBike ? settings.bike : settings.run)?.max) || 190;
-
-    let focus: 'low' | 'high' | 'anaerobic' = 'low';
-
-    if (act.streams_data?.heartrate?.data && act.streams_data?.time?.data) {
-      const hr = act.streams_data.heartrate.data;
-      const tm = act.streams_data.time.data;
-
-      let timeLow = 0;
-      let timeHigh = 0;
-      let timeAnaerobic = 0;
-
-      for (let i = 1; i < hr.length; i++) {
-        const dt = tm[i] - tm[i - 1];
-        if (dt > 10) continue;
-
-        const p = hr[i] / maxHr;
-        if (p > 0.89) {
-          timeAnaerobic += dt;
-        } else if (p > 0.79) {
-          timeHigh += dt;
-        } else {
-          timeLow += dt;
-        }
-      }
-
-      const totalActivityTime = timeLow + timeHigh + timeAnaerobic;
-
-      if (timeAnaerobic > 240 || (totalActivityTime > 0 && (timeAnaerobic / totalActivityTime) > 0.08)) {
-        focus = 'anaerobic';
-      } else if (timeHigh > 1200 || (totalActivityTime > 0 && (timeHigh / totalActivityTime) > 0.25)) {
-        focus = 'high';
-      } else {
-        focus = 'low';
-      }
-    } else {
-      const p = (act.hr_avg || 0) / maxHr;
-      const ifac = parseFloat(String(act.intensity_factor)) || 0;
-
-      if (ifac > 1.05 || p > 0.88) {
-        focus = 'anaerobic';
-      } else if (ifac > 0.85 || p > 0.79) {
-        focus = 'high';
-      } else {
-        focus = 'low';
-      }
-    }
-
-    if (focus === 'anaerobic') {
-      totalAnaerobic += actTss;
-    } else if (focus === 'high') {
-      totalHigh += actTss;
-    } else {
-      totalLow += actTss;
-    }
-  });
-
-  const totalLoad = totalLow + totalHigh + totalAnaerobic;
-  const pLow = totalLoad > 0 ? (totalLow / totalLoad) * 100 : 0;
-  const pHigh = totalLoad > 0 ? (totalHigh / totalLoad) * 100 : 0;
-  const pAnaerobic = totalLoad > 0 ? (totalAnaerobic / totalLoad) * 100 : 0;
-
-  const targets = {
-    low: {
-      min: Math.round(totalLoad * 0.60),
-      max: Math.round(totalLoad * 0.80),
-      pctMin: 60,
-      pctMax: 80,
-      label: 'Baja Aeróbica',
-    },
-    high: {
-      min: Math.round(totalLoad * 0.10),
-      max: Math.round(totalLoad * 0.25),
-      pctMin: 10,
-      pctMax: 25,
-      label: 'Alta Aeróbica',
-    },
-    anaerobic: {
-      min: Math.round(totalLoad * 0.05),
-      max: Math.round(totalLoad * 0.15),
-      pctMin: 5,
-      pctMax: 15,
-      label: 'Anaeróbica',
-    },
-  };
-
-  const maxVal = Math.max(
-    totalLow,
-    totalHigh,
-    totalAnaerobic,
-    targets.low.max,
-    targets.high.max,
-    targets.anaerobic.max,
-    100
-  );
-
-  let recommendation = 'Foco de carga óptimo';
-  let status = 'Equilibrado';
-  let color = '#10b981';
-  let details = 'Tu entrenamiento está bien equilibrado en todas las intensidades, lo que proporciona una base sólida y mejora el rendimiento general.';
-
-  if (totalLoad === 0) {
-    recommendation = 'No hay datos suficientes.';
-    status = 'Sin Datos';
-    color = '#94a3b8';
-    details = 'Registra más actividades con pulso para analizar tu foco de carga.';
-  } else {
-    const isLowShort = totalLow < targets.low.min;
-    const isHighShort = totalHigh < targets.high.min;
-    const isAnShort = totalAnaerobic < targets.anaerobic.min;
-    const isLowOver = totalLow > targets.low.max;
-    const isHighOver = totalHigh > targets.high.max;
-    const isAnOver = totalAnaerobic > targets.anaerobic.max;
-
-    if (isAnShort && isHighShort && isLowShort) {
-      recommendation = 'Carga general baja';
-      status = 'Desentrenamiento';
-      color = '#f59e0b';
-      details = 'Tu carga de entrenamiento es menor que tu rango óptimo en todas las categorías.';
-    } else if (isLowShort) {
-      recommendation = 'Carga aeróbica baja: insuficiente';
-      status = 'Falta Base';
-      color = '#00c2e0';
-      details = 'Prueba a incluir más actividades fáciles de baja intensidad.';
-    } else if (isHighShort) {
-      recommendation = 'Carga aeróbica de intensidad alta: insuficiente';
-      status = 'Falta Alta Int.';
-      color = '#f97316';
-      details = 'Prueba a incluir algo más de actividad aeróbica de alta intensidad.';
-    } else if (isAnShort) {
-      recommendation = 'Capacidad anaeróbica: insuficiente';
-      status = 'Falta Anaeróbico';
-      color = '#a855f7';
-      details = 'Añade más entrenamientos de intervalos cortos y de alta intensidad.';
-    } else if (isAnOver) {
-      recommendation = 'Exceso de carga anaeróbica';
-      status = 'Sobrecarga';
-      color = '#ef4444';
-      details = 'Has acumulado mucha fatiga anaeróbica.';
-    } else if (isHighOver) {
-      recommendation = 'Exceso de carga aeróbica alta';
-      status = 'No Polarizado';
-      color = '#f59e0b';
-      details = 'Estás pasando demasiado tiempo en intensidades medias y altas.';
-    }
-  }
-
-  return {
-    aerobicLow: totalLow,
-    aerobicHigh: totalHigh,
-    anaerobic: totalAnaerobic,
-    totalLoad,
-    maxScale: maxVal,
-    pcts: { low: pLow, high: pHigh, anaerobic: pAnaerobic },
-    targets,
-    recommendation,
-    status,
-    color,
-    details,
-    activityCount: relevant.length,
   };
 }
 
