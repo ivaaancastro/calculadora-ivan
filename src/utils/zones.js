@@ -133,13 +133,14 @@ export const zoneIndex = (value, mins) => {
 
 /**
  * Segundos en cada zona a partir de un stream. Cada muestra cuenta el intervalo que termina en
- * ella; `ignore` descarta muestras sin dato (sensor sin señal, parado).
+ * ella; `ignore` descarta muestras sin dato (sensor sin señal, parado) y `maxGap` los huecos
+ * más largos (pausas).
  */
-export const secondsInZones = (values, time, mins, { ignore } = {}) => {
+export const secondsInZones = (values, time, mins, { ignore, maxGap = Infinity } = {}) => {
     const seconds = mins.map(() => 0);
     for (let i = 1; i < values.length; i++) {
         const dt = time[i] - time[i - 1];
-        if (!(dt > 0) || ignore?.(values[i])) continue;
+        if (!(dt > 0) || dt > maxGap || ignore?.(values[i])) continue;
         seconds[zoneIndex(values[i], mins)] += dt;
     }
     return seconds;
