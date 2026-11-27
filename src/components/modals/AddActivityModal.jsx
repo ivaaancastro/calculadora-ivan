@@ -3,10 +3,11 @@ import { X, Save, Activity } from 'lucide-react';
 import { supabase } from '../../supabase';
 import toast from 'react-hot-toast';
 import { Input, Modal, Select } from '../ui';
+import { todayKey } from '../../utils/dates';
 
 const AddActivityModal = ({ isOpen, onClose, onSave }) => {
     const [formData, setFormData] = useState({
-        date: new Date().toISOString().split('T')[0],
+        date: todayKey(),
         type: 'Carrera', duration: '', hr_avg: '', distance: '', elevation_gain: ''
     });
     const [loading, setLoading] = useState(false);
@@ -43,7 +44,7 @@ const AddActivityModal = ({ isOpen, onClose, onSave }) => {
             onSave();
             onClose();
             toast.success("Actividad generada exitosamente.");
-            setFormData({ date: new Date().toISOString().split('T')[0], type: 'Carrera', duration: '', hr_avg: '', distance: '', elevation_gain: '' });
+            setFormData({ date: todayKey(), type: 'Carrera', duration: '', hr_avg: '', distance: '', elevation_gain: '' });
         } catch (err) {
             toast.error(err.message);
         } finally {

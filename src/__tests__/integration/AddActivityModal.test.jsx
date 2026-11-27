@@ -105,4 +105,14 @@ describe('AddActivityModal', () => {
             expect(toast.success).toHaveBeenCalledWith('Actividad generada exitosamente.');
         });
     });
+
+    it('propone la fecha local, no la UTC', () => {
+        vi.stubEnv('TZ', 'Europe/Madrid');
+        vi.useFakeTimers({ toFake: ['Date'] });
+        vi.setSystemTime(new Date('2026-06-15T22:30:00Z')); // 00:30 del 16 en Madrid
+        const { baseElement } = render(<AddActivityModal isOpen onClose={mockOnClose} onSave={mockOnSave} />);
+        expect(baseElement.querySelector('input[type="date"]').value).toBe('2026-06-16');
+        vi.useRealTimers();
+        vi.unstubAllEnvs();
+    });
 });

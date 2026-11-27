@@ -111,7 +111,7 @@ export const AdvancedAnalytics = React.memo(({ activities, settings, timeRange, 
             atl: atl || 0,
             tsb: tsb || 0,
             acwr: acwr || 0,
-            rampRate: rampRate || 0,
+            rampRate: rampRate ?? null,
             monotony: monotony || 0,
             strain: strain || 0,
             loadTrend,
@@ -150,7 +150,7 @@ export const AdvancedAnalytics = React.memo(({ activities, settings, timeRange, 
 
     // Tendencia y capacidad: sin dato no hay fila (RF-D6).
     const ledger = [
-        { label: 'Rampa', metric: 'ramp', value: `${model.rampRate > 0 ? '+' : ''}${formatNumber(model.rampRate, 1)}`, sub: 'pts/sem' },
+        model.rampRate != null && { label: 'Rampa', metric: 'ramp', value: `${model.rampRate > 0 ? '+' : ''}${formatNumber(model.rampRate, 1)}`, sub: 'pts/sem' },
         model.monotony > 0 && { label: 'Monotonía', value: formatNumber(model.monotony, 2), sub: 'índice de carga' },
         primaryVo2.value && { label: primaryVo2.source ? VO2_SOURCES[primaryVo2.source].label : 'VO₂max', metric: 'vo2max', value: formatNumber(primaryVo2.value, 1), sub: primaryVo2.source ? VO2_SOURCES[primaryVo2.source].source : '' },
     ].filter(Boolean);

@@ -105,6 +105,22 @@ describe('calculatePMC — métricas de hoy', () => {
         expect(r.metrics.rawCtl).toBeCloseTo(r.fullSeries[idx].ctlRaw - 5, 6);
     });
 
+    const daysAgo = (n) => run(addDays(TODAY, -n), 80);
+
+    it('con menos de 7 días de historia no hay monotonía ni strain', () => {
+        for (const n of [0, 5]) {
+            expect(pmc([daysAgo(n)]).metrics).toMatchObject({ monotony: null, strain: null });
+        }
+        const week = pmc([daysAgo(6)]).metrics; // 80 TSS y seis días de descanso
+        expect(week.monotony).toBeCloseTo(0.41, 2);
+        expect(week.strain).toBe(33);
+    });
+
+    it('con menos de 8 días de serie no hay rampa', () => {
+        expect(pmc([daysAgo(6)]).metrics.rampRate).toBeNull();
+        expect(pmc([daysAgo(7)]).metrics.rampRate).toEqual(expect.any(Number));
+    });
+
     it('con menos de 28 días no hay ACWR', () => {
         expect(pmc([run('2026-06-10', 50)]).metrics.acwr).toBe(0);
     });

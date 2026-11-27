@@ -73,9 +73,10 @@ export const PmcFloatingChart = ({ pmcByDate, onClose, initPos }) => {
         return `${li === 0 ? 'M' : 'L'}${xS(i).toFixed(1)},${scaleY(e[key] ?? 0).toFixed(1)}`;
     }).join(' ');
 
-    const buildRampPath = (entries) => entries.map((e, li) => {
+    // Los primeros 7 días de historia no tienen rampa: la línea empieza donde hay dato.
+    const buildRampPath = (entries) => entries.filter(e => e.ramp != null).map((e, li) => {
         const i = visible.findIndex(v => v.date === e.date);
-        const yH = yBotS(e.ramp ?? 0);
+        const yH = yBotS(e.ramp);
         // Step path for ramp rate
         if (li === 0) return `M${xS(i).toFixed(1)},${yH.toFixed(1)}`;
         const prevX = xS(i - 1).toFixed(1);
@@ -221,7 +222,7 @@ export const PmcFloatingChart = ({ pmcByDate, onClose, initPos }) => {
                         <text x={W - PAD.r + 6} y={yTopS(lastReal.ctlRaw) + 3} fontSize={11} fontWeight="bold" fill={ct.pmc.ctlInk}>{lastReal.ctl}</text>
                         <text x={W - PAD.r + 6} y={yTopS(lastReal.atlRaw) + 3} fontSize={11} fontWeight="bold" fill={ct.pmc.atlInk}>{lastReal.atl}</text>
                         <text x={W - PAD.r + 6} y={yMidS(lastReal.tsb) + 3} fontSize={11} fontWeight="bold" fill={ct.pmc.tsbInk}>{lastReal.tsb}</text>
-                        <text x={W - PAD.r + 6} y={yBotS(lastReal.ramp) + 3} fontSize={11} fontWeight="bold" fill={ct.pmc.rampInk}>{formatNumber(lastReal.ramp, 1)}</text>
+                        {lastReal.ramp != null && <text x={W - PAD.r + 6} y={yBotS(lastReal.ramp) + 3} fontSize={11} fontWeight="bold" fill={ct.pmc.rampInk}>{formatNumber(lastReal.ramp, 1)}</text>}
                     </g>
                 )}
 

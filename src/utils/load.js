@@ -77,9 +77,10 @@ export const fitnessTrend = (ctlValues, i, lag = 28) => {
     return past > 0 ? ((ctlValues[i] - past) / past) * 100 : 0;
 };
 
-/** Monotonía y strain (Foster, 1998) de los últimos 7 días de carga diaria. */
+/** Monotonía y strain (Foster, 1998) de los últimos 7 días de carga diaria; sin 7 días, null. */
 export const monotonyStrain = (dailyLoads) => {
     const week = (dailyLoads || []).slice(-7);
+    if (week.length < 7) return { monotony: null, strain: null };
     const avg = mean(week);
     const deviation = Math.sqrt(mean(week.map((v) => (v - avg) ** 2)));
     // Semana idéntica todos los días: la monotonía sería infinita; se topa en 4.

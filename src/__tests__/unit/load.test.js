@@ -78,7 +78,8 @@ describe('load — rampa, tendencia y monotonía', () => {
         expect(monotonyStrain([999, 0, 100, 0, 100, 0, 100, 0])).toEqual({ monotony: 0.87, strain: 260 });
         expect(monotonyStrain(Array(7).fill(10))).toEqual({ monotony: 4, strain: 280 });
         expect(monotonyStrain(Array(7).fill(0))).toEqual({ monotony: 0, strain: 0 });
-        expect(monotonyStrain([])).toEqual({ monotony: 0, strain: 0 });
+        expect(monotonyStrain([])).toEqual({ monotony: null, strain: null });
+        expect(monotonyStrain(Array(6).fill(10))).toEqual({ monotony: null, strain: null });
     });
 });
 

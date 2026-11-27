@@ -130,12 +130,12 @@ export interface PmcMetrics {
   atlRaw: number;
   /** CTL sin ajuste manual ni redondeo: base de la calibración del Perfil. */
   rawCtl: number;
-  rampRate: number;
+  rampRate: number | null;
   load7: number;
   acwr: number;
   loadTrend: number;
-  monotony: number;
-  strain: number;
+  monotony: number | null;
+  strain: number | null;
 }
 
 interface DayLoad {
@@ -699,7 +699,7 @@ export function calculatePMC(
     ctlRaw: point.ctlRaw,
     atlRaw: point.atlRaw,
     rawCtl: point.ctlRaw - offsetCtl,
-    rampRate: point.ramp ?? 0,
+    rampRate: point.ramp,
     load7: rollingLoad(activities, today),
     acwr: acwr(loadHistory) ?? 0,
     loadTrend: fitnessTrend(ctlValues, todayIdx),
