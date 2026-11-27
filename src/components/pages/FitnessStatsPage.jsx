@@ -32,6 +32,7 @@ const EmptyCard = ({ id, icon, title, description, action }) => (
 export const FitnessStatsPage = ({
     activities,
     settings,
+    currentMetrics,
     onSelectActivity,
     loadHistoricalStreams,
     isLoadingHistoricalStreams,
@@ -190,7 +191,7 @@ export const FitnessStatsPage = ({
                 <p className="text-sm font-medium text-ink-3 mt-1.5">Perfil fisiológico y recuperación</p>
             </header>
 
-            <StatsHero trainingStatus={stats.trainingStatus} hrv={stats.hrv} />
+            <StatsHero metrics={currentMetrics} hrv={stats.hrv} />
 
             <div className="flex flex-col gap-4 md:gap-6">
                 <Segmented

@@ -10,7 +10,7 @@ const base = {
     activities: [{ id: 'a1', name: 'Rodaje', type: 'Run', date: new Date(2026, 5, 15, 8).toISOString(), tss: 50, duration: 40, distance: 8000 }],
     plannedWorkouts: [{ id: 'p1', name: 'Series', type: 'Run', date: new Date(2026, 5, 16, 8).toISOString(), tss: 70, duration: 50, description: JSON.stringify({ blocks: [] }) }],
     addPlannedWorkout: vi.fn(), updatePlannedWorkout: vi.fn(), deletePlannedWorkout: vi.fn(),
-    currentMetrics: {}, settings: {}, chartData: [],
+    settings: {}, pmcSeries: [],
 };
 
 beforeEach(() => sessionStorage.setItem('forma_calendar_date', new Date(2026, 5, 10).toISOString()));

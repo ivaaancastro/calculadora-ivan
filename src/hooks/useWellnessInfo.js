@@ -7,25 +7,18 @@
  *
  * Recibe los mismos parámetros que antes del refactor y expone la misma API pública.
  */
-import { useMemo } from 'react';
 import { useWellnessData } from './useWellnessData';
 import { useWellnessAnalytics } from './useWellnessAnalytics';
 
-export const useWellnessInfo = (activities, settings, chartData) => {
+/** `pmcToday`: métricas de hoy del PMC (`currentMetrics`); sin ellas no hay alertas de forma. */
+export const useWellnessInfo = (activities, settings, pmcToday) => {
   // ── Capa de datos de wellness ────────────────────────────────────────────
   const wellness = useWellnessData({ activities, settings });
-
-  // ── TSB actual del último punto del chart ────────────────────────────────
-  const currentTsb = useMemo(() => {
-    if (!chartData || chartData.length === 0) return 0;
-    const last = chartData[chartData.length - 1];
-    return last?.tsb ?? 0;
-  }, [chartData]);
 
   // ── Capa de analítica ────────────────────────────────────────────────────
   const analytics = useWellnessAnalytics({
     wellnessData: wellness.wellnessData,
-    currentTsb,
+    pmcToday,
     dailyTSS: wellness.dailyTSS,
     error: wellness.error,
   });

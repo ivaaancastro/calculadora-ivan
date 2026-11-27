@@ -6,8 +6,8 @@ import { EmptyState } from '../ui';
 import { useChartMotion } from '../charts/useChartMotion';
 import { ChartSkeleton } from '../charts/ChartSkeleton';
 import { summarizeSeries, chartFigureProps } from '../charts/chartA11y';
-import { pmcTodayKey, projectionLabelText } from '../../utils/pmcPoints';
-import { toLocalDate } from '../../utils/dates';
+import { projectionLabelText } from '../../utils/pmcPoints';
+import { toLocalDate, todayKey } from '../../utils/dates';
 import { axisProps, AXIS_FONT_SIZE } from '../charts/axisProps.js';
 
 /**
@@ -108,7 +108,7 @@ export const EvolutionChart = ({ data, loading = false }) => {
     );
   }
 
-  const todayStr = pmcTodayKey();
+  const todayStr = todayKey();
   const latestPoint = data[data.length - 1];
   const hasProjection = data.some((d) => d.date > todayStr);
   // Recharts 3 ya no da `activePayload`: el punto sale del índice activo.
@@ -154,7 +154,7 @@ export const EvolutionChart = ({ data, loading = false }) => {
             <XAxis
               dataKey="date"
               {...axisProps(ct)}
-              tickFormatter={(val) => new Date(val).toLocaleDateString('es-ES', { day: 'numeric', month: 'short' })}
+              tickFormatter={(val) => toLocalDate(val).toLocaleDateString('es-ES', { day: 'numeric', month: 'short' })}
               minTickGap={40}
               padding={{ left: 10, right: 10 }}
               dy={10}
@@ -206,7 +206,7 @@ export const EvolutionChart = ({ data, loading = false }) => {
             <Area 
                 yAxisId="left" 
                 type="monotone" 
-                dataKey="ctl" 
+                dataKey="ctlRaw" 
                 stroke={ct.series.ctl} 
                 strokeWidth={3} 
                 fillOpacity={1} 
@@ -218,7 +218,7 @@ export const EvolutionChart = ({ data, loading = false }) => {
             <Line 
                 yAxisId="left" 
                 type="monotone" 
-                dataKey="atl" 
+                dataKey="atlRaw" 
                 stroke={ct.series.atl} 
                 strokeWidth={2} 
                 strokeDasharray="3 3"

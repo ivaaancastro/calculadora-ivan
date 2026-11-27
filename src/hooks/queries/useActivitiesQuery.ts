@@ -13,6 +13,8 @@
 import { useState, useCallback } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "../../supabase";
+import { todayKey } from "../../utils/dates";
+import { streamsWindowStart } from "../../utils/load";
 
 /** Columnas ligeras a solicitar en la primera fase (excluye streams_data). */
 const LIGHT_COLS = [
@@ -22,9 +24,6 @@ const LIGHT_COLS = [
     // Ruta resumida de Strava: el detalle pinta el mapa sin esperar a los streams (BUG-13).
     'map_polyline',
 ].join(',');
-
-/** Días hacia atrás a considerar para la carga de streams en segundo plano. */
-const STREAMS_LOOKBACK_DAYS = 95;
 
 /** Obtiene el user_id de la sesión activa, o lanza si no hay sesión. */
 const requireUserId = async (): Promise<string> => {
@@ -60,14 +59,11 @@ export const useActivitiesQuery = () => {
             // Fase 2: streams en segundo plano (500ms de retardo para no bloquear el render)
             setTimeout(async () => {
                 try {
-                    const cutoff = new Date();
-                    cutoff.setDate(cutoff.getDate() - STREAMS_LOOKBACK_DAYS);
-
                     const { data: streamsData } = await supabase
                         .from('activities')
                         .select('id,streams_data')
                         .eq('user_id', userId)
-                        .gte('date', cutoff.toISOString().split('T')[0])
+                        .gte('date', streamsWindowStart(todayKey()))
                         .not('streams_data', 'is', null);
 
                     if (streamsData && streamsData.length > 0) {
@@ -100,14 +96,11 @@ export const useActivitiesQuery = () => {
         setIsLoadingHistoricalStreams(true);
         try {
             const userId = await requireUserId();
-            const cutoff = new Date();
-            cutoff.setDate(cutoff.getDate() - STREAMS_LOOKBACK_DAYS);
-
             const { data: streamsData, error } = await supabase
                 .from('activities')
                 .select('id,streams_data')
                 .eq('user_id', userId)
-                .lt('date', cutoff.toISOString().split('T')[0])
+                .lt('date', streamsWindowStart(todayKey()))
                 .not('streams_data', 'is', null);
 
             if (error) throw error;

@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
 import { setupApp } from './support/mockApp.js';
-import { SCREENS, openScreen } from './support/ui.js';
+import { SCREENS, openScreen, gotoReady } from './support/ui.js';
 import { duplicatedMetrics } from './support/metrics.js';
 
 // «Un dato, un sitio» (spec Capa 6, RF-D1): cada cifra con `data-metric` se ve una sola vez
@@ -21,3 +21,35 @@ for (const screen of SCREENS.filter((s) => s.auth)) {
     expect(pending.filter((m) => !found.includes(m)), 'ya corregido: quítalo de PENDING_DUPLICATES').toEqual([]);
   });
 }
+
+// Una sola fuente (spec B1, CA-1 y CA-2): el CTL, el ATL y el TSB de hoy son los mismos en todas
+// las pantallas, TSB = CTL − ATL, y visitar otras pantallas no los cambia.
+test('CTL, ATL y TSB cuadran entre sí y entre pantallas', async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: 'reduce' }); // sin la cuenta animada de las cifras
+  await setupApp(page, { authenticated: true });
+  const read = async (key) => {
+    const text = await page.locator(`[data-metric="${key}"]`).filter({ visible: true }).first().innerText();
+    return Number(text.match(/[+\-−]?\d+/)[0].replace('−', '-'));
+  };
+  const dashboard = async () => ({ ctl: await read('ctl'), atl: await read('atl'), tsb: await read('tsb') });
+
+  await gotoReady(page, '/');
+  const nav = (name) => page.getByRole('link', { name }).first().click();
+  await expect.poll(async () => (await dashboard()).ctl).toBeGreaterThan(0);
+  // Los streams llegan en segundo plano y ajustan el TSS una vez: se espera a que la cifra se asiente.
+  await page.waitForLoadState('networkidle');
+  const first = await dashboard();
+  expect(first.tsb).toBe(first.ctl - first.atl);
+
+  await nav('Rendimiento');
+  await expect(page.locator('[data-stats="hero"]').filter({ visible: true })).toBeVisible();
+  expect(await read('tsb')).toBe(first.tsb);
+
+  await nav('Calendario');
+  await page.locator('[data-cal="pmc-toggle"]').filter({ visible: true }).click();
+  const stats = page.locator('[data-cal="pmc"]').locator('[data-cal="pmc-stat"]');
+  await expect(stats).toHaveText([`CTL ${first.ctl}`, `ATL ${first.atl}`, new RegExp(`^TSB \\+?${first.tsb}$`)]);
+
+  await nav('Dashboard');
+  await expect.poll(dashboard).toEqual(first);
+});

@@ -13,6 +13,8 @@
  */
 
 import { ZONE_PACE } from './zones';
+import { activityDayKey, addDays, planDayKey, todayKey } from './dates';
+import { acwr, fitnessTrend, monotonyStrain, rampAt, rollingLoad } from './load';
 
 // ── Tipos compartidos ────────────────────────────────────────────────────────
 
@@ -28,7 +30,6 @@ export type SportCategory =
 export interface SportLoadEntry {
   fitness: number;
   fatigue: number;
-  countsForWeekly: boolean;
 }
 
 export interface SportLoadConfig {
@@ -110,27 +111,37 @@ export interface TssResult {
 
 export interface PmcSeriesPoint {
   date: string;
+  projected: boolean;
   ctl: number;
   atl: number;
   tsb: number;
-  tcb: number;
+  ctlRaw: number;
+  atlRaw: number;
+  ramp: number | null;
   dailyTss: number;
   dailyTssEffective: number;
 }
 
 export interface PmcMetrics {
   ctl: number;
-  rawCtl: number;
   atl: number;
   tsb: number;
-  tcb: number;
-  rampRate: number;
-  avgTss7d: number;
+  ctlRaw: number;
+  atlRaw: number;
+  /** CTL sin ajuste manual ni redondeo: base de la calibración del Perfil. */
+  rawCtl: number;
+  rampRate: number | null;
+  load7: number;
   acwr: number;
-  injuryRisk: 'Bajo' | 'Alerta' | 'Peligro' | 'Desentreno';
-  pastCtl: number;
-  isFitnessGrowing: boolean;
-  growthPercentage: number;
+  loadTrend: number;
+  monotony: number | null;
+  strain: number | null;
+}
+
+interface DayLoad {
+  tss: number;
+  fitness: number;
+  fatigue: number;
 }
 
 export interface PmcResult {
@@ -169,16 +180,15 @@ export interface PlannedWorkout {
  * Configuración de la contribución al PMC por tipo de deporte.
  * - fitness:           % de contribución al CTL (forma crónica)
  * - fatigue:           % de contribución al ATL (fatiga aguda)
- * - countsForWeekly:   si se incluye en el sumario TSS semanal (estilo intervals.icu)
  */
 export const SPORT_LOAD_CONFIG: SportLoadConfig = {
-  ride:     { fitness: 1.0, fatigue: 1.0, countsForWeekly: true  },
-  run:      { fitness: 1.0, fatigue: 1.0, countsForWeekly: true  },
-  swim:     { fitness: 1.0, fatigue: 1.0, countsForWeekly: true  },
-  strength: { fitness: 0.0, fatigue: 1.0, countsForWeekly: false }, // No construye CTL aeróbico
-  walk:     { fitness: 0.0, fatigue: 0.5, countsForWeekly: false },
-  yoga:     { fitness: 0.0, fatigue: 0.2, countsForWeekly: false },
-  other:    { fitness: 1.0, fatigue: 1.0, countsForWeekly: true  },
+  ride:     { fitness: 1.0, fatigue: 1.0 },
+  run:      { fitness: 1.0, fatigue: 1.0 },
+  swim:     { fitness: 1.0, fatigue: 1.0 },
+  strength: { fitness: 0.0, fatigue: 1.0 }, // No construye CTL aeróbico
+  walk:     { fitness: 0.0, fatigue: 0.5 },
+  yoga:     { fitness: 0.0, fatigue: 0.2 },
+  other:    { fitness: 1.0, fatigue: 1.0 },
 };
 
 // ── Clasificación de deporte ──────────────────────────────────────────────────
@@ -572,18 +582,6 @@ export function estimateTssFromBlocks(
   return Math.round(totalTSS);
 }
 
-// ── 4. TSS efectivo ponderado por fatiga del deporte ─────────────────────────
-/**
- * Devuelve el TSS efectivo de una actividad aplicando el factor de fatiga
- * específico de su deporte (de SPORT_LOAD_CONFIG).
- */
-export function getEffectiveTSS(act: Activity): number {
-  const tss = act.tss || 0;
-  const cat = act.sportCategory || getSportCategory(act.type ?? '');
-  const cfg = SPORT_LOAD_CONFIG[cat] ?? SPORT_LOAD_CONFIG.other;
-  return Math.round(tss * cfg.fatigue);
-}
-
 // ── 5. Recalcular TSS de un plan almacenado ───────────────────────────────────
 /**
  * Recalcula el TSS de un workout planificado a partir de su campo `description`
@@ -611,145 +609,101 @@ export function recalcTssFromBlocks(
   }
 }
 
+/** Días que se proyectan después de hoy con los entrenos planificados. */
+export const PMC_PROJECTION_DAYS = 90;
+
+/** Entero sin `-0`. */
+const whole = (n: number): number => Math.round(n) || 0;
+
 /**
- * Calcula el Performance Management Chart (PMC) utilizando Exponentially Weighted Moving Average (EWMA).
- * Proyecta los datos día a día desde la primera actividad hasta 7 días en el futuro.
+ * Performance Management Chart: media móvil exponencial (`ta`/`tf` días) de la carga diaria, desde
+ * la primera actividad hasta hoy + 90. Hasta hoy cuenta lo realizado; después, los planes.
+ *
+ * TSB, convención «hoy» (D1): CTL y ATL del mismo día, redondeados, y TSB = su resta, para que
+ * siempre cuadre con lo que se ve. `ctlRaw`/`atlRaw` (sin redondear) son para dibujar y calcular.
  */
 export function calculatePMC(
   activities: Activity[],
-  settings: UserSettings = {}
+  settings: UserSettings = {},
+  plannedWorkouts: PlannedWorkout[] = [],
+  { today = todayKey() }: { today?: string } = {}
 ): PmcResult {
-  if (!activities || activities.length === 0) {
-    return { fullSeries: [], metrics: null, loadHistory: [] };
-  }
+  const empty: PmcResult = { fullSeries: [], metrics: null, loadHistory: [] };
+  if (!activities || activities.length === 0) return empty;
 
-  // 1. Indexar actividades por día
-  const activitiesMap = new Map<string, Activity[]>();
-  activities.forEach((act) => {
-    const dKey = new Date(act.date).toISOString().split('T')[0];
-    if (!activitiesMap.has(dKey)) activitiesMap.set(dKey, []);
-    const sportCategory = act.sportCategory || getSportCategory(act.type);
-    activitiesMap.get(dKey)!.push({ ...act, sportCategory });
-  });
+  // 1. Carga por día y su contribución a CTL y ATL
+  const done = new Map<string, DayLoad>();
+  const planned = new Map<string, DayLoad>();
+  const addLoad = (days: Map<string, DayLoad>, key: string, item: Activity | PlannedWorkout) => {
+    if (!key) return;
+    const category = (item as Activity).sportCategory || getSportCategory(item.type ?? '');
+    const cfg = SPORT_LOAD_CONFIG[category] ?? SPORT_LOAD_CONFIG.other;
+    const tss = item.tss || 0;
+    const day = days.get(key) ?? { tss: 0, fitness: 0, fatigue: 0 };
+    day.tss += tss;
+    day.fitness += tss * cfg.fitness;
+    day.fatigue += tss * cfg.fatigue;
+    days.set(key, day);
+  };
+  activities.forEach((act) => addLoad(done, activityDayKey(act.date), act));
+  (plannedWorkouts || []).forEach((plan) => addLoad(planned, planDayKey(plan.date), plan));
+  if (done.size === 0) return empty;
 
-  // 2. Constantes del modelo EWMA
+  // 2. Modelo
   const ta = settings.ta || 42;
   const tf = settings.tf || 7;
-  const K_CTL = Math.exp(-1 / ta);
-  const K_ATL = Math.exp(-1 / tf);
-  const K_CTL_GAIN = 1 - K_CTL;
-  const K_ATL_GAIN = 1 - K_ATL;
+  const kCtl = Math.exp(-1 / ta);
+  const kAtl = Math.exp(-1 / tf);
   const offsetCtl = parseFloat(String(settings.offsetCtl)) || 0;
 
-  // 3. Rango de tiempo
-  const oneDay = 24 * 60 * 60 * 1000;
-  const sortedActivities = [...activities].sort(
-    (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
-  );
-  const startDate = new Date(sortedActivities[0].date);
-  const today = new Date();
-
-  const startUTC = Date.UTC(
-    startDate.getUTCFullYear(),
-    startDate.getUTCMonth(),
-    startDate.getUTCDate()
-  );
-  const todayUTC = Date.UTC(
-    today.getUTCFullYear(),
-    today.getUTCMonth(),
-    today.getUTCDate()
-  );
-  const endUTC = todayUTC + 7 * oneDay;
-
+  // 3. Día a día. El ajuste manual se suma al final: no entra en la media, así que no decae.
+  const firstDone = [...done.keys()].sort()[0];
+  const start = firstDone < today ? firstDone : today;
+  const end = addDays(today, PMC_PROJECTION_DAYS);
   let ctl = 0;
   let atl = 0;
   const fullSeries: PmcSeriesPoint[] = [];
+  const ctlValues: number[] = [];
   const loadHistory: number[] = [];
 
-  // 4. Calcular día a día
-  for (let time = startUTC; time <= endUTC; time += oneDay) {
-    const dateStr = new Date(time).toISOString().split('T')[0];
-    const daysActs = activitiesMap.get(dateStr) || [];
+  for (let date = start; date <= end; date = addDays(date, 1)) {
+    const projected = date > today;
+    const day = (projected ? planned : done).get(date) ?? { tss: 0, fitness: 0, fatigue: 0 };
+    ctl = ctl * kCtl + day.fitness * (1 - kCtl);
+    atl = atl * kAtl + day.fatigue * (1 - kAtl);
+    if (!projected) loadHistory.push(day.fatigue);
 
-    let dailyTss = 0;
-    let dailyCtlContrib = 0;
-    let dailyAtlContrib = 0;
-
-    daysActs.forEach((act) => {
-      const cfg =
-        SPORT_LOAD_CONFIG[act.sportCategory ?? 'other'] ??
-        SPORT_LOAD_CONFIG.other;
-      const tss = act.tss || 0;
-      dailyTss += tss;
-      dailyCtlContrib += tss * cfg.fitness;
-      dailyAtlContrib += tss * cfg.fatigue;
-    });
-
-    if (time <= todayUTC) {
-      loadHistory.push(Math.round(dailyAtlContrib));
-    }
-
-    ctl = ctl * K_CTL + dailyCtlContrib * K_CTL_GAIN;
-    atl = atl * K_ATL + dailyAtlContrib * K_ATL_GAIN;
-
-    const finalCtl = ctl + offsetCtl;
-    const tsb = parseFloat((finalCtl - atl).toFixed(1));
-
+    const ctlRaw = ctl + offsetCtl;
+    ctlValues.push(ctlRaw);
     fullSeries.push({
-      date: dateStr,
-      ctl: parseFloat(finalCtl.toFixed(1)),
-      atl: parseFloat(atl.toFixed(1)),
-      tsb: tsb,
-      tcb: tsb,
-      dailyTss: Math.round(dailyTss),
-      dailyTssEffective: Math.round(dailyAtlContrib),
+      date,
+      projected,
+      ctl: whole(ctlRaw),
+      atl: whole(atl),
+      tsb: whole(ctlRaw) - whole(atl),
+      ctlRaw,
+      atlRaw: atl,
+      ramp: rampAt(ctlValues, ctlValues.length - 1),
+      dailyTss: Math.round(day.tss),
+      dailyTssEffective: Math.round(day.fatigue),
     });
   }
 
-  // 5. Métricas actuales
-  const todayStr = new Date(todayUTC).toISOString().split('T')[0];
-  const todayIdx = fullSeries.findIndex((d) => d.date === todayStr);
-  const currentIdx =
-    todayIdx !== -1 ? todayIdx : fullSeries.length - 8;
-
-  const lastPoint = fullSeries[currentIdx] ?? { ctl: 0, atl: 0, tsb: 0 };
-  const prevWeekPoint = fullSeries[currentIdx - 7] ?? { ctl: 0 };
-  const pastMonthPoint =
-    fullSeries[currentIdx - 30] ?? fullSeries[0] ?? { ctl: 0 };
-
-  const rampRate = parseFloat((lastPoint.ctl - prevWeekPoint.ctl).toFixed(1));
-  const last7Loads = loadHistory.slice(-7);
-  const last28Loads = loadHistory.slice(-28);
-
-  const sum7 = last7Loads.reduce((a, b) => a + b, 0);
-  const avg7 = sum7 / 7;
-  const avg28 =
-    last28Loads.reduce((a, b) => a + b, 0) / (last28Loads.length || 1);
-
-  const acwr = avg28 > 0 ? parseFloat((avg7 / avg28).toFixed(2)) : 0;
-  let injuryRisk: PmcMetrics['injuryRisk'] = 'Bajo';
-  if (acwr > 1.5) injuryRisk = 'Peligro';
-  else if (acwr >= 1.3) injuryRisk = 'Alerta';
-  else if (acwr < 0.8 && loadHistory.length > 28) injuryRisk = 'Desentreno';
-
+  // 4. Métricas de hoy
+  const todayIdx = loadHistory.length - 1;
+  const point = fullSeries[todayIdx];
   const metrics: PmcMetrics = {
-    ctl: lastPoint.ctl,
-    rawCtl: lastPoint.ctl - offsetCtl,
-    atl: lastPoint.atl,
-    tsb: lastPoint.tsb,
-    tcb: lastPoint.tsb,
-    rampRate,
-    avgTss7d: Math.round(avg7),
-    acwr,
-    injuryRisk,
-    pastCtl: parseFloat(pastMonthPoint.ctl.toFixed(1)),
-    isFitnessGrowing: lastPoint.ctl > pastMonthPoint.ctl,
-    growthPercentage:
-      pastMonthPoint.ctl > 0
-        ? Math.round(
-            ((lastPoint.ctl - pastMonthPoint.ctl) / pastMonthPoint.ctl) * 100
-          )
-        : 0,
+    ctl: point.ctl,
+    atl: point.atl,
+    tsb: point.tsb,
+    ctlRaw: point.ctlRaw,
+    atlRaw: point.atlRaw,
+    rawCtl: point.ctlRaw - offsetCtl,
+    rampRate: point.ramp,
+    load7: rollingLoad(activities, today),
+    acwr: acwr(loadHistory) ?? 0,
+    loadTrend: fitnessTrend(ctlValues, todayIdx),
+    ...monotonyStrain(loadHistory),
   };
 
   return { fullSeries, metrics, loadHistory };

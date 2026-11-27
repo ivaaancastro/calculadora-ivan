@@ -2,7 +2,7 @@
 import { Activity, Target, Plus } from 'lucide-react';
 import React from 'react';
 import { getSportCategory } from '../../utils/tssEngine';
-import { getComplianceForDay, computeWeekStats, findWeekPmc, findPrevWeekPmc, getWeekNumber } from '../../utils/calendarEngine';
+import { getComplianceForDay, computeWeekStats, findWeekPmc, getWeekNumber } from '../../utils/calendarEngine';
 import { WEEKDAYS, getZoneColor } from './calendarHelpers';
 import { SportIcon } from '../common/SportIcon';
 import { formatMinutes, formatNumber } from '../../utils/formatters';
@@ -85,11 +85,9 @@ export const CalendarMonthView = ({
                                 const { weekRealizedTSS, weekPlannedTSS, weekDuration, weekDist } = computeWeekStats(week, activitiesByDate);
                                 const weekKey = toDateKey(week[0].date);
 
-                                // Get PMC values — actual or projected
-                                const lastDayKey = toDateKey(week[6].date);
+                                // Estado de forma al cierre de la semana (real o proyectado).
                                 const weekPmc = findWeekPmc(week, fullPmcByDate);
-                                const prevWeekPmc = findPrevWeekPmc(week, fullPmcByDate);
-                                const ramp = weekPmc.ctl && prevWeekPmc.ctl ? (weekPmc.ctl - prevWeekPmc.ctl).toFixed(1) : null;
+                                const ramp = weekPmc.ramp ?? null;
                                 const isProjected = weekPmc.projected;
                                 const progress = planProgress(weekRealizedTSS, weekPlannedTSS);
 
@@ -131,14 +129,14 @@ export const CalendarMonthView = ({
                                             {/* Estado de carga al cierre de la semana (Intervals.icu). */}
                                             {weekPmc.ctl != null && (
                                                 <div className="grid grid-cols-3 gap-1.5">
-                                                    <WeekFigure label="Fitness" title="Fitness (CTL)" value={Math.round(weekPmc.ctl)} tone="text-metric-ctl-ink" />
-                                                    <WeekFigure label="Fatiga" title="Fatiga (ATL)" value={weekPmc.atl != null ? Math.round(weekPmc.atl) : ''} tone="text-metric-atl-ink" />
-                                                    <WeekFigure label="Forma" title="Forma (TSB)" value={weekPmc.tcb != null ? Math.round(weekPmc.tcb) : ''} tone="text-metric-tsb-ink" />
+                                                    <WeekFigure label="Fitness" title="Fitness (CTL)" value={weekPmc.ctl} tone="text-metric-ctl-ink" />
+                                                    <WeekFigure label="Fatiga" title="Fatiga (ATL)" value={weekPmc.atl} tone="text-metric-atl-ink" />
+                                                    <WeekFigure label="Forma" title="Forma (TSB)" value={weekPmc.tsb} tone="text-metric-tsb-ink" />
                                                 </div>
                                             )}
                                             {ramp != null && (
                                                 <div className="text-[11px] text-ink-4 tabular-nums">
-                                                    Rampa <span className="font-semibold text-ink-3">{Number(ramp) > 0 ? '+' : ''}{formatNumber(Number(ramp), 1)}</span>
+                                                    Rampa <span className="font-semibold text-ink-3">{ramp > 0 ? '+' : ''}{formatNumber(ramp, 1)}</span>
                                                 </div>
                                             )}
 

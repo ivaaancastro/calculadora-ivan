@@ -4,6 +4,7 @@
  * `formState.js` (fuente única, D3).
  */
 import { FORM_STATES as STATES, formStateKey } from './formState';
+import { acwrZone } from './load';
 
 export { formStateKey };
 
@@ -20,8 +21,9 @@ export function buildFormSummary({ ctl = 0, tsb = 0, acwr = 0, rampRate = 0, loa
   else if (loadTrend < -2) trend = `tu fitness baja un ${pct(loadTrend)} % en 28 días`;
   else trend = 'tu fitness se mantiene estable en 28 días';
   let risk = '';
-  if (acwr > 1.5) risk = ' Ojo: la carga reciente supera con mucho a tu base.';
-  else if (acwr > 0 && acwr < 0.8) risk = ' La carga reciente es baja respecto a tu base.';
+  const load = acwrZone(acwr).key;
+  if (load === 'risk') risk = ' Ojo: la carga reciente supera con mucho a tu base.';
+  else if (load === 'low') risk = ' La carga reciente es baja respecto a tu base.';
   else if (rampRate > 8) risk = ' La rampa semanal es alta: vigila la recuperación.';
   return {
     state,

@@ -28,12 +28,11 @@ describe('useCalendarData', () => {
     it('deriva agrupación, PMC y cuadrícula', () => {
         const { result } = renderHook(() => useCalendarData({
             activities: [{ id: 1, date: '2026-06-15T08:00:00' }], plannedWorkouts: [],
-            chartData: [{ date: '2026-06-14', ctl: 1, atl: 1 }], year: 2026, month: 5,
+            pmcSeries: [{ date: '2026-06-14', ctl: 1, atl: 1 }], year: 2026, month: 5,
         }));
         expect(result.current.activitiesByDate['2026-06-15']).toHaveLength(1);
-        expect(result.current.pmcByDate['2026-06-14'].ctl).toBe(1);
         expect(result.current.calendarGrid).toHaveLength(5);
-        expect(result.current.fullPmcByDate['2026-06-14']).toBeDefined();
+        expect(result.current.fullPmcByDate['2026-06-14'].ctl).toBe(1);
     });
 });
 

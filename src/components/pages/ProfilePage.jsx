@@ -145,7 +145,7 @@ export const ProfilePage = ({
             };
             setFormData(next);
             // Initialize targetCtl from the current adjusted value
-            const ctl0 = currentMetrics?.ctl != null ? Math.round(currentMetrics.ctl) : null;
+            const ctl0 = currentMetrics?.ctl ?? null;
             if (ctl0 != null) setTargetCtl(ctl0);
             initialRef.current = { form: JSON.stringify(next), ctl: ctl0 };
         }
@@ -350,8 +350,9 @@ export const ProfilePage = ({
                 </span>
                 <button 
                   onClick={() => {
-                    const raw = currentMetrics?.rawCtl || 0;
-                    const newOffset = targetCtl !== null ? (targetCtl - raw) : formData.offsetCtl;
+                    // Solo se recalibra si se cambió la cifra: guardar otra cosa no mueve el ajuste.
+                    const recalibrate = targetCtl !== null && targetCtl !== (currentMetrics?.ctl ?? null);
+                    const newOffset = recalibrate ? targetCtl - (currentMetrics?.rawCtl || 0) : formData.offsetCtl;
                     onUpdate({ ...formData, offsetCtl: newOffset });
                   }} 
                   data-profile="save"

@@ -1,7 +1,6 @@
 // Lógica pura del Calendario (extraída de CalendarPage.jsx, PR 8a). Sin React: testeable.
-import { getEffectiveTSS, getSportCategory, SPORT_LOAD_CONFIG } from './tssEngine';
 import { ZONE_PACE } from './zones';
-import { toDateKey } from './dates';
+import { activityDayKey, planDayKey, toDateKey } from './dates';
 
 /** Fecha guardada en sessionStorage o ahora. */
 export const loadSavedCalendarDate = (storage = sessionStorage) => {
@@ -31,14 +30,14 @@ export const groupActivitiesByDate = (activities, plannedWorkouts) => {
     const map = {};
     if (activities) {
         activities.forEach(act => {
-            const dateKey = toDateKey(act.date);
+            const dateKey = activityDayKey(act.date);
             if (!map[dateKey]) map[dateKey] = [];
             map[dateKey].push({ ...act, isPlanned: false });
         });
     }
     if (plannedWorkouts) {
         plannedWorkouts.forEach(pAct => {
-            const dateKey = toDateKey(pAct.date);
+            const dateKey = planDayKey(pAct.date);
             if (!map[dateKey]) map[dateKey] = [];
             map[dateKey].push({ ...pAct, isPlanned: true });
         });
@@ -46,50 +45,10 @@ export const groupActivitiesByDate = (activities, plannedWorkouts) => {
     return map;
 };
 
-/** Datos PMC indexados por fecha. */
-export const indexPmcByDate = (chartData) => {
+/** Serie del PMC indexada por fecha. */
+export const indexPmcByDate = (series) => {
     const map = {};
-    (chartData || []).forEach(d => { map[d.date] = d; });
-    return map;
-};
-
-/** Proyección PMC hacia delante (90 días) con el TSS de los entrenos planificados. */
-export const projectPmc = (pmcByDate, plannedWorkouts, today = toDateKey(new Date())) => {
-    const map = {};
-
-    // Copy only past/today actual data
-    const sortedDates = Object.keys(pmcByDate).sort();
-    sortedDates.forEach(dk => {
-        if (dk <= today) map[dk] = pmcByDate[dk];
-    });
-
-    // Find the last actual PMC entry (up to today)
-    const pastDates = sortedDates.filter(dk => dk <= today);
-    if (pastDates.length === 0) return map;
-    const lastDate = pastDates[pastDates.length - 1];
-    const lastPmc = pmcByDate[lastDate];
-    if (!lastPmc || lastPmc.ctl == null) return map;
-
-    // Build a map of planned TSS per date
-    const plannedTssByDate = {};
-    (plannedWorkouts || []).forEach(p => {
-        const dk = toDateKey(p.date);
-        plannedTssByDate[dk] = (plannedTssByDate[dk] || 0) + getEffectiveTSS(p);
-    });
-
-    // Project forward day by day from today up to 90 days out
-    let ctl = lastPmc.ctl;
-    let atl = lastPmc.atl;
-    const startDate = new Date(lastDate + 'T00:00:00');
-    for (let i = 1; i <= 90; i++) {
-        const d = new Date(startDate);
-        d.setDate(d.getDate() + i);
-        const dk = toDateKey(d);
-        const dayTSS = plannedTssByDate[dk] || 0;
-        ctl = ctl + (dayTSS - ctl) / 42;
-        atl = atl + (dayTSS - atl) / 7;
-        map[dk] = { date: dk, ctl, atl, tcb: ctl - atl, projected: true };
-    }
+    (series || []).forEach(d => { map[d.date] = d; });
     return map;
 };
 
@@ -161,130 +120,6 @@ export const estimateBlocksMinutes = (blocks, planType) => {
         }
     });
     return totalMins;
-};
-
-/** Recomendación del Smart Coach para un día. */
-export const getSmartRecommendation = ({ selectedDateForPlan, activities, plannedWorkouts, currentMetrics }) => {
-    if (!selectedDateForPlan) return null;
-    const selectedDate = new Date(selectedDateForPlan);
-    const today = new Date(); today.setHours(0, 0, 0, 0);
-
-    // 1. Calcular carga de los últimos 7 días (actividades reales)
-    let last7TSS = 0;
-    let last7Count = 0;
-    const sevenDaysAgo = new Date(selectedDate); sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
-    if (activities) {
-        activities.forEach(a => {
-            const ad = new Date(a.date);
-            if (ad >= sevenDaysAgo && ad < selectedDate && !a.isPlanned) {
-                last7TSS += getEffectiveTSS(a);
-                last7Count++;
-            }
-        });
-    }
-
-    // 2. Calcular carga planificada esta semana (lunes a domingo de la semana seleccionada)
-    const dayOfWeek = selectedDate.getDay();
-    const mondayOffset = dayOfWeek === 0 ? -6 : 1 - dayOfWeek;
-    const weekStart = new Date(selectedDate); weekStart.setDate(weekStart.getDate() + mondayOffset);
-    const weekEnd = new Date(weekStart); weekEnd.setDate(weekEnd.getDate() + 7);
-
-    let weekActualTSS = 0;
-    let weekPlannedTSS = 0;
-    let plannedDays = new Set();
-    let actualDays = new Set();
-
-    if (activities) {
-        activities.forEach(a => {
-            const ad = new Date(a.date);
-            if (ad >= weekStart && ad < weekEnd) {
-                weekActualTSS += getEffectiveTSS(a);
-                actualDays.add(toDateKey(ad));
-            }
-        });
-    }
-    if (plannedWorkouts) {
-        plannedWorkouts.forEach(p => {
-            const pd = new Date(p.date);
-            if (pd >= weekStart && pd < weekEnd && toDateKey(pd) !== toDateKey(selectedDate)) {
-                weekPlannedTSS += getEffectiveTSS(p);
-                plannedDays.add(toDateKey(pd));
-            }
-        });
-    }
-
-    const totalWeekTSS = weekActualTSS + weekPlannedTSS;
-
-    // 3. Calcular CTL/TSB desde currentMetrics o analytics
-    const ctl = currentMetrics?.ctl || 0;
-    const tsb = currentMetrics?.tsb || 0;
-    const monotony = currentMetrics?.monotony || 0;
-
-    // 4. Calcular target semanal ideal (CTL * 7 para mantener, + 10-20% para crecer)
-    const weeklyMaintenance = Math.round(ctl * 7);
-    const weeklyGrowth = Math.round(ctl * 7 * 1.1);
-    const remainingBudget = Math.max(0, weeklyGrowth - totalWeekTSS);
-
-    // 5. Ayer entrené?
-    const yesterday = new Date(selectedDate); yesterday.setDate(yesterday.getDate() - 1);
-    const yesterdayKey = toDateKey(yesterday);
-    let yesterdayTSS = 0;
-    if (activities) {
-        activities.forEach(a => {
-            if (toDateKey(a.date) === yesterdayKey) yesterdayTSS += getEffectiveTSS(a);
-        });
-    }
-
-    // 6. Generar recomendación inteligente
-    let type, intensity, tssRange, reason;
-
-    if (tsb < -30) {
-        type = '🛑 Descanso Total';
-        intensity = 'rest';
-        tssRange = [0, 0];
-        reason = `TSB en ${Math.round(tsb)} — riesgo de sobreentrenamiento. Tu cuerpo necesita recuperarse.`;
-    } else if (tsb < -15 || monotony > 2.0) {
-        type = '🧘 Recovery / Z1';
-        intensity = 'recovery';
-        tssRange = [20, 40];
-        reason = `Fatiga acumulada (TSB: ${Math.round(tsb)}). Un rodaje suave en Z1 facilitará la absorción del entrenamiento.`;
-    } else if (yesterdayTSS > ctl * 1.3) {
-        type = '🏃 Endurance / Z2';
-        intensity = 'endurance';
-        tssRange = [40, 60];
-        reason = `Ayer cargaste fuerte (${Math.round(yesterdayTSS)} TSS). Hoy toca asimilar con aeróbico base.`;
-    } else if (tsb > 5 && totalWeekTSS < weeklyMaintenance * 0.6) {
-        type = '⚡ Intervalos / Tempo Z3-Z4';
-        intensity = 'hard';
-        tssRange = [80, 120];
-        reason = `Estás fresco (TSB: +${Math.round(tsb)}) y la semana está descargada. Momento ideal para buscar adaptaciones.`;
-    } else if (tsb >= -10 && tsb <= 5) {
-        type = '🎯 Tempo / Progresivo Z2-Z3';
-        intensity = 'moderate';
-        tssRange = [50, 80];
-        reason = `Form equilibrada. Un esfuerzo de intensidad media mantendrá tu progresión sin sobrecargar.`;
-    } else {
-        type = '🏃 Endurance / Z2';
-        intensity = 'endurance';
-        tssRange = [40, 70];
-        reason = `Día estándar para acumular volumen aeróbico base.`;
-    }
-
-    return {
-        type,
-        intensity,
-        tssRange,
-        reason,
-        weekContext: {
-            actual: Math.round(weekActualTSS),
-            planned: Math.round(weekPlannedTSS),
-            target: weeklyGrowth,
-            remaining: remainingBudget,
-            daysTrainedOrPlanned: actualDays.size + plannedDays.size,
-        },
-        last7: { tss: Math.round(last7TSS), count: last7Count },
-        tsb: Math.round(tsb),
-    };
 };
 
 /** Bloques de entrenamiento a partir de texto pegado (parser «magic paste»). */
@@ -474,12 +309,9 @@ export const computeWeekStats = (week, activitiesByDate) => {
         const dateKey = toDateKey(day.date);
         const acts = activitiesByDate[dateKey] || [];
         acts.forEach(a => {
-            const cat = a.sportCategory || getSportCategory(a.type || '');
-            const cfg = SPORT_LOAD_CONFIG[cat] || SPORT_LOAD_CONFIG.other;
-            if (cfg.countsForWeekly) {
-                if (a.isPlanned) weekPlannedTSS += (a.tss || 0);
-                else weekRealizedTSS += (a.tss || 0);
-            }
+            // Todos los deportes suman (D3): el total coincide con las fichas de la semana.
+            if (a.isPlanned) weekPlannedTSS += (a.tss || 0);
+            else weekRealizedTSS += (a.tss || 0);
             weekDuration += (a.duration || 0);
             if (a.isPlanned) {
                 let planDist = 0;
@@ -509,18 +341,6 @@ export const findWeekPmc = (week, fullPmcByDate) => {
     for (let di = 6; di >= 0; di--) {
         const dk = toDateKey(week[di].date);
         if (fullPmcByDate[dk]) return fullPmcByDate[dk];
-    }
-    return {};
-};
-
-/** PMC más reciente (hasta 7 días) anterior a la semana; {} si no hay. */
-export const findPrevWeekPmc = (week, fullPmcByDate) => {
-    const d = new Date(week[0].date);
-    d.setDate(d.getDate() - 1);
-    for (let i = 0; i < 7; i++) {
-        const dk = toDateKey(d);
-        if (fullPmcByDate[dk]) return fullPmcByDate[dk];
-        d.setDate(d.getDate() - 1);
     }
     return {};
 };

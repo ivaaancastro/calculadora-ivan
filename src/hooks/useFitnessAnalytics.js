@@ -2,10 +2,12 @@ import { useMemo, useState, useEffect } from 'react';
 import {
     estimateFTP, estimateCyclingVO2max, estimateRunningVO2max,
     analyzePowerProfile, getPowerProfileBenchmarks,
-    getTrainingBalance, getTrainingStatus, getHRVAnalysis, predictRaceTimes
+    getTrainingBalance, getHRVAnalysis, predictRaceTimes
 } from '../utils/fitnessStatsEngine';
 import { useWellnessInfo } from './useWellnessInfo';
 import { sportOf } from '../utils/sport';
+import { activityDayKey, addDays, parseDateKey, todayKey } from '../utils/dates';
+import { weeklyLoads } from '../utils/load';
 import { HR_ZONE_LABELS, hrSettingsFor, hrZoneMins, secondsInZones } from '../utils/zones';
 
 export const formatInterval = (secs) => {
@@ -19,13 +21,6 @@ export const formatPace = (decimalMinutes) => {
     const mins = Math.floor(decimalMinutes);
     const secs = Math.round((decimalMinutes - mins) * 60);
     return `${mins}:${secs.toString().padStart(2, '0')}`;
-};
-
-export const getMonday = (d) => {
-    const date = new Date(d);
-    const day = date.getDay();
-    const diff = date.getDate() - day + (day === 0 ? -6 : 1);
-    return new Date(date.setDate(diff)).toISOString().split('T')[0];
 };
 
 export const TIME_INTERVALS = [1, 5, 15, 30, 60, 180, 300, 600, 1200, 2400, 3600, 7200];
@@ -81,7 +76,7 @@ export const useFitnessAnalytics = (activities, settings, options = {}) => {
             return {
                 vo2: { run: { vo2max: 0 }, bike: { vo2max: 0 } },
                 ftp: {}, profile: null, powerProfile: null, balance: null,
-                trainingStatus: null, hrv: null, racePredictions: null
+                hrv: null, racePredictions: null
             };
         }
 
@@ -95,14 +90,12 @@ export const useFitnessAnalytics = (activities, settings, options = {}) => {
         const powerProfile = getPowerProfileBenchmarks(activities, settings, ftp.eFTP, { days: ppDays });
 
         const balance = getTrainingBalance(activities, settings, balanceDays);
-        const trainingStatus = getTrainingStatus(activities);
-
         const hrv = getHRVAnalysis(activities, wellnessMetrics);
         const racePredictions = predictRaceTimes(runVo2Result.vo2max, activities);
 
         return {
             vo2: { run: runVo2Result, bike: bikeVo2Result },
-            ftp, profile, powerProfile, balance, trainingStatus, hrv, racePredictions
+            ftp, profile, powerProfile, balance, hrv, racePredictions
         };
     }, [activities, settings, balanceDays, wellnessMetrics, powerProfileTimeframe]);
 
@@ -150,7 +143,6 @@ export const useFitnessAnalytics = (activities, settings, options = {}) => {
 
         const zonesData = [0, 0, 0, 0, 0, 0, 0];
         const sortedActivities = [...activities].sort((a, b) => new Date(a.date) - new Date(b.date));
-        const weeklyMap = new Map();
 
         const getPeakByTime = (data, timeData, windowSecs) => {
             if (!data || !timeData || data.length === 0) return 0;
@@ -204,16 +196,6 @@ export const useFitnessAnalytics = (activities, settings, options = {}) => {
 
         sortedActivities.forEach(act => {
             const actDate = new Date(act.date);
-            const actTss = act.tss || 0;
-
-            if (actDate >= date90DaysAgo) {
-                const weekStart = getMonday(act.date);
-                if (!weeklyMap.has(weekStart)) weeklyMap.set(weekStart, { week: weekStart, tss: 0, hours: 0 });
-                const wData = weeklyMap.get(weekStart);
-                wData.tss += actTss;
-                wData.hours += (act.duration || 0) / 60;
-            }
-
             const sport = sportOf(act.type);
             const isBike = sport === 'bike';
             const isRun = sport === 'run';
@@ -319,10 +301,11 @@ export const useFitnessAnalytics = (activities, settings, options = {}) => {
             }
         });
 
-        const weeklyChart = Array.from(weeklyMap.values()).map(w => ({
-            dateLabel: new Date(w.week).toLocaleDateString('es-ES', { day: '2-digit', month: 'short' }),
-            tss: Math.round(w.tss),
-            hours: Number(w.hours.toFixed(1))
+        const weeklyFrom = addDays(todayKey(), -89);
+        const weeklyChart = weeklyLoads(activities.filter((a) => activityDayKey(a.date) >= weeklyFrom)).map((w) => ({
+            dateLabel: parseDateKey(w.week).toLocaleDateString('es-ES', { day: '2-digit', month: 'short' }),
+            tss: w.tss,
+            hours: w.hours
         }));
         const zonesChart = zonesData.map((secs, i) => ({
             name: HR_ZONE_LABELS[i],

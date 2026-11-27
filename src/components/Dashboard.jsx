@@ -128,7 +128,7 @@ const Dashboard = () => {
       <FitnessStatsPage
         activities={activities}
         settings={settings}
-        chartData={chartData}
+        currentMetrics={currentMetrics}
         onSelectActivity={handleSelectActivity}
         loadHistoricalStreams={loadHistoricalStreams}
         isLoadingHistoricalStreams={isLoadingHistoricalStreams}
@@ -149,9 +149,8 @@ const Dashboard = () => {
         addPlannedWorkout={addPlannedWorkout}
         deletePlannedWorkout={deletePlannedWorkout}
         updatePlannedWorkout={updatePlannedWorkout}
-        currentMetrics={currentMetrics}
         settings={settings}
-        chartData={chartData}
+        pmcSeries={pmcSeries}
         onDelete={deleteActivity}
         onSelectActivity={handleSelectActivity}
       />
@@ -160,7 +159,7 @@ const Dashboard = () => {
 
   const renderHealth = (
     <ErrorBoundary>
-      <><HealthPage activities={activities} settings={settings} chartData={chartData} /></>
+      <><HealthPage activities={activities} settings={settings} currentMetrics={currentMetrics} /></>
     </ErrorBoundary>
   );
 
