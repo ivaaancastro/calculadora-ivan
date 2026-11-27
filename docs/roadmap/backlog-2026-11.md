@@ -9,10 +9,10 @@ Base auditada: `develop` @ `cb595b8` (igual que `main` salvo el merge de la rele
 
 | Bloque | Oleada | Depende de | Estado | Rama | PR | Sesión |
 |--------|--------|-----------|--------|------|----|--------|
-| B1 Cálculos centralizados | 1 | — | Pendiente | `feat/calculos-centralizados` (prevista) | — | — |
-| B3 Tema | 1 | — | Pendiente | `feat/tema-sistema` (prevista) | — | — |
-| B5 Popovers de información | 1 | código: tras B1 | Pendiente | `feat/popovers-info` (prevista) | — | — |
-| B8a Auditoría de datos | 1 | — | Pendiente | `docs/auditoria-datos` (prevista) | — | — |
+| B1 Cálculos centralizados | 1 | — | Spec (en redacción) | `feat/calculos-centralizados` | — | `b1-calculos` |
+| B3 Tema | 1 | — | Spec (en redacción) | `feat/tema-sistema` | — | `b3-tema` |
+| B5 Popovers de información | 1 | código: tras B1 | Spec (en redacción) | `feat/popovers-info` | — | `b5-popovers` |
+| B8a Auditoría de datos | 1 | — | Spec (en redacción) | `docs/auditoria-datos` | — | `b8a-datos` |
 | B2 Detalle de actividad | 2 | B1, B5 (y B3 por el mapa) | Bloqueado | — | — | — |
 | B4 Calendario | 2 | B1, B5 | Bloqueado | — | — | — |
 | B7 Modo por deporte | 3 | B1 + brainstorming | Bloqueado | — | — | — |
@@ -80,7 +80,7 @@ Base auditada: `develop` @ `cb595b8` (igual que `main` salvo el merge de la rele
 - **Existe:** PWA instalable, iconos y favicon.
 - **Falta:** identidad única (favicon y icono PWA no coinciden), logo en cabecera, `og:image`, `robots.txt`, Capacitor o iOS.
 
-## Plan de la Oleada 1 (pendiente de OK)
+## Plan de la Oleada 1 (aprobado y lanzado el 2026-11-27)
 
 Cada sesión usa su worktree desde `origin/develop` y redacta `spec.md` y `plan.md`. Sin aprobación no hay `tasks.md` ni código.
 
