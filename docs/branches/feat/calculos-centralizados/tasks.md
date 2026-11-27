@@ -11,12 +11,12 @@ confirme que la anterior está en `develop`.
 - [x] Registrar y abrir PR a `develop`
 
 ## PR 2 — PMC, TSS y carga (`feat/calculos-pmc`)
-- [ ] `load.js`: totales (D3), ACWR, rampa, tendencia, monotonía
-- [ ] `calculatePMC` único: claves locales, proyección con planes, `offsetCtl`, TSB (D1)
-- [ ] TSS estable, streams solo 95 días (D2)
-- [ ] Consumidores: Dashboard, Calendario, gráfico flotante, Salud, Perfil, Rendimiento, `useStravaSync`
-- [ ] Sin VFC inventada (D5); fuera `getTrainingStatus`
-- [ ] E2E `TSB = CTL − ATL`, verificación, capturas y PR
+- [x] `load.js`: totales (D3), ACWR, rampa, tendencia, monotonía
+- [x] `calculatePMC` único: claves locales, proyección con planes, `offsetCtl`, TSB (D1)
+- [x] TSS estable, streams solo 95 días (D2)
+- [x] Consumidores: Dashboard, Calendario, gráfico flotante, Salud, Perfil, Rendimiento, `useStravaSync`
+- [x] Sin VFC inventada (D5); fuera `getTrainingStatus`
+- [x] E2E `TSB = CTL − ATL`, verificación, capturas y PR
 
 ## PR 3 — Distribución de carga (`feat/calculos-distribucion`)
 - [ ] Reparto del TSS en tres categorías; sustituye a `getTrainingBalance`

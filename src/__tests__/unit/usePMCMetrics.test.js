@@ -38,11 +38,16 @@ describe('usePMCMetrics — serie y rango', () => {
         const narrow = hook(acts, { timeRange: '7d' });
         expect(narrow.pmcSeries).toEqual(wide.pmcSeries);
         expect(narrow.currentMetrics).toEqual(wide.currentMetrics);
-        expect(narrow.chartData[0].date).toBe(addDays(today, -7));
+        expect(narrow.chartData[0].date).toBe(addDays(today, -6));
         expect(narrow.chartData.at(-1).date).toBe(addDays(today, 7));
         expect(narrow.pmcSeries.at(-1).date).toBe(addDays(today, 90));
         expect(narrow.summary.count).toBe(1);
         expect(narrow.summary.tss).toBe(25);
+    });
+
+    it('«7 días» son siete contando hoy', () => {
+        const r = hook([ride(7), ride(6)], { timeRange: '7d' });
+        expect(r.summary.count).toBe(1);
     });
 
     it('los planes entran en la proyección', () => {

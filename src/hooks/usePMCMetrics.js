@@ -45,7 +45,8 @@ export function usePMCMetrics({ activities, plannedWorkouts, settings, timeRange
 
   const view = useMemo(() => {
     const days = TIME_RANGE_DAYS[timeRange];
-    const from = days ? addDays(today, -days) : '';
+    // «30 días» son treinta contando hoy.
+    const from = days ? addDays(today, 1 - days) : '';
     const to = addDays(today, CHART_PROJECTION_DAYS);
     const visible = pmc.processed.filter((a) => activityDayKey(a.date) >= from);
 

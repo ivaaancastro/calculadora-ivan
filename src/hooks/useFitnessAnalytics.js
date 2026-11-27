@@ -301,7 +301,7 @@ export const useFitnessAnalytics = (activities, settings, options = {}) => {
             }
         });
 
-        const weeklyFrom = addDays(todayKey(), -90);
+        const weeklyFrom = addDays(todayKey(), -89);
         const weeklyChart = weeklyLoads(activities.filter((a) => activityDayKey(a.date) >= weeklyFrom)).map((w) => ({
             dateLabel: parseDateKey(w.week).toLocaleDateString('es-ES', { day: '2-digit', month: 'short' }),
             tss: w.tss,
