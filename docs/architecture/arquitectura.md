@@ -16,7 +16,7 @@ de IA.
 | Lógica de presentación | `hooks/` | Custom hooks (actividades, métricas, planner, swipe, tema, etc.) |
 | Servicios externos | `services/` | IA (Gemini) |
 | Estado global | `store/` | Zustand (`useAppStore`) |
-| Utilidades / motores | `utils/` | TSS, fitness stats, parser, formatters |
+| Utilidades / motores | `utils/` | TSS, fitness stats, parser, formatters. Fórmulas en [`metricas.md`](metricas.md) |
 | Pruebas | `__tests__/` | Unit (node) e integración (jsdom) |
 
 ## 3. Backend / BaaS (Supabase)

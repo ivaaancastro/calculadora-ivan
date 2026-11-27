@@ -37,7 +37,8 @@ En orden; cada rama sale de `develop` con el anterior ya mergeado. Revisa y merg
 6. E2E: `TSB = CTL − ATL` y mismas cifras entre pantallas; ajustar `mockApp`.
 
 ### PR 3 — Distribución de carga
-1. Tests y reparto de TSS por categoría en `load.js`; sustituye a `getTrainingBalance`.
+1. Tests y reparto de TSS por categoría en `loadDistribution.js` (aparte de `load.js` para no
+   cerrar un ciclo con `tssEngine`); sustituye a `getTrainingBalance`.
 2. `TrainingBalanceCard`: 7/28/90, tres categorías, sesiones estimadas y nota de aproximación.
 3. «Distribución de foco» según D4.
 4. `docs/architecture/metricas.md`; `e2e/stats` y `e2e/metrics`.
