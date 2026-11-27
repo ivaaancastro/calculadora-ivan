@@ -4,6 +4,7 @@ import { MapPin } from 'lucide-react';
 import 'leaflet/dist/leaflet.css';
 import { MAP_TILES } from './mapTiles';
 import { useChartTheme } from '../charts/useChartTheme';
+import { useTheme } from '../../hooks/useTheme';
 import { useCursor } from './detail/cursorStore';
 
 const decodePolyline = (str, precision = 5) => {
@@ -89,7 +90,10 @@ const CursorMarker = ({ color, ring, position }) => {
  */
 export const InteractiveMap = memo(function InteractiveMap({ polyline, highResCoords, color, currentPosition }) {
     const ct = useChartTheme();
-    const [mapType, setMapType] = useState('light');
+    const { theme } = useTheme();
+    // Sin elección (null) las teselas siguen al tema; elegir la del tema activo vuelve a seguirlo.
+    const [chosen, setChosen] = useState(null);
+    const mapType = chosen ?? theme;
 
     const coords = useMemo(() => {
         if (highResCoords && highResCoords.length > 0) return highResCoords;
@@ -116,7 +120,8 @@ export const InteractiveMap = memo(function InteractiveMap({ polyline, highResCo
             <div data-detail="map-types" className="absolute top-3 right-3 z-map flex border !border-line !rounded-lg !bg-surface backdrop-blur-sm !shadow-sm overflow-hidden p-0.5 max-lg:[&>button]:!min-h-[44px] max-lg:[&>button]:!min-w-[44px]">
                 {['light', 'dark', 'satellite'].map((type) => (
                     <button
-                        key={type} onClick={(e) => { e.stopPropagation(); setMapType(type); }}
+                        key={type} type="button" aria-pressed={mapType === type}
+                        onClick={(e) => { e.stopPropagation(); setChosen(type === theme ? null : type); }}
                         className={`px-2.5 py-1 text-2xs font-semibold transition-colors rounded-sm ${mapType === type ? 'bg-slate-800 text-ink-inverse dark:bg-zinc-200' : 'text-ink-3 hover:text-ink-2-soft'}`}
                     >
                         {MAP_TYPE_LABEL[type]}

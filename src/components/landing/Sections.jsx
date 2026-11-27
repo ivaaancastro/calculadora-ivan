@@ -2,7 +2,7 @@ import React from 'react';
 import { Activity, ArrowRight } from 'lucide-react';
 import { Reveal } from './Reveal';
 
-/** Cifras = hechos del código: 7 zonas (tssEngine LTHR_ZONE_PCT), PMC, NP/IF/TSS, Strava y CSV. */
+/** Cifras = hechos del código: 7 zonas (zones LTHR_ZONE_PCT), PMC, NP/IF/TSS, Strava y CSV. */
 const FACTS = [
   { value: '7', label: 'zonas de FC' },
   { value: 'CTL · ATL · TSB', label: 'forma y fatiga' },

@@ -1,13 +1,5 @@
 // Datos del planificador del Calendario (extraído de CalendarPage.jsx, PR 8a).
 
-// --- ESTIMATED PACE PER ZONE (min/km for Run, min/10km for Ride) ---
-export const ZONE_PACE = {
-    Run: { Z1: 7.0, R12: 6.5, Z2: 6.0, R23: 5.6, Z3: 5.2, Z4: 4.5, Z5: 3.8, Z6: 3.2 },
-    Ride: { Z1: 3.0, R12: 2.75, Z2: 2.5, R23: 2.35, Z3: 2.2, Z4: 2.0, Z5: 1.7, Z6: 1.5 },
-    Swim: { Z1: 3.0, R12: 2.75, Z2: 2.5, R23: 2.35, Z3: 2.2, Z4: 2.0, Z5: 1.7, Z6: 1.5 },
-};
-
-
 // --- WORKOUT TEMPLATES BY SPORT ---
 export const WORKOUT_TEMPLATES = {
     Run: [

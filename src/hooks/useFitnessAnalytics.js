@@ -6,6 +6,7 @@ import {
 } from '../utils/fitnessStatsEngine';
 import { useWellnessInfo } from './useWellnessInfo';
 import { sportOf } from '../utils/sport';
+import { HR_ZONE_LABELS, hrSettingsFor, hrZoneMins, secondsInZones } from '../utils/zones';
 
 export const formatInterval = (secs) => {
     if (secs < 60) return `${secs}s`;
@@ -29,7 +30,6 @@ export const getMonday = (d) => {
 
 export const TIME_INTERVALS = [1, 5, 15, 30, 60, 180, 300, 600, 1200, 2400, 3600, 7200];
 export const ZONE_COLORS = ['#94a3b8', '#3b82f6', '#22c55e', '#eab308', '#f97316', '#ef4444', '#a855f7'];
-export const ZONE_LABELS = ['Z1 Recuperación', 'Z2 Aeróbico', 'Z3 Tempo', 'Z4 SubUmbral', 'Z5 SupraUmbral', 'Z6 VO2Max', 'Z7 Anaeróbico'];
 
 export const useFitnessAnalytics = (activities, settings, options = {}) => {
     const {
@@ -252,13 +252,10 @@ export const useFitnessAnalytics = (activities, settings, options = {}) => {
                 if (act.streams_data.heartrate) {
                     const hrData = act.streams_data.heartrate.data;
                     if (actDate >= dateIntensity) {
-                        const userZones = isBike ? settings.bike.zones : settings.run.zones;
-                        for (let i = 1; i < hrData.length; i++) {
-                            const hr = hrData[i];
-                            const dt = timeData[i] - timeData[i - 1];
-                            const zIndex = userZones.findIndex(z => hr >= z.min && hr <= z.max);
-                            if (zIndex !== -1 && zIndex < 7) zonesData[zIndex] += dt;
-                            else if (hr > userZones[userZones.length - 1].max) zonesData[6] += dt;
+                        const userZones = hrSettingsFor(act.type, settings)?.zones;
+                        if (userZones?.length) {
+                            secondsInZones(hrData, timeData, hrZoneMins(userZones), { ignore: (hr) => !(hr > 0) })
+                                .forEach((secs, i) => { if (i < 7) zonesData[i] += secs; });
                         }
                     }
 
@@ -328,7 +325,7 @@ export const useFitnessAnalytics = (activities, settings, options = {}) => {
             hours: Number(w.hours.toFixed(1))
         }));
         const zonesChart = zonesData.map((secs, i) => ({
-            name: ZONE_LABELS[i],
+            name: HR_ZONE_LABELS[i],
             hours: Number((secs / 3600).toFixed(1)),
             fill: ZONE_COLORS[i]
         }));

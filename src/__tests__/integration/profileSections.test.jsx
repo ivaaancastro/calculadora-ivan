@@ -1,7 +1,7 @@
 /** @vitest-environment jsdom */
 import { describe, it, expect, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
-import { calcZonesFromFCMax, calcPaceZones } from '../../components/pages/profile/zonesCalc';
+import { calcZonesFromFCMax, calcPaceZones } from '../../utils/zones';
 import { GeneralSection } from '../../components/pages/profile/GeneralSection';
 import { ZonesSection } from '../../components/pages/profile/ZonesSection';
 import { IntegrationsSection } from '../../components/pages/profile/IntegrationsSection';

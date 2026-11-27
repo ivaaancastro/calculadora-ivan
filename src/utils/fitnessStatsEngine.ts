@@ -11,13 +11,11 @@
  *  7.  analyzePowerProfile        — Perfil sprint/anaeróbico desde eFTP + W'
  *  8.  calculateDanielsPaces      — Ritmos Daniels E/M/T/I/R desde VO2max
  *  9.  estimateThresholdPace      — Ritmo umbral estimado
- * 10. calculatePowerZones        — Zonas de potencia Coggan desde eFTP
- * 11. calculateFTPHistory        — Evolución del eFTP en los últimos meses
- * 12. calculateFitnessScore      — Score global 0-100 (VO2max + W/kg + CTL)
- * 13. analyzeIntensityDistribution — Distribución de intensidad (90 días)
- * 14. getPowerProfileBenchmarks  — Comparación W/kg vs nivel Coggan
- * 15. getTrainingStatus          — Estado de entreno (Garmin Training Status style)
- * 16. getHRVAnalysis             — Análisis de variabilidad cardíaca
+ * 10. calculateFTPHistory        — Evolución del eFTP en los últimos meses
+ * 11. calculateFitnessScore      — Score global 0-100 (VO2max + W/kg + CTL)
+ * 12. getPowerProfileBenchmarks  — Comparación W/kg vs nivel Coggan
+ * 13. getTrainingStatus          — Estado de entreno (Garmin Training Status style)
+ * 14. getHRVAnalysis             — Análisis de variabilidad cardíaca
  */
 import { sportOf } from './sport';
 import { formatDuration } from './formatters';
@@ -152,16 +150,6 @@ export interface ThresholdPaceResult {
   diff: number | null;
 }
 
-export interface PowerZone {
-  zone: number;
-  name: string;
-  pctMin: number;
-  pctMax: number;
-  min: number;
-  max: number | null;
-  color: string;
-}
-
 export interface FTPHistoryEntry {
   label: string;
   date: string;
@@ -179,22 +167,6 @@ export interface FitnessScoreResult {
     ftp: number | null;
     ctl: number | null;
   };
-}
-
-export interface IntensityZone {
-  name: string;
-  label: string;
-  pct: number;
-  hours: number;
-  color: string;
-}
-
-export interface IntensityDistributionResult {
-  zones: IntensityZone[];
-  totalHours: number;
-  pattern: string;
-  patternDesc: string;
-  patternColor: string;
 }
 
 export interface PowerProfileBenchmarks {
@@ -1231,20 +1203,6 @@ export function estimateThresholdPace(
   };
 }
 
-export function calculatePowerZones(eFTP: number): PowerZone[] | null {
-  if (!eFTP || eFTP <= 0) return null;
-
-  return [
-    { zone: 1, name: 'Recuperación activa', pctMin: 0, pctMax: 0.55, min: 0, max: Math.round(eFTP * 0.55), color: '#94a3b8' },
-    { zone: 2, name: 'Resistencia', pctMin: 0.56, pctMax: 0.75, min: Math.round(eFTP * 0.56), max: Math.round(eFTP * 0.75), color: '#3b82f6' },
-    { zone: 3, name: 'Tempo', pctMin: 0.76, pctMax: 0.90, min: Math.round(eFTP * 0.76), max: Math.round(eFTP * 0.90), color: '#22c55e' },
-    { zone: 4, name: 'Umbral', pctMin: 0.91, pctMax: 1.05, min: Math.round(eFTP * 0.91), max: Math.round(eFTP * 1.05), color: '#f59e0b' },
-    { zone: 5, name: 'VO2max', pctMin: 1.06, pctMax: 1.20, min: Math.round(eFTP * 1.06), max: Math.round(eFTP * 1.20), color: '#ef4444' },
-    { zone: 6, name: 'Anaeróbica', pctMin: 1.21, pctMax: 1.50, min: Math.round(eFTP * 1.21), max: Math.round(eFTP * 1.50), color: '#a855f7' },
-    { zone: 7, name: 'Neuromuscular', pctMin: 1.50, pctMax: null, min: Math.round(eFTP * 1.50), max: null, color: '#ec4899' },
-  ];
-}
-
 export function calculateFTPHistory(activities: Activity[], settings: UserSettings): FTPHistoryEntry[] {
   const weight = Number(settings?.weight) || 70;
   const today = new Date();
@@ -1333,90 +1291,6 @@ export function calculateFitnessScore(
       ftp: ftpScore !== null ? Math.round(ftpScore) : null,
       ctl: ctlScore !== null ? Math.round(ctlScore) : null,
     },
-  };
-}
-
-export function analyzeIntensityDistribution(
-  activities: Activity[],
-  settings: UserSettings
-): IntensityDistributionResult | null {
-  const today = new Date();
-  const d90 = new Date(today);
-  d90.setDate(today.getDate() - 90);
-
-  let totalTime = 0;
-  let timeZ12 = 0, timeZ3 = 0, timeZ4 = 0, timeZ5 = 0;
-
-  activities.forEach((act) => {
-    if (new Date(act.date) < d90 || (act.duration || 0) < 10) return;
-    const sport = sportOf(act.type);
-    const isCardio = sport === 'run' || sport === 'bike';
-    if (!isCardio) return;
-
-    const isBike = sport === 'bike';
-    const maxHr = Number((isBike ? settings.bike : settings.run)?.max) || 190;
-
-    if (act.streams_data?.heartrate?.data && act.streams_data?.time?.data) {
-      const hr = act.streams_data.heartrate.data;
-      const tm = act.streams_data.time.data;
-
-      for (let i = 1; i < hr.length; i++) {
-        const dt = tm[i] - tm[i - 1];
-        if (dt > 10 || dt <= 0) continue;
-        totalTime += dt;
-        const pct = hr[i] / maxHr;
-        if (pct < 0.72) timeZ12 += dt;
-        else if (pct < 0.82) timeZ3 += dt;
-        else if (pct < 0.90) timeZ4 += dt;
-        else timeZ5 += dt;
-      }
-    } else if (act.hr_avg) {
-      const durSecs = act.duration * 60;
-      totalTime += durSecs;
-      const pct = act.hr_avg / maxHr;
-      if (pct < 0.72) timeZ12 += durSecs;
-      else if (pct < 0.82) timeZ3 += durSecs;
-      else if (pct < 0.90) timeZ4 += durSecs;
-      else timeZ5 += durSecs;
-    }
-  });
-
-  if (totalTime === 0) return null;
-
-  const pZ12 = (timeZ12 / totalTime) * 100;
-  const pZ3 = (timeZ3 / totalTime) * 100;
-  const pZ4 = (timeZ4 / totalTime) * 100;
-  const pZ5 = (timeZ5 / totalTime) * 100;
-
-  let pattern = 'Mixto';
-  let patternDesc = 'Distribución sin patrón definido.';
-  let patternColor = '#94a3b8';
-
-  if (pZ12 >= 75 && (pZ4 + pZ5) >= 10) {
-    pattern = 'Polarizado';
-    patternDesc = 'Mucho volumen fácil + sesiones intensas. Distribución óptima.';
-    patternColor = '#22c55e';
-  } else if (pZ12 >= 60 && pZ3 >= 15 && pZ3 > (pZ4 + pZ5)) {
-    pattern = 'Piramidal';
-    patternDesc = 'Base amplia con intensidad decreciente por zona. Buena distribución.';
-    patternColor = '#3b82f6';
-  } else if (pZ3 + pZ4 >= 40) {
-    pattern = 'Threshold-heavy';
-    patternDesc = 'Demasiado tiempo en zona media. Riesgo de estancamiento.';
-    patternColor = '#f59e0b';
-  }
-
-  return {
-    zones: [
-      { name: 'Z1-Z2', label: 'Fácil', pct: Number(pZ12.toFixed(1)), hours: Number((timeZ12 / 3600).toFixed(1)), color: '#3b82f6' },
-      { name: 'Z3', label: 'Tempo', pct: Number(pZ3.toFixed(1)), hours: Number((timeZ3 / 3600).toFixed(1)), color: '#22c55e' },
-      { name: 'Z4', label: 'Umbral', pct: Number(pZ4.toFixed(1)), hours: Number((timeZ4 / 3600).toFixed(1)), color: '#f59e0b' },
-      { name: 'Z5+', label: 'Alta', pct: Number(pZ5.toFixed(1)), hours: Number((timeZ5 / 3600).toFixed(1)), color: '#ef4444' },
-    ],
-    totalHours: Number((totalTime / 3600).toFixed(1)),
-    pattern,
-    patternDesc,
-    patternColor,
   };
 }
 

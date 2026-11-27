@@ -9,10 +9,10 @@ Base auditada: `develop` @ `cb595b8` (igual que `main` salvo el merge de la rele
 
 | Bloque | Oleada | Depende de | Estado | Rama | PR | Sesión |
 |--------|--------|-----------|--------|------|----|--------|
-| B1 Cálculos centralizados | 1 | — | Spec (en redacción) | `feat/calculos-centralizados` | — | `b1-calculos` |
-| B3 Tema | 1 | — | Spec (en redacción) | `feat/tema-sistema` | — | `b3-tema` |
-| B5 Popovers de información | 1 | código: tras B1 | Spec (en redacción) | `feat/popovers-info` | — | `b5-popovers` |
-| B8a Auditoría de datos | 1 | — | Spec (en redacción) | `docs/auditoria-datos` | — | `b8a-datos` |
+| B1 Cálculos centralizados | 1 | — | Implementando (PR 1 de 3) | `feat/calculos-centralizados` | — | `b1-calculos` |
+| B3 Tema | 1 | — | Implementando | `feat/tema-sistema` | — | `b3-tema` |
+| B5 Popovers de información | 1 | código: tras B1 | Bloqueado (spec aprobada) | `feat/popovers-info` | — | `b5-popovers` |
+| B8a Auditoría de datos | 1 | — | Implementando | `docs/auditoria-datos` | — | `b8a-datos` |
 | B2 Detalle de actividad | 2 | B1, B5 (y B3 por el mapa) | Bloqueado | — | — | — |
 | B4 Calendario | 2 | B1, B5 | Bloqueado | — | — | — |
 | B7 Modo por deporte | 3 | B1 + brainstorming | Bloqueado | — | — | — |
@@ -91,6 +91,8 @@ Cada sesión usa su worktree desde `origin/develop` y redacta `spec.md` y `plan.
 | B8a | `docs/branches/docs/auditoria-datos/` (solo documentos; scripts de medida en scratchpad) | `src/` | 5184 / — |
 | B5 | `components/ui/*Tooltip*` y componente nuevo, llamadas en `fitness/*`, `detail/DetailHero`, `title=` informativos, `tokens.css`, sus tests, `e2e/mobile` | motores de cálculo | 5183 / 5283 |
 
+**B1 propone 3 PR:** fechas y zonas; PMC, TSS y carga; distribución de carga. B5 implementa tras el tercero.
+
 **Orden de código:** B1, B3 y B8a en paralelo. B5 redacta su spec a la vez e implementa cuando B1 esté en `develop` (comparten las tarjetas de Rendimiento y `CalendarMonthView`).
 **Merges:** de uno en uno. Antes de cada PR, la sesión actualiza su rama con `develop` y solo entonces añade su entrada en `CHANGELOG.md` y `MEMORY.md`. La sesión PM revisa diff, CI y navegador antes de mergear. Nunca a `main`.
 
@@ -98,6 +100,12 @@ Cada sesión usa su worktree desde `origin/develop` y redacta `spec.md` y `plan.
 
 | # | Decisión | Recomendación | Estado |
 |---|----------|---------------|--------|
-| D1 | TSB «hoy» (CTL−ATL tras la actividad del día) o «ayer» (estilo TrainingPeaks) | Hoy; redondear CTL y ATL y restar los enteros | Pendiente |
-| D2 | ¿Los tooltips de gráfica entran en B5? | No: B5 cubre información; las gráficas, en B2 | Pendiente |
-| D3 | Posible bucle de auto-sync de Intervals | Que B8a lo mida primero y, si se confirma, `fix` propio | Pendiente |
+| D1 | TSB «hoy» o «ayer» | Hoy; redondear CTL y ATL y restar los enteros | Aprobada (2026-11-27) |
+| D2 | ¿Los tooltips de gráfica entran en B5? | No: van en B2 | Aprobada (2026-11-27) |
+| D3 | Posible bucle de auto-sync de Intervals | Que B8a lo mida primero y, si se confirma, `fix` propio | Aprobada (2026-11-27) |
+
+El 2026-11-27 se aprobaron las cuatro specs de la Oleada 1 con las opciones recomendadas. El detalle está en el `spec.md` de cada rama:
+- **B1:** TSB «hoy»; streams solo 95 días para el TSS; totales con todos los deportes; foco solo en horas; sin VFC inventada.
+- **B3:** opción «Sistema» en Ajustes; el botón vuelve a ella; el mapa sigue el tema; se respetan preferencias; manifest oscuro.
+- **B5:** sin dependencias; popover anclado también en móvil; apertura al pasar el ratón solo en «?»; un popover por semana en Calendario.
+- **B8a:** datos simulados y consultas de solo lectura que ejecuta el usuario.

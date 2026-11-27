@@ -1,6 +1,6 @@
 // Lógica pura del Calendario (extraída de CalendarPage.jsx, PR 8a). Sin React: testeable.
 import { getEffectiveTSS, getSportCategory, SPORT_LOAD_CONFIG } from './tssEngine';
-import { ZONE_PACE } from './calendarTemplates';
+import { ZONE_PACE } from './zones';
 import { toDateKey } from './dates';
 
 /** Fecha guardada en sessionStorage o ahora. */
