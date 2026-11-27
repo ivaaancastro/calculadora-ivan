@@ -10,8 +10,8 @@ Base auditada: `develop` @ `cb595b8` (igual que `main` salvo el merge de la rele
 | Bloque | Oleada | Depende de | Estado | Rama | PR | Sesión |
 |--------|--------|-----------|--------|------|----|--------|
 | **Fix auto-sync de Intervals (urgente, afecta a `main`)** | 1 | — | Por lanzar | `fix/intervals-auto-sync` (prevista) | — | — |
-| B1 Cálculos centralizados | 1 | — | En revisión (PR 2 de 3) | `feat/calculos-pmc` | #168 mergeado; #171 | `b1-calculos` |
-| B3 Tema | 1 | — | En `develop` | `feat/tema-sistema` | #169 | `b3-tema` |
+| B1 Cálculos centralizados | 1 | — | Implementando (PR 3 de 3) | `feat/calculos-distribucion` | #168 y #171 mergeados | `b1-calculos` |
+| B3 Tema | 1 | — | En `develop` | `feat/tema-sistema` | #169 | `b3-tema` (archivada) |
 | B5 Popovers de información | 1 | código: tras B1 | Bloqueado (spec aprobada) | `feat/popovers-info` | — | `b5-popovers` |
 | B8a Auditoría de datos | 1 | — | En `develop`; falta calibrar con datos reales | `docs/auditoria-datos` | #172 | `b8a-datos` |
 | B2 Detalle de actividad | 2 | B1, B5 (y B3 por el mapa) | Bloqueado | — | — | — |
@@ -25,6 +25,8 @@ Base auditada: `develop` @ `cb595b8` (igual que `main` salvo el merge de la rele
 ## Estado actual por bloque
 
 ### B1 Cálculos centralizados
+PR 1 (fechas y zonas) y PR 2 (PMC y carga) en `develop`; falta el PR 3 (distribución de carga y documentación). Lo siguiente es la auditoría previa.
+
 - **Existe:** `calculatePMC` y `calculateActivityTSS` (`src/utils/tssEngine.ts`), tabla de estados `formState.js`, tarjetas `TrainingBalanceCard` (3 categorías tipo Garmin) y `WeeklyVolumeAndFocusCard`.
 - **Discrepancias:**
   - Segundo «TSB» en Rendimiento (`fitnessStatsEngine.ts` `getTrainingStatus`, medias de 28 y 7 días).
