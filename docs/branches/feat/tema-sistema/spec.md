@@ -5,7 +5,7 @@
 - **Título:** Seguir el tema del sistema por defecto y teselas del mapa según el tema
 - **Autor:** agente B3 (Oleada 1)
 - **Fecha:** 2026-11-27
-- **Estado:** pendiente de aprobación
+- **Estado:** en curso (aprobada por el usuario el 2026-11-27, D1–D5 en A)
 
 ## 2. Objetivo
 Por defecto Forma sigue el tema del sistema, también cuando cambia con la app abierta, y el mapa del detalle usa teselas claras u oscuras según el tema activo.
@@ -58,7 +58,7 @@ Las letras D remiten a las decisiones de la sección 8 (aquí, la opción recome
 - **E2E:** en `e2e/layout.spec.js`, caso con `emulateMedia` (sin preferencia sembrada: opción nueva en `e2e/support/mockApp.js`); el caso actual del interruptor sigue valiendo. En `e2e/detail-map.spec.js`, teselas oscuras con tema oscuro.
 - **Verificación:** `AGENTS.md` §8 bis.
 
-## 8. Decisiones pendientes
+## 8. Decisiones (aprobadas: todas en A)
 
 | # | Decisión | Opciones | Recomendación |
 |---|----------|----------|---------------|
