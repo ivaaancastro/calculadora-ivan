@@ -9,7 +9,8 @@ Base auditada: `develop` @ `cb595b8` (igual que `main` salvo el merge de la rele
 
 | Bloque | Oleada | Depende de | Estado | Rama | PR | Sesión |
 |--------|--------|-----------|--------|------|----|--------|
-| B1 Cálculos centralizados | 1 | — | En revisión (PR 1 de 3) | `feat/calculos-centralizados` | #168 | `b1-calculos` |
+| **Fix auto-sync de Intervals (urgente, afecta a `main`)** | 1 | — | Por lanzar | `fix/intervals-auto-sync` (prevista) | — | — |
+| B1 Cálculos centralizados | 1 | — | Implementando (PR 2 de 3) | `feat/calculos-pmc` | #168 mergeado | `b1-calculos` |
 | B3 Tema | 1 | — | En `develop` | `feat/tema-sistema` | #169 | `b3-tema` |
 | B5 Popovers de información | 1 | código: tras B1 | Bloqueado (spec aprobada) | `feat/popovers-info` | — | `b5-popovers` |
 | B8a Auditoría de datos | 1 | — | Implementando | `docs/auditoria-datos` | — | `b8a-datos` |
@@ -45,7 +46,7 @@ Base auditada: `develop` @ `cb595b8` (igual que `main` salvo el merge de la rele
 - **Falta:** un solo componente con portal y colisiones, animación de salida, foco y móvil. Pendiente decidir si entran los tooltips de gráfica.
 
 ### B8a Auditoría de datos (primera pasada, sin medir)
-1. Posible bucle de auto-sync de Intervals (`useIntervalsAutoSync.js`: depende de `profileQuery`, sin guarda).
+1. **Confirmado con datos simulados (2026-11-27):** el auto-sync de Intervals lanza ~53 sincronizaciones a la vez y la app cae en la pantalla de error (`useIntervalsAutoSync.js`). El código es igual en `main`.
 2. Streams de 95 días descargados al arrancar; un refetch borra los históricos.
 3. `wellness_data select('*')` de 180 días repetido y sin caché.
 4. `activities` sin paginar (posible corte a 1.000 filas) y `profiles select('*')` con tokens.
