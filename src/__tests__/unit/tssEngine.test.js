@@ -2,12 +2,12 @@ import { describe, it, expect } from 'vitest';
 import {
   calculatePMC,
   getSportCategory,
-  calcZonesFromLTHR,
   calculateActivityTSS,
   computeZoneTssPerHour,
   estimateTssFromBlocks,
   getEffectiveTSS,
 } from '../../../src/utils/tssEngine';
+import { calcZonesFromLTHR } from '../../../src/utils/zones';
 
 const settings = {
   gender: 'male',

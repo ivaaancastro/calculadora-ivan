@@ -9,7 +9,7 @@
  *  - Estado de la conexión con Strava
  */
 import { create } from 'zustand';
-import { calcZonesFromLTHR } from '../utils/tssEngine';
+import { calcZonesFromLTHR } from '../utils/zones';
 
 /**
  * Settings fisiológicos por defecto.

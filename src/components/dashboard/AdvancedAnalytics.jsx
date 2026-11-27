@@ -23,7 +23,6 @@ import { seriesValues, deltaOver, acwrZone } from '../../utils/kpiTrend';
 import { buildFormSummary } from '../../utils/formSummary';
 import { supabase } from '../../supabase';
 import { useTheme } from '../../hooks/useTheme';
-import { getChartTheme } from '../charts/chartTheme';
 import { Card, SectionHeader, Segmented, Stat } from '../ui';
 import { pmcTodayKey } from '../../utils/pmcPoints';
 import { formatNumber } from '../../utils/formatters';
@@ -33,8 +32,6 @@ const TIME_INTERVALS = [1, 5, 15, 30, 60, 180, 300, 600, 1200, 2400, 3600, 7200]
 // const formatInterval = (secs) => { if (secs < 60) return `${secs}s`; if (secs < 3600) return `${secs / 60}m`; return `${secs / 3600}h`; };
 // const formatPace = (decimalMinutes) => { if (!decimalMinutes || decimalMinutes >= 20) return '>20:00'; const mins = Math.floor(decimalMinutes); const secs = Math.round((decimalMinutes - mins) * 60); return `${mins}:${secs.toString().padStart(2, '0')}`; };
 // const getMonday = (d) => { const date = new Date(d); const day = date.getDay(); const diff = date.getDate() - day + (day === 0 ? -6 : 1); return new Date(date.setDate(diff)).toISOString().split('T')[0]; };
-const ZONE_COLORS = getChartTheme('light').zones.all;
-const ZONE_LABELS = ['Z1 Recuperación', 'Z2 Aeróbico', 'Z3 Tempo', 'Z4 SubUmbral', 'Z5 SupraUmbral', 'Z6 VO2Max', 'Z7 Anaeróbico'];
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Helper: load the latest wellness row from Supabase (written by useIntervalsSync)

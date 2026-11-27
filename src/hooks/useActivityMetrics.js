@@ -3,7 +3,9 @@ import { formatPace, formatDuration, formatNumber } from '../utils/formatters';
 import { calculateTrainingEffect } from '../utils/fitnessStatsEngine';
 import { buildCoachInsights } from '../utils/coachInsights';
 import { detectSportType, isPaceSport } from '../utils/activityMetricsBySport';
-import { PACE_ZONES, paceToSec } from '../components/pages/profile/zonesCalc';
+import {
+    PACE_ZONES, POWER_ZONES, paceToSec, hrSettingsFor, hrZoneMins, powerZoneMins, paceZoneMins, secondsInZones,
+} from '../utils/zones';
 
 export const useActivityMetrics = (activity, streams, settings) => {
     const sport = useMemo(() => detectSportType(activity?.type), [activity]);
@@ -11,17 +13,9 @@ export const useActivityMetrics = (activity, streams, settings) => {
 
     const exactZoneAnalysis = useMemo(() => {
         if (!streams || !streams.heartrate || !streams.time) return null;
-        const type = activity.type.toLowerCase();
-        const isBike = type.includes('bici') || type.includes('ciclismo');
-        const userZones = isBike ? settings.bike.zones : settings.run.zones;
-        const hrData = streams.heartrate.data; const timeData = streams.time.data;
-        let zoneSeconds = [0, 0, 0, 0, 0, 0, 0];
-
-        for (let i = 1; i < hrData.length; i++) {
-            const hr = hrData[i]; const dt = timeData[i] - timeData[i - 1];
-            const zIndex = userZones.findIndex(z => hr >= z.min && hr <= z.max);
-            if (zIndex !== -1) zoneSeconds[zIndex] += dt; else if (hr > userZones[userZones.length - 1].max) zoneSeconds[userZones.length - 1] += dt;
-        }
+        const userZones = hrSettingsFor(activity.type, settings)?.zones;
+        if (!userZones?.length) return null;
+        const zoneSeconds = secondsInZones(streams.heartrate.data, streams.time.data, hrZoneMins(userZones), { ignore: (hr) => !(hr > 0) });
         const totalSeconds = zoneSeconds.reduce((a, b) => a + b, 0);
         return zoneSeconds.map((sec, i) => {
             const zMin = userZones[i]?.min || 0;
@@ -43,20 +37,10 @@ export const useActivityMetrics = (activity, streams, settings) => {
         if (sport === 'run' && streams.velocity_smooth) {
             const velData = streams.velocity_smooth.data;
             // Misma fuente que Perfil: PACE_ZONES (% de la velocidad umbral) y thresholdPace.
-            const tpSecs = paceToSec(settings?.run?.thresholdPace || '4:30');
-            const tpSpeedMs = 1000 / tpSecs;
+            const thresholdPace = settings?.run?.thresholdPace;
+            const tpSpeedMs = 1000 / paceToSec(thresholdPace);
             const pzMs = PACE_ZONES;
-
-            let zoneSeconds = [0, 0, 0, 0, 0, 0, 0];
-            for (let i = 1; i < velData.length; i++) {
-                const vel = velData[i]; const dt = timeData[i] - timeData[i - 1];
-                if (vel < 0.2) continue;
-                const pct = vel / tpSpeedMs;
-                const zIndex = pzMs.findIndex(z => pct >= z.sMin && pct <= z.sMax);
-                if (zIndex !== -1) zoneSeconds[zIndex] += dt;
-                else if (pct > pzMs[6].sMax) zoneSeconds[6] += dt;
-                else if (pct < pzMs[0].sMin) zoneSeconds[0] += dt;
-            }
+            const zoneSeconds = secondsInZones(velData, timeData, paceZoneMins(thresholdPace), { ignore: (vel) => !(vel >= 0.2) });
             const totalSeconds = zoneSeconds.reduce((a, b) => a + b, 0);
             if (totalSeconds === 0) return null;
 
@@ -99,23 +83,8 @@ export const useActivityMetrics = (activity, streams, settings) => {
         if (sport === 'bike' && streams.watts) {
             const powerData = streams.watts.data;
             const ftp = settings.bike?.ftp || 200;
-            const pz = [
-                { pMin: 0, pMax: 0.55 },
-                { pMin: 0.56, pMax: 0.75 },
-                { pMin: 0.76, pMax: 0.90 },
-                { pMin: 0.91, pMax: 1.05 },
-                { pMin: 1.06, pMax: 1.20 },
-                { pMin: 1.21, pMax: 1.50 },
-                { pMin: 1.51, pMax: 2.00 },
-            ];
-            let zoneSeconds = [0, 0, 0, 0, 0, 0, 0];
-            for (let i = 1; i < powerData.length; i++) {
-                const w = powerData[i]; const dt = timeData[i] - timeData[i - 1];
-                const pct = w / ftp;
-                const zIndex = pz.findIndex(z => pct >= z.pMin && pct <= z.pMax);
-                if (zIndex !== -1) zoneSeconds[zIndex] += dt;
-                else if (pct > pz[6].pMax) zoneSeconds[6] += dt;
-            }
+            const pz = POWER_ZONES;
+            const zoneSeconds = secondsInZones(powerData, timeData, powerZoneMins(ftp), { ignore: (w) => !(w >= 0) });
             const totalSeconds = zoneSeconds.reduce((a, b) => a + b, 0);
             if (totalSeconds === 0) return null;
             const labels = ['Z1 Recovery', 'Z2 Endurance', 'Z3 Tempo', 'Z4 Threshold', 'Z5 VO2 Max', 'Z6 Anaerobic', 'Z7 Neuromusc'];
