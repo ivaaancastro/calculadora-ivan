@@ -1,6 +1,6 @@
 # Backlog 2026-11 — Tablero de seguimiento
 
-Lo mantiene la sesión PM. Última actualización: 2026-11-27.
+Lo mantiene la sesión PM. Última actualización: 2026-11-28.
 Base auditada: `develop` @ `cb595b8` (igual que `main` salvo el merge de la release #165). Auditoría por lectura de código, sin ejecutar la app.
 
 **Estados:** Pendiente · Brainstorming · Spec (en redacción) · Por aprobar · Implementando · En revisión (PR) · En `develop` · Bloqueado.
@@ -10,9 +10,9 @@ Base auditada: `develop` @ `cb595b8` (igual que `main` salvo el merge de la rele
 | Bloque | Oleada | Depende de | Estado | Rama | PR | Sesión |
 |--------|--------|-----------|--------|------|----|--------|
 | **Fix auto-sync de Intervals (urgente, afecta a `main`)** | 1 | — | Por lanzar | `fix/intervals-auto-sync` (prevista) | — | — |
-| B1 Cálculos centralizados | 1 | — | Implementando (PR 3 de 3) | `feat/calculos-distribucion` | #168 y #171 mergeados | `b1-calculos` |
+| B1 Cálculos centralizados | 1 | — | En `develop` | `feat/calculos-distribucion` (última) | #168, #171, #175 | `b1-calculos` |
 | B3 Tema | 1 | — | En `develop` | `feat/tema-sistema` | #169 | `b3-tema` (archivada) |
-| B5 Popovers de información | 1 | código: tras B1 | Bloqueado (spec aprobada) | `feat/popovers-info` | — | `b5-popovers` |
+| B5 Popovers de información | 1 | código: tras B1 | Implementando | `feat/popovers-info` | — | `b5-popovers` |
 | B8a Auditoría de datos | 1 | — | En `develop`; falta calibrar con datos reales | `docs/auditoria-datos` | #172 | `b8a-datos` |
 | B2 Detalle de actividad | 2 | B1, B5 (y B3 por el mapa) | Bloqueado | — | — | — |
 | B4 Calendario | 2 | B1, B5 | Bloqueado | — | — | — |
@@ -25,7 +25,7 @@ Base auditada: `develop` @ `cb595b8` (igual que `main` salvo el merge de la rele
 ## Estado actual por bloque
 
 ### B1 Cálculos centralizados
-PR 1 (fechas y zonas) y PR 2 (PMC y carga) en `develop`; falta el PR 3 (distribución de carga y documentación). Lo siguiente es la auditoría previa.
+Los 3 PR (fechas y zonas; PMC y carga; distribución de carga) están en `develop`; fórmulas en `docs/architecture/metricas.md`. Lo siguiente es la auditoría previa.
 
 - **Existe:** `calculatePMC` y `calculateActivityTSS` (`src/utils/tssEngine.ts`), tabla de estados `formState.js`, tarjetas `TrainingBalanceCard` (3 categorías tipo Garmin) y `WeeklyVolumeAndFocusCard`.
 - **Discrepancias:**
