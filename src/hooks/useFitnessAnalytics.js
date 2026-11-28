@@ -2,12 +2,13 @@ import { useMemo, useState, useEffect } from 'react';
 import {
     estimateFTP, estimateCyclingVO2max, estimateRunningVO2max,
     analyzePowerProfile, getPowerProfileBenchmarks,
-    getTrainingBalance, getHRVAnalysis, predictRaceTimes
+    getHRVAnalysis, predictRaceTimes
 } from '../utils/fitnessStatsEngine';
 import { useWellnessInfo } from './useWellnessInfo';
 import { sportOf } from '../utils/sport';
 import { activityDayKey, addDays, parseDateKey, todayKey } from '../utils/dates';
 import { weeklyLoads } from '../utils/load';
+import { loadDistribution } from '../utils/loadDistribution';
 import { HR_ZONE_LABELS, hrSettingsFor, hrZoneMins, secondsInZones } from '../utils/zones';
 
 export const formatInterval = (secs) => {
@@ -37,7 +38,7 @@ export const useFitnessAnalytics = (activities, settings, options = {}) => {
     const [powerUnit, setPowerUnit] = useState('w'); // 'w' or 'wkg'
     const [selectedDurs, setSelectedDurs] = useState(new Set([5, 15, 30, 60, 300, 'eftp']));
     const [showPowerConfig, setShowPowerConfig] = useState(false);
-    const [balanceDays, setBalanceDays] = useState(30);
+    const [balanceDays, setBalanceDays] = useState(28);
 
     const [curveType, setCurveType] = useState('power');
     const [curveSport, setCurveSport] = useState('bike');
@@ -89,7 +90,7 @@ export const useFitnessAnalytics = (activities, settings, options = {}) => {
         const ppDays = powerProfileTimeframe === '90d' ? 90 : (powerProfileTimeframe === '1y' ? 365 : null);
         const powerProfile = getPowerProfileBenchmarks(activities, settings, ftp.eFTP, { days: ppDays });
 
-        const balance = getTrainingBalance(activities, settings, balanceDays);
+        const balance = loadDistribution(activities, settings, balanceDays);
         const hrv = getHRVAnalysis(activities, wellnessMetrics);
         const racePredictions = predictRaceTimes(runVo2Result.vo2max, activities);
 
@@ -112,7 +113,7 @@ export const useFitnessAnalytics = (activities, settings, options = {}) => {
     const analytics = useMemo(() => {
         if (!activities || activities.length === 0) {
             return {
-                zonesChart: [], focusChart: [], weeklyChart: [],
+                zonesChart: [], weeklyChart: [],
                 curves: { all: { spd: [], hr: [], pwr: [] }, bike: { spd: [], hr: [], pwr: [] }, run: { spd: [], hr: [], pwr: [] } },
                 allTimeCurves: { all: { spd: [], hr: [], pwr: [] }, bike: { spd: [], hr: [], pwr: [] }, run: { spd: [], hr: [], pwr: [] } },
                 efData: { bike: [], run: [] },
@@ -135,11 +136,8 @@ export const useFitnessAnalytics = (activities, settings, options = {}) => {
             dateMmp.setDate(today.getDate() - 365);
         }
 
-        const dateIntensity = new Date(today);
-        if (intensityTimeframe === '28d') dateIntensity.setDate(today.getDate() - 28);
-        else if (intensityTimeframe === '90d') dateIntensity.setDate(today.getDate() - 90);
-        else if (intensityTimeframe === '1y') dateIntensity.setDate(today.getDate() - 365);
-        else dateIntensity.setFullYear(2000);
+        // «Horas por zona»: N días contando hoy, como el resto de rangos.
+        const intensityFrom = addDays(todayKey(), intensityTimeframe === '90d' ? -89 : -27);
 
         const zonesData = [0, 0, 0, 0, 0, 0, 0];
         const sortedActivities = [...activities].sort((a, b) => new Date(a.date) - new Date(b.date));
@@ -233,7 +231,7 @@ export const useFitnessAnalytics = (activities, settings, options = {}) => {
 
                 if (act.streams_data.heartrate) {
                     const hrData = act.streams_data.heartrate.data;
-                    if (actDate >= dateIntensity) {
+                    if (activityDayKey(act.date) >= intensityFrom) {
                         const userZones = hrSettingsFor(act.type, settings)?.zones;
                         if (userZones?.length) {
                             secondsInZones(hrData, timeData, hrZoneMins(userZones), { ignore: (hr) => !(hr > 0) })
@@ -312,12 +310,6 @@ export const useFitnessAnalytics = (activities, settings, options = {}) => {
             hours: Number((secs / 3600).toFixed(1)),
             fill: ZONE_COLORS[i]
         }));
-        const totalFocus = zonesData.reduce((a, b) => a + b, 0);
-        const focusChart = totalFocus > 0 ? [
-            { name: 'Aeróbico', value: Math.round(((zonesData[0] + zonesData[1]) / totalFocus) * 100), color: '#3b82f6' },
-            { name: 'Tempo/Umbral', value: Math.round(((zonesData[2] + zonesData[3]) / totalFocus) * 100), color: '#eab308' },
-            { name: 'Anaeróbico', value: Math.round(((zonesData[4] + zonesData[5] + zonesData[6]) / totalFocus) * 100), color: '#ef4444' }
-        ] : [];
 
         // Curvas para el periodo seleccionado
         const curves = { all: { spd: [], hr: [], pwr: [] }, bike: { spd: [], hr: [], pwr: [] }, run: { spd: [], hr: [], pwr: [] } };
@@ -365,7 +357,6 @@ export const useFitnessAnalytics = (activities, settings, options = {}) => {
 
         return {
             zonesChart,
-            focusChart,
             weeklyChart,
             curves,
             allTimeCurves,

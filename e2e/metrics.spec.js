@@ -52,4 +52,33 @@ test('CTL, ATL y TSB cuadran entre sí y entre pantallas', async ({ page }) => {
 
   await nav('Dashboard');
   await expect.poll(dashboard).toEqual(first);
+
+  // Perfil calibra sobre ese mismo CTL; Salud, en zona productiva, no avisa de la forma.
+  await gotoReady(page, '/profile');
+  await expect(page.getByLabel('Calibrar Fitness (CTL)')).toHaveValue(String(first.ctl));
+  await gotoReady(page, '/health');
+  await expect(page.locator('[data-health="biomarkers"]').filter({ visible: true }).first()).toBeVisible();
+  await expect(page.locator('[data-health="insight"]').filter({ hasText: /Desentrenamiento|TSB/ })).toHaveCount(0);
+});
+
+// Con un ajuste manual de +40 en el CTL, la forma de hoy pasa a «Transición»: Dashboard, Perfil y
+// Salud lo leen del mismo PMC (spec B1, CA-1).
+test('Salud y Perfil usan el mismo CTL y TSB que el Dashboard', async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await setupApp(page, { authenticated: true, state: { profile: { user_settings: { offsetCtl: 40 } } } });
+  const read = async (key) => {
+    const text = await page.locator(`[data-metric="${key}"]`).filter({ visible: true }).first().innerText();
+    return Number(text.match(/[+\-−]?\d+/)[0].replace('−', '-'));
+  };
+
+  await gotoReady(page, '/');
+  await expect.poll(() => read('tsb')).toBeGreaterThan(25);
+  await page.waitForLoadState('networkidle');
+  const [ctl, atl, tsb] = [await read('ctl'), await read('atl'), await read('tsb')];
+  expect(tsb).toBe(ctl - atl);
+
+  await gotoReady(page, '/profile');
+  await expect(page.getByLabel('Calibrar Fitness (CTL)')).toHaveValue(String(ctl));
+  await gotoReady(page, '/health');
+  await expect(page.locator('[data-health="insight"]').filter({ hasText: 'Desentrenamiento', visible: true }).first()).toBeVisible();
 });

@@ -174,7 +174,6 @@ export const FitnessStatsPage = ({
         volumen: analytics.weeklyChart?.length ? (
             <WeeklyVolumeAndFocusCard
                 weeklyChart={analytics.weeklyChart}
-                focusChart={analytics.focusChart}
                 zonesChart={analytics.zonesChart}
                 intensityTimeframe={intensityTimeframe}
                 setIntensityTimeframe={setIntensityTimeframe}

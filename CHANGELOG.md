@@ -7,6 +7,12 @@ y este proyecto adhiere a [Semantic Versioning](https://semver.org/lang/es/).
 
 ## [Unreleased]
 
+### Changed — Cálculos centralizados (B1, #168, #171 y `feat/calculos-distribucion`)
+Spec, plan y tareas en `docs/branches/feat/calculos-centralizados/`; fórmulas en `docs/architecture/metricas.md`. **Algunas cifras cambian respecto a antes: es la corrección buscada.**
+- `feat(calculos):` fechas y zonas en un solo sitio; las zonas ya no pierden segundos entre rangos y el detalle de una salida en bici usa las zonas de bici.
+- `feat(calculos):` un solo PMC para Dashboard, Rendimiento, Calendario, Salud y Perfil, con `TSB = CTL − ATL`; una definición de carga, rampa y ACWR; el TSS ya no depende de las pantallas visitadas y deja de inventarse la VFC.
+- `feat(rendimiento):` «Distribución de carga» reparte cada sesión entre aeróbico bajo, aeróbico alto y anaeróbico (7, 28 o 90 días), cuenta las estimadas y las que quedan fuera, y no rellena TSS; «Distribución de foco» pasa a «Horas por zona».
+
 ### Docs — Auditoría de carga de datos (`docs/auditoria-datos`, B8a)
 Informe, mediciones y `consultas.sql` en `docs/branches/docs/auditoria-datos/`. Sin cambios de código.
 - `docs(auditoria-datos):` medido con datos simulados qué carga cada pantalla; confirmados el bucle del auto-sync de Intervals y el resto de sospechas, con recortes priorizados.

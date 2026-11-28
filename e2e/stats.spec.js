@@ -51,3 +51,28 @@ test('sin datos de potencia: EmptyState con acción, sin ceros falsos', async ({
   await expect(empty.getByRole('button')).toBeVisible();
   await expect(page.getByRole('tabpanel')).not.toContainText(/(^|\s)(--|0,00)(\s|$)/);
 });
+
+// Distribución de carga (spec B1, RF-15 a RF-19 y CA-5).
+test('distribución de carga: tres categorías que suman la carga y rango de 7, 28 o 90 días', async ({ page }) => {
+  const card = page.locator('[data-card="balance"]').filter({ visible: true });
+  await expect(card.getByRole('heading', { name: 'Distribución de carga' })).toBeVisible();
+  await expect(card.getByRole('button', { name: '28D' })).toHaveAttribute('aria-pressed', 'true');
+  await expect(card.locator('[data-load="category"]')).toHaveCount(3);
+  const numbers = async (locator) => (await locator.allInnerTexts()).map((t) => Number(t.match(/\d+/)[0]));
+  for (const range of ['7D', '28D', '90D']) {
+    await card.getByRole('button', { name: range }).click();
+    await expect(card.getByRole('button', { name: range })).toHaveAttribute('aria-pressed', 'true');
+    const parts = await numbers(card.locator('[data-load="value"]'));
+    const [total] = await numbers(card.locator('[data-load="total"]'));
+    expect(parts.reduce((a, b) => a + b, 0), `suma en ${range}`).toBe(total);
+  }
+  await expect(card.locator('[data-load="note"]')).toContainText('Garmin');
+  await expect(card.locator('[data-load="note"]')).toContainText(/estimadas? con la FC media/);
+});
+
+test('volumen: la tarjeta de foco solo muestra horas por zona', async ({ page }) => {
+  await gotoReady(page, '/stats?tab=volumen');
+  const card = page.locator('[data-card="focus"]').filter({ visible: true });
+  await expect(card.getByRole('heading', { name: 'Horas por zona' })).toBeVisible();
+  await expect(card).not.toContainText('%');
+});

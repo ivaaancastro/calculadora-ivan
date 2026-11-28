@@ -19,7 +19,7 @@ confirme que la anterior está en `develop`.
 - [x] E2E `TSB = CTL − ATL`, verificación, capturas y PR
 
 ## PR 3 — Distribución de carga (`feat/calculos-distribucion`)
-- [ ] Reparto del TSS en tres categorías; sustituye a `getTrainingBalance`
-- [ ] `TrainingBalanceCard` 7/28/90 y «Distribución de foco» solo con horas (D4)
-- [ ] Quitar el relleno de 50 TSS/h (RF-11) y E2E de cifras en Salud y Perfil (CA-1)
-- [ ] `docs/architecture/metricas.md`, E2E, `CHANGELOG.md`, `MEMORY.md` y PR
+- [x] Reparto del TSS en tres categorías; sustituye a `getTrainingBalance`
+- [x] `TrainingBalanceCard` 7/28/90 y «Distribución de foco» solo con horas (D4)
+- [x] Quitar el relleno de 50 TSS/h (RF-11) y E2E de cifras en Salud y Perfil (CA-1)
+- [x] `docs/architecture/metricas.md`, E2E, `CHANGELOG.md`, `MEMORY.md` y PR

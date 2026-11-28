@@ -5,7 +5,7 @@
 - **Título:** Una sola fuente de verdad para carga, forma, zonas y fechas
 - **Autor:** agente B1 (Oleada 1)
 - **Fecha:** 2026-11-27
-- **Estado:** en curso — aprobada por el usuario el 2026-11-27 con **D1–D5 en la opción A**
+- **Estado:** implementada (PR 1–3) — aprobada por el usuario el 2026-11-27 con **D1–D5 en la opción A**
 
 ## 2. Objetivo
 Que CTL, ATL, TSB, TSS, zonas y carga salgan de un único sitio y digan lo mismo en todas las
@@ -48,52 +48,52 @@ anaeróbico. Cada fórmula, con test unitario y documentada.
 ## 4. Requisitos funcionales
 
 ### Fechas (`utils/dates.js`)
-- [ ] RF-1 Una clave de día única `YYYY-MM-DD`: `activityDayKey` (el día escrito en la fecha de la
+- [x] RF-1 Una clave de día única `YYYY-MM-DD`: `activityDayKey` (el día escrito en la fecha de la
   actividad, que ya es local) y `planDayKey` (instante → día local; fecha sola → tal cual).
   «Hoy» es el día local. Sin recortes de `toISOString()` en métricas.
-- [ ] RF-2 `formatDayShort(valor, { year })` → «lun 15 jun» («lun 15 jun 2026»), para B2 y B4.
+- [x] RF-2 `formatDayShort(valor, { year })` → «lun 15 jun» («lun 15 jun 2026»), para B2 y B4.
 
 ### Zonas (`utils/zones.js`)
-- [ ] RF-3 Definiciones únicas de FC (LTHR y FCmáx), potencia, ritmo y ritmo estimado por zona.
-- [ ] RF-4 Clasificación contigua por límite inferior (`zona = última con valor >= min`): ningún
+- [x] RF-3 Definiciones únicas de FC (LTHR y FCmáx), potencia, ritmo y ritmo estimado por zona.
+- [x] RF-4 Clasificación contigua por límite inferior (`zona = última con valor >= min`): ningún
   segundo se pierde. No cambian las zonas guardadas ni los rangos que se muestran.
-- [ ] RF-5 El deporte se decide con `sportOf` (corrige C3).
+- [x] RF-5 El deporte se decide con `sportOf` (corrige C3).
 
 ### Forma (`tssEngine.ts`)
-- [ ] RF-6 Un único `calculatePMC(actividades, ajustes, planes)`: serie por día local, real hasta
+- [x] RF-6 Un único `calculatePMC(actividades, ajustes, planes)`: serie por día local, real hasta
   hoy y proyectada hasta +90 d con los planes, con la misma EWMA (`ta`/`tf`), pesos por deporte y
   `offsetCtl` sumado después (no decae).
-- [ ] RF-7 Cada punto guarda valores crudos (para calcular) y mostrados según **D1**. Ninguna
+- [x] RF-7 Cada punto guarda valores crudos (para calcular) y mostrados según **D1**. Ninguna
   pantalla vuelve a redondear ni a restar por su cuenta.
-- [ ] RF-8 Dashboard, Rendimiento, Calendario (semanas y gráfico flotante), Salud y Perfil leen de
+- [x] RF-8 Dashboard, Rendimiento, Calendario (semanas y gráfico flotante), Salud y Perfil leen de
   esa serie; el rango del Dashboard solo recorta su gráfica.
-- [ ] RF-9 Estado de forma solo desde `formState.js` (también en Salud y recomendador). Se elimina
+- [x] RF-9 Estado de forma solo desde `formState.js` (también en Salud y recomendador). Se elimina
   `getTrainingStatus`.
 
 ### TSS y carga (`utils/load.js`)
-- [ ] RF-10 TSS estable según **D2**: no depende de las pantallas visitadas.
-- [ ] RF-11 Una definición de carga por semana (lunes–domingo local), 7 d móviles, mes y periodo,
+- [x] RF-10 TSS estable según **D2**: no depende de las pantallas visitadas.
+- [x] RF-11 Una definición de carga por semana (lunes–domingo local), 7 d móviles, mes y periodo,
   según **D3**. «Carga 7 d» es la suma. Sin rellenos `45` ni `50 TSS/h`: se usa el TSS calculado.
-- [ ] RF-12 Una rampa: `CTL(d) − CTL(d − 7)`. La semana del Calendario es esa rampa en su domingo.
-- [ ] RF-13 Un ACWR: media diaria 7 d / 28 d de la carga ponderada por fatiga, con una sola escala
+- [x] RF-12 Una rampa: `CTL(d) − CTL(d − 7)`. La semana del Calendario es esa rampa en su domingo.
+- [x] RF-13 Un ACWR: media diaria 7 d / 28 d de la carga ponderada por fatiga, con una sola escala
   (`< 0,8` baja, `≤ 1,3` óptima, `≤ 1,5` vigilar, `> 1,5` riesgo); sin 28 días de historia, «Sin datos».
-- [ ] RF-14 Tendencia de fitness contra hace 28 días. Monotonía y strain, en `load.js`.
+- [x] RF-14 Tendencia de fitness contra hace 28 días. Monotonía y strain, en `load.js`.
 
 ### Distribución de carga (Rendimiento, evoluciona `TrainingBalanceCard`)
-- [ ] RF-15 El TSS de cada sesión se **reparte** entre aeróbico bajo (Z1–Z2), aeróbico alto
+- [x] RF-15 El TSS de cada sesión se **reparte** entre aeróbico bajo (Z1–Z2), aeróbico alto
   (Z3–Z5) y anaeróbico (Z6–Z7), proporcional a `tiempo en zona × TSS/h de la zona`. La suma de las
   tres es el TSS de la sesión.
-- [ ] RF-16 Fuente, por orden: potencia (bici con vatios) → FC en streams → FC media (toda la
+- [x] RF-16 Fuente, por orden: potencia (bici con vatios) → FC en streams → FC media (toda la
   sesión a una zona) → sin clasificar. La tarjeta dice cuántas sesiones son estimadas o quedan
   fuera.
-- [ ] RF-17 Entran carrera, bici, natación y «otros»; fuerza, yoga y caminata no.
-- [ ] RF-18 Rangos 7 / 28 / 90 días (28 por defecto); objetivos actuales (60–80, 10–25, 5–15 %).
+- [x] RF-17 Entran carrera, bici, natación y «otros»; fuerza, yoga y caminata no.
+- [x] RF-18 Rangos 7 / 28 / 90 días (28 por defecto); objetivos actuales (60–80, 10–25, 5–15 %).
   La tarjeta explica que es una aproximación propia inspirada en el «Enfoque de carga» de Garmin
   (el modelo de Firstbeat, basado en EPOC, es propietario).
-- [ ] RF-19 «Distribución de foco» (pestaña Volumen) según **D4**.
+- [x] RF-19 «Distribución de foco» (pestaña Volumen) según **D4**.
 
 ### Documentación
-- [ ] RF-20 `docs/architecture/metricas.md`: fórmulas, convenciones, zonas y límites de la
+- [x] RF-20 `docs/architecture/metricas.md`: fórmulas, convenciones, zonas y límites de la
   aproximación.
 
 ## 5. Decisiones para el usuario
@@ -131,16 +131,16 @@ anaeróbico. Cada fórmula, con test unitario y documentada.
 - B: mantener una estimación rotulada «estimada», recalculada con el TSB único y sin ruido.
 
 ## 6. Criterios de aceptación
-- [ ] CA-1 Con los mismos datos, Dashboard, Rendimiento, Calendario, Salud y Perfil muestran los
+- [x] CA-1 Con los mismos datos, Dashboard, Rendimiento, Calendario, Salud y Perfil muestran los
   mismos CTL, ATL y TSB de hoy; con D1-A, `TSB = CTL − ATL` en cada punto visible.
-- [ ] CA-2 Visitar cualquier pantalla o cambiar cualquier rango no cambia ningún CTL.
-- [ ] CA-3 Un solo cálculo de PMC, rampa, ACWR, carga semanal y zonas en `src/`.
-- [ ] CA-4 Una actividad a las 23:30 y un plan caen en su día con `TZ=Europe/Madrid`,
+- [x] CA-2 Visitar cualquier pantalla o cambiar cualquier rango no cambia ningún CTL.
+- [x] CA-3 Un solo cálculo de PMC, rampa, ACWR, carga semanal y zonas en `src/`.
+- [x] CA-4 Una actividad a las 23:30 y un plan caen en su día con `TZ=Europe/Madrid`,
   `America/Los_Angeles` y `UTC`.
-- [ ] CA-5 La suma de las tres categorías es la suma del TSS de las sesiones clasificadas.
-- [ ] CA-6 Cada fórmula (TSS, NP, PMC, proyección, TSB, rampa, ACWR, monotonía, zonas, reparto,
+- [x] CA-5 La suma de las tres categorías es la suma del TSS de las sesiones clasificadas.
+- [x] CA-6 Cada fórmula (TSS, NP, PMC, proyección, TSB, rampa, ACWR, monotonía, zonas, reparto,
   fechas) tiene test unitario con valores calculados a mano.
-- [ ] CA-7 `npm run verify` y CI (< 5 min) en verde.
+- [x] CA-7 `npm run verify` y CI (< 5 min) en verde.
 
 ## 7. Diseño técnico
 - **Utilidades:** `tssEngine.ts`, nuevos `zones.js` y `load.js`, `dates.js`, `calendarEngine.js`,
